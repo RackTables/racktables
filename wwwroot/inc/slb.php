@@ -82,6 +82,8 @@ class SLBTriplet
 		global $triplet_class;
 		foreach ($rows as $row)
 		{
+			$row['vsconfig'] = dos2unix ($row['vsconfig']);
+			$row['rsconfig'] = dos2unix ($row['rsconfig']);
 			$triplet = new $triplet_class ($row['object_id'], $row['vs_id'], $row['rspool_id'], $row);
 			$triplet->display_cells = $display_cells;
 			$ret[] = $triplet;
@@ -126,6 +128,10 @@ function generateSLBConfig ($triplet_list)
 	$gl_parser->addMacro ('GLOBAL_VS_CONF', dos2unix ($defaults['vsconfig']));
 	$gl_parser->addMacro ('GLOBAL_RS_CONF', dos2unix ($defaults['rsconfig']));
 	$gl_parser->addMacro ('RSPORT', '%VPORT%');
+	$gl_parser->addMacro ('VS_PREPEND',
+"# LB (id == %LB_ID%): %LB_NAME%
+# VS (id == %VS_ID%): %VS_NAME%
+# RS (id == %RSP_ID%): %RSP_NAME%");
 
 	// group triplets by object_id, vs_id
 	$grouped = array();
@@ -182,9 +188,7 @@ function generateSLBConfig ($triplet_list)
 				$rs_parser->addMacro ('SLB_RS_CONF', dos2unix ($triplet->slb['rsconfig']));
 
 				$ret .= $rs_parser->expand ("
-# LB (id == %LB_ID%): %LB_NAME%
-# VS (id == %VS_ID%): %VS_NAME%
-# RS (id == %RSP_ID%): %RSP_NAME%
+%VS_PREPEND%
 virtual_server %VS_HEADER% {
 	protocol %PROTO%
 	%GLOBAL_VS_CONF%
@@ -532,7 +536,12 @@ class MacroParser
 function buildEntityLVSConfig ($cell)
 {
 	$ret = "#\n#\n# This configuration has been generated automatically by RackTables\n#\n#\n";
-	$ret .= generateSLBConfig (SLBTriplet::getTriplets ($cell));
+	// slbv2
+	if ($cell['realm'] != 'ipv4vs')
+		$ret .= generateSLBConfig2 (getTriplets ($cell));
+	// slbv1
+	if ($cell['realm'] != 'ipvs')
+		$ret .= generateSLBConfig (SLBTriplet::getTriplets ($cell));
 	return $ret;
 }
 
@@ -694,6 +703,7 @@ function getRSList ()
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$row['rsip'] = ip_format ($row['rsip_bin']);
+		$row['rsconfig'] = dos2unix ($row['rsconfig']);
 		foreach (array ('inservice', 'rsip_bin', 'rsip', 'rsport', 'rspool_id', 'rsconfig') as $cname)
 			$ret[$row['id']][$cname] = $row[$cname];
 	}

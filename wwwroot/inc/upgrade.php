@@ -188,6 +188,22 @@ REVERSED_RACKS_LISTSRC and NEAREST_RACKS_CHECKBOX.
 [1] http://php.net/manual/en/function.strftime.php
 ENDOFTEXT
 ,
+
+	'0.20.5' => <<<ENDOFTEXT
+This release introduces the VS groups feature. VS groups is a new way to store
+and display virtual services configuration. New realm 'ipvs' (VS group) is created.
+All the existing VS configuration is kept and displayed as-is, but user is free to convert
+it to the new format, which displays it in more natural way and allows to generate
+virtual_server_group keepalived configs. To convert a virtual servise to the new format,
+you need to manually create the vs group object and assign IP addresses to it. Then, if you
+have the old-style VSes configured, the Migrate tab will be displayed on the particular VS group's
+page. After successfull migration, you can remove the old-style VS objects.
+
+Old-style VS configuration becomes DEPRECATED. Its support will be removed in one of the following
+major releases. So it is strongly recommended to convert it to the new format.
+ENDOFTEXT
+,
+
 );
 
 // At the moment we assume, that for any two releases we can
@@ -1682,6 +1698,73 @@ CREATE OR REPLACE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_
 			$query[] = "UPDATE AttributeMap SET sticky = 'yes' WHERE objtype_id = 1787 AND attr_id = 30"; // Management interface -> Mgmt type
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('RDP_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for RDP-managed objects')";
+
+			// SLB v2 tables
+			$query[] = "
+CREATE TABLE `VS` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(255) DEFAULT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VSIPs` (
+  `vs_id` int(10) unsigned NOT NULL,
+  `vip` varbinary(16) NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`vs_id`,`vip`),
+  KEY `vip` (`vip`),
+  CONSTRAINT `VSIPs-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VSPorts` (
+  `vs_id` int(10) unsigned NOT NULL,
+  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `vport` int(10) unsigned NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`vs_id`,`proto`,`vport`),
+  CONSTRAINT `VS-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VSEnabledIPs` (
+  `object_id` int(10) unsigned NOT NULL,
+  `vs_id` int(10) unsigned NOT NULL,
+  `vip` varbinary(16) NOT NULL,
+  `rspool_id` int(10) unsigned NOT NULL,
+  `prio` varchar(255) DEFAULT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`object_id`,`vs_id`,`vip`),
+  KEY `vip` (`vip`),
+  KEY `VSEnabledIPs-FK-vs_id-vip` (`vs_id`,`vip`),
+  KEY `VSEnabledIPs-FK-rspool_id` (`rspool_id`),
+  CONSTRAINT `VSEnabledIPs-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledIPs-FK-vs_id-vip` FOREIGN KEY (`vs_id`, `vip`) REFERENCES `VSIPs` (`vs_id`, `vip`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
+			$query[] = "
+CREATE TABLE `VSEnabledPorts` (
+  `object_id` int(10) unsigned NOT NULL,
+  `vs_id` int(10) unsigned NOT NULL,
+  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `vport` int(10) unsigned NOT NULL,
+  `rspool_id` int(10) unsigned NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`object_id`,`vs_id`,`proto`,`vport`),
+  KEY `VSEnabledPorts-FK-vs_id-proto-vport` (`vs_id`,`proto`,`vport`),
+  KEY `VSEnabledPorts-FK-rspool_id` (`rspool_id`),
+  CONSTRAINT `VSEnabledPorts-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledPorts-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
+) ENGINE=InnoDB
+";
 			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

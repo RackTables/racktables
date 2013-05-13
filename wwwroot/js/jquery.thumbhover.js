@@ -84,11 +84,21 @@
 			}
 			if (popup.data("sticked"))
 				return;
+			var left;
 			if (windowSize.width + windowSize.scrollLeft < event.pageX + popupSize.width + settings.cursorLeftOffset){
-				$(popup).css("left", event.pageX - popupSize.width - settings.cursorLeftOffset);
+				left = event.pageX - popupSize.width - settings.cursorLeftOffset;
 			} else {
-				$(popup).css("left", event.pageX + settings.cursorLeftOffset);
+				left = event.pageX + settings.cursorLeftOffset;
 			}
+			// center pop-up if it does not fit entirely into window
+			if (
+				left < windowSize.scrollLeft ||
+				left + popupSize.width > windowSize.scrollLeft + windowSize.width
+			) {
+				left = (windowSize.width - popupSize.width) / 2;
+			}
+			$(popup).css("left", left);
+
 			if (bPopupShownAbove) {
 				$(popup).css("top", event.pageY - popupSize.height - settings.cursorTopOffset);
 			} else {

@@ -1283,6 +1283,7 @@ function renderObject ($object_id)
 		finishPortlet();
 	}
 
+	renderSLBTriplets2 ($info);
 	renderSLBTriplets ($info);
 	echo "</td>\n";
 
@@ -2595,6 +2596,12 @@ function renderIPv4NetworkAddresses ($range)
 			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
+		foreach ($addr['vsglist'] as $vs_id)
+		{
+			$vs = spotEntity ('ipvs', $vs_id);
+			echo $delim . mkA ($vs['name'], 'ipvs', $vs['id']) . '&rarr;';
+			$delim = '<br>';
+		}
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
@@ -2708,6 +2715,12 @@ function renderIPv6NetworkAddresses ($netinfo)
 			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
+		foreach ($addr['vsglist'] as $vs_id)
+		{
+			$vs = spotEntity ('ipvs', $vs_id);
+			echo $delim . mkA ($vs['name'], 'ipvs', $vs['id']) . '&rarr;';
+			$delim = '<br>';
+		}
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
@@ -2780,9 +2793,16 @@ function renderIPAddress ($ip_bin)
 	renderEntitySummary ($address, 'summary', $summary);
 
 	// render SLB portlet
-	if (! empty ($address['vslist']) or ! empty ($address['rsplist']))
+	if (! empty ($address['vslist']) or ! empty ($address['vsglist']) or ! empty ($address['rsplist']))
 	{
 		startPortlet ("");
+		if (! empty ($address['vsglist']))
+		{
+			printf ("<h2>virtual service groups (%d):</h2>", count ($address['vsglist']));
+			foreach ($address['vsglist'] as $vsg_id)
+				renderSLBEntityCell (spotEntity ('ipvs', $vsg_id));
+		}
+
 		if (! empty ($address['vslist']))
 		{
 			printf ("<h2>virtual services (%d):</h2>", count ($address['vslist']));
@@ -2822,7 +2842,22 @@ function renderIPAddress ($ip_bin)
 		finishPortlet();
 	}
 
-	if (! empty ($address['vslist']) or ! empty ($address['rsplist']))
+	if (! empty ($address['rsplist']))
+	{
+		startPortlet ("RS pools:");
+		foreach ($address['rsplist'] as $rsp_id)
+		{
+			renderSLBEntityCell (spotEntity ('ipv4rspool', $rsp_id));
+			echo '<br>';
+		}
+		finishPortlet();
+	}
+
+	if (! empty ($address['vsglist']))
+		foreach ($address['vsglist'] as $vsg_id)
+			renderSLBTriplets2 (spotEntity ('ipvs', $vsg_id), FALSE, $ip_bin);
+
+	if (! empty ($address['vslist']))
 		renderSLBTriplets ($address);
 
 	foreach (array ('outpf' => 'departing NAT rules', 'inpf' => 'arriving NAT rules') as $key => $title)
@@ -5679,6 +5714,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'ipv4vs':
+	case 'ipvs':
 	case 'ipv4rspool':
 		renderSLBEntityCell ($cell);
 		break;
@@ -5831,8 +5867,9 @@ function showPathAndSearch ($pageno, $tabno)
 		$self = __FUNCTION__;
 		global $page;
 		$path = array();
+		$page_name = preg_replace ('/:.*/', '', $targetno);
 		// Recursion breaks at first parentless page.
-		if ($targetno == 'ipaddress')
+		if ($page_name == 'ipaddress')
 		{
 			// case ipaddress is a universal v4/v6 page, it has two parents and requires special handling
 			$ip_bin = ip_parse ($_REQUEST['ip']);
@@ -5840,22 +5877,28 @@ function showPathAndSearch ($pageno, $tabno)
 			$path = $self ($parent);
 			$path[] = $targetno;
 		}
-		elseif (!isset ($page[$targetno]['parent']))
+		elseif (!isset ($page[$page_name]['parent']))
 			$path = array ($targetno);
 		else
 		{
-			$path = $self ($page[$targetno]['parent']);
+			$path = $self ($page[$page_name]['parent']);
 			$path[] = $targetno;
 		}
 		return $path;
 	}
-	global $page;
+	global $page, $tab;
 	// Path.
 	$path = getPath ($pageno);
 	$items = array();
 	foreach (array_reverse ($path) as $no)
 	{
-		if (isset ($page[$no]['title']))
+		if (preg_match ('/(.*):(.*)/', $no, $m) && isset ($tab[$m[1]][$m[2]]))
+			$title = array
+			(
+				'name' => $tab[$m[1]][$m[2]],
+				'params' => array('page' => $m[1], 'tab' => $m[2]),
+			);
+		elseif (isset ($page[$no]['title']))
 			$title = array
 			(
 				'name' => $page[$no]['title'],
@@ -5981,6 +6024,13 @@ function dynamic_title_decoder ($path_position)
 		return array
 		(
 			'name' => $vs_info['dname'],
+			'params' => array ('vs_id' => $vs_info['id'])
+		);
+	case 'ipvs':
+		$vs_info = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+		return array
+		(
+			'name' => $vs_info['name'],
 			'params' => array ('vs_id' => $vs_info['id'])
 		);
 	case 'object':

@@ -102,6 +102,20 @@ should be sufficient:
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.20.5 ***
+
+This release introduces the VS groups feature. VS groups is a new way to store
+and display virtual services configuration. New realm 'ipvs' (VS group) is created.
+All the existing VS configuration is kept and displayed as-is, but user is free to convert
+it to the new format, which displays it in more natural way and allows to generate
+virtual_server_group keepalived configs. To convert a virtual servise to the new format,
+you need to manually create the vs group object and assign IP addresses to it. Then, if you
+have the old-style VSes configured, the Migrate tab will be displayed on the particular VS group's
+page. After successfull migration, you can remove the old-style VS objects.
+
+Old-style VS configuration becomes DEPRECATED. Its support will be removed in one of the following
+major releases. So it is strongly recommended to convert it to the new format.
+
 *** Upgrading to 0.20.4 ***
 
 Please note that some dictionary items of Cisco Catalyst 2960 series switches

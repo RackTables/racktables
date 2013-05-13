@@ -115,6 +115,18 @@ $SQLSchema = array
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('IPv4VS.vip', 'IPv4VS.proto', 'IPv4VS.vport'),
 	),
+	'ipvs' => array
+	(
+		'table' => 'VS',
+		'columns' => array
+		(
+			'id' => 'id',
+			'name' => 'name',
+			'vsconfig' => 'vsconfig',
+			'rsconfig' => 'rsconfig',
+		),
+		'keycolumn' => 'id',
+	),
 	'ipv4rspool' => array
 	(
 		'table' => 'IPv4RSPool',
@@ -422,10 +434,13 @@ function listCells ($realm, $parent_id = 0)
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
 		$qparams[] = $parent_id;
 	}
-	$query .= " ORDER BY ";
-	foreach ($SQLinfo['ordcolumns'] as $oc)
-		$query .= "${oc}, ";
-	$query = trim($query, ', ');
+	if (isset ($SQLinfo['ordcolumns']))
+	{
+		$query .= " ORDER BY ";
+		foreach ($SQLinfo['ordcolumns'] as $oc)
+			$query .= "${oc}, ";
+		$query = trim($query, ', ');
+	}
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
 	// Index returned result by the value of key column.
@@ -492,6 +507,16 @@ function listCells ($realm, $parent_id = 0)
 		case 'ipv4vs':
 			$entity['vip'] = ip_format ($entity['vip_bin']);
 			setDisplayedName ($entity); // set $entity['dname']
+			$entity['vsconfig'] = dos2unix ($entity['vsconfig']);
+			$entity['rsconfig'] = dos2unix ($entity['rsconfig']);
+			break;
+		case 'ipv4rspool':
+			$entity['vsconfig'] = dos2unix ($entity['vsconfig']);
+			$entity['rsconfig'] = dos2unix ($entity['rsconfig']);
+			break;
+		case 'ipvs':
+			$entity['vsconfig'] = dos2unix ($entity['vsconfig']);
+			$entity['rsconfig'] = dos2unix ($entity['rsconfig']);
 			break;
 		default:
 			break;
@@ -600,6 +625,16 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	case 'ipv4vs':
 		$ret['vip'] = ip_format ($ret['vip_bin']);
 		setDisplayedName ($ret); // set $ret['dname']
+		$ret['vsconfig'] = dos2unix ($ret['vsconfig']);
+		$ret['rsconfig'] = dos2unix ($ret['rsconfig']);
+		break;
+	case 'ipv4rspool':
+		$ret['vsconfig'] = dos2unix ($ret['vsconfig']);
+		$ret['rsconfig'] = dos2unix ($ret['rsconfig']);
+		break;
+	case 'ipvs':
+		$ret['vsconfig'] = dos2unix ($ret['vsconfig']);
+		$ret['rsconfig'] = dos2unix ($ret['rsconfig']);
 		break;
 	default:
 		break;
@@ -725,6 +760,24 @@ function amplifyCell (&$record, $dummy = NULL)
 		$result = usePreparedSelectBlade ('SELECT object_id, domain_id FROM VLANSwitch WHERE template_id = ?', array ($record['id']));
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
 			$record['switches'][$row['object_id']] = $row;
+		break;
+	case 'ipvs':
+		$result = usePreparedSelectBlade ("SELECT proto, vport, vsconfig, rsconfig FROM VSPorts WHERE vs_id = ?", array ($record['id']));
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		{
+			$row['vsconfig'] = dos2unix ($row['vsconfig']);
+			$row['rsconfig'] = dos2unix ($row['rsconfig']);
+			$record['ports'][] = $row;
+		}
+		unset ($result);
+		$result = usePreparedSelectBlade ("SELECT vip, vsconfig, rsconfig FROM VSIPs WHERE vs_id = ?", array ($record['id']));
+		while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		{
+			$row['vsconfig'] = dos2unix ($row['vsconfig']);
+			$row['rsconfig'] = dos2unix ($row['rsconfig']);
+			$record['vips'][] = $row;
+		}
+		unset ($result);
 		break;
 	default:
 	}
@@ -1885,7 +1938,8 @@ function scanIPv4Space ($pairlist)
 	$or = '';
 	$whereexpr1 = '(';
 	$whereexpr2 = '(';
-	$whereexpr3 = '(';
+	$whereexpr3a = '(';
+	$whereexpr3b = '(';
 	$whereexpr4 = '(';
 	$whereexpr5a = '(';
 	$whereexpr5b = '(';
@@ -1896,7 +1950,8 @@ function scanIPv4Space ($pairlist)
 	{
 		$whereexpr1 .= $or . "ip between ? and ?";
 		$whereexpr2 .= $or . "ip between ? and ?";
-		$whereexpr3 .= $or . "vip between ? and ?";
+		$whereexpr3a .= $or . "vip between ? and ?";
+		$whereexpr3b .= $or . "vip between ? and ?";
 		$whereexpr4 .= $or . "rsip between ? and ?";
 		$whereexpr5a .= $or . "remoteip between ? and ?";
 		$whereexpr5b .= $or . "localip between ? and ?";
@@ -1909,7 +1964,8 @@ function scanIPv4Space ($pairlist)
 	}
 	$whereexpr1 .= ')';
 	$whereexpr2 .= ')';
-	$whereexpr3 .= ')';
+	$whereexpr3a .= ')';
+	$whereexpr3b .= ')';
 	$whereexpr4 .= ')';
 	$whereexpr5a .= ')';
 	$whereexpr5b .= ')';
@@ -1953,8 +2009,8 @@ function scanIPv4Space ($pairlist)
 		);
 	}
 
-	// 3. look for virtual services
-	$query = "select id, vip from IPv4VS where ${whereexpr3}";
+	// 3a. look for virtual services
+	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -1964,6 +2020,19 @@ function scanIPv4Space ($pairlist)
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['vslist'][] = $row['id'];
+	}
+
+	// 3b. look for virtual service groups
+	$query = "select vs_id, vip from VSIPs where ${whereexpr3b}";
+	$result = usePreparedSelectBlade ($query, $qparams_bin);
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
+	{
+		$ip_bin = $row['vip'];
+		if (!isset ($ret[$ip_bin]))
+			$ret[$ip_bin] = constructIPAddress ($ip_bin);
+		$ret[$ip_bin]['vsglist'][] = $row['vs_id'];
 	}
 
 	// 4. don't forget about real servers along with pools
@@ -2062,7 +2131,8 @@ function scanIPv6Space ($pairlist)
 	$or = '';
 	$whereexpr1 = '(';
 	$whereexpr2 = '(';
-	$whereexpr3 = '(';
+	$whereexpr3a = '(';
+	$whereexpr3b = '(';
 	$whereexpr4 = '(';
 	$whereexpr6 = '(';
 	$qparams = array();
@@ -2070,7 +2140,8 @@ function scanIPv6Space ($pairlist)
 	{
 		$whereexpr1 .= $or . "ip between ? and ?";
 		$whereexpr2 .= $or . "ip between ? and ?";
-		$whereexpr3 .= $or . "vip between ? and ?";
+		$whereexpr3a .= $or . "vip between ? and ?";
+		$whereexpr3b .= $or . "vip between ? and ?";
 		$whereexpr4 .= $or . "rsip between ? and ?";
 		$whereexpr6 .= $or . "l.ip between ? and ?";
 		$or = ' or ';
@@ -2079,7 +2150,8 @@ function scanIPv6Space ($pairlist)
 	}
 	$whereexpr1 .= ')';
 	$whereexpr2 .= ')';
-	$whereexpr3 .= ')';
+	$whereexpr3a .= ')';
+	$whereexpr3b .= ')';
 	$whereexpr4 .= ')';
 	$whereexpr6 .= ')';
 
@@ -2121,8 +2193,8 @@ function scanIPv6Space ($pairlist)
 		);
 	}
 
-	// 3. look for virtual services
-	$query = "select id, vip from IPv4VS where ${whereexpr3}";
+	// 3a. look for virtual services
+	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -2132,6 +2204,19 @@ function scanIPv6Space ($pairlist)
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['vslist'][] = $row['id'];
+	}
+
+	// 3b. look for virtual service groups
+	$query = "select vs_id, vip from VSIPs where ${whereexpr3b}";
+	$result = usePreparedSelectBlade ($query, $qparams);
+	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($allRows as $row)
+	{
+		$ip_bin = $row['vip'];
+		if (!isset ($ret[$ip_bin]))
+			$ret[$ip_bin] = constructIPAddress ($ip_bin);
+		$ret[$ip_bin]['vsglist'][] = $row['vs_id'];
 	}
 
 	// 4. don't forget about real servers along with pools
@@ -3750,6 +3835,10 @@ function generateEntityAutoTags ($cell)
 			if ($cell['refcnt'] == 0)
 				$ret[] = array ('tag' => '$unused');
 			$ret[] = array ('tag' => '$type_' . strtolower ($cell['proto'])); // $type_tcp, $type_udp or $type_mark
+			break;
+		case 'ipvs':
+			$ret[] = array ('tag' => '$ipvsid_' . $cell['id']);
+			$ret[] = array ('tag' => '$any_vs');
 			break;
 		case 'ipv4rspool':
 			$ret[] = array ('tag' => '$ipv4rspid_' . $cell['id']);

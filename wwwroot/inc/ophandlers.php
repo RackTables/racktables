@@ -1658,6 +1658,249 @@ function updateVService ()
 	return showFuncMessage (__FUNCTION__, 'OK');
 }
 
+function updateVS ()
+{
+	$vs_id = assertUIntArg ('vs_id');
+	$name = assertStringArg ('name');
+	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+
+	usePreparedUpdateBlade ('VS', array ('name' => $name, 'vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('id' => $vs_id));
+	showSuccess ("Service updated successfully");
+}
+
+function addIPToVS()
+{
+	$ip_bin = assertIPArg ('ip');
+	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	amplifyCell ($vsinfo);
+	$row = array ('vs_id' => $vsinfo['id'], 'vip' => $ip_bin, 'vsconfig' => NULL, 'rsconfig' => NULL);
+	if ($vip = isVIPEnabled ($row, $vsinfo['vips']))
+		return showError ("Service already contains IP " . formatVSIP ($vip));
+	usePreparedInsertBlade ('VSIPs', $row);
+	showSuccess ("IP addded");
+}
+
+function addPortToVS()
+{
+	global $vs_proto;
+	$proto = assertStringArg ('proto');
+	if (! in_array ($proto, $vs_proto))
+		throw new InvalidRequestArgException ('proto', "Invalid VS protocol");
+	$vport = assertUIntArg ('port', TRUE);
+	if ($proto == 'MARK')
+	{
+		if ($vport > 0xFFFFFFFF)
+			return showError ("fwmark value is too large");
+	}
+	else
+		if ($vport == 0 || $vport >= 0xFFFF)
+			return showError ("Invalid $proto port value");
+
+	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	amplifyCell ($vsinfo);
+	$row = array ('vs_id' => $vsinfo['id'], 'proto' => $proto, 'vport' => $vport, 'vsconfig' => NULL, 'rsconfig' => NULL);
+	if ($port = isPortEnabled ($row, $vsinfo['ports']))
+		return showError ("Service already contains port " . formatVSPort ($port));
+	usePreparedInsertBlade ('VSPorts', $row);
+	showSuccess ("port addded");
+}
+
+function updateIPInVS()
+{
+	$vs_id = assertUIntArg ('vs_id');
+	$ip_bin = assertIPArg ('ip');
+	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+	if (usePreparedUpdateBlade ('VSIPs', array ('vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('vs_id' => $vs_id, 'vip' => $ip_bin)))
+		showSuccess ("IP configuration updated");
+	else
+		showNotice ("Nothing changed");
+}
+
+function updatePortInVS()
+{
+	$vs_id = assertUIntArg ('vs_id');
+	$proto = assertStringArg ('proto');
+	$vport = assertUIntArg ('port', TRUE);
+	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+	if (usePreparedUpdateBlade ('VSPorts', array ('vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('vs_id' => $vs_id, 'proto' => $proto, 'vport' => $vport)))
+		showSuccess ("Port configuration updated");
+	else
+		showNotice ("Nothing changed");
+}
+
+function removeIPFromVS()
+{
+	$vip = array ('vip' => assertIPArg ('ip'));
+	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	amplifyCell ($vsinfo);
+	$used = 0;
+	foreach (getTriplets ($vsinfo) as $triplet)
+		if (isVIPEnabled ($vip, $triplet['vips']))
+			$used++;
+	if (usePreparedDeleteBlade ('VSIPs', array ('vs_id' => $vsinfo['id']) + $vip))
+		showSuccess ("IP removed" . ($used ? ", it was binded with $used SLBs" : ''));
+	else
+		showNotice ("Nothing changed");
+}
+
+function removePortFromVS()
+{
+	$port = array ('proto' => assertStringArg ('proto'), 'vport' => assertUIntArg ('port', TRUE));
+	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	amplifyCell ($vsinfo);
+	$used = 0;
+	foreach (getTriplets ($vsinfo) as $triplet)
+		if (isPortEnabled ($port, $triplet['ports']))
+			$used++;
+	if (usePreparedDeleteBlade ('VSPorts', array ('vs_id' => $vsinfo['id']) + $port))
+		showSuccess ("Port removed" . ($used ? ", it was binded with $used SLBs" : ''));
+	else
+		showNotice ("Nothing changed");
+}
+
+function updateTripletConfig()
+{
+	$key_fields = array
+	(
+		'object_id' => assertUIntArg ('object_id'),
+		'vs_id' => assertUIntArg ('vs_id'),
+		'rspool_id' => assertUIntArg ('rspool_id'),
+	);
+	$config_fields = array
+	(
+		'vsconfig' => nullEmptyStr (assertStringArg ('vsconfig', TRUE)),
+		'rsconfig' => nullEmptyStr (assertStringArg ('rsconfig', TRUE)),
+	);
+
+	$vsinfo = spotEntity ('ipvs', $key_fields['vs_id']);
+	amplifyCell ($vsinfo);
+	$found = FALSE;
+
+	if ($_REQUEST['op'] == 'updPort')
+	{
+		$table = 'VSEnabledPorts';
+		$proto = assertStringArg ('proto');
+		$vport = assertUIntArg ('port', TRUE);
+		$key_fields['proto'] = $proto;
+		$key_fields['vport'] = $vport;
+		$key = "Port $proto-$vport";
+		// check if such port exists in VS
+		foreach ($vsinfo['ports'] as $vs_port)
+			if ($vs_port['proto'] == $proto && $vs_port['vport'] == $vport)
+			{
+				$found = TRUE;
+				break;
+			}
+	}
+	else
+	{
+		$table = 'VSEnabledIPs';
+		$vip = assertIPArg ('vip');
+		$config_fields['prio'] = nullEmptyStr (assertStringArg ('prio', TRUE));
+		$key_fields['vip'] = $vip;
+		$key = "IP " . ip_format ($vip);
+		// check if such VIP exists in VS
+		foreach ($vsinfo['vips'] as $vs_vip)
+			if ($vs_vip['vip'] === $vip)
+			{
+				$found = TRUE;
+				break;
+			}
+	}
+	if (! $found)
+		return showError ("$key not found in VS");
+
+	$nchanged = 0;
+	if (! isCheckSet ('enabled'))
+	{
+		if ($nchanged += usePreparedDeleteBlade ($table, $key_fields))
+			return showSuccess ("$key disabled");
+	}
+	else
+	{
+		global $dbxlink;
+		$dbxlink->beginTransaction();
+		$q = "SELECT * FROM $table WHERE";
+		$sep = '';
+		$params = array();
+		foreach ($key_fields as $field => $value)
+		{
+			$q .= " $sep $field = ?";
+			$params[] = $value;
+			$sep = 'AND';
+		}
+		$result = usePreparedSelectBlade ("$q FOR UPDATE", $params);
+		$row = $result->fetch (PDO::FETCH_ASSOC);
+		unset ($result);
+		if ($row)
+		{
+			if ($nchanged += usePreparedUpdateBlade ($table, $config_fields, $key_fields))
+				showSuccess ("$key config updated");
+		}
+		else
+		{
+			$constraint_failed = FALSE;
+			// search VIP in some other triplet on this balancer
+			if (isset ($vip))
+			{
+				$result = usePreparedSelectBlade ("SELECT * FROM $table WHERE object_id = ? AND vip = ?", array ($key_fields['object_id'], $vip));
+				if ($result->fetch (PDO::FETCH_ASSOC))
+				{
+					$constraint_failed = TRUE;
+					showError ("$key is already used on this server");
+				}
+			}
+			if (! $constraint_failed)
+				if ($nchanged += usePreparedInsertBlade ($table, $key_fields + $config_fields))
+					showSuccess ("$key enabled");
+		}
+		$dbxlink->commit();
+	}
+	if (! $nchanged)
+		showNotice ("No changes made");
+}
+
+function removeTriplet()
+{
+	$key_fields = array
+	(
+		'object_id' => assertUIntArg ('object_id'),
+		'vs_id' => assertUIntArg ('vs_id'),
+		'rspool_id' => assertUIntArg ('rspool_id'),
+	);
+
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	usePreparedDeleteBlade ('VSEnabledIPs', $key_fields);
+	usePreparedDeleteBlade ('VSEnabledPorts', $key_fields);
+	$dbxlink->commit();
+	showSuccess ('Triplet deleted');
+}
+
+function createTriplet()
+{
+	$object_id = assertUIntArg ('object_id');
+	$vs_id = assertUIntArg ('vs_id');
+	$rspool_id = assertUIntArg ('rspool_id');
+	$vips = array_key_exists ('enabled_vips', $_REQUEST) ? genericAssertion ('enabled_vips', 'array') : array();
+	$ports = array_key_exists ('enabled_ports', $_REQUEST) ? genericAssertion ('enabled_ports', 'array') : array();
+	if (getTriplet ($object_id, $vs_id, $rspool_id))
+		return showError ("SLB triplet already exists");
+
+	$vsinfo = spotEntity ('ipvs', $vs_id);
+	amplifyCell ($vsinfo);
+	foreach ($vsinfo['vips'] as $vip)
+		if (in_array (ip_format ($vip['vip']), $vips))
+			usePreparedInsertBlade ('VSEnabledIPs', array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'vip' => $vip['vip']));
+	foreach ($vsinfo['ports'] as $port)
+		if (in_array($port['proto'] . '-' . $port['vport'], $ports))
+			usePreparedInsertBlade ('VSEnabledPorts', array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'proto' => $port['proto'], 'vport' => $port['vport']));
+	showSuccess ("SLB triplet created");
+}
+
 $msgcode['addLoadBalancer']['OK'] = 48;
 function addLoadBalancer ()
 {
@@ -2994,6 +3237,71 @@ function cloneRSPool()
 		addRStoRSPool ($new_id, $rs['rsip_bin'], $rs['rsport'], $rs['inservice'], $rs['rsconfig'], $rs['comment']);
 	showSuccess ('Created a copy of pool  ' . mkA ($pool['name'], 'ipv4rspool', $pool['id']));
 	return buildRedirectURL ('ipv4rspool', 'default', array ('pool_id' => $new_id));
+}
+
+function doVSMigrate()
+{
+	global $dbxlink;
+	$vs_id = assertUIntArg ('vs_id');
+	$vs_cell = spotEntity ('ipvs', $vs_id);
+	amplifyCell ($vs_cell);
+	$tag_ids = genericAssertion ('taglist', 'array');
+	$old_vs_list = genericAssertion ('vs_list', 'array');
+	$plan = callHook ('buildVSMigratePlan', $vs_id, $old_vs_list);
+
+	$dbxlink->beginTransaction();
+
+	// remove all triplets
+	usePreparedDeleteBlade ('VSEnabledIPs', array ('vs_id' => $vs_id));
+	usePreparedDeleteBlade ('VSEnabledPorts', array ('vs_id' => $vs_id));
+
+	// remove all VIPs and ports which are in $plan,and create new ones
+	foreach ($plan['vips'] as $vip)
+	{
+		usePreparedDeleteBlade ('VSIPs', array ('vs_id' => $vs_id, 'vip' => $vip['vip']));
+		usePreparedInsertBlade ('VSIPs', array ('vs_id' => $vs_id) + $vip);
+	}
+	foreach ($plan['ports'] as $port)
+	{
+		usePreparedDeleteBlade ('VSPorts', array ('vs_id' => $vs_id, 'proto' => $port['proto'], 'vport' => $port['vport']));
+		usePreparedInsertBlade ('VSPorts', array ('vs_id' => $vs_id) + $port);
+	}
+
+	// create triplets
+	foreach ($plan['triplets'] as $triplet)
+	{
+		$tr_key = array
+		(
+			'vs_id' => $triplet['vs_id'],
+			'object_id' => $triplet['object_id'],
+			'rspool_id' => $triplet['rspool_id'],
+		);
+
+		foreach ($triplet['ports'] as $port)
+			usePreparedInsertBlade ('VSEnabledPorts', $tr_key + $port);
+		foreach ($triplet['vips'] as $vip)
+			usePreparedInsertBlade ('VSEnabledIPs', $tr_key + $vip);
+	}
+
+	// update configs
+	usePreparedUpdateBlade ('VS', $plan['properties'], array ('id' => $vs_id));
+
+	// replace tags
+	global $taglist;
+	$chain = array();
+	foreach ($tag_ids as $tid)
+		if (! isset ($taglist[$tid]))
+		{
+			$dbxlink->rollback();
+			showError ("Unknown tag id $tid");
+		}
+		else
+			$chain[] = $taglist[$tid];
+	rebuildTagChainForEntity ('ipvs', $vs_id, $chain, TRUE);
+
+	$dbxlink->commit();
+	showSuccess ("old VS configs were copied to VS group");
+	return buildRedirectURL (NULL, 'default');
 }
 
 # validate user input and produce SQL columns per the opspec descriptor

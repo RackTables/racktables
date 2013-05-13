@@ -59,6 +59,7 @@ $etype_by_pageno = array
 	'ipv6net' => 'ipv6net',
 	'ipv4rspool' => 'ipv4rspool',
 	'ipv4vs' => 'ipv4vs',
+	'ipvs' => 'ipvs',
 	'object' => 'object',
 	'rack' => 'rack',
 	'row' => 'row',
@@ -2464,6 +2465,7 @@ function constructIPAddress ($ip_bin)
 		'reserved' => 'no',
 		'allocs' => array(),
 		'vslist' => array(),
+		'vsglist' => array(),
 		'rsplist' => array(),
 	);
 
@@ -2672,6 +2674,8 @@ function formatEntityName ($name)
 			return 'IPv4 RS Pool';
 		case 'ipv4vs':
 			return 'IPv4 Virtual Service';
+		case 'ipvs':
+			return 'IP Virtual Service';
 		case 'object':
 			return 'Object';
 		case 'rack':
@@ -5629,6 +5633,16 @@ function array_last ($array)
 		return $single[0];
 }
 
+// returns array of key-value pairs from array $a such that keys are not present in $b
+function array_sub ($a, $b)
+{
+	$ret = array();
+	foreach ($a as $key => $value)
+		if (! array_key_exists($key, $b))
+			$ret[$key] = $value;
+	return $ret;
+}
+
 // Registers additional ophandler on page-tab-opname triplet.
 // Valid $method values are 'before' and 'after'.
 //   'before' puts your ophandler in the beginning of the list (and thus before the default)
@@ -5873,6 +5887,9 @@ function formatEntityList ($list)
 			case 'ipv4vs':
 				$ret[$entity['id']] = $entity['name'] . (strlen ($entity['name']) ? ' ' : '') . '(' . $entity['dname'] . ')';
 				break;
+			case 'ipvs':
+				$ret[$entity['id']] = $entity['name'];
+				break;
 			case 'ipv4rspool':
 				$ret[$entity['id']] = $entity['name'];
 				break;
@@ -6000,6 +6017,11 @@ function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
 			if ($record['id'] == $attr_id and in_array ($record['key'], $values))
 				return TRUE;
 	return FALSE;
+}
+
+function nullEmptyStr ($str)
+{
+	return strlen ($str) ? $str : NULL;
 }
 
 ?>

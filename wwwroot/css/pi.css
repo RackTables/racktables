@@ -639,6 +639,7 @@ div.vlan {
 	border: 1px solid #000000;
 	background: #FFFFFF;
 	padding: 0px 5px;
+	z-index: 999;
 }
 
 /*popup div with MAC list*/
@@ -806,4 +807,78 @@ a.noclick {
 	font-style: italic;
 	margin: 0 0;
 	font-size: 90%;
+}
+
+.slb-checks {
+	margin: 0px;
+	padding: 0px 2em;
+	list-style: square;
+}
+
+.slb-checks li {
+	margin: 5px 0px;
+	white-space: pre;
+}
+
+.slb-checks li.disabled {
+	color: #999999;
+	list-style-image: url(?module=chrome&uri=pix/unchecked.png)
+}
+
+.slb-checks li.disabled * {
+	color: #999999;
+}
+
+.slb-checks li.enabled {
+	list-style-image: url(?module=chrome&uri=pix/checked.png);
+}
+
+.slb-checks.editable li:hover {
+	list-style-image: url(?module=chrome&uri=pix/pencil-icon.png);
+	cursor: pointer;
+}
+
+.slb-checks.editable li a {
+	cursor: pointer;
+}
+
+.slb-checks.editable li * {
+	cursor: auto;
+}
+
+.slb-checks li form {
+	display: none;
+}
+
+.slb-prio {
+	border: 1px solid #aaaaaa;
+	padding: 0px 2px;
+	margin-left: 1em;
+}
+
+.slbconf-btn {
+	border: 1px solid #aaaaaa;
+	font-size: 12px;
+	font-weight: bold;
+	height: 10px;
+	line-height: 6px;
+
+	display: inline-block;
+	padding: 0px 2px;
+	margin-left: 1em;
+	position: relative;
+	top: -3px;
+}
+
+.popup-box h1 {
+	background-color: #3C78B5;
+	color: white;
+	text-align: center;
+	font-family: verdana, tahoma;
+	font-weight: normal;
+	padding: 0px;
+	margin: 0px -5px;
+	margin-top: 0.5em;
+	font-size: 12px;
+	line-height: 1.5em;
 }

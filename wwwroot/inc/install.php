@@ -559,7 +559,7 @@ CREATE TABLE `Dictionary` (
 
 CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','row','user') NOT NULL,
+  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL,
   `parent_entity_id` int(10) unsigned NOT NULL,
   `child_entity_type` enum('file','location','object','rack','row') NOT NULL,
   `child_entity_id` int(10) unsigned NOT NULL,
@@ -586,7 +586,7 @@ CREATE TABLE `File` (
 CREATE TABLE `FileLink` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `file_id` int(10) unsigned NOT NULL,
-  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','row','user') NOT NULL default 'object',
+  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL default 'object',
   `entity_id` int(10) NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `FileLink-file_id` (`file_id`),
@@ -945,7 +945,7 @@ CREATE TABLE `Script` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE `TagStorage` (
-  `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
+  `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
   `tag_is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
@@ -1071,6 +1071,66 @@ CREATE TABLE `VLANSwitchTemplate` (
 CREATE TABLE `VLANValidID` (
   `vlan_id` int(10) unsigned NOT NULL default '1',
   PRIMARY KEY  (`vlan_id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VS` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(255) DEFAULT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `VSIPs` (
+  `vs_id` int(10) unsigned NOT NULL,
+  `vip` varbinary(16) NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`vs_id`,`vip`),
+  KEY `vip` (`vip`),
+  CONSTRAINT `VSIPs-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `VSPorts` (
+  `vs_id` int(10) unsigned NOT NULL,
+  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `vport` int(10) unsigned NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`vs_id`,`proto`,`vport`),
+  CONSTRAINT `VS-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `VSEnabledIPs` (
+  `object_id` int(10) unsigned NOT NULL,
+  `vs_id` int(10) unsigned NOT NULL,
+  `vip` varbinary(16) NOT NULL,
+  `rspool_id` int(10) unsigned NOT NULL,
+  `prio` varchar(255) DEFAULT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`object_id`,`vs_id`,`vip`),
+  KEY `vip` (`vip`),
+  KEY `VSEnabledIPs-FK-vs_id-vip` (`vs_id`,`vip`),
+  KEY `VSEnabledIPs-FK-rspool_id` (`rspool_id`),
+  CONSTRAINT `VSEnabledIPs-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledIPs-FK-vs_id-vip` FOREIGN KEY (`vs_id`, `vip`) REFERENCES `VSIPs` (`vs_id`, `vip`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE `VSEnabledPorts` (
+  `object_id` int(10) unsigned NOT NULL,
+  `vs_id` int(10) unsigned NOT NULL,
+  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `vport` int(10) unsigned NOT NULL,
+  `rspool_id` int(10) unsigned NOT NULL,
+  `vsconfig` text,
+  `rsconfig` text,
+  PRIMARY KEY (`object_id`,`vs_id`,`proto`,`vport`),
+  KEY `VSEnabledPorts-FK-vs_id-proto-vport` (`vs_id`,`proto`,`vport`),
+  KEY `VSEnabledPorts-FK-rspool_id` (`rspool_id`),
+  CONSTRAINT `VSEnabledPorts-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledPorts-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name

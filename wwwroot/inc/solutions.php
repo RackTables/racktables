@@ -13,6 +13,8 @@ amount of other code (which should eventually be placed in a sort of
 
 */
 
+require_once 'slb-interface.php';
+
 define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alpha:]]+/)*[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
 function dispatchImageRequest()

@@ -1,0 +1,531 @@
+<?php
+
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
+function renderVSGList ()
+{
+	renderCellList ('ipvs', 'VS groups');
+}
+
+function formatVSPort ($port, $plain_text = FALSE)
+{
+	if ($port['proto'] == 'MARK')
+		return 'fwmark ' . $port['vport'];
+	$proto = strtolower ($port['proto']);
+	$name = $port['vport'] . '/' . $proto;
+	if (!$plain_text && NULL !== ($srv = getservbyport ($port['vport'], $proto)))
+		return '<span title="' . $name . '">' . $srv . '</span>';
+	else
+		return $name;
+}
+
+function formatVSIP ($vip, $plain_text = FALSE)
+{
+	$fmt_ip = ip_format ($vip['vip']);
+	if ($plain_text)
+		return $fmt_ip;
+	$ret = '<a href="' . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt_ip)) . '">' . $fmt_ip . '</a>';
+	return $ret;
+}
+
+function renderVS ($vsid)
+{
+	$vsinfo = spotEntity ('ipvs', $vsid);
+	amplifyCell ($vsinfo);
+
+	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
+	if (strlen ($vsinfo['name']))
+		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
+	echo '<tr>';
+
+	echo '<td class=pcleft>';
+	$summary = array();
+	$summary['Name'] = $vsinfo['name'] . getPopupSLBConfig ($vsinfo);
+	$summary['tags'] = '';
+
+	$ips = '<ul class="slb-checks">';
+	foreach ($vsinfo['vips'] as $vip)
+		$ips .= '<li>' . formatVSIP ($vip) . getPopupSLBConfig ($vip) . '</li>';
+	$ips .= '</ul>';
+	$summary['IPs'] = $ips;
+
+	$ports = '<ul class="slb-checks">';
+	foreach ($vsinfo['ports'] as $port)
+		$ports .= '<li>' . formatVSPort ($port) . getPopupSLBConfig ($port) . '</li>';
+	$ports .= '</ul>';
+	$summary['Ports'] = $ports;
+
+	renderEntitySummary ($vsinfo, 'Summary', $summary);
+	echo '</td>';
+
+	echo '<td class=pcright>';
+	renderSLBTriplets2 ($vsinfo);
+	echo '</td></tr><tr><td colspan=2>';
+	renderFilesPortlet ('ipvs', $vsid);
+	echo '</tr><table>';
+}
+
+function renderTripletForm ($bypass_id)
+{
+	global $pageno, $etype_by_pageno;
+	$cell = spotEntity ($etype_by_pageno[$pageno], $bypass_id);
+	renderSLBTriplets2 ($cell, TRUE);
+}
+
+// either $port of $vip argument should be NULL
+function renderPopupTripletForm ($triplet, $port, $vip, $row)
+{
+	printOpFormIntro (isset ($port) ? 'updPort' : 'updIp');
+	echo '<input type=hidden name=object_id value="' . htmlspecialchars ($triplet['object_id'], ENT_QUOTES) . '">';
+	echo '<input type=hidden name=vs_id value="' . htmlspecialchars ($triplet['vs_id'], ENT_QUOTES) . '">';
+	echo '<input type=hidden name=rspool_id value="' . htmlspecialchars ($triplet['rspool_id'], ENT_QUOTES) . '">';
+	echo '<p><label><input type=checkbox name=enabled' . (is_array ($row) ? ' checked' : '') . '> ' . (isset ($port) ? 'Enable port' : 'Enable IP') . '</label>';
+	if (isset ($port))
+	{
+		echo '<input type=hidden name=proto value="' . htmlspecialchars ($port['proto'], ENT_QUOTES) . '">';
+		echo '<input type=hidden name=port value="'  . htmlspecialchars ($port['vport'], ENT_QUOTES) . '">';
+	}
+	else
+	{
+		echo '<input type=hidden name=vip value="'  . htmlspecialchars (ip_format ($vip['vip']), ENT_QUOTES) . '">';
+		echo '<p><label>Priority:<br><input type=text name=prio value="'  . htmlspecialchars (is_array ($row) ? $row['prio'] : '', ENT_QUOTES) . '"></label>';
+	}
+	echo '<p><label>VS config:<br>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars (is_array ($row) ? $row['vsconfig'] : '') . '</textarea></label>';
+	echo '<p><label>RS config:<br>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars (is_array ($row) ? $row['rsconfig'] : '') . '</textarea></label>';
+	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</form>';
+}
+
+function renderPopupVSPortForm ($port, $used = 0)
+{
+	$keys = array ('proto' => $port['proto'], 'port' => $port['vport']);
+	$title = 'remove port ' . formatVSPort ($port) . ($used ? " (used $used times)" : '');
+	printOpFormIntro ('updPort', $keys);
+	echo '<p align=center>';
+	echo getOpLink (array ('op' => 'delPort') + $keys, $title, 'destroy', '', ($used ? 'del-used-slb' : '') );
+	echo '<p><label>VS config:<br>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($port['vsconfig']) . '</textarea></label>';
+	echo '<p><label>RS config:<br>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($port['rsconfig']) . '</textarea></label>';
+	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</form>';
+}
+
+function renderPopupVSVIPForm ($vip, $used = 0)
+{
+	$fmt_ip = ip_format ($vip['vip']);
+	$title = 'remove IP ' . formatVSIP ($vip) . ($used ? " (used $used times)" : '');
+	printOpFormIntro ('updIP', array ('ip' => $fmt_ip));
+	echo '<p align=center>';
+	echo getOpLink (array ('op' => 'delIP', 'ip' => $fmt_ip), $title, 'destroy', '', ($used ? 'del-used-slb' : '') );
+	echo '<p><label>VS config:<br>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($vip['vsconfig']) . '</textarea></label>';
+	echo '<p><label>RS config:<br>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vip['rsconfig']) . '</textarea></label>';
+	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</form>';
+}
+
+function renderEditVS ($vs_id)
+{
+	global $vs_proto;
+	$vsinfo = spotEntity ('ipvs', $vs_id);
+	amplifyCell ($vsinfo);
+	$triplets = getTriplets ($vsinfo);
+
+	// first form - common VS settings
+	printOpFormIntro ('updVS');
+	echo '<table border=0 align=center>';
+	echo '<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value="' . htmlspecialchars ($vsinfo['name'], ENT_QUOTES) . '"></td></tr>';
+	echo '<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['vsconfig']) . '</textarea></td></tr>';
+	echo '<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['rsconfig']) . '</textarea></td></tr>';
+	echo '<tr><th></th><th>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo '</th></tr>';
+	echo '</table></form>';
+
+	addJS ('js/jquery.thumbhover.js');
+	addJS ('js/slb_editor.js');
+
+	// second form - ports and IPs settings
+	echo '<p>'; // vertical indentation
+	echo '<table width=50% border=0 align=center>';
+
+	echo '<tr><th style="white-space:nowrap">';
+	printOpFormIntro ('addPort');
+	echo 'Add new port:<br>';
+	echo getSelect ($vs_proto, array ('name' => 'proto'));
+	echo ' <input name=port size=5> ';
+	echo getImageHREF ('add', 'Add port', TRUE);
+	echo '</form></th>';
+
+	echo '<td width=99%></td>';
+
+	echo '<th style="white-space:nowrap">';
+	printOpFormIntro ('addIP');
+	echo 'Add new IP:<br>';
+	echo '<input name=ip size=14> ';
+	echo getImageHREF ('add', 'Add IP', TRUE);
+	echo '</form></th></tr>';
+
+	echo '<tr><td valign=top class=tdleft><ul class="slb-checks editable">';
+	foreach ($vsinfo['ports'] as $port)
+	{
+		$used = 0;
+		foreach ($triplets as $triplet)
+			if (isPortEnabled ($port, $triplet['ports']))
+				$used++;
+		echo '<li class="enabled">';
+		echo formatVSPort ($port) . getPopupSLBConfig ($port);
+		renderPopupVSPortForm ($port, $used);
+		echo '</li>';
+	}
+	echo '</ul></td>';
+
+	echo '<td width=99%></td>';
+
+	echo '<td valign=top class=tdleft><ul class="slb-checks editable">';
+	foreach ($vsinfo['vips'] as $vip)
+	{
+		$used = 0;
+		foreach ($triplets as $triplet)
+			if (isVIPEnabled ($vip, $triplet['vips']))
+				$used++;
+		echo '<li class="enabled">';
+		echo formatVSIP ($vip) . getPopupSLBConfig ($vip);
+		renderPopupVSVIPForm ($vip, $used);
+		echo '</li>';
+	}
+	echo '</ul></td>';
+
+	echo '</tr></table>';
+}
+
+// supports object, ipvs, ipv4rspool cell types
+function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
+{
+	list ($realm1, $realm2) = array_values (array_diff (array ('object', 'ipvs', 'ipv4rspool'), array ($cell['realm'])));
+	if ($editable && getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		callHook ('renderNewTripletForm', $realm1, $realm2);
+
+	$fields = array
+	(
+		'ipvs' => 'vs_id',
+		'object' => 'object_id',
+		'ipv4rspool' => 'rspool_id',
+	);
+
+	$headers = array
+	(
+		'ipvs' => 'VS',
+		'object' => 'LB',
+		'ipv4rspool' => 'RS pool',
+	);
+
+	$triplets = getTriplets ($cell);
+
+	// render table header
+	if (count ($triplets))
+	{
+		startPortlet ('VS group instances (' . count ($triplets) . ')');
+		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable><tr>";
+		foreach ($headers as $realm => $header)
+			if ($realm != $cell['realm'])
+				echo "<th>$header</th>";
+		echo '<th>Ports</th>';
+		echo '<th>VIPs</th>';
+		echo "</tr>";
+	}
+
+	$class = 'slb-checks';
+	if ($editable)
+	{
+		addJS ('js/jquery.thumbhover.js');
+		addJS ('js/slb_editor.js');
+		$class .= ' editable';
+	}
+
+	// render table rows
+	global $nextorder;
+	$order = 'odd';
+	foreach ($triplets as $slb)
+	{
+		$vs_cell = spotEntity ('ipvs', $slb['vs_id']);
+		amplifyCell ($vs_cell);
+		echo "<tr valign=top class='row_${order} triplet-row'>";
+		foreach (array_keys ($headers) as $realm)
+		{
+			if ($realm == $cell['realm'])
+				continue;
+			echo "<td class=tdleft>";
+			$slb_cell = spotEntity ($realm, $slb[$fields[$realm]]);
+			renderSLBEntityCell ($slb_cell);
+			echo "</td>";
+		}
+		// render ports
+		echo "<td class=tdleft><ul class='$class'>";
+		foreach ($vs_cell['ports'] as $port)
+		{
+			echo '<li class="' . (($row = isPortEnabled ($port, $slb['ports'])) ? 'enabled' : 'disabled') . '">';
+			echo formatVSPort ($port) . getPopupSLBConfig ($row);
+			if ($editable)
+				renderPopupTripletForm ($slb, $port, NULL, $row);
+			echo '</li>';
+		}
+		echo '</ul></td>';
+
+		// render VIPs
+		echo "<td class=tdleft><ul class='$class'>";
+		foreach ($vs_cell['vips'] as $vip)
+		{
+			$li_class = isVIPEnabled ($vip, $slb['vips']) ? 'enabled' : 'disabled';
+			if ($vip['vip'] === $hl_ip && $li_class == 'enabled')
+				$li_class .= ' highlight';
+			echo "<li class='$li_class'>";
+			echo formatVSIP ($vip);
+			if (is_array ($row) && !empty ($row['prio']))
+			{
+				$prio_class = 'slb-prio slb-prio-' . preg_replace ('/\s.*/', '', $row['prio']);
+				echo '<span class="' . htmlspecialchars ($prio_class, ENT_QUOTES) . '">' . htmlspecialchars($row['prio']) . '</span>';
+			}
+			echo getPopupSLBConfig ($row);
+			if ($editable)
+				renderPopupTripletForm ($slb, NULL, $vip, $row);
+			echo '</li>';
+		}
+		echo '<ul></td>';
+
+		if ($editable)
+		{
+			echo '<td valign=middle>';
+			printOpFormIntro ('del', array (
+				'object_id' => $slb['object_id'],
+				'vs_id' => $slb['vs_id'],
+				'rspool_id' => $slb['rspool_id'],
+			));
+			printImageHREF ('DELETE', 'Remove triplet', TRUE);
+			echo '</form></td>';
+		}
+
+		echo "</tr>\n";
+		$order = $nextorder[$order];
+	}
+	if (count ($triplets))
+	{
+		echo "</table>\n";
+		finishPortlet();
+	}
+
+	if ($editable && getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		callHook ('renderNewTripletForm', $realm1, $realm2);
+
+}
+
+function renderSLBFormAJAX()
+{
+	global $pageno, $tabno;
+	parse_str (assertStringArg ('form'), $orig_request);
+	parse_str (ltrim (assertStringArg ('action'), '?'), $action);
+	$pageno = $action['page'];
+	$tabno = $action['tab'];
+	printOpFormIntro ($action['op'], $orig_request);
+
+	$realm_list = array_diff (array ('ipvs', 'object', 'ipv4rspool'), array ($pageno));
+	echo '<table align=center><tr class="tdleft">';
+	foreach ($realm_list as $realm)
+	{
+		switch ($realm)
+		{
+			case 'object':
+				$slb_cell = spotEntity ('object', $orig_request['object_id']);
+				break;
+			case 'ipv4rspool':
+				$slb_cell = spotEntity ('ipv4rspool', $orig_request['rspool_id']);
+				break;
+			case 'ipvs':
+				$slb_cell = spotEntity ('ipvs', $orig_request['vs_id']);
+				break;
+		}
+		echo '<td>';
+		renderSLBEntityCell ($slb_cell);
+		echo '</td>';
+	}
+
+	$vsinfo = spotEntity ('ipvs', $orig_request['vs_id']);
+	amplifyCell ($vsinfo);
+
+	echo '<td><ul style="list-style: none">';
+	foreach ($vsinfo['ports'] as $port)
+	{
+		$key = $port['proto'] . '-' . $port['vport'];
+		echo '<li><label><input type=checkbox name="enabled_ports[]" value="' . htmlspecialchars ($key, ENT_QUOTES) . '" checked>' . formatVSPort ($port) . '</label></li>';
+	}
+	echo '</ul></td>';
+
+	echo '<td><ul style="list-style: none">';
+	foreach ($vsinfo['vips'] as $vip)
+	{
+		$key = ip_format ($vip['vip']);
+		echo '<li><label><input type=checkbox name="enabled_vips[]" value="' . htmlspecialchars ($key, ENT_QUOTES) . '" checked>' . $key . '</label></li>';
+	}
+	echo '</ul></td>';
+	echo '<td>';
+	printImageHREF ('ADD', 'Configure LB', TRUE);
+	echo '</td>';
+	echo '</tr></table>';
+	echo '</form>';
+}
+
+function renderNewTripletForm ($realm1, $realm2)
+{
+	function get_realm_data ($realm)
+	{
+		$name = NULL;
+		$list = array();
+		$options = array();
+		switch ($realm)
+		{
+			case 'object':
+				$name = 'Load balancer';
+				//FIXME: remove Y-specific optimizer
+				// $list = getNarrowObjectList ('IPV4LB_LISTSRC');
+				$list = formatEntityList (quickListTaggedBy ($realm, 58));
+				$options = array ('name' => 'object_id', 'tabindex' => 100);
+				break;
+			case 'ipvs':
+				$name = 'Virtual service';
+				$list = formatEntityList (listCells ('ipvs'));
+				$options = array ('name' => 'vs_id', 'tabindex' => 101);
+				break;
+			case 'ipv4rspool':
+				$name = 'RS pool';
+				$list = formatEntityList (listCells ('ipv4rspool'));
+				$options = array ('name' => 'rspool_id', 'tabindex' => 102);
+				break;
+			default:
+				throw new InvalidArgException('realm', $realm);
+		}
+		return array ('name' => $name, 'list' => $list, 'options' => $options);
+	}
+
+	$realm1_data = get_realm_data ($realm1);
+	$realm2_data = get_realm_data ($realm2);
+	startPortlet ('Add new VS group');
+	if (count ($realm1_data['list']) && count ($realm2_data['list']))
+		printOpFormIntro ('addLink');
+	echo "<table cellspacing=0 cellpadding=5 align=center>";
+	echo "<tr valign=top><th class=tdright>{$realm1_data['name']}</th><td class=tdleft>";
+	printSelect ($realm1_data['list'], $realm1_data['options']);
+	echo '</td><td class=tdcenter valign=middle rowspan=2>';
+	if (count ($realm1_data['list']) && count ($realm2_data['list']))
+		printImageHREF ('ADD', 'Configure LB', TRUE, 120);
+	else
+	{
+		$names = array();
+		if (! count ($realm1_data['list']))
+			$names[] = 'a ' . $realm1_data['name'];
+		if (! count ($realm2_data['list']))
+			$names[] = 'a ' . $realm2_data['name'];
+		$message = 'Please create ' . (implode (' and ', $names)) . '.';
+		showNotice ($message);
+		printImageHREF ('DENIED', $message, FALSE);
+	}
+	echo "<tr valign=top><th class=tdright>{$realm2_data['name']}</th><td class=tdleft>";
+	printSelect ($realm2_data['list'], $realm2_data['options']);
+	echo "</td></tr>\n";
+	echo "</table></form>\n";
+	finishPortlet();
+}
+
+function getPopupSLBConfig ($row)
+{
+	$do_vs = (isset ($row) && isset ($row['vsconfig']) && strlen ($row['vsconfig']));
+	$do_rs = (isset ($row) && isset ($row['rsconfig']) && strlen ($row['rsconfig']));
+	if (!$do_vs && !$do_rs)
+		return;
+
+	$ret = '';
+	$ret .= '<div class="slbconf-btn">…</div>';
+	$ret .= '<div class="slbconf popup-box">';
+	if ($do_vs)
+	{
+		$ret .= '<h1>VS config:</h1>';
+		$ret .= $row['vsconfig'];
+	}
+	if ($do_rs)
+	{
+		$ret .= '<h1>RS config:</h1>';
+		$ret .= $row['rsconfig'];
+	}
+	$ret .= '</div>';
+
+	static $js_added = FALSE;
+	if (! $js_added)
+	{
+		addJS ('js/jquery.thumbhover.js');
+		addJS (<<<END
+$(document).ready (function () {
+	$('.slbconf-btn').each (function () {
+		$(this).thumbPopup($(this).siblings('.slbconf.popup-box'), { showFreezeHint: false });
+	});
+});
+END
+		, TRUE);
+	}
+	return $ret;
+}
+
+function trigger_ipvs_convert ()
+{
+	return count (callHook ('getVSIDsByGroup', getBypassValue())) ? 'std' : '';
+}
+
+function renderIPVSConvert ($vs_id)
+{
+	$old_vs_list = callHook ('getVSIDsByGroup', $vs_id);
+
+	$grouped = array();
+	$used_tags = array();
+	foreach ($old_vs_list as $old_vs_id)
+	{
+		$vsinfo = spotEntity ('ipv4vs', $old_vs_id);
+		foreach ($vsinfo['etags'] as $taginfo)
+			$used_tags[$taginfo['id']] = $taginfo;
+		$port_key = $vsinfo['proto'] . '-' . $vsinfo['vport'];
+		$grouped[$port_key][] = $vsinfo;
+	}
+
+	startPortlet ("Found " . count ($old_vs_list) . " matching VS");
+	printOpFormIntro ('convert');
+	if (count ($used_tags))
+	{
+		echo '<p>Assign these tags to VS group:</p>';
+		foreach ($used_tags as $taginfo)
+			echo '<p><label><input type=checkbox checked name="taglist[]" value="' . htmlspecialchars ($taginfo['id'], ENT_QUOTES) . '""> ' . serializeTags (array ($taginfo)) . '<label>';
+	}
+
+	echo '<p>Import settings of these VS:</p>';
+	echo '<table align=center><tr>';
+	foreach ($grouped as $port_key => $list)
+		echo '<th>' . $port_key . '</th>';
+	echo '</tr><tr>';
+	foreach ($grouped as $port_key => $list)
+	{
+		echo '<td><table>';
+		foreach ($list as $vsinfo)
+		{
+			echo '<tr><td><input type=checkbox name="vs_list[]" checked value="' . htmlspecialchars ($vsinfo['id'], ENT_QUOTES) . '"></td><td>';
+			renderSLBEntityCell ($vsinfo);
+			echo '</td></tr>';
+		}
+		echo '</table></td>';
+	}
+	echo '</tr></table>';
+	printImageHREF ('next', "Import settings of the selected services", TRUE);
+	echo '</form>';
+	finishPortlet();
+}
