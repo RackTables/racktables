@@ -1959,7 +1959,7 @@ function markupIPAddrList (&$addrlist)
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		elseif ($nrealms > 1)
 			$addrlist[$ip_bin]['class'] = 'trerror';
-		elseif (! empty ($addrlist[$ip_bin]['vslist']) or ! empty ($addrlist[$ip_bin]['rsplist']))
+		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'reserved', 'allocs', 'inpf', 'outpf')))
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		else
 			$addrlist[$ip_bin]['class'] = '';
@@ -4867,7 +4867,7 @@ function buildSearchRedirectURL ($result_type, $record)
 		case 'ipv4addressbydescr':
 		case 'ipv6addressbydescr':
 			$address = getIPAddress ($record['ip']);
-			if (isset ($address['allocs']) and count ($address['allocs']) == 1 and count ($address['vslist']) == 0 and count ($address['rsplist']) == 0)
+			if (isset ($address['allocs']) and count ($address['allocs']) == 1 and isIPAddressEmpty ($address, array ('allocs')))
 			{
 				$next_page = 'object';
 				$id = $address['allocs'][0]['object_id'];
@@ -5587,6 +5587,29 @@ function fillIPSpareListBstr (&$net, $a, $b)
 	}
 }
 
+// returns TRUE if all of the fields set by constructIPAddress are empty
+function isIPAddressEmpty ($addrinfo, $except_fields = array())
+{
+	// string fields
+	$check_fields = array ('name', 'comment');
+	foreach (array_diff ($check_fields, $except_fields) as $field)
+		if (array_key_exists ($field, $addrinfo) && $addrinfo[$field] != '')
+			return FALSE;
+
+	// "boolean" fields
+	if (! in_array ('reserved', $except_fields) && $addrinfo['reserved'] != 'no')
+		return FALSE;
+
+	// array fields
+	$check_fields = array ('allocs', 'rsplist', 'vslist', 'vsglist')
+	if (strlen ($addrinfo['ip_bin']) == 4)
+		$check_fields = array_merge ($check_fields, array ('inpf', 'outpf'));
+	foreach (array_diff ($check_fields, $except_fields) as $field)
+		if (array_key_exists ($field, $addrinfo) && is_array ($addrinfo[$field]) && count ($addrinfo[$field]) > 0)
+			return FALSE;
+	return TRUE;
+}
+
 // returns TRUE if the network cell is allowed to be deleted, FALSE otherwise
 // $netinfo could be either ipv4net or ipv6net entity.
 // in case of returning FALSE, $netinfo['addrlist'] is set
@@ -5606,16 +5629,7 @@ function isIPNetworkEmpty (&$netinfo)
 			array_key_exists ($ip, $netinfo['addrlist']) and
 			$netinfo['addrlist'][$ip]['name'] == $comment and
 			$netinfo['addrlist'][$ip]['reserved'] == 'yes' and
-			! count ($netinfo['addrlist'][$ip]['allocs']) and
-			! count ($netinfo['addrlist'][$ip]['rsplist']) and
-			! count ($netinfo['addrlist'][$ip]['vslist']) and
-			(
-				$netinfo['realm'] == 'ipv6net' or (
-					! count ($netinfo['addrlist'][$ip]['outpf']) and
-					! count ($netinfo['addrlist'][$ip]['inpf'])
-
-				)
-			)
+			isIPAddressEmpty ($netinfo['addrlist'][$ip], array ('name', 'reserved'))
 		)
 			$pure_auto++;
 	return ($netinfo['own_addrc'] <= $pure_auto);
