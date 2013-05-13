@@ -67,6 +67,7 @@ $etype_by_pageno = array
 	'file' => 'file',
 	'vst' => 'vst',
 );
+$pageno_by_etype = array_flip ($etype_by_pageno);
 
 // Rack thumbnail image width summands: "front", "interior" and "rear" elements w/o surrounding border.
 $rtwidth = array
@@ -4856,8 +4857,7 @@ function searchEntitiesByText ($terms)
 // returns URL to redirect to, or NULL if $result_type is unknown
 function buildSearchRedirectURL ($result_type, $record)
 {
-	global $page;
-	$next_page = $result_type;
+	global $pageno_by_etype, $page;
 	$id = isset ($record['id']) ? $record['id'] : NULL;
 	$params = array();
 	switch ($result_type)
@@ -4880,24 +4880,17 @@ function buildSearchRedirectURL ($result_type, $record)
 				$params['hl_ip'] = ip_format ($record['ip']);
 			}
 			break;
-		case 'object':
-			if (isset ($record['by_port']) and 1 == count ($record['by_port']))
-			{
-				$found_ports_ids = array_keys ($record['by_port']);
-				$params['hl_port_id'] = $found_ports_ids[0];
-			}
-			break;
-		case 'ipv4net':
-		case 'ipv6net':
-		case 'vlan':
-		case 'user':
-		case 'ipv4rspool':
-		case 'ipv4vs':
-		case 'file':
-		case 'rack':
-			break;
 		default:
-			return NULL;
+			if (! isset ($pageno_by_etype[$result_type]))
+				return NULL;
+			$next_page = $pageno_by_etype[$result_type];
+			if ($result_type == 'object')
+				if (isset ($record['by_port']) and 1 == count ($record['by_port']))
+				{
+					$found_ports_ids = array_keys ($record['by_port']);
+					$params['hl_port_id'] = $found_ports_ids[0];
+				}
+			break;
 	}
 	if (array_key_exists ($next_page, $page) && isset ($page[$next_page]['bypass']))
 		$key = $page[$next_page]['bypass'];
@@ -5860,16 +5853,11 @@ function arePortsCompatible ($portinfo_a, $portinfo_b)
 // returns HTML-formatted link to the given entity
 function mkCellA ($cell)
 {
-	global $page, $etype_by_pageno;
-	$cell_page = NULL;
-	foreach ($etype_by_pageno as $page_name => $realm)
-		if ($realm == $cell['realm'])
-		{
-			$cell_page = $page_name;
-			break;
-		}
-	if (! isset ($cell_page))
-		throw new RackTablesError ("Internal structure error in array \$etype_by_pageno. Page for realm '$realm' is not set", RackTablesError::INTERNAL);
+	global $page, $pageno_by_etype;
+	if (! isset ($pageno_by_etype[$cell['realm']]))
+		throw new RackTablesError ("Internal structure error in array \$pageno_by_etype. Page for realm '${cell['realm']}' is not set", RackTablesError::INTERNAL);
+	else
+		$cell_page = $pageno_by_etype[$cell['realm']];
 
 	if ($cell['realm'] == 'user')
 		$cell_key = $cell['userid'];
