@@ -5601,7 +5601,7 @@ function isIPAddressEmpty ($addrinfo, $except_fields = array())
 		return FALSE;
 
 	// array fields
-	$check_fields = array ('allocs', 'rsplist', 'vslist', 'vsglist')
+	$check_fields = array ('allocs', 'rsplist', 'vslist', 'vsglist');
 	if (strlen ($addrinfo['ip_bin']) == 4)
 		$check_fields = array_merge ($check_fields, array ('inpf', 'outpf'));
 	foreach (array_diff ($check_fields, $except_fields) as $field)
