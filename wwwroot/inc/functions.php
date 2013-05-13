@@ -2991,33 +2991,18 @@ function considerGivenConstraint ($cell, $filtertext)
 // records, even if the list is empty (array() !== NULL). If the
 // text is an empty string, return all found records in the given
 // realm.
-function scanRealmByText ($realm = NULL, $ftext = '')
+function scanRealmByText ($realm, $ftext = '')
 {
-	switch ($realm)
+	if (!strlen ($ftext = trim ($ftext)))
+		$fexpr = array();
+	else
 	{
-	case 'object':
-	case 'rack':
-	case 'user':
-	case 'ipv4net':
-	case 'ipv6net':
-	case 'file':
-	case 'ipv4vs':
-	case 'ipv4rspool':
-	case 'vst':
-		if (!strlen ($ftext = trim ($ftext)))
-			$fexpr = array();
-		else
-		{
-			$fparse = spotPayload ($ftext, 'SYNT_EXPR');
-			if ($fparse['result'] != 'ACK')
-				return NULL;
-			$fexpr = $fparse['load'];
-		}
-		return filterCellList (listCells ($realm), $fexpr);
-	default:
-		throw new InvalidArgException ('$realm', $realm);
+		$fparse = spotPayload ($ftext, 'SYNT_EXPR');
+		if ($fparse['result'] != 'ACK')
+			return NULL;
+		$fexpr = $fparse['load'];
 	}
-
+	return filterCellList (listCells ($realm), $fexpr);
 }
 
 function getVSTOptions()
