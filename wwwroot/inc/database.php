@@ -727,8 +727,8 @@ function amplifyCell (&$record, $dummy = NULL)
 				$record[$i][$locidx]['state'] = 'F';
 		// load difference
 		$query =
-			"select unit_no, atom, state, object_id " .
-			"from RackSpace where rack_id = ? and " .
+			"select unit_no, atom, state, object_id, has_problems " .
+			"from RackSpace LEFT JOIN Object ON Object.id = object_id where rack_id = ? and " .
 			"unit_no between 1 and ? order by unit_no";
 		$result = usePreparedSelectBlade ($query, array ($record['id'], $record['height']));
 		global $loclist;
@@ -739,6 +739,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		{
 			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
+			$record[$row['unit_no']][$loclist[$row['atom']]]['hl'] = $row['has_problems'] == 'yes' ? 'w' : '';
 			if ($row['state'] == 'T' and $row['object_id'] != NULL)
 				$mounted_objects[$row['object_id']] = TRUE;
 		}

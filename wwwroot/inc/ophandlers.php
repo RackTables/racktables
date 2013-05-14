@@ -2313,7 +2313,6 @@ function updateRackDesign ()
 	$rackData = spotEntity ('rack', getBypassValue());
 	amplifyCell ($rackData);
 	applyRackDesignMask($rackData);
-	markupObjectProblems ($rackData);
 	if (processGridForm ($rackData, 'A', 'F'))
 		showSuccess ("Saved successfully");
 	else
@@ -2325,7 +2324,6 @@ function updateRackProblems ()
 	$rackData = spotEntity ('rack', getBypassValue());
 	amplifyCell ($rackData);
 	applyRackProblemMask($rackData);
-	markupObjectProblems ($rackData);
 	if (processGridForm ($rackData, 'F', 'U'))
 		showSuccess ("Saved successfully");
 	else

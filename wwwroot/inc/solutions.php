@@ -140,7 +140,6 @@ function printRackThumbImage ($rack_id, $scale = 1)
 {
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
-	markupObjectProblems ($rackData);
 	global $rtwidth;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];

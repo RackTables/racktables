@@ -637,7 +637,6 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	markAllSpans ($rackData);
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
-	markupObjectProblems ($rackData);
 	$prev_id = getPrevIDforRack ($rackData['row_id'], $rack_id);
 	$next_id = getNextIDforRack ($rackData['row_id'], $rack_id);
 	echo "<center><table border=0><tr valign=middle>";

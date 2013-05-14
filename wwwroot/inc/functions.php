@@ -630,8 +630,6 @@ function highlightObject (&$rackData, $object_id)
 				($rackData[$unit_no][$locidx]['object_id'] == $object_id or	in_array($rackData[$unit_no][$locidx]['object_id'], $parent_ids))
 			)
 				$rackData[$unit_no][$locidx]['hl'] = 'h';
-			else
-				unset ($rackData[$unit_no][$locidx]['hl']);
 }
 
 // This function marks atoms to selected or not depending on their current state.
@@ -869,28 +867,6 @@ function ip6_mask ($prefix_len)
 		return $mask[$prefix_len];
 	else
 		throw new InvalidArgException ('prefix_len', $prefix_len);
-}
-
-// This function looks up 'has_problems' flag for 'T' atoms
-// and modifies 'hl' key. May be, this should be better done
-// in amplifyCell(). We don't honour 'skipped' key, because
-// the function is also used for thumb creation.
-function markupObjectProblems (&$rackData)
-{
-	for ($i = $rackData['height']; $i > 0; $i--)
-		for ($locidx = 0; $locidx < 3; $locidx++)
-			if ($rackData[$i][$locidx]['state'] == 'T')
-			{
-				$object = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
-				if ($object['has_problems'] == 'yes')
-				{
-					// Object can be already highlighted.
-					if (isset ($rackData[$i][$locidx]['hl']))
-						$rackData[$i][$locidx]['hl'] = $rackData[$i][$locidx]['hl'] . 'w';
-					else
-						$rackData[$i][$locidx]['hl'] = 'w';
-				}
-			}
 }
 
 // Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
