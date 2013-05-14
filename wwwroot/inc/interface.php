@@ -232,16 +232,21 @@ function getRenderedAlloc ($object_id, $alloc)
 		$ret['td_network'] = "<td class='$td_class'>" .
 			getOutputOf ('renderCell', $netinfo) . '</td>';
 
-		// filter out self-allocation
-		loadIPAddrList ($netinfo);
-		$other_routers = array();
-		foreach (findRouters ($netinfo['own_addrlist']) as $router)
-			if ($router['id'] != $object_id)
-				$other_routers[] = $router;
-		if (count ($other_routers))
-			$ret['td_routed_by'] = getOutputOf ('printRoutersTD', $other_routers, getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
+		// render "routed by" td
+		if ($display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') == 'none'))
+			$ret['td_routed_by'] = '';
 		else
-			$ret['td_routed_by'] = "<td class='$td_class'>&nbsp;</td>";
+		{
+			loadIPAddrList ($netinfo);
+			$other_routers = array();
+			foreach (findRouters ($netinfo['own_addrlist']) as $router)
+				if ($router['id'] != $object_id)
+					$other_routers[] = $router;
+			if (count ($other_routers))
+				$ret['td_routed_by'] = getOutputOf ('printRoutersTD', $other_routers, $display_routers);
+			else
+				$ret['td_routed_by'] = "<td class='$td_class'>&nbsp;</td>";
+		}
 	}
 
 	// render peers td
