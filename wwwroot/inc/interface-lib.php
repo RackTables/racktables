@@ -997,20 +997,17 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 // prepend cutting button to each of them.
 function serializeFileLinks ($links, $scissors = FALSE)
 {
-	global $pageno_by_etype;
 	$comma = '';
 	$ret = '';
 	foreach ($links as $link_id => $li)
-		if (! isset ($pageno_by_etype[$li['entity_type']]))
-			throw new RackTablesError ("Unknown etype '${li['entity_type']}'", RackTablesError::INTERNAL);
-		else
-		{
-			$ret .= $comma;
-			if ($scissors)
-				$ret .= getOpLink (array('op'=>'unlinkFile', 'link_id'=>$link_id), '', 'cut', 'Unlink file') . ' ';
-			$ret .= mkA ($li['name'], $pageno_by_etype[$li['entity_type']], $li['entity_id']);
-			$comma = '<br>';
-		}
+	{
+		$cell = spotEntity ($li['entity_type'], $li['entity_id']);
+		$ret .= $comma;
+		if ($scissors)
+			$ret .= getOpLink (array('op'=>'unlinkFile', 'link_id'=>$link_id), '', 'cut', 'Unlink file') . ' ';
+		$ret .= mkCellA ($cell);
+		$comma = '<br>';
+	}
 	return $ret;
 }
 

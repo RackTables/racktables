@@ -1011,7 +1011,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 
 		// name needs to have some value for hrefs to work
 		if (!strlen ($name))
-			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
+			$name = sprintf("[Unnamed %s]", formatRealmName ($row['entity_type']));
 
 		$ret[$row['id']] = array(
 				'page' => $page,
@@ -4332,81 +4332,11 @@ function getFileLinks ($file_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, file_id, entity_type, entity_id FROM FileLink ' .
+		'SELECT id, entity_type, entity_id FROM FileLink ' .
 		'WHERE file_id = ? ORDER BY entity_type, entity_id',
 		array ($file_id)
 	);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	$ret = array();
-	foreach ($rows as $row)
-	{
-		// get info of the parent
-		switch ($row['entity_type'])
-		{
-			case 'ipv4net':
-			case 'ipv6net':
-				$page = $row['entity_type'];
-				$id_name = 'id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = sprintf("%s (%s/%s)", $parent['name'], $parent['ip'], $parent['mask']);
-				break;
-			case 'ipv4rspool':
-				$page = 'ipv4rspool';
-				$id_name = 'pool_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['name'];
-				break;
-			case 'ipv4vs':
-				$page = 'ipv4vs';
-				$id_name = 'vs_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['name'];
-				break;
-			case 'object':
-				$page = 'object';
-				$id_name = 'object_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['dname'];
-				break;
-			case 'location':
-				$page = 'location';
-				$id_name = 'location_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['name'];
-				break;
-			case 'row':
-				$page = 'row';
-				$id_name = 'row_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['name'];
-				break;
-			case 'rack':
-				$page = 'rack';
-				$id_name = 'rack_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['name'];
-				break;
-			case 'user':
-				$page = 'user';
-				$id_name = 'user_id';
-				$parent = spotEntity ($row['entity_type'], $row['entity_id']);
-				$name = $parent['user_name'];
-				break;
-		}
-
-		// name needs to have some value for hrefs to work
-		if (! strlen ($name))
-			$name = sprintf("[Unnamed %s]", formatEntityName($row['entity_type']));
-
-		$ret[$row['id']] = array(
-				'page' => $page,
-				'id_name' => $id_name,
-				'entity_type' => $row['entity_type'],
-				'entity_id' => $row['entity_id'],
-				'name' => $name
-		);
-	}
-	return $ret;
+	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getFileStats ()

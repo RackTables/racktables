@@ -5349,21 +5349,21 @@ function renderFileLinks ($links)
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	foreach ($links as $link)
 	{
+		$cell = spotEntity ($link['entity_type'], $link['entity_id']);
 		echo '<tr><td class=tdleft>';
 		switch ($link['entity_type'])
 		{
 			case 'user':
 			case 'ipv4net':
 			case 'rack':
+			case 'ipvs':
 			case 'ipv4vs':
 			case 'ipv4rspool':
 			case 'object':
-				renderCell (spotEntity ($link['entity_type'], $link['entity_id']));
+				renderCell ($cell);
 				break;
 			default:
-				echo formatEntityName ($link['entity_type']) . ': ';
-				echo "<a href='" . makeHref(array('page'=>$link['page'], $link['id_name']=>$link['entity_id']));
-				echo "'>${link['name']}</a>";
+				echo formatRealmName ($link['entity_type']) . ': ' . mkCellA ($cell);
 				break;
 		}
 		echo '</td></tr>';

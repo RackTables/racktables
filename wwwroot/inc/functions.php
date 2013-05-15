@@ -2638,9 +2638,9 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 }
 
 // Convert entity name to human-readable value
-function formatEntityName ($name)
+function formatRealmName ($realm)
 {
-	switch ($name)
+	switch ($realm)
 	{
 		case 'ipv4net':
 			return 'IPv4 Network';
@@ -5844,7 +5844,18 @@ function mkCellA ($cell)
 	else
 		$bypass_key = $page[$cell_page]['bypass'];
 
-	$title = array_first (formatEntityList (array ($cell)));
+	switch ($cell['realm'])
+	{
+		case 'object':
+		case 'ipv4vs':
+		case 'ipv4net':
+		case 'ipv6net':
+			$title = formatEntityName ($cell);
+			break;
+		default:
+			$title = formatRealmName ($cell['realm']) . ' ' . formatEntityName ($cell);
+			break;
+	}
 	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
 }
 
@@ -5855,28 +5866,40 @@ function formatEntityList ($list)
 {
 	$ret = array();
 	foreach ($list as $entity)
-		switch ($entity['realm'])
-		{
-			case 'object':
-				$ret[$entity['id']] = $entity['dname'];
-				break;
-			case 'ipv4vs':
-				$ret[$entity['id']] = $entity['name'] . (strlen ($entity['name']) ? ' ' : '') . '(' . $entity['dname'] . ')';
-				break;
-			case 'ipvs':
-				$ret[$entity['id']] = $entity['name'];
-				break;
-			case 'ipv4rspool':
-				$ret[$entity['id']] = $entity['name'];
-				break;
-			case 'ipv4net':
-			case 'ipv6net':
-				$ret[$entity['id']] = $entity['ip'] . '/' . $entity['mask'];
-				break;
-			default:
-				$ret[$entity['id']] = $entity['realm'] . '#' . $entity['id'];
-		}
+		$ret[$entity['id']] = formatEntityName ($entity);
 	asort ($ret);
+	return $ret;
+}
+
+function formatEntityName ($entity)
+{
+	$ret = '';
+	switch ($entity['realm'])
+	{
+		case 'object':
+			$ret = $entity['dname'];
+			break;
+		case 'ipv4vs':
+			$ret = $entity['name'] . (strlen ($entity['name']) ? ' ' : '') . '(' . $entity['dname'] . ')';
+			break;
+		case 'ipv4net':
+		case 'ipv6net':
+			$ret = $entity['ip'] . '/' . $entity['mask'];
+			break;
+		case 'user':
+			$ret = $entity['user_name'];
+			break;
+		case 'ipvs':
+		case 'ipv4rspool':
+		case 'file':
+		case 'rack':
+		case 'row':
+		case 'location':
+			$ret = $entity['name'];
+			break;
+	}
+	if ($ret == '')
+		$ret = '[unnamed] #' . $entity['id'];
 	return $ret;
 }
 
