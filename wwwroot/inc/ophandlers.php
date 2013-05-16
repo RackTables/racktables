@@ -1582,7 +1582,18 @@ function addVService ()
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
-	return showSuccess ('Virtual service ' . mkA ($vsinfo['dname'], 'ipv4vs', $vs_id) . ' created successfully');
+	return showSuccess (mkCellA ($vsinfo) . ' created successfully');
+}
+
+function addVSG ()
+{
+	$name = assertStringArg ('name');
+	usePreparedInsertBlade ('VS', array ('name' => $name));
+	$vs_id = lastInsertID();
+	if (isset ($_REQUEST['taglist']))
+		produceTagsForNewRecord ('ipvs', $_REQUEST['taglist'], $vs_id);
+	$vsinfo = spotEntity ('ipvs', $vs_id);
+	return showSuccess (mkCellA ($vsinfo) . ' created successfully');
 }
 
 $msgcode['deleteVService']['OK'] = 49;

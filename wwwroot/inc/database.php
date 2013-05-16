@@ -763,6 +763,8 @@ function amplifyCell (&$record, $dummy = NULL)
 			$record['switches'][$row['object_id']] = $row;
 		break;
 	case 'ipvs':
+		$record['ports'] = array();
+		$record['vips'] = array();
 		$result = usePreparedSelectBlade ("SELECT proto, vport, vsconfig, rsconfig FROM VSPorts WHERE vs_id = ?", array ($record['id']));
 		while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		{
