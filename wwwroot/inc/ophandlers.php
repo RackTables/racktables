@@ -1608,6 +1608,16 @@ function deleteVService ()
 	return buildRedirectURL ('ipv4slb', 'default');
 }
 
+function deleteVS()
+{
+	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	if (count (getTriplets ($vsinfo)) != 0)
+		return showError ("Could not delete linked virtual service group");
+	commitDeleteVSG ($vsinfo['id']);
+	showSuccess (formatEntityName ($vsinfo) . ' deleted');
+	return buildRedirectURL ('ipv4slb', 'vs');
+}
+
 $msgcode['updateSLBDefConfig']['OK'] = 43;
 function updateSLBDefConfig ()
 {

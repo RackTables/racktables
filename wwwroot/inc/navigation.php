@@ -424,6 +424,7 @@ $tabhandler['ipvs']['tags'] = 'renderEntityTags';
 $tabhandler['ipvs']['files'] = 'renderFilesForEntity';
 $tabhandler['ipvs']['convert'] = 'renderIPVSConvert';
 $ophandler['ipvs']['edit']['updVS'] = 'updateVS';
+$ophandler['ipvs']['edit']['del'] = 'deleteVS';
 $ophandler['ipvs']['edit']['addIP'] = 'addIPToVS';
 $ophandler['ipvs']['edit']['addPort'] = 'addPortToVS';
 $ophandler['ipvs']['edit']['updIP'] = 'updateIPInVS';

@@ -145,6 +145,13 @@ function renderEditVS ($vs_id)
 	echo '<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['rsconfig']) . '</textarea></td></tr>';
 	echo '<tr><th></th><th>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
+	// delete link
+	$triplets = getTriplets ($vsinfo);
+	echo '<span style="margin-left: 2em"></span>';
+	if (count ($triplets) > 0)
+		echo getOpLink (NULL, '', 'NODESTROY', "Could not delete: there are " . count ($triplets) . " LB links");
+	else
+		echo getOpLink (array ('op' => 'del', 'id' => $vsinfo['id']), '', 'DESTROY', 'Delete', 'need-confirmation');
 	echo '</th></tr>';
 	echo '</table></form>';
 

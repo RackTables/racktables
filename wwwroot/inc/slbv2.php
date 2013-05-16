@@ -612,3 +612,10 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 
 	return $ret;
 }
+
+function commitDeleteVSG ($id)
+{
+	releaseFiles ('ipvs', $id);
+	destroyTagsForEntity ('ipvs', $id);
+	usePreparedDeleteBlade ('VS', array ('id' => $id));
+}
