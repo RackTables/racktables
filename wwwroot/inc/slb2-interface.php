@@ -289,7 +289,8 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		echo "<td class=tdleft><ul class='$class'>";
 		foreach ($vs_cell['vips'] as $vip)
 		{
-			$li_class = isVIPEnabled ($vip, $slb['vips']) ? 'enabled' : 'disabled';
+			$row = isVIPEnabled ($vip, $slb['vips']);
+			$li_class = $row ? 'enabled' : 'disabled';
 			if ($vip['vip'] === $hl_ip && $li_class == 'enabled')
 				$li_class .= ' highlight';
 			echo "<li class='$li_class'>";
