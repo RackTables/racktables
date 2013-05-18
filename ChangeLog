@@ -20,6 +20,7 @@
 	update: use the monospace font family when displaying comments (#781)
 	update: display parent locations when browsing rackspace (#845)
 	update: display parent and child location(s) on View Location page (#847)
+	update: display blades when rendering a rack (#745)
 	new feature: Rackcode filter for RDP-managed objects (#819)
 	new feature: grouping of Virtual services, generating of
 		virtual_server_group-aware keepalived configs

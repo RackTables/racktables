@@ -604,7 +604,7 @@ function renderRow ($row_id)
 }
 
 // Used by renderRack()
-function printObjectDetailsForRenderRack ($object_id)
+function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 {
 	$objectData = spotEntity ('object', $object_id);
 	if (strlen ($objectData['asset_no']))
@@ -617,16 +617,77 @@ function printObjectDetailsForRenderRack ($object_id)
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
 	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
+	$slotInfo = $slotData = $slotTitle = array ();
 	if (count($objectChildren) > 0)
 	{
 		foreach ($objectChildren as $child)
+		{
 			$childNames[] = $child['name'];
+			$childData = spotEntity ('object', $child['entity_id']);
+			$attrData = getAttrValues ($child['entity_id']); 
+			if ($attrData['28']) // slot number
+			{
+				$slot = $attrData['28']['value'];
+				$slotInfo[$slot] = $child['name'];
+				$slotData[$slot] = $child['entity_id'];
+				if (strlen ($childData['asset_no']))
+					$slotTitle[$slot] = "<div title='${childData['asset_no']}";
+				else
+					$slotTitle[$slot] = "<div title='no asset tag";
+				if (strlen ($childData['label']) and $childData['label'] != $child['name'])
+					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
+				$slotTitle[$slot] .= "'>";
+			}
+		}
 		natsort($childNames);
 		$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
 	}
 	else
 		$suffix = "'>";
 	echo "${prefix}${body}${suffix}" . mkA ($objectData['dname'], 'object', $objectData['id']) . '</div>';
+	if (in_array ($objectData['objtype_id'], array (1502,1503))) // server chassis, network chassis
+	{
+		$objAttr = getAttrValues ($objectData['id']);
+		if (isset ($objAttr[2])) // HW type
+		{
+			extractLayout ($objAttr[2]);
+			if (isset ($objAttr[2]['rows']))
+			{
+				$rows = $objAttr[2]['rows'];
+				$cols = $objAttr[2]['cols'];
+				$layout = $objAttr[2]['layout'];
+				echo "<table width='100%' border='1'>";
+				for ($r = 0; $r < $rows; $r++)
+				{
+					echo '<tr>';
+					for ($c = 0; $c < $cols; $c++)
+					{
+						$s = ($r * $cols) + $c + 1;
+						if (isset ($slotData[$s]))
+						{
+							echo "<td class='state_T";
+							if ($slotData[$s] == $hl_obj_id)
+								echo 'h';
+							echo "'>${slotTitle[$s]}";
+							if ($layout == 'V')
+							{
+								$tmp = substr ($slotInfo[$s], 0, 1);
+								foreach (str_split (substr ($slotInfo[$s],1)) as $letter)
+									$tmp .= '<br>' . $letter;
+								$slotInfo[$s] = $tmp;
+							}
+							echo mkA ($slotInfo[$s], 'object', $slotData[$s]);
+							echo '</div></td>';
+						}
+						else
+							echo "<td class='state_F'><div title=\"Free slot\">&nbsp;</div></td>";
+					}
+					echo '</tr>';
+				}
+				echo '</table>';
+			}
+		}
+	}
 }
 
 // This function renders rack as HTML table.
@@ -670,7 +731,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			switch ($state)
 			{
 				case 'T':
-					printObjectDetailsForRenderRack($rackData[$i][$locidx]['object_id']);
+					printObjectDetailsForRenderRack ($rackData[$i][$locidx]['object_id'], $hl_obj_id);
 					break;
 				case 'A':
 					echo '<div title="This rackspace does not exist">&nbsp;</div>';

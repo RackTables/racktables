@@ -1033,7 +1033,23 @@ function parseWikiLink (&$record)
 // FIXME: should this be saved as "P-data"?
 function execGMarker ($line)
 {
-	return preg_replace ('/^.+%GSKIP%/', '', preg_replace ('/^(.+)%GPASS%/', '\\1 ', $line));
+	return preg_replace ('/^.+%GSKIP%/', '',
+		preg_replace ('/^(.+)%GPASS%/', '\\1 ',
+			preg_replace ('/%L\d+,\d+(H|V|)%/', '', $line)));
+}
+
+// extract the layout information from the %L...% marker in the dictionary info
+// This is somewhat similar to the %GPASS %GSKIP
+function extractLayout (&$record)
+{
+	if (preg_match ('/%L(\d+),(\d+)(H|V|)%/', $record['value'], $matches))
+	{
+		$record['rows'] = $matches[1];
+		$record['cols'] = $matches[2];
+		$record['layout'] = $matches[3];
+		if (!strlen ($record['layout']))
+			$record['layout'] = ($record['cols'] >= 4) ? 'V' : 'H';
+	}
 }
 
 // rackspace usage for a single rack
