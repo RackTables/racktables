@@ -1002,7 +1002,6 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	$filter ($rackData);
-	markupObjectProblems ($rackData);
 
 	// Render the result whatever it is.
 	// Main layout.
