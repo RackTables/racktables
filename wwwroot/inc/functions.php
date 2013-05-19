@@ -5181,25 +5181,23 @@ function isEthernetPort($port)
 
 function loadConfigDefaults()
 {
-	global $configCache;
-	$configCache = loadConfigCache();
-	if (!count ($configCache))
+	$ret = loadConfigCache();
+	if (!count ($ret))
 		throw new RackTablesError ('Failed to load configuration from the database.', RackTablesError::INTERNAL);
-	foreach ($configCache as $varname => &$row)
+	foreach ($ret as $varname => &$row)
 	{
 		$row['is_altered'] = 'no';
 		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
 		$row['defaultvalue'] = $row['varvalue'];
 	}
+	return $ret;
 }
 
 function alterConfigWithUserPreferences()
 {
 	global $configCache;
-	global $userConfigCache;
 	global $remote_username;
-	$userConfigCache = loadUserConfigCache($remote_username);
-	foreach ($userConfigCache as $key => $row)
+	foreach (loadUserConfigCache($remote_username) as $key => $row)
 	{
 		if ($configCache[$key]['is_userdefined'] == 'yes')
 		{

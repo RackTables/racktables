@@ -4518,12 +4518,12 @@ function renderConfigVarName ($v)
 
 function renderUIConfig ()
 {
-	global $configCache, $nextorder;
+	global $nextorder;
 	startPortlet ('Current configuration');
 	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="70%">';
 	echo '<tr><th class=tdleft>Option</th><th class=tdleft>Value</th></tr>';
 	$order = 'odd';
-	foreach ($configCache as $v)
+	foreach (loadConfigCache() as $v)
 	{
 		if ($v['is_hidden'] != 'no')
 			continue;
@@ -5321,7 +5321,7 @@ function renderConfigEditor ()
 	printOpFormIntro ('upd');
 
 	$i = 0;
-	foreach ($configCache as $v)
+	foreach ($per_user ? $configCache : loadConfigCache() as $v)
 	{
 		if ($v['is_hidden'] != 'no')
 			continue;
