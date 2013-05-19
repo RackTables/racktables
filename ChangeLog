@@ -10,6 +10,7 @@
 	bugfix: invalid search result when only one location matched (#843)
 	bugfix: when there's no local account created while using LDAP auth,
 		quick links can't be saved on that account (#831)
+	bugfix: ip tree: "Routed by" column displays routers in aggregate networks (#773)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab
