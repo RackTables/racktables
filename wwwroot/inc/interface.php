@@ -381,7 +381,7 @@ function renderRackspace ()
 				while ($location_id)
 				{
 						$parentLocation = spotEntity ('location', $location_id);
-						$locationTree = "&raquo; <a href='" . 
+						$locationTree = "&raquo; <a href='" .
 							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
 							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
 							$locationTree;
@@ -624,7 +624,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 		{
 			$childNames[] = $child['name'];
 			$childData = spotEntity ('object', $child['entity_id']);
-			$attrData = getAttrValues ($child['entity_id']); 
+			$attrData = getAttrValues ($child['entity_id']);
 			if ($attrData['28']) // slot number
 			{
 				$slot = $attrData['28']['value'];
@@ -8583,7 +8583,7 @@ function renderEditVlan ($vlan_ck)
 	if ($portc)
 	{
 		$clear_line .= '<p>';
-		$clear_line .= getOpLink (array ('op' => 'clear'), 'remove', 'clear', "remove this VLAN from $portc ports") . 
+		$clear_line .= getOpLink (array ('op' => 'clear'), 'remove', 'clear', "remove this VLAN from $portc ports") .
 			' this VLAN from ' . mkA ("${portc} ports", 'vlan', $vlan_ck);
 	}
 
