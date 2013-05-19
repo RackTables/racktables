@@ -1006,16 +1006,17 @@ $msgcode['updateUser']['OK'] = 6;
 function updateUser ()
 {
 	genericAssertion ('user_id', 'uint');
-	assertStringArg ('username');
+	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
-	assertStringArg ('password');
-	$username = $_REQUEST['username'];
-	$new_password = $_REQUEST['password'];
+	$new_password = assertStringArg ('password');
 	$userinfo = spotEntity ('user', $_REQUEST['user_id']);
 	// Update user password only if provided password is not the same as current password hash.
 	if ($new_password != $userinfo['user_password_hash'])
 		$new_password = sha1 ($new_password);
 	commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
+	// if user account renaming is being performed, change key value in UserConfig table
+	if ($userinfo['user_name'] !== $username)
+		usePreparedUpdateBlade ('UserConfig', array ('user' => $username), array('user' => $userinfo['user_name']));
 	return showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 

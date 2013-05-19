@@ -985,8 +985,7 @@ CREATE TABLE `UserConfig` (
   `user` char(64) NOT NULL,
   UNIQUE KEY `user_varname` (`user`,`varname`),
   KEY `varname` (`varname`),
-  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE,
-  CONSTRAINT `UserConfig-FK-user` FOREIGN KEY (`user`) REFERENCES `UserAccount` (`user_name`) ON DELETE CASCADE
+  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE `VLANDescription` (
