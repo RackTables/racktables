@@ -1534,41 +1534,48 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
-	$dbxlink->exec ('LOCK TABLES Port WRITE');
-	if (alreadyUsedL2Address ($db_l2address, $object_id))
+	if ($do_locks = !empty ($db_l2address))
+		$dbxlink->exec ('LOCK TABLES Port WRITE');
+	try
 	{
-		$dbxlink->exec ('UNLOCK TABLES');
-		throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
-	}
-	$matches = array();
-	switch (1)
-	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = 1;
-		$oif_id = $matches[1];
-		break;
-	default:
-		$dbxlink->exec ('UNLOCK TABLES');
-		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-	}
-	usePreparedInsertBlade
-	(
-		'Port',
-		array
+		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
+			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		$matches = array();
+		switch (1)
+		{
+		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = $matches[1];
+			$oif_id = $matches[2];
+			break;
+		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = 1;
+			$oif_id = $matches[1];
+			break;
+		default:
+			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+		}
+		usePreparedInsertBlade
 		(
-			'name' => $port_name,
-			'object_id' => $object_id,
-			'label' => $port_label,
-			'iif_id' => $iif_id,
-			'type' => $oif_id,
-			'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
-		)
-	);
-	$dbxlink->exec ('UNLOCK TABLES');
+			'Port',
+			array
+			(
+				'name' => $port_name,
+				'object_id' => $object_id,
+				'label' => $port_label,
+				'iif_id' => $iif_id,
+				'type' => $oif_id,
+				'l2address' => nullEmptyStr ($db_l2address),
+			)
+		);
+		if ($do_locks)
+			$dbxlink->exec ('UNLOCK TABLES');
+	}
+	catch (Exception $e)
+	{
+		if ($do_locks)
+			$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
+	}
 	return lastInsertID();
 }
 
@@ -1585,35 +1592,46 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
-	$dbxlink->exec ('LOCK TABLES Port WRITE');
-	if (alreadyUsedL2Address ($db_l2address, $object_id))
+	$portinfo = getPortInfo ($port_id);
+	if ($do_locks = (! empty ($db_l2address) && $portinfo['l2address'] !== $port_l2address))
+		$dbxlink->exec ('LOCK TABLES Port WRITE');
+	try
 	{
-		$dbxlink->exec ('UNLOCK TABLES');
-		// FIXME: it is more correct to throw InvalidArgException here
-		// and convert it to InvalidRequestArgException at upper level,
-		// when there is a mean to do that.
-		throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
+		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
+		{
+			// FIXME: it is more correct to throw InvalidArgException here
+			// and convert it to InvalidRequestArgException at upper level,
+			// when there is a mean to do that.
+			throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
+		}
+		$prev_comment = getPortReservationComment ($port_id);
+		$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
+		usePreparedUpdateBlade
+		(
+			'Port',
+			array
+			(
+				'name' => $port_name,
+				'type' => $port_type_id,
+				'label' => $port_label,
+				'reservation_comment' => $reservation_comment,
+				'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
+			),
+			array
+			(
+				'id' => $port_id,
+				'object_id' => $object_id
+			)
+		);
+		if ($do_locks)
+			$dbxlink->exec ('UNLOCK TABLES');
 	}
-	$prev_comment = getPortReservationComment ($port_id);
-	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
-	usePreparedUpdateBlade
-	(
-		'Port',
-		array
-		(
-			'name' => $port_name,
-			'type' => $port_type_id,
-			'label' => $port_label,
-			'reservation_comment' => $reservation_comment,
-			'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
-		),
-		array
-		(
-			'id' => $port_id,
-			'object_id' => $object_id
-		)
-	);
-	$dbxlink->exec ('UNLOCK TABLES');
+	catch (Exception $e)
+	{
+		if ($do_locks)
+			$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
+	}
 	if ($prev_comment !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
 }
@@ -4546,8 +4564,8 @@ function alreadyUsedL2Address ($address, $my_object_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT COUNT(*) FROM Port WHERE BINARY l2address = ? AND object_id != ?',
-		array ($address, $my_object_id)
+		'SELECT COUNT(*) FROM Port WHERE l2address = ? AND BINARY l2address = ? AND object_id != ?',
+		array ($address, $address, $my_object_id)
 	);
 	$row = $result->fetch (PDO::FETCH_NUM);
 	return $row[0] != 0;
