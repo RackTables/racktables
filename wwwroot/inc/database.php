@@ -5218,4 +5218,22 @@ function getMuninServers()
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
+function isTransactionActive()
+{
+	global $dbxlink;
+	try
+	{
+		if ($dbxlink->beginTransaction())
+		{
+			$dbxlink->rollBack();
+			return FALSE;
+		}
+		throw new RackTablesError ("beginTransaction returned false instead of throwing exception", RackTablesError::INTERNAL);
+	}
+	catch (PDOException $e)
+	{
+		return TRUE;
+	}
+}
+
 ?>

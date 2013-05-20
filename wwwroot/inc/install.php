@@ -1092,11 +1092,12 @@ CREATE TABLE `VSIPs` (
 
 CREATE TABLE `VSPorts` (
   `vs_id` int(10) unsigned NOT NULL,
-  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `proto` enum('TCP','UDP','MARK') NOT NULL,
   `vport` int(10) unsigned NOT NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY (`vs_id`,`proto`,`vport`),
+  KEY `proto-vport` (`proto`,`vport`),
   CONSTRAINT `VS-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -1108,7 +1109,7 @@ CREATE TABLE `VSEnabledIPs` (
   `prio` varchar(255) DEFAULT NULL,
   `vsconfig` text,
   `rsconfig` text,
-  PRIMARY KEY (`object_id`,`vs_id`,`vip`),
+  PRIMARY KEY (`object_id`,`vs_id`,`vip`,`rspool_id`),
   KEY `vip` (`vip`),
   KEY `VSEnabledIPs-FK-vs_id-vip` (`vs_id`,`vip`),
   KEY `VSEnabledIPs-FK-rspool_id` (`rspool_id`),
@@ -1119,12 +1120,12 @@ CREATE TABLE `VSEnabledIPs` (
 CREATE TABLE `VSEnabledPorts` (
   `object_id` int(10) unsigned NOT NULL,
   `vs_id` int(10) unsigned NOT NULL,
-  `proto` enum('TCP','UDP','MARK') CHARACTER SET latin1 NOT NULL,
+  `proto` enum('TCP','UDP','MARK') NOT NULL,
   `vport` int(10) unsigned NOT NULL,
   `rspool_id` int(10) unsigned NOT NULL,
   `vsconfig` text,
   `rsconfig` text,
-  PRIMARY KEY (`object_id`,`vs_id`,`proto`,`vport`),
+  PRIMARY KEY (`object_id`,`vs_id`,`proto`,`vport`,`rspool_id`),
   KEY `VSEnabledPorts-FK-vs_id-proto-vport` (`vs_id`,`proto`,`vport`),
   KEY `VSEnabledPorts-FK-rspool_id` (`rspool_id`),
   CONSTRAINT `VSEnabledPorts-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,

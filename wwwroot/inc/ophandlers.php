@@ -1864,20 +1864,13 @@ function updateTripletConfig()
 		}
 		else
 		{
-			$constraint_failed = FALSE;
-			// search VIP in some other triplet on this balancer
-			if (isset ($vip))
-			{
-				$result = usePreparedSelectBlade ("SELECT * FROM $table WHERE object_id = ? AND vip = ?", array ($key_fields['object_id'], $vip));
-				if ($result->fetch (PDO::FETCH_ASSOC))
-				{
-					$constraint_failed = TRUE;
-					showError ("$key is already used on this server");
-				}
-			}
-			if (! $constraint_failed)
-				if ($nchanged += usePreparedInsertBlade ($table, $key_fields + $config_fields))
-					showSuccess ("$key enabled");
+			if (
+				$nchanged += ($table == 'VSEnabledIPs' ?
+					addSLBIPLink ($key_fields + $config_fields) :
+					addSLBPortLink ($key_fields + $config_fields)
+				)
+			)
+				showSuccess ("$key enabled");
 		}
 		$dbxlink->commit();
 	}
@@ -3298,9 +3291,9 @@ function doVSMigrate()
 		);
 
 		foreach ($triplet['ports'] as $port)
-			usePreparedInsertBlade ('VSEnabledPorts', $tr_key + $port);
+			addSLBPortLink ($tr_key + $port);
 		foreach ($triplet['vips'] as $vip)
-			usePreparedInsertBlade ('VSEnabledIPs', $tr_key + $vip);
+			addSLBIPLink ($tr_key + $vip);
 	}
 
 	// update configs

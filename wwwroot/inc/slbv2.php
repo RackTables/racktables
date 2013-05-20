@@ -619,3 +619,98 @@ function commitDeleteVSG ($id)
 	destroyTagsForEntity ('ipvs', $id);
 	usePreparedDeleteBlade ('VS', array ('id' => $id));
 }
+
+// returns an array of object_ids which have links to a given VS
+// may be used as 'refcnt'
+function getVSLinkedObjects ($vs_id)
+{
+	$result = usePreparedSelectBlade ("SELECT DISTINCT object_id FROM VSEnabledIPs WHERE vs_id = ? UNION SELECT DISTINCT object_id FROM VSEnabledPorts WHERE vs_id = ?", array ($vs_id, $vs_id));
+	return array_unique ($result->fetchAll (PDO::FETCH_COLUMN, 0));
+}
+
+// prevent linking two identical ip:port pairs, or two identical fwmarks to object
+function addSLBPortLink ($link_row)
+{
+	global $dbxlink;
+	$do_transaction = !isTransactionActive();
+	if ($do_transaction)
+		$dbxlink->beginTransaction();
+
+	// lock on port
+	$result = usePreparedSelectBlade
+	(
+		"SELECT * FROM VSPorts WHERE proto = ? AND vport = ? FOR UPDATE",
+		array ($link_row['proto'], $link_row['vport'])
+	);
+	unset ($result);
+
+	// if this is a fwmark port, assure it is single link with given tag on that balancer
+	if ($link_row['proto'] == 'MARK')
+	{
+		$result = usePreparedSelectBlade
+		(
+			"SELECT COUNT(*) FROM VSEnabledPorts WHERE object_id = ? AND proto = ? AND vport = ?",
+			array ($link_row['object_id'], $link_row['proto'], $link_row['vport'])
+		);
+		if (0 < $result->fetch (PDO::FETCH_COLUMN, 0))
+		{
+			if ($do_transaction)
+				$dbxlink->rollBack();
+			throw new RTDatabaseError ("Duplicate link of fwmark " . $link_row['vport'] . " to object #" . $link_row['object_id']);
+		}
+		unset ($result);
+	}
+	$ret = usePreparedInsertBlade ('VSEnabledPorts', $link_row);
+	if ($link_row['proto'] != 'MARK')
+	{
+		$result = usePreparedSelectBlade
+		(
+			"SELECT vip FROM VSEnabledPorts vep INNER JOIN VSEnabledIPs vei USING (vs_id, object_id, rspool_id) WHERE vep.object_id = ? AND proto = ? AND vport = ? HAVING COUNT(distinct vip) != COUNT(vip)",
+			array ($link_row['object_id'], $link_row['proto'], $link_row['vport'])
+		);
+		if ($row = $result->fetch (PDO::FETCH_ASSOC, 0))
+		{
+			unset ($result);
+			if ($do_transaction)
+				$dbxlink->rollBack();
+			throw new RTDatabaseError (sprintf ("Duplicate link of %s [%s]:%s to object #%d", $link_row['proto'], ip_format ($row['vip']), $link_row['vport'], $link_row['object_id']));
+		}
+	}
+	if ($do_transaction)
+		$dbxlink->commit();
+	return $ret;
+}
+
+// prevent linking two identical ip:port pairs to object
+function addSLBIPLink ($link_row)
+{
+	global $dbxlink;
+	$do_transaction = !isTransactionActive();
+	if ($do_transaction)
+		$dbxlink->beginTransaction();
+
+	// lock on vip
+	$result = usePreparedSelectBlade
+	(
+		"SELECT * FROM VSIPs WHERE vip = ? FOR UPDATE",
+		array ($link_row['vip'])
+	);
+	unset ($result);
+
+	$ret = usePreparedInsertBlade ('VSEnabledIPs', $link_row);
+	$result = usePreparedSelectBlade
+	(
+		"SELECT proto, vport FROM VSEnabledPorts vep INNER JOIN VSEnabledIPs vei USING (vs_id, object_id, rspool_id) WHERE vei.object_id = ? AND vip = ? HAVING COUNT(distinct proto,vport) != COUNT(vport)",
+		array ($link_row['object_id'], $link_row['vip'])
+	);
+	if ($row = $result->fetch (PDO::FETCH_ASSOC, 0))
+	{
+		unset ($result);
+		if ($do_transaction)
+			$dbxlink->rollBack();
+		throw new RTDatabaseError (sprintf ("Duplicate link of %s [%s]:%s to object #%d", $row['proto'], ip_format ($link_row['vip']), $row['vport'], $link_row['object_id']));
+	}
+	if ($do_transaction)
+		$dbxlink->commit();
+	return $ret;
+}
