@@ -3,7 +3,15 @@ $(document).ready (function () {
 	$('.slb-checks.editable li').click (function (e) {
 		if (e.target.tagName != 'LI')
 			return true;
-		var form = $('<div>').addClass ('popup-box').appendTo ('body').append ($(this).find('form').clone());
+		// clone form into new_form, re-setting all selectbox values which are cleared by clone()
+		var old_form = $(this).find('form');
+		var new_form = old_form.clone();
+		new_form.find('select').each (function (i, elem) {
+			var corresponding = old_form.find('select[name="' + $(this).attr('name') + '"]');
+			if (corresponding.length)
+				$(this).val(corresponding.val());
+		});
+		var form = $('<div>').addClass ('popup-box').appendTo ('body').append (new_form);
 		// confirmation box on port/vip deletion
 		$('a.del-used-slb').click (function (e) {
 			return confirm ('This entity is used. Please confirm the deletion');
