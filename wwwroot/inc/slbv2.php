@@ -251,6 +251,8 @@ function generateSLBConfig2 ($triplet_list)
 				$gid = 1;
 				foreach ($groups as $content => $keys)
 				{
+					if (NULL !== ($new_content = callHook ('generateSLBConfig_stage2', $content, $keys)))
+						$content = $new_content;
 					$ret .= $tr_parser->expand ("\n%VS_PREPEND%\n");
 					if (count ($keys) == 1)
 						$ret .= "virtual_server " . array_first ($keys) . " {\n" . $content . "}\n";
