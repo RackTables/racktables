@@ -3441,6 +3441,19 @@ function renderSearchResults ($terms, $summary)
 					echo '</table>';
 					finishPortlet();
 					break;
+				case 'ipvs':
+					startPortlet ("<a href='index.php?page=ipv4slb&tab=vs'>VS groups</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $cell)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						renderCell ($cell);
+						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
 				case 'ipv4vs':
 					startPortlet ("<a href='index.php?page=ipv4slb&tab=default'>Virtual services</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';

@@ -2674,6 +2674,22 @@ function getIPv4VServiceSearchResult ($terms)
 	return $ret;
 }
 
+function getVServiceSearchResult ($terms)
+{
+	$byname = getSearchResultByField
+	(
+		'VS',
+		array ('id'),
+		'name',
+		$terms,
+		'name'
+	);
+	$ret = array();
+	foreach ($byname as $row)
+		$ret[$row['id']] = spotEntity ('ipvs', $row['id']);
+	return $ret;
+}
+
 function getAccountSearchResult ($terms)
 {
 	$byUsername = getSearchResultByField

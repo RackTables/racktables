@@ -4813,6 +4813,7 @@ function searchEntitiesByText ($terms)
 			$summary['ipv4net'] = getIPv4PrefixSearchResult ($terms);
 			$summary['ipv6net'] = getIPv6PrefixSearchResult ($terms);
 			$summary['ipv4rspool'] = getIPv4RSPoolSearchResult ($terms);
+			$summary['ipvs'] = getVServiceSearchResult ($terms);
 			$summary['ipv4vs'] = getIPv4VServiceSearchResult ($terms);
 			$summary['user'] = getAccountSearchResult ($terms);
 			$summary['file'] = getFileSearchResult ($terms);
@@ -4823,7 +4824,7 @@ function searchEntitiesByText ($terms)
 	}
 	# Filter search results in a way in some realms to omit records, which the
 	# user would not be able to browse anyway.
-	foreach (array ('object', 'ipv4net', 'ipv6net', 'ipv4rspool', 'ipv4vs', 'file', 'rack', 'location') as $realm)
+	foreach (array ('object', 'ipv4net', 'ipv6net', 'ipv4rspool', 'ipv4vs', 'ipvs', 'file', 'rack', 'location') as $realm)
 		if (isset ($summary[$realm]))
 			foreach ($summary[$realm] as $key => $record)
 				if (! isolatedPermission ($realm, 'default', spotEntity ($realm, $record['id'])))
