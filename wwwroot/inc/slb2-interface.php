@@ -15,7 +15,8 @@ function formatVSPort ($port, $plain_text = FALSE)
 		return 'fwmark ' . $port['vport'];
 	$proto = strtolower ($port['proto']);
 	$name = $port['vport'] . '/' . $proto;
-	if (!$plain_text && NULL !== ($srv = getservbyport ($port['vport'], $proto)))
+	$srv = getservbyport ($port['vport'], $proto);
+	if (!$plain_text && FALSE !== $srv)
 		return '<span title="' . $name . '">' . $srv . '</span>';
 	else
 		return $name;
