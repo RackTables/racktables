@@ -545,7 +545,9 @@ function renderNewVSGForm ()
 	printOpFormIntro ('add');
 	echo '<table border=0 cellpadding=10 cellspacing=0 align=center>';
 	echo '<tr valign=bottom><th>name</th><th>Assign tags</th></tr>';
-	echo '<tr valign=top><td><input type=text name=name></td><td>';
+	echo '<tr valign=top><td><input type=text name=name><p>';
+	printImageHREF ('CREATE', 'create virtual service', TRUE);
+	echo '</p></td><td>';
 	renderNewEntityTags ('ipvs');
 	echo '</td></tr></table></form>';
 	finishPortlet();
