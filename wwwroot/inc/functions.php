@@ -4867,6 +4867,10 @@ function buildSearchRedirectURL ($result_type, $record)
 				$params['hl_ip'] = ip_format ($record['ip']);
 			}
 			break;
+		case 'vlan':
+			$next_page = 'vlan';
+			$id = $record['id'];
+			break;
 		default:
 			if (! isset ($pageno_by_etype[$result_type]))
 				return NULL;
