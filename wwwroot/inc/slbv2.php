@@ -219,7 +219,7 @@ function generateSLBConfig2 ($triplet_list)
 					if ($is_mark)
 					{
 						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
-						$virtual_services[$parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $p_parser);
+						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $p_parser);
 					}
 					else
 					{
