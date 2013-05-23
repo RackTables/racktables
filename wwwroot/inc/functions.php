@@ -4849,11 +4849,16 @@ function buildSearchRedirectURL ($result_type, $record)
 		case 'ipv4addressbydescr':
 		case 'ipv6addressbydescr':
 			$address = getIPAddress ($record['ip']);
-			if (isset ($address['allocs']) and count ($address['allocs']) == 1 and isIPAddressEmpty ($address, array ('allocs')))
+			if (count ($address['allocs']) == 1 && isIPAddressEmpty ($address, array ('allocs')))
 			{
 				$next_page = 'object';
 				$id = $address['allocs'][0]['object_id'];
 				$params['hl_ip'] = ip_format ($record['ip']);
+			}
+			elseif (count ($address['vsglist'] + $address['vslist']) && isIPAddressEmpty ($address, array ('vslist', 'vsglist')))
+			{
+				$next_page = 'ipaddress';
+				$id = ip_format ($record['ip']);
 			}
 			else
 			{
