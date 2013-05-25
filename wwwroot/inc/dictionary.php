@@ -2107,6 +2107,8 @@ $dictionary = array
 	2021 => array ('chapter_id' => 30, 'dict_value' => 'Enterasys%GPASS%N3%L3,1H%'),
 	2022 => array ('chapter_id' => 30, 'dict_value' => 'Enterasys%GPASS%N5%L5,1H%'),
 	2023 => array ('chapter_id' => 30, 'dict_value' => 'Enterasys%GPASS%N7%L1,7V%'),
+	2024 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%877'),
+	2025 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%878'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

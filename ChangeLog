@@ -26,6 +26,7 @@
 	update: display parent and child location(s) on View Location page (#847)
 	update: display blades when rendering a rack (#745)
 	update: add Enterasys dictionary entries (#865)
+	update: SNMP support for Cisco ISR 877 (#863), 878 (#861)
 	new feature: Rackcode filter for RDP-managed objects (#819)
 	new feature: grouping of Virtual services, generating of
 		virtual_server_group-aware keepalived configs

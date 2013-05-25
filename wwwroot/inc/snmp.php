@@ -1783,6 +1783,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C3560-48PS: 48 RJ-45/10-100TX + 4 SFP/1000',
 		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.569' => array
+	(
+		'dict_key' => 2024,
+		'text' => 'Cisco 877 ISR: 4 RJ-45/10-100TX',
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.570' => array
+	(
+		'dict_key' => 2025,
+		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
 	'9.1.1025' => array
 	(
 		'dict_key' => 1807,
@@ -2679,8 +2691,9 @@ function doSNMPmining ($object_id, $snmpsetup)
 
 	switch ($objectInfo['objtype_id'])
 	{
-	case 7:
-	case 8:
+	case 7:   // Router
+	case 8:   // Network switch
+	case 965: // Wireless
 		$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
 		return doSwitchSNMPmining ($objectInfo, $device);
 	case 2:
