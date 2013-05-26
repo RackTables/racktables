@@ -582,6 +582,7 @@ function renderPopupTraceRoute ()
 		assertUIntArg ('object_id');
 		$object = spotEntity ('object', $_REQUEST['object_id']);
 		amplifyCell ($object);
+		$title = 'Tracing all ports of ' . $object['dname'];
 		$port_data = array ();
 		foreach ($object['ports'] as $port_id => $port_details)
 			$port_data = $port_data + getNeighborPorts ($port_id);
@@ -590,10 +591,13 @@ function renderPopupTraceRoute ()
 	{
 		assertUIntArg ('port');
 		$port_id = intval ($_REQUEST['port']);
+		$port_info = getPortInfo ($port_id);
+		$title = 'Tracing ' . $port_info['object_name'] . ' / ' . $port_info['name'];
 		$port_data = getNeighborPorts ($port_id);
 	}
 
-	$graph = new Image_GraphViz(NULL, NULL, 'Trace route');
+	$graph = new Image_GraphViz(NULL, NULL, $title);
+	$graph->addAttributes(array ('label' => $title, 'labelloc' => 't'));
 
 	// add a cluster to the graph for each unique object
 	$objects = array ();
