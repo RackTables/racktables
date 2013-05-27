@@ -3570,9 +3570,16 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	global $object_attribute_cache;
 	if (isset ($object_attribute_cache[$object_id]))
 		unset ($object_attribute_cache[$object_id]);
-	$result = usePreparedSelectBlade ('select type as attr_type from Attribute where id = ?', array ($attr_id));
-	$row = $result->fetch (PDO::FETCH_NUM);
-	$attr_type = $row[0];
+	$result = usePreparedSelectBlade
+	(
+		"SELECT type AS attr_type, av.* FROM Attribute a " .
+		"LEFT JOIN AttributeValue av ON a.id = av.attr_id AND av.object_id = ?" .
+		"WHERE a.id = ?",
+		array ($object_id, $attr_id)
+	);
+	if (! $row = $result->fetch (PDO::FETCH_ASSOC))
+		throw new InvalidArgException ('$attr_id', $attr_id, 'No such attribute #'.$attr_id);
+	$attr_type = $row['attr_type'];
 	unset ($result);
 	switch ($attr_type)
 	{
@@ -3588,22 +3595,29 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		default:
 			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
-	usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
-	if ($value == '')
-		return;
-
-	$type_id = getObjectType ($object_id);
-	usePreparedInsertBlade
-	(
-		'AttributeValue',
-		array
+	if (isset ($row['attr_id']))
+	{
+		// AttributeValue row present in table
+		if ($value == '')
+			usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
+		else
+			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), array ('object_id' => $object_id, 'attr_id' => $attr_id));
+	}
+	elseif ($value != '')
+	{
+		$type_id = getObjectType ($object_id);
+		usePreparedInsertBlade
 		(
-			$column => $value,
-			'object_id' => $object_id,
-			'object_tid' => $type_id,
-			'attr_id' => $attr_id,
-		)
-	);
+			'AttributeValue',
+			array
+			(
+				$column => $value,
+				'object_id' => $object_id,
+				'object_tid' => $type_id,
+				'attr_id' => $attr_id,
+			)
+		);
+	}
 }
 
 function convertPDOException ($e)
