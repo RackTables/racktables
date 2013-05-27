@@ -2422,7 +2422,7 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 	}
 
 	// compute update log message
-	$result = usePreparedSelectBlade ("SELECT name, comment FROM $table WHERE ip = ?", array ($db_ip));
+	$result = usePreparedSelectBlade ("SELECT name, comment, reserved FROM $table WHERE ip = ?", array ($db_ip));
 	$old_name = '';
 	$old_comment = '';
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2434,6 +2434,8 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 	// If the 'comment' argument was specified when this function was called, use it.
 	// If not, retain the old value.
 	$comment = (func_num_args () == 4 ) ? $comment : $old_comment;
+	$new_row = array ('name' => $name, 'comment' => $comment, 'reserved' => $reserved);
+	$new_row_empty = !($name != '' or $comment != '' or $reserved != 'no');
 
 	unset ($result);
 	$messages = array ();
@@ -2456,9 +2458,12 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 			$messages[] = "comment changed from '$old_comment' to '$comment'";
 	}
 
-	usePreparedDeleteBlade ($table, array ('ip' => $db_ip));
+	if ($row && ! $new_row_empty && $row == $new_row)
+		return;
+	if ($row)
+		usePreparedDeleteBlade ($table, array ('ip' => $db_ip));
 	// INSERT may appear not necessary.
-	if ($name != '' or $comment != '' or $reserved != 'no')
+	if (! $new_row_empty)
 		usePreparedInsertBlade
 		(
 			$table,
