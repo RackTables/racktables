@@ -400,9 +400,7 @@ function renderNewTripletForm ($realm1, $realm2)
 		{
 			case 'object':
 				$name = 'Load balancer';
-				//FIXME: remove Y-specific optimizer
-				// $list = getNarrowObjectList ('IPV4LB_LISTSRC');
-				$list = formatEntityList (quickListTaggedBy ($realm, 58));
+				$list = getNarrowObjectList ('IPV4LB_LISTSRC');
 				$options = array ('name' => 'object_id', 'tabindex' => 100);
 				break;
 			case 'ipvs':
