@@ -244,44 +244,11 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 	$settings = &$ref_settings[0];
 	$commands = &$ref_commands[0];
 
-	switch ($settings['protocol'])
-	{
-		case 'sshnokey':
-			$params_from_settings['proto'] = 'proto';
-			$params_from_settings['prompt'] = 'prompt';
-			$params_from_settings['prompt-delay'] = 'prompt_delay';
-			$params_from_settings['username'] = 'username';
-			$params_from_settings['password'] = 'password';
-		case 'telnet':
-		case 'netcat':
-			// prepend telnet commands by credentials
-			if (isset ($settings['password']))
-				$commands = $settings['password'] . "\n" . $commands;
-			if (isset ($settings['username']))
-				$commands = $settings['username'] . "\n" . $commands;
-			break;
-		case 'ucssdk': # remote XML through a Python backend
-			# UCS in its current implementation besides the terminal_settings() provides
-			# an additional username/password feed through the HTML from. Whenever the
-			# user provides the credentials through the form, use these instead of the
-			# credentials [supposedly] set by terminal_settings().
-			global $script_mode;
-			if ($script_mode != TRUE && ! isCheckSet ('use_terminal_settings'))
-			{
-				$settings['username'] = assertStringArg ('ucs_login');
-				$settings['password'] = assertStringArg ('ucs_password');
-			}
-			foreach (array ('hostname', 'username', 'password') as $item)
-				if (empty ($settings[$item]))
-					throw new RTGatewayError ("${item} not available, check terminal_settings()");
-			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
-			break;
-	}
-
-	$ret = array();
+	$prepend_credentials = FALSE;
 	switch ($settings['protocol'])
 	{
 		case 'telnet':
+			$prepend_credentials = TRUE;
 			$params_from_settings['port'] = 'port';
 			$params_from_settings['prompt'] = 'prompt';
 			$params_from_settings['connect-timeout'] = 'connect_timeout';
@@ -290,10 +257,19 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings[] = $settings['hostname'];
 			break;
 		case 'netcat':
+			$prepend_credentials = TRUE;
 			$params_from_settings['p'] = 'port';
 			$params_from_settings['w'] = 'timeout';
 			$params_from_settings['b'] = 'ncbin';
 			$params_from_settings[] = $settings['hostname'];
+			break;
+		case 'sshnokey':
+			$prepend_credentials = TRUE;
+			$params_from_settings['proto'] = 'proto';
+			$params_from_settings['prompt'] = 'prompt';
+			$params_from_settings['prompt-delay'] = 'prompt_delay';
+			$params_from_settings['username'] = 'username';
+			$params_from_settings['password'] = 'password';
 			break;
 		case 'ssh':
 			$params_from_settings['sudo-user'] = 'sudo_user';
@@ -322,8 +298,33 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings[] = '-oLogLevel=ERROR';
 			$params_from_settings[] = $settings['hostname'];
 			break;
+		case 'ucssdk': # remote XML through a Python backend
+			# UCS in its current implementation besides the terminal_settings() provides
+			# an additional username/password feed through the HTML from. Whenever the
+			# user provides the credentials through the form, use these instead of the
+			# credentials [supposedly] set by terminal_settings().
+			global $script_mode;
+			if ($script_mode != TRUE && ! isCheckSet ('use_terminal_settings'))
+			{
+				$settings['username'] = assertStringArg ('ucs_login');
+				$settings['password'] = assertStringArg ('ucs_password');
+			}
+			foreach (array ('hostname', 'username', 'password') as $item)
+				if (empty ($settings[$item]))
+					throw new RTGatewayError ("${item} not available, check terminal_settings()");
+			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
+			break;
 		default:
 			throw new RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
+	}
+
+	// prepend commands by credentials
+	if ($prepend_credentials)
+	{
+		if (isset ($settings['password']))
+			$commands = $settings['password'] . "\n" . $commands;
+		if (isset ($settings['username']))
+			$commands = $settings['username'] . "\n" . $commands;
 	}
 
 	foreach ($params_from_settings as $param_name => $setting_name)

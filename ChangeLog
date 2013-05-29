@@ -11,6 +11,7 @@
 	bugfix: when there's no local account created while using LDAP auth,
 		quick links can't be saved on that account (#831)
 	bugfix: ip tree: "Routed by" column displays routers in aggregate networks (#773)
+	bugfix: UCS gateway was broken since 0.20.4
 	bugfix: user-overrided config values were displayed in global config editor form
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
