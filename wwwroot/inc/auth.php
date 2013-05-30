@@ -30,7 +30,11 @@ function authenticate ()
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))
+	{
+		if (isset ($user_auth_src) and 'saml' == $user_auth_src)
+			saml_logout ();
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
+	}
 	// Phase 2. Do some method-specific processing, initialize $remote_username on success.
 	switch (TRUE)
 	{
@@ -261,7 +265,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 // a wrapper for SAML auth method
 function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NULL)
 {
-	global $SAML_options, $debug_mode;
+	global $SAML_options, $debug_mode, $auto_tags;
 	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
 		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
 	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
@@ -271,7 +275,23 @@ function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NU
 	$attributes = $as->getAttributes();
 	$saml_username = saml_getAttributeValue ($attributes, $SAML_options['usernameAttribute']);
 	$saml_displayname = saml_getAttributeValue ($attributes, $SAML_options['fullnameAttribute']);
+	if (array_key_exists ('groupListAttribute', $SAML_options))
+	{
+		foreach (saml_getAttributeValues ($attributes, $SAML_options['groupListAttribute']) as $autotag)
+			$auto_tags[] = array ('tag' => '$sgcn_' . $autotag);
+	}
 	return $as->isAuthenticated();
+}
+
+function saml_logout ()
+{
+	global $SAML_options;
+	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
+		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
+	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
+	$as = new SimpleSAML_Auth_Simple ($SAML_options['sp_profile']);
+	header("Location: ".$as->getLogoutURL('/'));
+	exit;
 }
 
 function saml_getAttributeValue ($attributes, $name)
@@ -279,6 +299,13 @@ function saml_getAttributeValue ($attributes, $name)
 	if (! isset ($attributes[$name]))
 		return '';
 	return is_array ($attributes[$name]) ? $attributes[$name][0] : $attributes[$name];
+}
+
+function saml_getAttributeValues ($attributes, $name)
+{
+	if (! isset ($attributes[$name]))
+		return array();
+	return is_array ($attributes[$name]) ? $attributes[$name] : array($attributes[$name]);
 }
 
 // a wrapper for two LDAP auth methods below

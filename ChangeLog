@@ -32,6 +32,7 @@
 	new feature: Rackcode filter for RDP-managed objects (#819)
 	new feature: grouping of Virtual services, generating of
 		virtual_server_group-aware keepalived configs
+	new feature: SAML groups and logout support (#867) by Thomas Powers
 0.20.4 2013-04-15
 	bugfix: %GPASS% dictionary markers were ignored in selectboxes
 	bugfix: 802.1Q: better Force10 switches support
