@@ -284,6 +284,7 @@ function init_config ()
 #	'sp_profile' => 'default-sp',
 #	'usernameAttribute' => 'eduPersonPrincipName',
 #	'fullnameAttribute' => 'fullName',
+#	'groupListAttribute' => 'memberOf',
 #);
 
 # This HTML banner is intended to assist users in dispatching their issues

@@ -276,10 +276,8 @@ function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NU
 	$saml_username = saml_getAttributeValue ($attributes, $SAML_options['usernameAttribute']);
 	$saml_displayname = saml_getAttributeValue ($attributes, $SAML_options['fullnameAttribute']);
 	if (array_key_exists ('groupListAttribute', $SAML_options))
-	{
 		foreach (saml_getAttributeValues ($attributes, $SAML_options['groupListAttribute']) as $autotag)
 			$auto_tags[] = array ('tag' => '$sgcn_' . $autotag);
-	}
 	return $as->isAuthenticated();
 }
 
