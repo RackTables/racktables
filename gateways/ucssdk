@@ -55,7 +55,7 @@ for line in sys.stdin:
 			print "ERR could not log into " + words[1]
 	# endif "login"
 	elif len(words) == 1 and words[0] == "getmo":
-		if (loggedin != 1 or handle.cookie == ""):
+		if (loggedin != 1):
 			print "ERR not logged in"
 		else:
 			try:
