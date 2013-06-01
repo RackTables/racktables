@@ -1615,7 +1615,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 				'type' => $port_type_id,
 				'label' => $port_label,
 				'reservation_comment' => $reservation_comment,
-				'l2address' => ($db_l2address === '') ? NULL : $db_l2address,
+				'l2address' => nullEmptyStr ($db_l2address),
 			),
 			array
 			(

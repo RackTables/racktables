@@ -874,25 +874,35 @@ function ip6_mask ($prefix_len)
 function l2addressForDatabase ($string)
 {
 	$string = strtoupper ($string);
+	$ret = '';
 	switch (TRUE)
 	{
 		case ($string == '' or preg_match (RE_L2_SOLID, $string) or preg_match (RE_L2_WWN_SOLID, $string)):
-			return $string;
+			$ret = $string;
+			break;
 		case (preg_match (RE_L2_IFCFG, $string) or preg_match (RE_L2_WWN_COLON, $string)):
 			// reformat output of SunOS ifconfig
 			$ret = '';
 			foreach (explode (':', $string) as $byte)
 				$ret .= (strlen ($byte) == 1 ? '0' : '') . $byte;
-			return $ret;
+			$ret = $ret;
+			break;
 		case (preg_match (RE_L2_CISCO, $string)):
-			return str_replace ('.', '', $string);
+			$ret = str_replace ('.', '', $string);
+			break;
 		case (preg_match (RE_L2_HUAWEI, $string)):
-			return str_replace ('-', '', $string);
+			$ret = str_replace ('-', '', $string);
+			break;
 		case (preg_match (RE_L2_IPCFG, $string) or preg_match (RE_L2_WWN_HYPHEN, $string)):
-			return str_replace ('-', '', $string);
+			$ret = str_replace ('-', '', $string);
+			break;
 		default:
 			throw new InvalidArgException ('$string', $string, 'malformed MAC/WWN address');
 	}
+	// some switches provide this fake address through SNMP. Store it as NULL to allow multiple copies
+	if ($ret === '000000000000')
+		$ret = '';
+	return $ret;
 }
 
 function l2addressFromDatabase ($string)
