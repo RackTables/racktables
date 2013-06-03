@@ -1697,7 +1697,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1394,
 		'text' => 'WS-C2960S-24PS-L: 24 RJ-45/10-100-1000T(X) + 4 SFP/1000',
-		'processors' => array ('catalyst-stack-1-to-4-SFP', 'catalyst-chassis-mgmt', 'catalyst-stack-any-100'),
+		'processors' => array ('catalyst-stack-25-to-28-SFP', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
 	),
 	'9.1.1650' => array
 	(
