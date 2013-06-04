@@ -799,5 +799,6 @@ $ajaxhandler['upd-reservation-port'] = 'updatePortRsvAJAX';
 $ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 $ajaxhandler['get-slb-form'] = 'renderSLBFormAJAX';
+$ajaxhandler['triplet-preview'] = 'getTripletConfigAJAX';
 
 ?>

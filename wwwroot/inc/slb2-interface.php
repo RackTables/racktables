@@ -240,7 +240,7 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 	if (count ($triplets))
 	{
 		startPortlet ('VS group instances (' . count ($triplets) . ')');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable><tr>";
+		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable><tr><th></th>";
 		foreach ($headers as $realm => $header)
 			if ($realm != $cell['realm'])
 				echo "<th>$header</th>";
@@ -249,13 +249,12 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		echo "</tr>";
 	}
 
+	addJS ('js/slb_editor.js');
+	addJS ('js/jquery.thumbhover.js');
+
 	$class = 'slb-checks';
 	if ($editable)
-	{
-		addJS ('js/jquery.thumbhover.js');
-		addJS ('js/slb_editor.js');
 		$class .= ' editable';
-	}
 
 	// render table rows
 	global $nextorder;
@@ -265,6 +264,7 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		$vs_cell = spotEntity ('ipvs', $slb['vs_id']);
 		amplifyCell ($vs_cell);
 		echo "<tr valign=top class='row_${order} triplet-row'>";
+		echo '<td><a href="#" onclick="' . "slb_config_preview(event, ${slb['object_id']}, ${slb['vs_id']}, ${slb['rspool_id']}); return false" . '">' . getImageHREF ('Zoom', 'config preview') . '</a></td>';
 		foreach (array_keys ($headers) as $realm)
 		{
 			if ($realm == $cell['realm'])
@@ -387,6 +387,19 @@ function renderSLBFormAJAX()
 	echo '</td>';
 	echo '</tr></table>';
 	echo '</form>';
+}
+
+function getTripletConfigAJAX()
+{
+	$tr_list = fetchTripletRows
+	(
+		array (
+			'object_id' => assertUIntArg ('object_id'),
+			'vs_id' => assertUIntArg ('vs_id'),
+			'rspool_id' => assertUIntArg ('rspool_id'),
+		)
+	);
+	echo '<div class="slbconf" style="max-height: 500px; max-width: 600px; overflow: auto">' . htmlspecialchars (generateSLBConfig2 ($tr_list)) . '</div>';
 }
 
 function renderNewTripletForm ($realm1, $realm2)

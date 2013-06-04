@@ -48,3 +48,22 @@ $(document).ready (function () {
 		return false;
 	});
 });
+
+function slb_config_preview (e, object_id, vs_id, rspool_id) {
+	$.ajax ({
+		type: 'POST',
+		url: 'index.php',
+		data: {
+			module: 'ajax',
+			ac: 'triplet-preview',
+			object_id: object_id,
+			vs_id: vs_id,
+			rspool_id: rspool_id
+		},
+		success: function (data) {
+			var div = $('<div />').addClass('popup-box').appendTo('body');
+			div.html(data);
+			$(this).thumbPopup (div, { event: e });
+		}
+	});
+}
