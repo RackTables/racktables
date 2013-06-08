@@ -475,6 +475,20 @@ function renderLocationRowForEditor ($subtree, $level = 0)
 	}
 }
 
+function renderLocationSelectTree ($selected_id = NULL)
+{
+	echo '<option value=0>-- NONE --</option>';
+	foreach (treeFromList (listCells ('location')) as $location)
+	{
+		echo "<option value=${location['id']} style='font-weight: bold' ";
+		if ($location['id'] == $selected_id )
+		    echo ' selected';
+		echo ">${location['name']}</option>";
+		printLocationChildrenSelectOptions ($location, 0, $selected_id);
+	}
+	echo '</select>';
+}
+
 function renderRackspaceLocationEditor ()
 {
 	addJS
@@ -493,14 +507,11 @@ END
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addLocation');
-		echo "<tr><td>";
+		echo '<tr><td>';
 		printImageHREF ('create', 'Add new location', TRUE);
-		echo "</td><td><select name=parent_id tabindex=100>";
-		echo "<option value=0>-- NONE --</option>";
-		foreach (listCells ('location') as $location)
-			echo "<option value=${location['id']}>${location['name']}</option>";
-		echo "</select></td>";
-		echo "<td><input type=text size=48 name=name tabindex=101></td><td>";
+		echo '</td><td><select name=parent_id tabindex=100>';
+		renderLocationSelectTree ();
+		echo '</td><td><input type=text size=48 name=name tabindex=101></td><td>';
 		printImageHREF ('create', 'Add new location', TRUE, 102);
 		echo "</td></tr></form>\n";
 	}
@@ -522,47 +533,39 @@ END
 
 function renderRackspaceRowEditor ()
 {
-	function printNewItemTR ($locationlist)
+	function printNewItemTR ()
 	{
 		printOpFormIntro ('addRow');
-		echo "<tr><td>";
+		echo '<tr><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
-		echo "</td><td><select name=location_id tabindex=100>";
-		echo "<option value=0>-- NONE --</option>";
-		foreach ($locationlist as $location)
-			echo "<option value=${location['id']}>${location['name']}</option>";
-		echo "</select></td>";
-		echo "<td><input type=text name=name tabindex=101></td><td>";
+		echo '</td><td><select name=location_id tabindex=100>';
+		renderLocationSelectTree ();
+		echo '</td><td><input type=text name=name tabindex=101></td><td>';
 		printImageHREF ('create', 'Add new row', TRUE, 102);
-		echo "</td></tr></form>";
+		echo '</td></tr></form>';
 	}
-	$locationlist = listCells ('location');
-
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR($locationlist);
+		printNewItemTR ();
 	foreach (getAllRows() as $row_id => $rowInfo)
 	{
-		echo "<tr><td>";
+		echo '<tr><td>';
 		if ($rc = count (listCells ('rack', $row_id)))
 			printImageHREF ('nodestroy', "${rc} rack(s) here");
 		else
 			echo getOpLink (array('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row');
 		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
-		echo "</td><td>";
-		$selectlist = array();
-		$selectlist['other'][0] = '-- NONE --';
-		foreach ($locationlist as $location_id => $locationdata)
-			$selectlist['other'][$location_id] = $locationdata['name'];
-		printNiftySelect ($selectlist, array ('name' => 'location_id'), $rowInfo['location_id']);
+		echo '</td><td>';
+		echo '<select name=location_id tabindex=100>';
+		renderLocationSelectTree ($rowInfo['location_id']);
 		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR($locationlist);
+		printNewItemTR ();
 	echo "</table><br>\n";
 	finishPortlet();
 }

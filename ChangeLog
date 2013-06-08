@@ -26,6 +26,7 @@
 	update: display parent locations when browsing rackspace (#845)
 	update: add JavaScript to toggle children of Location filter tree (#841)
 	update: display parent and child location(s) on View Location page (#847)
+	update: display location drop-down list as a tree (#879)
 	update: display blades when rendering a rack (#745)
 	update: add Enterasys dictionary entries (#865)
 	update: SNMP support for Cisco 877 (#863), ISR 878 (#861), 4948E (#741),

@@ -6057,4 +6057,20 @@ function nullEmptyStr ($str)
 	return strlen ($str) ? $str : NULL;
 }
 
+function printLocationChildrenSelectOptions ($location, $level, $parent_id, $location_id = NULL)
+{
+	$self = __FUNCTION__;
+	$level++;
+	foreach ($location['kids'] as $subLocation)
+		if ($subLocation['id'] != $location_id)
+		{
+			echo "<option value=${subLocation['id']}";
+			if ($subLocation['id'] == $parent_id)
+				echo ' selected';
+			echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
+			if ($subLocation['kidc'] > 0)
+				$self ($subLocation, $level, $parent_id, $location_id);
+		}
+}
+
 ?>
