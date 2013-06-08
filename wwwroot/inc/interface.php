@@ -311,7 +311,7 @@ END
 	startPortlet ('Location filter');
 	echo <<<END
 <table border=0 align=center cellspacing=0 class="tagtree" id="locationFilter">
-    <form method=get>
+    <form method=post>
     <input type=hidden name=page value=rackspace>
     <input type=hidden name=tab value=default>
     <input type=hidden name=changeLocationFilter value=true>
