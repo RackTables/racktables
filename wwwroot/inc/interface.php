@@ -283,17 +283,34 @@ function renderLocationFilterPortlet ()
 		{
 			echo "<tr><td class=tagbox style='padding-left: " . ($level * 16) . "px;'><label>";
 			$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
-			echo "<label><input type=checkbox name='location_id[]' value='${location['id']}'${checked}>${location['name']}";
+			echo "<label><input type=checkbox name='location_id[]' class=${level} value='${location['id']}'${checked} onClick=checkAll(this)>${location['name']}";
 			echo "</label></td></tr>\n";
 			if ($location['kidc'])
 				$self ($location['kids'], $level + 1);
 		}
 	}
 
-	// TODO: add some javascript to toggle all children when a parent is toggled
+	addJS(<<<END
+function checkAll(bx) {
+	for (var tbls=document.getElementsByTagName("table"), i=tbls.length; i--;)
+		if (tbls[i].id == "locationFilter") {	
+			var bxs=tbls[i].getElementsByTagName("input");
+			var in_tree = false;
+			for (var j=0; j<bxs.length; j++ ) {
+				if(in_tree == false && bxs[j].value == bx.value)
+					in_tree = true;
+				else if(parseInt(bxs[j].className) <= parseInt(bx.className))
+					in_tree = false;
+				if (bxs[j].type=="checkbox" && in_tree == true)
+					bxs[j].checked = bx.checked;
+			}
+		}
+}
+END
+	,TRUE);
 	startPortlet ('Location filter');
 	echo <<<END
-<table border=0 align=center cellspacing=0 class="tagtree">
+<table border=0 align=center cellspacing=0 class="tagtree" id="locationFilter">
     <form method=get>
     <input type=hidden name=page value=rackspace>
     <input type=hidden name=tab value=default>
@@ -303,6 +320,9 @@ END;
 	$locationlist = listCells ('location');
 	if (count ($locationlist))
 	{
+		echo "<tr><td class=tagbox style='padding-left: 0px'><label>";
+		echo "<input type=checkbox name='location'  onClick=checkAll(this)> Toggle all";
+		echo "</label></td></tr>\n";
 		echo "<tr><td class=tagbox><hr></td></tr>\n";
 		renderLocationCheckbox (treeFromList ($locationlist));
 		echo "<tr><td class=tagbox><hr></td></tr>\n";

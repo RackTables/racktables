@@ -24,6 +24,7 @@
 		which are being used (#835)
 	update: use the monospace font family when displaying comments (#781)
 	update: display parent locations when browsing rackspace (#845)
+	update: add JavaScript to toggle children of Location filter tree (#841)
 	update: display parent and child location(s) on View Location page (#847)
 	update: display blades when rendering a rack (#745)
 	update: add Enterasys dictionary entries (#865)
