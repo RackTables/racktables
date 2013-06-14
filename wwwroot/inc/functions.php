@@ -10,6 +10,11 @@
 *
 */
 
+// PHP messages in the following defines are suppressed because of the possibility
+// that they are already defined by user in secret.php file
+@define ('TAGNAME_REGEXP', '/^[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
+@define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
+
 $loclist[0] = 'front';
 $loclist[1] = 'interior';
 $loclist[2] = 'rear';
@@ -6075,6 +6080,15 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
 			if ($subLocation['kidc'] > 0)
 				$self ($subLocation, $level, $parent_id, $location_id);
 		}
+}
+
+function validTagName ($s, $allow_autotag = FALSE)
+{
+	if (preg_match (TAGNAME_REGEXP, $s))
+		return TRUE;
+	if ($allow_autotag && preg_match (AUTOTAGNAME_REGEXP, $s))
+		return TRUE;
+	return FALSE;
 }
 
 ?>

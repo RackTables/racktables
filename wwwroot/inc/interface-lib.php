@@ -4,9 +4,6 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-define ('TAGNAME_REGEXP', '/^[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
-define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9]([. _~-]?[\p{L}0-9])*$/u');
-
 // Let's have it here, so extensions can add their own images.
 $image = array();
 $image['rackspace']['path'] = 'pix/racks.png';
@@ -735,15 +732,6 @@ function printPageHeaders ()
 				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
 			elseif ($item['type'] == 'file')
 				echo "<script type='text/javascript' src='?module=chrome&uri=${item['script']}'></script>\n";
-}
-
-function validTagName ($s, $allow_autotag = FALSE)
-{
-	if (1 == preg_match (TAGNAME_REGEXP, $s))
-		return TRUE;
-	if ($allow_autotag and 1 == preg_match (AUTOTAGNAME_REGEXP, $s))
-		return TRUE;
-	return FALSE;
 }
 
 function cmpTags ($a, $b)

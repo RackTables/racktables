@@ -15,10 +15,23 @@
 // Complain about martian char.
 function lexError1 ($state, $text, $pos, $ln = 'N/A')
 {
+	$char = mb_substr ($text, $pos, 1);
+	switch ($char)
+	{
+		case "\n":
+			$char = '\n';
+			break;
+		case "\r":
+			$char = '\r';
+			break;
+		case "\t":
+			$char = '\t';
+			break;
+	}
 	return array
 	(
 		'result' => 'NAK',
-		'load' => "Invalid character '" . mb_substr ($text, $pos, 1) . "' near line ${ln}"
+		'load' => "Invalid character '${char}' near line ${ln}"
 	);
 }
 
@@ -104,16 +117,17 @@ function getLexemsFromRawText ($text)
 						$buffer = $char;
 						break;
 					case ($char == "\n"):
-						$lineno++; // fall through
 					case ($char == ' '):
 					case ($char == "\t"):
 						// nom-nom...
 						break;
 					case ($char == '{'):
-						$newstate = 'reading tag 1';
+						$newstate = 'reading tag';
+						$buffer = '';
 						break;
 					case ($char == '['):
-						$newstate = 'reading predicate 1';
+						$newstate = 'reading predicate';
+						$buffer = '';
 						break;
 					default:
 						return lexError1 ($state, $text, $i, $lineno);
@@ -126,7 +140,6 @@ function getLexemsFromRawText ($text)
 						$buffer .= $char;
 						break;
 					case ($char == "\n"):
-						$lineno++; // fall through
 					case ($char == ' '):
 					case ($char == "\t"):
 					case ($char == ')'): // this will be handled below
@@ -183,79 +196,34 @@ function getLexemsFromRawText ($text)
 						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
-			case 'reading tag 1':
-				switch (TRUE)
+			case 'reading tag':
+			case 'reading predicate':
+				$tag_mode = ($state == 'reading tag');
+				$breaking_char = $tag_mode ? '}' : ']';
+				switch ($char)
 				{
-					case ($char == "\n"):
-						$lineno++; // fall through
-					case ($char == ' '):
-					case ($char == "\t"):
-						// nom-nom...
-						break;
-					case (preg_match ('/[\p{L}0-9\$]/u', $char) == 1):
-						$buffer = $char;
-						$newstate = 'reading tag 2';
-						break;
-					default:
-						return lexError1 ($state, $text, $i, $lineno);
-				}
-				break;
-			case 'reading tag 2':
-				switch (TRUE)
-				{
-					case ($char == '}'):
-						$buffer = rtrim ($buffer);
-						if (!validTagName ($buffer, TRUE))
+					case $breaking_char:
+						$buffer = trim ($buffer, "\t ");
+						if (!validTagName ($buffer, $tag_mode))
 							return lexError4 ($buffer, $lineno);
-						$ret[] = array ('type' => ($buffer[0] == '$' ? 'LEX_AUTOTAG' : 'LEX_TAG'), 'load' => $buffer, 'lineno' => $lineno);
+						if ($tag_mode)
+							$lex_type = ($buffer[0] == '$' ? 'LEX_AUTOTAG' : 'LEX_TAG');
+						else
+							$lex_type = 'LEX_PREDICATE';
+						$ret[] = array ('type' => $lex_type, 'load' => $buffer, 'lineno' => $lineno);
 						$newstate = 'ESOTSM';
 						break;
-					case (preg_match ('/[\p{L}0-9. _~-]/u', $char) == 1):
+					case "\n":
+						return lexError1 ($state, $text, $i, $lineno);
+					default:
 						$buffer .= $char;
 						break;
-					default:
-						return lexError1 ($state, $text, $i, $lineno);
-				}
-				break;
-			case 'reading predicate 1':
-				switch (TRUE)
-				{
-					case ($char == "\n"):
-						$lineno++; // fall through
-					case ($char == ' '):
-					case ($char == "\t"):
-						// nom-nom...
-						break;
-					case (preg_match ('/[\p{L}0-9]/u', $char) == 1):
-						$buffer = $char;
-						$newstate = 'reading predicate 2';
-						break;
-					default:
-						return lexError1 ($state, $text, $i, $lineno);
-				}
-				break;
-			case 'reading predicate 2':
-				switch (TRUE)
-				{
-					case ($char == ']'):
-						$buffer = rtrim ($buffer);
-						if (!validTagName ($buffer))
-							return lexError4 ($buffer, $lineno);
-						$ret[] = array ('type' => 'LEX_PREDICATE', 'load' => $buffer, 'lineno' => $lineno);
-						$newstate = 'ESOTSM';
-						break;
-					case (preg_match ('/[\p{L}0-9. _~-]/u', $char) == 1):
-						$buffer .= $char;
-						break;
-					default:
-						return lexError1 ($state, $text, $i, $lineno);
 				}
 				break;
 			case 'skipping comment':
 				switch ($char)
 				{
 					case "\n":
-						$lineno++;
 						$newstate = 'ESOTSM';
 					default: // eat char, nom-nom...
 						break;
@@ -264,6 +232,8 @@ function getLexemsFromRawText ($text)
 			default:
 				die (__FUNCTION__ . "(): internal error, state == ${state}");
 		endswitch;
+		if ($char == "\n")
+			$lineno++;
 		$state = $newstate;
 	endfor;
 	if ($state != 'ESOTSM' and $state != 'skipping comment')
