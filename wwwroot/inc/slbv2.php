@@ -239,7 +239,7 @@ function generateSLBConfig2 ($triplet_list)
 								}
 							$ip_parser->addMacro ('SLB_VIP_VS_CONF', dos2unix ($ip_row['vsconfig']));
 							$ip_parser->addMacro ('SLB_VIP_RS_CONF', dos2unix ($ip_row['rsconfig']));
-							$virtual_services[$ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $ip_parser);
+							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $ip_parser);
 						}
 					}
 				}
@@ -247,7 +247,7 @@ function generateSLBConfig2 ($triplet_list)
 				// group multiple virtual_services into vs_groups
 				$groups = array();
 				foreach ($virtual_services as $key => $content)
-					$groups[$content][] = $key;
+					$groups[$content][] = preg_replace ('/^(TCP|UDP)\s+/', '', $key);
 				$gid = 1;
 				foreach ($groups as $content => $keys)
 				{
