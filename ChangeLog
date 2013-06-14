@@ -33,6 +33,8 @@
 	update: add Enterasys dictionary entries (#865)
 	update: SNMP support for Cisco 877 (#863), ISR 878 (#861), 4948E (#741),
 		WS-C2960S-24PS-L, WS-C2960S-F48LPS-L
+	update: tag names now can contain '+', '%', ':' characters,
+		can begin with '-' and end with '+', ':' characters.
 	new feature: Rackcode filter for RDP-managed objects (#819)
 	new feature: grouping of Virtual services, generating of
 		virtual_server_group-aware keepalived configs
