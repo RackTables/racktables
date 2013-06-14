@@ -319,6 +319,12 @@ function genericAssertion ($argname, $argtype)
 		if (! is_array ($_REQUEST[$argname]))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'argument is not an array');
 		return $_REQUEST[$argname];
+	case 'array0':
+		if (! array_key_exists ($argname, $_REQUEST))
+			return array();
+		if (! is_array ($_REQUEST[$argname]))
+			throw new InvalidRequestArgException ($argname, '(omitted)', 'argument is not an array');
+		return $_REQUEST[$argname];
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))

@@ -1900,8 +1900,8 @@ function createTriplet()
 	$object_id = assertUIntArg ('object_id');
 	$vs_id = assertUIntArg ('vs_id');
 	$rspool_id = assertUIntArg ('rspool_id');
-	$vips = array_key_exists ('enabled_vips', $_REQUEST) ? genericAssertion ('enabled_vips', 'array') : array();
-	$ports = array_key_exists ('enabled_ports', $_REQUEST) ? genericAssertion ('enabled_ports', 'array') : array();
+	$vips = genericAssertion ('enabled_vips', 'array0');
+	$ports = genericAssertion ('enabled_ports', 'array0');
 	if (getTriplet ($object_id, $vs_id, $rspool_id))
 		return showError ("SLB triplet already exists");
 
@@ -3048,7 +3048,7 @@ function addObjectlog ()
 
 function saveQuickLinks()
 {
-	genericAssertion ('page_list', 'array');
+	genericAssertion ('page_list', 'array0');
 	if (is_array ($_REQUEST['page_list']))
 	{
 		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));
@@ -3258,7 +3258,7 @@ function doVSMigrate()
 	$vs_id = assertUIntArg ('vs_id');
 	$vs_cell = spotEntity ('ipvs', $vs_id);
 	amplifyCell ($vs_cell);
-	$tag_ids = genericAssertion ('taglist', 'array');
+	$tag_ids = genericAssertion ('taglist', 'array0');
 	$old_vs_list = genericAssertion ('vs_list', 'array');
 	$plan = callHook ('buildVSMigratePlan', $vs_id, $old_vs_list);
 
