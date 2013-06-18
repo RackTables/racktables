@@ -5857,10 +5857,14 @@ function stopHookPropagation()
 
 function arePortTypesCompatible ($oif1, $oif2)
 {
-	foreach (getPortOIFCompat() as $item)
-		if ($item['type1'] == $oif1 && $item['type2'] == $oif2)
-			return TRUE;
-	return FALSE;
+	static $map = NULL;
+	if (! isset ($map))
+	{
+		$map = array();
+		foreach (getPortOIFCompat() as $item)
+			$map[$item['type1']][$item['type2']] = 1;
+	}
+	return isset ($map[$oif1][$oif2]);
 }
 
 function arePortsCompatible ($portinfo_a, $portinfo_b)
