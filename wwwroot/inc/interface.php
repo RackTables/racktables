@@ -648,7 +648,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 			$childNames[] = $child['name'];
 			$childData = spotEntity ('object', $child['entity_id']);
 			$attrData = getAttrValues ($child['entity_id']);
-			if ($attrData['28']) // slot number
+			if (isset ($attrData['28'])) // slot number
 			{
 				$slot = $attrData['28']['value'];
 				$slotInfo[$slot] = $child['name'];
