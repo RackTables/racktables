@@ -5821,14 +5821,15 @@ function registerHook ($hook_name, $callback, $method = 'after')
 function universalHookHandler()
 {
 	global $hook_propagation_stop;
-	$hook_propagation_stop = FALSE;
+	if (! isset ($hook_propagation_stop))
+		$hook_propagation_stop = array();
+	array_unshift ($hook_propagation_stop, FALSE);
 	global $hooks_stack;
 	$ret = NULL;
 	$bk_params = func_get_args();
 	$hook_name = array_shift ($bk_params);
 	if (! array_key_exists ($hook_name, $hooks_stack) || ! is_array ($hooks_stack[$hook_name]))
 		throw new InvalidRequestArgException ('$hooks_stack["' . $hook_name . '"]', $hooks_stack[$hook_name]);
-
 	foreach ($hooks_stack[$hook_name] as $callback)
 	{
 		$params = $bk_params;
@@ -5841,9 +5842,10 @@ function universalHookHandler()
 			$ret = call_user_func_array ($callback, $params);
 		else
 			throw new RackTablesError ("Call of non-existant callback '$callback'", RackTablesError::INTERNAL);
-		if ($hook_propagation_stop)
+		if ($hook_propagation_stop[0])
 			break;
 	}
+	array_shift ($hook_propagation_stop);
 	return $ret;
 }
 
@@ -5852,7 +5854,8 @@ function universalHookHandler()
 function stopHookPropagation()
 {
 	global $hook_propagation_stop;
-	$hook_propagation_stop = TRUE;
+	if ($hook_propagation_stop)
+		$hook_propagation_stop[0] = TRUE;
 }
 
 function arePortTypesCompatible ($oif1, $oif2)
