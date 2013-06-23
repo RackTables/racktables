@@ -1,4 +1,4 @@
-0.20.5
+0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
 	bugfix: Virtual Resources page threw exception if a hypervisor/resource pool
