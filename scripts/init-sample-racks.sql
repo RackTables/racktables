@@ -1559,6 +1559,11 @@ INSERT INTO `Script` (`script_name`, `script_text`) VALUES
 ('DefaultRSConfig','CONNECT_TIMEOUT=1\nCONNECT_PORT=%RSPORT%\nCHECK_TCP=`TCP_CHECK {\n	connect_port %CONNECT_PORT%\n	connect_timeout %CONNECT_TIMEOUT% \n}\'\n%CHECK%\n'),
 ('DefaultVSConfig','METHOD=NAT\nlvs_method %METHOD%\n');
 
+REPLACE INTO `Config` VALUES ('IPV4LB_LISTSRC','{load balancer}','string','yes','no','no','List source: IPv4 load balancers');
+
+INSERT INTO `VS` VALUES
+(1,'service1',NULL,NULL);
+
 INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES
 (1,NULL,'testing'),
 (2,NULL,'production'),
@@ -1625,7 +1630,8 @@ INSERT INTO `TagStorage` (`entity_realm`, `entity_id`, `tag_id`, `user`, `date`)
 ('object',981,12,'john_doe','2012-06-01'),
 ('vst',1,22,'john_doe','2012-06-01'),
 ('vst',2,22,'john_doe','2012-06-01'),
-('vst',3,23,'john_doe','2012-06-01');
+('vst',3,23,'john_doe','2012-06-01'),
+('ipvs',1,2,'admin','2013-06-23 23:48:52');
 
 INSERT INTO `VLANDomain` (`id`, `description`) VALUES
 (2,'English'),
@@ -1711,3 +1717,19 @@ INSERT INTO `VLANSwitch` (`object_id`, `domain_id`, `template_id`, `mutex_rev`, 
 (979,2,1,4,'no',0,'2012-09-09 16:11:57','0000-00-00 00:00:00','0000-00-00 00:00:00','0000-00-00 00:00:00'),
 (980,2,2,4,'no',0,'2012-09-09 16:16:22','0000-00-00 00:00:00','0000-00-00 00:00:00','0000-00-00 00:00:00'),
 (981,2,3,1,'no',0,'2012-09-09 16:16:53','0000-00-00 00:00:00','0000-00-00 00:00:00','0000-00-00 00:00:00');
+
+INSERT INTO `VSIPs` VALUES (1,0x0AC80139,NULL,NULL);
+INSERT INTO `VSIPs` VALUES (1,0x0AC8013A,NULL,NULL);
+INSERT INTO `VSIPs` VALUES (1,0xFC001450000200000000000000000039,NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (928,1,0x0AC80139,1,'100',NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (928,1,0x0AC8013A,1,'200',NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (928,1,0xFC001450000200000000000000000039,1,NULL,NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (929,1,0x0AC80139,1,'200',NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (929,1,0x0AC8013A,1,'100',NULL,NULL);
+INSERT INTO `VSEnabledIPs` VALUES (929,1,0xFC001450000200000000000000000039,1,NULL,NULL,NULL);
+INSERT INTO `VSPorts` VALUES (1,'TCP',80,NULL,'CHECK_HTTP {\n  url /ping\n  status_code 200\n}');
+INSERT INTO `VSPorts` VALUES (1,'TCP',443,NULL,'CHECK_SSL {\n url /ping\n status_code 200\n}');
+INSERT INTO `VSEnabledPorts` VALUES (928,1,'TCP',80,1,NULL,NULL);
+INSERT INTO `VSEnabledPorts` VALUES (928,1,'TCP',443,1,NULL,NULL);
+INSERT INTO `VSEnabledPorts` VALUES (929,1,'TCP',80,1,NULL,NULL);
+INSERT INTO `VSEnabledPorts` VALUES (929,1,'TCP',443,1,NULL,NULL);
