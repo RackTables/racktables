@@ -280,7 +280,18 @@ function getRowInfo ($row_id)
 
 function getAllRows ()
 {
-	$result = usePreparedSelectBlade ('SELECT id, name, location_id, location_name FROM Row ORDER BY location_name, name');
+	$result = usePreparedSelectBlade ('
+SELECT
+	Row.id,
+	Row.name,
+	Row.location_id,
+	Row.location_name,
+	COUNT(Rack.id) AS rackc
+FROM Row
+LEFT JOIN Rack ON Rack.row_id = Row.id
+GROUP BY Row.id
+ORDER BY location_name, name
+');
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 

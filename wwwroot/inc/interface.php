@@ -293,7 +293,7 @@ function renderLocationFilterPortlet ()
 	addJS(<<<END
 function checkAll(bx) {
 	for (var tbls=document.getElementsByTagName("table"), i=tbls.length; i--;)
-		if (tbls[i].id == "locationFilter") {	
+		if (tbls[i].id == "locationFilter") {
 			var bxs=tbls[i].getElementsByTagName("input");
 			var in_tree = false;
 			for (var j=0; j<bxs.length; j++ ) {
@@ -552,7 +552,7 @@ function renderRackspaceRowEditor ()
 	foreach (getAllRows() as $row_id => $rowInfo)
 	{
 		echo '<tr><td>';
-		if ($rc = count (listCells ('rack', $row_id)))
+		if ($rc = $rowInfo['rackc'])
 			printImageHREF ('nodestroy', "${rc} rack(s) here");
 		else
 			echo getOpLink (array('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row');
