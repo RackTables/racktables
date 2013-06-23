@@ -86,7 +86,7 @@ function getTriplet ($object_id, $vs_id, $rspool_id)
 	));
 }
 
-function generateVSSection ($rspool_id, $vs_parser)
+function generateVSSection ($vs_parser)
 {
 	$ret = $vs_parser->expand (
 "	protocol %PROTO%
@@ -104,7 +104,7 @@ function generateVSSection ($rspool_id, $vs_parser)
 	else
 		$family_length = strlen ($vip_bin);
 
-	foreach (getRSListInPool ($rspool_id) as $rs)
+	foreach ($vs_parser->getRSList() as $rs)
 	{
 		if ($rs['inservice'] != 'yes')
 			continue;
@@ -219,7 +219,7 @@ function generateSLBConfig2 ($triplet_list)
 					if ($is_mark)
 					{
 						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
-						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $p_parser);
+						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($p_parser);
 					}
 					else
 					{
@@ -239,7 +239,7 @@ function generateSLBConfig2 ($triplet_list)
 								}
 							$ip_parser->addMacro ('SLB_VIP_VS_CONF', dos2unix ($ip_row['vsconfig']));
 							$ip_parser->addMacro ('SLB_VIP_RS_CONF', dos2unix ($ip_row['rsconfig']));
-							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($triplet['rspool_id'], $ip_parser);
+							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($ip_parser);
 						}
 					}
 				}

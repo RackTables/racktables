@@ -197,7 +197,7 @@ virtual_server %VS_HEADER% {
 	%SLB_VS_CONF%
 ");
 
-				foreach (getRSListInPool ($rsp['id']) as $rs_row)
+				foreach ($rs_parser->getRSList() as $rs_row)
 				{
 					if ($rs_row['inservice'] != 'yes')
 						continue;
@@ -530,6 +530,14 @@ class MacroParser
 			$ret = '';
 		array_pop ($this->trace);
 		return $ret;
+	}
+
+	// you can inherit the parser class and override this method to fill RS list dynamically
+	public function getRSList()
+	{
+		if (isset ($this->macros['RSP_ID']))
+			return getRSListInPool ($this->macros['RSP_ID']);
+		return array();
 	}
 }
 
