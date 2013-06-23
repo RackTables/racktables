@@ -540,7 +540,7 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE);
 		echo '</td><td><select name=location_id tabindex=100>';
 		renderLocationSelectTree ();
-		echo '</td><td><input type=text name=name tabindex=101></td><td>';
+		echo '</td><td><input type=text name=name tabindex=100></td><td>';
 		printImageHREF ('create', 'Add new row', TRUE, 102);
 		echo '</td></tr></form>';
 	}
@@ -560,7 +560,7 @@ function renderRackspaceRowEditor ()
 		echo '</td><td>';
 		echo '<select name=location_id tabindex=100>';
 		renderLocationSelectTree ($rowInfo['location_id']);
-		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
+		echo "</td><td><input type=text name=name value='${rowInfo['name']}' tabindex=100></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td></tr>\n";
 	}
