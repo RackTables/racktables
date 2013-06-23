@@ -2814,6 +2814,23 @@ function getRackSearchResult ($terms)
 	return $ret;
 }
 
+function getRowSearchResult ($terms)
+{
+	$byName = getSearchResultByField
+	(
+		'Row',
+		array ('id'),
+		'name',
+		$terms,
+		'name'
+	);
+
+	$ret = array();
+	foreach ($byName as $row)
+		$ret[$row['id']] = spotEntity ('row', $row['id']);
+	return $ret;
+}
+
 function getLocationSearchResult ($terms)
 {
 	$byName = getSearchResultByField

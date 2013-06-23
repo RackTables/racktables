@@ -3529,6 +3529,19 @@ function renderSearchResults ($terms, $summary)
 					echo '</table>';
 					finishPortlet();
 					break;
+				case 'row':
+					startPortlet ("<a href='index.php?page=rackspace'>Rack rows</a>");
+					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+					foreach ($what as $cell)
+					{
+						echo "<tr class=row_${order}><td class=tdleft>";
+						echo mkCellA ($cell);
+						echo "</td></tr>";
+						$order = $nextorder[$order];
+					}
+					echo '</table>';
+					finishPortlet();
+					break;
 				case 'location':
 					startPortlet ("<a href='index.php?page=rackspace'>Locations</a>");
 					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';

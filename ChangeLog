@@ -18,6 +18,7 @@
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab
 		- display search query in form field when search return multiple results
+		- search for rack rows by name (#885)
 	update: handle EntityNotFoundException as redirect to main page and
 		show appropriate error message
 	update: prevent deletion of system-level attribute mappings (#771)
