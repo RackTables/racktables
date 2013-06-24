@@ -4486,7 +4486,7 @@ function detectVLANSwitchQueue ($vswitch)
 		else
 			return 'resync_ready';
 	case E_8021Q_SYNC_DISABLED:
-		return 'sync_ready';
+		return 'disabled';
 	}
 	return '';
 }
@@ -4496,21 +4496,12 @@ function get8021QDeployQueues()
 	global $dqtitle;
 	$ret = array();
 	foreach (array_keys ($dqtitle) as $qcode)
-		if ($qcode != 'disabled')
-			$ret[$qcode] = array
-			(
-				'enabled' => array(),
-				'disabled' => array(),
-			);
+		$ret[$qcode] = array();
 	foreach (getVLANSwitches() as $object_id)
 	{
 		$vswitch = getVLANSwitchInfo ($object_id);
 		if ('' != $qcode = detectVLANSwitchQueue ($vswitch))
-		{
-			$cell = spotEntity ('object', $vswitch['object_id']);
-			$enabled_key = considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC') ? 'enabled' : 'disabled';
-			$ret[$qcode][$enabled_key][] = $vswitch;
-		}
+			$ret[$qcode][] = $vswitch;
 	}
 	return $ret;
 }

@@ -100,12 +100,21 @@ fclose ($fp);
 // fetch all the needed data from DB (preparing for DB connection loss)
 $switch_queue = array();
 foreach ($switch_list as $object_id)
-	if (in_array (detectVLANSwitchQueue (getVLANSwitchInfo ($object_id)), $todo[$options['mode']]))
+{
+	$queue = detectVLANSwitchQueue (getVLANSwitchInfo ($object_id));
+	if ($queue == 'disabled' || in_array ($queue, $todo[$options['mode']]))
 	{
 		$cell = spotEntity ('object', $object_id);
 		if (considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC'))
 			$switch_queue[] = $cell;
+		else
+			usePreparedExecuteBlade
+			(
+				'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
+				array (E_8021Q_SYNC_DISABLED, $cell['id'])
+			);
 	}
+}
 
 // YOU SHOULD NOT USE DB FUNCTIONS BELOW IN THE PARENT PROCESS
 // THE PARENT'S DB CONNECTION IS LOST DUE TO RECONNECTING IN THE CHILD

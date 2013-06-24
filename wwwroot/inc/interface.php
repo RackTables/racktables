@@ -6619,23 +6619,18 @@ function render8021QStatus ()
 	echo '</td><td class=pcright>';
 
 	startPortlet ('deploy queues');
-	$enabled_total = 0;
-	$disabled_total = 0;
+	$total = 0;
 	echo '<table border=0 cellspacing=0 cellpadding=3 width="100%">';
 	foreach (get8021QDeployQueues() as $qcode => $qitems)
 	{
 		echo '<tr><th width="50%" class=tdright>' . mkA ($dqtitle[$qcode], 'dqueue', $qcode) . ':</th>';
-		echo '<td class=tdleft>' . count ($qitems['enabled']) . '</td></tr>';
+		echo '<td class=tdleft>' . count ($qitems) . '</td></tr>';
 
-		$enabled_total += count ($qitems['enabled']);
-		$disabled_total += count ($qitems['disabled']);
+		$total += count ($qitems);
 	}
+	echo '<tr><th width="50%" class=tdright>Total:</th>';
+	echo '<td class=tdleft>' . $total . '</td></tr>';
 	echo '</table>';
-	$total = $enabled_total + $disabled_total;
-	echo "<p align=left>$total switches total";
-	if ($disabled_total)
-		echo ', ' . mkA ($disabled_total, 'dqueue', 'disabled') . ' disabled';
-	echo '</p>';
 	finishPortlet();
 	echo '</td></tr></table>';
 }
@@ -7886,17 +7881,15 @@ function renderDeployQueue()
 	$order = 'odd';
 	$dqcode = getBypassValue();
 	$allq = get8021QDeployQueues();
-	$en_key = $dqcode == 'disabled' ? 'disabled' : 'enabled';
 	foreach ($allq as $qcode => $data)
-		if ($dqcode == 'disabled' || $dqcode == $qcode)
+		if ($dqcode == $qcode)
 		{
-			if (! count ($data[$en_key]))
+			echo "<h2 align=center>Queue '" . $dqtitle[$qcode] . "' (" . count ($data) . ")</h2>";
+			if (! count ($data))
 				continue;
-			if ($dqcode == 'disabled')
-				echo "<h2 align=center>Queue " . $dqtitle[$qcode] . " (" . count ($data[$en_key]) . ")</h2>";
 			echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 			echo '<tr><th>switch</th><th>changed</th><th>';
-			foreach ($data[$en_key] as $item)
+			foreach ($data as $item)
 			{
 				echo "<tr class=row_${order}><td>";
 				renderCell (spotEntity ('object', $item['object_id']));
