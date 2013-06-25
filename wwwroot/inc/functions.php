@@ -4340,19 +4340,20 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	return $done;
 }
 
+// returns a first port from $ports which is connected and it's name equals to $name
+function findConnectedPort ($ports, $name)
+{
+	foreach ($ports as $portinfo)
+		if ($portinfo['linked'] && $portinfo['name'] == $name)
+			return $portinfo;
+}
+
 // checks if the desired config of all uplink/downlink ports of that switch, and
 // his neighbors, equals to the recalculated config. If not,
 // sets the recalculated configs as desired and puts switches into out-of-sync state.
 // Returns an array with object_id as key and portname subkey
 function recalc8021QPorts ($switch_id)
 {
-	function find_connected_portinfo ($ports, $name)
-	{
-		foreach ($ports as $portinfo)
-			if ($portinfo['name'] == $name and $portinfo['remote_object_id'] != '' and $portinfo['remote_name'] != '')
-				return $portinfo;
-	}
-
 	$ret = array
 	(
 		'switches' => 0,
@@ -4378,7 +4379,7 @@ function recalc8021QPorts ($switch_id)
 			continue;
 
 		// if there is a link with remote side type 'uplink', use its vlan mask
-		if ($portinfo = find_connected_portinfo ($object['ports'], $pn))
+		if ($portinfo = findConnectedPort ($object['ports'], $pn))
 		{
 			$remote_pn = $portinfo['remote_name'];
 			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
@@ -4424,7 +4425,7 @@ function recalc8021QPorts ($switch_id)
 			continue;
 
 		// if there is a link with remote side type 'downlink', replace its vlan mask
-		if ($portinfo = find_connected_portinfo ($object['ports'], $pn))
+		if ($portinfo = findConnectedPort ($object['ports'], $pn))
 		{
 			$remote_pn = $portinfo['remote_name'];
 			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
