@@ -3365,9 +3365,14 @@ function reduceSubarraysToColumn ($input, $column)
 
 // Use the VLAN switch template to set VST role for each port of
 // the provided list. Return resulting list.
-function apply8021QOrder ($vst_id, $portlist)
+function apply8021QOrder ($vswitch, $portlist)
 {
-	$vst = spotEntity ('vst', $vst_id);
+	$hook_result = callHook ('apply8021Qrder_hook', $vswitch, $portlist);
+	if (isset ($hook_result))
+		return $hook_result;
+
+	$vst_id = $vswitch['template_id'];
+	$vst = spotEntity ('vst', $vswitch['template_id']);
 	amplifyCell ($vst);
 	foreach (array_keys ($portlist) as $port_name)
 	{
@@ -3998,7 +4003,7 @@ function get8021QSyncOptions
 	$allports = array();
 	foreach (array_unique (array_merge (array_keys ($C), array_keys ($R))) as $pn)
 		$allports[$pn] = array();
-	foreach (apply8021QOrder ($vswitch['template_id'], $allports) as $pn => $port)
+	foreach (apply8021QOrder ($vswitch, $allports) as $pn => $port)
 	{
 		// catch anomalies early
 		if ($port['vst_role'] == 'none')
@@ -4165,7 +4170,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	}
 	// redo uplinks unconditionally
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-	$Dnew = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
+	$Dnew = apply8021QOrder ($vswitch, getStored8021QConfig ($vswitch['object_id'], 'desired'));
 	// Take new "desired" configuration and derive uplink port configuration
 	// from it. Then cancel changes to immune VLANs and save resulting
 	// changes (if any left).
@@ -4269,7 +4274,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	}
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 	// aplly VST to the smallest set necessary
-	$requested_changes = apply8021QOrder ($vswitch['template_id'], $requested_changes);
+	$requested_changes = apply8021QOrder ($vswitch, $requested_changes);
 	$before = getStored8021QConfig ($object_id, 'desired');
 	$changes_to_save = array();
 	// first filter by wrt_vlans constraint
@@ -4362,7 +4367,7 @@ function recalc8021QPorts ($switch_id)
 	if (! $vswitch)
 		return $ret;
 	$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
-	$order = apply8021QOrder ($vswitch['template_id'], $vlan_config);
+	$order = apply8021QOrder ($vswitch, $vlan_config);
 	$before = $order;
 
 	$dbxlink->beginTransaction();
@@ -4381,7 +4386,7 @@ function recalc8021QPorts ($switch_id)
 			if (! $remote_vswitch)
 				continue;
 			$remote_domain_vlanlist = getDomainVLANs ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch['template_id'], $remote_vlan_config);
+			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
 			$remote_before = $remote_order;
 			if ($remote_order[$remote_pn]['vst_role'] == 'uplink')
 			{
@@ -4427,7 +4432,7 @@ function recalc8021QPorts ($switch_id)
 			if (! $remote_vswitch)
 				continue;
 			$remote_domain_vlanlist = getDomainVLANs ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch['template_id'], $remote_vlan_config);
+			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
 			$remote_before = $remote_order;
 			if ($remote_order[$remote_pn]['vst_role'] == 'downlink')
 			{
@@ -5430,13 +5435,13 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 			throw new InvalidArgException ('object_id', $switch_id, 'VLAN domain is not set for this object');
 		if (isset ($mutex_rev) and $vswitch['mutex_rev'] != $mutex_rev)
 			throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, 'expired form data');
-		$after = $before = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($vswitch['object_id'], 'desired'));
+		$after = $before = apply8021QOrder ($vswitch, getStored8021QConfig ($vswitch['object_id'], 'desired'));
 		$domain_vlanlist = getDomainVLANs ($vswitch['domain_id']);
 		$changes = filter8021QChangeRequests
 		(
 			$domain_vlanlist,
 			$before,
-			apply8021QOrder ($vswitch['template_id'], $changes)
+			apply8021QOrder ($vswitch, $changes)
 		);
 		$desired_ports_count = count ($changes);
 		$changes = authorize8021QChangeRequests ($before, $changes);
@@ -5981,7 +5986,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 			if (! $remote_vswitch)
 				return ! $local_auto;
 
-			$remote_ports = apply8021QOrder ($remote_vswitch['template_id'], getStored8021QConfig ($remote_vswitch['object_id'], 'desired'));
+			$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired'));
 			if (! $remote = @$remote_ports[$portinfo['remote_name']])
 				// linked auto-port must have corresponding remote 802.1Q port
 				return

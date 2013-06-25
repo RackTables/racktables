@@ -6795,7 +6795,7 @@ function renderObject8021QPorts ($object_id)
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
-	$desired_config = apply8021QOrder ($vswitch['template_id'], getStored8021QConfig ($object_id, 'desired'));
+	$desired_config = apply8021QOrder ($vswitch, getStored8021QConfig ($object_id, 'desired'));
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
 	$desired_config = sortPortList	($desired_config);
 	$uplinks = filter8021QChangeRequests ($vdom['vlanlist'], $desired_config, produceUplinkPorts ($vdom['vlanlist'], $desired_config, $vswitch['object_id']));
@@ -7399,7 +7399,7 @@ function renderObject8021QSync ($object_id)
 	try
 	{
 		$R = getRunning8021QConfig ($object_id);
-		$plan = apply8021QOrder ($vswitch['template_id'], get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
+		$plan = apply8021QOrder ($vswitch, get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
 		foreach ($plan as $port)
 			if
 			(
