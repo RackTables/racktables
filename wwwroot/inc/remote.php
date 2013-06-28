@@ -270,6 +270,7 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings['prompt-delay'] = 'prompt_delay';
 			$params_from_settings['username'] = 'username';
 			$params_from_settings['password'] = 'password';
+			$params_from_settings[] = $settings['hostname'];
 			break;
 		case 'ssh':
 			$params_from_settings['sudo-user'] = 'sudo_user';
