@@ -2020,26 +2020,23 @@ function scanIPv4Space ($pairlist)
 
 	// 2. check for allocations
 	$query =
-		"select ip, object_id, name, type " .
-		"from IPv4Allocation where ${whereexpr2} order by type";
+		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
+		"from IPv4Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
 	$result = usePreparedSelectBlade ($query, $qparams);
-	// release DBX early to avoid issues with nested spotEntity() calls
-	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
-	unset ($result);
-	foreach ($allRows as $row)
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip4_int2bin ($row['ip']);
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
-		$oinfo = spotEntity ('object', $row['object_id']);
 		$ret[$ip_bin]['allocs'][] = array
 		(
 			'type' => $row['type'],
 			'name' => $row['name'],
 			'object_id' => $row['object_id'],
-			'object_name' => $oinfo['dname'],
+			'object_name' => $row['object_name'],
 		);
 	}
+	unset ($result);
 
 	// 3a. look for virtual services
 	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
@@ -2204,26 +2201,23 @@ function scanIPv6Space ($pairlist)
 
 	// 2. check for allocations
 	$query =
-		"select ip, object_id, name, type " .
-		"from IPv6Allocation where ${whereexpr2} order by type";
+		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
+		"from IPv6Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
 	$result = usePreparedSelectBlade ($query, $qparams);
-	// release DBX early to avoid issues with nested spotEntity() calls
-	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
-	unset ($result);
-	foreach ($allRows as $row)
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = $row['ip'];
 		if (!isset ($ret[$ip_bin]))
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
-		$oinfo = spotEntity ('object', $row['object_id']);
 		$ret[$ip_bin]['allocs'][] = array
 		(
 			'type' => $row['type'],
 			'name' => $row['name'],
 			'object_id' => $row['object_id'],
-			'object_name' => $oinfo['dname'],
+			'object_name' => $row['object_name'],
 		);
 	}
+	unset ($result);
 
 	// 3a. look for virtual services
 	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
