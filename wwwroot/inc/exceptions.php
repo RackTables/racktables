@@ -227,6 +227,8 @@ function stringTrace($trace)
 					$printarg = 'NULL';
 				elseif (is_array ($arg))
 					$printarg = print_r ($arg, 1);
+				elseif (is_object ($arg))
+					$printarg = "Object(" . get_class ($arg) . ")";
 				else
 					$printarg = $arg;
 				$ret .= $printarg;
