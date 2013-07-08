@@ -1051,6 +1051,33 @@ $iftable_processors['quidway-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['hce-any-1000T'] = array
+(
+	'pattern' => '@^GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'ge\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['hce-any-SFP'] = array
+(
+	'pattern' => '@^10GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => '10ge\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['hce-any-QSFP'] = array
+(
+	'pattern' => '@^40GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => '40ge\\1\\2',
+	'dict_key' => '10-1588',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['quidway-XFP'] = array
 (
 	'pattern' => '@^XGigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
@@ -2412,6 +2439,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1339,
 		'text' => 'S5328C-SI: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + 2 XFP slots',
 		'processors' => array ('quidway-21-to-24-comboSFP', 'quidway-any-1000T', 'quidway-XFP', 'quidway-mgmt'),
+	),
+	'2011.2.239.4' => array
+	(
+		'dict_key' => 1769,
+		'text' => 'CE5850-48T4S2Q-EI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
+		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
 	'1991.1.3.45.2.1.1.1' => array
 	(
