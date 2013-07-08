@@ -204,6 +204,8 @@ function queryDevice ($object_id, $command)
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
 
+	global $current_query_breed;
+	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
 	for ($i = 0; $i < 3; $i++)
 		try
 		{
@@ -218,6 +220,12 @@ function queryDevice ($object_id, $command)
 			sleep (3);
 			continue;
 		}
+		catch (Exception $e)
+		{
+			$current_query_breed = NULL;
+			throw $e;
+		}
+	$current_query_breed = NULL;
 
 	if (NULL !== ($subst = callHook ('alterDeviceQueryResult', $ret, $object_id, $command)))
 		$ret = $subst;
@@ -231,7 +239,19 @@ function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
-	return $funcname ($object_id, $crq, $vlan_names);
+	global $current_query_breed;
+	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
+	try
+	{
+		$ret = $funcname ($object_id, $crq, $vlan_names);
+	}
+	catch (Exception $e)
+	{
+		$current_query_breed = NULL;
+		throw $e;
+	}
+	$current_query_breed = NULL;
+	return $ret;
 }
 
 // takes settings struct (declared in queryTerminal) and CLI commands (plain text) as input by reference
@@ -595,6 +615,49 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 		elseif (preg_match ('/#\s*commit\s*$([^#]*?^error: .*?)$/sm', $output, $m))
 			throw new RTGatewayError ("Commit failed: ${m[1]}");
 	}
+}
+
+// if both $breed and $object_id are omitted, the breed could be auto-detected
+// in case shortenIfName is called from within queryDevice
+// (i.e. some function in deviceconfig.php)
+function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
+{
+	global $current_query_breed;
+	if (! isset ($breed))
+	{
+		if (isset ($object_id))
+			$breed = detectDeviceBreed ($object_id);
+		elseif (isset ($current_query_breed))
+			$breed = $current_query_breed;
+	}
+	switch ($breed)
+	{
+	}
+	// default case is outside of switch()
+	return ios12ShortenIfName ($if_name);
+}
+
+// this function should be kept as-is for compatibility.
+// It is trying hard to complement every known breed.
+function ios12ShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	$ifname = preg_replace ('@^(?:[Ee]thernet|Eth)(.+)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
+	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
+	$ifname = preg_replace ('@^LongReachEthernet(.+)$@', 'lo\\1', $ifname);
+	$ifname = preg_replace ('@^Management(.+)$@', 'ma\\1', $ifname);
+	$ifname = preg_replace ('@^Et(\d.*)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigE(.*)$@', 'te\\1', $ifname); // IOS XR4
+	$ifname = preg_replace ('@^Mg(?:mtEth)?(.*)$@', 'mg\\1', $ifname); // IOS XR4
+	$ifname = preg_replace ('@^BE(\d+)$@', 'bundle-ether\\1', $ifname); // IOS XR4
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
 }
 
 ?>

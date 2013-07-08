@@ -3269,28 +3269,6 @@ function formatVLANAsRichText ($vlaninfo)
 	return $ret;
 }
 
-// map interface name
-function ios12ShortenIfName ($ifname)
-{
-	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
-		return "Eth-Trunk${m[1]}";
-	$ifname = preg_replace ('@^(?:[Ee]thernet|Eth)(.+)$@', 'e\\1', $ifname);
-	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
-	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
-	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
-	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
-	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
-	$ifname = preg_replace ('@^LongReachEthernet(.+)$@', 'lo\\1', $ifname);
-	$ifname = preg_replace ('@^Management(.+)$@', 'ma\\1', $ifname);
-	$ifname = preg_replace ('@^Et(\d.*)$@', 'e\\1', $ifname);
-	$ifname = preg_replace ('@^TenGigE(.*)$@', 'te\\1', $ifname); // IOS XR4
-	$ifname = preg_replace ('@^Mg(?:mtEth)?(.*)$@', 'mg\\1', $ifname); // IOS XR4
-	$ifname = preg_replace ('@^BE(\d+)$@', 'bundle-ether\\1', $ifname); // IOS XR4
-	$ifname = strtolower ($ifname);
-	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
-	return $ifname;
-}
-
 # Produce a list of integers from a string in the following format:
 # A,B,C-D,E-F,G,H,I-J,K ...
 function iosParseVLANString ($string)
@@ -5979,7 +5957,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 
 	// find linked port with the same name
 	foreach ($links_cache[$vswitch['object_id']] as $portinfo)
-		if ($portinfo['linked'] && ios12ShortenIfName ($portinfo['name']) == $port_name)
+		if ($portinfo['linked'] && shortenIfName ($portinfo['name'], NULL, $portinfo['object_id']) == $port_name)
 		{
 			if ($port_name != $portinfo['name'])
 				return FALSE; // typo in local port name
@@ -5992,7 +5970,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 				// linked auto-port must have corresponding remote 802.1Q port
 				return
 					! $local_auto &&
-					! isset ($remote_ports[ios12ShortenIfName ($portinfo['remote_name'])]); // typo in remote port name
+					! isset ($remote_ports[shortenIfName ($portinfo['remote_name'], NULL, $portinfo['remote_object_id'])]); // typo in remote port name
 
 			$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
 				$remote['vst_role'] :
