@@ -101,7 +101,7 @@ function xos12ReadLLDPStatus ($input)
 	return $ret;
 }
 
-function vrp5xReadLLDPStatus ($input)
+function vrpReadLLDPStatus ($input)
 {
 	$ret = array();
 	$valid_subtypes = array
@@ -971,6 +971,123 @@ function vrp55Read8021QConfig ($input)
 	return $ret;
 }
 
+function vrp85Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+		'portconfig' => array(),
+	);
+	$state = 'vlans';
+	$current = array();
+
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = rtrim ($line);
+		do switch ($state)
+		{
+			case 'vlans':
+				if (preg_match ('/^VLAN ID: (.*)/', $line, $m))
+				{
+					$current['vlanlist'] = ' ' . $m[1];
+					$state = 'vlans-nextline';
+				}
+				elseif (preg_match('/^-+$/', $line))
+				{
+					// commit $current into vlanlist
+					$range = trim (preg_replace('/\s+/', ',', $current['vlanlist']), ',-');
+					$ret['vlanlist'] = $range == '' ? array() : iosParseVLANString ($range);
+					$current = array();
+
+					$state = 'ports';
+				}
+				break;
+			case 'vlans-nextline':
+				if (preg_match('/^\s+(\d.*)/', $line, $m))
+					$current['vlanlist'] .= ' ' . $m[1];
+				else
+				{
+					$state = 'vlans';
+					continue 2;
+				}
+				break;
+			case 'ports':
+				if (isset ($current['name']))
+				{
+					if (preg_match('/^\s+(\d.*)/', $line, $m))
+						$current['allowed'] .= ' ' . $m[1];
+					else
+					{
+						// port-channel members are displayed in 'display port vlan' with PVID = 0.
+						if ($current['native'] >= VLAN_MIN_ID && $current['native'] <= VLAN_MAX_ID)
+						{
+							// commit $current into portdata
+							$data = array
+							(
+								'mode' => $current['mode'],
+								'native' => $current['native'],
+								'allowed' => array(),
+							);
+							$range = trim (preg_replace('/\s+/', ',', $current['allowed']), ',-');
+							$data['allowed'] = $range == '' ? array() : iosParseVLANString ($range);
+							if ($data['mode'] == 'access')
+								$data['allowed'] = array ($current['native']);
+							elseif ($data['mode'] == 'trunk')
+							{
+								if (! in_array ($data['native'], $data['allowed']))
+									$data['native'] = 0;
+							}
+							else
+							{
+								$data['allowed'] = array();
+								$data['native'] = 0;
+							}
+							$ret['portdata'][$current['name']] = $data;
+						}
+						$current = array();
+					}
+				}
+				if (preg_match ('/^</', $line))
+					$state = 'conf';
+				elseif (preg_match ('/^(\S+)\s+(\w+)\s+(\d+)\s+(.*)$/', $line, $m))
+				{
+					$current['name'] = shortenIfName ($m[1]);
+					$current['mode'] = ($m[2] == 'access' || $m[2] == 'trunk') ? $m[2] : 'none';
+					$current['native'] = intval ($m[3]);
+					$current['allowed'] = $m[4];
+				}
+				break;
+			case 'conf':
+				if (preg_match ('/^interface (\S+)$/', $line, $m))
+				{
+					$current['name'] = shortenIfName ($m[1]);
+					$current['lines'] = array (array ('type' => 'line-header', 'line' => $line));
+					$state = 'iface';
+				}
+				break;
+			case 'iface':
+				$line_class = ($line == '#') ? 'line-header' : 'line-other';
+				if (preg_match ('/^\s*port (trunk|link-type|default vlan)/', $line))
+					$line_class = 'line-8021q';
+				$current['lines'][] = array ('type' => $line_class, 'line' => $line);
+				if ($line == '#')
+				{
+					// commit $current into portconfig
+					$ret['portconfig'][$current['name']] = $current['lines'];
+					$current = array();
+					$state = 'conf';
+				}
+				break;
+			default:
+				throw new RackTablesError ("Unknown FSM state '$state'", RackTablesError::INTERNAL);
+		}
+		while (FALSE);
+	}
+
+	return $ret;
+}
+
 /*
 D-Link VLAN info sample:
 ========================
@@ -1429,6 +1546,101 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		// query list
 		case 'get8021q':
+			$ret .= "display current-configuration\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "display lldp neighbor\n";
+			break;
+		case 'getportstatus':
+			$ret .= "display interface brief\n";
+			break;
+		case 'getmaclist':
+			$ret .= "display mac-address dynamic\n";
+			break;
+		case 'getallconf':
+			$ret .= "display current-configuration\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
+function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			// VRP 5.50's meaning of "trunk" is much like the one of IOS
+			// (unlike the way VRP 5.30 defines "trunk" and "hybrid"),
+			// but it is necessary to undo configured VLANs on a port
+			// for mode change command to succeed.
+			$before = array
+			(
+				'access' => "undo port trunk allow-pass vlan all\n" .
+					"port trunk allow-pass vlan 1\n" .
+					"undo port trunk pvid vlan\n",
+				'trunk' => "undo port default vlan\n",
+			);
+			$after = array
+			(
+				'access' => '',
+				'trunk' => "undo port trunk allow-pass vlan 1\n",
+			);
+			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= $before[$cmd['arg2']];
+			$ret .= "port link-type ${cmd['arg2']}\n";
+			$ret .= $after[$cmd['arg2']];
+			$ret .= "quit\n";
+			break;
+		case 'begin configuration':
+			$ret .= "system-view immediately\n";
+			break;
+		case 'end configuration':
+			$ret .= "return\n";
+			break;
+		case 'save configuration':
+			$ret .= "save\nY\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .= "display vlan summary\n";
+			$ret .= "display port vlan\n";
 			$ret .= "display current-configuration\n";
 			break;
 		case 'getlldpstatus':
@@ -2948,7 +3160,7 @@ function vrp53ReadMacList ($text)
 	return $result;
 }
 
-function vrp55ReadMacList ($text)
+function vrpReadMacList ($text)
 {
 	$result = array();
 	$state = 'headerSearch';
@@ -3162,7 +3374,7 @@ function fdry5SpotConfigText ($input)
 	return $input;
 }
 
-function vrp5xSpotConfigText ($input)
+function vrpSpotConfigText ($input)
 {
 	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input, 1);
 }

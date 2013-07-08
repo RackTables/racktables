@@ -1,6 +1,6 @@
 0.20.6
 	bugfix: "sshnokey" gateway had a bug
-	update: SNMP support of Huawei CE5800 series switch
+	update: support of Huawei CE5800 series switch
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine

@@ -26,20 +26,26 @@ $breedfunc = array
 	'fdry5-get8021q-readport'  => 'fdry5PickInterfaceSubcommand',
 	'fdry5-xlatepushq-main'    => 'fdry5TranslatePushQueue',
 	'fdry5-getallconf-main'    => 'fdry5SpotConfigText',
-	'vrp53-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp53-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp53-get8021q-main'      => 'vrp53ReadVLANConfig',
 	'vrp53-get8021q-top'       => 'vrp53ScanTopLevel',
 	'vrp53-get8021q-readport'  => 'vrp53PickInterfaceSubcommand',
 	'vrp53-getportstatus-main' => 'vrpReadInterfaceStatus',
 	'vrp53-getmaclist-main'    => 'vrp53ReadMacList',
 	'vrp53-xlatepushq-main'    => 'vrp53TranslatePushQueue',
-	'vrp53-getallconf-main'    => 'vrp5xSpotConfigText',
-	'vrp55-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp53-getallconf-main'    => 'vrpSpotConfigText',
+	'vrp55-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp55-get8021q-main'      => 'vrp55Read8021QConfig',
 	'vrp55-getportstatus-main' => 'vrpReadInterfaceStatus',
-	'vrp55-getmaclist-main'    => 'vrp55ReadMacList',
+	'vrp55-getmaclist-main'    => 'vrpReadMacList',
 	'vrp55-xlatepushq-main'    => 'vrp55TranslatePushQueue',
-	'vrp55-getallconf-main'    => 'vrp5xSpotConfigText',
+	'vrp55-getallconf-main'    => 'vrpSpotConfigText',
+	'vrp85-getlldpstatus-main' => 'vrpReadLLDPStatus',
+	'vrp85-get8021q-main'      => 'vrp85Read8021QConfig',
+	'vrp85-getportstatus-main' => 'vrpReadInterfaceStatus',
+	'vrp85-getmaclist-main'    => 'vrpReadMacList',
+	'vrp85-xlatepushq-main'    => 'vrp85TranslatePushQueue',
+	'vrp85-getallconf-main'    => 'vrpSpotConfigText',
 	'nxos4-getcdpstatus-main'  => 'ios12ReadCDPStatus',
 	'nxos4-getlldpstatus-main' => 'nxos4ReadLLDPStatus',
 	'nxos4-get8021q-main'      => 'ios12ReadVLANConfig',
@@ -120,6 +126,7 @@ $breed_by_swcode = array
 	1360 => 'vrp53', // Huawei VRP 5.3
 	1361 => 'vrp55', // Huawei VRP 5.5
 	1369 => 'vrp55', // Huawei VRP 5.7
+	2027 => 'vrp85', // Huawei VRP 8.5
 	1363 => 'fdry5', // IronWare 5
 	1367 => 'jun10', // 10S
 	1597 => 'jun10', // 10R
@@ -389,11 +396,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$commands = "skip-page-display\n" . $commands;
 			break;
 		case 'vrp55':
+		case 'vrp85':
 			$commands = "screen-length 0 temporary\n" . $commands;
 			/* fall-through */
 		case 'vrp53':
 			$protocol = 'telnet';
-			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
+			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|\[[Yy][^\[\]]*\]\s*:?\s*$';
 			break;
 		case 'nxos4':
 			$protocol = 'telnet';
@@ -632,9 +640,62 @@ function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 	}
 	switch ($breed)
 	{
+		case 'ios12':
+			return ios12ShortenIfName_real ($if_name);
+		case 'vrp53':
+		case 'vrp55':
+			return vrp5xShortenIfName ($if_name);
+		case 'vrp85':
+			return vrp85ShortenIfName ($if_name);
+		case 'iosxr4':
+			return iosxr4ShortenIfName ($if_name);
 	}
 	// default case is outside of switch()
 	return ios12ShortenIfName ($if_name);
+}
+
+function ios12ShortenIfName_real ($ifname)
+{
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
+}
+
+function vrp5xShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
+	$ifname = preg_replace ('@^(?:Ethernet|Eth)(.+)$@', 'ether\\1', $ifname);
+	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
+}
+
+function vrp85ShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	// VRP 8.5 has already shortened ifNames
+	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
+}
+
+function iosxr4ShortenIfName ($ifname)
+{
+	$ifname = preg_replace ('@^Mg(?:mtEth)?\s*(.*)$@', 'mg\\1', $ifname);
+	$ifname = preg_replace ('@^FastEthernet\s*(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet\s*(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigE\s*(.*)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^BE\s*(\d+)$@', 'bundle-ether\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
 }
 
 // this function should be kept as-is for compatibility.
