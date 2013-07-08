@@ -2729,11 +2729,11 @@ function checkPIC ($port_type_id)
 		}
 	}
 
-	if (preg_match ('/^(\d+-)?(\d+)$/', $port_type_id, $m))
+	if (preg_match ('/^(?:(\d+)-)?(\d+)$/', $port_type_id, $m))
 	{
 		$iif_id = $m[1];
 		$oif_id = $m[2];
-		if (empty ($iif_id[1]))
+		if (! isset ($iif_id))
 		{
 			$iif_id = 1;
 			$port_type_id = $iif_id . '-' . $port_type_id;
