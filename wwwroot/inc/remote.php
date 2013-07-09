@@ -122,6 +122,7 @@ $breed_by_swcode = array
 	1411 => 'nxos4', // NX-OS 5.1
 	1809 => 'nxos4', // NX-OS 5.2
 	1643 => 'nxos4', // NX-OS 6.0
+	2028 => 'nxos4', // NX-OS 6.1
 	1352 => 'xos12', // Extreme XOS 12
 	1360 => 'vrp53', // Huawei VRP 5.3
 	1361 => 'vrp55', // Huawei VRP 5.5
