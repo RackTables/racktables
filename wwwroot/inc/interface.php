@@ -405,7 +405,7 @@ function renderRackspace ()
 							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
 							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
 							$locationTree;
-						$location_id = $parentLocation['parent_id'];
+						$location_id = ($parentLocation['parent_id'] == $location_id) ? 0 : $parentLocation['parent_id'];
 				}
 				$locationTree = substr ($locationTree, 8);
 				echo $locationTree;
