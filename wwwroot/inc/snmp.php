@@ -2734,7 +2734,7 @@ function checkPIC ($port_type_id)
 	{
 		$iif_id = $m[1];
 		$oif_id = $m[2];
-		if (! isset ($iif_id))
+		if (empty ($iif_id))
 		{
 			$iif_id = 1;
 			$port_type_id = $iif_id . '-' . $port_type_id;
