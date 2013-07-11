@@ -2305,7 +2305,7 @@ function bindIPToObject ($ip_bin, $object_id = 0, $name = '', $type = '')
 		array ('ip' => $db_ip, 'object_id' => $object_id, 'name' => $name, 'type' => $type)
 	);
 	// store history line
-	$cell = spotEntity ('object', $object_id);
+	$cell = spotEntity ('object', $object_id, TRUE);
 	setDisplayedName ($cell);
 	addIPLogEntry ($ip_bin, "Binded with ${cell['dname']}, ifname=$name");
 }
