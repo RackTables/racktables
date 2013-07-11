@@ -75,6 +75,12 @@ class EntityNotFoundException extends RackTablesError
 	}
 	public function dispatch()
 	{
+		global $debug_mode;
+		if ($debug_mode)
+		{
+			printGenericException ($this);
+			return;
+		}
 		showError ($this->message);
 		redirectUser (buildRedirectURL('index', 'default'));
 	}
