@@ -188,9 +188,9 @@ function generateSLBConfig2 ($triplet_list)
 			$vs_parser->addMacro ('VS_NAME', $vs_cell['name']);
 			$vs_parser->addMacro ('VS_RS_CONF', dos2unix ($vs_cell['rsconfig']));
 
-			$virtual_services = array();
 			foreach ($triplets as $triplet)
 			{
+				$virtual_services = array();
 				$tr_parser = clone $vs_parser;
 				$rs_cell = spotEntity ('ipv4rspool', $triplet['rspool_id']);
 				$tr_parser->addMacro ('RSP_ID', $rs_cell['id']);
@@ -240,15 +240,14 @@ function generateSLBConfig2 ($triplet_list)
 							$ip_parser->addMacro ('SLB_VIP_VS_CONF', dos2unix ($ip_row['vsconfig']));
 							$ip_parser->addMacro ('SLB_VIP_RS_CONF', dos2unix ($ip_row['rsconfig']));
 							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($ip_parser);
-						}
+						} // vips
 					}
-				}
+				} //ports
 
 				// group multiple virtual_services into vs_groups
 				$groups = array();
 				foreach ($virtual_services as $key => $content)
 					$groups[$content][] = preg_replace ('/^(TCP|UDP)\s+/', '', $key);
-				$gid = 1;
 				foreach ($groups as $content => $keys)
 				{
 					if (NULL !== ($new_content = callHook ('generateSLBConfig_stage2', $content, $keys)))
@@ -271,9 +270,9 @@ function generateSLBConfig2 ($triplet_list)
 						$ret .= $content . "}\n";
 					}
 				}
-			}
-		}
-	}
+			} // triplets
+		} // vs
+	} // balancers
 	return $ret;
 }
 
@@ -311,13 +310,14 @@ function makeUniqueVSGName ($seen_names, $keys, $vs_cell)
 			$cname .= '_fwm' . implode('_fwm', $seen_marks);
 		if (! array_key_exists ($cname, $seen_names))
 			$vsg_name = $cname;
+		else
+		{
+			$cname .= '_' . substr (sha1 (serialize ($keys)), 0, 6);
+			if (! array_key_exists ($cname, $seen_names))
+				$vsg_name = $cname;
+		}
 	}
-	if (! isset ($vsg_name))
-	{
-		$cname = $basename . '_' . substr (sha1 (serialize ($vsg['keys'])), 0, 6);
-		if (! array_key_exists ($cname, $seen_names))
-			$vsg_name = $cname;
-	}
+
 	if (! isset ($vsg_name))
 		throw new RackTablesError ("Could not produce unique VS group name for ${vs_cell['name']}", RackTablesError::INTERNAL);
 	return $vsg_name;
