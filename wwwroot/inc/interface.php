@@ -491,9 +491,7 @@ function renderLocationSelectTree ($selected_id = NULL)
 
 function renderRackspaceLocationEditor ()
 {
-	addJS
-	(
-<<<END
+    $js = <<<JSTXT
 function locationeditor_showselectbox(e) {
 	$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
 	$(this).unbind('mousedown', locationeditor_showselectbox);
@@ -501,9 +499,9 @@ function locationeditor_showselectbox(e) {
 $(document).ready(function () {
 	$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
 });
-END
-		, TRUE
-	);
+JSTXT;
+    
+	addJS($js, TRUE	);
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addLocation');
@@ -794,11 +792,9 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderRackSortForm ($row_id)
 {
-	includeJQueryUI (FALSE);
-	addJS
-	(
-<<<END
-  $(document).ready(
+	includeJQueryUI (false);
+	$js = <<<JSTXT
+$(document).ready(
     function () {
       $("#sortRacks").sortable({
         update : function () {
@@ -812,9 +808,8 @@ function renderRackSortForm ($row_id)
       });
     }
   );
-END
-		, TRUE
-	);
+JSTXT;
+	addJS($js, true);
 
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
