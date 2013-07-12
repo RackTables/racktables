@@ -13,10 +13,11 @@ try {
     if (array_key_exists ('module', $_REQUEST)) {
         $requestedModule = $_REQUEST['module'];
     } else {
-        $requestedModule = 'interface';
+        $requestedModule = 'interface'; //The default 
     }
     
 	switch ($requestedModule) {
+	default:
 	case 'interface':
 		require_once 'inc/interface.php';
 		// init.php has to be included after interface.php, otherwise the bits
