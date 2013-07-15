@@ -4119,12 +4119,10 @@ function exec8021QDeploy ($object_id, $do_push)
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['both']);
 			break;
 		case 'ok_to_delete':
-			del8021QPort ($vswitch['object_id'], $pn);
-			$nsaved++;
+			$nsaved += del8021QPort ($vswitch['object_id'], $pn);
 			break;
 		case 'ok_to_add':
-			add8021QPort ($vswitch['object_id'], $pn, $port['right']);
-			$nsaved++;
+			$nsaved += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
 			break;
 		case 'delete_conflict':
 		case 'merge_conflict':
@@ -4134,9 +4132,8 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		case 'ok_to_pull':
 			// FIXME: this can be logged
-			upd8021QPort ('desired', $vswitch['object_id'], $pn, $port['right']);
+			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $port['right']);
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
-			$nsaved++;
 			break;
 		case 'ok_to_push_with_merge':
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
@@ -4275,10 +4272,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	// immune VLANs filter
 	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, $changes_to_save) as $pn => $finalconfig)
 		if (!same8021QConfigs ($finalconfig, $before[$pn]))
-		{
-			upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
-			$nsaved++;
-		}
+			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig);
 	if ($nsaved)
 		touchVLANSwitch ($vswitch['object_id']);
 	$dbxlink->commit();

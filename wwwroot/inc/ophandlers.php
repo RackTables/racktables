@@ -2832,15 +2832,9 @@ function resolve8021QConflicts ()
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
 					throw new InvalidRequestArgException ("port ${port_name}", '(hidden)', 'expired form (switch data has changed)');
 				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
-				{
-					upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
-					$ndone++;
-				}
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
 				elseif ($port['decision'] == 'left') // R wins, cross D up
-				{
-					upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
-					$ndone++;
-				}
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
 				// otherwise there was no decision made
 			}
 			elseif
@@ -2849,11 +2843,8 @@ function resolve8021QConflicts ()
 				$plan[$port_name]['status'] == 'martian_conflict'
 			)
 				if ($port['decision'] == 'left')
-				{
 					// confirm deletion of local copy
-					del8021QPort ($vswitch['object_id'], $port_name);
-					$ndone++;
-				}
+					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
 				// otherwise ignore a decision, which doesn't address a conflict
 		}
 	}
@@ -2884,15 +2875,9 @@ function update8021QPortList()
 	);
 	foreach ($sic['ports'] as $line)
 		if (preg_match ('/^enable (.+)$/', $line, $m))
-		{
-			add8021QPort (getBypassValue(), $m[1], $default_port);
-			$enabled++;
-		}
+			$enabled += add8021QPort (getBypassValue(), $m[1], $default_port);
 		elseif (preg_match ('/^disable (.+)$/', $line, $m))
-		{
-			del8021QPort (getBypassValue(), $m[1]);
-			$disabled++;
-		}
+			$disabled += del8021QPort (getBypassValue(), $m[1]);
 		else
 			throw new InvalidRequestArgException ('ports[]', $line, 'malformed array item');
 	# $enabled + $disabled > 0

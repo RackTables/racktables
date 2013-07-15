@@ -4963,36 +4963,40 @@ function getVLANConfiguredPorts ($vlan_ck)
 function add8021QPort ($object_id, $port_name, $port)
 {
 	global $tablemap_8021q;
-	usePreparedInsertBlade
+	$changed = 0;
+	$changed += usePreparedInsertBlade
 	(
 		$tablemap_8021q['cached']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
 	);
-	usePreparedInsertBlade
+	$changed += usePreparedInsertBlade
 	(
 		$tablemap_8021q['desired']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
 	);
-	upd8021QPort ('cached', $object_id, $port_name, $port);
-	upd8021QPort ('desired', $object_id, $port_name, $port);
+	$changed += upd8021QPort ('cached', $object_id, $port_name, $port);
+	$changed += upd8021QPort ('desired', $object_id, $port_name, $port);
+	return $changed ? 1 : 0;
 }
 
 function del8021QPort ($object_id, $port_name)
 {
 	// rely on ON DELETE CASCADE for PortAllowedVLAN and PortNativeVLAN
 	global $tablemap_8021q;
-	usePreparedDeleteBlade
+	$changed = 0;
+	$changed += usePreparedDeleteBlade
 	(
 		$tablemap_8021q['desired']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
-	usePreparedDeleteBlade
+	$changed += usePreparedDeleteBlade
 	(
 		$tablemap_8021q['cached']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
 
 	callHook ('portConfChanged', $object_id, $port_name, NULL);
+	return $changed ? 1 : 0;
 }
 
 function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
@@ -5008,13 +5012,14 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 		return 0;
-	usePreparedUpdateBlade
+	$changed = 0;
+	$changed += usePreparedUpdateBlade
 	(
 		$tablemap_8021q[$instance]['pvm'],
 		array ('vlan_mode' => $port['mode']),
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
-	usePreparedDeleteBlade (
+	$changed += usePreparedDeleteBlade (
 		$tablemap_8021q[$instance]['pav'],
 		array ('object_id' => $object_id, 'port_name' => $port_name)
 	);
@@ -5022,7 +5027,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	// without wrapping each row with own INSERT (otherwise the SQL connection
 	// instantly becomes the bottleneck).
 	foreach (listToRanges ($port['allowed']) as $range)
-		usePreparedExecuteBlade
+		$changed += usePreparedExecuteBlade
 		(
 			'INSERT INTO ' . $tablemap_8021q[$instance]['pav'] . ' (object_id, port_name, vlan_id) ' .
 			'SELECT ?, ?, vlan_id FROM VLANValidID WHERE vlan_id BETWEEN ? AND ?',
@@ -5033,7 +5038,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 		$port['native'] and
 		in_array ($port['native'], $port['allowed'])
 	)
-		usePreparedInsertBlade
+		$changed += usePreparedInsertBlade
 		(
 			$tablemap_8021q[$instance]['pnv'],
 			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native'])
@@ -5041,7 +5046,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 
 	if ($instance == 'desired')
 		callHook ('portConfChanged', $object_id, $port_name, $port);
-	return 1;
+	return $changed ? 1 : 0;
 }
 
 function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes)
@@ -5053,10 +5058,7 @@ function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes
 			!array_key_exists ($port_name, $before) or
 			!same8021QConfigs ($port, $before[$port_name])
 		)
-		{
-			upd8021QPort ($instance, $object_id, $port_name, $port);
-			$done++;
-		}
+			$done += upd8021QPort ($instance, $object_id, $port_name, $port);
 	return $done;
 }
 
