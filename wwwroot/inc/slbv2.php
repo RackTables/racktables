@@ -218,6 +218,14 @@ function generateSLBConfig2 ($triplet_list)
 
 					if ($is_mark)
 					{
+						// find enabled IP families to fill IP_VER
+						$seen_families = array();
+						foreach ($triplet['vips'] as $ip_row)
+							$seen_families[strlen ($ip_row['vip'])] = 1;
+						if (count ($seen_families) == 1)
+							// if there are both or neither families enabled, IP_VER is not set
+							$p_parser->addMacro ('IP_VER', array_first (array_keys ($seen_families)) == 16 ? 6 : 4 );
+
 						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
 						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($p_parser);
 					}
