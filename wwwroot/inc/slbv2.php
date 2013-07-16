@@ -98,12 +98,7 @@ function generateVSSection ($vs_parser)
 	%SLB_PORT_VS_CONF%
 	%SLB_VIP_VS_CONF%
 ");
-	$vip_bin = ip_checkparse ($vs_parser->expandMacro ('VIP'));
-	if ($vip_bin === FALSE)
-		$family_length = 4;
-	else
-		$family_length = strlen ($vip_bin);
-
+	$family_length = ($vs_parser->expandMacro ('IP_VER') == 6) ? 16 : 4;
 	foreach ($vs_parser->getRSList() as $rs)
 	{
 		if ($rs['inservice'] != 'yes')
