@@ -2093,7 +2093,8 @@ function renderDepot ()
 			    $groups[decodeObjectType ($obj['objtype_id'], 'o')][] = $obj;
 			}
 			
-			foreach ($groups as $key => $objectStash) {
+			foreach ($groups as $key => $objectStash) 
+			{
 			    //Now loop through all groups
 			    echo '<br><br>
 		        <H3>'.$key.' </H3>
@@ -2101,27 +2102,28 @@ function renderDepot ()
 			    echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
 			    $order = 'odd';
 			    
-			    foreach ($objectStash as $obj) {
+			    foreach ($objectStash as $obj) 
+				{
 			        //And display each object
 			        echo "<tr class='row_${order} tdleft' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
-			        if (count ($obj['etags']))
+			        if (count ($obj['etags'])) 
 			            echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 			        echo "</td><td>${obj['label']}</td>";
 			        echo "<td>${obj['asset_no']}</td>";
 			        $places = array();
 			        if ($obj['container_id'])
-					$places[] = mkA ($obj['container_dname'], 'object', $obj['container_id']);
-				elseif (! array_key_exists ($obj['id'], $mountinfo))
-			        				        $places[] = 'Unmounted';
-				else
-			        foreach ($mountinfo[$obj['id']] as $mi)
-			            $places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
-			            echo "<td>" . implode (', ', $places) . '</td>';
-			            echo '</tr>';
-			        $order = $nextorder[$order];
-			    }
-			    echo '</table>';
-			    
+						$places[] = mkA ($obj['container_dname'], 'object', $obj['container_id']);
+					elseif (! array_key_exists ($obj['id'], $mountinfo))
+						$places[] = 'Unmounted';
+					else
+						foreach ($mountinfo[$obj['id']] as $mi)
+							$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
+					echo "<td>" . implode (', ', $places) . '</td>';
+					echo '</tr>';
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+
 			}
 			
 			echo '<br/><br/>'; //Add some space
