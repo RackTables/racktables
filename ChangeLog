@@ -3,6 +3,7 @@
 	bugfix: SLB config was generated incrorrectly when multiple 
 		rspools were linked with the same balancer-vsg pair
 	update: support of Huawei CE5800 series switch
+	new feature: port tracing (#333)
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine

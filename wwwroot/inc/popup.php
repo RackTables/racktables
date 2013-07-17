@@ -607,7 +607,7 @@ function renderPopupTraceRoute ()
 		if (!array_key_exists ($object_id, $objects))
 		{
 			$objects[$object_id] = $port_details['object_name'];
-			$graph->addCluster("${object_id}Cluster", $port_details['object_name'], array ('URL' => "index.php?page=object&object_id=${object_id}"));
+			$graph->addCluster("${object_id}Cluster", $port_details['object_name'], array ('URL' => "index.php?module=popup&helper=traceroute&object_id=${object_id}"));
 		}
 	}
 
@@ -615,7 +615,7 @@ function renderPopupTraceRoute ()
 	foreach ($port_data as $port_id => $port_details)
 	{
 		$object_id = $port_details['object_id'];
-		$graph->addNode("${port_id}Node", array ('fontsize' => 8, 'label' => $port_details['port_name'], 'tooltip' => $port_details['port_name']), "${object_id}Cluster");
+		$graph->addNode("${port_id}Node", array ('fontsize' => 8, 'label' => $port_details['port_name'], 'tooltip' => $port_details['port_name'], 'URL' => "index.php?module=popup&helper=traceroute&port=${port_id}"), "${object_id}Cluster");
 	}
 
 	// identify the links

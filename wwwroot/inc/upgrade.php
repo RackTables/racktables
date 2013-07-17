@@ -204,6 +204,15 @@ major releases. So it is strongly recommended to convert it to the new format.
 ENDOFTEXT
 ,
 
+	'0.20.6' => <<<ENDOFTEXT
+0.20.6 uses database triggers for consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
+Cable paths can be traced and displayed in a graphical format. This requires
+the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -261,7 +270,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.3',
 		'0.20.4',
 		'0.20.5',
-		'0.21.0',
+		'0.20.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1773,7 +1782,7 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `UserConfig` DROP FOREIGN KEY `UserConfig-FK-user`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
 			break;
-		case '0.21.0':
+		case '0.20.6':
 			if (!isInnoDBSupported ())
 			{
 				showUpgradeError ("Cannot upgrade because triggers are not supported by your MySQL server.", __FUNCTION__);
@@ -1847,7 +1856,7 @@ BEGIN
   END IF;
 END;
 ";
-			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
+			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
