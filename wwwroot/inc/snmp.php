@@ -394,20 +394,29 @@ $iftable_processors['catalyst-blade-any-bp/1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-11-to-12-1000T'] = array
+$iftable_processors['catalyst-1-to-8-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(11|12)$@',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3|4|5|6|7|8)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '1-24',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-1-to-10-1000T'] = array
+$iftable_processors['catalyst-9-to-10-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3|4|5|6|7|8|9|10)$@',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(9|10)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-9-to-10-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(9|10)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
@@ -1952,13 +1961,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 398,
 		'text' => 'WS-C3550-12T: 10 RJ-45/10-100-1000T(X) + 2 GBIC/1000',
-		'processors' => array ('catalyst-1-to-10-1000T', 'catalyst-11-to-12-GBIC'),
+		'processors' => array ('catalyst-1-to-8-1000T', 'catalyst-9-to-10-1000T', 'catalyst-11-to-12-GBIC'),
 	),
 	'9.1.431' => array
 	(
 		'dict_key' => 399,
 		'text' => 'WS-C3550-12G: 10 GBIC/1000 + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('catalyst-11-to-12-1000T', 'catalyst-chassis-any-1000GBIC'),
+		'processors' => array ('catalyst-blade-11-to-12-1000T', 'catalyst-chassis-any-1000GBIC'),
 	),
 	'9.1.282' => array
 	(
@@ -2692,6 +2701,24 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'G8052: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('ibm-49-to-52-SFP+', 'ibm-any-1000T'),
 	),
+	'9.1.1044' => array
+	(
+		'dict_key' => 2029,
+		'text' => 'C2921/K9: 3 Ge, 4 EHWIC, 2 DSP',
+		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'9.1.1007' => array
+	(
+		'dict_key' => 2030,
+		'text' => 'Me3400E: 2Ge/SFP + 4 SFP',
+		'processors' => array ('catalyst-chassis-any-1000SFP','catalyst-chassis-mgmt'),
+	),
+	'9.1.1316' => array
+	(
+		'dict_key' => 168,
+		'text' => 'WS-C2960G-8TC',
+		'processors' => array ('catalyst-1-to-8-1000T','catalyst-9-to-10-1000SFP'),
+	),
 );
 
 global $swtype_pcre;
@@ -2787,12 +2814,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 		return showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 	$sysObjectID = preg_replace ('/^.*(enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
+	// If we don't know this switch, there's no point in continuing
+	if (!isset ($known_switches[$sysObjectID]))
+		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
 	$ifDescr_tablename = (isset($known_switches[$sysObjectID]['ifDescrOID'])) ? $known_switches[$sysObjectID]['ifDescrOID'] : 'ifDescr';
-	if (!isset ($known_switches[$sysObjectID]))
-		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 	showSuccess ($known_switches[$sysObjectID]['text']);
 	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)
 		if (!array_key_exists ($known_switches[$sysObjectID]['processors'][$pkey], $iftable_processors))
