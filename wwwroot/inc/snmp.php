@@ -394,31 +394,22 @@ $iftable_processors['catalyst-blade-any-bp/1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-1-to-8-1000T'] = array
+$iftable_processors['catalyst-1-to-10-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3|4|5|6|7|8)$@',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3|4|5|6|7|8|9|10)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '1-24',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-9-to-10-1000T'] = array
-(
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(9|10)$@',
-	'replacement' => 'gi\\1\\2',
-	'dict_key' => '1-24',
-	'label' => '\\2',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['catalyst-9-to-10-1000SFP'] = array
+$iftable_processors['catalyst-9-to-10-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(9|10)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '4-1077',
 	'label' => '\\2',
-	'try_next_proc' => FALSE,
+	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['catalyst-11-to-12-GBIC'] = array
@@ -1961,7 +1952,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 398,
 		'text' => 'WS-C3550-12T: 10 RJ-45/10-100-1000T(X) + 2 GBIC/1000',
-		'processors' => array ('catalyst-1-to-8-1000T', 'catalyst-9-to-10-1000T', 'catalyst-11-to-12-GBIC'),
+		'processors' => array ('catalyst-1-to-10-1000T', 'catalyst-11-to-12-GBIC'),
 	),
 	'9.1.431' => array
 	(
@@ -2703,21 +2694,21 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1044' => array
 	(
-		'dict_key' => 2029,
-		'text' => 'C2921/K9: 3 Ge, 4 EHWIC, 2 DSP',
+		'dict_key' => 1329,
+		'text' => 'C2921/K9: 3 10-100-1000T',
 		'processors' => array ('catalyst-chassis-any-1000T'),
 	),
 	'9.1.1007' => array
 	(
 		'dict_key' => 2030,
-		'text' => 'Me3400E: 2Ge/SFP + 4 SFP',
-		'processors' => array ('catalyst-chassis-any-1000SFP','catalyst-chassis-mgmt'),
+		'text' => 'ME-3400EG-2CS-A: 2 combo ports + 4 SFP',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000T','catalyst-chassis-any-1000SFP','catalyst-chassis-mgmt'),
 	),
 	'9.1.1316' => array
 	(
-		'dict_key' => 168,
-		'text' => 'WS-C2960G-8TC',
-		'processors' => array ('catalyst-1-to-8-1000T','catalyst-9-to-10-1000SFP'),
+		'dict_key' => 2029,
+		'text' => 'WS-C2960G-8TC: 8 10-100-1000T + 2 combo ports',
+		'processors' => array ('catalyst-9-to-10-combo-1000SFP','catalyst-chassis-any-1000T'),
 	),
 );
 
