@@ -2692,16 +2692,10 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'G8052: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('ibm-49-to-52-SFP+', 'ibm-any-1000T'),
 	),
-	'9.1.1044' => array
-	(
-		'dict_key' => 1329,
-		'text' => 'C2921/K9: 3 10-100-1000T',
-		'processors' => array ('catalyst-chassis-any-1000T'),
-	),
 	'9.1.1007' => array
 	(
 		'dict_key' => 2030,
-		'text' => 'ME-3400EG-2CS-A: 2 combo ports + 4 SFP',
+		'text' => 'ME 3400EG-2CS-A: 2 combo ports + 4 SFP',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000T','catalyst-chassis-any-1000SFP','catalyst-chassis-mgmt'),
 	),
 	'9.1.1316' => array
