@@ -64,7 +64,7 @@ $CodePressMap = array
 (
 	'sql' => 'sql',
 	'php' => 'php',
-	'html' => 'html',
+	'html' => 'htmlmixed',
 	'css' => 'css',
 	'js' => 'javascript',
 );
@@ -5382,14 +5382,16 @@ function renderRackCodeViewer ()
 
 function renderRackCodeEditor ()
 {
-	addJS ('js/codepress/codepress.js');
+	addJS ('js/codemirror/codemirror.js');
+	addJS ('js/codemirror/rackcode.js');
+	addCSS ('js/codemirror/codemirror.css');
 	addJS (<<<ENDJAVASCRIPT
 function verify()
 {
 	$.ajax({
 		type: "POST",
 		url: "index.php",
-		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': $(RCTA).getCode()},
+		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': $("#RCTA").text()},
 		success: function (data)
 		{
 			arr = data.split("\\n");
@@ -5413,13 +5415,20 @@ $(document).ready(function() {
 	$("#SaveChanges")[0].disabled = "disabled";
 	$("#ShowMessage")[0].innerHTML = "";
 	$("#ShowMessage")[0].className = "";
+
+	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
+		mode:'rackcode',
+		lineNumbers:true });
+	rackCodeMirror.on("change",function(cm,cmChangeObject){
+		$("#RCTA").text(cm.getValue());
+    });
 });
 ENDJAVASCRIPT
 	, TRUE);
 
 	$text = loadScript ('RackCode');
 	printOpFormIntro ('saveRackCode');
-	echo '<table border=0 align=center>';
+	echo '<table style="width:100%;border:1px;" border=0 align=center>';
 	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
