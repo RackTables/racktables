@@ -4,6 +4,7 @@
 		rspools were linked with the same balancer-vsg pair
 	update: support of Huawei CE5800 series switch
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
+	update: add a link to the View Rack page (#947)
 	new feature: port tracing (#333)
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in

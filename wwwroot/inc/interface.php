@@ -1059,7 +1059,7 @@ function renderEditRackForm ($rack_id)
 function renderRackInfoPortlet ($rackData)
 {
 	$summary = array();
-	$summary['Rack row'] = $rackData['row_name'];
+	$summary['Rack row'] = mkA ($rackData['row_name'], 'row', $rackData['row_id']);
 	$summary['Name'] = $rackData['name'];
 	$summary['Height'] = $rackData['height'];
 	if (strlen ($rackData['asset_no']))
