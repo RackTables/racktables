@@ -735,13 +735,19 @@ function editPortForObject ()
 {
 	global $sic;
 	assertUIntArg ('port_id');
-	assertUIntArg ('port_type_id');
-	assertStringArg ('reservation_comment', TRUE);
-	genericAssertion ('l2address', 'l2address0');
-	genericAssertion ('name', 'string');
-	commitUpdatePort ($sic['object_id'], $sic['port_id'], $sic['name'], $sic['port_type_id'], $sic['label'], $sic['l2address'], $sic['reservation_comment']);
+	if (array_key_exists ('port_type_id', $_REQUEST))
+	{
+		assertUIntArg ('port_type_id');
+		assertStringArg ('reservation_comment', TRUE);
+		genericAssertion ('l2address', 'l2address0');
+		genericAssertion ('name', 'string');
+		commitUpdatePort ($sic['object_id'], $sic['port_id'], $sic['name'], $sic['port_type_id'], $sic['label'], $sic['l2address'], $sic['reservation_comment']);
+	}
 	if (array_key_exists ('cable', $_REQUEST))
-		commitUpdatePortLink ($sic['port_id'], $sic['cable']);
+	{
+		assertUIntArg ('link_id');
+		commitUpdatePortLink ($sic['link_id'], $sic['cable']);
+	}
 	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
@@ -3179,9 +3185,9 @@ function getOpspec()
 
 function unlinkPort ()
 {
-	assertUIntArg ('port_id');
-	commitUnlinkPort ($_REQUEST['port_id']);
-	showSuccess ("Port unlinked successfully");
+	assertUIntArg ('link_id');
+	commitUnlinkPort ($_REQUEST['link_id']);
+	showSuccess ('Port unlinked successfully');
 }
 
 function clearVlan()

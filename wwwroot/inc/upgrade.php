@@ -204,6 +204,15 @@ major releases. So it is strongly recommended to convert it to the new format.
 ENDOFTEXT
 ,
 
+	'0.20.6' => <<<ENDOFTEXT
+0.20.6 uses database triggers for consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
+Cable paths can be traced and displayed in a graphical format. This requires
+the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -261,6 +270,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.3',
 		'0.20.4',
 		'0.20.5',
+		'0.20.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1771,6 +1781,82 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `TagStorage` MODIFY COLUMN `entity_realm` ENUM('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','user','vst') NOT NULL DEFAULT 'object'";
 			$query[] = "ALTER TABLE `UserConfig` DROP FOREIGN KEY `UserConfig-FK-user`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.6':
+			if (!isInnoDBSupported ())
+			{
+				showUpgradeError ("Cannot upgrade because triggers are not supported by your MySQL server.", __FUNCTION__);
+				die;
+			}
+			// allow one-to-many port links
+			$query[] = "ALTER TABLE `Link` DROP FOREIGN KEY `Link-FK-a`, DROP FOREIGN KEY `Link-FK-b`";
+			$query[] = "ALTER TABLE `Link` DROP PRIMARY KEY, DROP KEY `porta`, DROP KEY `portb`";
+			$query[] = "ALTER TABLE `Link` ADD UNIQUE KEY `porta-portb-unique` (`porta`,`portb`), ADD KEY `porta` (`porta`), ADD KEY `portb` (`portb`)";
+			$query[] = "ALTER TABLE `Link` ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`) ON DELETE CASCADE, ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE";
+			$query[] = "ALTER TABLE `Link` ADD COLUMN `id` int(10) unsigned NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST";
+			$query[] = "
+CREATE TRIGGER `checkLinkBeforeInsert` BEFORE INSERT ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb;
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+";
+			$query[] = "
+CREATE TRIGGER `checkLinkBeforeUpdate` BEFORE UPDATE ON `Link`
+  FOR EACH ROW
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+  IF NEW.porta = NEW.portb THEN
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb;
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+";
+			$query[] = "
+CREATE TRIGGER `checkPortCompatBeforeDelete` BEFORE DELETE ON `PortCompat`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+  SELECT COUNT(*) INTO count FROM Link LEFT JOIN Port AS PortA ON Link.porta = PortA.id LEFT JOIN Port AS PortB ON Link.portb = PortB.id WHERE (PortA.type = OLD.type1 AND PortB.type = OLD.type2) OR (PortA.type = OLD.type2 AND PortB.type = OLD.type1);
+  IF count > 0 THEN
+    UPDATE `Cannot delete: rule still used` SET x = 1;
+  END IF;
+END;
+";
+			$query[] = "
+CREATE TRIGGER `checkPortCompatBeforeUpdate` BEFORE UPDATE ON `PortCompat`
+  FOR EACH ROW
+BEGIN
+  DECLARE count INTEGER;
+  SELECT COUNT(*) INTO count FROM Link LEFT JOIN Port AS PortA ON Link.porta = PortA.id LEFT JOIN Port AS PortB ON Link.portb = PortB.id WHERE (PortA.type = OLD.type1 AND PortB.type = OLD.type2) OR (PortA.type = OLD.type2 AND PortB.type = OLD.type1);
+  IF count > 0 THEN
+    UPDATE `Cannot update: rule still used` SET x = 1;
+  END IF;
+END;
+";
+			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
