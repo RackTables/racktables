@@ -281,12 +281,18 @@ function renderLocationFilterPortlet ()
 
 		foreach ($subtree as $location_id => $location)
 		{
-			echo "<tr><td class=tagbox style='padding-left: " . ($level * 16) . "px;'><label>";
+			echo "<div class=tagbox style='text-align:left; padding-left:" . ($level * 16) . "px;'>";
 			$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
 			echo "<label><input type=checkbox name='location_id[]' class=${level} value='${location['id']}'${checked} onClick=checkAll(this)>${location['name']}";
-			echo "</label></td></tr>\n";
+			echo '</label>';
 			if ($location['kidc'])
+			{
+				echo "<a id='lfa" . $location['id'] . "' onclick=\"expand('${location['id']}')\" href\"#\" > - </a>";
+				echo "<div id='lfd" . $location['id'] . "'>";
 				$self ($location['kids'], $level + 1);
+				echo '</div>';
+			}
+			echo '</div>';
 		}
 	}
 
@@ -296,7 +302,7 @@ function checkAll(bx) {
 		if (tbls[i].id == "locationFilter") {
 			var bxs=tbls[i].getElementsByTagName("input");
 			var in_tree = false;
-			for (var j=0; j<bxs.length; j++ ) {
+			for (var j=0; j<bxs.length; j++) {
 				if(in_tree == false && bxs[j].value == bx.value)
 					in_tree = true;
 				else if(parseInt(bxs[j].className) <= parseInt(bx.className))
@@ -305,6 +311,44 @@ function checkAll(bx) {
 					bxs[j].checked = bx.checked;
 			}
 		}
+}
+
+function collapseAll(bx) {
+	for (var tbls=document.getElementsByTagName("table"), i=tbls.length; i--;)
+		if (tbls[i].id == "locationFilter") {
+			var bxs=tbls[i].getElementsByTagName("div");
+			//loop through divs to hide unchecked
+			for (var j=0; j<bxs.length; j++) {
+				var is_checked = -1;
+				var in_div=bxs[j].getElementsByTagName("input");
+				//loop through input to find if any is checked
+				for (var k=0; k<in_div.length; k++) {
+					if(in_div[k].type="checkbox") {
+						if (in_div[k].checked == true) {
+							is_checked = true;
+							break;
+						}
+						else
+							is_checked = false;
+					}
+				}
+				// nothing selected and element id is lfd, collapse it
+				if (is_checked == false && !bxs[j].id.indexOf("lfd"))
+					expand(bxs[j].id.substr(3));
+			}
+		}
+}
+
+function expand(id) {
+	var divid = document.getElementById("lfd" + id);
+	var iconid = document.getElementById("lfa" + id);
+	if (divid.style.display == 'none') {
+		divid.style.display = 'block';
+		iconid.innerHTML = ' - ';
+	} else {
+		divid.style.display = 'none';
+		iconid.innerHTML = ' + ';
+	}
 }
 END
 	,TRUE);
@@ -322,11 +366,12 @@ END;
 	{
 		echo "<tr><td class=tagbox style='padding-left: 0px'><label>";
 		echo "<input type=checkbox name='location'  onClick=checkAll(this)> Toggle all";
+		echo "<img src=pix/1x1t.gif onLoad=collapseAll(this)>"; // dirty hack to collapse all when page is displayed
 		echo "</label></td></tr>\n";
-		echo "<tr><td class=tagbox><hr></td></tr>\n";
+		echo "<tr><td class=tagbox><hr>\n";
 		renderLocationCheckbox (treeFromList ($locationlist));
-		echo "<tr><td class=tagbox><hr></td></tr>\n";
-		echo "<tr><td>";
+		echo "<hr></td></tr>\n";
+		echo '<tr><td>';
 		printImageHREF ('setfilter', 'set filter', TRUE);
 		echo "</td></tr>\n";
 	}
