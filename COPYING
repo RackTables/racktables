@@ -118,3 +118,7 @@ RackTables uses JS library jquery.optionTree written by Krzysztof Kotowicz.
 http://code.google.com/p/jquery-option-tree/. This library is released
 under the MIT license.
 
+----------------------8<----------------------8<----------------------
+
+RackTables uses CodeMirror by Marijn Haverbeke.http://codemirror.net/.
+This library is released under a MIT style license.
