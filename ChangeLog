@@ -7,6 +7,8 @@
 	update: display links to newly created rows & locations (#883)
 	update: add collapse/expand feature to location filter (#901)
 	update: add a link to the View Rack page (#947)
+	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
+		HP Procurve J9028B (#941) by Mark Wilkinson
 	new feature: port tracing (#333)
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
