@@ -685,7 +685,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
 	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
-	$slotInfo = $slotData = $slotTitle = array ();
+	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = array ();
 	if (count($objectChildren) > 0)
 	{
 		foreach ($objectChildren as $child)
@@ -693,9 +693,23 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 			$childNames[] = $child['name'];
 			$childData = spotEntity ('object', $child['entity_id']);
 			$attrData = getAttrValues ($child['entity_id']);
+			$numRows = $numCols = 1;
+			if (isset ($attrData[2])) // HW type
+			{
+				extractLayout ($attrData[2]);
+				if (isset ($attrData[2]['rows']))
+				{
+					$numRows = $attrData[2]['rows'];
+					$numCols = $attrData[2]['cols'];
+				}
+			}
 			if (isset ($attrData['28'])) // slot number
 			{
 				$slot = $attrData['28']['value'];
+				if (preg_match ('/\d+/', $slot, $matches))
+					$slot = $matches[0];
+				$slotRows[$slot] = $numRows;
+				$slotCols[$slot] = $numCols;
 				$slotInfo[$slot] = $child['name'];
 				$slotData[$slot] = $child['entity_id'];
 				if (strlen ($childData['asset_no']))
@@ -733,19 +747,34 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 						$s = ($r * $cols) + $c + 1;
 						if (isset ($slotData[$s]))
 						{
-							echo "<td class='state_T";
-							if ($slotData[$s] == $hl_obj_id)
-								echo 'h';
-							echo "'>${slotTitle[$s]}";
-							if ($layout == 'V')
+							if ($slotData[$s] >= 0)
 							{
-								$tmp = substr ($slotInfo[$s], 0, 1);
-								foreach (str_split (substr ($slotInfo[$s],1)) as $letter)
-									$tmp .= '<br>' . $letter;
-								$slotInfo[$s] = $tmp;
+								for ($lr = 0; $lr < $slotRows[$s]; $lr++)
+									for ($lc = 0; $lc < $slotCols[$s]; $lc++)
+									{
+										$skip = ($lr * $cols) + $lc;
+										if ($skip > 0)
+											$slotData[$s + $skip] = -1;
+									}
+								echo '<td';
+								if ($slotRows[$s] > 1)
+									echo " rowspan=$slotRows[$s]";
+								if ($slotCols[$s] > 1)
+									echo " colspan=$slotCols[$s]";
+								echo " class='state_T";
+								if ($slotData[$s] == $hl_obj_id)
+									echo 'h';
+								echo "'>${slotTitle[$s]}";
+								if ($layout == 'V')
+								{
+									$tmp = substr ($slotInfo[$s], 0, 1);
+									foreach (str_split (substr ($slotInfo[$s], 1)) as $letter)
+										$tmp .= '<br>' . $letter;
+									$slotInfo[$s] = $tmp;
+								}
+								echo mkA ($slotInfo[$s], 'object', $slotData[$s]);
+								echo '</div></td>';
 							}
-							echo mkA ($slotInfo[$s], 'object', $slotData[$s]);
-							echo '</div></td>';
 						}
 						else
 							echo "<td class='state_F'><div title=\"Free slot\">&nbsp;</div></td>";

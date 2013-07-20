@@ -1616,10 +1616,10 @@ $dictionary = array
 	1519 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M605'),
 	1520 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M610'),
 	1521 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M610x'),
-	1522 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M710'),
-	1523 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M805'),
-	1524 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M905'),
-	1525 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M910'),
+	1522 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M710%L2,1%'),
+	1523 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M805%L2,1%'),
+	1524 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M905%L2,1%'),
+	1525 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M910%L2,1%'),
 	1526 => array ('chapter_id' => 26, 'dict_value' => 'Brocade (blade)%GPASS%McDATA 3014'),
 	1527 => array ('chapter_id' => 26, 'dict_value' => 'Brocade (blade)%GPASS%McDATA 4314'),
 	1528 => array ('chapter_id' => 26, 'dict_value' => 'Brocade (blade)%GPASS%McDATA 4416'),
@@ -1791,7 +1791,7 @@ $dictionary = array
 	1695 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R815'),
 	1696 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M620'),
 	1697 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M710HD'),
-	1698 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M915'),
+	1698 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M915%L2,1%'),
 	1699 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect (blade)%GPASS%M6348'),
 	1700 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect (blade)%GPASS%M8428'),
 	1701 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 16 | http://docs.fedoraproject.org/en-US/Fedora/16/html/Release_Notes/]]'),
@@ -2124,6 +2124,8 @@ $dictionary = array
 	2028 => array ('chapter_id' => 14, 'dict_value' => 'Cisco NX-OS 6.1'),
 	2029 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst C2960CG-8TC-L | http://www.cisco.com/en/US/products/ps6406/index.html]]'),
 	2030 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME-3400EG-2CS-A'),
+	2031 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M520'),
+	2032 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M820%L2,1%'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
