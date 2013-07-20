@@ -6081,15 +6081,16 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
 	$self = __FUNCTION__;
 	$level++;
 	foreach ($location['kids'] as $subLocation)
-		if ($subLocation['id'] != $location_id)
-		{
-			echo "<option value=${subLocation['id']}";
-			if ($subLocation['id'] == $parent_id)
-				echo ' selected';
-			echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
-			if ($subLocation['kidc'] > 0)
-				$self ($subLocation, $level, $parent_id, $location_id);
-		}
+	{
+		if ($subLocation['id'] == $location_id)
+			continue;
+		echo "<option value=${subLocation['id']}";
+		if ($subLocation['id'] == $parent_id)
+			echo ' selected';
+		echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
+		if ($subLocation['kidc'] > 0)
+			$self ($subLocation, $level, $parent_id, $location_id);
+	}
 }
 
 function validTagName ($s, $allow_autotag = FALSE)
