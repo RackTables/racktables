@@ -2110,7 +2110,7 @@ function addLocation ()
 	$location_id = commitAddObject ($_REQUEST['name'], NULL, 1562, NULL);
 	if ($_REQUEST['parent_id'])
 		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $location_id);
-	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return showSuccess ('added location ' . mkA ($_REQUEST['name'], 'location', $location_id));
 }
 
 $msgcode['updateLocation']['OK'] = 6;
@@ -2179,7 +2179,7 @@ function addRow ()
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
 	if ($_REQUEST['location_id'])
 		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $row_id);
-	return showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
+	return showSuccess ('added row ' . mkA ($_REQUEST['name'], 'row', $row_id));
 }
 
 $msgcode['updateRow']['OK'] = 6;

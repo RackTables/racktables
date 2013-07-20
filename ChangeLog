@@ -4,6 +4,7 @@
 		rspools were linked with the same balancer-vsg pair
 	update: support of Huawei CE5800 series switch
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
+	update: display links to newly created rows & locations (#883)
 	update: add collapse/expand feature to location filter (#901)
 	update: add a link to the View Rack page (#947)
 	new feature: port tracing (#333)
