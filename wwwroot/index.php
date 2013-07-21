@@ -7,12 +7,14 @@
 ob_start();
 require_once 'inc/pre-init.php';
 try {
-// Code block below is a module request dispatcher. Turning it into a
-// function will break things because of the way require() works.
-	switch (TRUE)
+	// Switch block below is a module request dispatcher.
+	// Dispatches based on module request.
+	// The last string 'interface' is the default.
+	$requestedModule = array_key_exists ('module', $_REQUEST) ? $_REQUEST['module'] : 'interface';
+
+	switch ($requestedModule)
 	{
-	case ! array_key_exists ('module', $_REQUEST):
-	case 'interface' == $_REQUEST['module']:
+	case 'interface':
 		require_once 'inc/interface.php';
 		// init.php has to be included after interface.php, otherwise the bits
 		// set by local.php get lost
@@ -45,13 +47,15 @@ try {
 		ob_clean();
 		renderInterfaceHTML ($pageno, $tabno, $contents);
 		break;
-	case 'chrome' == $_REQUEST['module']:
+
+	case 'chrome':
 		require_once 'inc/init.php';
 		require_once 'inc/solutions.php';
 		genericAssertion ('uri', 'string');
 		proxyStaticURI ($_REQUEST['uri']);
 		break;
-	case 'download' == $_REQUEST['module']:
+
+	case 'download':
 		require_once 'inc/init.php';
 		$pageno = 'file';
 		$tabno = 'download';
@@ -64,7 +68,8 @@ try {
 			header("Content-Disposition: attachment; filename={$file['name']}");
 		echo $file['contents'];
 		break;
-	case 'image' == $_REQUEST['module']:
+
+	case 'image':
 		# The difference between "image" and "download" ways to serve the same
 		# picture file is that the former is used in <IMG SRC=...> construct,
 		# and the latter is accessed as a standalone URL and can reply with any
@@ -88,7 +93,8 @@ try {
 			renderErrorImage();
 		}
 		break;
-	case 'svg' == $_REQUEST['module']:
+
+	case 'svg':
 		require_once 'inc/init.php';
 		require_once 'inc/solutions.php';
 		header ('Content-Type: image/svg+xml');
@@ -129,7 +135,8 @@ try {
 			printSVGMessageBar ('unknown error', array(), array ('fill' => 'red', 'stroke' => 'black'));
 		}
 		break;
-	case 'progressbar' == $_REQUEST['module']:
+
+	case 'progressbar':
 		# Unlike images (and like static content), progress bars are processed
 		# without a permission check, but only for authenticated users.
 		require_once 'inc/init.php';
@@ -148,7 +155,8 @@ try {
 			renderProgressBarError();
 		}
 		break;
-	case 'progressbar4' == $_REQUEST['module']:
+
+	case 'progressbar4':
 		# Unlike images (and like static content), progress bars are processed
 		# without a permission check, but only for authenticated users.
 		require_once 'inc/init.php';
@@ -163,7 +171,8 @@ try {
 			renderProgressBarError();
 		}
 		break;
-	case 'ajax' == $_REQUEST['module']:
+
+	case 'ajax':
 		require_once 'inc/init.php';
 		require_once 'inc/ajax-interface.php';
 		require_once 'inc/solutions.php';
@@ -191,7 +200,8 @@ try {
 			echo "NAK\nRuntime exception: ". $e->getMessage();
 		}
 		break;
-	case 'redirect' == $_REQUEST['module']:
+
+	case 'redirect':
 		// Include init after ophandlers/snmp, not before, so local.php can redefine things.
 		require_once 'inc/ophandlers.php';
 		// snmp.php is an exception, it is treated by a special hack
@@ -244,26 +254,30 @@ try {
 		redirectUser ($location);
 		// any other error requires no special handling and will be caught outside
 		break;
-	case 'popup' == $_REQUEST['module']:
+
+	case 'popup':
 		require_once 'inc/popup.php';
 		require_once 'inc/init.php';
 		renderPopupHTML();
 		break;
-	case 'upgrade' == $_REQUEST['module']:
+
+	case 'upgrade':
 		require_once 'inc/config.php'; // for CODE_VERSION
 		require_once 'inc/dictionary.php';
 		require_once 'inc/functions.php'; // for ip translation functions
 		require_once 'inc/upgrade.php';
 		renderUpgraderHTML();
 		break;
-	case 'installer' == $_REQUEST['module']:
+
+	case 'installer':
 		require_once 'inc/dictionary.php';
 		require_once 'inc/config.php';
 		require_once 'inc/install.php';
 		renderInstallerHTML();
 		break;
+
 	default:
-		throw new InvalidRequestArgException ('module', $_REQUEST['module']);
+		throw new InvalidRequestArgException ('module', $requestedModule);
 	}
 	ob_end_flush();
 }

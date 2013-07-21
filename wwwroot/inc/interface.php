@@ -536,19 +536,17 @@ function renderLocationSelectTree ($selected_id = NULL)
 
 function renderRackspaceLocationEditor ()
 {
-	addJS
-	(
-<<<END
-function locationeditor_showselectbox(e) {
-	$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
-	$(this).unbind('mousedown', locationeditor_showselectbox);
-}
-$(document).ready(function () {
-	$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
-});
-END
-		, TRUE
-	);
+	$js = <<<JSTXT
+	function locationeditor_showselectbox(e) {
+		$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
+		$(this).unbind('mousedown', locationeditor_showselectbox);
+	}
+	$(document).ready(function () {
+		$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
+	});
+JSTXT;
+
+	addJS($js, TRUE	);
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addLocation');
@@ -868,27 +866,24 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderRackSortForm ($row_id)
 {
-	includeJQueryUI (FALSE);
-	addJS
-	(
-<<<END
-  $(document).ready(
-    function () {
-      $("#sortRacks").sortable({
-        update : function () {
-          serial = $('#sortRacks').sortable('serialize');
-          $.ajax({
-            url: 'index.php?module=ajax&ac=upd-rack-sort-order',
-            type: 'post',
-            data: serial,
-          });
-        }
-      });
-    }
-  );
-END
-		, TRUE
+	includeJQueryUI (false);
+	$js = <<<JSTXT
+	$(document).ready(
+		function () {
+			$("#sortRacks").sortable({
+				update : function () {
+					serial = $('#sortRacks').sortable('serialize');
+					$.ajax({
+						url: 'index.php?module=ajax&ac=upd-rack-sort-order',
+						type: 'post',
+						data: serial,
+					});
+				}
+			});
+		}
 	);
+JSTXT;
+	addJS($js, true);
 
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
