@@ -491,7 +491,7 @@ function renderLocationSelectTree ($selected_id = NULL)
 
 function renderRackspaceLocationEditor ()
 {
-    $js = <<<JSTXT
+	$js = <<<JSTXT
 function locationeditor_showselectbox(e) {
 	$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
 	$(this).unbind('mousedown', locationeditor_showselectbox);
@@ -500,7 +500,7 @@ $(document).ready(function () {
 	$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
 });
 JSTXT;
-    
+
 	addJS($js, TRUE	);
 	function printNewItemTR ()
 	{
@@ -795,19 +795,19 @@ function renderRackSortForm ($row_id)
 	includeJQueryUI (false);
 	$js = <<<JSTXT
 $(document).ready(
-    function () {
-      $("#sortRacks").sortable({
-        update : function () {
-          serial = $('#sortRacks').sortable('serialize');
-          $.ajax({
-            url: 'index.php?module=ajax&ac=upd-rack-sort-order',
-            type: 'post',
-            data: serial,
-          });
-        }
-      });
-    }
-  );
+	function () {
+		$("#sortRacks").sortable({
+			update : function () {
+				serial = $('#sortRacks').sortable('serialize');
+				$.ajax({
+					url: 'index.php?module=ajax&ac=upd-rack-sort-order',
+					type: 'post',
+					data: serial,
+				});
+			}
+		});
+	}
+);
 JSTXT;
 	addJS($js, true);
 
@@ -2106,18 +2106,22 @@ function renderDepot ()
 				{
 					//And display each object
 					echo "<tr class='row_${order} tdleft' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
+
 					if (count ($obj['etags'])) 
 						echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
+
 					echo "</td><td>${obj['label']}</td>";
 					echo "<td>${obj['asset_no']}</td>";
 					$places = array();
-			    	if ($obj['container_id'])
+
+					if ($obj['container_id'])
 						$places[] = mkA ($obj['container_dname'], 'object', $obj['container_id']);
 					elseif (! array_key_exists ($obj['id'], $mountinfo))
 						$places[] = 'Unmounted';
 					else
 						foreach ($mountinfo[$obj['id']] as $mi)
 							$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
+
 					echo "<td>" . implode (', ', $places) . '</td>';
 					echo '</tr>';
 					$order = $nextorder[$order];
