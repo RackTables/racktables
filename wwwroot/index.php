@@ -7,12 +7,11 @@
 ob_start();
 require_once 'inc/pre-init.php';
 try {
-    
-    // Switch block below is a module request dispatcher.
-    // Dispatches based on module request. 
+	// Switch block below is a module request dispatcher.
+	// Dispatches based on module request. 
 	// The last string 'interface' is the default.
 	$requestedModule = array_key_exists ('module', $_REQUEST) ? $_REQUEST['module'] : 'interface';
-    
+
 	switch ($requestedModule) 
 	{
 	case 'interface':
