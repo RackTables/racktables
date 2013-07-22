@@ -1601,6 +1601,33 @@ $iftable_processors['ibm-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-any-serial'] = array
+(
+	'pattern' => '@^Serial(\d/)(\d+)$@',
+	'replacement' => 'se\\1\\2',
+	'dict_key' => '1-29',
+	'label' => 'se\\1\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-any-PRI'] = array
+(
+	'pattern' => '@^Pri (\d/)(\d+)$@',
+	'replacement' => 'Pri \\1\\2',
+	'dict_key' => '1-2037',
+	'label' => 'Pri\\1\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-any-E1T1'] = array
+(
+	'pattern' => '@^(E1|T1) (\d/)(\d+)$@',
+	'replacement' => '\\1 \\2\\3',
+	'dict_key' => '1-2036',
+	'label' => '\\1 \\2\\3',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2741,6 +2768,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2034,
 		'text' => 'WS-C3524T-XL-EN: 24 RJ-45/10-100TX + 2 GBIC/1000',
 		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.679' => array
+	(
+		'dict_key' => 2035,
+		'text' => 'AS5350XM Universal Gateway - 2 10/100/1000T + 2 Serial + upto 8 E1/T1/PRI',
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-any-serial',
+                                       'catalyst-any-E1T1', 'catalyst-any-PRI'),
 	),
 );
 
