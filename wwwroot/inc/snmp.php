@@ -2763,19 +2763,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
-	'9.1.287' => array
-	(
-		'dict_key' => 2034,
-		'text' => 'WS-C3524T-XL-EN: 24 RJ-45/10-100TX + 2 GBIC/1000',
-		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
-	),
-	'9.1.679' => array
-	(
-		'dict_key' => 2035,
-		'text' => 'AS5350XM Universal Gateway - 2 10/100/1000T + 2 Serial + upto 8 E1/T1/PRI',
-		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-any-serial',
-                                       'catalyst-any-E1T1', 'catalyst-any-PRI'),
-	),
 );
 
 global $swtype_pcre;

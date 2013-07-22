@@ -10,8 +10,7 @@
 	update: add a link to the View Rack page (#947)
 	update: support blades of varying sizes in the same chassis (#923) by Mark Wilkinson
 	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
-		WS-CBS3012-IBM/-I (#871), WS-C3524T-XL-EN (#751), AS5350XM (#777),
-		HP Procurve J9028B (#941) by Mark Wilkinson
+		WS-CBS3012-IBM/-I (#871), HP Procurve J9028B (#941) by Mark Wilkinson
 	new feature: port tracing (#333)
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
