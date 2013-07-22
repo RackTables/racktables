@@ -2712,6 +2712,30 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'G8052: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('ibm-49-to-52-SFP+', 'ibm-any-1000T'),
 	),
+	'9.1.1007' => array
+	(
+		'dict_key' => 2030,
+		'text' => 'ME 3400EG-2CS-A: 2 combo ports + 4 SFP',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000T','catalyst-chassis-any-1000SFP','catalyst-chassis-mgmt'),
+	),
+	'9.1.1316' => array
+	(
+		'dict_key' => 2029,
+		'text' => 'WS-C2960G-8TC: 8 10-100-1000T + 2 combo ports',
+		'processors' => array ('catalyst-9-to-10-combo-1000SFP','catalyst-chassis-any-1000T'),
+	),
+	'9.1.999' => array
+	(
+		'dict_key' => 2033,
+		'text' => 'WS-CBS3012-IBM 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
+		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+	),
+	'9.1.1000' => array
+	(
+		'dict_key' => 2033,
+		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
+		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+	),
 );
 
 global $swtype_pcre;

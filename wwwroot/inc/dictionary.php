@@ -2126,6 +2126,7 @@ $dictionary = array
 	2030 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME-3400EG-2CS-A'),
 	2031 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M520'),
 	2032 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M820%L2,1%'),
+	2033 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst WS-CBS3012-IBM/-I | http://www.cisco.com/en/US/products/ps8766/index.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
