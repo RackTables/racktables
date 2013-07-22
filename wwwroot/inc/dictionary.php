@@ -490,7 +490,7 @@ $dictionary = array
 	390 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950G-48'),
 	391 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3508G XL'),
 	392 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3512 XL'),
-	393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3524 XL'),
+	393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C3524-XL'),
 	394 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3524 PWR XL'),
 	395 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3548 XL'),
 	396 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 2400-24TS-A'),
@@ -2127,6 +2127,7 @@ $dictionary = array
 	2031 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M520'),
 	2032 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M820%L2,1%'),
 	2033 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst WS-CBS3012-IBM/-I | http://www.cisco.com/en/US/products/ps8766/index.html]]'),
+	2034 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C3524T-XL-EN'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
