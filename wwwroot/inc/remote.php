@@ -158,6 +158,7 @@ $linux_sw_ranges = array (
 	1331,1334,
 	1395,1396,
 	1417,1422,
+	1704,1709,
 );
 for ($i = 0; $i + 1 < count ($linux_sw_ranges); $i += 2)
 	for ($j = $linux_sw_ranges[$i]; $j <= $linux_sw_ranges[$i + 1]; $j++)
