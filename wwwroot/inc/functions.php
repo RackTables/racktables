@@ -6131,4 +6131,10 @@ function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 	return $name;
 }
 
+function cmp_array_sizes ($a, $b)
+{
+	$diff = count ($a) - count ($b);
+	return $diff < 0 ? -1 : ($diff > 0 ? 1 : 0);
+}
+
 ?>

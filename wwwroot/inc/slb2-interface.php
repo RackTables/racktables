@@ -213,6 +213,67 @@ function renderEditVS ($vs_id)
 	echo '</tr></table>';
 }
 
+// returns sorted (grouped) array of elements from $tr_list.
+// Sets 'span' key for grouped rows, indexed by grouped realms,
+// with the value = number of rows in the group
+function groupTriplets ($tr_list)
+{
+	$self = __FUNCTION__;
+
+	// index triplets by ids of fields
+	$index = array();
+	foreach ($tr_list as $tr)
+	{
+		if (! isset ($tr['key']))
+			$tr['key'] = implode ('-', array ($tr['vs_id'], $tr['rspool_id'], $tr['object_id']));
+		$index[$tr['key']] = $tr;
+	}
+
+	$ret = array();
+	while ($index)
+	{
+		$seen = array();
+		foreach ($index as $tr)
+			foreach (array ('ipvs' => 'vs_id', 'ipv4rspool' => 'rspool_id', 'object' => 'object_id') as $realm => $key)
+				$seen[$realm . '-' . $tr[$key]][] = $tr;
+		// sort $seen by count in groups, desc
+		uasort ($seen, 'cmp_array_sizes');
+		$seen = array_reverse ($seen, TRUE);
+		foreach ($seen as $group_key => $group)
+		{
+			$group_by = preg_replace ('/-.*/', '', $group_key);
+			$first_tr = array_first ($group);
+			if (isset ($first_tr['span'][$group_by]))
+				// if already grouped by this field, take next group
+				continue;
+			elseif (count ($group) == 1)
+			{
+				// dont create groups of 1 element
+				if (isset ($index[$first_tr['key']]))
+				{
+					unset ($index[$first_tr['key']]);
+					unset ($first_tr['key']);
+					$ret[] = $first_tr;
+				}
+			}
+			else
+			{
+				foreach ($group as &$tr_ref)
+					$tr_ref['span'][$group_by] = count ($group);
+				foreach ($self ($group) as $tr)
+					if (isset ($index[$tr['key']]))
+					{
+						unset ($index[$tr['key']]);
+						unset ($tr['key']);
+						$ret[] = $tr;
+					}
+				break;
+			}
+		}
+	}
+	return $ret;
+}
+
 // supports object, ipvs, ipv4rspool cell types
 function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 {
@@ -234,7 +295,24 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		'ipv4rspool' => 'RS pool',
 	);
 
-	$triplets = getTriplets ($cell);
+	$triplets = groupTriplets (getTriplets ($cell));
+
+	// sort $headers by number of grouped cells
+	$new_headers = array();
+	$grouped_by = array
+	(
+		'ipvs' => 0,
+		'object' => 0,
+		'ipv4rspool' => 0,
+	);
+	foreach ($triplets as $slb)
+		if (isset ($slb['span']))
+			foreach (array_keys ($slb['span']) as $realm)
+				$grouped_by[$realm]++;
+	arsort ($grouped_by, SORT_NUMERIC);
+	foreach (array_keys ($grouped_by) as $realm)
+		$new_headers[$realm] = $headers[$realm];
+	$headers = $new_headers;
 
 	// render table header
 	if (count ($triplets))
@@ -259,6 +337,7 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 	// render table rows
 	global $nextorder;
 	$order = 'odd';
+	$span = array();
 	foreach ($triplets as $slb)
 	{
 		$vs_cell = spotEntity ('ipvs', $slb['vs_id']);
@@ -269,10 +348,24 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		{
 			if ($realm == $cell['realm'])
 				continue;
-			echo "<td class=tdleft>";
-			$slb_cell = spotEntity ($realm, $slb[$fields[$realm]]);
-			renderSLBEntityCell ($slb_cell);
-			echo "</td>";
+			if (isset ($span[$realm]))
+			{
+				if (--$span[$realm] <= 0)
+					unset ($span[$realm]);
+			}
+			else
+			{
+				$span_html = '';
+				if (isset ($slb['span'][$realm]))
+				{
+					$span[$realm] = $slb['span'][$realm] - 1;
+					$span_html = sprintf ("rowspan=%d", $slb['span'][$realm]);
+				}
+				echo "<td $span_html class=tdleft>";
+				$slb_cell = spotEntity ($realm, $slb[$fields[$realm]]);
+				renderSLBEntityCell ($slb_cell);
+				echo "</td>";
+			}
 		}
 		// render ports
 		echo "<td class=tdleft><ul class='$class'>";
