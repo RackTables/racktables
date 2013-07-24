@@ -4570,14 +4570,17 @@ function formatPort ($port_info, $a_class = '')
 // function returns a HTML-formatted link to remote port, connected to the specified port
 function formatLinkedPort ($port_info, $a_class = '')
 {
-	return formatPortLink
-	(
-		$port_info['remote_object_id'],
-		$port_info['remote_object_name'],
-		$port_info['remote_id'],
-		$port_info['remote_name'],
-		$a_class
-	);
+	if (! $link_info = array_first ($port_info['links']))
+		return formatPort ($port_info, $a_class);
+	else
+		return formatPortLink
+		(
+			$link_info['remote_object_id'],
+			$link_info['remote_object_name'],
+			$link_info['remote_id'],
+			$link_info['remote_name'],
+			$a_class
+		);
 }
 
 function compareDecomposedPortNames ($porta, $portb)
