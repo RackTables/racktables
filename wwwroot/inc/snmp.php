@@ -1601,33 +1601,6 @@ $iftable_processors['ibm-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-any-serial'] = array
-(
-	'pattern' => '@^Serial(\d/)(\d+)$@',
-	'replacement' => 'se\\1\\2',
-	'dict_key' => '1-29',
-	'label' => 'se\\1\\2',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['catalyst-any-PRI'] = array
-(
-	'pattern' => '@^Pri (\d/)(\d+)$@',
-	'replacement' => 'Pri \\1\\2',
-	'dict_key' => '1-2037',
-	'label' => 'Pri\\1\\2',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['catalyst-any-E1T1'] = array
-(
-	'pattern' => '@^(E1|T1) (\d/)(\d+)$@',
-	'replacement' => '\\1 \\2\\3',
-	'dict_key' => '1-2036',
-	'label' => '\\1 \\2\\3',
-	'try_next_proc' => FALSE,
-);
-
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
