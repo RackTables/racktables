@@ -8159,7 +8159,10 @@ function renderDiscoveredNeighbors ($object_id)
 				// get port list which names match CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
 				foreach ($dp_remote_object['ports'] as $port)
-					if ($port['name'] == $dp_neighbor['port'])
+					if (
+						mb_strtolower($port['name']) == $dp_neighbor['port']
+						or l2addressForDatabase($port['l2address']) == l2addressForDatabase($dp_neighbor['port'])
+					)
 					{
 						$portinfo_remote = $port;
 						$remote_ports[] = $port;
@@ -8185,7 +8188,8 @@ function renderDiscoveredNeighbors ($object_id)
 						if
 						(
 							$portinfo_local['remote_object_id'] == $dp_remote_object_id
-							and $portinfo_local['remote_name'] == $dp_neighbor['port']
+							and mb_strtolower($portinfo_local['remote_name']) == $dp_neighbor['port']
+                                                        or (l2addressForDatabase($port['l2address']) == l2addressForDatabase($dp_neighbor['port']))
 						)
 						{
 							// set $portinfo_remote to corresponding remote port
