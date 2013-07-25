@@ -252,7 +252,6 @@ function groupTriplets ($tr_list)
 				if (isset ($index[$first_tr['key']]))
 				{
 					unset ($index[$first_tr['key']]);
-					unset ($first_tr['key']);
 					$ret[] = $first_tr;
 				}
 			}
@@ -264,7 +263,6 @@ function groupTriplets ($tr_list)
 					if (isset ($index[$tr['key']]))
 					{
 						unset ($index[$tr['key']]);
-						unset ($tr['key']);
 						$ret[] = $tr;
 					}
 				break;
