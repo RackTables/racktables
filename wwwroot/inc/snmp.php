@@ -2742,6 +2742,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C3560-8PC 8 RJ-45/10-100TX + 1 combo-gig'
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP','catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
+	'9.1.323' => array
+	(
+		'dict_key' => 381,
+		'text' => 'WS-C2950-12 12 RJ-45/10-100TX'
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
 );
 
 global $swtype_pcre;
