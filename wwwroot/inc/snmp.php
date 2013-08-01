@@ -2748,6 +2748,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950-12 12 RJ-45/10-100TX'
 		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
+	'9.1.472' => array
+	(
+		'dict_key' => 383,
+		'text' => 'WS-C2950G-24-DC 24 RJ-45/10-100TX + 2 GBIC/1000'
+		'processors' => array ('catalyst-chassis-any-1000GBIC','catalyst-chassis-any-100TX'),
+	),
 );
 
 global $swtype_pcre;

@@ -480,7 +480,7 @@ $dictionary = array
 	380 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950-24'),
 	381 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C2950-12'),
 	382 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950C-24'),
-	383 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950G-24-DC'),
+	383 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C2950G-24-DC'),
 	384 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950SX-48'),
 	385 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950SX-24'),
 	386 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950T-24'),
