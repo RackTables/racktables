@@ -2736,6 +2736,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
+	'9.1.797' => array
+	(
+		'dict_key' => 139,
+		'text' => 'WS-C3560-8PC 8 RJ-45/10-100TX + 1 combo-gig'
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP','catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+	),
 );
 
 global $swtype_pcre;

@@ -238,7 +238,7 @@ $dictionary = array
 	136 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron Edge X424-POE'),
 	137 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 800'),
 	138 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 1600'),
-	139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-8PC'),
+	139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C3560-8PC'),
 	140 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-S'),
 	141 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-E'),
 	142 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst Express 500-24LC'),
