@@ -1458,18 +1458,13 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 {
 	// Transform the given flat list into a list of groups, each representing a rack row.
 	$rdata = array();
-	$locations = listCells ('location');
 	foreach ($racks as $rack)
 	{
-		// Include all parents in the location name
-		$location_name = '';
-		$location_id = $rack['location_id'];
-		while(isset ($location_id))
-		{
-			$location_name = $locations[$location_id]['name'] . ' / ' . $location_name;
-			$location_id = $locations[$location_id]['parent_id'];
-		}
-		$row_name = $location_name . $rack['row_name'];
+		$trail = getLocationTrail ($rack['location_id'], FALSE);
+		if(!empty ($trail))
+			$row_name = $trail . ' : ' . $rack['row_name'];
+		else
+			$row_name = $rack['row_name'];
 		$rdata[$row_name][$rack['id']] = $rack['name'];
 	}
 	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
@@ -6135,6 +6130,19 @@ function showPathAndSearch ($pageno, $tabno)
 		$item .= $ancor_tail;
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
+
+		// location bread crumbs insert for Rows and Racks
+		if ($no == 'row')
+		{
+			$trail = getLocationTrail ($title['params']['location_id']);
+			if(!empty ($trail))
+				$items[] = $trail;
+		}
+		if($no == 'location')
+		{
+			// overwrite the bread crumb for current location with whole path
+			$items[count ($items)-1] = getLocationTrail ($title['params']['location_id']);
+		}
 	}
 	// Search form.
 	echo "<div class='searchbox' style='float:right'>";
@@ -6265,14 +6273,14 @@ function dynamic_title_decoder ($path_position)
 			return array
 			(
 				'name' => $rack['row_name'],
-				'params' => array ('row_id' => $rack['row_id'])
+				'params' => array ('row_id' => $rack['row_id'], 'location_id' => $rack['location_id'])
 			);
 		case 'row':
 			$row_info = getRowInfo (assertUIntArg ('row_id'));
 			return array
 			(
 				'name' => $row_info['name'],
-				'params' => array ('row_id' => $row_info['id'])
+				'params' => array ('row_id' => $row_info['id'], 'location_id' => $row_info['location_id'])
 			);
 		default:
 			break;

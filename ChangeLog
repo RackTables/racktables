@@ -6,6 +6,7 @@
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
 	update: add collapse/expand feature to location filter (#901)
+	update: display location tree in breadcrumbs (#905)
 	update: display location parents in the rack list when mounting an object (#925)
 	update: add a link to the View Rack page (#947)
 	update: support blades of varying sizes in the same chassis (#923) by Mark Wilkinson
