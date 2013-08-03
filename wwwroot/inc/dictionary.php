@@ -1032,7 +1032,7 @@ $dictionary = array
 	932 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 10'),
 	933 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE 11.1'),
 	934 => array ('chapter_id' => 12, 'dict_value' => '[[F5%GPASS%BIG-IP WebAccelerator 4500 | http://www.f5.com/pdf/products/big-ip-webaccelerator-ds.pdf]]'),
-	935 => array ('chapter_id' => 12, 'dict_value' => '[[F5%GPASS%VIPRION | http://www.f5.com/pdf/products/viprion-overview-ds.pdf]]'),
+	935 => array ('chapter_id' => 30, 'dict_value' => 'F5%GPASS%VIPRION 2400%L2,2H'),
 	936 => array ('chapter_id' => 12, 'dict_value' => '[[F5%GPASS%BIG-IP 1500 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
 	937 => array ('chapter_id' => 12, 'dict_value' => '[[F5%GPASS%BIG-IP 1600 | http://www.f5.com/pdf/products/big-ip-platforms-ds.pdf]]'),
 	938 => array ('chapter_id' => 12, 'dict_value' => '[[F5%GPASS%BIG-IP 3400 | http://www.f5.com/pdf/products/big-ip-platforms-2007-ds.pdf]]'),
@@ -2126,6 +2126,11 @@ $dictionary = array
 	2030 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME-3400EG-2CS-A'),
 	2031 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M520'),
 	2032 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge (blade)%GPASS%M820%L2,1%'),
+	2033 => array ('chapter_id' => 30, 'dict_value' => 'F5%GPASS%VIPRION 4480%L4,1H'),
+	2034 => array ('chapter_id' => 30, 'dict_value' => 'F5%GPASS%VIPRION 4800%L1,8V'),
+	2035 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 2100'),
+	2036 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4200'),
+	2037 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4300'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
