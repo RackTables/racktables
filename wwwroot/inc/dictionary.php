@@ -1244,7 +1244,7 @@ $dictionary = array
 	1147 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP9565 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP9565]]'),
 	1148 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP9568 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP9568]]'),
 	1149 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP9572 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP9572]]'),
-	1150 => array ('chapter_id' => 30, 'dict_value' => '[[Cisco%GPASS%Catalyst 6509-V-E%L9,1H% | http://www.cisco.com/en/US/products/ps9306/index.html]]'),
+	1150 => array ('chapter_id' => 30, 'dict_value' => '[[Cisco%GPASS%Catalyst 6509-V-E%L9,1V% | http://www.cisco.com/en/US/products/ps9306/index.html]]'),
 	1151 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP7902J | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP7902J]]'),
 	1152 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP7930J | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP7930J]]'),
 	1153 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP7932J | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP7932J]]'),
