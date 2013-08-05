@@ -1643,7 +1643,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.323' => array
 	(
 		'dict_key' => 381,
-		'text' => 'WS-C2950-12 12 RJ-45/10-100TX'
+		'text' => 'WS-C2950-12 12 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
 	'9.1.324' => array
@@ -1709,7 +1709,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.472' => array
 	(
 		'dict_key' => 383,
-		'text' => 'WS-C2950G-24-DC 24 RJ-45/10-100TX + 2 GBIC/1000'
+		'text' => 'WS-C2950G-24-DC 24 RJ-45/10-100TX + 2 GBIC/1000',
 		'processors' => array ('catalyst-chassis-any-1000GBIC','catalyst-chassis-any-100TX'),
 	),
 	'9.1.527' => array
@@ -1889,7 +1889,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.797' => array
 	(
 		'dict_key' => 139,
-		'text' => 'WS-C3560-8PC 8 RJ-45/10-100TX + 1 combo-gig'
+		'text' => 'WS-C3560-8PC 8 RJ-45/10-100TX + 1 combo-gig',
 		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP','catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
 	'9.1.799' => array
@@ -1947,13 +1947,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.999' => array
 	(
 		'dict_key' => 2038,
-		'text' => 'WS-CBS3012-IBM 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
+		'text' => 'WS-CBS3012-IBM 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)',
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
 	'9.1.1000' => array
 	(
 		'dict_key' => 2038,
-		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
+		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)',
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
 	'9.1.1005' => array
