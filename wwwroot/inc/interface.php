@@ -1052,8 +1052,11 @@ function renderEditRackForm ($rack_id)
 	echo '<table border=0 align=center>';
 	echo "<tr><td>&nbsp;</td><th class=tdright>Rack row:</th><td class=tdleft>";
 	foreach (getAllRows () as $row_id => $rowInfo)
-		$rows[$row_id] = $rowInfo['name'];
-    natcasesort ($rows);
+	{
+		$trail = getLocationTrail ($rowInfo['location_id'], FALSE);
+		$rows[$row_id] = empty ($trail) ? $rowInfo['name'] : $rowInfo['name'] . ' [' . $trail . ']';
+	}
+	natcasesort ($rows);
 	printSelect ($rows, array ('name' => 'row_id'), $rack['row_id']);
 	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
