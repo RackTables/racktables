@@ -6105,4 +6105,30 @@ function validTagName ($s, $allow_autotag = FALSE)
 	return FALSE;
 }
 
+// returns html string with parent location names
+// link: if each name should be wrapped in an href
+function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
+{
+	$locations = listCells ('location');
+
+	static $location_tree = array ();
+	if (count ($location_tree) == 0)
+		foreach ($locations as $location)
+			$location_tree[$location['id']] = array ('parent_id' => $location['parent_id'], 'name' => $location['name']);
+
+	// prepend parent location(s) to given location string
+	$name = '';
+	$id = $location_id;
+	while (isset ($id))
+	{
+		if ($link)
+			$name = mkA ($location_tree[$id]['name'], 'location', $id) . $spacer . $name;
+		else
+			$name = $location_tree[$id]['name'] . $spacer . $name;
+		$id = $location_tree[$id]['parent_id'];
+	}
+	$name = substr ($name, 0, 0 - strlen ($spacer));
+	return $name;
+}
+
 ?>

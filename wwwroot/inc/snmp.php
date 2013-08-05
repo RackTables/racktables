@@ -1946,13 +1946,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.999' => array
 	(
-		'dict_key' => 2033,
+		'dict_key' => 2038,
 		'text' => 'WS-CBS3012-IBM 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
 	'9.1.1000' => array
 	(
-		'dict_key' => 2033,
+		'dict_key' => 2038,
 		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)'
 		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),

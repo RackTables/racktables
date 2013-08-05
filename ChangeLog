@@ -2,13 +2,16 @@
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 
 		rspools were linked with the same balancer-vsg pair
+	bugfix: change blade orientation of Cisco 6509-V-E (#985)
 	update: support of Huawei CE5800 series switch
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
 	update: add collapse/expand feature to location filter (#901)
+	update: display location tree in breadcrumbs (#905)
 	update: display location parents in the rack list when mounting an object (#925)
 	update: add a link to the View Rack page (#947)
 	update: support blades of varying sizes in the same chassis (#923) by Mark Wilkinson
+	update: add F5 VIPRION models to dictionary (#987)
 	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
 		WS-CBS3012-IBM/-I (#871), WS-C3560-8PC (#975), WS-C2950-12 (#973),
 		WS-C2950G-24-DC (#981), HP Procurve J9028B (#941) by Mark Wilkinson
