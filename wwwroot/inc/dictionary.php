@@ -238,7 +238,7 @@ $dictionary = array
 	136 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron Edge X424-POE'),
 	137 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 800'),
 	138 => array ('chapter_id' => 12, 'dict_value' => 'Foundry%GPASS%FastIron SX 1600'),
-	139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-8PC'),
+	139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C3560-8PC'),
 	140 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-48TC-S'),
 	141 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560-E'),
 	142 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst Express 500-24LC'),
@@ -478,9 +478,9 @@ $dictionary = array
 	378 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 4924-10GE'),
 	379 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-24-S'),
 	380 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950-24'),
-	381 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950-12'),
+	381 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C2950-12'),
 	382 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950C-24'),
-	383 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950G-24-DC'),
+	383 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C2950G-24-DC'),
 	384 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950SX-48'),
 	385 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950SX-24'),
 	386 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950T-24'),
@@ -490,7 +490,7 @@ $dictionary = array
 	390 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2950G-48'),
 	391 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3508G XL'),
 	392 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3512 XL'),
-	393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3524 XL'),
+	393 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst WS-C3524-XL'),
 	394 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3524 PWR XL'),
 	395 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3548 XL'),
 	396 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 2400-24TS-A'),
@@ -2131,6 +2131,7 @@ $dictionary = array
 	2035 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 2100'),
 	2036 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4200'),
 	2037 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4300'),
+	2038 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst WS-CBS3012-IBM/-I | http://www.cisco.com/en/US/products/ps8766/index.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
