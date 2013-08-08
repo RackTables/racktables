@@ -17,6 +17,7 @@
 		WS-CBS3012-IBM/-I (#871), WS-C3560-8PC (#975), WS-C2950-12 (#973),
 		WS-C2950G-24-DC (#981),
 		HP ProCurve J9028B (#941), J9022A (#767) by Mark Wilkinson
+	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	new feature: port tracing (#333)
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in

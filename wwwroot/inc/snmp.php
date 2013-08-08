@@ -169,7 +169,7 @@ $iftable_processors['catalyst-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-9-to-12-1000SFP'] = array
+$iftable_processors['catalyst-9-to-12-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(9|10|11|12)$@',
 	'replacement' => 'gi\\1',
@@ -1788,7 +1788,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 147,
 		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
+		'processors' => array ('catalyst-chassis-45-to-48-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt'),
 	),
 	'9.1.633' => array
 	(
@@ -1854,7 +1854,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 161,
 		'text' => 'WS-CE500G-12TC: 8 RJ-45/10-100/1000T(X) + 4 combo',
-		'processors' => array ('catalyst-9-to-12-1000SFP', 'catalyst-9-to-12-1000T', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-9-to-12-combo-1000SFP', 'catalyst-9-to-12-1000T', 'catalyst-any-1000T'),
 	),
 	'9.1.749' => array
 	(
