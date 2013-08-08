@@ -169,7 +169,7 @@ $iftable_processors['catalyst-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['catalyst-9-to-12-1000SFP'] = array
+$iftable_processors['catalyst-9-to-12-combo-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(9|10|11|12)$@',
 	'replacement' => 'gi\\1',
@@ -1712,6 +1712,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950G-24-DC 24 RJ-45/10-100TX + 2 GBIC/1000',
 		'processors' => array ('catalyst-chassis-any-1000GBIC','catalyst-chassis-any-100TX'),
 	),
+	'9.1.480' => array
+	(
+		'dict_key' => 385,
+		'text' => 'WS-C2950SX-24 24 RJ-45/10-100TX + 2 1000Base-SX',
+		'processors' => array ('catalyst-chassis-uplinks-1000SX','catalyst-chassis-any-100TX'),
+	),
 	'9.1.527' => array
 	(
 		'dict_key' => 210,
@@ -1788,7 +1794,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 147,
 		'text' => 'WS-C4948: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000 + 1 RJ-45/100TX (OOB mgmt)',
-		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
+		'processors' => array ('catalyst-chassis-45-to-48-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-mgmt'),
 	),
 	'9.1.633' => array
 	(
@@ -1854,7 +1860,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 161,
 		'text' => 'WS-CE500G-12TC: 8 RJ-45/10-100/1000T(X) + 4 combo',
-		'processors' => array ('catalyst-9-to-12-1000SFP', 'catalyst-9-to-12-1000T', 'catalyst-any-1000T'),
+		'processors' => array ('catalyst-9-to-12-combo-1000SFP', 'catalyst-9-to-12-1000T', 'catalyst-any-1000T'),
 	),
 	'9.1.749' => array
 	(
@@ -1978,6 +1984,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-1-to-2-1000SFP',
 			'catalyst-chassis-uplinks-1000T',
 		),
+	),
+	'9.1.1024' => array
+	(
+		'dict_key' => 1805,
+		'text' => 'WS-C3560V2-48TS: 48 RJ-45/10-100TX + 4 SFP/1000',
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.1025' => array
 	(
@@ -2235,6 +2247,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 868,
 		'text' => 'J9021A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'11.2.3.7.11.64' => array
+	(
+		'dict_key' => 869,
+		'text' => 'J9022A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
 	'11.2.3.7.11.65' => array
 	(
