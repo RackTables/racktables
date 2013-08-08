@@ -1979,6 +1979,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-uplinks-1000T',
 		),
 	),
+	'9.1.1024' => array
+	(
+		'dict_key' => 1805,
+		'text' => 'WS-C3560V2-48TS: 48 RJ-45/10-100TX + 4 SFP/1000',
+		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.1025' => array
 	(
 		'dict_key' => 1807,
