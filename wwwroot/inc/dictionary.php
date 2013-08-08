@@ -966,7 +966,7 @@ $dictionary = array
 	866 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2650'),
 	867 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2650-PWR'),
 	868 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2810-24G'),
-	869 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2810-48G'),
+	869 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2810-48G J9022A'),
 	870 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2824'),
 	871 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2848'),
 	872 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2900-24G'),
