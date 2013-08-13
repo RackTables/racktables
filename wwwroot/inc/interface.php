@@ -1562,7 +1562,7 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-		echo "<td class='tdleft' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
+		echo "<td class='tdleft' NOWRAP><input type=text name='port-${port['id']}' class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
 		echo "<td><input type=text name=label value='${port['label']}'></td>";
 		if (! $port['linked'])
 		{
