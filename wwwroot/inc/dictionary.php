@@ -2154,6 +2154,11 @@ $dictionary = array
 	2058 => array ('chapter_id' => 12, 'dict_value' => '[[TPLink%GPASS%TL-SL5428E | http://www.tp-link.com/en/products/details/?model=TL-SL5428E]]'),
 	2059 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560CG-8PC-S'),
 
+	// a hole here
+
+	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.110'),
+	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.120'),
+
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.
