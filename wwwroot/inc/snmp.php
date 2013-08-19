@@ -2991,6 +2991,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.1' => 251,
 			'12.2' => 252,
 			'15.0' => 1901,
+			'15.1' => 2082,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))

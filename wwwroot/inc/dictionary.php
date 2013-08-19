@@ -2156,8 +2156,9 @@ $dictionary = array
 
 	// a hole here
 
-	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.110'),
-	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.120'),
+	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
+	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
+	2082 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.1'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
