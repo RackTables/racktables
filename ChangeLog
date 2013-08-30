@@ -3,6 +3,7 @@
 	bugfix: SLB config was generated incrorrectly when multiple 
 		rspools were linked with the same balancer-vsg pair
 	bugfix: change blade orientation of Cisco 6509-V-E (#985)
+	bugfix: default values of some LDAP options weren't being used
 	update: support of Huawei CE5800 series switch
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
