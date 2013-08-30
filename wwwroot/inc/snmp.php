@@ -1340,6 +1340,15 @@ $iftable_processors['dell-52xx-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dell-m6220-gigabitethernet'] = array
+(
+	'pattern' => '@Gi1/0/(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['dell-g1-to-g2-1000SFP'] = array
 (
 	'pattern' => '@^g(1|2)$@',
@@ -2464,6 +2473,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 352,
 		'text' => 'PowerConnect 6224F: 20 SFP + 4 combo-gig',
 		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000SFP'),
+	),
+	'674.10895.3015' => array
+	(
+		'dict_key' => 1532,
+		'text' => 'PowerConnect M6220 blade cabinet switch',
+		'processors' => array ('dell-m6220-gigabitethernet'),
+		'ifDescrOID' => 'ifDescr',
 	),
 	'674.10895.3017' => array
 	(
