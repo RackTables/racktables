@@ -825,6 +825,15 @@ $iftable_processors['netgear-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['netgear-chassis-any-1000T'] = array
+(
+	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => 24,
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['netgear-chassis-any-1000SFP'] = array
 (
 	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
