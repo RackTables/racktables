@@ -17,7 +17,7 @@
 	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
 		WS-CBS3012-IBM/-I (#871), WS-C3560-8PC (#975), WS-C2950-12 (#973),
 		WS-C2950G-24-DC (#981), WS-C3560GV2-48TS (#983), WS-C2950SX-24 (#991),
-		HP ProCurve J9028B (#941), J9022A (#767) by Mark Wilkinson
+		HP ProCurve J9028B (#941), J9022A (#767), Netgear GS724TP (#1001) by Mark Wilkinson
 	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	new feature: port tracing (#333)
 0.20.5 2013-06-23
