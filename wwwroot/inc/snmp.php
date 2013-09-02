@@ -807,12 +807,21 @@ $iftable_processors['gbe2csfp-24'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['netgear-chassis-any-1000T'] = array
+$iftable_processors['netgear-23-to-24-1000SPFcombo'] = array
 (
-	'pattern' => '@^Unit: (\d+) Slot: (\d+) Port: (\d+) Gigabit - Level$@',
-	'replacement' => '\\1/\\2/\\3',
+	'pattern' => '@^g(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['netgear-any-1000T'] = array
+(
+	'pattern' => '@^g(\d+)$@',
+	'replacement' => 'g\\1',
 	'dict_key' => 24,
-	'label' => '\\3',
+	'label' => 'g\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -2703,6 +2712,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1794,
 		'text' => 'GSM7352Sv2: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + SFP+ uplinks',
 		'processors' => array ('netgear-chassis-45-to-48-1000SFPcombo', 'netgear-chassis-any-1000T', 'netgear-chassis-any-SFP+'),
+	),
+	'4526.100.4.10' => array
+	(
+		'dict_key' => 565,
+		'text' => 'Netgear Prosafe GS724TP: 24 RJ-45/10-100-1000T + 2 combo-gig SFP',
+		'ifDescrOID' => 'ifName',
+		'processors' => array ('netgear-23-to-24-1000SPFcombo', 'netgear-any-1000T'),
 	),
 	'6027.1.3.12' => array
 	(
