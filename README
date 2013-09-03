@@ -114,6 +114,13 @@ It is worth to add the following line to the permissions script if the
 old-fashioned 'Tags' tab is not needed any more:
   deny {$tab_tags} # this hides 'Tags' tab
 
+This release converts collation of all DB fields to the utf8_unicode_ci. This
+procedure may take some time, and could fail if there are rows that differ only
+by letter case. If this happen, you'll see the failed SQL query in upgrade report
+with the "Duplicate entry" error message. Feel free to continue using your
+installation. If desired so, you could eliminate the case-duplicating rows
+and re-apply the failed query.
+
 *** Upgrading to 0.20.6 ***
 
 New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
