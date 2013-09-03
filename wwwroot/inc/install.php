@@ -447,7 +447,7 @@ function get_pseudo_file ($name)
 	case 'structure':
 		$query = array();
 
-		$query[] = "alter database character set utf8";
+		$query[] = "alter database character set utf8 collate utf8_unicode_ci";
 		$query[] = "set names 'utf8'";
 		$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
 
@@ -458,7 +458,7 @@ function get_pseudo_file ($name)
   `atom` enum('front','interior','rear') default NULL,
   CONSTRAINT `Atom-FK-molecule_id` FOREIGN KEY (`molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Attribute` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -466,7 +466,7 @@ function get_pseudo_file ($name)
   `name` char(64) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
@@ -478,7 +478,7 @@ function get_pseudo_file ($name)
   KEY `chapter_id` (`chapter_id`),
   CONSTRAINT `AttributeMap-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`),
   CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `Attribute` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned NOT NULL,
@@ -496,7 +496,7 @@ function get_pseudo_file ($name)
   KEY `object_tid-attr_id` (`object_tid`,`attr_id`),
   CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`),
   CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `CachedPAV` (
   `object_id` int(10) unsigned NOT NULL,
@@ -506,7 +506,7 @@ function get_pseudo_file ($name)
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE,
   CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `CachedPNV` (
   `object_id` int(10) unsigned NOT NULL,
@@ -515,7 +515,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   UNIQUE KEY `port_id` (`object_id`,`port_name`),
   CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `CachedPVM` (
   `object_id` int(10) unsigned NOT NULL,
@@ -523,7 +523,7 @@ function get_pseudo_file ($name)
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
   CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `CactiGraph` (
   `object_id` int(10) unsigned NOT NULL,
@@ -535,7 +535,7 @@ function get_pseudo_file ($name)
   KEY `graph_id` (`graph_id`),
   CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
   CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `CactiServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -543,7 +543,7 @@ function get_pseudo_file ($name)
   `username` char(64) DEFAULT NULL,
   `password` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Chapter` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -551,7 +551,7 @@ function get_pseudo_file ($name)
   `name` char(128) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Config` (
   `varname` char(32) NOT NULL,
@@ -562,7 +562,7 @@ function get_pseudo_file ($name)
   `is_userdefined` enum('yes','no') NOT NULL default 'no',
   `description` text,
   PRIMARY KEY  (`varname`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Dictionary` (
   `chapter_id` int(10) unsigned NOT NULL,
@@ -572,7 +572,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`dict_key`),
   UNIQUE KEY `dict_unique` (`chapter_id`,`dict_value`,`dict_sticky`),
   CONSTRAINT `Dictionary-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -583,7 +583,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY (`id`),
   UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
   KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `File` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -598,7 +598,7 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `FileLink` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -609,7 +609,7 @@ function get_pseudo_file ($name)
   KEY `FileLink-file_id` (`file_id`),
   UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
   CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4Address` (
   `ip` int(10) unsigned NOT NULL default '0',
@@ -617,7 +617,7 @@ function get_pseudo_file ($name)
   `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
@@ -627,7 +627,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
@@ -642,7 +642,7 @@ function get_pseudo_file ($name)
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
   CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4Log` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
@@ -652,7 +652,7 @@ function get_pseudo_file ($name)
   `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ip-date` (`ip`,`date`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv6Log` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
@@ -662,7 +662,7 @@ function get_pseudo_file ($name)
   `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ip-date` (`ip`,`date`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL default '0',
@@ -677,7 +677,7 @@ function get_pseudo_file ($name)
   KEY `remoteip` (`remoteip`),
   KEY `object_id` (`object_id`),
   CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -687,7 +687,7 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `base-len` (`ip`,`mask`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4RS` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -701,7 +701,7 @@ function get_pseudo_file ($name)
   KEY `rsip` (`rsip`),
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
   CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4RSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -709,7 +709,7 @@ function get_pseudo_file ($name)
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -721,7 +721,7 @@ function get_pseudo_file ($name)
   `rsconfig` text,
   PRIMARY KEY  (`id`),
   KEY `vip` (`vip`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv6Address` (
   `ip` binary(16) NOT NULL,
@@ -729,7 +729,7 @@ function get_pseudo_file ($name)
   `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv6Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
@@ -739,7 +739,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `IPv6Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -750,7 +750,7 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `ip` (`ip`,`mask`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,
@@ -761,7 +761,7 @@ function get_pseudo_file ($name)
   `memberof` text,
   UNIQUE KEY `presented_username` (`presented_username`),
   KEY `scanidx` (`presented_username`,`successful_hash`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Link` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -774,12 +774,12 @@ function get_pseudo_file ($name)
   KEY `portb` (`portb`),
   CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -794,7 +794,7 @@ function get_pseudo_file ($name)
   CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `MuninGraph` (
   `object_id` int(10) unsigned NOT NULL,
@@ -806,13 +806,13 @@ function get_pseudo_file ($name)
   KEY `graph` (`graph`),
   CONSTRAINT `MuninGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `MuninServer` (`id`),
   CONSTRAINT `MuninGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `MuninServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `base_url` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `ObjectLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -824,13 +824,13 @@ function get_pseudo_file ($name)
   KEY `object_id` (`object_id`),
   KEY `date` (`date`),
   CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `ObjectParentCompat` (
   `parent_objtype_id` int(10) unsigned NOT NULL,
   `child_objtype_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `parent_child` (`parent_objtype_id`,`child_objtype_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -849,7 +849,7 @@ function get_pseudo_file ($name)
   KEY `Port-FK-iif-oif` (`iif_id`,`type`),
   CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`),
   CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortAllowedVLAN` (
   `object_id` int(10) unsigned NOT NULL,
@@ -859,28 +859,28 @@ function get_pseudo_file ($name)
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
   CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortCompat` (
   `type1` int(10) unsigned NOT NULL default '0',
   `type2` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `type1_2` (`type1`,`type2`),
   KEY `type2` (`type2`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `iif_name` (`iif_name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortInterfaceCompat` (
   `iif_id` int(10) unsigned NOT NULL,
   `oif_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
   CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -891,7 +891,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY (`id`),
   KEY `port_id-date` (`port_id`,`date`),
   CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortNativeVLAN` (
   `object_id` int(10) unsigned NOT NULL,
@@ -900,7 +900,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   UNIQUE KEY `port_id` (`object_id`,`port_name`),
   CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `PortVLANMode` (
   `object_id` int(10) unsigned NOT NULL,
@@ -908,7 +908,7 @@ function get_pseudo_file ($name)
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
   CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Object` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -922,7 +922,7 @@ function get_pseudo_file ($name)
   UNIQUE KEY `asset_no` (`asset_no`),
   KEY `id-tid` (`id`,`objtype_id`),
   KEY `type_id` (`objtype_id`,`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `ObjectHistory` (
   `id` int(10) unsigned default NULL,
@@ -936,7 +936,7 @@ function get_pseudo_file ($name)
   `user_name` char(64) default NULL,
   KEY `id` (`id`),
   CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
@@ -948,20 +948,20 @@ function get_pseudo_file ($name)
   KEY `RackSpace_object_id` (`object_id`),
   CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `RackThumbnail` (
   `rack_id` int(10) unsigned NOT NULL,
   `thumb_data` blob,
   UNIQUE KEY `rack_id` (`rack_id`),
   CONSTRAINT `RackThumbnail-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `Script` (
   `script_name` char(64) NOT NULL,
   `script_text` longtext,
   PRIMARY KEY  (`script_name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
@@ -975,7 +975,7 @@ function get_pseudo_file ($name)
   KEY `TagStorage-FK-tag_id` (`tag_id`),
   KEY `tag_id-tag_is_assignable` (`tag_id`,`tag_is_assignable`),
   CONSTRAINT `TagStorage-FK-TagTree` FOREIGN KEY (`tag_id`, `tag_is_assignable`) REFERENCES `TagTree` (`id`, `is_assignable`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -987,7 +987,7 @@ function get_pseudo_file ($name)
   KEY `TagTree-K-parent_id` (`parent_id`),
   KEY `id-is_assignable` (`id`,`is_assignable`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
@@ -996,7 +996,7 @@ function get_pseudo_file ($name)
   `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `UserConfig` (
   `varname` char(32) NOT NULL,
@@ -1005,7 +1005,7 @@ function get_pseudo_file ($name)
   UNIQUE KEY `user_varname` (`user`,`varname`),
   KEY `varname` (`varname`),
   CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANDescription` (
   `domain_id` int(10) unsigned NOT NULL,
@@ -1016,14 +1016,14 @@ function get_pseudo_file ($name)
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `description` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANIPv4` (
   `domain_id` int(10) unsigned NOT NULL,
@@ -1033,7 +1033,7 @@ function get_pseudo_file ($name)
   KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANIPv6` (
   `domain_id` int(10) unsigned NOT NULL,
@@ -1043,7 +1043,7 @@ function get_pseudo_file ($name)
   KEY `VLANIPv6-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv6-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANSTRule` (
   `vst_id` int(10) unsigned NOT NULL,
@@ -1054,7 +1054,7 @@ function get_pseudo_file ($name)
   `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
   CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANSwitch` (
   `object_id` int(10) unsigned NOT NULL,
@@ -1075,7 +1075,7 @@ function get_pseudo_file ($name)
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
   CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANSwitchTemplate` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -1084,12 +1084,12 @@ function get_pseudo_file ($name)
   `saved_by` char(64) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VLANValidID` (
   `vlan_id` int(10) unsigned NOT NULL default '1',
   PRIMARY KEY  (`vlan_id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VS` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -1097,7 +1097,7 @@ function get_pseudo_file ($name)
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VSIPs` (
   `vs_id` int(10) unsigned NOT NULL,
@@ -1107,7 +1107,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY (`vs_id`,`vip`),
   KEY `vip` (`vip`),
   CONSTRAINT `VSIPs-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VSPorts` (
   `vs_id` int(10) unsigned NOT NULL,
@@ -1118,7 +1118,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY (`vs_id`,`proto`,`vport`),
   KEY `proto-vport` (`proto`,`vport`),
   CONSTRAINT `VS-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VSEnabledIPs` (
   `object_id` int(10) unsigned NOT NULL,
@@ -1134,7 +1134,7 @@ function get_pseudo_file ($name)
   KEY `VSEnabledIPs-FK-rspool_id` (`rspool_id`),
   CONSTRAINT `VSEnabledIPs-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledIPs-FK-vs_id-vip` FOREIGN KEY (`vs_id`, `vip`) REFERENCES `VSIPs` (`vs_id`, `vip`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TABLE `VSEnabledPorts` (
   `object_id` int(10) unsigned NOT NULL,
@@ -1150,7 +1150,7 @@ function get_pseudo_file ($name)
   CONSTRAINT `VSEnabledPorts-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledPorts-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
-) ENGINE=InnoDB";
+) ENGINE=InnoDB CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
 
 		$query[] = "CREATE TRIGGER `checkLinkBeforeInsert` BEFORE INSERT ON `Link`
   FOR EACH ROW
