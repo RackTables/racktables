@@ -2011,8 +2011,8 @@ function IPCmp ($ip_binA, $ip_binB)
 
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
-// valid return values are: 1, 0, -1, -2
-// -2 has special meaning: $netA includes $netB
+// valid return values are: 2, 1, 0, -1, -2
+// -2, 2 have special meaning: $netA includes $netB or vice versa, respecively
 // "The comparison function must return an integer less than, equal to, or greater
 // than zero if the first argument is considered to be respectively less than,
 // equal to, or greater than the second." (c) PHP manual
@@ -2023,6 +2023,8 @@ function IPNetworkCmp ($netA, $netB)
 		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
 	if ($ret == -1 and $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
 		$ret = -2;
+	if ($ret == 1 and $netB['ip_bin'] === ($netA['ip_bin'] & $netB['mask_bin']))
+		$ret = 2;
 	return $ret;
 }
 
@@ -2438,13 +2440,15 @@ function ip4_mask_size ($mask)
 }
 
 // returns array with keys 'ip', 'ip_bin', 'mask', 'mask_bin'
-function constructIPRange ($ip_bin, $mask)
+function constructIPRange ($ip_bin, $mask = NULL)
 {
 	$node = array();
 	switch (strlen ($ip_bin))
 	{
 		case 4: // IPv4
-			if ($mask < 0 || $mask > 32)
+			if ($mask === NULL)
+				$mask = 32;
+			elseif ($mask < 0 || $mask > 32)
 				throw new InvalidArgException ('mask', $mask, "Invalid v4 prefix length");
 			$node['mask_bin'] = ip4_mask ($mask);
 			$node['mask'] = $mask;
@@ -2452,7 +2456,9 @@ function constructIPRange ($ip_bin, $mask)
 			$node['ip'] = ip4_format ($node['ip_bin']);
 			break;
 		case 16: // IPv6
-			if ($mask < 0 || $mask > 128)
+			if ($mask === NULL)
+				$mask = 128;
+			elseif ($mask < 0 || $mask > 128)
 				throw new InvalidArgException ('mask', $mask, "Invalid v6 prefix length");
 			$node['mask_bin'] = ip6_mask ($mask);
 			$node['mask'] = $mask;
