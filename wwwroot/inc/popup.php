@@ -111,6 +111,12 @@ INNER JOIN (
 		$query .= 'AND o.name like ? ';
 		$qparams[] = '%' . $filter['objects'] . '%';
 	}
+	// asset_no filter
+	if (! empty ($filter['asset_no']))
+	{
+		$query .= 'AND o.asset_no like ? ';
+		$qparams[] = '%' . $filter['asset_no'] . '%';
+	}
 	// portname filter
 	if (! empty ($filter['ports']))
 	{
@@ -410,12 +416,15 @@ function renderPopupPortSelector()
 		'racks' => array(),
 		'objects' => '',
 		'ports' => '',
+		'asset_no' => '',
 		'linked' => $linked
 	);
 	if (isset ($_REQUEST['filter-obj']))
 		$filter['objects'] = trim($_REQUEST['filter-obj']);
 	if (isset ($_REQUEST['filter-port']))
 		$filter['ports'] = trim($_REQUEST['filter-port']);
+	if (isset ($_REQUEST['filter-asset_no']))
+		$filter['asset_no'] = trim($_REQUEST['filter-asset_no']);
 	if ($in_rack)
 	{
 		$object = spotEntity ('object', $port_info['object_id']);
@@ -433,7 +442,8 @@ function renderPopupPortSelector()
 	(
 		! empty ($filter['racks'])  ||
 		! empty ($filter['objects']) ||
-		! empty ($filter['ports'])
+		! empty ($filter['ports']) ||
+		! empty ($filter['asset_no'])
 	)
 		$spare_ports = findSparePorts ($port_info, $filter);
 
@@ -446,6 +456,7 @@ function renderPopupPortSelector()
 	echo '<input type=hidden name="port" value="' . $port_id . '">';
 	echo '<table align="center" valign="bottom"><tr>';
 	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Asset tag:<br><input type=text size=8 name="filter-asset_no" value="' . htmlspecialchars ($filter['asset_no'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td></tr>';
 	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
 	echo '<td class="tdleft" vlaign="bottom"><label><input type=checkbox name="linked"'. ($linked ? ' checked' : '') .'>Include linked ports</label></td></tr>';
