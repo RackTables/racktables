@@ -558,9 +558,9 @@ $tab['attrs']['editmap'] = 'Edit map';
 $tabhandler['attrs']['default'] = 'renderAttributes';
 $tabhandler['attrs']['editattrs'] = 'renderEditAttributesForm';
 $tabhandler['attrs']['editmap'] = 'renderEditAttrMapForm';
-$ophandler['attrs']['editattrs']['add'] = 'tableHandler';
+$ophandler['attrs']['editattrs']['add'] = 'insertAttribute';
 $ophandler['attrs']['editattrs']['del'] = 'tableHandler';
-$ophandler['attrs']['editattrs']['upd'] = 'tableHandler';
+$ophandler['attrs']['editattrs']['upd'] = 'updateAttribute';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'tableHandler';
 

@@ -350,6 +350,7 @@ $opspec_list['attrs-editattrs-add'] = array
 	(
 		array ('url_argname' => 'attr_type', 'table_colname' => 'type', 'assertion' => 'enum/attr_type'),
 		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+		array ('url_argname' => 'display_on_summary', 'table_colname' => 'summary', 'assertion' => 'checkbox'),
 	),
 );
 $opspec_list['attrs-editattrs-del'] = array
@@ -368,6 +369,7 @@ $opspec_list['attrs-editattrs-upd'] = array
 	'set_arglist' => array
 	(
 		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
+		array ('url_argname' => 'display_on_summary', 'table_colname' => 'summary', 'assertion' => 'checkbox'),
 	),
 	'where_arglist' => array
 	(
@@ -1146,6 +1148,42 @@ function updateObjectAllocation ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($changecnt));
 }
 
+function insertAttribute ()
+{
+	genericAssertion ('attr_type', 'enum/attr_type');
+	genericAssertion ('attr_name', 'string');
+	usePreparedInsertBlade
+	(
+		'Attribute',
+		array
+		(
+			'type' => $_REQUEST['attr_type'],
+			'name' => $_REQUEST['attr_name'],
+			'summary' => isCheckSet('display_on_summary'),
+		)
+	);
+	showOneLiner(48);
+}
+function updateAttribute ()
+{
+	genericAssertion ('attr_name', 'string');
+	genericAssertion ('attr_id', 'uint');
+	usePreparedUpdateBlade
+	(
+		'Attribute',
+		array
+		(
+			'name' => $_REQUEST['attr_name'],
+			'summary' => isCheckSet('display_on_summary'),
+		),
+		array
+		(
+			'id' => $_REQUEST['attr_id'],
+		)
+	);
+	showOneLiner(51);
+}
+
 $msgcode['updateObject']['OK'] = 51;
 function updateObject ()
 {
@@ -1443,7 +1481,7 @@ function resetUIConfig()
 	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
 	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
 	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
-	setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
+	setConfigVar ('DEFAULT_SNMP_COMMUNITY','1:public');
 	setConfigVar ('IPV4_ENABLE_KNIGHT','yes');
 	setConfigVar ('TAGS_TOPLIST_SIZE','50');
 	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
@@ -3341,6 +3379,11 @@ function buildOpspecColumns ($opspec, $listname)
 				default:
 					throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
 				}
+			if ( $argspec['assertion'] == 'checkbox' )
+				if ( $arg_value == 'on' )
+					$arg_value = TRUE;
+				else
+					$arg_value = FALSE;
 			$columns[$table_colname] = $arg_value;
 			break;
 		case array_key_exists ('fix_argname', $argspec): # fixed column

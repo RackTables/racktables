@@ -3492,7 +3492,7 @@ function getAttrMap ()
 
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, type, name, chapter_id, sticky, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
+		'SELECT id, type, name, chapter_id, sticky, summary, (SELECT dict_value FROM Dictionary WHERE dict_key = objtype_id) '.
 		'AS objtype_name, (SELECT name FROM Chapter WHERE id = chapter_id) ' .
 		'AS chapter_name, objtype_id, (SELECT COUNT(object_id) FROM AttributeValue AS av INNER JOIN Object AS o ' .
 		'ON av.object_id = o.id WHERE av.attr_id = Attribute.id AND o.objtype_id = AttributeMap.objtype_id) ' .
@@ -3507,6 +3507,7 @@ function getAttrMap ()
 				'id' => $row['id'],
 				'type' => $row['type'],
 				'name' => $row['name'],
+				'display_on_summary' => $row['summary'],
 				'application' => array(),
 			);
 		if ($row['objtype_id'] == '')
@@ -3557,11 +3558,12 @@ function cacheAllObjectsAttributes()
 // Fetches a list of attributes for each object in $object_set array.
 // If $object_set is not set, returns attributes for all objects in DB
 // Returns an array with object_id keys
-function fetchAttrsForObjects ($object_set = array())
+function fetchAttrsForObjects ($object_set = array(), $hide = FALSE)
 {
 	$ret = array();
 	$query =
 		"select AM.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
+		"A.summary as display_on_summary, " .
 		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, O.id as object_id from " .
 		"Object as O left join AttributeMap as AM on O.objtype_id = AM.objtype_id " .
 		"left join Attribute as A on AM.attr_id = A.id " .
@@ -3587,6 +3589,7 @@ function fetchAttrsForObjects ($object_set = array())
 		$record['id'] = $row['attr_id'];
 		$record['name'] = $row['attr_name'];
 		$record['type'] = $row['attr_type'];
+		$record['display_on_summary'] = $row['display_on_summary'];
 		switch ($row['attr_type'])
 		{
 			case 'dict':
@@ -3620,8 +3623,7 @@ function getAttrValues ($object_id)
 	global $object_attribute_cache;
 	if (isset ($object_attribute_cache[$object_id]))
 		return $object_attribute_cache[$object_id];
-
-	$ret = fetchAttrsForObjects(array($object_id));
+	$ret = fetchAttrsForObjects(array($object_id), $hide);
 	$attrs = array();
 	if (isset ($ret[$object_id]))
 	{

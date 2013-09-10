@@ -1859,6 +1859,11 @@ END;
 			// one HW type was moved from the 'Network switch' chapter to the 'Network chassis' chapter
 			// change the type of affected objects to 'Network chassis'
 			$query[] = "UPDATE `Object` SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM `AttributeValue` WHERE attr_id = 2 and uint_value = 935)";
+			$query[] = "ALTER TABLE `Attribute` ADD COLUMN `summary` BOOLEAN DEFAULT TRUE";
+			$query[] = "UPDATE Attribute SET summary = True";
+			$query[] = "INSERT INTO `Attribute` (`id`,`type`,`name`,`summary`) VALUES (31,'string','Mgmt type',FALSE)";
+			$query[] = "INSERT INTO `AttributeMap` (`objtype_id`,`attr_id`,`chapter_id`) VALUES (2,31,NULL),(7,31,NULL),(8,31,NULL),(965,31,NULL)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT('1:', varvalue) WHERE varname = 'DEFAULT_SNMP_COMMUNITY';
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
