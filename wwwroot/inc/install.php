@@ -1772,9 +1772,7 @@ WHERE O.objtype_id = 1562";
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
-('SSH_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
-('RDP_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for RDP-managed objects'),
-('TELNET_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
+('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices')
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links'),
 ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),

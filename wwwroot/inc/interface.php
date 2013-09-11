@@ -8301,16 +8301,20 @@ function formatAttributeValue ($record)
 	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
 	{
 		if ($record['id'] == 3) // FQDN attribute
-		{
-			$protos_to_try = array (
-				'ssh'    => 'SSH_OBJS_LISTSRC',
-				'telnet' => 'TELNET_OBJS_LISTSRC',
-				'rdp'    => 'RDP_OBJS_LISTSRC',
-			);
-			foreach ($protos_to_try as $proto => $cfgvar)
-				if (considerConfiguredConstraint (NULL, $cfgvar))
-					return "<a title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
-		}
+			foreach (getMgmtProtosConfig() as $proto => $filter)
+				try
+				{
+					if (considerGivenConstraint (NULL, $filter))
+					{
+						$blank = (preg_match ('/^https?$/', $proto) ? 'target=_blank' : '');
+						return "<a $blank title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
+					}
+				}
+				catch (RackTablesError $e)
+				{
+					// syntax error in $filter
+					continue;
+				}
 		return isset ($record['href']) ? "<a href=\"".$record['href']."\">${record['a_value']}</a>" : $record['a_value'];
 	}
 

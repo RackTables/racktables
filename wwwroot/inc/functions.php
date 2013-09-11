@@ -6143,4 +6143,25 @@ function cmp_array_sizes ($a, $b)
 	return $diff < 0 ? -1 : ($diff > 0 ? 1 : 0);
 }
 
+// parses the value of MGMT_PROTOS config variable and returns an array
+// indexed by protocol name with corresponding textual RackCode values
+function getMgmtProtosConfig ($ignore_cache = FALSE)
+{
+	static $cache = NULL;
+	if (!$ignore_cache && isset ($cache))
+		return $cache;
+
+	$cache = array();
+	$config = getConfigVar ('MGMT_PROTOS');
+	foreach (explode (';', $config) as $item)
+	{
+		$item = trim ($item);
+		if (! strlen ($item))
+			continue;
+		if (preg_match('/^(\S+)\s*:\s*(.*)$/', $item, $m))
+			$cache[$m[1]] = $m[2];
+	}
+	return $cache;
+}
+
 ?>
