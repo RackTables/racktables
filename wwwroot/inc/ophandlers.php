@@ -350,7 +350,6 @@ $opspec_list['attrs-editattrs-add'] = array
 	(
 		array ('url_argname' => 'attr_type', 'table_colname' => 'type', 'assertion' => 'enum/attr_type'),
 		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
-		array ('url_argname' => 'display_on_summary', 'table_colname' => 'summary', 'assertion' => 'checkbox'),
 	),
 );
 $opspec_list['attrs-editattrs-del'] = array
@@ -369,7 +368,6 @@ $opspec_list['attrs-editattrs-upd'] = array
 	'set_arglist' => array
 	(
 		array ('url_argname' => 'attr_name', 'table_colname' => 'name', 'assertion' => 'string'),
-		array ('url_argname' => 'display_on_summary', 'table_colname' => 'summary', 'assertion' => 'checkbox'),
 	),
 	'where_arglist' => array
 	(
@@ -3379,11 +3377,6 @@ function buildOpspecColumns ($opspec, $listname)
 				default:
 					throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
 				}
-			if ( $argspec['assertion'] == 'checkbox' )
-				if ( $arg_value == 'on' )
-					$arg_value = TRUE;
-				else
-					$arg_value = FALSE;
 			$columns[$table_colname] = $arg_value;
 			break;
 		case array_key_exists ('fix_argname', $argspec): # fixed column

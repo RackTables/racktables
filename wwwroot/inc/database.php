@@ -3558,7 +3558,7 @@ function cacheAllObjectsAttributes()
 // Fetches a list of attributes for each object in $object_set array.
 // If $object_set is not set, returns attributes for all objects in DB
 // Returns an array with object_id keys
-function fetchAttrsForObjects ($object_set = array(), $hide = FALSE)
+function fetchAttrsForObjects ($object_set = array())
 {
 	$ret = array();
 	$query =
@@ -3623,7 +3623,7 @@ function getAttrValues ($object_id)
 	global $object_attribute_cache;
 	if (isset ($object_attribute_cache[$object_id]))
 		return $object_attribute_cache[$object_id];
-	$ret = fetchAttrsForObjects(array($object_id), $hide);
+	$ret = fetchAttrsForObjects(array($object_id));
 	$attrs = array();
 	if (isset ($ret[$object_id]))
 	{
