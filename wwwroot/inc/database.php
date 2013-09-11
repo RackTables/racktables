@@ -4688,16 +4688,36 @@ function getPortInterfaceCompat()
 
 // Return a set of options for a plain SELECT. These options include the current
 // OIF of the given port and all OIFs of its permanent IIF.
+// If given port is already linked, returns only types compatible with the remote port's type
 function getExistingPortTypeOptions ($port_id)
 {
-	$result = usePreparedSelectBlade
-	(
-		'SELECT oif_id, dict_value AS oif_name ' .
-		'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
-		'WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?) ' .
-		'ORDER BY oif_name',
-		array ($port_id)
-	);
+	$portinfo = getPortInfo ($port_id);
+	$remote_type = NULL;
+	if ($portinfo['linked'])
+	{
+		$remote_portinfo = getPortInfo ($portinfo['remote_id']);
+		$result = usePreparedSelectBlade ("
+SELECT DISTINCT oif_id, dict_value AS oif_name
+FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key
+LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ?
+LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ?
+WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
+AND (pc1.type1 IS NOT NULL OR pc2.type2 IS NOT NULL)
+ORDER BY oif_name
+", array ($remote_portinfo['oif_id'], $remote_portinfo['oif_id'], $port_id)
+		);
+	}
+	else
+	{
+		$result = usePreparedSelectBlade ("
+SELECT oif_id, dict_value AS oif_name
+FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key
+WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
+ORDER BY oif_name
+", array ($port_id)
+		);
+	}
+
 	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
 }
 

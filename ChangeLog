@@ -45,6 +45,7 @@
 	update: display all containers and mount points on list objects page (#1081)
 	update: cell filter pages display fast if no filters specified
 		(the MAX_UNFILTERED_ENTITIES config variable must be set)
+	update: port type could now be changed even if port is linked
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
