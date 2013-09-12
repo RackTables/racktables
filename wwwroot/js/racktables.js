@@ -97,3 +97,15 @@ $(document).ready (function (e) {
 		return confirm ("Are you sure?");
 	})
 });
+
+// Used for bulk selection and deselection of object rackspace checkboxes
+$(function () {
+    $("#selectableRack tbody").selectable({
+        filter: 'td.atom',
+        stop: function () {
+            $(".ui-selected input:enabled", this).each(function () {
+                this.checked = !this.checked
+            });
+        }
+    });
+});

@@ -2075,7 +2075,6 @@ function renderRackSpaceForObject ($object_id)
 	startPortlet ('Working copy');
 	includeJQueryUI (false);
 	addJS ('js/racktables.js');
-	addJS ('js/bulkselector.js');
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
