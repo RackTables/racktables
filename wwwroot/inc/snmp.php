@@ -3089,7 +3089,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
-	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
+	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		checkPIC ('1-16');
