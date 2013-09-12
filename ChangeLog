@@ -21,6 +21,7 @@
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
 	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	new feature: port tracing (#333)
+	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
