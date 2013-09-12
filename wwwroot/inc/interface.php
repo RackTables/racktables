@@ -2073,7 +2073,9 @@ function renderRackSpaceForObject ($object_id)
 	// reflect the former state of the grid in current form.
 	echo "<td class=pcright rowspan=2 height='1%'>";
 	startPortlet ('Working copy');
+	includeJQueryUI (false);
 	addJS ('js/racktables.js');
+	addJS ('js/bulkselector.js');
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
@@ -2086,7 +2088,7 @@ function renderRackSpaceForObject ($object_id)
 			mergeGridFormToRack ($rackData);
 		echo "<td valign=top>";
 		echo "<center>\n<h2>${rackData['name']}</h2>\n";
-		echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
+		echo "<table class=rack id=selectableRack border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th width='10%'>&nbsp;</th>";
 		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";

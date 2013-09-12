@@ -695,6 +695,11 @@ div.vlan {
 .state_Tw  { background-color: #804040; }
 .state_Thw { background-color: #ff8080; }
 
+/* highlighting for drag selection */
+.atom.ui-selecting { 
+	background-color: #E2D087 !important; 
+}
+
 /* link with single image as body */
 a.img-link {
 	vertical-align: bottom;
