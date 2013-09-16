@@ -337,7 +337,7 @@ function renderImagePreview ($file_id)
 
 function printStatic404()
 {
-	header ('404 Not Found');
+	header ('HTTP/1.0 404 Not Found');
 ?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>404 Not Found</title>
