@@ -995,7 +995,8 @@ function vrp85Read8021QConfig ($input)
 				elseif (preg_match('/^-+$/', $line))
 				{
 					// commit $current into vlanlist
-					$range = trim (preg_replace('/\s+/', ',', $current['vlanlist']), ',-');
+					$range = preg_replace ('/\s+to\s+/', '-', $current['vlanlist']);
+					$range = trim (preg_replace('/\s+/', ',', $range), ',-');
 					$ret['vlanlist'] = $range == '' ? array() : iosParseVLANString ($range);
 					$current = array();
 
