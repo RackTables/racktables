@@ -2030,7 +2030,10 @@ username is "admin". RackTables wiki provides more information on this topic.
 <?php
 
 if (!platform_is_ok())
+{
+	echo '<h1>Please resolve the failed (red) item(s) above.</h1>';
 	die ('</body></html>');
+}
 
 echo '<h1>Upgrade status</h1>';
 $dbver = getDatabaseVersion();
