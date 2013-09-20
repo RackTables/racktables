@@ -3088,6 +3088,8 @@ function ios12ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/(\d+)\s+([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s.*?(\S+)$/', trim ($line), $matches))
 					break;
+				if ($matches[3] == 'Drop') // 802.1X issue - no port name
+					break;
 				$portname = shortenIfName ($matches[3]);
 				$result[$portname][] = array
 				(
