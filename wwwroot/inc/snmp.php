@@ -2563,18 +2563,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FGS648P-POE: 48 RJ-45/10-100-1000T(X) + 4 combo-gig + uplink slot',
 		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T', 'fgs-uplinks'),
 	),
-	'1991.1.3.54.2.4.1.1' => array # L2 software
-	(
-		'dict_key' => 1362,
-		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
-		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
-	),
-	'1991.1.3.54.2.4.1.3' => array # L3 software
-	(
-		'dict_key' => 1362,
-		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
-		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
-	),
 	'1991.1.3.46.1.1.1.1' => array
 	(
 		'dict_key' => 413,
@@ -2592,6 +2580,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1032,
 		'text' => 'FWS648G: 4 combo-gig + 44 RJ-45/10-100-1000T(X)',
 		'processors' => array ('fgs-1-to-4-comboSFP', 'fgs-any-1000T'),
+	),
+	'1991.1.3.54.2.4.1.1' => array # L2 software
+	(
+		'dict_key' => 1362,
+		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
+		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
+	),
+	'1991.1.3.54.2.4.1.3' => array # L3 software
+	(
+		'dict_key' => 1362,
+		'text' => 'FCX 648: 48 RJ-45/10-100-1000T(X) + uplink slot with 4 SFP+',
+		'processors' => array ('fgs-any-1000T', 'fcx-uplinks', 'fcx-management'),
 	),
 	'2011.2.23.94' => array
 	(
