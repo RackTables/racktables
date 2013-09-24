@@ -1146,6 +1146,42 @@ function updateObjectAllocation ()
 	return showFuncMessage (__FUNCTION__, 'OK', array ($changecnt));
 }
 
+function insertAttribute ()
+{
+	genericAssertion ('attr_type', 'enum/attr_type');
+	genericAssertion ('attr_name', 'string');
+	usePreparedInsertBlade
+	(
+		'Attribute',
+		array
+		(
+			'type' => $_REQUEST['attr_type'],
+			'name' => $_REQUEST['attr_name'],
+			'summary' => isCheckSet('display_on_summary'),
+		)
+	);
+	showOneLiner(48);
+}
+function updateAttribute ()
+{
+	genericAssertion ('attr_name', 'string');
+	genericAssertion ('attr_id', 'uint');
+	usePreparedUpdateBlade
+	(
+		'Attribute',
+		array
+		(
+			'name' => $_REQUEST['attr_name'],
+			'summary' => isCheckSet('display_on_summary'),
+		),
+		array
+		(
+			'id' => $_REQUEST['attr_id'],
+		)
+	);
+	showOneLiner(51);
+}
+
 $msgcode['updateObject']['OK'] = 51;
 function updateObject ()
 {
@@ -1443,7 +1479,7 @@ function resetUIConfig()
 	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
 	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
 	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
-	setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
+	setConfigVar ('DEFAULT_SNMP_COMMUNITY','1:public');
 	setConfigVar ('IPV4_ENABLE_KNIGHT','yes');
 	setConfigVar ('TAGS_TOPLIST_SIZE','50');
 	setConfigVar ('TAGS_QUICKLIST_SIZE','20');

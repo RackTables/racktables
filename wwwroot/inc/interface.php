@@ -1268,7 +1268,8 @@ function renderObject ($object_id)
 		if
 		(
 			strlen ($record['value']) and
-			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id']))) and
+			$record['display_on_summary']
 		)
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary[] = array (getOutputOf ('printTagTRs',
@@ -4274,13 +4275,15 @@ function renderEditAttributesForm ()
 		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
 		global $attrtypes;
 		printSelect ($attrtypes, array ('name' => 'attr_type', 'tabindex' => 101));
-		echo '</td><td>';
+		echo '</td>';
+		echo "<td class=tdleft><input type=checkbox name=display_on_summary checked></td><td>";
 		printImageHREF ('add', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
+		echo "\n";
 	}
 	startPortlet ('Optional attributes');
 	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>Name</th><th>Type</th><th>Display</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (getAttrMap() as $attr)
@@ -4294,10 +4297,16 @@ function renderEditAttributesForm ()
 		else
 			echo getOpLink (array('op'=>'del', 'attr_id'=>$attr['id']), '', 'destroy', 'Remove attribute');
 		echo "</td><td><input type=text name=attr_name value='${attr['name']}'></td>";
-		echo "<td class=tdleft>${attr['type']}</td><td>";
+		echo "<td class=tdleft>${attr['type']}</td>";
+		echo "<td class=tdleft><input type=checkbox name=display_on_summary";
+                if ( $attr['display_on_summary'] ) {
+                  echo " checked";
+                }
+                echo "></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></tr>';
 		echo '</form>';
+		echo "\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
@@ -4680,74 +4689,192 @@ function renderSNMPPortFinder ($object_id)
 		echo "<div class=msg_error>The PHP SNMP extension is not loaded.  Cannot continue.</div>";
 		return;
 	}
-	$snmpcomm = getConfigVar('DEFAULT_SNMP_COMMUNITY');
-	if (empty($snmpcomm))
-		$snmpcomm = 'public';
+	$attrs = getAttrValues($object_id);
+	if ( $attrs[31] )
+		$snmpparams = $attrs['31']['value'];
+	if (empty($snmpparams))
+		$snmpparams = getConfigVar('DEFAULT_SNMP_COMMUNITY');
+	if (empty($snmpparams))
+		$snmpparams = '1:public';
 
-	startPortlet ('SNMPv1');
-	printOpFormIntro ('querySNMPData', array ('ver' => 1));
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th class=tdright><label for=communityv1>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=communityv1 value='${snmpcomm}'></td></tr>";
-	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
-	echo '</table></form>';
-	finishPortlet();
+        if (! empty($_REQUEST['attr_set']))
+		$snmpparams = $_REQUEST['attr_set'];
 
-	startPortlet ('SNMPv2c');
-	printOpFormIntro ('querySNMPData', array ('ver' => 2));
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th class=tdright><label for=communityv2>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=communityv2 value='${snmpcomm}'></td></tr>";
-	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
-	echo '</table></form>';
-	finishPortlet();
+	list($snmp_ver,$snmp_comm, $snmp_lvl, $snmp_aproto, $snmp_akey, $snmp_pproto, $snmp_pkey) = explode(":", $snmpparams);
 
-	startPortlet ('SNMPv3');
-	printOpFormIntro ('querySNMPData', array ('ver' => 3));
+        addJS(<<<END
+function toggleVersion() {
+        var sel = document.getElementById("ver");
+        var ver = sel.options[sel.selectedIndex].value;
+	if ( ver == "3" ) {
+		$('#snmp_1_2').hide();
+		toggleSecLvl();
+	} else {
+		$('#snmp_1_2').show();
+		$('#snmp tr.snmp_3').hide();
+	}
+	updateAttrSet();
+}
+
+function toggleSecLvl() {
+	var lvl = document.getElementById("sec_level");
+	var val = lvl.options[lvl.selectedIndex].value;
+	if ( val == "noAuthNoPriv" ) {
+		$('#snmp tr.snmp_3').hide();
+		$('#snmp tr.snmp_3n').show();
+	} else if ( val == "authNoPriv" ) {
+		$('#snmp tr.snmp_3').hide();
+		$('#snmp tr.snmp_3a').show();
+	} else if ( val == "authPriv" ) {
+		$('#snmp tr.snmp_3').hide();
+		$('#snmp tr.snmp_3p').show();
+	}
+	updateAttrSet();
+}
+
+function updateAttrSet() {
+	var attrSet = document.getElementById("attr_set");
+
+        var sel = document.getElementById("ver");
+        var comm = document.getElementById("community").value;
+	var sel2 = document.getElementById("sec_level");
+        var ver = sel.options[sel.selectedIndex].value;
+	var lvl = sel2.options[sel2.selectedIndex].value;
+	if ( ver == "3" ) {
+		var authStr = "";
+		var privStr = "";
+		switch ( lvl ) {
+			case "authPriv":
+				privStr = ":";
+				var priv = document.getElementsByName('priv_protocol');
+				for (var j = 0; j < priv.length; j++) {
+					if (priv[j].checked) {
+						privStr = ":" + priv[j].value;
+					}
+				}
+				var privpp = document.getElementById('priv_passphrase').value;
+				privStr = privStr + ":" + privpp;
+			case "authNoPriv":
+				authStr = ":";
+				var auth = document.getElementsByName('auth_protocol');
+				for (var j = 0; j < auth.length; j++) {
+					if (auth[j].checked) {
+						authStr = ":" + auth[j].value;
+					}
+				}
+				var authpp = document.getElementById('auth_passphrase').value;
+				authStr = authStr + ":" + authpp;
+		}
+		attrSet.value = ver + ":" + comm + ":" + lvl + authStr + privStr;
+	} else {
+		attrSet.value = ver + ":" + comm;
+	}
+	
+}
+
+$(document).ready(function(){
+	toggleVersion();
+	updateAttrSet();
+});
+
+END
+	, TRUE);
+	startPortlet ('SNMP');
+	printOpFormIntro ('querySNMPData');
 ?>
-	<table cellspacing=0 cellpadding=5 align=center class=widetable>
+	<table cellspacing=0 cellpadding=5 align=center class=widetable id=snmp>
 	<tr>
-		<th class=tdright><label for=sec_name>Security User:</label></th>
-		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo $snmpcomm;?>'></td>
-	</tr>
-	<tr>
-		<th class=tdright><label for="sec_level">Security Level:</label></th>
-		<td class=tdleft><select id="sec_level" name="sec_level">
-			<option value="noAuthNoPriv" selected="selected">noAuth and no Priv</option>
-			<option value="authNoPriv" >auth without Priv</option>
-			<option value="authPriv" >auth with Priv</option>
+		<th class=tdright><label for="ver">SNMP Version:</label></th>
+		<td class=tdleft><select id="ver" name="ver" onChange="toggleVersion();">
+<?php
+	foreach ( array('1' => '1', '2' => '2c', '3' => '3') as $opt => $val)
+	{
+		echo "<option value='$opt'";
+		if ( $val == $snmp_ver )
+			echo " selected";
+		echo ">$val</option>";
+	}
+?>
 		</select></td>
 	</tr>
-	<tr>
+	<tr id="snmp_1_2">
+		<th class=tdright><label for=community>Community: </label></th>
+		<td class=tdleft><input type=text name=community id=community value='<?php echo $snmp_comm ?>' onChange='updateAttrSet()'></td>
+	</tr>
+	<tr class="snmp_3 snmp_3n snmp_3a snmp_3p">
+		<th class=tdright><label for=sec_name>Security User:</label></th>
+		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo $snmp_comm;?>' onChange='updateAttrSet()'></td>
+	</tr>
+	<tr class="snmp_3 snmp_3n snmp_3a snmp_3p">
+		<th class=tdright><label for="sec_level">Security Level:</label></th>
+		<td class=tdleft><select id="sec_level" name="sec_level" onChange="toggleSecLvl();">
+<?php
+	foreach ( array('noAuthNoPriv' => 'no Auth and No Priv',
+                        'authNoPriv' => 'Auth without Priv',
+                        'authPriv' => 'Auth with Priv') as $opt => $val)
+	{
+		echo "<option value='$opt'";
+		if ( $opt == $snmp_lvl )
+			echo " selected";
+		echo ">$val</option>";
+	}
+?>
+		</select></td>
+	</tr>
+        </div>
+	<tr class="snmp_3 snmp_3a snmp_3p">
 		<th class=tdright><label for="auth_protocol_1">Auth Type:</label></th>
 		<td class=tdleft>
-		<input id=auth_protocol_1 name=auth_protocol type=radio value=md5 />
-		<label for=auth_protocol_1>MD5</label>
-		<input id=auth_protocol_2 name=auth_protocol type=radio value=sha />
-		<label for=auth_protocol_2>SHA</label>
+<?php
+	$cnt = 1;
+	foreach ( array('md5' => 'MD5',
+                        'sha' => 'SHA') as $opt => $val)
+	{
+		echo "<input type='radio' name='auth_protocol' id='auth_protocol_$cnt' value='$opt' onChange='updateAttrSet()'";
+		if ( $opt == strtolower($snmp_lvl) )
+			echo " checked";
+		echo "/><label for='auth_protocol_$cnt'>$val</label>";
+		$cnt++;
+	}
+?>
 		</td>
 	</tr>
-	<tr>
+	<tr class="snmp_3 snmp_3a snmp_3p">
 		<th class=tdright><label for=auth_passphrase>Auth Key:</label></th>
-		<td class=tdleft><input type=text id=auth_passphrase name=auth_passphrase></td>
+		<td class=tdleft><input type=text id=auth_passphrase name=auth_passphrase value='<?php echo $snmp_akey ?>' onkeyup="updateAttrSet();"></td>
 	</tr>
-	<tr>
+	<tr class="snmp_3 snmp_3p">
 		<th class=tdright><label for=priv_protocol_1>Priv Type:</label></th>
 		<td class=tdleft>
-		<input id=priv_protocol_1 name=priv_protocol type=radio value=DES />
-		<label for=priv_protocol_1>DES</label>
-		<input id=priv_protocol_2 name=priv_protocol type=radio value=AES />
-		<label for=priv_protocol_2>AES</label>
+<?php
+	$cnt = 1;
+	foreach ( array('DES' => 'DES',
+                        'AES' => 'AES') as $opt => $val)
+	{
+		echo "<input type='radio' name='priv_protocol' id='priv_protocol_$cnt' value='$opt' onChange='updateAttrSet()'";
+		if ( $opt == strtoupper($snmp_ptype) )
+			echo " checked";
+		echo "/><label for='priv_protocol_$cnt'>$val</label>";
+		$cnt++;
+	}
+?>
 		</td>
 	</tr>
-	<tr>
+	<tr class="snmp_3 snmp_3p">
 		<th class=tdright><label for=priv_passphrase>Priv Key</label></th>
-		<td class=tdleft><input type=text id=priv_passphrase name=priv_passphrase></td>
+		<td class=tdleft><input type=text id=priv_passphrase name=priv_passphrase value='<?php echo $snmp_pkey ?>' onkeyup='updateAttrSet();'></td>
 	</tr>
-	<tr><td colspan=2><input type=submit value="Try now"></td></tr>
+	<tr>
+		<td colspan=2><input type=submit value="Try now"></td>
+	</tr>
+	<tr><td colspan=2>&nbsp;</td></tr>
+	<tr>
+		<th class=tdright><label for=attr_set>Attr String</label></th>
+		<td class=tdleft><input type=text id=attr_set value='' size=50 /></td>
+	</tr>
 	</table>
+	</form>
 <?php
-	echo '</form>';
 	finishPortlet();
 }
 
