@@ -47,7 +47,7 @@ function ios12ReadLLDPStatus ($input)
 		if (!$got_header)
 			continue;
 
-		$matches = preg_split ('/\s+/', $line);
+		$matches = preg_split ('/\s+/', trim ($line));
 
 		switch (count ($matches))
 		{
@@ -152,64 +152,6 @@ function vrpReadLLDPStatus ($input)
 		}
 	}
 	unset ($ret['current']);
-	return $ret;
-}
-
-function nxos4ReadLLDPStatus ($input)
-{
-	$ret = array();
-	$current = array();
-	$if_name = NULL;
-	$sys_descr = NULL;
-	$port_descr = NULL;
-	foreach (explode ("\n", $input) as $line)
-	{
-		$line = trim ($line);
-		if ($line == '')
-		{
-			if (isset ($if_name) and isset ($current['port']) and isset ($current['device']))
-			{
-				// Juniper MX routers sends SNMP if-id in PortID TLV. Use Port Description instead
-				if (isset ($port_descr) && preg_match ('/juniper/i', $sys_descr) && preg_match ('/^\d+$/', $current['port']))
-				{
-					$port_descr = preg_replace ('/[^\x20-z]/', '', $port_descr); // cut non-printable chars
-					$current['port'] = $port_descr;
-				}
-				$ret[$if_name][] = $current;
-			}
-			$current = array();
-			$if_name = NULL;
-			$sys_descr = NULL;
-			$port_descr = NULL;
-		}
-		else
-		{
-			$pair = explode (': ', $line);
-			if (count ($pair) >= 2 and isset ($pair[1]))
-			{
-				list ($key, $value) = $pair;
-				$value = trim ($value, "\x06\x10\x13");
-				switch ($key)
-				{
-					case 'Port id':
-						$current['port'] = $value;
-						break;
-					case 'Port Description':
-						$port_descr = $value;
-						break;
-					case 'System Description':
-						$sys_descr = $value;
-						break;
-					case 'System Name':
-						$current['device'] = $value;
-						break;
-					case 'Local Port id':
-						$if_name = shortenIfName ($value);
-						break;
-				}
-			}
-		}
-	}
 	return $ret;
 }
 
@@ -1225,9 +1167,6 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
-		case 'getlldpstatus':
-			$ret .= "show lldp neighbors detail\n";
-			break;
 		case 'set mode':
 			if ($cmd['arg2'] == 'trunk')
 			{
