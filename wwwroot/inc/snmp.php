@@ -1466,6 +1466,24 @@ $iftable_processors['tplink-21-to-24-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['tplink-l2-any-100T'] = array
+(
+	'pattern' => 'port ([[:digit:]]+): 10/100 Copper',
+	'replacement' => 'e\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['tplink-l2-25-to-28-1000T'] = array
+(
+	'pattern' => 'port (25|26|27|28): Gigabit Copper',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['tplink-any-1000T'] = array
 (
 	'pattern' => '@^.+ Port on unit .+ port ([[:digit:]]+)$@',
@@ -2752,6 +2770,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 577,
 		'text' => 'FS750T2: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('netgear-49-to-50-combo-1000SFP', 'netgear-49-to-50-combo-1000T', 'netgear-any-100TX'),
+	),
+	'11863.1.1.1' => array
+	(
+		'dict_key' => 2039,
+		'text' => 'TL-SL5428E: 24 RJ-45/10-100T + 4 1000T',
+		'processors' => array ('tplink-l2-25-to-28-1000T', 'tplink-l2-any-100T'),
 	),
 	'11863.6.10.58' => array
 	(
