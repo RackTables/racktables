@@ -3167,7 +3167,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.5024/', $sysObjectID):
-	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID): // TPLink
+	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
+	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
