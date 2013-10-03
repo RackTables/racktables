@@ -1475,6 +1475,16 @@ $iftable_processors['tplink-l2-any-100T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['tplink-l2-27-to-28-combo-1000SFP'] = array
+(
+	'pattern' => 'port (27|28): Gigabit Copper',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+
 $iftable_processors['tplink-l2-25-to-28-1000T'] = array
 (
 	'pattern' => 'port (25|26|27|28): Gigabit Copper',
@@ -2775,7 +2785,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2039,
 		'text' => 'TL-SL5428E: 24 RJ-45/10-100T + 4 1000T',
-		'processors' => array ('tplink-l2-25-to-28-1000T', 'tplink-l2-any-100T'),
+		'processors' => array ('tplink-l2-27-to-28-combo-1000SFP', 'tplink-l2-25-to-28-1000T', 'tplink-l2-any-100T'),
 	),
 	'11863.6.10.58' => array
 	(
