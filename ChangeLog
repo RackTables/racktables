@@ -39,6 +39,7 @@
 	bugfix: user-overrided config values were displayed in global config editor form
 	bugfix: API: built-in hook functions were not called in 'before' and 'after' modes
 	bugfix: Linux host's port status fetching was broken (#903)
+	bugfix: recognize unqualified hostnames in URLs (#1023)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab

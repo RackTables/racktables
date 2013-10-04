@@ -1111,7 +1111,7 @@ function string_insert_hrefs ($s)
 		return $s;
 
 	$rexProtocol  = '(https?://)?';
-	$rexDomain    = '(?:[-a-zA-Z0-9]{1,63}\.)+[a-zA-Z][-a-zA-Z0-9]{1,62}';
+	$rexDomain    = '(?:[-a-zA-Z0-9]{1,63}\.)*[a-zA-Z][-a-zA-Z0-9]{1,62}';
 	$rexIp        = '(?:[1-9][0-9]{0,2}\.|0\.){3}(?:[1-9][0-9]{0,2}|0)'; // doesn't support IPv6 addresses
 	$rexPort      = '(:[0-9]{1,5})?';
 	$rexPath      = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
