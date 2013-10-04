@@ -2132,6 +2132,18 @@ $dictionary = array
 	2036 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4200'),
 	2037 => array ('chapter_id' => 12, 'dict_value' => 'F5 (blade)%GPASS%VIPRION 4300'),
 	2038 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst WS-CBS3012-IBM/-I | http://www.cisco.com/en/US/products/ps8766/index.html]]'),
+	2039 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1000U'),
+	2040 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1100'),
+	2041 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1100Hx2'),
+	2042 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1100AH'),
+	2043 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1100AHx2'),
+	2044 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1200'),
+	2045 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB2011L-RM'),
+	2046 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB2011iL-RM'),
+	2047 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB2011UAS-RM'),
+	2048 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1016-12G'),
+	2049 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1036-8G-2S+'),
+	2050 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1036-12G-4S'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
