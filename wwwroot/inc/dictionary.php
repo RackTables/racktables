@@ -2144,6 +2144,13 @@ $dictionary = array
 	2048 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1016-12G'),
 	2049 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1036-8G-2S+'),
 	2050 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1036-12G-4S'),
+	2051 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7150S-24'),
+	2052 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7150S-52'),
+	2053 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7150S-64'),
+	2054 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7100S'),
+	2055 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050T-36'),
+	2056 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050QX-32'),
+	2057 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-128'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
