@@ -4,6 +4,7 @@
 		rspools were linked with the same balancer-vsg pair
 	bugfix: change blade orientation of Cisco 6509-V-E (#985)
 	bugfix: default values of some LDAP options weren't being used
+	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	update: support of Huawei CE5800 series switch
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
@@ -11,6 +12,7 @@
 	update: display location tree in breadcrumbs (#905)
 	update: display location parents in the rack list when mounting an object (#925)
 	update: display location parents in the row list when editing a rack (#993)
+	update: sort by location and row name when mounting an object (#1021)
 	update: add a link to the View Rack page (#947)
 	update: support blades of varying sizes in the same chassis (#923) by Mark Wilkinson
 	update: add F5 VIPRION models to dictionary (#987)
@@ -19,7 +21,6 @@
 		WS-C2950G-24-DC (#981), WS-C3560GV2-48TS (#983), WS-C2950SX-24 (#991),
 		HP ProCurve J9028B (#941), J9022A (#767), Netgear GS724TP (#1001) by Mark Wilkinson
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
-	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	new feature: port tracing (#333)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23

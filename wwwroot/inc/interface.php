@@ -1471,6 +1471,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 			$row_name = $rack['row_name'];
 		$rdata[$row_name][$rack['id']] = $rack['name'];
 	}
+	ksort ($rdata, SORT_NATURAL);
 	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
 	foreach ($rdata as $optgroup => $racklist)
 	{
