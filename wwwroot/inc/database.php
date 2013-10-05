@@ -3691,8 +3691,6 @@ function convertPDOException ($e)
 	switch ($e->getCode() . '-' . $e->errorInfo[1])
 	{
 	case '23000-1062':
-		$text = 'such record already exists';
-		break;
 	case '23000-1205':
 		$text = 'such record already exists';
 		break;
@@ -4241,13 +4239,13 @@ function saveScript ($name = '', $text)
 function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip_bin))
-		throw new InvalidArgException ('localip_bin', $localip_bin, "Non-existant ip");
+		throw new InvalidRequestArgException ('localip_bin', $localip_bin, 'Non-existent ip');
 	if (NULL === getIPv4AddressNetworkId ($remoteip_bin))
-		throw new InvalidArgException ('remoteip_bin', $remoteip_bin, "Non-existant ip");
+		throw new InvalidRequestArgException ('remoteip_bin', $remoteip_bin, 'Non-existent ip');
 	if ( ($localport <= 0) or ($localport >= 65536) )
-		throw new InvalidArgException ('localport', $localport, "invaild port");
+		throw new InvalidRequestArgException ('localport', $localport, 'Invaild port');
 	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
-		throw new InvalidArgException ('remoteport', $remoteport, "invaild port");
+		throw new InvalidRequestArgException ('remoteport', $remoteport, 'Invaild port');
 
 	return usePreparedInsertBlade
 	(
