@@ -918,9 +918,8 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 
 function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $title = '', $comment = '', $class = '')
 {
-	$ret = '';
 	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
-	echo '<a href="#"';
+	$ret = '<a href="#"';
 	$class = trim ($class);
 	if (! empty ($class))
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';

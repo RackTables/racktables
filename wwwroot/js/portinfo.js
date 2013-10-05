@@ -7,7 +7,6 @@ bk_event = null;
 
 (function () {
 	var menu_item_candidates = {
-		trace: {'Trace this port': {onclick: tracePortClicked, className: 'itemname-trace'}},
 		link: {'Show links status': {onclick: menuItemClicked, className: 'itemname-link'}},
 		conf: {'Show ports configuration': {onclick: menuItemClicked, className: 'itemname-conf'}},
 		mac: {'Show learned MACs': {onclick: menuItemClicked, className: 'itemname-mac'}}
@@ -121,16 +120,6 @@ function menuItemClicked(menuItem, menu) {
 		}
 	});
 	disableMenuItem(menuItem);
-}
-
-function tracePortClicked(event) {
-	var portnameElem = $(this).siblings('.interactive-portname')[0];
-	var port_id = portnameElem.name.replace (/port-/, '');
-	window.open (
-		"?module=popup&helper=traceroute&port=" + port_id,
-		'findlink',
-		'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no'
-	);
 }
 
 function rememberCursorPosition(event) {
