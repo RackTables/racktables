@@ -26,6 +26,7 @@
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
 	update: searches now examine 'dictionary' attributes (#1003)
 	update: exclude some elements when printing to paper (#464)
+	update: add resource pool info to the Virtual Resources cluster portlet (#915)
 	new feature: port tracing (#333)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23

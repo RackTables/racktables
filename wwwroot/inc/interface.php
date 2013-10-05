@@ -8437,14 +8437,18 @@ function renderVirtualResourcesSummary ()
 	if (count($clusters) > 0)
 	{
 		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
-		echo "<tr><th>Cluster</th><th>Hypervisors</th><th>VMs</th></tr>\n";
+		echo "<tr><th>Cluster</th><th>Hypervisors</th><th>Resource Pools</th><th>Cluster VMs</th><th>RP VMs</th><th>Total VMs</th></tr>\n";
 		$order = 'odd';
 		foreach ($clusters as $cluster)
 		{
+			$total_vms = $cluster['cluster_vms'] + $cluster['resource_pool_vms'];
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class="tdleft">' . mkA ("<strong>${cluster['name']}</strong>", 'object', $cluster['id']) . '</td>';
 			echo "<td class='tdleft'>${cluster['hypervisors']}</td>";
-			echo "<td class='tdleft'>${cluster['VMs']}</td>";
+			echo "<td class='tdleft'>${cluster['resource_pools']}</td>";
+			echo "<td class='tdleft'>${cluster['cluster_vms']}</td>";
+			echo "<td class='tdleft'>${cluster['resource_pool_vms']}</td>";
+			echo "<td class='tdleft'>$total_vms</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}

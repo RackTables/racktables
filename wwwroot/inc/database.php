@@ -1177,32 +1177,55 @@ function commitUnlinkEntitiesByLinkID ($link_id)
 	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
 }
 
-// The following functions return stats about VM-related info.
-// TODO: simplify the queries
+// return VM clusters and corresponding stats
+//	- number of hypervisors
+//	- number of resource pools
+//	- number of VMs whose parent is the cluster itself
+//	- number of VMs whose parent is one of the resource pools in the cluster
 function getVMClusterSummary ()
 {
-	$result = usePreparedSelectBlade
-	(
-		"SELECT O.id, O.name, " .
-		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN Object O_H ON EL.child_entity_id = O_H.id " .
-		"LEFT JOIN AttributeValue AV ON O_H.id = AV.object_id " .
-		"WHERE EL.parent_entity_type = 'object' " .
-		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = O.id " .
-		"AND O_H.objtype_id = 4 " .
-		"AND AV.attr_id = 26 " .
-		"AND AV.uint_value = 1501) AS hypervisors, " .
-		"(SELECT COUNT(*) FROM EntityLink EL " .
-		"LEFT JOIN Object O_VM ON EL.child_entity_id = O_VM.id " .
-		"WHERE EL.parent_entity_type = 'object' " .
-		"AND EL.child_entity_type = 'object' " .
-		"AND EL.parent_entity_id = O.id " .
-		"AND O_VM.objtype_id = 1504) AS VMs " .
-		"FROM Object O " .
-		"WHERE O.objtype_id = 1505 " .
-		"ORDER BY O.name"
-	);
+	$query = <<<END
+SELECT
+	O.id,
+	O.name,
+	(SELECT COUNT(*) FROM EntityLink EL
+		LEFT JOIN Object O_H ON EL.child_entity_id = O_H.id
+		LEFT JOIN AttributeValue AV ON O_H.id = AV.object_id
+		WHERE EL.parent_entity_type = 'object'
+		AND EL.child_entity_type = 'object'
+		AND EL.parent_entity_id = O.id
+		AND O_H.objtype_id = 4
+		AND AV.attr_id = 26
+		AND AV.uint_value = 1501) AS hypervisors,
+	(SELECT COUNT(*) FROM EntityLink EL
+		LEFT JOIN Object O_RP ON EL.child_entity_id = O_RP.id
+		WHERE EL.parent_entity_type = 'object'
+		AND EL.child_entity_type = 'object'
+		AND EL.parent_entity_id = O.id
+		AND O_RP.objtype_id = 1506) AS resource_pools,
+	(SELECT COUNT(*) FROM EntityLink EL
+		LEFT JOIN Object O_C_VM ON EL.child_entity_id = O_C_VM.id
+		WHERE EL.parent_entity_type = 'object'
+		AND EL.child_entity_type = 'object'
+		AND EL.parent_entity_id = O.id
+		AND O_C_VM.objtype_id = 1504) AS cluster_vms,
+	(SELECT COUNT(*) FROM EntityLink EL
+		LEFT JOIN Object O_RP_VM ON EL.child_entity_id = O_RP_VM.id
+		WHERE EL.parent_entity_type = 'object'
+		AND EL.child_entity_type = 'object'
+		AND EL.parent_entity_id IN
+			(SELECT child_entity_id FROM EntityLink EL
+				LEFT JOIN Object O_RP ON EL.child_entity_id = O_RP.id
+				WHERE EL.parent_entity_type = 'object'
+				AND EL.child_entity_type = 'object'
+				AND EL.parent_entity_id = O.id
+				AND O_RP.objtype_id = 1506)
+		AND O_RP_VM.objtype_id = 1504) AS resource_pool_vms
+FROM Object O
+WHERE O.objtype_id = 1505
+ORDER BY O.name
+END;
+	$result = usePreparedSelectBlade ($query);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
