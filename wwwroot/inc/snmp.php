@@ -1466,6 +1466,33 @@ $iftable_processors['tplink-21-to-24-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['tplink-25-to-28-1000T'] = array
+(
+	'pattern' => 'port (25|26|27|28): Gigabit Copper',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['tplink-27-to-28-combo-1000SFP'] = array
+(
+	'pattern' => 'port (27|28): Gigabit Copper',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['tplink-any-100T'] = array
+(
+	'pattern' => 'port ([[:digit:]]+): 10/100 Copper',
+	'replacement' => 'e\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+); 
+
 $iftable_processors['tplink-any-1000T'] = array
 (
 	'pattern' => '@^.+ Port on unit .+ port ([[:digit:]]+)$@',
@@ -2753,6 +2780,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FS750T2: 48 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('netgear-49-to-50-combo-1000SFP', 'netgear-49-to-50-combo-1000T', 'netgear-any-100TX'),
 	),
+	'11863.1.1.1' => array
+	(
+		'dict_key' => 2058,
+		'text' => 'TL-SL5428E: 24 RJ-45/10-100TX + 2 1000T + 2 combo ports',
+		'processors' => array ('tplink-27-to-28-combo-1000SFP', 'tplink-25-to-28-1000T', 'tplink-any-100T'),
+	),
 	'11863.6.10.58' => array
 	(
 		'dict_key' => 1793,
@@ -3133,7 +3166,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.5024/', $sysObjectID):
-	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID): // TPLink
+	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
+	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
