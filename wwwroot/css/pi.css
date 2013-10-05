@@ -1,3 +1,15 @@
+@media print {
+	body table.maintable { font-size: 80%; }
+	.mainheader { display: none; }
+	.menubar { display: none; }
+	.tabbar { display: none; }
+	div.greynavbar { border-top-width: 0px; }
+	.greynavbar * a[class=std] { display: none; }
+	.greynavbar * a[class=attn] { display: none; }
+	td.atom.state_Th div a { color: red; font-weight: bold; }
+	td.atom div a { font-weight: normal; }
+}
+
 td.submit {
 	text-align: center;
 }
