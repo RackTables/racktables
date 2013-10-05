@@ -2994,22 +2994,26 @@ function getObjectAttrsSearchResults ($what)
 
 // Search stickers and return a list of pairs "object_id-attribute_id",
 // which matched. A partilar object_id could be returned more than once, if it has
-// multiple matching stickers. Search is only performed on "string" attributes.
+// multiple matching stickers. Search is only performed on "string" or "dict" attributes.
 function getStickerSearchResults ($tablename, $what)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT object_id, attr_id FROM AttributeValue AV ' .
+		'SELECT AV.object_id, AV.attr_id FROM AttributeValue AV ' .
 		"INNER JOIN ${tablename} O ON AV.object_id = O.id " .
-		'WHERE string_value LIKE ? ORDER BY object_id',
-		array ("%${what}%")
+		'INNER JOIN Attribute A ON AV.attr_id = A.id ' .
+		'LEFT JOIN AttributeMap AM ON A.type = "dict" AND AV.object_tid = AM.objtype_id AND AV.attr_id = AM.attr_id ' .
+		'LEFT JOIN Dictionary D ON AM.chapter_id = D.chapter_id AND AV.uint_value = D.dict_key ' .
+		'WHERE string_value LIKE ? ' .
+		'OR (A.type = "dict" AND dict_value LIKE ?) ORDER BY object_id',
+		array ("%${what}%", "%${what}%")
 	);
 
 	$map = getAttrMap();
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if ($map[$row['attr_id']]['type'] == 'string')
+		if (in_array ($map[$row['attr_id']]['type'], array ('string', 'dict')))
 		{
 			$ret[$row['object_id']]['id'] = $row['object_id'];
 			$ret[$row['object_id']]['by_sticker'][] = $row['attr_id'];

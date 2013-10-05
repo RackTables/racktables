@@ -23,6 +23,7 @@
 		HP ProCurve J9028B (#941), J9022A (#767), Netgear GS724TP (#1001),
 		TL-SL5428E (#1015) by Mark Wilkinson
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
+	update: searches now examine 'dictionary' attributes (#1003)
 	new feature: port tracing (#333)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23
