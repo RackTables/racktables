@@ -2152,6 +2152,7 @@ $dictionary = array
 	2056 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050QX-32'),
 	2057 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-128'),
 	2058 => array ('chapter_id' => 12, 'dict_value' => '[[TPLink%GPASS%TL-SL5428E | http://www.tp-link.com/en/products/details/?model=TL-SL5428E]]'),
+	2059 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560CG-8PC-S'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
