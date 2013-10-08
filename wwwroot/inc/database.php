@@ -832,9 +832,9 @@ SELECT
 	Port.type AS oif_id,
 	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
 	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
-	IF(la.id, la.id, lb.id) AS link_id,
-	IF(la.id, la.cable, lb.cable) AS cableid,
-	rp.id AS remote_id,
+	Link.id AS link_id,
+	Link.cable AS cableid,
+	IF(Link.porta = Port.id, Link.portb, Link.porta) AS remote_id,
 	rp.name AS remote_name,
 	rp.object_id AS remote_object_id,
 	ro.name AS remote_object_name,
@@ -845,9 +845,8 @@ SELECT
 FROM
 	Port
 	INNER JOIN Object ON Port.object_id = Object.id
-	LEFT JOIN Link AS la ON Port.id = la.porta
-	LEFT JOIN Link AS lb ON Port.id = lb.portb
-	LEFT JOIN Port AS rp ON (IF(la.id, la.portb, lb.porta)) = rp.id
+	LEFT JOIN Link ON Port.id = Link.porta OR Port.id = Link.portb
+	LEFT JOIN Port AS rp ON (IF(Link.porta = Port.id, Link.portb, Link.porta)) = rp.id
 	LEFT JOIN Object AS ro ON rp.object_id = ro.id
 	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = rp.id ORDER BY date DESC LIMIT 1)
 WHERE
