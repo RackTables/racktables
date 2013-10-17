@@ -1041,12 +1041,12 @@ $iftable_processors['juniper-ex-pic0-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['juniper-ex-mgmt'] = array
+$iftable_processors['juniper-mgmt'] = array
 (
-	'pattern' => '/^me0$/',
-	'replacement' => 'me0',
+	'pattern' => '/^(vme|me0|fxp0)$/',
+	'replacement' => '\\0',
 	'dict_key' => '1-24',
-	'label' => 'MGMT',
+	'label' => '\\0',
 	'try_next_proc' => FALSE,
 );
 
@@ -2701,30 +2701,528 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'CE5850-48T4S2Q-EI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
 		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
+	'2636.1.1.1.2.1' => array
+	(
+		'dict_key' => 2060,
+		'text' => 'Juniper M40',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.2' => array
+	(
+		'dict_key' => 2061,
+		'text' => 'Juniper M20',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.3' => array
+	(
+		'dict_key' => 2062,
+		'text' => 'Juniper M160',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.4' => array
+	(
+		'dict_key' => 2063,
+		'text' => 'Juniper M10',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.5' => array
+	(
+		'dict_key' => 2064,
+		'text' => 'Juniper M5',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.6' => array
+	(
+		'dict_key' => 929,
+		'text' => 'Juniper T640',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.7' => array
+	(
+		'dict_key' => 928,
+		'text' => 'Juniper T320',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.8' => array
+	(
+		'dict_key' => 922,
+		'text' => 'Juniper M40e',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.9' => array
+	(
+		'dict_key' => 924,
+		'text' => 'Juniper M320',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.10' => array
+	(
+		'dict_key' => 920,
+		'text' => 'Juniper M7i',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.11' => array
+	(
+		'dict_key' => 921,
+		'text' => 'Juniper M10i',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.13' => array
+	(
+		'dict_key' => 2065,
+		'text' => 'Juniper J2300',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.14' => array
+	(
+		'dict_key' => 2066,
+		'text' => 'Juniper J4300',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.15' => array
+	(
+		'dict_key' => 2067,
+		'text' => 'Juniper J6300',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.17' => array
+	(
+		'dict_key' => 2069,
+		'text' => 'Juniper TX',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.18' => array
+	(
+		'dict_key' => 923,
+		'text' => 'Juniper M120',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.19' => array
+	(
+		'dict_key' => 918,
+		'text' => 'Juniper J4350',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.20' => array
+	(
+		'dict_key' => 919,
+		'text' => 'Juniper J6350',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.21' => array
+	(
+		'dict_key' => 927,
+		'text' => 'Juniper MX960',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.22' => array
+	(
+		'dict_key' => 2070,
+		'text' => 'Juniper J4320',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.23' => array
+	(
+		'dict_key' => 916,
+		'text' => 'Juniper J2320',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.24' => array
+	(
+		'dict_key' => 917,
+		'text' => 'Juniper J2350',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.25' => array
+	(
+		'dict_key' => 926,
+		'text' => 'Juniper MX480',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.26' => array
+	(
+		'dict_key' => 2071,
+		'text' => 'Juniper SRX5800',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 12,
+	),
+	'2636.1.1.1.2.27' => array
+	(
+		'dict_key' => 930,
+		'text' => 'Juniper T1600',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.28' => array
+	(
+		'dict_key' => 2072,
+		'text' => 'Juniper SRX5600',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 6,
+	),	
 	'2636.1.1.1.2.29' => array
 	(
 		'dict_key' => 925,
-		'text' => 'MX240 modular router',
-		'processors' => array ('juniper-DPCE-R-4XGE-XFP'),
+		'text' => 'Juniper MX240',
+		'processors' => array ('juniper-mgmt'),
 	),
-	// Juniper Networks assigns single SNMP OID per series:
-	// EX2200 2636.1.1.1.1.43
-	// EX3200 2636.1.1.1.2.30
-	// EX4200 2636.1.1.1.2.31
-	// EX4500 2636.1.1.1.1.44
-	// There is a special workaround in code below to derive specific
-	// product number from sysDescr string.
 	'2636.1.1.1.2.30' => array
 	(
-		'dict_key' => 900,
-		'text' => 'Juniper EX3200 series',
-		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+		'dict_key' => 2073,
+		'text' => 'Juniper EX3200',
+		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.31' => array
 	(
-		'dict_key' => 905,
-		'text' => 'Juniper EX4200 series',
-		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+		'dict_key' => 2074,
+		'text' => 'Juniper EX4200',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.32' => array
+	(
+		'dict_key' => 2075,
+		'text' => 'Juniper EX8208',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.33' => array
+	(
+		'dict_key' => 2076,
+		'text' => 'Juniper EX8216',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.34' => array
+	(
+		'dict_key' => 2077,
+		'text' => 'Juniper SRX3600',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 13,
+	),
+	'2636.1.1.1.2.35' => array
+	(
+		'dict_key' => 2078,
+		'text' => 'Juniper SRX3400',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 8,
+	),
+	'2636.1.1.1.2.36' => array
+	(
+		'dict_key' => 2079,
+		'text' => 'Juniper SRX210',
+		'processors' => array (),
+		'node_offset' => 2,
+	),
+	'2636.1.1.1.2.37' => array
+	(
+		'dict_key' => 931,
+		'text' => 'Juniper TX Plus',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.38' => array
+	(
+		'dict_key' => 2080,
+		'text' => 'Juniper JCS',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.39' => array
+	(
+		'dict_key' => 2081,
+		'text' => 'Juniper SRX240',
+		'processors' => array (),
+		'node_offset' => 5,
+	),
+	'2636.1.1.1.2.40' => array
+	(
+		'dict_key' => 2082,
+		'text' => 'Juniper SRX650',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 9,
+	),
+	'2636.1.1.1.2.41' => array
+	(
+		'dict_key' => 2083,
+		'text' => 'Juniper SRX100',
+		'processors' => array (),
+		'node_offset' => 1,
+	),
+	'2636.1.1.1.2.42' => array
+	(
+		'dict_key' => 2084,
+		'text' => 'Juniper LN1000V',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.43' => array
+	(
+		'dict_key' => 2085,
+		'text' => 'Juniper EX2200',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.44' => array
+	(
+		'dict_key' => 2086,
+		'text' => 'Juniper EX4500',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.49' => array
+	(
+		'dict_key' => 2088,
+		'text' => 'Juniper SRX1400',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 4,
+	),
+	'2636.1.1.1.2.57' => array
+	(
+		'dict_key' => 2089,
+		'text' => 'Juniper MX80',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.58' => array
+	(
+		'dict_key' => 2090,
+		'text' => 'Juniper SRX220',
+		'processors' => array (),
+		'node_offset' => 3,
+	),
+	'2636.1.1.1.2.59' => array
+	(
+		'dict_key' => 2091,
+		'text' => 'Juniper EXXRE',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.60' => array
+	(
+		'dict_key' => 2092,
+		'text' => 'Juniper QFXInterconnect',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.61' => array
+	(
+		'dict_key' => 2093,
+		'text' => 'Juniper QFXNode',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.62' => array
+	(
+		'dict_key' => 2094,
+		'text' => 'Juniper QFXJVRE',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.63' => array
+	(
+		'dict_key' => 2095,
+		'text' => 'Juniper EX4300',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.64' => array
+	(
+		'dict_key' => 2096,
+		'text' => 'Juniper SRX110',
+		'processors' => array (),
+		'node_offset' => 1,
+	),
+	'2636.1.1.1.2.65' => array
+	(
+		'dict_key' => 2097,
+		'text' => 'Juniper SRX120',
+		'processors' => array (),
+		'node_offset' => 1,
+	),
+	'2636.1.1.1.2.66' => array
+	(
+		'dict_key' => 2098,
+		'text' => 'Juniper MAG8600',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.67' => array
+	(
+		'dict_key' => 2099,
+		'text' => 'Juniper MAG6611',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.68' => array
+	(
+		'dict_key' => 2100,
+		'text' => 'Juniper MAG6610',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.69' => array
+	(
+		'dict_key' => 2101,
+		'text' => 'Juniper PTX5000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.70' => array
+	(
+		'dict_key' => 2102,
+		'text' => 'Juniper PTX9000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.74' => array
+	(
+		'dict_key' => 2103,
+		'text' => 'Juniper EX6210',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.76' => array
+	(
+		'dict_key' => 2105,
+		'text' => 'Juniper EX3300',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.77' => array
+	(
+		'dict_key' => 2106,
+		'text' => 'Juniper DELLJSRX3600',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.78' => array
+	(
+		'dict_key' => 2107,
+		'text' => 'Juniper DELLJSRX3400',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.79' => array
+	(
+		'dict_key' => 2108,
+		'text' => 'Juniper DELLJSRX1400',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.80' => array
+	(
+		'dict_key' => 2109,
+		'text' => 'Juniper DELLJSRX5800',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.81' => array
+	(
+		'dict_key' => 2110,
+		'text' => 'Juniper DELLJSRX5600',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.82' => array
+	(
+		'dict_key' => 2111,
+		'text' => 'Juniper QFXSwitch',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.83' => array
+	(
+		'dict_key' => 2112,
+		'text' => 'Juniper T4000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.84' => array
+	(
+		'dict_key' => 2113,
+		'text' => 'Juniper QFX3000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.85' => array
+	(
+		'dict_key' => 2114,
+		'text' => 'Juniper QFX5000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.86' => array
+	(
+		'dict_key' => 2115,
+		'text' => 'Juniper SRX550',
+		'processors' => array ('juniper-mgmt'),
+		'node_offset' => 9,
+	),
+	'2636.1.1.1.2.87' => array
+	(
+		'dict_key' => 2116,
+		'text' => 'Juniper ACX',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.88' => array
+	(
+		'dict_key' => 2117,
+		'text' => 'Juniper MX40',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.89' => array
+	(
+		'dict_key' => 2118,
+		'text' => 'Juniper MX10',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.90' => array
+	(
+		'dict_key' => 2119,
+		'text' => 'Juniper MX5',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.91' => array
+	(
+		'dict_key' => 2120,
+		'text' => 'Juniper QFXMInterconnect',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.92' => array
+	(
+		'dict_key' => 2121,
+		'text' => 'Juniper EX4550',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.93' => array
+	(
+		'dict_key' => 2122,
+		'text' => 'Juniper MX2020',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.95' => array
+	(
+		'dict_key' => 2124,
+		'text' => 'Juniper LN2600',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.96' => array
+	(
+		'dict_key' => 2125,
+		'text' => 'Juniper VSRX',
+		'processors' => array (),
+	),
+	'2636.1.1.1.2.100' => array
+	(
+		'dict_key' => 2126,
+		'text' => 'Juniper QFX3100',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.97' => array
+	(
+		'dict_key' => 2127,
+		'text' => 'Juniper MX104',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.98' => array
+	(
+		'dict_key' => 2128,
+		'text' => 'Juniper PTX3000',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.99' => array
+	(
+		'dict_key' => 2129,
+		'text' => 'Juniper MX2010',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.102' => array
+	(
+		'dict_key' => 2131,
+		'text' => 'Juniper EX9214',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.103' => array
+	(
+		'dict_key' => 2132,
+		'text' => 'Juniper EX9208',
+		'processors' => array ('juniper-mgmt'),
+	),
+	'2636.1.1.1.2.104' => array
+	(
+		'dict_key' => 2133,
+		'text' => 'Juniper EX9204',
+		'processors' => array ('juniper-mgmt'),
 	),
 	'3955.6.1.2048.1' => array
 	(
@@ -2880,6 +3378,9 @@ $swtype_pcre = array
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
+	'/^Juniper Networks,.+JUNOS 11\./' => 2134,
+	'/^Juniper Networks,.+JUNOS 12\./' => 2135,
+	'/^Juniper Networks,.+JUNOS 13\./' => 2136,
 	'/^Arista Networks EOS version 4\./' => 1675,
 	'/^Dell Force10 OS\b.*\bApplication Software Version: 8(\.\d+){3}/' => 1594,
 );
@@ -2944,6 +3445,7 @@ function doSNMPmining ($object_id, $snmpsetup)
 	{
 	case 7:   // Router
 	case 8:   // Network switch
+	case 798: // Network security
 	case 965: // Wireless
 		$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
 		return doSwitchSNMPmining ($objectInfo, $device);
@@ -3092,23 +3594,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
-	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
-		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
-		updateStickerForCell ($objectInfo, 5, $sw_version);
-		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)
+	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		// Juniper uses the same sysObjectID for multiple HW models, override if necessary
-		if (preg_match ('/^Juniper Networks, Inc. ex3200-48t internet router/', $sysDescr))
-			updateStickerForCell ($objectInfo, 2, 902);
-		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
-			updateStickerForCell ($objectInfo, 2, 907);
-		break;
-	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
-		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
+		generatePortsForJunosPic($objectInfo['id'], $device, $known_switches[$sysObjectID]);
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
@@ -3654,6 +4143,106 @@ function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $
 		for ($i = 0; $i <= 11; $i++)
 			commitAddPort ($object_id, "gi${slotno}/0/${i}", '9-1084', "slot ${slotno} port ${i}", $mac_address);
 		break;
+	}
+}
+
+function mapJunosPortType($type)
+{
+	switch ($type)
+	{
+		case 'GE':
+		case 'Base-T':
+			return '1-24'; // hardwired 1000Base-T
+		case 'FE':
+			return '1-19'; // hardwired 100Base-TX
+		case 'SFP':
+			return '4-1077'; // empty SFP-1000 slot
+		case 'SFP+':
+			return '9-1084'; // empty SFP+ slot
+		case 'XFP':
+			return '8-1082'; // empty XFP slot
+		default:
+			return '42'; //unknown
+	}
+}
+/**
+ * Tested with EX2200C EX3200 EX3300 EX4200 MX10 MX480 SRX240 SRX210 SRX100 J6350
+ * If your Junos device does not work you could write a patch or send me (charendt at ipb.de)
+ * the output of snmpwalk .1.3.6.1.4.1.2636.3.1.8.1.6.8 and witch device you are using.
+ */
+function generatePortsForJunosPic ($object_id, $device, $switch_record)
+{
+	// prepare a lookuptable for if_names => if_aliases
+	$if_names = $device->snmpwalkoid(".1.3.6.1.2.1.31.1.1.1.1");
+	$if_alias = $device->snmpwalkoid(".1.3.6.1.2.1.31.1.1.1.18");
+	$if_table = $if_names_clean = array();
+	
+	foreach ($if_names as $key => $value) 
+	{
+		$index = explode('.', $key);
+		$if_names_clean[end($index)] = preg_replace('/^STRING: "?(.*)"?$/', '\1', $value);
+	}
+	foreach ($if_alias as $key => $value)
+	{
+		$index = explode('.', $key);
+		$if_table[$if_names_clean[end($index)]] = preg_replace('/^STRING: "?(.*)"?$/', '\1', $value);
+	}
+	
+	/*file_put_contents('/tmp/snmp.php.log', print_r($if_names,true));
+	file_put_contents('/tmp/snmp.php.log', print_r($if_alias,true));
+	file_put_contents('/tmp/snmp.php.log', print_r($if_table,true));*/
+	file_put_contents('/tmp/snmp.php.log', print_r($device,true));
+	$pics = $device->snmpwalkoid(".1.3.6.1.4.1.2636.3.1.8.1.6.8");
+	// Get PICs for Junos Devices
+	foreach ($pics as $pic)
+	{
+		$matches = array();
+		$pic = preg_replace('/^STRING: "(.*)"$/', '\1', $pic);
+		
+		switch (true)
+		{
+			// EX3300 combo ports
+			case preg_match ('"^PIC: (\d+)x .*(GE/XE SFP\+).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				for ($i=0; $i<$matches[1]; ++$i) 
+				{
+					commitAddPort ($object_id, "ge-$matches[3]/$matches[4]/$i", mapJunosPortType('SFP'), $if_table["ge-$matches[3]/$matches[4]/$i"], '');
+					commitAddPort ($object_id, "xe-$matches[3]/$matches[4]/$i ", mapJunosPortType('SFP+'), $if_table["xe-$matches[3]/$matches[4]/$i"], '');
+				}
+				break;
+			// EX2200C combo ports
+			case preg_match ('"^PIC: (\d+)x .*(Base-T or GE SFP).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				for ($i=0; $i<$matches[1]; ++$i) 
+				{
+					commitAddPort ($object_id, "ge-$matches[3]/$matches[4]/$i", mapJunosPortType('GE'), $if_table["ge-$matches[3]/$matches[4]/$i"], '');
+					commitAddPort ($object_id, "ge-$matches[3]/$matches[4]/$i", mapJunosPortType('SFP'), $if_table["ge-$matches[3]/$matches[4]/$i"], '');
+				}
+				break;
+			// SFP+ ports, XFP ports
+			case preg_match ('"^PIC: (\d+)x .*(SFP\+|XFP).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				for ($i=0; $i<$matches[1]; ++$i)
+					commitAddPort ($object_id, "xe-$matches[3]/$matches[4]/$i", mapJunosPortType($matches[2]), $if_table["xe-$matches[3]/$matches[4]/$i"], '');
+				break;
+			// SFP, 1000Base-T
+			case preg_match ('"^PIC: (\d+)x .*(SFP|Base-T).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				for ($i=0; $i<$matches[1]; ++$i)
+					commitAddPort ($object_id, "ge-$matches[3]/$matches[4]/$i", mapJunosPortType($matches[2]), $if_table["ge-$matches[3]/$matches[4]/$i"], '');
+				break;
+			// SRX210 (has different port speeds 2xGE 6xFE)
+			case preg_match ('"^(node(\d+) )?PIC: (\d+)x (GE), (\d+)x (FE).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				$matches[7] = (!empty($matches[1]) && isset($switch_record['node_offset']))?$matches[2]*$switch_record['node_offset']:0;
+				for ($i=0; $i<$matches[3]; ++$i)
+					commitAddPort ($object_id, "ge-$matches[7]/$matches[8]/$i", mapJunosPortType($matches[4]), $if_table["ge-$matches[7]/$matches[8]/$i"], '');
+				$j=$i;
+				for (; $i<($matches[5]+$j); ++$i)
+					commitAddPort ($object_id, "fe-$matches[7]/$matches[8]/$i", mapJunosPortType($matches[6]), $if_table["fe-$matches[7]/$matches[8]/$i"], '');
+				break;
+			// SRX
+			case preg_match ('"^(node(\d+) )?PIC: (\d+)x (GE|FE).*@ (\d+)/(\d+)/\*"', $pic, $matches):
+				$matches[5] = (!empty($matches[1]) && isset($switch_record['node_offset']))?$matches[2]*$switch_record['node_offset']:0;
+				for ($i=0; $i<$matches[3]; ++$i)
+					commitAddPort ($object_id, strtolower($matches[4])."-$matches[5]/$matches[6]/$i", mapJunosPortType($matches[4]), $if_table[strtolower($matches[4])."-$matches[5]/$matches[6]/$i"], '');
+				break;
+		}
 	}
 }
 
