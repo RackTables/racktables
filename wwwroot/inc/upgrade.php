@@ -211,6 +211,12 @@ MySQL 5.1.7.
 
 Cable paths can be traced and displayed in a graphical format. This requires
 the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
+
+Config variables TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC were merged into new MGMT_PROTOS.
+The old ones were deleted from the DB. MGMT_PROTOS allows to specify any management protocol for a particular
+device list by RackCode filter. The default value is 'ssh: {\$typeid_4}, telnet: {\$typeid_8}' which leads to
+object's FQDN linked to 'ssh://server.fqdn' and 'telnet://switch.fqdn'. If the old variables contained any data,
+it will be converted to the new syntax and stored into MGMT_PROTOS variable.
 ENDOFTEXT
 ,
 );
@@ -1859,6 +1865,12 @@ END;
 			// one HW type was moved from the 'Network switch' chapter to the 'Network chassis' chapter
 			// change the type of affected objects to 'Network chassis'
 			$query[] = "UPDATE `Object` SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM `AttributeValue` WHERE attr_id = 2 and uint_value = 935)";
+
+			// convert values of old 'TELNET_OBJS_LISTSRC' 'SSH_OBJS_LISTSRC', 'RDP_OBJS_LISTSRC' variables into 'MGMT_PROTOS'
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices')";
+			if ('' !== $mgmt_converted_var = convertMgmtConfigVars())
+				$query[] = "UPDATE `Config` SET varvalue = '" . mysql_escape_string ($mgmt_converted_var) . "' WHERE varname = 'MGMT_PROTOS'"; // TODO: call of deprecated function
+			$query[] = "DELETE `Config`,`UserConfig` FROM `Config` LEFT JOIN `UserConfig` USING (`varname`) WHERE `Config`.`varname` IN ('TELNET_OBJS_LISTSRC', 'SSH_OBJS_LISTSRC', 'RDP_OBJS_LISTSRC')";
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
@@ -2177,6 +2189,24 @@ function usePreparedInsertBlade ($tablename, $columns)
 	{
 		throw convertPDOException ($e);
 	}
+}
+
+// converts the values of old-style config vars TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC
+// to the format of MGMT_PROTOS (comma-separated list of "proto: rackcode" pairs)
+function convertMgmtConfigVars()
+{
+	global $dbxlink;
+	$ret = array();
+	foreach (array ('telnet' => 'TELNET_OBJS_LISTSRC', 'ssh' => 'SSH_OBJS_LISTSRC', 'rdp' => 'RDP_OBJS_LISTSRC') as $proto => $varname)
+	{
+		$result = $dbxlink->prepare ("SELECT varvalue FROM Config WHERE varname = ?");
+		$result->execute (array ($varname));
+		if ($row = $result->fetch (PDO::FETCH_ASSOC))
+			if ($row['varvalue'] != 'false' && $row['varvalue'] != '')
+				$ret[] = "$proto: " . $row['varvalue'];
+		unset ($result);
+	}
+	return implode (',', $ret);
 }
 
 ?>

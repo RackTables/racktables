@@ -1080,7 +1080,7 @@ $iftable_processors['quidway-slot1-SFP'] = array
 $iftable_processors['quidway-any-100TX'] = array
 (
 	'pattern' => '@^Ethernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
-	'replacement' => 'e\\1\\2',
+	'replacement' => 'ether\\1\\2',
 	'dict_key' => '1-19',
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
@@ -3373,6 +3373,8 @@ $swtype_pcre = array
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5\.30 /s' => 1360,
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software, Version 5\.50 /s' => 1361,
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5\.70 /is' => 1369,
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5\.110 /is' => 2080,
+	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5\.120 /is' => 2081,
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 8\.50 /is' => 2027,
 	// FIXME: get sysDescr for IronWare 5 and add a pattern
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
@@ -3491,6 +3493,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.1' => 251,
 			'12.2' => 252,
 			'15.0' => 1901,
+			'15.1' => 2082,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
@@ -3588,7 +3591,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
-	case preg_match ('/^2011\.2\.23\./', $sysObjectID): // Huawei
+	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		checkPIC ('1-16');

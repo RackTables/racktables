@@ -6,7 +6,10 @@
 	bugfix: default values of some LDAP options weren't being used
 	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
 	update: display friendlier message when attempting to NAT non-existent IP (#963) 
+	bugfix: jQuery.UI static files were not accessible (by Aleksandr Balezin)
+	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
 	update: support of Huawei CE5800 series switch
+	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
 	update: add collapse/expand feature to location filter (#901)

@@ -1903,22 +1903,31 @@ function removeTriplet()
 
 function createTriplet()
 {
+	global $dbxlink;
 	$object_id = assertUIntArg ('object_id');
 	$vs_id = assertUIntArg ('vs_id');
 	$rspool_id = assertUIntArg ('rspool_id');
 	$vips = genericAssertion ('enabled_vips', 'array0');
 	$ports = genericAssertion ('enabled_ports', 'array0');
-	if (getTriplet ($object_id, $vs_id, $rspool_id))
-		return showError ("SLB triplet already exists");
 
 	$vsinfo = spotEntity ('ipvs', $vs_id);
 	amplifyCell ($vsinfo);
-	foreach ($vsinfo['vips'] as $vip)
-		if (in_array (ip_format ($vip['vip']), $vips))
-			usePreparedInsertBlade ('VSEnabledIPs', array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'vip' => $vip['vip']));
-	foreach ($vsinfo['ports'] as $port)
-		if (in_array($port['proto'] . '-' . $port['vport'], $ports))
-			usePreparedInsertBlade ('VSEnabledPorts', array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'proto' => $port['proto'], 'vport' => $port['vport']));
+	try
+	{
+		$dbxlink->beginTransaction();
+		foreach ($vsinfo['vips'] as $vip)
+			if (in_array (ip_format ($vip['vip']), $vips))
+				addSLBIPLink (array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'vip' => $vip['vip']));
+		foreach ($vsinfo['ports'] as $port)
+			if (in_array($port['proto'] . '-' . $port['vport'], $ports))
+				addSLBPortLink (array ('object_id' => $object_id, 'vs_id' => $vs_id, 'rspool_id' => $rspool_id, 'proto' => $port['proto'], 'vport' => $port['vport']));
+		$dbxlink->commit();
+	}
+	catch (RTDatabaseError $e)
+	{
+		$dbxlink->rollBack();
+		throw $e;
+	}
 	showSuccess ("SLB triplet created");
 }
 

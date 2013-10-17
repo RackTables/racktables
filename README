@@ -111,6 +111,12 @@ MySQL 5.1.7.
 Cable paths can be traced and displayed in a graphical format. This requires
 the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
 
+Config variables TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC were merged into new MGMT_PROTOS.
+The old ones were deleted from the DB. MGMT_PROTOS allows to specify any management protocol for a particular
+device list by RackCode filter. The default value is 'ssh: {\$typeid_4}, telnet: {\$typeid_8}' which leads to
+object's FQDN linked to 'ssh://server.fqdn' and 'telnet://switch.fqdn'. If the old variables contained any data,
+it will be converted to the new syntax and stored into MGMT_PROTOS variable.
+
 *** Upgrading to 0.20.5 ***
 
 This release introduces the VS groups feature. VS groups is a new way to store

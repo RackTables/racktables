@@ -2228,6 +2228,16 @@ $dictionary = array
 	2137 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 9'),
 	2138 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 13'),
 
+	// a hole here
+
+	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
+	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
+	2082 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.1'),
+	2083 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9001 | http://cisco.com/en/US/products/ps12074/index.html]]'),
+	2084 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9922 | http://cisco.com/en/US/products/ps11755/index.html]]'),
+	2085 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6001 | http://www.cisco.com/en/US/products/ps12869/index.html]]'),
+	2086 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6004 | http://www.cisco.com/en/US/products/ps12807/index.html]]'),
+
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.

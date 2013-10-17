@@ -98,6 +98,7 @@ function generateVSSection ($vs_parser)
 	%SLB_PORT_VS_CONF%
 	%SLB_VIP_VS_CONF%
 ");
+	$rs_count = 0;
 	$family_length = ($vs_parser->expandMacro ('IP_VER') == 6) ? 16 : 4;
 	foreach ($vs_parser->getRSList() as $rs)
 	{
@@ -123,6 +124,7 @@ function generateVSSection ($vs_parser)
 
 				for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
 				{
+					$rs_count++;
 					$rs_parser = clone $parser;
 					$rs_parser->addMacro ('RSPORT', $rsport);
 					$ret .= $rs_parser->expand ("
@@ -141,7 +143,7 @@ function generateVSSection ($vs_parser)
 				}
 			}
 	}
-	return $ret;
+	return $rs_count ? $ret : '';
 }
 
 function generateSLBConfig2 ($triplet_list)
@@ -213,16 +215,24 @@ function generateSLBConfig2 ($triplet_list)
 
 					if ($is_mark)
 					{
+						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
 						// find enabled IP families to fill IP_VER
 						$seen_families = array();
 						foreach ($triplet['vips'] as $ip_row)
-							$seen_families[strlen ($ip_row['vip'])] = 1;
-						if (count ($seen_families) == 1)
-							// if there are both or neither families enabled, IP_VER is not set
-							$p_parser->addMacro ('IP_VER', array_first (array_keys ($seen_families)) == 16 ? 6 : 4 );
-
-						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
-						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($p_parser);
+						{
+							$family_length = strlen ($ip_row['vip']);
+							$seen_families[$family_length] = ($family_length == 16 ? 6 : 4);
+						}
+						if (! $seen_families)
+							$seen_families['unknown'] = '';
+						foreach ($seen_families as $ip_ver)
+						{
+							$fam_parser = clone $p_parser;
+							if ($ip_ver)
+								$fam_parser->addMacro ('IP_VER', $ip_ver);
+							if ('' != $vs_config = generateVSSection ($fam_parser))
+								$virtual_services["IPv${ip_ver} " . $fam_parser->expandMacro ('VS_HEADER')] = $vs_config;
+						}
 					}
 					else
 					{
@@ -242,7 +252,8 @@ function generateSLBConfig2 ($triplet_list)
 								}
 							$ip_parser->addMacro ('SLB_VIP_VS_CONF', dos2unix ($ip_row['vsconfig']));
 							$ip_parser->addMacro ('SLB_VIP_RS_CONF', dos2unix ($ip_row['rsconfig']));
-							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($ip_parser);
+							if ('' != $vs_config = generateVSSection ($ip_parser))
+								$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = $vs_config;
 						} // vips
 					}
 				} //ports
@@ -250,7 +261,7 @@ function generateSLBConfig2 ($triplet_list)
 				// group multiple virtual_services into vs_groups
 				$groups = array();
 				foreach ($virtual_services as $key => $content)
-					$groups[$content][] = preg_replace ('/^(TCP|UDP)\s+/', '', $key);
+					$groups[$content][] = preg_replace ('/^(TCP|UDP|IPv[46]?)\s+/', '', $key);
 				foreach ($groups as $content => $keys)
 				{
 					if (NULL !== ($new_content = callHook ('generateSLBConfig_stage2', $content, $keys)))
