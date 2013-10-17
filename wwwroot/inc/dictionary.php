@@ -2153,8 +2153,10 @@ $dictionary = array
 	2057 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-128'),
 	2058 => array ('chapter_id' => 12, 'dict_value' => '[[TPLink%GPASS%TL-SL5428E | http://www.tp-link.com/en/products/details/?model=TL-SL5428E]]'),
 	2059 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560CG-8PC-S'),
+	2060 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 18 | http://docs.fedoraproject.org/en-US/Fedora/18/html/Release_Notes/]]'),
+	2061 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 19 | http://docs.fedoraproject.org/en-US/Fedora/19/html/Release_Notes/]]'),
 
-	// a hole here
+	// add new records here until the gap is filled
 
 	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
 	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
