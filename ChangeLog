@@ -10,6 +10,7 @@
 	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
 	bugfix: IOS CLI prompt detection (#1033)
 	update: support of Huawei CE5800 series switch
+	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)

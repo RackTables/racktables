@@ -1566,21 +1566,21 @@ function renderPortsForObject ($object_id)
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
 		echo "<td class='tdleft' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
 		echo "<td><input type=text name=label value='${port['label']}'></td>";
-		if (! $port['linked'])
+		echo '<td class=tdleft>';
+		if (count ($port['links']) <= 1)
 		{
-			echo '<td>';
 			if ($port['iif_id'] != 1)
 				echo '<label>' . $port['iif_name'] . ' ';
 			printSelect (getExistingPortTypeOptions ($port['id']), array ('name' => 'port_type_id'), $port['oif_id']);
 			if ($port['iif_id'] != 1)
 				echo '</label>';
-			echo '</td>';
 		}
 		else
 		{
 			echo "<input type=hidden name=port_type_id value='${port['oif_id']}'>";
-			echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td>";
+			echo formatPortIIFOIF ($port);
 		}
+		echo '</td>';
 		// 18 is enough to fit 6-byte MAC address in its longest form,
 		// while 24 should be Ok for WWN
 		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";

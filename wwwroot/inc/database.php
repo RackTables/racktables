@@ -836,6 +836,8 @@ SELECT
 	Link.cable AS cableid,
 	IF(Link.porta = Port.id, Link.portb, Link.porta) AS remote_id,
 	rp.name AS remote_name,
+	rp.iif_id AS remote_iif_id,
+	rp.type AS remote_oif_id,
 	rp.object_id AS remote_object_id,
 	ro.name AS remote_object_name,
 	ro.objtype_id AS remote_object_type,
@@ -866,6 +868,8 @@ END;
 			'cableid' => $row['cableid'],
 			'remote_id' => $row['remote_id'],
 			'remote_name' => $row['remote_name'],
+			'remote_iif_id' => $row['remote_iif_id'],
+			'remote_oif_id' => $row['remote_oif_id'],
 			'remote_object_id' => $row['remote_object_id'],
 			'remote_object_name' => $row['remote_object_name'],
 			'remote_object_type' => $row['remote_object_type'],
@@ -4705,16 +4709,38 @@ function getPortInterfaceCompat()
 
 // Return a set of options for a plain SELECT. These options include the current
 // OIF of the given port and all OIFs of its permanent IIF.
+// If given port is already linked once, return only types compatible with the remote port's type 
 function getExistingPortTypeOptions ($port_id)
 {
-	$result = usePreparedSelectBlade
-	(
-		'SELECT oif_id, dict_value AS oif_name ' .
-		'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
-		'WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?) ' .
-		'ORDER BY oif_name',
-		array ($port_id)
-	);
+	$portinfo = getPortInfo ($port_id);
+	if ($portinfo['linked'])
+	{
+		// there are multiple links, calculating compatibility is too costly
+		if (count ($portinfo['links']) > 1)
+			return NULL;
+
+		// there is a single link
+		$result = usePreparedSelectBlade
+		(
+			'SELECT DISTINCT oif_id, dict_value AS oif_name ' .
+			'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
+			'LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ? ' .
+			'LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ? ' .
+			'WHERE iif_id = ? ' .
+			'AND (pc1.type1 IS NOT NULL OR pc2.type2 IS NOT NULL) ' .
+			'ORDER BY oif_name',
+			array ($portinfo['links'][0]['remote_oif_id'], $portinfo['links'][0]['remote_oif_id'], $portinfo['links'][0]['remote_iif_id'])
+		);
+	}
+	else
+		$result = usePreparedSelectBlade
+		(
+			'SELECT oif_id, dict_value AS oif_name ' .
+			'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
+			'WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?) ' .
+			'ORDER BY oif_name',
+			array ($port_id)
+		);
 	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
 }
 
