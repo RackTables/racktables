@@ -114,7 +114,7 @@ function vrpReadLLDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
+		case preg_match ('/^(.+) has \d+ neighbor(\(s\)|s):$/', $line, $matches):
 			$ret['current']['local_port'] = shortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^Port ?ID ?(?:sub)?type\s*:\s*([^ ]+)/i', $line, $matches):
