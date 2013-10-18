@@ -4191,10 +4191,6 @@ function generatePortsForJunosPic ($object_id, $device, $switch_record)
 		$if_table[$if_names_clean[end($index)]] = preg_replace('/^STRING: "?(.*)"?$/', '\1', $value);
 	}
 	
-	/*file_put_contents('/tmp/snmp.php.log', print_r($if_names,true));
-	file_put_contents('/tmp/snmp.php.log', print_r($if_alias,true));
-	file_put_contents('/tmp/snmp.php.log', print_r($if_table,true));*/
-	file_put_contents('/tmp/snmp.php.log', print_r($device,true));
 	$pics = $device->snmpwalkoid(".1.3.6.1.4.1.2636.3.1.8.1.6.8");
 	// Get PICs for Junos Devices
 	foreach ($pics as $pic)
