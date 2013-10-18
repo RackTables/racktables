@@ -2703,31 +2703,31 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.1' => array
 	(
-		'dict_key' => 2060,
+		'dict_key' => 2087,
 		'text' => 'Juniper M40',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.2' => array
 	(
-		'dict_key' => 2061,
+		'dict_key' => 2088,
 		'text' => 'Juniper M20',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.3' => array
 	(
-		'dict_key' => 2062,
+		'dict_key' => 2089,
 		'text' => 'Juniper M160',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.4' => array
 	(
-		'dict_key' => 2063,
+		'dict_key' => 2090,
 		'text' => 'Juniper M10',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.5' => array
 	(
-		'dict_key' => 2064,
+		'dict_key' => 2091,
 		'text' => 'Juniper M5',
 		'processors' => array ('juniper-mgmt'),
 	),
@@ -2769,25 +2769,25 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.13' => array
 	(
-		'dict_key' => 2065,
+		'dict_key' => 2092,
 		'text' => 'Juniper J2300',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.14' => array
 	(
-		'dict_key' => 2066,
+		'dict_key' => 2093,
 		'text' => 'Juniper J4300',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.15' => array
 	(
-		'dict_key' => 2067,
+		'dict_key' => 2094,
 		'text' => 'Juniper J6300',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.17' => array
 	(
-		'dict_key' => 2069,
+		'dict_key' => 2096,
 		'text' => 'Juniper TX',
 		'processors' => array ('juniper-mgmt'),
 	),
@@ -2817,7 +2817,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.22' => array
 	(
-		'dict_key' => 2070,
+		'dict_key' => 2097,
 		'text' => 'Juniper J4320',
 		'processors' => array (),
 	),
@@ -2841,7 +2841,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.26' => array
 	(
-		'dict_key' => 2071,
+		'dict_key' => 2098,
 		'text' => 'Juniper SRX5800',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 12,
@@ -2854,7 +2854,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.28' => array
 	(
-		'dict_key' => 2072,
+		'dict_key' => 2099,
 		'text' => 'Juniper SRX5600',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 6,
@@ -2867,45 +2867,45 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.30' => array
 	(
-		'dict_key' => 2073,
+		'dict_key' => 2100,
 		'text' => 'Juniper EX3200',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.31' => array
 	(
-		'dict_key' => 2074,
+		'dict_key' => 2101,
 		'text' => 'Juniper EX4200',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.32' => array
 	(
-		'dict_key' => 2075,
+		'dict_key' => 2102,
 		'text' => 'Juniper EX8208',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.33' => array
 	(
-		'dict_key' => 2076,
+		'dict_key' => 2103,
 		'text' => 'Juniper EX8216',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.34' => array
 	(
-		'dict_key' => 2077,
+		'dict_key' => 2104,
 		'text' => 'Juniper SRX3600',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 13,
 	),
 	'2636.1.1.1.2.35' => array
 	(
-		'dict_key' => 2078,
+		'dict_key' => 2105,
 		'text' => 'Juniper SRX3400',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 8,
 	),
 	'2636.1.1.1.2.36' => array
 	(
-		'dict_key' => 2079,
+		'dict_key' => 2106,
 		'text' => 'Juniper SRX210',
 		'processors' => array (),
 		'node_offset' => 2,
@@ -2918,309 +2918,309 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'2636.1.1.1.2.38' => array
 	(
-		'dict_key' => 2080,
+		'dict_key' => 2107,
 		'text' => 'Juniper JCS',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.39' => array
 	(
-		'dict_key' => 2081,
+		'dict_key' => 2108,
 		'text' => 'Juniper SRX240',
 		'processors' => array (),
 		'node_offset' => 5,
 	),
 	'2636.1.1.1.2.40' => array
 	(
-		'dict_key' => 2082,
+		'dict_key' => 2109,
 		'text' => 'Juniper SRX650',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 9,
 	),
 	'2636.1.1.1.2.41' => array
 	(
-		'dict_key' => 2083,
+		'dict_key' => 2110,
 		'text' => 'Juniper SRX100',
 		'processors' => array (),
 		'node_offset' => 1,
 	),
 	'2636.1.1.1.2.42' => array
 	(
-		'dict_key' => 2084,
+		'dict_key' => 2111,
 		'text' => 'Juniper LN1000V',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.43' => array
 	(
-		'dict_key' => 2085,
+		'dict_key' => 2112,
 		'text' => 'Juniper EX2200',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.44' => array
 	(
-		'dict_key' => 2086,
+		'dict_key' => 2113,
 		'text' => 'Juniper EX4500',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.49' => array
 	(
-		'dict_key' => 2088,
+		'dict_key' => 2115,
 		'text' => 'Juniper SRX1400',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 4,
 	),
 	'2636.1.1.1.2.57' => array
 	(
-		'dict_key' => 2089,
+		'dict_key' => 2116,
 		'text' => 'Juniper MX80',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.58' => array
 	(
-		'dict_key' => 2090,
+		'dict_key' => 2117,
 		'text' => 'Juniper SRX220',
 		'processors' => array (),
 		'node_offset' => 3,
 	),
 	'2636.1.1.1.2.59' => array
 	(
-		'dict_key' => 2091,
+		'dict_key' => 2118,
 		'text' => 'Juniper EXXRE',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.60' => array
 	(
-		'dict_key' => 2092,
+		'dict_key' => 2119,
 		'text' => 'Juniper QFXInterconnect',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.61' => array
 	(
-		'dict_key' => 2093,
+		'dict_key' => 2120,
 		'text' => 'Juniper QFXNode',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.62' => array
 	(
-		'dict_key' => 2094,
+		'dict_key' => 2121,
 		'text' => 'Juniper QFXJVRE',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.63' => array
 	(
-		'dict_key' => 2095,
+		'dict_key' => 2122,
 		'text' => 'Juniper EX4300',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.64' => array
 	(
-		'dict_key' => 2096,
+		'dict_key' => 2123,
 		'text' => 'Juniper SRX110',
 		'processors' => array (),
 		'node_offset' => 1,
 	),
 	'2636.1.1.1.2.65' => array
 	(
-		'dict_key' => 2097,
+		'dict_key' => 2124,
 		'text' => 'Juniper SRX120',
 		'processors' => array (),
 		'node_offset' => 1,
 	),
 	'2636.1.1.1.2.66' => array
 	(
-		'dict_key' => 2098,
+		'dict_key' => 2125,
 		'text' => 'Juniper MAG8600',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.67' => array
 	(
-		'dict_key' => 2099,
+		'dict_key' => 2126,
 		'text' => 'Juniper MAG6611',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.68' => array
 	(
-		'dict_key' => 2100,
+		'dict_key' => 2127,
 		'text' => 'Juniper MAG6610',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.69' => array
 	(
-		'dict_key' => 2101,
+		'dict_key' => 2128,
 		'text' => 'Juniper PTX5000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.70' => array
 	(
-		'dict_key' => 2102,
+		'dict_key' => 2129,
 		'text' => 'Juniper PTX9000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.74' => array
 	(
-		'dict_key' => 2103,
+		'dict_key' => 2130,
 		'text' => 'Juniper EX6210',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.76' => array
 	(
-		'dict_key' => 2105,
+		'dict_key' => 2132,
 		'text' => 'Juniper EX3300',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.77' => array
 	(
-		'dict_key' => 2106,
+		'dict_key' => 2133,
 		'text' => 'Juniper DELLJSRX3600',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.78' => array
 	(
-		'dict_key' => 2107,
+		'dict_key' => 2134,
 		'text' => 'Juniper DELLJSRX3400',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.79' => array
 	(
-		'dict_key' => 2108,
+		'dict_key' => 2135,
 		'text' => 'Juniper DELLJSRX1400',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.80' => array
 	(
-		'dict_key' => 2109,
+		'dict_key' => 2136,
 		'text' => 'Juniper DELLJSRX5800',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.81' => array
 	(
-		'dict_key' => 2110,
+		'dict_key' => 2137,
 		'text' => 'Juniper DELLJSRX5600',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.82' => array
 	(
-		'dict_key' => 2111,
+		'dict_key' => 2138,
 		'text' => 'Juniper QFXSwitch',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.83' => array
 	(
-		'dict_key' => 2112,
+		'dict_key' => 2139,
 		'text' => 'Juniper T4000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.84' => array
 	(
-		'dict_key' => 2113,
+		'dict_key' => 2140,
 		'text' => 'Juniper QFX3000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.85' => array
 	(
-		'dict_key' => 2114,
+		'dict_key' => 2141,
 		'text' => 'Juniper QFX5000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.86' => array
 	(
-		'dict_key' => 2115,
+		'dict_key' => 2142,
 		'text' => 'Juniper SRX550',
 		'processors' => array ('juniper-mgmt'),
 		'node_offset' => 9,
 	),
 	'2636.1.1.1.2.87' => array
 	(
-		'dict_key' => 2116,
+		'dict_key' => 2143,
 		'text' => 'Juniper ACX',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.88' => array
 	(
-		'dict_key' => 2117,
+		'dict_key' => 2144,
 		'text' => 'Juniper MX40',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.89' => array
 	(
-		'dict_key' => 2118,
+		'dict_key' => 2145,
 		'text' => 'Juniper MX10',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.90' => array
 	(
-		'dict_key' => 2119,
+		'dict_key' => 2146,
 		'text' => 'Juniper MX5',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.91' => array
 	(
-		'dict_key' => 2120,
+		'dict_key' => 2147,
 		'text' => 'Juniper QFXMInterconnect',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.92' => array
 	(
-		'dict_key' => 2121,
+		'dict_key' => 2148,
 		'text' => 'Juniper EX4550',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.93' => array
 	(
-		'dict_key' => 2122,
+		'dict_key' => 2149,
 		'text' => 'Juniper MX2020',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.95' => array
 	(
-		'dict_key' => 2124,
+		'dict_key' => 2151,
 		'text' => 'Juniper LN2600',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.96' => array
 	(
-		'dict_key' => 2125,
+		'dict_key' => 2152,
 		'text' => 'Juniper VSRX',
 		'processors' => array (),
 	),
 	'2636.1.1.1.2.100' => array
 	(
-		'dict_key' => 2126,
+		'dict_key' => 2153,
 		'text' => 'Juniper QFX3100',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.97' => array
 	(
-		'dict_key' => 2127,
+		'dict_key' => 2154,
 		'text' => 'Juniper MX104',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.98' => array
 	(
-		'dict_key' => 2128,
+		'dict_key' => 2155,
 		'text' => 'Juniper PTX3000',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.99' => array
 	(
-		'dict_key' => 2129,
+		'dict_key' => 2156,
 		'text' => 'Juniper MX2010',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.102' => array
 	(
-		'dict_key' => 2131,
+		'dict_key' => 2158,
 		'text' => 'Juniper EX9214',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.103' => array
 	(
-		'dict_key' => 2132,
+		'dict_key' => 2159,
 		'text' => 'Juniper EX9208',
 		'processors' => array ('juniper-mgmt'),
 	),
 	'2636.1.1.1.2.104' => array
 	(
-		'dict_key' => 2133,
+		'dict_key' => 2160,
 		'text' => 'Juniper EX9204',
 		'processors' => array ('juniper-mgmt'),
 	),
@@ -3380,9 +3380,9 @@ $swtype_pcre = array
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
-	'/^Juniper Networks,.+JUNOS 11\./' => 2134,
-	'/^Juniper Networks,.+JUNOS 12\./' => 2135,
-	'/^Juniper Networks,.+JUNOS 13\./' => 2136,
+	'/^Juniper Networks,.+JUNOS 11\./' => 2161,
+	'/^Juniper Networks,.+JUNOS 12\./' => 2162,
+	'/^Juniper Networks,.+JUNOS 13\./' => 2163,
 	'/^Arista Networks EOS version 4\./' => 1675,
 	'/^Dell Force10 OS\b.*\bApplication Software Version: 8(\.\d+){3}/' => 1594,
 );
@@ -4170,8 +4170,8 @@ function mapJunosPortType($type)
 }
 /**
  * Tested with EX2200C EX3200 EX3300 EX4200 MX10 MX480 SRX240 SRX210 SRX100 J6350
- * If your Junos device does not work you could write a patch or send me (charendt at ipb.de)
- * the output of snmpwalk .1.3.6.1.4.1.2636.3.1.8.1.6.8 and witch device you are using.
+ * If your Junos device does not work you could write a patch or send the output
+ * of snmpwalk .1.3.6.1.4.1.2636.3.1.8.1.6.8 and witch device/modules you are using.
  */
 function generatePortsForJunosPic ($object_id, $device, $switch_record)
 {
