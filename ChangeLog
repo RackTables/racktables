@@ -8,6 +8,7 @@
 	update: display friendlier message when attempting to NAT non-existent IP (#963) 
 	bugfix: jQuery.UI static files were not accessible (by Aleksandr Balezin)
 	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
+	bugfix: IOS CLI prompt detection (#1033)
 	update: support of Huawei CE5800 series switch
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)

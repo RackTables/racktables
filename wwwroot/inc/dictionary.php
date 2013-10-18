@@ -2153,6 +2153,18 @@ $dictionary = array
 	2057 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-128'),
 	2058 => array ('chapter_id' => 12, 'dict_value' => '[[TPLink%GPASS%TL-SL5428E | http://www.tp-link.com/en/products/details/?model=TL-SL5428E]]'),
 	2059 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3560CG-8PC-S'),
+	2060 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 18 | http://docs.fedoraproject.org/en-US/Fedora/18/html/Release_Notes/]]'),
+	2061 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 19 | http://docs.fedoraproject.org/en-US/Fedora/19/html/Release_Notes/]]'),
+
+	// add new records here until the gap is filled
+
+	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
+	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
+	2082 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.1'),
+	2083 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9001 | http://cisco.com/en/US/products/ps12074/index.html]]'),
+	2084 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9922 | http://cisco.com/en/US/products/ps11755/index.html]]'),
+	2085 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6001 | http://www.cisco.com/en/US/products/ps12869/index.html]]'),
+	2086 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6004 | http://www.cisco.com/en/US/products/ps12807/index.html]]'),
 	2060 => array ('chapter_id' => 17, 'dict_value' => 'Juniper%GPASS%M40'),
 	2061 => array ('chapter_id' => 17, 'dict_value' => 'Juniper%GPASS%M20'),
 	2062 => array ('chapter_id' => 17, 'dict_value' => 'Juniper%GPASS%M160'),
@@ -2227,16 +2239,6 @@ $dictionary = array
 	2136 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 13'),
 	2137 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 9'),
 	2138 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 13'),
-
-	// a hole here
-
-	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
-	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
-	2082 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.1'),
-	2083 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9001 | http://cisco.com/en/US/products/ps12074/index.html]]'),
-	2084 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 9922 | http://cisco.com/en/US/products/ps11755/index.html]]'),
-	2085 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6001 | http://www.cisco.com/en/US/products/ps12869/index.html]]'),
-	2086 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6004 | http://www.cisco.com/en/US/products/ps12807/index.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
