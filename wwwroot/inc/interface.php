@@ -1471,12 +1471,13 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 			$row_name = $rack['row_name'];
 		$rdata[$row_name][$rack['id']] = $rack['name'];
 	}
-	ksort ($rdata, SORT_NATURAL);
 	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
-	foreach ($rdata as $optgroup => $racklist)
+	$row_names = array_keys ($rdata);
+	natsort ($row_names);
+	foreach ($row_names as $optgroup)
 	{
 		echo "<optgroup label='${optgroup}'>";
-		foreach ($racklist as $rack_id => $rack_name)
+		foreach ($rdata[$optgroup] as $rack_id => $rack_name)
 		{
 			echo "<option value=${rack_id}";
 			if (!(array_search ($rack_id, $selected) === FALSE))
