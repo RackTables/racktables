@@ -92,10 +92,6 @@ ENDOFTEXT
 ,
 
 	'0.20.0' => <<<ENDOFTEXT
-WARNING: This release have too many internal changes, some of them were waiting more than a year
-to be released. So this release is considered "BETA" and is recommended only to curiuos users,
-who agree to sacrifice the stability to the progress.
-
 Racks and Rows are now stored in the database as Objects.  The RackObject table
 was renamed to Object.  SQL views were created to ease the migration of custom
 reports and scripts.
@@ -1800,6 +1796,12 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `Link` ADD UNIQUE KEY `porta-portb-unique` (`porta`,`portb`), ADD KEY `porta` (`porta`), ADD KEY `portb` (`portb`)";
 			$query[] = "ALTER TABLE `Link` ADD CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`) ON DELETE CASCADE, ADD CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE";
 			$query[] = "ALTER TABLE `Link` ADD COLUMN `id` int(10) unsigned NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST";
+			// For the UNIQUE key to work, portb needs to be > porta
+			$result = $dbxlink->query ('SELECT porta, portb FROM `Link` WHERE porta > portb');
+			$links = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			foreach ($links as $link)
+				$query[] = "UPDATE `Link` SET `porta`=${link['portb']}, `portb`=${link['porta']} WHERE `porta`=${link['porta']} AND `portb`=${link['portb']}";
 			$query[] = "
 CREATE TRIGGER `checkLinkBeforeInsert` BEFORE INSERT ON `Link`
   FOR EACH ROW
