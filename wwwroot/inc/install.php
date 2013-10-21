@@ -388,7 +388,7 @@ function init_database_static ()
 	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 
 	echo '</table>';
-	if (isset($errlist) && count ($errlist))
+	if (count ($errlist))
 	{
 		echo '<pre>The following queries failed:\n';
 		foreach ($errlist as $q)
