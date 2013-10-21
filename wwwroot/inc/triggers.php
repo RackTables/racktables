@@ -80,6 +80,7 @@ function trigger_snmpportfinder ()
 	{
 	case 7:   // any router
 	case 8:   // or switch
+	case 798: // or Network security
 	case 965: // or wireless device would suffice
 		return $object['nports'] ? '' : 'attn';
 	case 2: // but only selected PDUs
