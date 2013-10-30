@@ -1873,6 +1873,9 @@ END;
 			if ('' !== $mgmt_converted_var = convertMgmtConfigVars())
 				$query[] = "UPDATE `Config` SET varvalue = '" . mysql_escape_string ($mgmt_converted_var) . "' WHERE varname = 'MGMT_PROTOS'"; // TODO: call of deprecated function
 			$query[] = "DELETE `Config`,`UserConfig` FROM `Config` LEFT JOIN `UserConfig` USING (`varname`) WHERE `Config`.`varname` IN ('TELNET_OBJS_LISTSRC', 'SSH_OBJS_LISTSRC', 'RDP_OBJS_LISTSRC')";
+
+			$query[] = "ALTER TABLE `VSEnabledIPs` ADD CONSTRAINT `VSEnabledIPs-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

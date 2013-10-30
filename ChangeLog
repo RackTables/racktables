@@ -9,6 +9,7 @@
 	bugfix: jQuery.UI static files were not accessible (by Aleksandr Balezin)
 	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
 	bugfix: IOS CLI prompt detection (#1033)
+	bugfix: SLB IP assignments were stored even if a balancer object was deleted
 	update: support of Huawei CE5800 series switch
 	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
