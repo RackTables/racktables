@@ -3380,7 +3380,10 @@ function renderSearchResults ($terms, $summary)
 		$nhits += count ($list);
 
 	if ($nhits == 0)
+	{
 		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
+		return;
+	}
 	elseif ($nhits == 1)
 	{
 		foreach ($summary as $realm => $record)
@@ -3392,277 +3395,259 @@ function renderSearchResults ($terms, $summary)
 		$url = buildSearchRedirectURL ($realm, $record);
 		if (isset ($url))
 			redirectUser ($url);
-		else
+	}
+	global $nextorder;
+	$order = 'odd';
+	echo "<center><h2>${nhits} result(s) found for '${terms}'</h2></center>";
+	foreach ($summary as $where => $what)
+		switch ($where)
 		{
-			startPortlet($realm);
-			if(is_array ($record))
-			{
+			case 'object':
+				startPortlet ("<a href='index.php?page=depot'>Objects</a>");
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-				echo "<tr class=row_odd><td class=tdleft>";
-				renderCell ($record);
-				echo "</td></tr>";
+				echo '<tr><th>what</th><th>why</th></tr>';
+				foreach ($what as $obj)
+				{
+					echo "<tr class=row_${order} valign=top><td>";
+					$object = spotEntity ('object', $obj['id']);
+					renderCell ($object);
+					echo "</td><td class=tdleft>";
+					if (isset ($obj['by_attr']))
+					{
+						// only explain non-obvious reasons for listing
+						echo '<ul>';
+						foreach ($obj['by_attr'] as $attr_name)
+							if ($attr_name != 'name')
+								echo "<li>${attr_name} matched</li>";
+						echo '</ul>';
+					}
+					if (isset ($obj['by_sticker']))
+					{
+						echo '<table>';
+						$aval = getAttrValues ($obj['id']);
+						foreach ($obj['by_sticker'] as $attr_id)
+						{
+							$record = $aval[$attr_id];
+							echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
+							echo "<td class=sticker>" . formatAttributeValue ($record) . "</td></tr>";
+						}
+						echo '</table>';
+					}
+					if (isset ($obj['by_port']))
+					{
+						echo '<table>';
+						amplifyCell ($object);
+						foreach ($obj['by_port'] as $port_id => $text)
+							foreach ($object['ports'] as $port)
+								if ($port['id'] == $port_id)
+								{
+									$port_href = '<a href="' . makeHref (array
+									(
+										'page' => 'object',
+										'object_id' => $object['id'],
+										'hl_port_id' => $port_id
+									)) . '">port ' . $port['name'] . '</a>';
+									echo "<tr><td>${port_href}:</td>";
+									echo "<td class=tdleft>${text}</td></tr>";
+									break; // next reason
+								}
+						echo '</table>';
+					}
+					if (isset ($obj['by_iface']))
+					{
+						echo '<ul>';
+						foreach ($obj['by_iface'] as $ifname)
+							echo "<li>interface ${ifname}</li>";
+						echo '</ul>';
+					}
+					if (isset ($obj['by_nat']))
+					{
+						echo '<ul>';
+						foreach ($obj['by_nat'] as $comment)
+							echo "<li>NAT rule: ${comment}</li>";
+						echo '</ul>';
+					}
+					if (isset ($obj['by_cableid']))
+					{
+						echo '<ul>';
+						foreach ($obj['by_cableid'] as $cableid)
+							echo "<li>link cable ID: ${cableid}</li>";
+						echo '</ul>';
+					}
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
 				echo '</table>';
-			}
-			else
-				echo $record;
-			finishPortlet();
-		}
-	}
-	else
-	{
-		global $nextorder;
-		$order = 'odd';
-		echo "<center><h2>${nhits} result(s) found for '${terms}'</h2></center>";
-		foreach ($summary as $where => $what)
-			switch ($where)
-			{
-				case 'object':
-					startPortlet ("<a href='index.php?page=depot'>Objects</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					echo '<tr><th>what</th><th>why</th></tr>';
-					foreach ($what as $obj)
-					{
-						echo "<tr class=row_${order} valign=top><td>";
-						$object = spotEntity ('object', $obj['id']);
-						renderCell ($object);
-						echo "</td><td class=tdleft>";
-						if (isset ($obj['by_attr']))
-						{
-							// only explain non-obvious reasons for listing
-							echo '<ul>';
-							foreach ($obj['by_attr'] as $attr_name)
-								if ($attr_name != 'name')
-									echo "<li>${attr_name} matched</li>";
-							echo '</ul>';
-						}
-						if (isset ($obj['by_sticker']))
-						{
-							echo '<table>';
-							$aval = getAttrValues ($obj['id']);
-							foreach ($obj['by_sticker'] as $attr_id)
-							{
-								$record = $aval[$attr_id];
-								echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
-								echo "<td class=sticker>" . formatAttributeValue ($record) . "</td></tr>";
-							}
-							echo '</table>';
-						}
-						if (isset ($obj['by_port']))
-						{
-							echo '<table>';
-							amplifyCell ($object);
-							foreach ($obj['by_port'] as $port_id => $text)
-								foreach ($object['ports'] as $port)
-									if ($port['id'] == $port_id)
-									{
-										$port_href = '<a href="' . makeHref (array
-										(
-											'page' => 'object',
-											'object_id' => $object['id'],
-											'hl_port_id' => $port_id
-										)) . '">port ' . $port['name'] . '</a>';
-										echo "<tr><td>${port_href}:</td>";
-										echo "<td class=tdleft>${text}</td></tr>";
-										break; // next reason
-									}
-							echo '</table>';
-						}
-						if (isset ($obj['by_iface']))
-						{
-							echo '<ul>';
-							foreach ($obj['by_iface'] as $ifname)
-								echo "<li>interface ${ifname}</li>";
-							echo '</ul>';
-						}
-						if (isset ($obj['by_nat']))
-						{
-							echo '<ul>';
-							foreach ($obj['by_nat'] as $comment)
-								echo "<li>NAT rule: ${comment}</li>";
-							echo '</ul>';
-						}
-						if (isset ($obj['by_cableid']))
-						{
-							echo '<ul>';
-							foreach ($obj['by_cableid'] as $cableid)
-								echo "<li>link cable ID: ${cableid}</li>";
-							echo '</ul>';
-						}
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'ipv4net':
-				case 'ipv6net':
-					if ($where == 'ipv4net')
-						startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
-					elseif ($where == 'ipv6net')
-						startPortlet ("<a href='index.php?page=ipv6space'>IPv6 networks</a>");
+				finishPortlet();
+				break;
+			case 'ipv4net':
+			case 'ipv6net':
+				if ($where == 'ipv4net')
+					startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
+				elseif ($where == 'ipv6net')
+					startPortlet ("<a href='index.php?page=ipv6space'>IPv6 networks</a>");
 
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order} valign=top><td>";
-						renderCell ($cell);
-						echo "</td></tr>\n";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'ipv4addressbydescr':
-				case 'ipv6addressbydescr':
-					if ($where == 'ipv4addressbydescr')
-						startPortlet ('IPv4 addresses');
-					elseif ($where == 'ipv6addressbydescr')
-						startPortlet ('IPv6 addresses');
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					// FIXME: address, parent network, routers (if extended view is enabled)
-					echo '<tr><th>Address</th><th>Description</th></tr>';
-					foreach ($what as $addr)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						$fmt = ip_format ($addr['ip']);
-						$parentnet = getIPAddressNetworkId ($addr['ip']);
-						if ($parentnet !== NULL)
-							echo "<a href='" . makeHref (array (
-									'page' => strlen ($addr['ip']) == 16 ? 'ipv6net' : 'ipv4net',
-									'id' => $parentnet,
-									'tab' => 'default',
-									'hl_ip' => $fmt,
-								)) . "'>${fmt}</a></td>";
-						else
-							echo "<a href='index.php?page=ipaddress&tab=default&ip=${fmt}'>${fmt}</a></td>";
-						echo "<td class=tdleft>${addr['name']}</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'ipv4rspool':
-					startPortlet ("<a href='index.php?page=ipv4slb&tab=rspools'>RS pools</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'ipvs':
-					startPortlet ("<a href='index.php?page=ipv4slb&tab=vs'>VS groups</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'ipv4vs':
-					startPortlet ("<a href='index.php?page=ipv4slb&tab=default'>Virtual services</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'user':
-					startPortlet ("<a href='index.php?page=userlist'>Users</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $item)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($item);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'file':
-					startPortlet ("<a href='index.php?page=files'>Files</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'rack':
-					startPortlet ("<a href='index.php?page=rackspace'>Racks</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'row':
-					startPortlet ("<a href='index.php?page=rackspace'>Rack rows</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						echo mkCellA ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'location':
-					startPortlet ("<a href='index.php?page=rackspace'>Locations</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $cell)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						renderCell ($cell);
-						echo "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				case 'vlan':
-					startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
-					echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-					foreach ($what as $vlan)
-					{
-						echo "<tr class=row_${order}><td class=tdleft>";
-						echo formatVLANAsHyperlink (getVLANInfo ($vlan['id'])) . "</td></tr>";
-						$order = $nextorder[$order];
-					}
-					echo '</table>';
-					finishPortlet();
-					break;
-				default: // you can use that in your plugins to add some non-standard search results
-					startPortlet($where);
-					echo $what;
-					finishPortlet();
-			}
-	}
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order} valign=top><td>";
+					renderCell ($cell);
+					echo "</td></tr>\n";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'ipv4addressbydescr':
+			case 'ipv6addressbydescr':
+				if ($where == 'ipv4addressbydescr')
+					startPortlet ('IPv4 addresses');
+				elseif ($where == 'ipv6addressbydescr')
+					startPortlet ('IPv6 addresses');
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				// FIXME: address, parent network, routers (if extended view is enabled)
+				echo '<tr><th>Address</th><th>Description</th></tr>';
+				foreach ($what as $addr)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					$fmt = ip_format ($addr['ip']);
+					$parentnet = getIPAddressNetworkId ($addr['ip']);
+					if ($parentnet !== NULL)
+						echo "<a href='" . makeHref (array (
+								'page' => strlen ($addr['ip']) == 16 ? 'ipv6net' : 'ipv4net',
+								'id' => $parentnet,
+								'tab' => 'default',
+								'hl_ip' => $fmt,
+							)) . "'>${fmt}</a></td>";
+					else
+						echo "<a href='index.php?page=ipaddress&tab=default&ip=${fmt}'>${fmt}</a></td>";
+					echo "<td class=tdleft>${addr['name']}</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'ipv4rspool':
+				startPortlet ("<a href='index.php?page=ipv4slb&tab=rspools'>RS pools</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'ipvs':
+				startPortlet ("<a href='index.php?page=ipv4slb&tab=vs'>VS groups</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'ipv4vs':
+				startPortlet ("<a href='index.php?page=ipv4slb&tab=default'>Virtual services</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'user':
+				startPortlet ("<a href='index.php?page=userlist'>Users</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $item)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($item);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'file':
+				startPortlet ("<a href='index.php?page=files'>Files</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'rack':
+				startPortlet ("<a href='index.php?page=rackspace'>Racks</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'row':
+				startPortlet ("<a href='index.php?page=rackspace'>Rack rows</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					echo mkCellA ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'location':
+				startPortlet ("<a href='index.php?page=rackspace'>Locations</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $cell)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					renderCell ($cell);
+					echo "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			case 'vlan':
+				startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				foreach ($what as $vlan)
+				{
+					echo "<tr class=row_${order}><td class=tdleft>";
+					echo formatVLANAsHyperlink (getVLANInfo ($vlan['id'])) . "</td></tr>";
+					$order = $nextorder[$order];
+				}
+				echo '</table>';
+				finishPortlet();
+				break;
+			default: // you can use that in your plugins to add some non-standard search results
+				startPortlet($where);
+				echo $what;
+				finishPortlet();
+		}
 }
 
 // This function prints a table of checkboxes to aid the user in toggling mount atoms
