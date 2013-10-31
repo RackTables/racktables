@@ -27,7 +27,44 @@ $(document).ready (function() {
 			);
 	});
 	$('body').mouseover(onBodyMouseOver);
+
+    $('.ping').html("<img src=pix/ping.png valign=top>");
+    $('#pingall').click(function() {
+        $('.ping').each(function() {
+            pingHost(this.id);
+        })
+    })
+    $('.ping').click(function() {
+        var iphost=this.id;
+        var res = pingHost(iphost);
+    })
+
+
+
 });
+
+function pingHost (ip) {
+    var jqxhr = $.ajax({
+        type: "POST",
+        url: "ping.php",
+        data: { host: ip },
+        success: (function(data) {
+//            var select='#'+ip;
+//            alert(select);
+//            $('#192\.168\.101\.21').hide();
+            if (data == 0) {
+                $('a.ping[ip="' + ip + '"]').html("<img src=pix/green.png valign=top>");
+            }
+            else {
+                $('a.ping[ip="' + ip + '"]').html("<img src=pix/red.png valign=top>");
+            }
+
+//            alert(ip+data);
+        })
+    })
+
+
+}
 
 function onSpanMouseOver (event) {
 	if (editMode)
