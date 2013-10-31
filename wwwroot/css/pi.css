@@ -467,6 +467,23 @@ border-color: #ff8c00;
 	border: 0px;
 }
 
+div.mainmenu_container {
+    margin: 0px 15px 0px 15px;
+}
+
+div.mainmenu_item {
+    width: 130px;
+    font-size: 20px;
+    float: left;
+    margin-bottom: 25px;
+    margin: 15px;
+
+}
+
+.mainmenu_item p {
+
+}
+
 .visible {
 	display: block;
 }
@@ -745,6 +762,17 @@ a.img-link {
 /* for OptionTree */
 select.vertical {
 	display: block;
+}
+
+/* main header line (black one) */
+tr.mainheader td {
+	background-color: black;
+	color: white;
+	padding: 5px;
+}
+tr.mainheader td a {
+	color: #5C98D5;
+	font-family: Arial,Sans-Serif,sans-serif;
 }
 
 /* quick links within the main header line */
