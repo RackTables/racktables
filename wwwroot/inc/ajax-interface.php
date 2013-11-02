@@ -288,4 +288,14 @@ function getNetUsageAJAX()
 	echo getRenderedIPNetCapacity ($net);
 }
 
+function pingIpv4AJAX ()
+{
+    $host = $_REQUEST['host'];
+    $count = $_REQUEST['count'] ? $_REQUEST['count'] : 2;           // Default count of icmp requests
+    $timeout = $_REQUEST['timeout'] ? $_REQUEST['timeout'] : 100;   // Default timeout for icmp reply
+    // Ping host for ipv4 lists, need fping tool installed to system.
+    exec("fping -r$count -t$timeout $host",$output, $status);
+    print $status;
+}
+
 ?>
