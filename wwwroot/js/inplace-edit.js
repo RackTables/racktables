@@ -46,13 +46,19 @@ $(document).ready (function() {
 function pingHost (ip) {
     var jqxhr = $.ajax({
         type: "POST",
-        url: "ping.php",
-        data: { host: ip },
+        url: "index.php",
+        data: {
+            'module': 'ajax',
+            'ac': 'ping-ipv4',
+            host: ip
+            },
         success: (function(data) {
             if (data == 0) {
+                // Host is available
                 $('a.ping[ip="' + ip + '"]').html("<img src=pix/link-up.png valign=top>");
             }
             else {
+                // Host is not available
                 $('a.ping[ip="' + ip + '"]').html("<img src=pix/link-disabled.png valign=top>");
             }
 
