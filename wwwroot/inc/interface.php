@@ -2715,6 +2715,7 @@ function renderIPv4NetworkAddresses ($range)
 	}
 
 	echo $rendered_pager;
+    echo "<a id='pingall'><img src=pix/tango-go-next.png valign=middle> Ping all</a>";
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
@@ -2728,7 +2729,7 @@ function renderIPv4NetworkAddresses ($range)
 			$addr = $range['addrlist'][$ip_bin];
 		else
 		{
-			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<tr class='tdleft $tr_class'><td class=tdleft width=150><a ip='$dottedquad' id='$dottedquad' class=ping title=Ping></a> <a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
@@ -2746,7 +2747,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		$tr_class .= ' ' . $addr['class'];
 		echo "<tr class='tdleft $tr_class'>";
-		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td><a id='${addr['ip']}' ip='${addr['ip']}' class=ping title=Ping></a> <a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a> </td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
