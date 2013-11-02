@@ -144,14 +144,9 @@ function renderIndex ()
 <?php
 foreach ($indexlayout as $row)
 {
-//	echo '<tr>';
 	foreach ($row as $column)
-		if ($column === NULL)
-//			echo '<td>&nbsp;</td>';
-            echo '';
-		else
+		if (!($column === NULL))
 			renderIndexItem ($column);
-//	echo '</tr>';
 }
 ?>
 			</table>
