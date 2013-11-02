@@ -99,30 +99,37 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <?php printPageHeaders(); ?>
 </head>
 <body>
-<div class="maintable">
- <div class="mainheader">
-  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
+<table border=0 cellpadding=0 cellspacing=0 width="100%" height="100%" class="maintable">
+ <tr class="mainheader"><td>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- </div>
- <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
- <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
- <div class="msgbar"><?php showMessageOrError(); ?></div>
- <div class="pagebar"><?php echo $payload; ?></div>
-</div>
+ <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
+ </td></tr>
+ <tr><td class="menubar">
+  <table border="0" width="100%" cellpadding="3" cellspacing="0">
+  <tr><?php showPathAndSearch ($pageno); ?></tr>
+  </table>
+ </td></tr>
+ <tr><td><?php showTabs ($pageno, $tabno); ?></td></tr>
+ <tr><td><?php showMessageOrError(); ?></td></tr>
+ <tr><td><?php echo $payload; ?></td></tr>
+</table>
+
 </body>
 </html>
 <?php
 }
 
 // Main menu.
-function renderIndexItem ($ypageno)
-{
-	echo (! permitted ($ypageno)) ? "          <td>&nbsp;</td>\n" :
-		"          <td>\n" .
-		"            <h1><a href='" . makeHref (array ('page' => $ypageno)) . "'>" .
-		getPageName ($ypageno) . "<br>\n" . getImageHREF ($ypageno) .
-		"</a></h1>\n" .
-		"          </td>\n";
+function renderIndexItem ($ypageno) {
+  global $page;
+  if (permitted($ypageno)) {
+	  $title = getPageName ($ypageno);
+	print "<div class='mainmenu_item'>\n";
+    print "<a href='".makeHref(array('page'=>$ypageno))."'>\n";
+    printImageHREF ($ypageno);
+    print "<div style='padding-top:15px;'>".$title."</div>";
+    print "</a></div>\n";
+  }
 }
 
 function renderIndex ()
@@ -137,13 +144,9 @@ function renderIndex ()
 <?php
 foreach ($indexlayout as $row)
 {
-	echo '<tr>';
 	foreach ($row as $column)
-		if ($column === NULL)
-			echo '<td>&nbsp;</td>';
-		else
+		if (!($column === NULL))
 			renderIndexItem ($column);
-	echo '</tr>';
 }
 ?>
 			</table>
