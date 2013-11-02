@@ -113,16 +113,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
  <tr><td><?php showMessageOrError(); ?></td></tr>
  <tr><td><?php echo $payload; ?></td></tr>
 </table>
-<!-- <div class="maintable">
- <div class="mainheader">
-  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
- <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- </div>
- <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
- <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
- <div class="msgbar"><?php showMessageOrError(); ?></div>
- <div class="pagebar"><?php echo $payload; ?></div>
-</div> -->
+
 </body>
 </html>
 <?php
@@ -136,7 +127,6 @@ function renderIndexItem ($ypageno) {
 	print "<div class='mainmenu_item'>\n";
     print "<a href='".makeHref(array('page'=>$ypageno))."'>\n";
     printImageHREF ($ypageno);
-//    print "</div>\n";
     print "<div style='padding-top:15px;'>".$title."</div>";
     print "</a></div>\n";
   }
