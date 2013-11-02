@@ -2714,7 +2714,7 @@ function renderIPv4NetworkAddresses ($range)
 	}
 
 	echo $rendered_pager;
-    echo "<a id='pingall'><img src=pix/ping.png valign=top> Ping all</a>";
+    echo "<a id='pingall'><img src=pix/tango-go-next.png valign=middle> Ping all</a>";
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 

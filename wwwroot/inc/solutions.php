@@ -528,4 +528,11 @@ function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rect
 	echo "</svg>\n";
 }
 
+function ping_host ($host, $count=2, $timeout=100)
+{
+	// Ping host for ipv4 lists, need fping tool installed to system.
+	exec("fping -r$count -t$timeout $host",$output, $status);
+	print $status; 
+}
+
 ?>
