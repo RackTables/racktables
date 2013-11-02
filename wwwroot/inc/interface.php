@@ -133,11 +133,12 @@ function renderIndexItem ($ypageno) {
   global $page;
   if (permitted($ypageno)) {
 	  $title = getPageName ($ypageno);
-	print "          <div class='mainmenu_item'>\n";
-    print "            <a href='".makeHref(array('page'=>$ypageno))."'><p>".$title."</p>\n";
+	print "<div class='mainmenu_item'>\n";
+    print "<a href='".makeHref(array('page'=>$ypageno))."'>\n";
     printImageHREF ($ypageno);
-    print "</a>\n";
-    print "          </div>\n";
+//    print "</div>\n";
+    print "<div style='padding-top:15px;'>".$title."</div>";
+    print "</a></div>\n";
   }
 }
 
@@ -153,13 +154,14 @@ function renderIndex ()
 <?php
 foreach ($indexlayout as $row)
 {
-	echo '<tr>';
+//	echo '<tr>';
 	foreach ($row as $column)
 		if ($column === NULL)
-			echo '<td>&nbsp;</td>';
+//			echo '<td>&nbsp;</td>';
+            echo '';
 		else
 			renderIndexItem ($column);
-	echo '</tr>';
+//	echo '</tr>';
 }
 ?>
 			</table>
