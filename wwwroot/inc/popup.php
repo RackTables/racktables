@@ -597,6 +597,13 @@ function renderPopupTraceRoute ()
 		$port_data = array ();
 		foreach ($object['ports'] as $port_id => $port_details)
 			$port_data = $port_data + getNeighborPorts ($port_id);
+		// add one level recursion
+		foreach ($port_data as $port_iter => $port_det) {
+			$new_object = spotEntity ('object', $port_det['object_id']);
+			amplifyCell ($new_object);
+			foreach ($new_object['ports'] as $port_id => $port_details)
+				$port_data = $port_data + getNeighborPorts ($port_id);
+		}
 	}
 	else
 	{
@@ -618,7 +625,15 @@ function renderPopupTraceRoute ()
 		if (!array_key_exists ($object_id, $objects))
 		{
 			$objects[$object_id] = $port_details['object_name'];
-			$graph->addCluster("${object_id}Cluster", $port_details['object_name'], array ('URL' => "index.php?module=popup&helper=traceroute&object_id=${object_id}"));
+			// colored selected object
+			$color='white';
+			if (${object_id}==$_REQUEST['object_id']) $color='#ddddff';
+			$graph->addCluster("${object_id}Cluster", $port_details['object_name'], array (
+				'URL' => "index.php?module=popup&helper=traceroute&object_id=${object_id}",
+				'style' => 'filled', 
+				'fillcolor'=>$color
+				)
+			);
 		}
 	}
 
