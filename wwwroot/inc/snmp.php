@@ -1198,7 +1198,7 @@ $iftable_processors['fcx-management'] = array
 
 $iftable_processors['turboiron-any-10000SFP+'] = array
 (
-	'pattern' => '@^10GigabitEthernet([[:digit:]]+$@',
+	'pattern' => '@^10GigabitEthernet([[:digit:]]+)$@',
 	'replacement' => 'te\\1',
 	'dict_key' => '4-1077',
 	'label' => '10GbE \\1',
@@ -1207,7 +1207,7 @@ $iftable_processors['turboiron-any-10000SFP+'] = array
 
 $iftable_processors['turboiron-any-10-100-1000T'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+$@',
+	'pattern' => '@^GigabitEthernet([[:digit:]]+)$@',
 	'replacement' => 'gi\\1',
 	'dict_key' => '1-24',
 	'label' => 'Gi \\1',
