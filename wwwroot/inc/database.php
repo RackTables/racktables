@@ -4592,24 +4592,38 @@ function findFileByName ($filename)
 	return NULL;
 }
 
-function acquireLDAPCache ($form_username, $password_hash, $expiry = 0)
+// guarantees there is a locked row for $form_username
+function acquireLDAPCache ($form_username, $password_hash, $expiry = 0, $deep = 0)
 {
+	$self = __FUNCTION__;
 	global $dbxlink;
+	usePreparedExecuteBlade ("INSERT IGNORE INTO LDAPCache (presented_username) VALUES (?)", array ($form_username));
 	$dbxlink->beginTransaction();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT TIMESTAMPDIFF(SECOND, first_success, now()) AS success_age, ' .
-		'TIMESTAMPDIFF(SECOND, last_retry, now()) AS retry_age, displayed_name, memberof ' .
-		'FROM LDAPCache WHERE presented_username = ? AND successful_hash = ? ' .
-		'HAVING success_age < ? FOR UPDATE',
-		array ($form_username, $password_hash, $expiry)
+		'TIMESTAMPDIFF(SECOND, last_retry, now()) AS retry_age, displayed_name, memberof, successful_hash ' .
+		'FROM LDAPCache WHERE presented_username = ? FOR UPDATE',
+		array ($form_username)
 	);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		$row['memberof'] = unserialize (base64_decode ($row['memberof']));
-		return $row;
+		if ($row['successful_hash'] === $password_hash && $row['success_age'] < $expiry)
+		{
+			$row['memberof'] = unserialize (base64_decode ($row['memberof']));
+			return $row;
+		}
+		return NULL;
 	}
-	return NULL;
+	else
+	{
+		if ($deep < 2)
+			// maybe another instance deleted our row before we've locked it. Try again
+			return $self ($form_username, $password_hash, $expiry, $deep + 1);
+		else
+			// the problem still persists after 2 tries, throw an exception
+			throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
+	}
 }
 
 function releaseLDAPCache ()
@@ -4626,18 +4640,16 @@ function touchLDAPCacheRecord ($form_username)
 
 function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
 {
-	// FIXME: This sequence is able to trigger a deadlock, namely, when executed
-	// in parallel from multiple working copies of the same user, which for some
-	// reason has no valid record in LDAPCache. Perhaps, using REPLACE INTO can
-	// lower the chances of this.
-	deleteLDAPCacheRecord ($form_username);
-	usePreparedInsertBlade ('LDAPCache',
+	usePreparedUpdateBlade ('LDAPCache',
 		array
 		(
-			'presented_username' => $form_username,
 			'successful_hash' => $password_hash,
 			'displayed_name' => $dname,
 			'memberof' => base64_encode (serialize ($memberof)),
+		),
+		array
+		(
+			'presented_username' => $form_username,
 		)
 	);
 }

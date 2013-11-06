@@ -11,6 +11,7 @@
 	bugfix: IOS CLI prompt detection (#1033)
 	bugfix: SLB IP assignments were stored even if a balancer object was deleted
 	bugfix: exception when searching for a alien IP address
+	bugfix: DB deadlocks in LDAP authentication when opening many tabs simultaneously
 	update: support of Huawei CE5800 series switch
 	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
