@@ -2523,7 +2523,8 @@ END
 	echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
 	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 2)) . '</td></tr>';
 	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
-	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=4></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected" id="is_connected" tabindex=4></td>';
+	echo '<th class=tdleft><label for="is_connected">reserve subnet-router anycast address</label></th></tr>';
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE, 5);
 	echo '</td></tr>';
