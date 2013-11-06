@@ -2156,6 +2156,8 @@ $dictionary = array
 	2060 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 18 | http://docs.fedoraproject.org/en-US/Fedora/18/html/Release_Notes/]]'),
 	2061 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 19 | http://docs.fedoraproject.org/en-US/Fedora/19/html/Release_Notes/]]'),
 	2062 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS125-24G-1S-RM'),
+	2063 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2012'),
+	2064 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2012 R2'),
 
 	// add new records here until the gap is filled
 
