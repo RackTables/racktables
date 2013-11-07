@@ -1,4 +1,5 @@
 0.20.6
+	update: SNMP support for 3Com 4500 family of switches by Rafael Driutti
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 
 		rspools were linked with the same balancer-vsg pair
