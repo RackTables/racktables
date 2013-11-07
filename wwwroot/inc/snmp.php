@@ -1226,27 +1226,18 @@ $iftable_processors['fcx-management'] = array
 $iftable_processors['turboiron-any-10000SFP+'] = array
 (
 	'pattern' => '@^10GigabitEthernet([[:digit:]]+)$@',
-	'replacement' => 'te\\1',
+	'replacement' => 'e\\1',
 	'dict_key' => '4-1077',
-	'label' => '10GbE \\1',
+	'label' => 'Slot \\1',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['turboiron-any-10-100-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+)$@',
-	'replacement' => 'gi\\1',
+	'replacement' => 'e\\1',
 	'dict_key' => '1-24',
-	'label' => 'Gi \\1',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['turboiron-management'] = array
-(
-	'pattern' => '@^Management$@',
-	'replacement' => 'mgmt',
-	'dict_key' => '1-24',
-	'label' => 'management',
+	'label' => 'Slot \\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -2678,7 +2669,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1044,
 		'text' => 'TurboIron 24X : 4 10/100/1000T RJ-45, 24 10000 SFP+, 1 10/100/1000 RJ-45 + 1 Db9 Serial Mgmt',
-		'processors' => array ('turboiron-any-10000SFP+', 'turboiron-any-10-100-1000T', 'turboiron-any-management'),
+		'processors' => array ('turboiron-any-10000SFP+', 'turboiron-any-10-100-1000T', 'fcx-management'),
 	),
 	'1991.1.3.54.2.4.1.1' => array # L2 software
 	(
