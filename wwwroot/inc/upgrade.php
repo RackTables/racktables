@@ -187,32 +187,35 @@ ENDOFTEXT
 
 	'0.20.5' => <<<ENDOFTEXT
 This release introduces the VS groups feature. VS groups is a new way to store
-and display virtual services configuration. New realm 'ipvs' (VS group) is created.
-All the existing VS configuration is kept and displayed as-is, but user is free to convert
-it to the new format, which displays it in more natural way and allows to generate
-virtual_server_group keepalived configs. To convert a virtual service to the new format,
-you need to manually create the vs group object and assign IP addresses to it. Then, if you
-have the old-style VSes configured, the Migrate tab will be displayed on the particular VS group's
-page. After successfull migration, you can remove the old-style VS objects.
+and display virtual services configuration. There is a new "ipvs" (VS group)
+realm. All previously existing VS configuration remains functional and user
+is free to convert it to the new format, which displays it in a more natural way
+and allows to generate virtual_server_group keepalived configs. To convert a
+virtual service to the new format, it is necessary to manually create a VS group
+object and assign IP addresses to it. The VS group will display a "Migrate" tab
+to convert the old-style VS objects, which can be removed after a successful
+conversion.
 
-Old-style VS configuration becomes DEPRECATED. Its support will be removed in one of the following
-major releases. So it is strongly recommended to convert it to the new format.
+The old-style VS configuration becomes DEPRECATED. Its support will be removed
+in a future major release. So it is strongly recommended to convert it to the
+new format.
 ENDOFTEXT
 ,
 
 	'0.20.6' => <<<ENDOFTEXT
-0.20.6 uses database triggers for consistency measures.  The database
+This release uses database triggers for consistency measures.  The database
 user account must have the 'TRIGGER' privilege, which was introduced in
 MySQL 5.1.7.
 
 Cable paths can be traced and displayed in a graphical format. This requires
 the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
 
-Config variables TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC were merged into new MGMT_PROTOS.
-The old ones were deleted from the DB. MGMT_PROTOS allows to specify any management protocol for a particular
-device list by RackCode filter. The default value is 'ssh: {\$typeid_4}, telnet: {\$typeid_8}' which leads to
-object's FQDN linked to 'ssh://server.fqdn' and 'telnet://switch.fqdn'. If the old variables contained any data,
-it will be converted to the new syntax and stored into MGMT_PROTOS variable.
+New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
+SSH_OBJS_LISTSRC and RDP_OBJS_LISTSRC options (converting existing settings as
+necessary). MGMT_PROTOS allows to specify any management protocol for a
+particular device list using a RackCode filter. The default value
+("ssh: {\$typeid_4}, telnet: {\$typeid_8}") produces "ssh://server.fqdn" for
+servers and "telnet://switch.fqdn" for network switches.
 ENDOFTEXT
 ,
 );
