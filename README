@@ -302,36 +302,3 @@ installation. There are yet options to work around that:
 2. Request Linux distribution vendor to fix the bug with PCRE.
 3. Repair your RHEL/CentOS installation yourself by fixing its PCRE
    RPM as explained here: http://bugs.centos.org/view.php?id=3252
-
-*** Upgrading to 0.17.0 ***
-
-One can always install RackTables 0.17.0 from scratch. However, upgrading an
-existing installation to 0.17.0 implies a certain upgrade path. If the existing
-database version is less, than 0.16.4, it must first be upgraded to version
-0.16.4, 0.16.5 or 0.16.6 (at one's choice) using appropriate tar.gz
-distribution. The resulting 0.16.4+ database can be upgraded to 0.17.0 (or later
-version) in a normal way (with tar.gz of the desired 0.17.x release).
-
-LDAP options have been moved to LDAP_options array. This means, that if you were
-using LDAP authentication for users in version 0.16.x, it will break right after
-upgrade to 0.17.0. To get things working again, adjust existing secret.php file
-according to secret-sample.php file provided with 0.17.0 release.
-
-This release is the first to take advantage of the foreign key support provided
-by the InnoDB storage engine in MySQL.  The installer and upgrader scripts check
-for InnoDB support and cannot complete without it. If you have trouble, the
-first step is to make sure the 'skip-innodb' option in my.cnf is commented out.
-
-Another change is the addition of support for file uploads.  Files are stored in
-the database.  There are several settings in php.ini which you may need to
-modify:
-    file_uploads        - needs to be On
-    upload_max_filesize - max size for uploaded files
-    post_max_size       - max size of all form data submitted via POST
-                          (including files)
-
-User accounts used to have 'enabled' flag, which allowed individual blocking and
-unblocking of each. This flag was dropped in favor of existing mean of access
-setup (RackCode). An unconditional denying rule is automatically added into
-RackCode for such blocked account, so the effective security policy remains the
-same.
