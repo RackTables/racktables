@@ -183,6 +183,9 @@ This release uses database triggers for consistency measures.  The database
 user account must have the 'TRIGGER' privilege, which was introduced in
 MySQL 5.1.7.
 
+0.20.6 introduces explicit use of default collation utf8_unicode_ci in order
+to fix http://bugs.racktables.org/view.php?id=837.
+
 Cable paths can be traced and displayed in a graphical format. This requires
 the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
 
@@ -1428,6 +1431,76 @@ BEGIN
   END IF;
 END;
 ";
+            // update to use utf8_unicode_ci collation
+            // http://bugs.racktables.org/view.php?id=837
+			$query[] = "ALTER DATABASE DEFAULT CHARACTER SET UTF8 COLLATE utf8_unicode_ci"
+            $query[] = "ALTER TABLE `Atom` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Attribute` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `AttributeMap` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `AttributeValue` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `CachedPAV` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `CachedPNV` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `CachedPVM` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `CactiGraph` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `CactiServer` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Chapter` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Config` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Dictionary` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `EntityLink` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `File` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `FileLink` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4Address` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4Allocation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4LB` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4Log` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv6Log` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4NAT` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4Network` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4RS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4RSPool` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv4VS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv6Address` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv6Allocation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `IPv6Network` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `LDAPCache` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Link` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Molecule` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `MountOperation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `MuninGraph` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `MuninServer` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `ObjectLog` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `ObjectParentCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Port` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortAllowedVLAN` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortInnerInterface` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortInterfaceCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortLog` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortNativeVLAN` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `PortVLANMode` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Object` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `ObjectHistory` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `RackSpace` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `RackThumbnail` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `Script` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `TagStorage` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `TagTree` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `UserAccount` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `UserConfig` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANDescription` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANDomain` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANIPv4` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANIPv6` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANSTRule` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANSwitch` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANSwitchTemplate` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VLANValidID` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VSIPs` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VSPorts` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VSEnabledIPs` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+            $query[] = "ALTER TABLE `VSEnabledPorts` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+
 			// one HW type was moved from the 'Network switch' chapter to the 'Network chassis' chapter
 			// change the type of affected objects to 'Network chassis'
 			$query[] = "UPDATE `Object` SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM `AttributeValue` WHERE attr_id = 2 and uint_value = 935)";

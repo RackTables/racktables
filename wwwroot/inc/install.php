@@ -447,7 +447,7 @@ function get_pseudo_file ($name)
 	case 'structure':
 		$query = array();
 
-		$query[] = "alter database character set utf8";
+		$query[] = "alter database character set utf8 collate utf8_unicode_ci";
 		$query[] = "set names 'utf8'";
 		$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
 
