@@ -3023,6 +3023,7 @@ function getObjectAttrsSearchResults ($what)
 // multiple matching stickers. Search is only performed on "string" or "dict" attributes.
 function getStickerSearchResults ($tablename, $what)
 {
+	$map = getAttrMap ();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT AV.object_id, AV.attr_id FROM AttributeValue AV ' .
@@ -3034,9 +3035,7 @@ function getStickerSearchResults ($tablename, $what)
 		'OR (A.type = "dict" AND dict_value LIKE ?) ORDER BY object_id',
 		array ("%${what}%", "%${what}%")
 	);
-
-	$map = getAttrMap();
-	$ret = array();
+	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		if (in_array ($map[$row['attr_id']]['type'], array ('string', 'dict')))
@@ -3669,7 +3668,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 	$result = usePreparedSelectBlade
 	(
 		"SELECT type AS attr_type, av.* FROM Attribute a " .
-		"LEFT JOIN AttributeValue av ON a.id = av.attr_id AND av.object_id = ?" .
+		"LEFT JOIN AttributeValue av ON a.id = av.attr_id AND av.object_id = ? " .
 		"WHERE a.id = ?",
 		array ($object_id, $attr_id)
 	);
