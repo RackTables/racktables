@@ -523,7 +523,8 @@ function renderLocationRowForEditor ($subtree, $level = 0)
 function renderLocationSelectTree ($selected_id = NULL)
 {
 	echo '<option value=0>-- NONE --</option>';
-	foreach (treeFromList (listCells ('location')) as $location)
+	$locationlist = listCells ('location');
+	foreach (treeFromList ($locationlist) as $location)
 	{
 		echo "<option value=${location['id']} style='font-weight: bold' ";
 		if ($location['id'] == $selected_id )
