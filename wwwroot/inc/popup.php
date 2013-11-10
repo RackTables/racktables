@@ -97,11 +97,25 @@ INNER JOIN (
 	// rack filter
 	if (! empty ($filter['racks']))
 	{
-		// include objects mounted directly in the specified racks, as well as children of those objects
-		$query .= 'AND p.object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
-			questionMarks (count ($filter['racks'])) . ') ' .
-			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='object' AND child_entity_type = 'object' AND parent_entity_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (" .
-			questionMarks (count ($filter['racks'])) . '))) ';
+		// objects directly mounted in the racks
+		$query .= sprintf
+		(
+			'AND p.object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (%s) ',
+			questionMarks (count ($filter['racks']))
+		);
+		// children of objects directly mounted in the racks
+		$query .= sprintf
+		(
+			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='object' AND child_entity_type = 'object' AND parent_entity_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (%s)) ",
+			questionMarks (count ($filter['racks']))
+		);
+		// zero-U objects mounted to the racks
+		$query .= sprintf
+		(
+			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='rack' AND child_entity_type='object' AND parent_entity_id IN (%s)) ",
+			questionMarks (count ($filter['racks']))
+		);
+		$qparams = array_merge ($qparams, $filter['racks']);
 		$qparams = array_merge ($qparams, $filter['racks']);
 		$qparams = array_merge ($qparams, $filter['racks']);
 	}

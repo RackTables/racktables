@@ -5,7 +5,6 @@
 	bugfix: change blade orientation of Cisco 6509-V-E (#985)
 	bugfix: default values of some LDAP options weren't being used
 	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
-	update: display friendlier message when attempting to NAT non-existent IP (#963) 
 	bugfix: jQuery.UI static files were not accessible (by Aleksandr Balezin)
 	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
 	bugfix: IOS CLI prompt detection (#1033)
@@ -14,6 +13,8 @@
 	bugfix: DB deadlocks in LDAP authentication when opening many tabs simultaneously
 	bugfix: object searching and updating may fail (#1031)
 	bugfix: strict standards message when managing locations or rows (#1065)
+	bugfix: ports of zero-U objects were not listed as candidates when linking ports (#917)
+	update: display friendlier message when attempting to NAT non-existent IP (#963)
 	update: support of Huawei CE5800 series switch
 	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
