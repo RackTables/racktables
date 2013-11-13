@@ -14,6 +14,7 @@
 	bugfix: object searching and updating may fail (#1031)
 	bugfix: strict standards message when managing locations or rows (#1065)
 	bugfix: ports of zero-U objects were not listed as candidates when linking ports (#917)
+	bugfix: blade objects with problems should be colored red (#1071) by Mark Wilkinson
 	update: display friendlier message when attempting to NAT non-existent IP (#963)
 	update: support of Huawei CE5800 series switch
 	update: port type can now be changed even if port is linked
