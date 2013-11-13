@@ -684,7 +684,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
 	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
-	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = array ();
+	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
 	if (count($objectChildren) > 0)
 	{
 		foreach ($objectChildren as $child)
@@ -718,6 +718,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 				if (strlen ($childData['label']) and $childData['label'] != $child['name'])
 					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
+				$slotClass[$slot] = "class_T";
+				if ( $childData['has_problems'] == 'yes' )
+					$slotClass[$slot] = "class_Tw";
+				if ( $child['entity_id'] == $hl_obj_id )
+					$slotClass[$slot] = "class_Th";
 			}
 		}
 		natsort($childNames);
@@ -760,10 +765,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 									echo " rowspan=$slotRows[$s]";
 								if ($slotCols[$s] > 1)
 									echo " colspan=$slotCols[$s]";
-								echo " class='state_T";
-								if ($slotData[$s] == $hl_obj_id)
-									echo 'h';
-								echo "'>${slotTitle[$s]}";
+								echo " class='${slotClass[$s]}'>${slotTitle[$s]}";
 								if ($layout == 'V')
 								{
 									$tmp = substr ($slotInfo[$s], 0, 1);
