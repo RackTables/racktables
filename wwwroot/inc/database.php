@@ -889,7 +889,8 @@ END;
 
 			$ret[$portinfo['id']] = $portinfo;
 		}
-		array_push ($ret[$row['id']]['links'], $link_details);
+		if (isset ($row['remote_id']))
+			array_push ($ret[$row['id']]['links'], $link_details);
 
 		$last_id = $row['id'];
 	}
