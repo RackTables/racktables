@@ -840,7 +840,6 @@ SELECT
 	rp.type AS remote_oif_id,
 	rp.object_id AS remote_object_id,
 	ro.name AS remote_object_name,
-	ro.objtype_id AS remote_object_type,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = rp.id) AS log_count,
 	PortLog.user,
 	UNIX_TIMESTAMP(PortLog.date) AS time
@@ -872,8 +871,6 @@ END;
 			'remote_oif_id' => $row['remote_oif_id'],
 			'remote_object_id' => $row['remote_object_id'],
 			'remote_object_name' => $row['remote_object_name'],
-			'remote_object_type' => $row['remote_object_type'],
-			'is_l1' => ($row['remote_object_type'] == 9), // patch panel link
 		);
 		$log_details = array
 		(
@@ -892,14 +889,7 @@ END;
 
 			$ret[$portinfo['id']] = $portinfo;
 		}
-		if (isset ($row['remote_id']))
-		{
-			// place L2 links before L1
-			if ($link_details['is_l1'])
-				array_push ($ret[$row['id']]['links'], $link_details);
-			else
-				array_unshift ($ret[$row['id']]['links'], $link_details);
-		}
+		array_push ($ret[$row['id']]['links'], $link_details);
 
 		$last_id = $row['id'];
 	}
