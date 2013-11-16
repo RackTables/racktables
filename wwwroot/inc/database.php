@@ -886,6 +886,11 @@ END;
 			$portinfo['linked'] = isset ($row['remote_id']) ? 1 : 0;
 			$portinfo['links'] = array();
 			$portinfo['last_log'] = $row['log_count'] ? $log_details : array();
+			// To maintain compatibility with 802.1Q, LLDP and some other functions,
+			// append details of the first link to the main array.
+			// The same info will exist in the $links sub-array, used in other ways.
+			if (isset ($row['remote_id']))
+				$portinfo = $portinfo + $link_details;
 
 			$ret[$portinfo['id']] = $portinfo;
 		}
