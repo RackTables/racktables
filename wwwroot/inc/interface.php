@@ -933,7 +933,7 @@ function renderNewRackForm ($row_id)
 
 function renderEditObjectForm()
 {
-	global $pageno, $virtual_obj_types;
+	global $pageno;
 	$object_id = getBypassValue();
 	$object = spotEntity ('object', $object_id);
 	startPortlet ();
@@ -947,16 +947,8 @@ function renderEditObjectForm()
 	echo '</td></tr>';
 	// baseline info
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	if (in_array($object['objtype_id'], $virtual_obj_types))
-	{
-		echo "<input type=hidden name=object_label value=''>\n";
-		echo "<input type=hidden name=object_asset_no value=''>\n";
-	}
-	else
-	{
-		echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
-		echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
-	}
+	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
@@ -3270,24 +3262,19 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	global $location_obj_types, $virtual_obj_types;
 	$typelist = readChapter (CHAP_OBJTYPE, 'o');
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
 	$tabindex = 100;
 
-	// create a list of object types to exclude (virtual and location-related ones)
-	$exclude_typelist = array_merge($location_obj_types, $virtual_obj_types);
+	// exclude location-related object types
+	global $location_obj_types;
+	foreach ($typelist['other'] as $key => $value)
+		if ($key > 0 && in_array($key, $location_obj_types))
+			unset($typelist['other'][$key]);
 
-	$phys_typelist = $typelist;
-	foreach ($phys_typelist['other'] as $key => $value)
-	{
-		// remove from list if type should be excluded
-		if ($key > 0 && in_array($key, $exclude_typelist))
-			unset($phys_typelist['other'][$key]);
-	}
-	startPortlet ('Physical objects');
+	startPortlet ('Distinct types, same tags');
 	printOpFormIntro ('addObjects');
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
@@ -3296,7 +3283,7 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($phys_typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
+		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
 		echo '</td>';
 		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
 		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
@@ -3314,51 +3301,12 @@ function renderAddMultipleObjectsForm ()
 	echo "</form></table>\n";
 	finishPortlet();
 
-	// create a list containing only virtual object types
-	$virt_typelist = $typelist;
-	foreach ($virt_typelist['other'] as $key => $value)
-	{
-		if ($key > 0 && !in_array($key, $virtual_obj_types))
-			unset($virt_typelist['other'][$key]);
-	}
-	startPortlet ('Virtual objects');
-	printOpFormIntro ('addObjects');
-	echo "<input type=hidden name=virtual_objects value=''>\n";
-	echo '<table border=0 align=center>';
-	echo "<tr><th>Object type</th><th>Common name</th><th>Tags</th></tr>\n";
-	for ($i = 0; $i < $max; $i++)
-	{
-		echo '<tr><td>';
-		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($virt_typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
-		echo '</td>';
-		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
-		if ($i == 0)
-		{
-			echo "<td valign=top rowspan=${max}>";
-			renderNewEntityTags ('object');
-			echo "</td>\n";
-		}
-		echo "</tr>\n";
-		$tabindex++;
-	}
-	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
-	echo "</form></table>\n";
-	finishPortlet();
-
-	// create a list excluding location object types
-	$lot_typelist = $typelist;
-	foreach ($lot_typelist['other'] as $key => $value)
-	{
-		if ($key > 0 && in_array($key, $location_obj_types))
-			unset($lot_typelist['other'][$key]);
-	}
 	startPortlet ('Same type, same tags');
 	printOpFormIntro ('addLotOfObjects');
 	echo "<table border=0 align=center><tr><th>names</th><th>type</th></tr>";
 	echo "<tr><td rowspan=3><textarea name=namelist cols=40 rows=25>\n";
 	echo "</textarea></td><td valign=top>";
-	printNiftySelect ($lot_typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
+	printNiftySelect ($typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'));
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";

@@ -1252,13 +1252,6 @@ function addMultipleObjects()
 		if (!isset ($_REQUEST["${i}_object_type_id"]))
 			return showError ('Submitted form is invalid at line ' . ($i + 1));
 
-		// set to empty values for virtual objects
-		if (isset ($_REQUEST['virtual_objects']))
-		{
-			$_REQUEST["${i}_object_label"] = '';
-			$_REQUEST["${i}_object_asset_no"] = '';
-		}
-
 		assertUIntArg ("${i}_object_type_id", TRUE);
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
