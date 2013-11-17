@@ -22,9 +22,9 @@ $SQLSchema = array
 			'label' => 'label',
 			'asset_no' => 'asset_no',
 			'objtype_id' => 'objtype_id',
-			'rack_id' => '(SELECT rack_id FROM RackSpace WHERE object_id = RackObject.id ORDER BY rack_id ASC LIMIT 1)',
-			'rack_id_2' => "(SELECT parent_entity_id AS rack_id FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'rack' ORDER BY rack_id ASC LIMIT 1)",
-			'container_id' => "(SELECT parent_entity_id FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'object' ORDER BY parent_entity_id ASC LIMIT 1)",
+			'rack_id' => '(SELECT MIN(rack_id) FROM RackSpace WHERE object_id = RackObject.id)',
+			'rack_id_2' => "(SELECT MIN(parent_entity_id) FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'rack')",
+			'container_id' => "(SELECT MIN(parent_entity_id) FROM EntityLink WHERE child_entity_type='object' AND child_entity_id = RackObject.id AND parent_entity_type = 'object')",
 			'container_name' => '(SELECT name FROM RackObject WHERE id = container_id)',
 			'container_objtype_id' => '(SELECT objtype_id FROM RackObject WHERE id = container_id)',
 			'has_problems' => 'has_problems',
@@ -553,9 +553,9 @@ function listCells ($realm, $parent_id = 0)
 // throws an exception if entity not exists
 function spotEntity ($realm, $id, $ignore_cache = FALSE)
 {
-	global $entityCache;
 	if (! $ignore_cache)
 	{
+		global $entityCache;
 		if (isset ($entityCache['complete'][$realm]))
 		// Emphasize the absence of record, if listCells() has already been called.
 			if (isset ($entityCache['complete'][$realm][$id]))
@@ -706,7 +706,8 @@ ORDER BY n2.ip, n2.mask
 		unset ($result);
 	}
 	$ret['atags'] = generateEntityAutoTags ($ret);
-	$entityCache['partial'][$realm][$id] = $ret;
+	if (! $ignore_cache)
+		$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
 }
 
