@@ -837,10 +837,9 @@ SELECT
 	Link.cable AS cableid,
 	IF(Link.porta = Port.id, Link.portb, Link.porta) AS remote_id,
 	rp.name AS remote_name,
-	rp.iif_id AS remote_iif_id,
-	rp.type AS remote_oif_id,
 	rp.object_id AS remote_object_id,
 	ro.name AS remote_object_name,
+	Dictionary.dict_value AS remote_object_type,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = rp.id) AS log_count,
 	PortLog.user,
 	UNIX_TIMESTAMP(PortLog.date) AS time
@@ -850,55 +849,54 @@ FROM
 	LEFT JOIN Link ON Port.id = Link.porta OR Port.id = Link.portb
 	LEFT JOIN Port AS rp ON (IF(Link.porta = Port.id, Link.portb, Link.porta)) = rp.id
 	LEFT JOIN Object AS ro ON rp.object_id = ro.id
+	LEFT JOIN Dictionary ON ro.objtype_id = Dictionary.dict_key
 	LEFT JOIN PortLog ON PortLog.id = (SELECT id FROM PortLog WHERE PortLog.port_id = rp.id ORDER BY date DESC LIMIT 1)
 WHERE
 	$sql_where_clause
-ORDER BY Port.id
 END;
 
 	$result = usePreparedSelectBlade ($query, $query_params);
+	$id = 0;
 	$ret = array();
-	$last_id = NULL;
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
+		$row['l2address'] = l2addressFromDatabase ($row['l2address']);
+
+		// last changed log
+		$row['last_log'] = array();
+		if ($row['log_count'])
+		{
+			$row['last_log']['user'] = $row['user'];
+			$row['last_log']['time'] = $row['time'];
+		}
+		unset ($row['user'], $row['time']);
+
 		// create a temporary array containing link info
-		$link_details = array
-		(
-			'link_id' => $row['link_id'],
-			'cableid' => $row['cableid'],
-			'remote_id' => $row['remote_id'],
-			'remote_name' => $row['remote_name'],
-			'remote_iif_id' => $row['remote_iif_id'],
-			'remote_oif_id' => $row['remote_oif_id'],
-			'remote_object_id' => $row['remote_object_id'],
-			'remote_object_name' => $row['remote_object_name'],
-		);
-		$log_details = array
-		(
-			'user' => $row['user'],
-			'time' => $row['time'],
-		);
+		$row['linked'] = 0;
+		$link_details = array();
+		if (isset ($row['remote_id']))
+		{
+			$row['linked'] = 1;
+			$remote_object_name = empty($row['remote_object_name']) ? '['.$row['remote_object_type'].']' : $row['remote_object_name'];
+			$link_details = array
+			(
+				'link_id' => $row['link_id'],
+				'cableid' => $row['cableid'],
+				'remote_id' => $row['remote_id'],
+				'remote_name' => $row['remote_name'],
+				'remote_object_id' => $row['remote_object_id'],
+				'remote_object_name' => $remote_object_name,
+			);
+			$link_details['last_log'] = $row['last_log'];
+		}
+		unset ($row['cableid'], $row['remote_id'], $row['remote_name'], $row['remote_object_id'], $row['remote_object_name']);
 
 		// see if this row represents an actual port or just an additional link
-		if ($row['id'] !== $last_id)
-		{
-			$portinfo = array_sub ($row, $link_details + $log_details);
-			$portinfo['l2address'] = l2addressFromDatabase ($row['l2address']);
-			$portinfo['linked'] = isset ($row['remote_id']) ? 1 : 0;
-			$portinfo['links'] = array();
-			$portinfo['last_log'] = $row['log_count'] ? $log_details : array();
-			// To maintain compatibility with 802.1Q, LLDP and some other functions,
-			// append details of the first link to the main array.
-			// The same info will exist in the $links sub-array, used in other ways.
-			if (isset ($row['remote_id']))
-				$portinfo = $portinfo + $link_details;
-
-			$ret[$portinfo['id']] = $portinfo;
-		}
-		if (isset ($row['remote_id']))
-			array_push ($ret[$row['id']]['links'], $link_details);
-
-		$last_id = $row['id'];
+		if ($row['id'] != $id)
+			$ret[$row['id']] = $row;
+		if (count ($link_details))
+			$ret[$row['id']]['links'][] = $link_details;
+		$id = $row['id'];
 	}
 	return $ret;
 }
@@ -4717,38 +4715,16 @@ function getPortInterfaceCompat()
 
 // Return a set of options for a plain SELECT. These options include the current
 // OIF of the given port and all OIFs of its permanent IIF.
-// If given port is already linked once, return only types compatible with the remote port's type 
 function getExistingPortTypeOptions ($port_id)
 {
-	$portinfo = getPortInfo ($port_id);
-	if ($portinfo['linked'])
-	{
-		// there are multiple links, calculating compatibility is too costly
-		if (count ($portinfo['links']) > 1)
-			return NULL;
-
-		// there is a single link
-		$result = usePreparedSelectBlade
-		(
-			'SELECT DISTINCT oif_id, dict_value AS oif_name ' .
-			'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
-			'LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ? ' .
-			'LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ? ' .
-			'WHERE iif_id = ? ' .
-			'AND (pc1.type1 IS NOT NULL OR pc2.type2 IS NOT NULL) ' .
-			'ORDER BY oif_name',
-			array ($portinfo['links'][0]['remote_oif_id'], $portinfo['links'][0]['remote_oif_id'], $portinfo['links'][0]['remote_iif_id'])
-		);
-	}
-	else
-		$result = usePreparedSelectBlade
-		(
-			'SELECT oif_id, dict_value AS oif_name ' .
-			'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
-			'WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?) ' .
-			'ORDER BY oif_name',
-			array ($port_id)
-		);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT oif_id, dict_value AS oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key ' .
+		'WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?) ' .
+		'ORDER BY oif_name',
+		array ($port_id)
+	);
 	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
 }
 

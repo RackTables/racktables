@@ -916,29 +916,6 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 	return $ret;
 }
 
-function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $title = '', $comment = '', $class = '')
-{
-	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
-	$ret = '<a href="#"';
-	$class = trim ($class);
-	if (! empty ($class))
-		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
-	if (! empty ($comment))
-		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
-	$href = makeHrefForHelper ($helper, $params);
-	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
-
-	if (! empty ($img_name))
-	{
-		$ret .= getImageHREF ($img_name, $comment);
-		if (! empty ($title))
-			$ret .= ' ';
-	}
-	$ret .= $title;
-	$ret .= '</a>';
-	return $ret;
-}
-
 function renderProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 {
 	echo getProgressBar ($percentage, $theme, $inline);
@@ -992,23 +969,17 @@ function getRenderedIPPortPair ($ip, $port = NULL)
 // Use special encoding for upload forms
 function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
-	echo getOpFormIntro ($opname, $extra, $upload);
-}
-
-function getOpFormIntro ($opname, $extra = array(), $upload = FALSE)
-{
 	global $pageno, $tabno, $page;
-	$ret = '';
 
-	$ret = "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
 	if ($upload)
-		$ret .= " enctype='multipart/form-data'";
-	$ret .= ">";
+		echo " enctype='multipart/form-data'";
+	echo ">";
 	fillBypassValues ($pageno, $extra);
 	foreach ($extra as $inputname => $inputvalue)
-		$ret .= sprintf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
-	return $ret;
+		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
 }
+
 
 // Display hrefs for all of a file's parents. If scissors are requested,
 // prepend cutting button to each of them.

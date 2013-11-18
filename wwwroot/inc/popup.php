@@ -622,7 +622,7 @@ function renderPopupTraceRoute ()
 	}
 
 	$graph = new Image_GraphViz(NULL, NULL, $title);
-	$graph->addAttributes(array ('label' => $title, 'labelloc' => 't', 'rankdir' => 'BT'));
+	$graph->addAttributes(array ('label' => $title, 'labelloc' => 't'));
 
 	// add a cluster to the graph for each unique object
 	$objects = array ();

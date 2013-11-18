@@ -17,7 +17,6 @@
 	bugfix: blade objects with problems should be colored red (#1071) by Mark Wilkinson
 	update: display friendlier message when attempting to NAT non-existent IP (#963)
 	update: support of Huawei CE5800 series switch
-	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
