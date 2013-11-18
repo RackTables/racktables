@@ -99,7 +99,7 @@ and initialize the application.
 *                                                     *
 *******************************************************
 
-*** Upgrading to 0.21.0 ***
+*** Upgrading to 0.20.6 ***
 
 New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
 SSH_OBJS_LISTSRC and RDP_OBJS_LISTSRC options (converting existing settings as

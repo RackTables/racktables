@@ -233,6 +233,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.3',
 		'0.20.4',
 		'0.20.5',
+		'0.20.6',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1344,7 +1345,7 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `UserConfig` DROP FOREIGN KEY `UserConfig-FK-user`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
 			break;
-		case '0.21.0':
+		case '0.20.6':
 			// one HW type was moved from the 'Network switch' chapter to the 'Network chassis' chapter
 			// change the type of affected objects to 'Network chassis'
 			$query[] = "UPDATE `Object` SET objtype_id = 1503 WHERE id IN (SELECT object_id FROM `AttributeValue` WHERE attr_id = 2 and uint_value = 935)";
@@ -1357,7 +1358,7 @@ CREATE TABLE `VSEnabledPorts` (
 
 			$query[] = "ALTER TABLE `VSEnabledIPs` ADD CONSTRAINT `VSEnabledIPs-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE";
 
-			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
+			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
