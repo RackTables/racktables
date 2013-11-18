@@ -183,13 +183,6 @@ ENDOFTEXT
 ,
 
 	'0.20.6' => <<<ENDOFTEXT
-This release uses database triggers for consistency measures.  The database
-user account must have the 'TRIGGER' privilege, which was introduced in
-MySQL 5.1.7.
-
-Cable paths can be traced and displayed in a graphical format. This requires
-the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
-
 New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
 SSH_OBJS_LISTSRC and RDP_OBJS_LISTSRC options (converting existing settings as
 necessary). MGMT_PROTOS allows to specify any management protocol for a
@@ -240,7 +233,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.3',
 		'0.20.4',
 		'0.20.5',
-		'0.20.6',
+		'0.21.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1352,7 +1345,7 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `UserConfig` DROP FOREIGN KEY `UserConfig-FK-user`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.5' WHERE varname = 'DB_VERSION'";
 			break;
-		case '0.20.6':
+		case '0.21.0':
 			if (!isInnoDBSupported ())
 			{
 				showUpgradeError ("Cannot upgrade because triggers are not supported by your MySQL server.", __FUNCTION__);
@@ -1438,7 +1431,7 @@ END;
 
 			$query[] = "ALTER TABLE `VSEnabledIPs` ADD CONSTRAINT `VSEnabledIPs-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE";
 
-			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
+			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
