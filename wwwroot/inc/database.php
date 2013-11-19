@@ -401,24 +401,6 @@ function getMountInfo ($object_ids)
 	return $ret;
 }
 
-// Return a simple object list w/o related information, so that the returned value
-// can be directly used by printSelect(). An optional argument is the name of config
-// option with constraint in RackCode.
-function getNarrowObjectList ($varname = '')
-{
-	$wideList = listCells ('object');
-	if (strlen ($varname) and strlen (getConfigVar ($varname)))
-	{
-		global $parseCache;
-		if (!isset ($parseCache[$varname]))
-			$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
-		if ($parseCache[$varname]['result'] != 'ACK')
-			return array();
-		$wideList = filterCellList ($wideList, $parseCache[$varname]['load']);
-	}
-	return formatEntityList ($wideList);
-}
-
 // For a given realm return a list of entity records, each with
 // enough information for judgeCell() to execute.
 function listCells ($realm, $parent_id = 0)
