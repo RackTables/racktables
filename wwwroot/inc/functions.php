@@ -384,10 +384,9 @@ function genericAssertion ($argname, $argtype)
 	case 'rackcode/expr':
 		if ('' == assertStringArg ($argname, TRUE))
 			return array();
-		$parse = spotPayload ($sic[$argname], 'SYNT_EXPR');
-		if ($parse['result'] != 'ACK')
+		if (! $expr = compileExpression ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'RackCode parsing error');
-		return $parse['load'];
+		return $expr;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
@@ -1842,13 +1841,8 @@ function getCellFilter ()
 	if (isset ($sic['cfe']))
 	{
 		$_SESSION[$pageno]['filter']['cfe'] = $sic['cfe'];
-		// Only consider extra text, when it is a correct RackCode expression.
-		$parse = spotPayload ($sic['cfe'], 'SYNT_EXPR');
-		if ($parse['result'] == 'ACK')
-		{
-			$ret['extratext'] = trim ($sic['cfe']);
-			$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
-		}
+		$ret['extratext'] = trim ($sic['cfe']);
+		$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
 	}
 	$finaltext = array();
 	if (strlen ($ret['text']))
@@ -1860,13 +1854,12 @@ function getCellFilter ()
 	if (strlen ($finaltext))
 	{
 		$ret['is_empty'] = FALSE;
-		$parse = spotPayload ($finaltext, 'SYNT_EXPR');
-		$ret['expression'] = $parse['result'] == 'ACK' ? $parse['load'] : NULL;
+		$ret['expression'] = compileExpression ($finaltext);
 		// It's not quite fair enough to put the blame of the whole text onto
 		// non-empty "extra" portion of it, but it's the only user-generated portion
 		// of it, thus the most probable cause of parse error.
 		if (strlen ($ret['extratext']))
-			$ret['extraclass'] = $parse['result'] == 'ACK' ? 'validation-success' : 'validation-error';
+			$ret['extraclass'] = $ret['expression'] ? 'validation-success' : 'validation-error';
 	}
 	if (! $andor_used)
 		$ret['andor'] = getConfigVar ('FILTER_DEFAULT_ANDOR');
@@ -2976,35 +2969,29 @@ function judgeContext ($expression)
 // An undefined $cell means current context.
 function considerConfiguredConstraint ($cell, $varname)
 {
-	if (!strlen (getConfigVar ($varname)))
-		return TRUE; // no restriction
-	global $parseCache;
-	if (!isset ($parseCache[$varname]))
-		// getConfigVar() doesn't re-read the value from DB because of its
-		// own cache, so there is no race condition here between two calls.
-		$parseCache[$varname] = spotPayload (getConfigVar ($varname), 'SYNT_EXPR');
-	if ($parseCache[$varname]['result'] != 'ACK')
+	try
+	{
+		return considerGivenConstraint ($cell, getConfigVar ($varname));
+	}
+	catch (RackTablesError $e)
+	{
 		return FALSE; // constraint set, but cannot be used due to compilation error
-	if (isset ($cell))
-		return judgeCell ($cell, $parseCache[$varname]['load']);
-	else
-		return judgeContext ($parseCache[$varname]['load']);
+	}
 }
 
 // Tell, if the given arbitrary RackCode text addresses the given record
 // (an empty text matches any record).
 // An undefined $cell means current context.
-function considerGivenConstraint ($cell, $filtertext)
+function considerGivenConstraint ($cell, $filter)
 {
-	if ($filtertext == '')
+	if (! strlen ($filter))
 		return TRUE;
-	$parse = spotPayload ($filtertext, 'SYNT_EXPR');
-	if ($parse['result'] != 'ACK')
-		throw new InvalidRequestArgException ('filtertext', $filtertext, 'RackCode parsing error');
+	if (! $expr = compileExpression ($filter))
+		throw new InvalidArgException ('filter', $filter, 'RackCode parsing error');
 	if (isset ($cell))
-		return judgeCell ($cell, $parse['load']);
+		return judgeCell ($cell, $expr);
 	else
-		return judgeContext ($parse['load']);
+		return judgeContext ($expr);
 }
 
 // Return list of records in the given realm, which conform to
@@ -3020,10 +3007,9 @@ function scanRealmByText ($realm, $ftext = '')
 		$fexpr = array();
 	else
 	{
-		$fparse = spotPayload ($ftext, 'SYNT_EXPR');
-		if ($fparse['result'] != 'ACK')
+		$fexpr = compileExpression ($ftext);
+		if (! $fexpr)
 			return NULL;
-		$fexpr = $fparse['load'];
 	}
 	return filterCellList (listCells ($realm), $fexpr);
 }
@@ -4576,17 +4562,14 @@ function formatPort ($port_info, $a_class = '')
 // function returns a HTML-formatted link to remote port, connected to the specified port
 function formatLinkedPort ($port_info, $a_class = '')
 {
-	if (! $link_info = array_first ($port_info['links']))
-		return formatPort ($port_info, $a_class);
-	else
-		return formatPortLink
-		(
-			$link_info['remote_object_id'],
-			$link_info['remote_object_name'],
-			$link_info['remote_id'],
-			$link_info['remote_name'],
-			$a_class
-		);
+	return formatPortLink
+	(
+		$port_info['remote_object_id'],
+		$port_info['remote_object_name'],
+		$port_info['remote_id'],
+		$port_info['remote_name'],
+		$a_class
+	);
 }
 
 function compareDecomposedPortNames ($porta, $portb)
@@ -5888,6 +5871,22 @@ function mkCellA ($cell)
 	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
 }
 
+// Return a simple object list w/o related information, so that the returned value
+// can be directly used by printSelect(). An optional argument is the name of config
+// option with constraint in RackCode.
+function getNarrowObjectList ($varname = '')
+{
+	$wideList = listCells ('object');
+	if (strlen ($varname) and strlen ($filter = getConfigVar ($varname)))
+	{
+		$expr = compileExpression ($filter);
+		if (! $expr)
+			return array();
+		$wideList = filterCellList ($wideList, $expr);
+	}
+	return formatEntityList ($wideList);
+}
+
 // takes an array of cells,
 // returns an array indexed by cell id, values are simple text representation of a cell.
 // Intended to pass its return value to printSelect routine.
@@ -5944,39 +5943,6 @@ function inverseRackUnit ($unit_no, $rack_cell)
 function isCLIMode ()
 {
 	return !isset ($_SERVER['REQUEST_METHOD']);
-}
-
-// Used to sort a chain of links from start to finish (sorts by port_id)
-function sortLinks ($port_id, $unsorted_links, $sorted_links = array (), $level = 0)
-{
-	$self = __FUNCTION__;
-
-	if ($level >= 10)
-		throw new InvalidArgException ('port', $port_id, 'tracing depth too deep - a loop probably exists');
-
-	// add the provided link to the sorted array
-	foreach ($unsorted_links as $link_id => $link)
-	{
-		$remote_port_id = FALSE;
-		if ($link[0] == $port_id) $remote_port_id = $link[1];
-		if ($link[1] == $port_id) $remote_port_id = $link[0];
-		if ($remote_port_id)
-		{
-			// note that this link has been sorted
-			unset ($unsorted_links[$link_id]);
-
-			//make sure this port_id is on the left (except if it's the last link, then it should be on the right)
-			if ($remote_port_id == $link[0])
-			{
-				$tmp = $link[0];
-				$link[0] = $link[1];
-				$link[1] = $tmp;
-			}
-			$sorted_links[] = $link;
-			$sorted_links = $self ($remote_port_id, $unsorted_links, $sorted_links, $level+1);
-		}
-	}
-	return $sorted_links;
 }
 
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
@@ -6162,6 +6128,24 @@ function getMgmtProtosConfig ($ignore_cache = FALSE)
 			$cache[$m[1]] = $m[2];
 	}
 	return $cache;
+}
+
+// returns compiled RackCode expression or NULL if syntax error occurs
+// caches the result in $exprCache global
+function compileExpression ($code, $do_cache_lookup = TRUE)
+{
+	global $exprCache;
+	if (! is_array ($exprCache))
+		$exprCache = array();
+	if ($do_cache_lookup && array_key_exists($code, $exprCache))
+		return $exprCache[$code];
+
+	$ret = NULL;
+	$parse = spotPayload ($code, 'SYNT_EXPR');
+	if ($parse['result'] == 'ACK')
+		$ret = $parse['load'];
+	$exprCache[$code] = $ret;
+	return $ret;
 }
 
 ?>

@@ -38,11 +38,9 @@ function isInnoDBSupported ()
 	global $dbxlink;
 	// create a temp table
 	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
-	$innodb_row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
-	$dbxlink->query("CREATE TRIGGER `trigger_test` BEFORE INSERT ON `innodb_test` FOR EACH ROW BEGIN END");
-	$trigger_row = $dbxlink->query("SELECT COUNT(*) AS count FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA() AND TRIGGER_NAME = 'trigger_test'")->fetch(PDO::FETCH_ASSOC);
+	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
 	$dbxlink->query("DROP TABLE `innodb_test`");
-	if ($innodb_row['Engine'] == 'InnoDB' && $trigger_row['count'] == 1)
+	if ($row['Engine'] == 'InnoDB')
 		return TRUE;
 
 	return FALSE;
@@ -87,14 +85,6 @@ function platform_is_ok ()
 	$nerrs += platform_function_test ('json_encode', 'JSON extension', 'JavaScript interface bits may fail.');
 	platform_generic_test (in_array  ('curl', get_loaded_extensions()), 'cURL extension', 'Not found, Cacti Graph integration is unavailable.', 'trwarning');
 	$nerrs += platform_function_test ('bcmul', 'BC Math extension');
-	@include_once 'Image/GraphViz.php';
-	platform_generic_test
-	(
-		class_exists ('Image_GraphViz'),
-		'GraphViz PEAR module',
-		'Not found, graphical cable path tracing is unavailable',
-		'trwarning'
-	);
 	platform_generic_test
 	(
 		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),

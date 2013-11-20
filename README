@@ -101,13 +101,6 @@ and initialize the application.
 
 *** Upgrading to 0.20.6 ***
 
-This release uses database triggers for consistency measures.  The database
-user account must have the 'TRIGGER' privilege, which was introduced in
-MySQL 5.1.7.
-
-Cable paths can be traced and displayed in a graphical format. This requires
-the Image_GraphViz PEAR module (http://pear.php.net/package/Image_GraphViz).
-
 New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
 SSH_OBJS_LISTSRC and RDP_OBJS_LISTSRC options (converting existing settings as
 necessary). MGMT_PROTOS allows to specify any management protocol for a

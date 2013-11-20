@@ -967,8 +967,14 @@ function renderEditObjectForm()
 		}
 		echo "<tr><td>&nbsp;</td>";
 		echo "<th class=tdright>Select container:</th><td class=tdleft>";
-		echo getPopupLink ('objlist', array ('object_id' => $object_id), 'findlink', 'attach', 'Select a container');
-		echo "</td></tr>\n";
+		echo "<span";
+		$helper_args = array ('object_id' => $object_id);
+		$popup_args = 'height=700, width=400, location=no, menubar=no, '.
+			'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+		echo " onclick='window.open(\"" . makeHrefForHelper ('objlist', $helper_args);
+		echo "\",\"findlink\",\"${popup_args}\");'>";
+		printImageHREF ('attach', 'Select a container');
+		echo "</span></td></tr>\n";
 	}
 	// optional attributes
 	$i = 0;
@@ -1189,29 +1195,27 @@ function renderRackProblems ($rack_id)
 
 function renderObjectPortRow ($port, $is_highlighted)
 {
-	$tr_class = $is_highlighted ? 'class=highlight' : '';
-	echo "<tr $tr_class>";
+	echo '<tr';
+	if ($is_highlighted)
+		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "<td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
-	if (! $port['linked'])
-		echo implode ('', formatPortReservation ($port)) . '<td></td>';
-	else
+	if ($port['remote_object_id'])
 	{
-		$editable = permitted ('object', 'ports', 'editPort')? 'editable' : '';
-		$sep = '';
-		foreach ($port['links'] as $linkinfo)
-		{
-			$trace_link = ($sep == '') ? '&nbsp;' . getPopupLink ('traceroute', array ('port' => $port['id']), 'findlink', 'find', '', 'Trace this port') : '';
-			echo $sep;
-			$sep = "</tr>\n<tr $tr_class><td colspan=4></td>";
-			echo '<td class=tdleft>'.formatLoggedSpan ($port['last_log'], formatPortLink ($linkinfo['remote_object_id'], $linkinfo['remote_object_name'], $linkinfo['remote_id'], NULL)).'</td>';
-			echo '<td class=tdleft>'.formatLoggedSpan ($port['last_log'], $linkinfo['remote_name'], 'underline').$trace_link.'</td>';
-			echo "<td class=tdleft><span class='rsvtext $editable id-".$linkinfo['link_id']." op-upd-reservation-cable'>".$linkinfo['cableid'].'</span></td>';
-		}
+		echo "<td class=tdleft>" .
+			formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) .
+			"</td>";
+		echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
+		$editable = permitted ('object', 'ports', 'editPort')
+			? 'editable'
+			: '';
+		echo "<td class=tdleft><span class='rsvtext $editable id-${port['id']} op-upd-reservation-cable'>${port['cableid']}</span></td>";
 	}
-	echo "</tr>\n";
+	else
+		echo implode ('', formatPortReservation ($port)) . '<td></td>';
+	echo "</tr>";
 }
 
 function renderObject ($object_id)
@@ -1280,7 +1284,7 @@ function renderObject ($object_id)
 			)
 		)."&"
 	));
-	renderEntitySummary ($info, 'Summary', $summary);
+	renderEntitySummary ($info, 'summary', $summary);
 
 	if (strlen ($info['comment']))
 	{
@@ -1312,7 +1316,7 @@ function renderObject ($object_id)
 
 	if (count ($info['ports']))
 	{
-		startPortlet ('Ports and links');
+		startPortlet ('ports and links');
 		$hl_port_id = 0;
 		if (isset ($_REQUEST['hl_port_id']))
 		{
@@ -1320,12 +1324,11 @@ function renderObject ($object_id)
 			$hl_port_id = $_REQUEST['hl_port_id'];
 			addAutoScrollScript ("port-$hl_port_id");
 		}
-		echo getPopupLink ('traceroute', array ('object_id' => $object_id), 'findlink', 'find', 'Trace all port links');
-		echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>";
+		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
 		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
 		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
 		echo '<th class=tdcenter colspan=2>Remote object and port</th>';
-		echo "<th class=tdleft>Cable ID</th></tr>\n";
+		echo '<th class=tdleft>Cable ID</th></tr>';
 		foreach ($info['ports'] as $port)
 			callHook ('renderObjectPortRow', $port, ($hl_port_id == $port['id']));
 		if (permitted (NULL, 'ports', 'set_reserve_comment'))
@@ -1493,7 +1496,7 @@ function renderPortsForObject ($object_id)
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td class='tdleft'><input type=text size=8 name=port_name tabindex=100></td>\n";
-		echo "<td><input type=text name=port_label tabindex=101></td><td class=tdleft>";
+		echo "<td><input type=text name=port_label tabindex=101></td><td>";
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 102), $prefs['selected']);
 		echo "<td><input type=text name=port_l2address tabindex=103 size=18 maxlength=24></td>\n";
 		echo "<td colspan=4>&nbsp;</td><td>";
@@ -1518,32 +1521,20 @@ function renderPortsForObject ($object_id)
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 107), $prefs['selected']);
 		echo "<td><input type=text name=port_numbering_start tabindex=108 size=3 maxlength=3></td>\n";
 		echo "<td><input type=text name=port_numbering_count tabindex=109 size=3 maxlength=3></td>\n";
-		echo "<td>";
+		echo "<td>&nbsp;</td><td>";
 		printImageHREF ('add', 'add ports', TRUE, 110);
 		echo "</td></tr></form>";
 		echo "</table><br>\n";
 	}
 
-	// clear ports link
-	echo getOpLink (array ('op'=>'deleteAll'), 'Clear port list', 'clear', 'Delete all existing ports', 'need-confirmation');
-
-	// link patch panels link
-	if ($object['objtype_id'] == 9)
-	{
-		echo '<span style="margin-left: 2em">';
-		echo getPopupLink ('patchpanellist', array ('object_id' => $object_id), 'findlink', 'plug', 'Link to another patch panel');
-		echo '</span>';
-	}
-
-	echo '<span style="margin-left: 2em">';
-	echo getPopupLink ('traceroute', array ('object_id' => $object_id), 'findlink', 'find', 'Trace all port links');
-	echo '</span>';
-
-	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
+	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
-	echo "<th class=tdleft colspan=2>Remote object and port</th><th class=tdleft>Cable ID</th><th class=tdleft>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
+	echo "<th class=tdcenter colspan=2>Remote object and port</th><th>Cable ID</th><th class=tdcenter>(Un)link or (un)reserve</th><th>&nbsp;</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($prefs);
+
+	// clear ports link
+	echo getOpLink (array ('op'=>'deleteAll'), 'Clear port list', 'clear', '', 'need-confirmation');
 
 	if (isset ($_REQUEST['hl_port_id']))
 	{
@@ -1560,52 +1551,41 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-		echo "<td class='tdleft' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
+		echo "<td class='tdleft' NOWRAP><input type=text name='port-${port['id']}' class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
 		echo "<td><input type=text name=label value='${port['label']}'></td>";
-		echo '<td class=tdleft>';
-		if (count ($port['links']) <= 1)
+		if (!$port['remote_object_id'])
 		{
+			echo '<td>';
 			if ($port['iif_id'] != 1)
 				echo '<label>' . $port['iif_name'] . ' ';
 			printSelect (getExistingPortTypeOptions ($port['id']), array ('name' => 'port_type_id'), $port['oif_id']);
 			if ($port['iif_id'] != 1)
 				echo '</label>';
+			echo '</td>';
 		}
 		else
 		{
-			echo "<input type=hidden name=port_type_id value='${port['oif_id']}'>";
-			echo formatPortIIFOIF ($port);
+			echo "<input type=hidden name=port_type_id value='${port['oif_id']}'><td class=tdleft>";
+			echo formatPortIIFOIF ($port) . '</td>';
 		}
-		echo '</td>';
 		// 18 is enough to fit 6-byte MAC address in its longest form,
 		// while 24 should be Ok for WWN
 		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
-		if ($port['linked'])
+		if ($port['remote_object_id'])
 		{
-			$sep = '';
-			foreach ($port['links'] as $linkinfo)
-			{
-				$trace_link = ($sep == '') ? '&nbsp;' . getPopupLink ('traceroute', array ('port' => $port['id']), 'findlink', 'find', '', 'Trace this port') : '';
-				echo $sep;
-				$sep = '<td>' . getImageHREF ('save', 'Save changes', TRUE) . "</td></form></tr>\n";
-				$sep .= getOpFormIntro ('editPort', array ('port_id' => $port['id'], 'name' => $port['name'], 'link_id' => $linkinfo['link_id']));
-				$sep .= "<tr $tr_class><td colspan=4>&nbsp;</td><td class=tdleft>";
-
-				echo "<input type=hidden name=reservation_comment value=''>";
-				echo "<input type=hidden name=link_id value='".$linkinfo['link_id']."'>";
-				echo '<td class=tdleft>'.formatLoggedSpan ($port['last_log'], formatPortLink ($linkinfo['remote_object_id'], $linkinfo['remote_object_name'], $linkinfo['remote_id'], NULL)).'</td>';
-				echo '<td class=tdleft>'.formatLoggedSpan ($port['last_log'], $linkinfo['remote_name'], 'underline').$trace_link.'</td>';
-				echo "<td><input type=text name=cable value='".$linkinfo['cableid']."'></td>";
-				echo '<td class=tdcenter>';
-				echo getPopupLink ('portlist', array ('port' => $port['id'], 'in_rack' => 'on'), 'findlink', 'plug', '', 'Link this port');
-				echo '<span style="margin-left: 2em">';
-				echo getOpLink (array ('op'=>'unlinkPort', 'link_id'=>$linkinfo['link_id'], 'object_id'=>$object_id), '', 'cut', 'Unlink this port');
-				echo '</span></td>';
-			}
+			echo "<td>" .
+				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL)) .
+				"</td>";
+			echo "<td> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
+				"<input type=hidden name=reservation_comment value=''></td>";
+			echo "<td><input type=text name=cable value='${port['cableid']}'></td>";
+			echo "<td class=tdcenter>";
+			echo getOpLink (array('op'=>'unlinkPort', 'port_id'=>$port['id'], ), '', 'cut', 'Unlink this port');
+			echo "</td>";
 		}
 		elseif (strlen ($port['reservation_comment']))
 		{
-			echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') . "</td>";
+			echo "<td>" . formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') . "</td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
 			echo "<td></td>";
 			echo "<td class=tdcenter>";
@@ -1623,13 +1603,19 @@ function renderPortsForObject ($object_id)
 			);
 			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
 				'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+			echo " ondblclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
 			echo " onclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
-			echo "\",\"findlink\",\"${popup_args}\");'>";
+			echo "\",\"findlink\",\"${popup_args}\");'";
+			// end of onclick=
+			echo '>';
+			// end of <a>
 			printImageHREF ('plug', 'Link this port');
-			echo "</span>&nbsp;<input type=text name=reservation_comment></td>\n";
+			echo "</span>";
+			echo " <input type=text name=reservation_comment></td>\n";
 		}
-
-		echo '<td>';
+		echo "<td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>\n";
 	}
@@ -1653,8 +1639,8 @@ function renderPortsForObject ($object_id)
 		echo "</td></tr></form>";
 		echo "</table><br>\n";
 	}
-	finishPortlet();
-
+	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
+		finishPortlet();
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') != 'yes')
 		return;
 
@@ -3159,7 +3145,10 @@ function renderNATv4ForObject ($object_id)
 
 		echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
 		echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
-		echo getPopupLink ('inet4list', array(), 'findobjectip', 'find', 'Find object');
+		echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
+		echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
+		printImageHREF ('find', 'Find object');
+		echo "</a>";
 		echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
 		echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE, 6);
@@ -8496,8 +8485,6 @@ function switchportInfoJS($object_id)
 			validBreedFunction ($breed, $data['gw'])
 		)
 			$allowed_ops[] = $prefix;
-
-	$allowed_ops[] = 'trace';
 
 	// make JS array with allowed items
 	$list = '';

@@ -17,7 +17,6 @@
 	bugfix: blade objects with problems should be colored red (#1071) by Mark Wilkinson
 	update: display friendlier message when attempting to NAT non-existent IP (#963)
 	update: support of Huawei CE5800 series switch
-	update: port type can now be changed even if port is linked
 	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
 	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
 	update: display links to newly created rows & locations (#883)
@@ -32,8 +31,9 @@
 	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
 		WS-CBS3012-IBM/-I (#871), WS-C3560-8PC (#975), WS-C2950-12 (#973),
 		WS-C2950G-24-DC (#981), WS-C3560GV2-48TS (#983), WS-C2950SX-24 (#991),
-		HP ProCurve J9028B (#941), J9022A (#767), Netgear GS724TP (#1001),
-		TL-SL5428E (#1015), Brocade TurboIron 24X (#1055) by Mark Wilkinson
+		WS-C2960-8TC-L (#1063), HP ProCurve J9028B (#941), J9022A (#767),
+		Netgear GS724TP (#1001), TL-SL5428E (#1015),
+		Brocade TurboIron 24X (#1055) by Mark Wilkinson
 		Cisco WS-C3560V2-24PS (#1049), Netgear FS726TP (#859) by Aaron Dummer
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
 	update: searches now examine 'dictionary' attributes (#1003)
@@ -41,7 +41,6 @@
 	update: add resource pool info to the Virtual Resources cluster portlet (#915)
 	update: remove the 'unmounted' autotag from objects inside a container (#1061)
 	update: virtual objects may use 'asset tag' and 'visible label' attributes (#1069)
-	new feature: port tracing (#333)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 	new feature: add IPv4 natting for all protocols (#971) by Mark Wilkinson
 0.20.5 2013-06-23
