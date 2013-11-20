@@ -646,7 +646,10 @@ function addPortForwarding ()
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
-	assertUIntArg ('localport');
+	if ($_REQUEST['proto'] != 'ALL') {
+		assertUIntArg ('localport');
+		assertUIntArg ('remoteport');
+	}
 	assertStringArg ('proto');
 	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
@@ -673,8 +676,10 @@ function delPortForwarding ()
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
-	assertUIntArg ('localport');
-	assertUIntArg ('remoteport');
+	if ($_REQUEST['proto'] != 'ALL') {
+		assertUIntArg ('localport');
+		assertUIntArg ('remoteport');
+	}
 	assertStringArg ('proto');
 
 	deletePortForwarding
@@ -695,10 +700,12 @@ function updPortForwarding ()
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
-	assertUIntArg ('localport');
-	assertUIntArg ('remoteport');
+	if ($_REQUEST['proto'] != 'ALL') {
+		assertUIntArg ('localport');
+		assertUIntArg ('remoteport');
+	}
 	assertStringArg ('proto');
-	assertStringArg ('description');
+	assertStringArg ('description', TRUE);
 
 	updatePortForwarding
 	(

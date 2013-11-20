@@ -42,6 +42,7 @@
 	update: remove the 'unmounted' autotag from objects inside a container (#1061)
 	update: virtual objects may use 'asset tag' and 'visible label' attributes (#1069)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
+	new feature: add IPv4 natting for all protocols (#971) by Tim Wilkes
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
