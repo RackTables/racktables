@@ -1647,7 +1647,6 @@ WHERE O.objtype_id = 1562";
 ('MAXSELSIZE','30','uint','no','no','yes','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','no','Organization name'),
 ('ROW_SCALE','2','uint','no','no','yes','Picture scale for rack row display'),
-('PORTS_PER_ROW','12','uint','no','no','yes','Ports per row in VLANs tab'),
 ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','yes','IPv4 addresses per page'),
 ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','yes','Default rack height'),
 ('DEFAULT_SLB_VS_PORT','','uint','yes','no','yes','Default port of SLB virtual service'),

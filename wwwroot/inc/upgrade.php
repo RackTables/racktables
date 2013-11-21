@@ -1358,6 +1358,7 @@ CREATE TABLE `VSEnabledPorts` (
 
 			$query[] = "ALTER TABLE `VSEnabledIPs` ADD CONSTRAINT `VSEnabledIPs-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE";
 
+			$query[] = "DELETE FROM Config WHERE varname = 'PORTS_PER_ROW'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

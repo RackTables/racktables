@@ -1393,7 +1393,6 @@ function resetUIConfig()
 	setConfigVar ('MASSCOUNT','8');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('ROW_SCALE','2');
-	setConfigVar ('PORTS_PER_ROW','12');
 	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
 	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
 	setConfigVar ('DEFAULT_SLB_VS_PORT','');
