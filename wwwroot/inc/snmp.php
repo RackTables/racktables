@@ -2495,37 +2495,37 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 766,
 		'text' => '4500 26-port: 24 100TX + 2 SFP/1000T combo',
-		'processors' => array ('3com-27-to-28-1000T','3com-25-to-26-1000SFP','3com-any-100TX'),
+		'processors' => array ('3com-27-to-28-1000T', '3com-25-to-26-1000SFP', '3com-any-100TX'),
 	),
-        '43.1.16.4.3.22' => array
+	'43.1.16.4.3.22' => array
 	(
 		'dict_key' => 767,
 		'text' => '4500 52-port: 48 100TX + 2 SFP/1000T combo',
-		'processors' => array ('3com-49-to-50-1000SFP','3com-51-to-52-1000T','3com-any-100TX'),
+		'processors' => array ('3com-49-to-50-1000SFP', '3com-51-to-52-1000T', '3com-any-100TX'),
 	),
 	'43.1.16.4.3.23' => array
 	(
 		'dict_key' => 768,
 		'text' => '4500-PWR 26-port: 24 100TX + 2 SFP/1000T combo',
-		'processors' => array ('3com-27-to-28-1000T','3com-25-to-26-1000SFP','3com-any-100TX'),
+		'processors' => array ('3com-27-to-28-1000T', '3com-25-to-26-1000SFP', '3com-any-100TX'),
 	),
 	'43.1.16.4.3.24' => array
 	(
 		'dict_key' => 769,
 		'text' => '4500-PWR 52-port: 48 100TX + 2 SFP/1000T combo',
-		'processors' => array ('3com-49-to-50-1000SFP','3com-51-to-52-1000T','3com-any-100TX'),
+		'processors' => array ('3com-49-to-50-1000SFP', '3com-51-to-52-1000T', '3com-any-100TX'),
 	),
 	'43.1.16.4.3.29' => array
 	(
 		'dict_key' => 758,
 		'text' => '4200G: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('3com-49-to-50-1000SFP','3com-51-to-52-1000SFP','3com-any-1000T'),
+		'processors' => array ('3com-49-to-50-1000SFP', '3com-51-to-52-1000SFP', '3com-any-1000T'),
 	),
 	'43.1.16.4.3.45' => array
 	(
 		'dict_key' => 760,
 		'text' => '4210 52-port: 48 100TX + 2 1000T + 2 SFP',
-		'processors' => array ('3com-49-to-50-1000T','3com-51-to-52-1000SFP','3com-any-100TX'),
+		'processors' => array ('3com-49-to-50-1000T', '3com-51-to-52-1000SFP', '3com-any-100TX'),
 	),
 	'45.3.68.5' => array
 	(
