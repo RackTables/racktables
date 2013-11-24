@@ -2167,6 +2167,7 @@ function renderDepot ()
 			foreach ($objects as $obj)
 				$idlist[] = $obj['id'];
 			$mountinfo = getMountInfo ($idlist);
+			$containerinfo = getContainerInfo ($idlist);
 			foreach ($objects as $obj)
 			{
 				echo "<tr class='row_${order} tdleft' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
@@ -2175,13 +2176,14 @@ function renderDepot ()
 				echo "</td><td>${obj['label']}</td>";
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
-				if ($obj['container_id'])
-					$places[] = mkA ($obj['container_dname'], 'object', $obj['container_id']);
-				elseif (! array_key_exists ($obj['id'], $mountinfo))
-					$places[] = 'Unmounted';
-				else
+				if (array_key_exists ($obj['id'], $containerinfo))
+					foreach ($containerinfo[$obj['id']] as $ci)
+						$places[] = mkA ($ci['container_name'], 'object', $ci['container_id']);
+				if (array_key_exists ($obj['id'], $mountinfo))
 					foreach ($mountinfo[$obj['id']] as $mi)
 						$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
+				if (! count ($places))
+					$places[] = 'Unmounted';
 				echo "<td>" . implode (', ', $places) . '</td>';
 				echo '</tr>';
 				$order = $nextorder[$order];

@@ -401,6 +401,33 @@ function getMountInfo ($object_ids)
 	return $ret;
 }
 
+# Return container details for a list of objects
+function getContainerInfo ($object_ids)
+{
+	if (! count ($object_ids))
+		return array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT EL.child_entity_id, EL.parent_entity_id, O.name ' .
+		'FROM EntityLink EL ' .
+		'LEFT JOIN Object O ON EL.parent_entity_id = O.id ' .
+		'WHERE EL.child_entity_id IN (' . questionMarks (count ($object_ids)) . ') ' .
+		"AND EL.parent_entity_type = 'object' " .
+		"AND EL.child_entity_type = 'object' " .
+		'ORDER BY O.name',
+		$object_ids
+	);
+	$ret = array ();
+	foreach ($result as $row)
+		$ret[$row['child_entity_id']][] = array
+		(
+			'container_id'   => $row['parent_entity_id'],
+			'container_name' => $row['name']
+		);
+	unset ($result);
+	return $ret;
+}
+
 // For a given realm return a list of entity records, each with
 // enough information for judgeCell() to execute.
 function listCells ($realm, $parent_id = 0)
