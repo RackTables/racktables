@@ -4814,6 +4814,25 @@ END
 	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
+// faster than getDomainVLANs, but w/o statistics
+function getDomainVLANList ($vdom_id)
+{
+	$result = usePreparedSelectBlade
+	(<<<END
+SELECT
+	vlan_id,
+	vlan_type,
+	vlan_descr
+FROM
+	VLANDescription AS VD
+WHERE domain_id = ?
+ORDER BY vlan_id
+END
+		, array ($vdom_id)
+	);
+	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
+}
+
 function getVLANSwitches()
 {
 	$result = usePreparedSelectBlade ('SELECT object_id FROM VLANSwitch');

@@ -3028,11 +3028,20 @@ function getVSTOptions()
 function getAllVLANOptions ($except = array())
 {
 	$ret = array();
-	foreach (getVLANDomainStats() as $domain)
-		foreach (getDomainVLANs ($domain['id']) as $vlan)
-			if (! array_key_exists ($domain['id'], $except) or ! in_array ($vlan['vlan_id'], $except[$domain['id']]))
-				$ret[$domain['description']]["${domain['id']}-${vlan['vlan_id']}"] =
-					"${vlan['vlan_id']} (${vlan['netc']}) ${vlan['vlan_descr']}";
+	foreach (getVLANDomainOptions() as $domain_id => $domain_descr)
+	{
+		$domain_list = array();
+		foreach (getDomainVLANList ($domain_id) as $vlan)
+			$domain_list["${domain_id}-${vlan['vlan_id']}"] = "${vlan['vlan_id']} ${vlan['vlan_descr']}";
+		if (isset ($except[$domain_id]))
+		{
+			$vlans_except = array();
+			foreach ($except[$domain_id] as $vid)
+				if (isset ($domain_list["${domain_id}-${vid}"]))
+					unset ($domain_list["${domain_id}-${vid}"]);
+		}
+		$ret[$domain_descr] = $domain_list;
+	}
 	return $ret;
 }
 
