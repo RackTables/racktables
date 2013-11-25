@@ -43,6 +43,8 @@
 	update: remove the 'unmounted' autotag from objects inside a container (#1061)
 	update: virtual objects may use 'asset tag' and 'visible label' attributes (#1069)
 	update: display all containers and mount points on list objects page (#1081)
+	update: cell filter pages display fast if no filters specified
+		(the MAX_UNFILTERED_ENTITIES config variable must be set)
 	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in

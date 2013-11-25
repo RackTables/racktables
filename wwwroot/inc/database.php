@@ -5341,4 +5341,14 @@ function isTransactionActive()
 	}
 }
 
+function getEntitiesCount ($realm)
+{
+	global $SQLSchema;
+	if (!isset ($SQLSchema[$realm]))
+		throw new InvalidArgException ('realm', $realm);
+	$table = $SQLSchema[$realm]['table'];
+	$result = usePreparedSelectBlade ("SELECT COUNT(*) FROM `$table`");
+	return $result->fetch (PDO::FETCH_COLUMN, 0);
+}
+
 ?>

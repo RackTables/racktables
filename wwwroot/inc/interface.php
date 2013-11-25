@@ -282,7 +282,7 @@ function renderLocationFilterPortlet ()
 		foreach ($subtree as $location_id => $location)
 		{
 			echo "<div class=tagbox style='text-align:left; padding-left:" . ($level * 16) . "px;'>";
-			$checked = (in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
+			$checked = (! isset ($_SESSION['locationFilter']) || in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
 			echo "<label><input type=checkbox name='location_id[]' class=${level} value='${location['id']}'${checked} onClick=checkAll(this)>${location['name']}";
 			echo '</label>';
 			if ($location['kidc'])
@@ -395,93 +395,97 @@ function renderRackspace ()
 		unset ($_SESSION['locationFilter']);
 	if (isset ($_REQUEST['location_id']))
 		$_SESSION['locationFilter'] = $_REQUEST['location_id'];
-	if (!isset ($_SESSION['locationFilter']))
-		$_SESSION['locationFilter'] = array_keys (listCells ('location')); // Add all locations to the filter
 	session_commit();
-
-	$found_racks = array();
-	$rows = array();
-	$cellfilter = getCellFilter();
-	$rackCount = 0;
-	foreach (getAllRows() as $row_id => $rowInfo)
-	{
-		$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
-		$found_racks = array_merge ($found_racks, $rackList);
-		$rows[] = array (
-			'location_id' => $rowInfo['location_id'],
-			'location_name' => $rowInfo['location_name'],
-			'row_id' => $row_id,
-			'row_name' => $rowInfo['name'],
-			'racks' => $rackList
-		);
-		$rackCount += count($rackList);
-	}
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 
-	if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
+	$found_racks = array();
+	$cellfilter = getCellFilter();
+	if (! ($cellfilter['is_empty'] && !isset ($_SESSION['locationFilter']) && renderEmptyResults ($cellfilter, 'racks', getEntitiesCount ('rack'))))
 	{
-		// generate thumb gallery
-		global $nextorder;
-		$rackwidth = getRackImageWidth();
-		// Zero value effectively disables the limit.
-		$maxPerRow = getConfigVar ('RACKS_PER_ROW');
-		$order = 'odd';
-		if (count ($rows))
+		$rows = array();
+		$rackCount = 0;
+		foreach (getAllRows() as $row_id => $rowInfo)
 		{
-			echo '<table border=0 cellpadding=10 class=cooltable>';
-			echo '<tr><th class=tdleft>Location</th><th class=tdleft>Row</th><th class=tdleft>Racks</th></tr>';
-			foreach ($rows as $row)
-			{
-				$location_id = $row['location_id'];
-				$row_id = $row['row_id'];
-				$row_name = $row['row_name'];
-				$rackList = $row['racks'];
-
-				if (($location_id != '' and !in_array ($location_id, $_SESSION['locationFilter'])) or (!count ($rackList) and count ($cellfilter['expression'])))
-					continue;
-				$rackListIdx = 0;
-				echo "<tr class=row_${order}><th class=tdleft>";
-				$locationTree = '';
-				while ($location_id)
-				{
-						$parentLocation = spotEntity ('location', $location_id);
-						$locationTree = "&raquo; <a href='" .
-							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
-							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
-							$locationTree;
-						$location_id = $parentLocation['parent_id'];
-				}
-				$locationTree = substr ($locationTree, 8);
-				echo $locationTree;
-				echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
-				echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
-				if (!count ($rackList))
-					echo "<td>(empty row)</td>";
-				else
-					foreach ($rackList as $rack)
-					{
-						if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
-						{
-							echo '</tr></table></th></tr>';
-							echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row_name} (continued)";
-							echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
-						}
-						echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-						echo "<img border=0 width=${rackwidth} height=";
-						echo getRackImageHeight ($rack['height']);
-						echo " title='${rack['height']} units'";
-						echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
-						echo "<br>${rack['name']}</a></td>";
-						$rackListIdx++;
-					}
-				$order = $nextorder[$order];
-				echo "</tr></table></th></tr>\n";
-			}
-			echo "</table>\n";
+			$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+			$found_racks = array_merge ($found_racks, $rackList);
+			$rows[] = array (
+				'location_id' => $rowInfo['location_id'],
+				'location_name' => $rowInfo['location_name'],
+				'row_id' => $row_id,
+				'row_name' => $rowInfo['name'],
+				'racks' => $rackList
+			);
+			$rackCount += count($rackList);
 		}
-		else
-			echo "<h2>No rows found</h2>\n";
+
+		if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
+		{
+			// generate thumb gallery
+			global $nextorder;
+			$rackwidth = getRackImageWidth();
+			// Zero value effectively disables the limit.
+			$maxPerRow = getConfigVar ('RACKS_PER_ROW');
+			$order = 'odd';
+			if (count ($rows))
+			{
+				echo '<table border=0 cellpadding=10 class=cooltable>';
+				echo '<tr><th class=tdleft>Location</th><th class=tdleft>Row</th><th class=tdleft>Racks</th></tr>';
+				foreach ($rows as $row)
+				{
+					$location_id = $row['location_id'];
+					$row_id = $row['row_id'];
+					$row_name = $row['row_name'];
+					$rackList = $row['racks'];
+
+					if (
+						$location_id != '' and isset ($_SESSION['locationFilter']) and !in_array ($location_id, $_SESSION['locationFilter']) or
+						empty ($rackList) and ! $cellfilter['is_empty']
+					)
+						continue;
+					$rackListIdx = 0;
+					echo "<tr class=row_${order}><th class=tdleft>";
+					$locationTree = '';
+					while ($location_id)
+					{
+							$parentLocation = spotEntity ('location', $location_id);
+							$locationTree = "&raquo; <a href='" .
+								makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
+								"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
+								$locationTree;
+							$location_id = $parentLocation['parent_id'];
+					}
+					$locationTree = substr ($locationTree, 8);
+					echo $locationTree;
+					echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
+					echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
+					if (!count ($rackList))
+						echo "<td>(empty row)</td>";
+					else
+						foreach ($rackList as $rack)
+						{
+							if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
+							{
+								echo '</tr></table></th></tr>';
+								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row_name} (continued)";
+								echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
+							}
+							echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
+							echo "<img border=0 width=${rackwidth} height=";
+							echo getRackImageHeight ($rack['height']);
+							echo " title='${rack['height']} units'";
+							echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
+							echo "<br>${rack['name']}</a></td>";
+							$rackListIdx++;
+						}
+					$order = $nextorder[$order];
+					echo "</tr></table></th></tr>\n";
+				}
+				echo "</table>\n";
+			}
+			else
+				echo "<h2>No rows found</h2>\n";
+		}
 	}
 	echo '</td><td class=pcright width="25%">';
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
@@ -2149,14 +2153,20 @@ function renderDepot ()
 {
 	global $pageno, $nextorder;
 	$cellfilter = getCellFilter();
-	$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
+	$objects = array();
+	$objects_count = getEntitiesCount ('object');
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
-	if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
+	if ($objects_count == 0)
+		echo '<h2>No objects exist</h2>';
+	// 1st attempt: do not fetch all objects if cellfilter is empty and rendering empty result is enabled
+	elseif (! ($cellfilter['is_empty'] && renderEmptyResults ($cellfilter, 'objects', $objects_count)))
 	{
-		if (count($objects) > 0)
+		$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
+		// 2st attempt: do not render all fetched objects if rendering empty result is enabled
+		if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
@@ -2191,8 +2201,6 @@ function renderDepot ()
 			echo '</table>';
 			finishPortlet();
 		}
-		else
-			echo '<h2>No objects exist</h2>';
 	}
 
 	echo "</td><td class=pcright width='25%'>";
@@ -2380,60 +2388,65 @@ function renderIPSpace()
 	global $pageno, $tabno;
 	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
 	$cellfilter = getCellFilter();
-	$top = NULL;
-	$netlist = array();
-	foreach (listCells ($realm) as $net)
-	{
-		if (isset ($top) and IPNetContains ($top, $net))
-			;
-		elseif (! count ($cellfilter['expression']) or judgeCell ($net, $cellfilter['expression']))
-			$top = $net;
-		else
-			continue;
-		$netlist[$net['id']] = $net;
-	}
-	$netcount = count ($netlist);
-	// expand request can take either natural values or "ALL". Zero means no expanding.
-	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
-	$tree = prepareIPTree ($netlist, $eid);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
-	if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
-	{
-		startPortlet ("networks (${netcount})");
-		echo '<h4>';
-		$all = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
-				$cellfilter['urlextra'] . "'>expand&nbsp;all</a>";
-		$none = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'NONE')) .
-				$cellfilter['urlextra'] . "'>collapse&nbsp;all</a>";
-		$auto = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
-			$cellfilter['urlextra'] . "'>auto-collapse</a>";
 
-		if ($eid === 0)
-			echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " ($all / $none)";
-		elseif ($eid === 'ALL')
-			echo "expanding all ($auto / $none)";
-		elseif ($eid === 'NONE')
-			echo "collapsing all ($all / $auto)";
-		else
+	$netlist = array();
+	if (! ($cellfilter['is_empty'] && renderEmptyResults($cellfilter, 'IP nets', getEntitiesCount ($realm))))
+	{
+		$top = NULL;
+		foreach (listCells ($realm) as $net)
 		{
-			$netinfo = spotEntity ($realm, $eid);
-			echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
+			if (isset ($top) and IPNetContains ($top, $net))
+				;
+			elseif (! count ($cellfilter['expression']) or judgeCell ($net, $cellfilter['expression']))
+				$top = $net;
+			else
+				continue;
+			$netlist[$net['id']] = $net;
 		}
-		echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
-		echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
-		if (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none')
-			echo "<th>routed by</th>";
-		echo "</tr>\n";
-		$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
-		renderIPSpaceRecords ($tree, $baseurl, $eid);
-		echo "</table>\n";
-		finishPortlet();
+		$netcount = count ($netlist);
+		// expand request can take either natural values or "ALL". Zero means no expanding.
+		$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
+		$tree = prepareIPTree ($netlist, $eid);
+
+		if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
+		{
+			startPortlet ("networks (${netcount})");
+			echo '<h4>';
+			$all = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
+					$cellfilter['urlextra'] . "'>expand&nbsp;all</a>";
+			$none = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'NONE')) .
+					$cellfilter['urlextra'] . "'>collapse&nbsp;all</a>";
+			$auto = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno)) .
+				$cellfilter['urlextra'] . "'>auto-collapse</a>";
+
+			if ($eid === 0)
+				echo 'auto-collapsing at threshold ' . getConfigVar ('TREE_THRESHOLD') . " ($all / $none)";
+			elseif ($eid === 'ALL')
+				echo "expanding all ($auto / $none)";
+			elseif ($eid === 'NONE')
+				echo "collapsing all ($all / $auto)";
+			else
+			{
+				$netinfo = spotEntity ($realm, $eid);
+				echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
+			}
+			echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+			echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
+			if (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none')
+				echo "<th>routed by</th>";
+			echo "</tr>\n";
+			$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
+			renderIPSpaceRecords ($tree, $baseurl, $eid);
+			echo "</table>\n";
+			finishPortlet();
+		}
 	}
 
 	echo '</td><td class=pcright>';
-	renderCellFilterPortlet ($cellfilter, 'ipv4net', $netlist);
+	renderCellFilterPortlet ($cellfilter, $realm, $netlist);
 	echo "</td></tr></table>\n";
 }
 
