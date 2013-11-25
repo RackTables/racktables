@@ -1,5 +1,6 @@
 0.20.7
 	update: enable IP addressing for all object types unless specifically excluded
+	update: drop the FileLink table, use EntityLink instead
 0.20.6 2013-11-29
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 

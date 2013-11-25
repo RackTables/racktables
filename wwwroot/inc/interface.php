@@ -5533,7 +5533,7 @@ function renderFile ($file_id)
 
 	callHook ('renderFileSummary', $file);
 
-	$links = getFileLinks ($file_id);
+	$links = getEntityRelatives ('parents', 'file', $file_id);
 	if (count ($links))
 		callHook ('renderFileLinks', $links);
 

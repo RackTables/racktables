@@ -2221,7 +2221,6 @@ function deleteLocation ()
 		showFuncMessage (__FUNCTION__, 'ERR1', array ($locationData['name']));
 		return;
 	}
-	releaseFiles ('location', $_REQUEST['location_id']);
 	destroyTagsForEntity ('location', $_REQUEST['location_id']);
 	commitDeleteObject ($_REQUEST['location_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($locationData['name']));
@@ -2383,7 +2382,6 @@ function deleteRack ()
 		showFuncMessage (__FUNCTION__, 'ERR1');
 		return;
 	}
-	releaseFiles ('rack', $_REQUEST['rack_id']);
 	destroyTagsForEntity ('rack', $_REQUEST['rack_id']);
 	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $_REQUEST['rack_id']));
 	commitDeleteObject ($_REQUEST['rack_id']);
@@ -2489,16 +2487,7 @@ function addFileToEntity ()
 	$fp = fopen($_FILES['file']['tmp_name'], 'rb');
 	global $sic;
 	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
-	usePreparedInsertBlade
-	(
-		'FileLink',
-		array
-		(
-			'file_id' => lastInsertID(),
-			'entity_type' => $realm,
-			'entity_id' => getBypassValue(),
-		)
-	);
+	commitLinkEntities ($realm, getBypassValue(), 'file', lastInsertID());
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
@@ -2510,17 +2499,8 @@ function linkFileToEntity ()
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 
+	commitLinkEntities ($etype_by_pageno[$pageno], getBypassValue(), 'file', $sic['file_id']);
 	$fi = spotEntity ('file', $sic['file_id']);
-	usePreparedInsertBlade
-	(
-		'FileLink',
-		array
-		(
-			'file_id' => $sic['file_id'],
-			'entity_type' => $etype_by_pageno[$pageno],
-			'entity_id' => getBypassValue(),
-		)
-	);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
@@ -2547,7 +2527,7 @@ $msgcode['unlinkFile']['OK'] = 72;
 function unlinkFile ()
 {
 	assertUIntArg ('link_id');
-	commitUnlinkFile ($_REQUEST['link_id']);
+	commitUnlinkEntitiesByLinkID ($_REQUEST['link_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 

@@ -733,7 +733,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
 		break;
 	case 'file':
-		$record['links'] = getFileLinks ($record['id']);
+		$record['links'] = getEntityRelatives ('parents', 'file', $record['id']);
 		break;
 	case 'location':
 		$record['locations'] = getLocations ($record['id']);
@@ -1016,7 +1016,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	$ret = array();
 	foreach ($rows as $row)
 	{
-		// get info of the relative (only objects supported now, others may be added later)
+		// get info of the relative
 		$relative = spotEntity ($row['entity_type'], $row['entity_id']);
 		switch ($row['entity_type'])
 		{
@@ -1025,10 +1025,35 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 				$id_name = 'object_id';
 				$name = $relative['dname'];
 				break;
+			case 'ipv4net':
+				$page = 'ipv4net';
+				$id_name = 'id';
+				$name = $relative['name'];
+				break;
+			case 'ipv6net':
+				$page = 'ipv6net';
+				$id_name = 'id';
+				$name = $relative['name'];
+				break;
 			case 'rack':
 				$page = 'rack';
 				$id_name = 'rack_id';
 				$name = $relative['name'];
+				break;
+			case 'row':
+				$page = 'row';
+				$id_name = 'row_id';
+				$name = $relative['name'];
+				break;
+			case 'location':
+				$page = 'location';
+				$id_name = 'location_id';
+				$name = $relative['name'];
+				break;
+			case 'user':
+				$page = 'user';
+				$id_name = 'user_id';
+				$name = $relative['user_realname'];
 				break;
 		}
 
@@ -1123,6 +1148,20 @@ function commitUnlinkEntities ($parent_entity_type, $parent_entity_id, $child_en
 function commitUnlinkEntitiesByLinkID ($link_id)
 {
 	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
+}
+
+// Delete all relationships using the child as criteria
+function commitUnlinkEntitiesByChild ($child_entity_type, $child_entity_id)
+{
+	usePreparedDeleteBlade
+	(
+		'EntityLink',
+		array
+		(
+			'child_entity_type' => $child_entity_type,
+			'child_entity_id' => $child_entity_id
+		)
+	);
 }
 
 // return VM clusters and corresponding stats
@@ -1256,12 +1295,6 @@ function getVMSwitchSummary ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-// Remove file links related to the entity, but leave the entity and file(s) intact.
-function releaseFiles ($entity_realm, $entity_id)
-{
-	usePreparedDeleteBlade ('FileLink', array ('entity_type' => $entity_realm, 'entity_id' => $entity_id));
-}
-
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
@@ -1281,7 +1314,6 @@ function commitDeleteObject ($object_id = 0)
 
 function commitResetObject ($object_id = 0)
 {
-	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
 	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4Allocation', array ('object_id' => $object_id));
@@ -4198,7 +4230,8 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 // FIXME: This function doesn't wipe relevant records from IPv4Address table.
 function destroyIPv4Prefix ($id)
 {
-	releaseFiles ('ipv4net', $id);
+	// TODO: replace this with DB triggers
+	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => 'ipv4net', 'parent_entity_id' => $id));
 	usePreparedDeleteBlade ('IPv4Network', array ('id' => $id));
 	destroyTagsForEntity ('ipv4net', $id);
 }
@@ -4206,7 +4239,8 @@ function destroyIPv4Prefix ($id)
 // FIXME: This function doesn't wipe relevant records from IPv6Address table.
 function destroyIPv6Prefix ($id)
 {
-	releaseFiles ('ipv6net', $id);
+	// TODO: replace this with DB triggers
+	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => 'ipv6net', 'parent_entity_id' => $id));
 	usePreparedDeleteBlade ('IPv6Network', array ('id' => $id));
 	destroyTagsForEntity ('ipv6net', $id);
 }
@@ -4362,7 +4396,7 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT id, name FROM File ' .
-		'WHERE id NOT IN (SELECT file_id FROM FileLink WHERE entity_type = ? AND entity_id = ?) ' .
+		"WHERE id NOT IN (SELECT child_entity_id FROM EntityLink WHERE child_entity_type = 'file' AND parent_entity_type = ? AND parent_entity_id = ?) " .
 		'ORDER BY name, id',
 		array ($entity_type, $entity_id)
 	);
@@ -4375,15 +4409,16 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
-		'FROM FileLink LEFT JOIN File ON FileLink.file_id = File.id ' .
-		'WHERE FileLink.entity_type = ? AND FileLink.entity_id = ? ORDER BY name',
+		'SELECT File.id, EL.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
+		'FROM EntityLink EL LEFT JOIN File ON EL.child_entity_id = File.id ' .
+		"WHERE EL.child_entity_type = 'file' AND EL.parent_entity_type = ? AND EL.parent_entity_id = ? " .
+		'ORDER BY name',
 		array ($entity_type, $entity_id)
 	);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['file_id']] = array (
-			'id' => $row['file_id'],
+		$ret[$row['id']] = array (
+			'id' => $row['id'],
 			'link_id' => $row['link_id'],
 			'name' => $row['name'],
 			'type' => $row['type'],
@@ -4439,39 +4474,36 @@ function commitAddFileCache ($file_id, $contents)
 	}
 }
 
-function getFileLinks ($file_id)
+function getFileStats ()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, entity_type, entity_id FROM FileLink ' .
-		'WHERE file_id = ? ORDER BY entity_type, entity_id',
-		array ($file_id)
+		'SELECT parent_entity_type, COUNT(*) AS count ' .
+		'FROM EntityLink ' .
+		"WHERE child_entity_type = 'file' " . 
+		'GROUP BY parent_entity_type'
 	);
-	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC));
-}
-
-function getFileStats ()
-{
-	$result = usePreparedSelectBlade ('SELECT entity_type, COUNT(*) AS count FROM FileLink GROUP BY entity_type');
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		if ($row['count'] > 0)
-			$ret["Links in realm '${row['entity_type']}'"] = $row['count'];
+			$ret["Links in realm '${row['parent_entity_type']}'"] = $row['count'];
 	unset ($result);
 
 	// Find number of files without any linkage
 	$result = usePreparedSelectBlade
 	(
 		'SELECT COUNT(*) ' .
-		'FROM File ' .
-		'WHERE id NOT IN (SELECT file_id FROM FileLink)'
+		'FROM File F ' .
+		"LEFT JOIN EntityLink EL ON F.id = EL.child_entity_id AND EL.child_entity_type = 'file' " .
+		'WHERE EL.child_entity_id IS NULL'
 	);
-	$ret["Unattached files"] = $result->fetchColumn ();
+	$ret["Unlinked files"] = $result->fetchColumn ();
 	unset ($result);
 
 	// Find total number of files
 	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM File');
 	$ret["Total files"] = $result->fetchColumn ();
+	unset ($result);
 
 	return $ret;
 }
@@ -4527,14 +4559,11 @@ function commitReplaceFile ($file_id = 0, $contents)
 	}
 }
 
-function commitUnlinkFile ($link_id)
-{
-	usePreparedDeleteBlade ('FileLink', array ('id' => $link_id));
-}
-
 function commitDeleteFile ($file_id)
 {
 	destroyTagsForEntity ('file', $file_id);
+	// TODO: replace this with DB triggers 
+	commitUnlinkEntitiesByChild ('file', $file_id);
 	usePreparedDeleteBlade ('File', array ('id' => $file_id));
 }
 

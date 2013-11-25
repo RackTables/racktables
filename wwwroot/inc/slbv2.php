@@ -631,7 +631,8 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 
 function commitDeleteVSG ($id)
 {
-	releaseFiles ('ipvs', $id);
+	// TODO: replace this with DB triggers
+	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => 'ipvs', 'parent_entity_id' => $id));
 	destroyTagsForEntity ('ipvs', $id);
 	usePreparedDeleteBlade ('VS', array ('id' => $id));
 }

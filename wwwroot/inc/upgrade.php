@@ -1371,7 +1371,11 @@ CREATE TABLE `VSEnabledPorts` (
 		case '0.20.7':
 			// enable IP addressing for all object types unless specifically excluded
 			$query[] = "UPDATE `Config` SET varvalue = 'not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})' WHERE varname = 'IPV4OBJ_LISTSRC'";
-			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
+
+			// move FileLink data to EntityLink
+			$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entity_type`, `child_entity_id`) SELECT `entity_type`, `entity_id`, 'file', `file_id` FROM `FileLink`";
+			$query[] = "DROP TABLE `FileLink`";
+			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

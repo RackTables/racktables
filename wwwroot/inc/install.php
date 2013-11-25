@@ -600,17 +600,6 @@ function get_pseudo_file ($name)
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB";
 
-		$query[] = "CREATE TABLE `FileLink` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `file_id` int(10) unsigned NOT NULL,
-  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL default 'object',
-  `entity_id` int(10) NOT NULL,
-  PRIMARY KEY  (`id`),
-  KEY `FileLink-file_id` (`file_id`),
-  UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
-  CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB";
-
 		$query[] = "CREATE TABLE `IPv4Address` (
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
