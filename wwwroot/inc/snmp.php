@@ -88,6 +88,15 @@ $iftable_processors['generic-gi-1-to-2-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['generic-gi-1-to-2-combo-1000SFP'] = array
+(
+	'pattern' => '@^gi(1|2)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['generic-gi-3-to-4-combo-1000SFP'] = array
 (
 	'pattern' => '@^gi(3|4)$@',
@@ -1493,6 +1502,15 @@ $iftable_processors['3com-25-to-26-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['3com-27-to-28-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(27|28)$@',
+	'replacement' => '\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['3com-49-to-50-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(49|50)$@',
@@ -2234,6 +2252,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('catalyst-2948-49-to-50-SFP', 'catalyst-2948-any-100TX'),
 		'ifDescrOID' => 'entPhysicalName',
 	),
+	'9.6.1.82.8.3' => array
+	(
+		'dict_key' => 2091,
+		'text' => 'SF 302-08MP: 8 RJ-45/10/100TX PWR + 2 combo-gig',
+		'processors' => array
+		(
+			'generic-gi-1-to-2-combo-1000SFP',
+			'generic-gi-1-to-2-1000T',
+			'generic-fa-any-100TX',
+		),
+		'ifDescrOID' => 'ifName',
+	),
 	'9.6.1.82.24.2' => array
 	(
 		'dict_key' => 1784,
@@ -2526,6 +2556,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 760,
 		'text' => '4210 52-port: 48 100TX + 2 1000T + 2 SFP',
 		'processors' => array ('3com-49-to-50-1000T', '3com-51-to-52-1000SFP', '3com-any-100TX'),
+	),
+	'43.1.16.4.3.83' => array
+	(
+		'dict_key' => 2092,
+		'text' => '4510G 24-port: 24 RJ-45/10-100-1000T(X) + 4 SFP combo-gig',
+		'processors' => array ('3com-25-to-26-1000SFP','3com-27-to-28-1000SFP','3com-any-1000T'),
 	),
 	'45.3.68.5' => array
 	(
@@ -2833,6 +2869,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1966,
 		'text' => 'Linksys SRW224G4: 24-port 10/100 + 4-Port Gigabit Switch with WebView',
+		'processors' => array ('generic-g-1-to-2-1000T', 'generic-g-3-to-4-combo-1000SFP', 'generic-g-3-to-4-combo-1000T', 'generic-e-any-100TX'),
+		'ifDescrOID' => 'ifName',
+	),
+	'3955.6.5048' => array
+	(
+		'dict_key' => 2093,
+		'text' => 'Linksys SRW248G4: 48-port 10/100 + 4-Port Gigabit Switch with WebView',
 		'processors' => array ('generic-g-1-to-2-1000T', 'generic-g-3-to-4-combo-1000SFP', 'generic-g-3-to-4-combo-1000T', 'generic-e-any-100TX'),
 		'ifDescrOID' => 'ifName',
 	),
@@ -3315,7 +3358,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
-	case preg_match ('/^3955\.6\.5024/', $sysObjectID):
+	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
+		checkPIC ('1-681');
+		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		break;
 	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
