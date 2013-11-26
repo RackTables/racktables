@@ -2148,6 +2148,19 @@ $dictionary = array
 	2062 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS125-24G-1S-RM'),
 	2063 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2012'),
 	2064 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2012 R2'),
+	2065 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X770'),
+	2066 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7504'),
+	2067 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7508'),
+	2068 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7304'),
+	2069 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7308'),
+	2070 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7316'),
+	2071 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7250QX-64'),
+	2072 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1012'),
+	2073 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1016'),
+	2074 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1024'),
+	2075 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1035'),
+	2076 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1036'),
+	2077 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5248'),
 
 	// add new records here until the gap is filled
 
