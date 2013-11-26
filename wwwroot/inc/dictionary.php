@@ -2161,9 +2161,8 @@ $dictionary = array
 	2075 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1035'),
 	2076 => array ('chapter_id' => 12, 'dict_value' => 'Mellanox%GPASS%SX1036'),
 	2077 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5248'),
-
-	// add new records here until the gap is filled
-
+	2078 => array ('chapter_id' => 12, 'dict_value' => 'Pica8%GPASS%P-3290'),
+	2079 => array ('chapter_id' => 12, 'dict_value' => 'Pica8%GPASS%P-3295'),
 	2080 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.11'),
 	2081 => array ('chapter_id' => 14, 'dict_value' => 'Huawei VRP 5.12'),
 	2082 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.1'),
@@ -2173,6 +2172,8 @@ $dictionary = array
 	2086 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 6004 | http://www.cisco.com/en/US/products/ps12807/index.html]]'),
 	2087 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5810-48T4S-EI'),
 	2088 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5810-24T4S-EI'),
+	2089 => array ('chapter_id' => 12, 'dict_value' => 'Pica8%GPASS%P-3780'),
+	2090 => array ('chapter_id' => 12, 'dict_value' => 'Pica8%GPASS%P-3922'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
