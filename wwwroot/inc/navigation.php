@@ -800,5 +800,6 @@ $ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 $ajaxhandler['get-slb-form'] = 'renderSLBFormAJAX';
 $ajaxhandler['triplet-preview'] = 'getTripletConfigAJAX';
+$ajaxhandler['ping-ipv4'] = 'pingIpv4AJAX';
 
 ?>

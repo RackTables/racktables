@@ -27,7 +27,46 @@ $(document).ready (function() {
 			);
 	});
 	$('body').mouseover(onBodyMouseOver);
+
+    $('.ping').html("<img src=pix/link-down.png valign=top>");
+    $('#pingall').click(function() {
+        $('.ping').each(function() {
+            pingHost(this.id);
+        })
+    })
+    $('.ping').click(function() {
+        var iphost=this.id;
+        var res = pingHost(iphost);
+    })
+
+
+
 });
+
+function pingHost (ip) {
+    var jqxhr = $.ajax({
+        type: "POST",
+        url: "index.php",
+        data: {
+            'module': 'ajax',
+            'ac': 'ping-ipv4',
+            host: ip
+            },
+        success: (function(data) {
+            if (data == 0) {
+                // Host is available
+                $('a.ping[ip="' + ip + '"]').html("<img src=pix/link-up.png valign=top>");
+            }
+            else {
+                // Host is not available
+                $('a.ping[ip="' + ip + '"]').html("<img src=pix/link-disabled.png valign=top>");
+            }
+
+        })
+    })
+
+
+}
 
 function onSpanMouseOver (event) {
 	if (editMode)
