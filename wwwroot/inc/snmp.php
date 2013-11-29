@@ -3034,9 +3034,15 @@ function doSNMPmining ($object_id, $snmpsetup)
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
-		return showFuncMessage (__FUNCTION__, 'ERR1'); // endpoint not found
+	{
+		showFuncMessage (__FUNCTION__, 'ERR1'); // endpoint not found
+		return;
+	}
 	if (count ($endpoints) > 1)
-		return showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
+	{
+		showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
+		return;
+	}
 
 	switch ($objectInfo['objtype_id'])
 	{
@@ -3058,10 +3064,16 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	global $known_switches, $iftable_processors;
 
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
-		return showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
+	{
+		showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
+		return;
+	}
 	$sysObjectID = preg_replace ('/^.*(enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	if (!isset ($known_switches[$sysObjectID]))
-		return showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+	{
+		showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+		return;
+	}
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
