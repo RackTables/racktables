@@ -1524,8 +1524,7 @@ function fixContext ($target = NULL)
 		$impl_tags,
 		$target_given_tags,
 		$user_given_tags,
-		$etype_by_pageno,
-		$page;
+		$etype_by_pageno;
 
 	if ($target !== NULL)
 	{
