@@ -284,7 +284,7 @@ function handlePopupPortLink()
 			8, 
 			array
 			(
-				formatPortLink ($port_info['id'], $port_info['name'], NULL, NULL),
+				formatPortLink ($port_info['object_id'], NULL, $port_info['id'], $port_info['name']),
 				formatPort ($remote_port_info),
 			)
 		);
