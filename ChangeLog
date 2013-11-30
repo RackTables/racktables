@@ -3,7 +3,7 @@
 	update: drop the FileLink table, use EntityLink instead
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,
-		3Com 5500G-EI 48-port (#1095) by Rainer Stumbaum
+		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum
 0.20.6 2013-11-29
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 

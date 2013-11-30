@@ -2554,7 +2554,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'43.1.16.4.3.29' => array
 	(
 		'dict_key' => 758,
-		'text' => '4200G: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'text' => '4200G 48-port: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('3com-49-to-50-1000SFP', '3com-51-to-52-1000SFP', '3com-any-1000T'),
+	),
+	'43.1.16.4.3.31' => array
+	(
+		'dict_key' => 771,
+		'text' => '4500G 48-port: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('3com-49-to-50-1000SFP', '3com-51-to-52-1000SFP', '3com-any-1000T'),
 	),
 	'43.1.16.4.3.45' => array
