@@ -37,7 +37,8 @@
 		WS-C2960-8TC-L (#1063), HP ProCurve J9028B (#941), J9022A (#767),
 		Netgear GS724TP (#1001), TL-SL5428E (#1015),
 		Brocade TurboIron 24X (#1055) by Mark Wilkinson
-		3Com 4500 family of switches (#1083) by Rafael Driutti
+		3Com 4500 family of switches (#1083),3com 4510G-24,
+		cisco SF302-08MP, Linksys SRW248G4 by Rafael Driutti
 		Cisco WS-C3560V2-24PS (#1049), Netgear FS726TP (#859) by Aaron Dummer
 	update: port link popup now has asset no search field (#949) by Thomas Uhde
 	update: searches now examine 'dictionary' attributes (#1003)
