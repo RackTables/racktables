@@ -2561,7 +2561,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2092,
 		'text' => '4510G 24-port: 24 RJ-45/10-100-1000T(X) + 4 SFP combo-gig',
-		'processors' => array ('3com-25-to-26-1000SFP','3com-27-to-28-1000SFP','3com-any-1000T'),
+		'processors' => array ('3com-25-to-26-1000SFP', '3com-27-to-28-1000SFP', '3com-any-1000T'),
 	),
 	'45.3.68.5' => array
 	(
@@ -3371,11 +3371,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
-		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		break;
 	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
