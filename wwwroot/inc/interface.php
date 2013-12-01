@@ -8890,4 +8890,438 @@ function renderMuninServersEditor()
 	echo '</table>';
 }
 
+// The validity of some data cannot be guaranteed using foreign keys.
+// Display any invalid rows that have crept in.
+// TODO:
+//    - check for IP addresses whose subnet does not exist in IPvXNetwork (X = 4 or 6)
+//        - IPvXAddress, IPvXAllocation, IPvXLog, IPvXRS, IPvXVS
+//    - provide links/buttons to delete invalid rows
+//    - verify that the current DDL is correct for each DB element
+//        - columns, indexes, foreign keys, views, character sets
+function renderDataIntegrityReport ()
+{
+	global $nextorder;
+	$violations = FALSE;
+
+	// check 1: EntityLink rows referencing not-existent relatives
+	// check 1.1: children 
+	$realms = array
+	(
+		'file' => 'File',
+		'location' => 'Location',
+		'object' => 'RackObject',
+		'rack' => 'Rack',
+		'row' => 'Row'
+	);
+	$orphans = array ();
+	foreach ($realms as $realm => $table)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT EL.* FROM EntityLink EL ' .
+			"LEFT JOIN ${table} ON EL.child_entity_id = ${table}.id " .
+			"WHERE EL.child_entity_type = ? AND ${table}.id IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['parent_entity_type']);
+			$parent = spotEntity ($orphan['parent_entity_type'], $orphan['parent_entity_id']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${realm_name}: ${parent['name']}</td>";
+			echo "<td>${orphan['child_entity_type']}</td>";
+			echo "<td>${orphan['child_entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 1.2: parents 
+	$realms = array
+	(
+		'ipv4net' => array ('table' => 'IPv4Network', 'column' => 'id'),
+		'ipv4rspool' => array ('table' => 'IPv4RSPool', 'column' => 'id'),
+		'ipv4vs' => array ('table' => 'IPv4VS', 'column' => 'id'),
+		'ipv6net' => array ('table' => 'IPv6Network', 'column' => 'id'),
+		'ipvs' => array ('table' => 'VS', 'column' => 'id'),
+		'location' => array ('table' => 'Location', 'column' => 'id'),
+		'object' => array ('table' => 'RackObject', 'column' => 'id'),
+		'rack' => array ('table' => 'Rack', 'column' => 'id'),
+		'row' => array ('table' => 'Row', 'column' => 'id'),
+		'user' => array ('table' => 'UserAccount', 'column' => 'user_id')
+	);
+	$orphans = array ();
+	foreach ($realms as $realm => $details)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT EL.* FROM EntityLink EL ' .
+			"LEFT JOIN ${details['table']} ON EL.parent_entity_id = ${details['table']}.${details['column']} " .
+			"WHERE EL.parent_entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['child_entity_type']);
+			$child = spotEntity ($orphan['child_entity_type'], $orphan['child_entity_id']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${realm_name}: ${child['name']}</td>";
+			echo "<td>${orphan['parent_entity_type']}</td>";
+			echo "<td>${orphan['parent_entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3: multiple tables referencing non-existent dictionary entries
+	// check 3.1: AttributeMap
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' . 
+		'FROM AttributeMap AM ' .
+		'LEFT JOIN Attribute A ON AM.attr_id = A.id ' .
+		'LEFT JOIN Chapter C ON AM.chapter_id = C.id ' .
+		'LEFT JOIN Dictionary D ON AM.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['attr_name']}</td>";
+			echo "<td>${orphan['chapter_name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.2: Object
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT O.* FROM Object O ' .
+		'LEFT JOIN Dictionary D ON O.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['id']}</td>";
+			echo "<td>${orphan['name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.3: ObjectHistory
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OH.* FROM ObjectHistory OH ' .
+		'LEFT JOIN Dictionary D ON OH.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['id']}</td>";
+			echo "<td>${orphan['name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.4: ObjectParentCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OPC.*, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
+		'FROM ObjectParentCompat OPC ' .
+		'LEFT JOIN Dictionary PD ON OPC.parent_objtype_id = PD.dict_key ' .
+		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' . 
+		'WHERE PD.dict_key IS NULL OR CD.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['parent_name']}</td>";
+			echo "<td>${orphan['parent_objtype_id']}</td>";
+			echo "<td>${orphan['child_name']}</td>";
+			echo "<td>${orphan['child_objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.5: PortCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT PC.*, 1D.dict_value AS type1_name, 2D.dict_value AS type2_name ' .
+		'FROM PortCompat PC ' .
+		'LEFT JOIN Dictionary 1D ON PC.type1 = 1D.dict_key ' .
+		'LEFT JOIN Dictionary 2D ON PC.type2 = 2D.dict_key ' .
+		'WHERE 1D.dict_key IS NULL OR 2D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Port Compatibility rules: Invalid From or To Type (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>From</th><th>From Type ID</th><th>To</th><th>To Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['type1_name']}</td>";
+			echo "<td>${orphan['type1']}</td>";
+			echo "<td>${orphan['type2_name']}</td>";
+			echo "<td>${orphan['type2']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.6: PortInterfaceCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT PIC.*, PII.iif_name ' .
+		'FROM PortInterfaceCompat PIC ' .
+		'LEFT JOIN PortInnerInterface PII ON PIC.iif_id = PII.id ' .
+		'LEFT JOIN Dictionary D ON PIC.oif_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Enabled Port Types: Invalid Outer Interface (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Inner Interface</th><th>Outer Interface ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['iif_name']}</td>";
+			echo "<td>${orphan['oif_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 4: relationships which violate ObjectParentCompat Rules
+	$invalids = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT CO.id AS child_id, CO.objtype_id AS child_type_id, CD.dict_value AS child_type, CO.name AS child_name, ' . 
+		'PO.id AS parent_id, PO.objtype_id AS parent_type_id, PD.dict_value AS parent_type, PO.name AS parent_name ' .
+		'FROM Object CO ' .
+		'LEFT JOIN EntityLink EL ON CO.id = EL.child_entity_id ' .
+		'LEFT JOIN Object PO ON EL.parent_entity_id = PO.id ' .
+		'LEFT JOIN ObjectParentCompat OPC ON PO.objtype_id = OPC.parent_objtype_id ' .
+		'LEFT JOIN Dictionary PD ON PO.objtype_id = PD.dict_key ' .
+		'LEFT JOIN Dictionary CD ON CO.objtype_id = CD.dict_key ' .
+		"WHERE EL.parent_entity_type = 'object' AND EL.child_entity_type = 'object' " .
+		'AND OPC.parent_objtype_id IS NULL'
+	);
+	$invalids = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Objects: Violate Object Container Compatibility rules (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Contained Obj Name</th><th>Contained Obj Type</th><th>Container Obj Name</th><th>Container Obj Type</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['child_name']}</td>";
+			echo "<td>${invalid['child_type']}</td>";
+			echo "<td>${invalid['parent_name']}</td>";
+			echo "<td>${invalid['parent_type']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 5: Links which violate PortCompat Rules
+	$invalids = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, DA.dict_value AS porta_type, ' . 
+		'OB.id AS objb_id, OB.name AS objb_name, L.portb AS portb_id, PB.name AS portb_name, DB.dict_value AS portb_type ' .
+		'FROM Link L ' .
+		'LEFT JOIN Port PA ON L.porta = PA.id ' .
+		'LEFT JOIN Object OA ON PA.object_id = OA.id ' .
+		'LEFT JOIN Dictionary DA ON PA.type = DA.dict_key ' .
+		'LEFT JOIN Port PB ON L.portb = PB.id ' .
+		'LEFT JOIN Object OB ON PB.object_id = OB.id ' .
+		'LEFT JOIN Dictionary DB ON PB.type = DB.dict_key ' .
+		'LEFT JOIN PortCompat PC on PA.type = PC.type1 AND PB.type = PC.type2 ' .
+		'WHERE PC.type1 IS NULL OR PC.type2 IS NULL'
+	);
+	$invalids = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Port Links: Violate Port Compatibility Rules (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Object A</th><th>Port A Name</th><th>Port A Type</th><th>Object B</th><th>Port B Name</th><th>Port B Type</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['obja_name']}</td>";
+			echo "<td>${invalid['porta_name']}</td>";
+			echo "<td>${invalid['porta_type']}</td>";
+			echo "<td>${invalid['objb_name']}</td>";
+			echo "<td>${invalid['portb_name']}</td>";
+			echo "<td>${invalid['portb_type']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 6: TagStorage rows referencing non-existent parents 
+	$realms = array
+	(
+		'file' => array ('table' => 'File', 'column' => 'id'),
+		'ipv4net' => array ('table' => 'IPv4Network', 'column' => 'id'),
+		'ipv4rspool' => array ('table' => 'IPv4RSPool', 'column' => 'id'),
+		'ipv4vs' => array ('table' => 'IPv4VS', 'column' => 'id'),
+		'ipv6net' => array ('table' => 'IPv6Network', 'column' => 'id'),
+		'ipvs' => array ('table' => 'VS', 'column' => 'id'),
+		'location' => array ('table' => 'Location', 'column' => 'id'),
+		'object' => array ('table' => 'RackObject', 'column' => 'id'),
+		'rack' => array ('table' => 'Rack', 'column' => 'id'),
+		'user' => array ('table' => 'UserAccount', 'column' => 'user_id'),
+		'vst' => array ('table' => 'VLANSwitchTemplate', 'column' => 'id'),
+	);
+	$orphans = array ();
+	foreach ($realms as $realm => $details)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT TS.*, TT.tag FROM TagStorage TS ' .
+			'LEFT JOIN TagTree TT ON TS.tag_id = TT.id ' .
+			"LEFT JOIN ${details['table']} ON TS.entity_id = ${details['table']}.${details['column']} " .
+			"WHERE TS.entity_realm = ? AND ${details['table']}.${details['column']} IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['entity_realm']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['tag']}</td>";
+			echo "<td>${realm_name}</td>";
+			echo "<td>${orphan['entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	if (! $violations)
+		echo '<h2>No integrity violations found</h2>';
+}
+
 ?>
