@@ -733,7 +733,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
 		break;
 	case 'file':
-		$record['links'] = getEntityRelatives ('parents', 'file', $record['id']);
+		$record['links'] = getFileLinks ($record['id']);
 		break;
 	case 'location':
 		$record['locations'] = getLocations ($record['id']);
@@ -1164,6 +1164,20 @@ function commitUnlinkEntitiesByChild ($child_entity_type, $child_entity_id)
 	);
 }
 
+// Delete all relationships using the parent as criteria
+function commitUnlinkEntitiesByParent ($parent_entity_type, $parent_entity_id)
+{
+	usePreparedDeleteBlade
+	(
+		'EntityLink',
+		array
+		(
+			'parent_entity_type' => $parent_entity_type,
+			'parent_entity_id' => $parent_entity_id
+		)
+	);
+}
+
 // return VM clusters and corresponding stats
 //	- number of hypervisors
 //	- number of resource pools
@@ -1308,14 +1322,12 @@ function commitDeleteObject ($object_id = 0)
 	commitResetObject ($object_id);
 	// Object itself
 	usePreparedDeleteBlade ('Object', array ('id' => $object_id));
-	// Dangling links
-	usePreparedExecuteBlade
-	(
-		'DELETE FROM EntityLink WHERE ' .
-		"(parent_entity_type IN ('rack', 'row', 'location') AND parent_entity_id = ?) OR " .
-		"(child_entity_type IN ('rack', 'row', 'location') AND child_entity_id = ?)",
-		array ($object_id, $object_id)
-	);
+	// Dangling links in case this is a rack, row or location
+	foreach (array ('rack', 'row', 'location') as $realm)
+	{
+		commitUnlinkEntitiesByChild ($realm, $object_id);
+		commitUnlinkEntitiesByParent ($realm, $object_id);
+	}
 }
 
 function commitResetObject ($object_id = 0)
@@ -1326,12 +1338,9 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('IPv6Allocation', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('IPv4NAT', array ('object_id' => $object_id));
 	// Parent-child relationships
-	usePreparedExecuteBlade
-	(
-		'DELETE FROM EntityLink WHERE ' .
-		"(parent_entity_type = 'object' AND parent_entity_id = ?) OR (child_entity_type = 'object' AND child_entity_id = ?)",
-		array ($object_id, $object_id)
-	);
+	commitUnlinkEntitiesByChild ('object', $object_id);
+	commitUnlinkEntitiesByParent ('object', $object_id); // files are also released here
+
 	// Rack space
 	usePreparedExecuteBlade ('DELETE FROM Atom WHERE molecule_id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
 	usePreparedExecuteBlade ('DELETE FROM Molecule WHERE id IN (SELECT new_molecule_id FROM MountOperation WHERE object_id = ?)', array ($object_id));
@@ -4237,7 +4246,7 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 function destroyIPv4Prefix ($id)
 {
 	// TODO: replace this with DB triggers
-	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => 'ipv4net', 'parent_entity_id' => $id));
+	releaseFiles ('ipv4net', $id);
 	usePreparedDeleteBlade ('IPv4Network', array ('id' => $id));
 	destroyTagsForEntity ('ipv4net', $id);
 }
@@ -4246,7 +4255,7 @@ function destroyIPv4Prefix ($id)
 function destroyIPv6Prefix ($id)
 {
 	// TODO: replace this with DB triggers
-	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => 'ipv6net', 'parent_entity_id' => $id));
+	releaseFiles ('ipv6net', $id);
 	usePreparedDeleteBlade ('IPv6Network', array ('id' => $id));
 	destroyTagsForEntity ('ipv6net', $id);
 }
@@ -4416,8 +4425,8 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT File.id, EL.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
-		'FROM EntityLink EL LEFT JOIN File ON EL.child_entity_id = File.id ' .
-		"WHERE EL.child_entity_type = 'file' AND EL.parent_entity_type = ? AND EL.parent_entity_id = ? " .
+		"FROM EntityLink EL LEFT JOIN File ON EL.child_entity_type = 'file' AND EL.child_entity_id = File.id " .
+		"WHERE EL.parent_entity_type = ? AND EL.parent_entity_id = ? " .
 		'ORDER BY name',
 		array ($entity_type, $entity_id)
 	);
@@ -4480,7 +4489,6 @@ function commitAddFileCache ($file_id, $contents)
 	}
 }
 
-// deprecated, use getEntityRelatives instead
 function getFileLinks ($file_id)
 {
 	return getEntityRelatives ('parents', 'file', $file_id);
@@ -4492,7 +4500,7 @@ function getFileStats ()
 	(
 		'SELECT parent_entity_type, COUNT(*) AS count ' .
 		'FROM EntityLink ' .
-		"WHERE child_entity_type = 'file' " . 
+		"WHERE child_entity_type = 'file' " .
 		'GROUP BY parent_entity_type'
 	);
 	$ret = array();
@@ -4574,7 +4582,7 @@ function commitReplaceFile ($file_id = 0, $contents)
 function commitDeleteFile ($file_id)
 {
 	destroyTagsForEntity ('file', $file_id);
-	// TODO: replace this with DB triggers 
+	// TODO: replace this with DB triggers
 	commitUnlinkEntitiesByChild ('file', $file_id);
 	usePreparedDeleteBlade ('File', array ('id' => $file_id));
 }
