@@ -1295,6 +1295,12 @@ function getVMSwitchSummary ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
+// deprecated, use usePreparedDeleteBlade instead
+function releaseFiles ($entity_realm, $entity_id)
+{
+	usePreparedDeleteBlade ('EntityLink', array ('parent_entity_type' => $entity_realm, 'parent_entity_id' => $entity_id, 'child_entity_type' => 'file'));
+}
+
 // There are times when you want to delete all traces of an object
 function commitDeleteObject ($object_id = 0)
 {
@@ -4472,6 +4478,12 @@ function commitAddFileCache ($file_id, $contents)
 	{
 		throw convertPDOException ($e);
 	}
+}
+
+// deprecated, use getEntityRelatives instead
+function getFileLinks ($file_id)
+{
+	return getEntityRelatives ('parents', 'file', $file_id);
 }
 
 function getFileStats ()
