@@ -545,7 +545,8 @@ function renderNewVSForm ()
 		$default_port = '';
 	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=102></td><td>";
 	global $vs_proto;
-	printSelect ($vs_proto, array ('name' => 'proto'), array_shift (array_keys ($vs_proto)));
+	$vs_keys = array_keys ($vs_proto);
+	printSelect ($vs_proto, array ('name' => 'proto'), array_shift ($vs_keys));
 	echo '</td><td><input type=text name=name tabindex=104></td><td>';
 	printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
 	echo "</td><td rowspan=3>";
