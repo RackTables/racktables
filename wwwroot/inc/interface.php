@@ -8738,12 +8738,12 @@ function renderExpirations ()
 
 				$object = spotEntity ('object', $row['object_id']);
 				$attributes = getAttrValues ($object['id']);
-				$oem_sn_1_attr = $attributes[1];
+				$oem_sn_1 = array_key_exists (1, $attributes) ? $attributes[1]['a_value'] : '&nbsp;';
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
 				echo "<td>${count}</td>";
 				echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 				echo "<td>${object['asset_no']}</td>";
-				echo "<td>${oem_sn_1_attr['a_value']}</td>";
+				echo "<td>${oem_sn_1}</td>";
 				echo "<td>${date_value}</td>";
 				echo "</tr>\n";
 				$order = $nextorder[$order];
