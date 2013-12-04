@@ -1087,11 +1087,9 @@ function updateObjectAllocation ()
 	$changecnt = 0;
 	// Get a list of all of this object's parents,
 	// then trim the list to only include parents which are racks
-	$objectParents = getEntityRelatives('parents', 'object', $object_id);
 	$parentRacks = array();
-	foreach ($objectParents as $parentData)
-		if ($parentData['entity_type'] == 'rack')
-			$parentRacks[] = $parentData['entity_id'];
+	foreach (getEntityRelatives('parents', 'object', $object_id, 'rack') as $parentData)
+		$parentRacks[] = $parentData['entity_id'];
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
 	{

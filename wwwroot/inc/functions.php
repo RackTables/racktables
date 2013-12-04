@@ -627,7 +627,7 @@ function applyRackProblemMask (&$rackData)
 function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
-	$parents = getEntityRelatives ('parents', 'object', $object_id);
+	$parents = getEntityRelatives ('parents', 'object', $object_id, 'object');
 	$parent_ids = array();
 	foreach ($parents as $parent)
 		$parent_ids[] = $parent['entity_id'];
@@ -5855,7 +5855,7 @@ function mkCellA ($cell)
 		$cell_page = $pageno_by_etype[$cell['realm']];
 
 	if ($cell['realm'] == 'user')
-		$cell_key = $cell['user_id'];
+		$cell_key = $cell['userid'];
 	else
 		$cell_key = $cell['id'];
 

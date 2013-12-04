@@ -687,7 +687,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 	if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
-	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
+	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id'], 'object');
 	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
 	if (count($objectChildren) > 0)
 	{
@@ -854,7 +854,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	}
 	echo "</table>\n";
 	// Get a list of all of objects Zero-U mounted to this rack
-	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id);
+	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id, 'object');
 	if (count ($zeroUObjects) > 0)
 	{
 		echo "<br><table width='75%' class=rack border=0 cellspacing=0 cellpadding=1>\n";
@@ -956,7 +956,7 @@ function renderEditObjectForm()
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
-		$parents = getEntityRelatives ('parents', 'object', $object_id);
+		$parents = getEntityRelatives ('parents', 'object', $object_id, 'object');
 		foreach ($parents as $link_id => $parent_details)
 		{
 			if (!isset($label))
@@ -1982,11 +1982,9 @@ function renderRackSpaceForObject ($object_id)
 
 	// Get a list of all of this object's parents,
 	// then trim the list to only include parents which are racks
-	$objectParents = getEntityRelatives('parents', 'object', $object_id);
 	$parentRacks = array();
-	foreach ($objectParents as $parentData)
-		if ($parentData['entity_type'] == 'rack')
-			$parentRacks[] = $parentData['entity_id'];
+	foreach (getEntityRelatives('parents', 'object', $object_id, 'rack') as $parentData)
+		$parentRacks[] = $parentData['entity_id'];
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";

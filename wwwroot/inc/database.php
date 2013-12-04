@@ -995,14 +995,21 @@ function compare_name ($a, $b)
 }
 
 // find either parents or children of a record
-function getEntityRelatives ($type, $entity_type, $entity_id)
+// if $relative_type is set, searches for relatives of the given type
+function getEntityRelatives ($type, $entity_type, $entity_id, $relative_type = NULL)
 {
+	$params = array ($entity_type, $entity_id);
 	if ($type == 'parents')
 	{
 		// searching for parents
 		$sql =
 			'SELECT id, parent_entity_type AS entity_type, parent_entity_id AS entity_id FROM EntityLink ' .
 			'WHERE child_entity_type = ? AND child_entity_id = ?';
+		if (isset ($relative_type))
+		{
+			$sql .= ' AND parent_entity_type = ?';
+			$params[] = $relative_type;
+		}
 	}
 	else
 	{
@@ -1010,8 +1017,13 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 		$sql =
 			'SELECT id, child_entity_type AS entity_type, child_entity_id AS entity_id FROM EntityLink ' .
 			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
+		if (isset ($relative_type))
+		{
+			$sql .= ' AND child_entity_type = ?';
+			$params[] = $relative_type;
+		}
 	}
-	$result = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
+	$result = usePreparedSelectBlade ($sql, $params);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
