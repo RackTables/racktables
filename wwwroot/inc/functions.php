@@ -5855,7 +5855,7 @@ function mkCellA ($cell)
 		$cell_page = $pageno_by_etype[$cell['realm']];
 
 	if ($cell['realm'] == 'user')
-		$cell_key = $cell['userid'];
+		$cell_key = $cell['user_id'];
 	else
 		$cell_key = $cell['id'];
 
