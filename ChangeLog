@@ -1,4 +1,5 @@
 0.20.7
+	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	update: enable IP addressing for all object types unless specifically excluded
 	update: drop the FileLink table, use EntityLink instead
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 

@@ -2382,11 +2382,14 @@ function renderIPSpace()
 	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
 	$cellfilter = getCellFilter();
 
+	// expand request can take either natural values or "ALL". Zero means no expanding.
+	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
+
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
 	$netlist = array();
-	if (! ($cellfilter['is_empty'] && renderEmptyResults($cellfilter, 'IP nets', getEntitiesCount ($realm))))
+	if (! ($cellfilter['is_empty'] && ! $eid && renderEmptyResults($cellfilter, 'IP nets', getEntitiesCount ($realm))))
 	{
 		$top = NULL;
 		foreach (listCells ($realm) as $net)
@@ -2400,8 +2403,6 @@ function renderIPSpace()
 			$netlist[$net['id']] = $net;
 		}
 		$netcount = count ($netlist);
-		// expand request can take either natural values or "ALL". Zero means no expanding.
-		$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
 		$tree = prepareIPTree ($netlist, $eid);
 
 		if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
