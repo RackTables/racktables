@@ -8731,16 +8731,19 @@ function renderExpirations ()
 				continue;
 			}
 			echo '<tr valign=top><th align=center>Count</th><th align=center>Name</th>';
-			echo "<th align=center>Asset Tag</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
+			echo "<th align=center>Asset Tag</th><th align=center>OEM S/N 1</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
 			foreach ($result as $row)
 			{
 				$date_value = datetimestrFromTimestamp ($row['uint_value']);
 
 				$object = spotEntity ('object', $row['object_id']);
+				$attributes = getAttrValues ($object['id']);
+				$oem_sn_1_attr = $attributes[1];
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
 				echo "<td>${count}</td>";
 				echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 				echo "<td>${object['asset_no']}</td>";
+				echo "<td>${oem_sn_1_attr['a_value']}</td>";
 				echo "<td>${date_value}</td>";
 				echo "</tr>\n";
 				$order = $nextorder[$order];
