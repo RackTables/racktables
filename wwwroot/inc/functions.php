@@ -1102,86 +1102,81 @@ function getRSUforRow ($rowData)
 	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
-// Find any URL in a string and replace it with a clickable link
-// Adopted from UrlLinker: https://bitbucket.org/kwi/urllinker/src
-function string_insert_hrefs ($s)
+# Detect URLs and email addresses in the string and replace them with href anchors
+# (adopted from MantisBT, core/string_api.php:string_insert_hrefs).
+function string_insert_hrefs ($p_string)
 {
+	static $s_url_regex = null;
+	static $s_url_replace = null;
+	static $s_email_regex = null;
+	static $s_anchor_regex = '/(<a[^>]*>.*?<\/a>)/is';
+
 	if (getConfigVar ('DETECT_URLS') != 'yes')
-		return $s;
+		return $p_string;
 
-	$rexProtocol  = '(https?://)?';
-	$rexDomain    = '(?:[-a-zA-Z0-9]{1,63}\.)*[a-zA-Z][-a-zA-Z0-9]{1,62}';
-	$rexIp        = '(?:[1-9][0-9]{0,2}\.|0\.){3}(?:[1-9][0-9]{0,2}|0)'; // doesn't support IPv6 addresses
-	$rexPort      = '(:[0-9]{1,5})?';
-	$rexPath      = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
-	$rexQuery     = '(\?[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-	$rexFragment  = '(#[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-	$rexUsername  = '[^]\\\\\x00-\x20\"(),:-<>[\x7f-\xff]{1,64}';
-	$rexPassword  = $rexUsername; // allow the same characters as in the username
-	$rexUrl       = "$rexProtocol(?:($rexUsername)(:$rexPassword)?@)?($rexDomain|$rexIp)($rexPort$rexPath$rexQuery$rexFragment)";
-	$rexUrlLinker = "{\\b$rexUrl(?=[?.!,;:\"]?(\s|$))}";
-
-	$html = '';
-	$position = 0;
-	while (preg_match($rexUrlLinker, $s, $match, PREG_OFFSET_CAPTURE, $position))
+	# Initialize static variables
+	if (is_null ($s_url_regex))
 	{
-		list($url, $urlPosition) = $match[0];
+		# URL regex
+		$t_url_protocol = '(?:[[:alpha:]][-+.[:alnum:]]*):\/\/';
 
-		// Add the text leading up to the URL.
-		$html .= substr($s, $position, $urlPosition - $position);
+		# %2A notation in url's
+		$t_url_hex = '%[[:digit:]A-Fa-f]{2}';
 
-		$protocol    = $match[1][0];
-		$username    = $match[2][0];
-		$password    = $match[3][0];
-		$domain      = $match[4][0];
-		$afterDomain = $match[5][0]; // everything following the domain
-		$port        = $match[6][0];
-		$path        = $match[7][0];
+		# valid set of characters that may occur in url scheme. Note: - should be first (A-F != -AF).
+		$t_url_valid_chars       = '-_.,!~*\';\/?%^\\\\:@&={\|}+$#[:alnum:]\pL';
+		$t_url_chars             = "(?:${t_url_hex}|[${t_url_valid_chars}\(\)\[\]])";
+		$t_url_chars2            = "(?:${t_url_hex}|[${t_url_valid_chars}])";
+		$t_url_chars_in_brackets = "(?:${t_url_hex}|[${t_url_valid_chars}\(\)])";
+		$t_url_chars_in_parens   = "(?:${t_url_hex}|[${t_url_valid_chars}\[\]])";
 
-		// Do not permit implicit protocol if a password is specified, as
-		// this causes too many errors (e.g. "my email:foo@example.org").
-		if (!$protocol && $password)
-		{
-			$html .= htmlspecialchars($username);
+		$t_url_part1 = "${t_url_chars}";
+		$t_url_part2 = "(?:\(${t_url_chars_in_parens}*\)|\[${t_url_chars_in_brackets}*\]|${t_url_chars2})";
 
-			// Continue text parsing at the ':' following the "username".
-			$position = $urlPosition + strlen($username);
-			continue;
-		}
+		$s_url_regex = "/(${t_url_protocol}(${t_url_part1}*?${t_url_part2}+))/sue";
 
-		if (!$protocol && $username && !$password && !$afterDomain)
-		{
-			// Looks like an email address.
-			$emailUrl = TRUE;
-			$completeUrl = "mailto:$url";
-			$linkText = $url;
-		}
-		else
-		{
-			// Prepend http:// if no protocol specified
-			$completeUrl = $protocol ? $url : "http://$url";
-			$linkText = "$protocol$domain$port$path";
-		}
+		# URL replacement
+		$t_url_href    = "href=\"'.rtrim('\\1','.').'\"";
+		$s_url_replace = "'<a ${t_url_href}>\\1</a> [<a ${t_url_href} target=\"_blank\">^</a>]'";
 
-		$linkHtml = '<a href="' . htmlspecialchars($completeUrl) . '">'
-			. htmlspecialchars($linkText)
-			. '</a>';
-
-		// It's not an e-mail address, provide an additional link with a new window/tab as the target
-		if (!isset($emailUrl))
-		 	$linkHtml .= ' [<a href="' . htmlspecialchars($completeUrl) . '" target="_blank">^</a>]';
-		unset($emailUrl);
-
-		// Add the hyperlink.
-		$html .= $linkHtml;
-
-		// Continue text parsing from after the URL.
-		$position = $urlPosition + strlen($url);
+		# e-mail regex
+		$s_email_regex = substr_replace (email_regex_simple(), '(?:mailto:)?', 1, 0);
 	}
 
-	// Add the remainder of the text.
-	$html .= substr($s, $position);
-	return $html;
+	# Find any URL in a string and replace it by a clickable link
+	$p_string = preg_replace ($s_url_regex, $s_url_replace, $p_string);
+
+	# Find any email addresses in the string and replace them with a clickable
+	# mailto: link, making sure that we skip processing of any existing anchor
+	# tags, to avoid parts of URLs such as https://user@example.com/ or
+	# http://user:password@example.com/ to be not treated as an email.
+	$t_pieces = preg_split ($s_anchor_regex, $p_string, null, PREG_SPLIT_DELIM_CAPTURE);
+	$p_string = '';
+	foreach ($t_pieces as $piece)
+		if (preg_match ($s_anchor_regex, $piece))
+			$p_string .= $piece;
+		else
+			$p_string .= preg_replace ($s_email_regex, '<a href="mailto:\0">\0</a>', $piece);
+
+	return $p_string;
+}
+
+# Adopted from MantisBT, core/email_api.php:email_regex_simple.
+function email_regex_simple()
+{
+	static $s_email_regex = null;
+
+	if (is_null ($s_email_regex))
+	{
+		$t_recipient = "([a-z0-9!#*+\/=?^_{|}~-]+(?:\.[a-z0-9!#*+\/=?^_{|}~-]+)*)";
+
+		# a domain is one or more subdomains
+		$t_subdomain = "(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)";
+		$t_domain    = "(${t_subdomain}(?:\.${t_subdomain})*)";
+
+		$s_email_regex = "/${t_recipient}\@${t_domain}/i";
+	}
+	return $s_email_regex;
 }
 
 // Parse AUTOPORTS_CONFIG and return a list of generated pairs (port_type, port_name)
