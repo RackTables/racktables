@@ -4437,7 +4437,7 @@ function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT File.id, EL.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
-		"FROM EntityLink EL LEFT JOIN File ON EL.child_entity_type = 'file' AND EL.child_entity_id = File.id " .
+		"FROM EntityLink EL INNER JOIN File ON EL.child_entity_type = 'file' AND EL.child_entity_id = File.id " .
 		"WHERE EL.parent_entity_type = ? AND EL.parent_entity_id = ? " .
 		'ORDER BY name',
 		array ($entity_type, $entity_id)
