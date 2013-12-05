@@ -999,7 +999,10 @@ function renderEditObjectForm()
 			else
 				echo '&nbsp;';
 			echo '</td>';
-			echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
+			echo "<th class=sticker>${record['name']}";
+			if ($record['type'] == 'date')
+				echo ' (' . datetimeFormatHint (getConfigVar ('DATETIME_FORMAT')) . ')';
+			echo ':</th><td class=tdleft>';
 			switch ($record['type'])
 			{
 				case 'uint':

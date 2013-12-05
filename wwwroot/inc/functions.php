@@ -6037,6 +6037,20 @@ function timestampFromDatetimestr ($s)
 	);
 }
 
+# Produce a human-readable clue, such as 'YYYY-MM-DD' for '%Y-%m-%d'.
+function datetimeFormatHint ($format)
+{
+	$subst = array
+	(
+		# leave ISO-8601:1988 week-numbering years (%g, %G) alone
+		'%y' => 'YY',
+		'%Y' => 'YYYY',
+		'%m' => 'MM',
+		'%d' => 'DD',
+	);
+	return str_replace (array_keys ($subst), $subst, $format);
+}
+
 // Return TRUE, if the object belongs to specified type and has
 // specified attribute belonging to the given set of values.
 function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
