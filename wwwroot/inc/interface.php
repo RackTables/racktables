@@ -1258,14 +1258,15 @@ function renderObject ($object_id)
 			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
 		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
 	}
-	$children = getEntityRelatives ('children', 'object', $object_id);
+
+	// Contains
+	$children = array();
+	foreach (getEntityRelatives ('children', 'object', $object_id) as $child)
+		if ($child['entity_type'] != 'file')
+			$children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
 	if (count ($children))
-	{
-		$fmt_children = array();
-		foreach ($children as $child)
-			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
-		$summary['Contains'] = implode ('<br>', $fmt_children);
-	}
+		$summary['Contains'] = implode ('<br>', $children);
+
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	foreach (getAttrValues ($object_id) as $record)
