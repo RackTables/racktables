@@ -1206,7 +1206,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 	if ($is_highlighted)
 		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='anchor interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 	if ($port['remote_object_id'])
@@ -2623,7 +2623,7 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 	if ($ip_bin === $hl_ip)
 		$class .= ' highlight';
 	$fmt = ip6_format ($ip_bin);
-	echo "<tr class='$class'><td><a class='anchor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "<tr class='$class'><td><a name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
 	$editable = permitted ('ipaddress', 'properties', 'editAddress')
 		? 'editable'
 		: '';
@@ -2721,7 +2721,7 @@ function renderIPv4NetworkAddresses ($range)
 			$addr = $range['addrlist'][$ip_bin];
 		else
 		{
-			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='anchor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<tr class='tdleft $tr_class'><td class=tdleft><a name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
@@ -2739,7 +2739,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		$tr_class .= ' ' . $addr['class'];
 		echo "<tr class='tdleft $tr_class'>";
-		echo "<td><a class='anchor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
@@ -2859,7 +2859,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
 		echo "<tr class='$tr_class'>";
-		echo "<td><a class='anchor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name'])
 			&& permitted ('ipaddress', 'properties', 'editAddress')
