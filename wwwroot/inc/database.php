@@ -2453,7 +2453,7 @@ function spotNetworkByIP ($ip_bin, $masklen = NULL)
 function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 {
 	$row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen);
-	return $row !== FALSE ? $row['id'] : NULL;
+	return $row !== NULL ? $row['id'] : NULL;
 }
 
 function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
@@ -2485,7 +2485,7 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 {
 	$row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen);
-	return $row !== FALSE ? $row['id'] : NULL;
+	return $row !== NULL ? $row['id'] : NULL;
 }
 
 function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
