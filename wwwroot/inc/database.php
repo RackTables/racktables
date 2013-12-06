@@ -274,8 +274,7 @@ function getRowInfo ($row_id)
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
-	else
-		throw new EntityNotFoundException ('rackrow', $row_id);
+	throw new EntityNotFoundException ('rackrow', $row_id);
 }
 
 function getAllRows ()
@@ -566,12 +565,13 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	{
 		global $entityCache;
 		if (isset ($entityCache['complete'][$realm]))
-		// Emphasize the absence of record, if listCells() has already been called.
+		{
 			if (isset ($entityCache['complete'][$realm][$id]))
 				return $entityCache['complete'][$realm][$id];
-			else
-				throw new EntityNotFoundException ($realm, $id);
-		elseif (isset ($entityCache['partial'][$realm][$id]))
+			// Emphasize the absence of record, if listCells() has already been called.
+			throw new EntityNotFoundException ($realm, $id);
+		}
+		if (isset ($entityCache['partial'][$realm][$id]))
 			return $entityCache['partial'][$realm][$id];
 	}
 	global $SQLSchema;
@@ -2452,9 +2452,8 @@ function spotNetworkByIP ($ip_bin, $masklen = NULL)
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 {
-	if ($row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen))
-		return $row['id'];
-	return NULL;
+	$row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen);
+	return $row !== FALSE ? $row['id'] : NULL;
 }
 
 function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
@@ -2477,27 +2476,24 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 		"and mask < ? " .
 		'order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array (ip4_bin2db ($ip_bin), $masklen));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row : NULL;
 }
 
 // Return the id of the smallest IPv6 network containing the given IPv6 address
 // ($ip is an instance of IPv4Address class) or NULL, if nothing was found.
 function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 {
-	if ($row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen))
-		return $row['id'];
-	return NULL;
+	$row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen);
+	return $row !== FALSE ? $row['id'] : NULL;
 }
 
 function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 {
 	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip_bin, $ip_bin, $masklen));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row : NULL;
 }
 
 // This function is actually used not only to update, but also to create records,
@@ -3216,9 +3212,7 @@ function searchByMgmtHostname ($string)
 	// second attempt: search for FQDN part, separated by dot.
 	$result = usePreparedSelectBlade ('SELECT object_id FROM AttributeValue WHERE attr_id = 3 AND string_value LIKE ? LIMIT 2', array ("$string.%"));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1)
-		return NULL;
-	return $rows[0][0];
+	return count ($rows) == 1 ? $rows[0][0] : NULL;
 }
 
 // returns an array of object ids
@@ -3328,9 +3322,7 @@ function objectTypeMayHaveParent ($objtype_id)
 {
 	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM ObjectParentCompat WHERE child_objtype_id = ?', array ($objtype_id));
 	$row = $result->fetch (PDO::FETCH_NUM);
-	if ($row[0] > 0)
-		return TRUE;
-	return FALSE;
+	return $row[0] > 0;
 }
 
 // Add a pair to the ObjectParentCompat table.
@@ -4276,10 +4268,7 @@ function loadScript ($name)
 {
 	$result = usePreparedSelectBlade ("select script_text from Script where script_name = ?", array ($name));
 	$row = $result->fetch (PDO::FETCH_NUM);
-	if ($row !== FALSE)
-		return $row[0];
-	else
-		return NULL;
+	return $row !== FALSE ? $row[0] : NULL;
 }
 
 function saveScript ($name = '', $text)
@@ -4480,9 +4469,8 @@ function getFileCache ($file_id)
 		'WHERE File.id = ? and File.thumbnail IS NOT NULL',
 		array ($file_id)
 	);
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
-		return FALSE;
-	return $row['thumbnail'];
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row['thumbnail'] : FALSE;
 }
 
 function commitAddFileCache ($file_id, $contents)
@@ -4614,10 +4602,8 @@ function getChapterList ()
 function findFileByName ($filename)
 {
 	$result = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)))
-		return $row['id'];
-
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row['id'] : NULL;
 }
 
 // guarantees there is a locked row for $form_username
@@ -4643,15 +4629,11 @@ function acquireLDAPCache ($form_username, $password_hash, $expiry = 0, $deep = 
 		}
 		return NULL;
 	}
-	else
-	{
-		if ($deep < 2)
-			// maybe another instance deleted our row before we've locked it. Try again
-			return $self ($form_username, $password_hash, $expiry, $deep + 1);
-		else
-			// the problem still persists after 2 tries, throw an exception
-			throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
-	}
+	if ($deep < 2)
+		// maybe another instance deleted our row before we've locked it. Try again
+		return $self ($form_username, $password_hash, $expiry, $deep + 1);
+	// the problem still persists after 2 tries, throw an exception
+	throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
 }
 
 function releaseLDAPCache ()
@@ -4697,9 +4679,8 @@ function discardLDAPCache ($maxage = 0)
 function getUserIDByUsername ($username)
 {
 	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHERE user_name = ?', array ($username));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row['user_id'];
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row['user_id'] : NULL;
 }
 
 # Derive a complete cell structure from the given username regardless
@@ -4932,9 +4913,8 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
 	);
-	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row !== FALSE ? $row : NULL;
 }
 
 function getStored8021QConfig ($object_id, $instance = 'desired')
@@ -5240,9 +5220,7 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	$query = "SELECT ${SQLinfo['keycolumn']} AS id FROM ${SQLinfo['table']} WHERE ${SQLinfo['table']}.${column}=? LIMIT 2";
 	$result = usePreparedSelectBlade ($query, array ($value));
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	if (count ($rows) != 1)
-		return NULL;
-	return $rows[0]['id'];
+	return count ($rows) == 1 ? $rows[0]['id'] : NULL;
 }
 
 // returns an array of attribute_id`s wich use specified chapter id.
