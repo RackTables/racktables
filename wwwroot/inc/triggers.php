@@ -174,7 +174,7 @@ function trigger_ports ()
 	return 'std';
 }
 
-// Offer the generic VLAN setup tab for every object, which already
+// Offer the generic VLAN setup tab for every object that already
 // has a VLAN domain associated or at least can have one (in the latter
 // case additionally heat the tab, if no domain is set.
 function trigger_object_8021qorder ()

@@ -321,7 +321,7 @@ function getRacks ($row_id)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
-# Return rack and row details for those objects on the list, which have
+# Return rack and row details for those objects on the list that have
 # at least one rackspace atom allocated to them.
 function getMountInfo ($object_ids)
 {
@@ -1446,7 +1446,7 @@ function resetRackSortOrder ($row_id)
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes
-// supplied in $_REQUEST and returns resulting array. Only those changes are examined, which
+// supplied in $_REQUEST and returns resulting array. Only those changes are examined that
 // correspond to current rack ID.
 // 1st arg is rackdata, 2nd arg is unchecked state, 3rd arg is checked state.
 // If 4th arg is present, object_id fields will be updated accordingly to the new state.
@@ -1518,7 +1518,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	return FALSE;
 }
 
-// This function builds a list of rack-unit-atom records, which are assigned to
+// This function builds a list of rack-unit-atom records assigned to
 // the requested object.
 function getMoleculeForObject ($object_id)
 {
@@ -3041,8 +3041,8 @@ function getObjectAttrsSearchResults ($what)
 	return $ret;
 }
 
-// Search stickers and return a list of pairs "object_id-attribute_id",
-// which matched. A partilar object_id could be returned more than once, if it has
+// Search stickers and return a list of pairs "object_id-attribute_id"
+// that matched. A partilar object_id could be returned more than once, if it has
 // multiple matching stickers. Search is only performed on "string" or "dict" attributes.
 function getStickerSearchResults ($tablename, $what)
 {
@@ -3452,7 +3452,7 @@ function getRackspaceStats ()
 
 /*
 
-The following allows figuring out records in TagStorage, which refer to non-existing entities:
+The following allows figuring out records in TagStorage that refer to non-existing entities:
 
 mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
 mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
@@ -3461,7 +3461,7 @@ mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where
 mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
 mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
 
-Accordingly, these are the records, which refer to non-existent tags:
+Accordingly, these are the records that refer to non-existent tags:
 
 mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id is null;
 
@@ -4012,7 +4012,7 @@ function generateEntityAutoTags ($cell)
 			break;
 		case 'user':
 			# {$username_XXX} autotag is generated always, but {$userid_XXX}
-			# appears only for accounts, which exist in local database.
+			# appears only for accounts that exist in local database.
 			$ret[] = array ('tag' => '$username_' . $cell['user_name']);
 			if (isset ($cell['user_id']))
 				$ret[] = array ('tag' => '$userid_' . $cell['user_id']);
@@ -4122,7 +4122,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 }
 
 // Add records into TagStorage, if this makes sense (IOW, they don't appear
-// on the implicit list already). Then remove any other records, which
+// on the implicit list already). Then remove any other records that
 // appear on the "implicit" side of the chain. This will make sure,
 // that both the tag base is still minimal and all requested tags appear on
 // the resulting tag chain.
@@ -4130,7 +4130,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
 	// Put the current explicit sub-chain into a buffer and merge all tags from
-	// the extra chain, which aren't there yet.
+	// the extra chain that aren't there yet.
 	$oldchain = array();
 	$newchain = array();
 	foreach (loadEntityTags ($realm, $entity_id) as $oldtag)
@@ -4405,7 +4405,7 @@ function getNATv4ForObject ($object_id)
 	return $ret;
 }
 
-// Return a list of files, which are not linked to the specified record. This list
+// Return a list of files that are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
@@ -4982,7 +4982,7 @@ function getVLANInfo ($vlan_ck)
 	return $ret;
 }
 
-// return list of network IDs, which are not bound to the given VLAN domain
+// return list of network IDs that are not bound to the given VLAN domain
 function getVLANIPv4Options ($except_vdid)
 {
 	$prepared = usePreparedSelectBlade
@@ -4995,7 +4995,7 @@ function getVLANIPv4Options ($except_vdid)
 	return reduceSubarraysToColumn ($prepared->fetchAll (PDO::FETCH_ASSOC), 'id');
 }
 
-// return list of network IDs, which are not bound to the given VLAN domain
+// return list of network IDs that are not bound to the given VLAN domain
 function getVLANIPv6Options ($except_vdid)
 {
 	$prepared = usePreparedSelectBlade
@@ -5068,7 +5068,7 @@ function commitReduceVLANIPv6 ($vlan_ck, $ipv6net_id)
 	);
 }
 
-// Return a list of switches, which have specific VLAN configured on
+// Return a list of switches that have specific VLAN configured on
 // any port (each switch with the list of such ports).
 function getVLANConfiguredPorts ($vlan_ck)
 {
@@ -5365,7 +5365,7 @@ function touchVLANSwitch ($switch_id)
 	);
 }
 
-# Return list of rows for objects, which have the date stored in the given
+# Return list of rows for objects that have the date stored in the given
 # attribute belonging to the given range (relative to today's date).
 function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 {

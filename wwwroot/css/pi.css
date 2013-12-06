@@ -617,7 +617,7 @@ div.vlan {
 	border: solid 4px lime !important;
 }
 
-/*this style is used for <a>s which does not contain href (ancors), to make them look like plain text*/
+/*this style is used for <a>s that do not contain href (anchors) to make them look like plain text*/
 .nolink {
 	text-decoration: none;
 	color: black;
@@ -628,7 +628,7 @@ div.vlan {
 	text-decoration: none;
 }
 
-/*this class controls popup switch info. It should be on the element which contains portname in plain text*/
+/*This class controls popup switch info. It should be on the element that contains portname in plain text.*/
 .interactive-portname {
 	cursor: default;
 }

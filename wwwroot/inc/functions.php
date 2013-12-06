@@ -416,7 +416,7 @@ function getBypassValue()
 	return genericAssertion ($page[$pageno]['bypass'], $page[$pageno]['bypass_type']);
 }
 
-// fills $args array with the bypass values of specified $pageno which are provided in $_REQUEST
+// fills $args array with the bypass values of specified $pageno that are provided in $_REQUEST
 function fillBypassValues ($pageno, &$args)
 {
 	global $page, $sic;
@@ -462,7 +462,7 @@ function setDisplayedName (&$cell)
 	}
 }
 
-// This function finds height of solid rectangle of atoms, which are all
+// This function finds height of solid rectangle of atoms that are all
 // assigned to the same object. Rectangle base is defined by specified
 // template.
 function rectHeight ($rackData, $startRow, $template_idx)
@@ -1262,8 +1262,8 @@ function treeItemCmp ($a, $b)
 
 // Build a tree from the item list and return it. Input and output data is
 // indexed by item id (nested items in output are recursively stored in 'kids'
-// key, which is in turn indexed by id. Functions, which are ready to handle
-// tree collapsion/expansion themselves, may request non-zero threshold value
+// key, which is in turn indexed by id. Functions that are ready to handle
+// tree collapsion/expansion themselves may request non-zero threshold value
 // for smaller resulting tree.
 function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = TRUE)
 {
@@ -1324,7 +1324,7 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 }
 
 // Build a tree from the tag list and return everything _except_ the tree.
-// IOW, return taginfo items, which have parent_id set and pointing outside
+// IOW, return taginfo items that have parent_id set and pointing outside
 // of the "normal" tree, which originates from the root.
 function getOrphanedTags ()
 {
@@ -1442,7 +1442,7 @@ function getTagSubtree ($tagid)
 	return $subtree;
 }
 
-// returns an array of tag ids which have $tagid as its parent (all levels)
+// returns an array of tag ids that have $tagid as its parent (all levels)
 function getTagDescendents ($tagid)
 {
 	$ret = array();
@@ -1649,8 +1649,8 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 	return $ret;
 }
 
-// Preprocess tag tree to get only tags which can effectively reduce given filter result,
-// than passes shrinked tag tree to getObjectiveTagTree and return its result.
+// Preprocess tag tree to get only tags that can effectively reduce given filter result,
+// then pass shrinked tag tree to getObjectiveTagTree and return its result.
 // This makes sense only if andor mode is 'and', otherwise function does not modify tree.
 // 'Given filter' is a pair of $entity_list(filter result) and $preselect(filter data).
 // 'Effectively' means reduce to non-empty result.
@@ -1791,7 +1791,7 @@ function getCellFilter ()
 		showWarning ('Invalid and/or switch value in submitted form');
 		return NULL;
 	}
-	// Both tags and predicates, which don't exist, should be
+	// Both tags and predicates that don't exist, should be
 	// handled somehow. Discard them silently for now.
 	global $taglist, $pTable;
 	foreach (array ('cft', 'cfp', 'nft', 'nfp') as $param)
@@ -2628,7 +2628,7 @@ function prepareIPTree ($netlist, $expanded_id = 0)
 	return $tree;
 }
 
-# Traverse IPv4/IPv6 tree and return a list of all networks, which
+# Traverse IPv4/IPv6 tree and return a list of all networks that
 # exist in DB and don't have any sub-networks.
 function getTerminalNetworks ($tree)
 {
@@ -2644,7 +2644,7 @@ function getTerminalNetworks ($tree)
 
 // Check all items of the tree recursively, until the requested target id is
 // found. Mark all items leading to this item as "expanded", collapsing all
-// the rest, which exceed the given threshold (if the threshold is given).
+// the rest that exceed the given threshold (if the threshold is given).
 function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 {
 	$self = __FUNCTION__;
@@ -2988,7 +2988,7 @@ function considerGivenConstraint ($cell, $filter)
 		return judgeContext ($expr);
 }
 
-// Return list of records in the given realm, which conform to
+// Return list of records in the given realm that conform to
 // the given RackCode expression. If the realm is unknown or text
 // doesn't validate as a RackCode expression, return NULL.
 // Otherwise (successful scan) return a list of all matched
@@ -3138,7 +3138,7 @@ function getPortListPrefs()
 
 // Return data for printNiftySelect() with port type options. All OIF options
 // for the default IIF will be shown, but only the default OIFs will be present
-// for each other IIFs. IIFs, for which there is no default OIF, will not
+// for each other IIFs. IIFs for that there is no default OIF will not
 // be listed.
 // This SELECT will be used for the "add new port" form.
 function getNewPortTypeOptions()
@@ -3283,7 +3283,7 @@ function iosParseVLANString ($string)
 	return $ret;
 }
 
-// Scan given array and return the key, which addresses the first item
+// Scan given array and return the key that addresses the first item
 // with requested column set to given value (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus
 // require strict checking (=== and !===).
@@ -3302,7 +3302,7 @@ function array_values_same ($a1, $a2)
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
 }
 
-# Reindex provided array of arrays by a column value, which is present in
+# Reindex provided array of arrays by a column value that is present in
 # each sub-array and is assumed to be unique. Most often, make "id" column in
 # a list of cells into the key space.
 function reindexById ($input, $column_name = 'id')
@@ -3442,7 +3442,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
 	$employed_vlans = getEmployedVlans ($vswitch['object_id'], $domain_vlanlist);
 
-	// only ignore VLANs, which exist and are explicitly shown as "alien"
+	// only ignore VLANs that exist and are explicitly shown as "alien"
 	$old_managed_vlans = array();
 	foreach ($device_vlanlist as $vlan_id)
 		if
@@ -3482,10 +3482,10 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	$ports_to_do = $ports_to_do_queue1 + $ports_to_do_queue2;
 	// New VLAN table is a union of:
 	// 1. all compulsory VLANs
-	// 2. all "current" non-alien allowed VLANs of those ports, which are left
+	// 2. all "current" non-alien allowed VLANs of those ports that are left
 	//    intact (regardless if a VLAN exists in VLAN domain, but looking,
 	//    if it is present in device's own VLAN table)
-	// 3. all "new" allowed VLANs of those ports, which we do "push" now
+	// 3. all "new" allowed VLANs of those ports that we do "push" now
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
@@ -3493,7 +3493,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	// in order to delete it from device as soon as vlan will be removed from the last port
 	// This array tracks port count:
 	//  * keys are vlan_id's;
-	//  * values are the number of changed ports which were using this vlan in old configuration
+	//  * values are the number of changed ports that were using this vlan in old configuration
 	$used_vlans = array();
 	// 1
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
@@ -3670,7 +3670,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		switch ($port['old_mode'] . '->' . $port['new_mode'])
 		{
 		case 'trunk->trunk':
-			// For each allowed VLAN, which is present on the "new" list and missing from
+			// For each allowed VLAN that is present on the "new" list and missing from
 			// the "old" one, queue a command to assign current port to that VLAN.
 			if (count ($tmp = array_diff ($port['new_allowed'], $port['old_allowed'])))
 				$crq[] = array
@@ -4018,7 +4018,7 @@ function get8021QSyncOptions
 		// (__R): port missing from DB
 		if (!array_key_exists ($pn, $C))
 		{
-			// Allow importing any configuration, which passes basic
+			// Allow importing any configuration that passes basic
 			// validation. If port mode doesn't match its VST role,
 			// this will be handled later WRT each port.
 			$ret[$pn] = array
@@ -4307,7 +4307,7 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	return $done;
 }
 
-// returns a first port from $ports which is connected and it's name equals to $name
+// returns the first port from $ports that is connected and its name equals to $name
 function findConnectedPort ($ports, $name)
 {
 	foreach ($ports as $portinfo)
@@ -4631,8 +4631,8 @@ function compareDecomposedPortNames ($porta, $portb)
 // * fa1, gi0/1~48, te1/49~50 (type matters, then index)
 // * gi5/1~3, te5/4~5 (here index matters more, than type)
 // This implementation makes port type (prefix) matter for all
-// interfaces, which have less, than 2 indices, but for other ports
-// their indices matter more, than type (unless there is a clash
+// interfaces that have less than 2 indices, but for other ports
+// their indices matter more than type (unless there is a clash
 // of indices).
 // When $name_in_value is TRUE, port name determines as $plist[$key]['name']
 // Otherwise portname is the key of $plist
@@ -4683,7 +4683,7 @@ function usort_portlist(&$array)
 
 // This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
-// 2. Cut strings, which are too long, append "cut here" indicator and provide a mouse hint.
+// 2. Cut strings that are too long: append "cut here" indicator and provide a mouse hint.
 function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1
@@ -4808,7 +4808,7 @@ function searchEntitiesByText ($terms)
 			$summary['vlan'] = getVLANSearchResult ($terms);
 		}
 	}
-	# Filter search results in a way in some realms to omit records, which the
+	# Filter search results in a way in some realms to omit records that the
 	# user would not be able to browse anyway.
 	foreach (array ('object', 'ipv4net', 'ipv6net', 'ipv4rspool', 'ipv4vs', 'ipvs', 'file', 'rack', 'row', 'location') as $realm)
 		if (isset ($summary[$realm]))
@@ -5246,11 +5246,11 @@ function getPortinfoByName (&$object, $portname)
 }
 
 # For the given object ID return a getSelect-suitable list of object types
-# compatible with the object's attributes, which have an assigned value in
+# compatible with the object's attributes that have an assigned value in
 # AttributeValue (no assigned values mean full compatibility). Being compatible
 # with an attribute means having a record in AttributeMap (with the same chapter
 # ID, if the attribute is dictionary-based). This knowledge is required to allow
-# the user changing object type ID in a way, which leaves data in AttributeValue
+# the user changing object type ID in a way that leaves data in AttributeValue
 # meeting constraints in AttributeMap upon the change.
 function getObjectTypeChangeOptions ($object_id)
 {

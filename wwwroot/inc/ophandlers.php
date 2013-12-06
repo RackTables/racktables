@@ -6,8 +6,8 @@
 
 /*
 
-"Ophandler" in RackTables stands for "operation handler", or a function,
-which handles execution of "operation" (in the meaning explained in
+"Ophandler" in RackTables stands for "operation handler", or a function
+that handles execution of "operation" (in the meaning explained in
 navigation.php). Most of the ophandlers are meant to perform one specific
 action, for example, to set a name of an object. Each such action often
 requires a set of parameters (e. g. ID of the object and the new name),
@@ -20,7 +20,7 @@ assorted classes. Namely, an "InvalidRequestArgException" class means, that
 at least one of the parameters provided by the user is not acceptable. This
 is a "soft" error, which gets displayed in the standard message area of
 otherwise usual interface. A different case is "InvalidArgException", which
-means, that one of the internal functions detected its argument(s) invalid
+means that one of the internal functions detected its argument(s) invalid
 or corrupted, and that argument(s) did not come from user's input (and thus
 cannot be fixed without fixing a bug in the code). Such "hard" errors don't
 get special early handling and end up in the default catching block. The
@@ -401,7 +401,7 @@ $opspec_list['chapter-edit-del'] = array
 	(
 		// Technically dict_key is enough to delete, but including chapter_id into
 		// WHERE clause makes sure, that the action actually happends for the same
-		// chapter, which authorization was granted for.
+		// chapter that authorization was granted for.
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
 		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
@@ -1086,7 +1086,7 @@ function updateObjectAllocation ()
 	$object_id = getBypassValue();
 	$changecnt = 0;
 	// Get a list of all of this object's parents,
-	// then trim the list to only include parents which are racks
+	// then trim the list to only include parents that are racks
 	$parentRacks = array();
 	foreach (getEntityRelatives('parents', 'object', $object_id, 'rack') as $parentData)
 		$parentRacks[] = $parentData['entity_id'];
@@ -2902,7 +2902,7 @@ function resolve8021QConflicts ()
 				if ($port['decision'] == 'left')
 					// confirm deletion of local copy
 					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
-				// otherwise ignore a decision, which doesn't address a conflict
+				// otherwise ignore a decision that doesn't address a conflict
 		}
 	}
 	catch (InvalidRequestArgException $e)
@@ -2993,7 +2993,7 @@ function updVSTRule()
 	}
 	catch (Exception $e)
 	{
-		// Every case, which is soft-processed in process.php, will have the working copy available for a retry.
+		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 		{
 			@session_start();
@@ -3274,7 +3274,7 @@ function deleteVlan()
 	assertStringArg ('vlan_ck');
 	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
 	if (! empty ($confports))
-		throw new RackTablesError ("You can not delete vlan which has assosiated ports");
+		throw new RackTablesError ("You can not delete VLAN that has assosiated ports");
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
@@ -3312,7 +3312,7 @@ function doVSMigrate()
 	usePreparedDeleteBlade ('VSEnabledIPs', array ('vs_id' => $vs_id));
 	usePreparedDeleteBlade ('VSEnabledPorts', array ('vs_id' => $vs_id));
 
-	// remove all VIPs and ports which are in $plan,and create new ones
+	// remove all VIPs and ports that are in $plan and create new ones
 	foreach ($plan['vips'] as $vip)
 	{
 		usePreparedDeleteBlade ('VSIPs', array ('vs_id' => $vs_id, 'vip' => $vip['vip']));

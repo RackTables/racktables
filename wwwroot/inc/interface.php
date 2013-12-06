@@ -1206,7 +1206,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 	if ($is_highlighted)
 		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='anchor interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 	if ($port['remote_object_id'])
@@ -1985,7 +1985,7 @@ function renderRackSpaceForObject ($object_id)
 			}
 
 	// Get a list of all of this object's parents,
-	// then trim the list to only include parents which are racks
+	// then trim the list to only include parents that are racks
 	$parentRacks = array();
 	foreach (getEntityRelatives('parents', 'object', $object_id, 'rack') as $parentData)
 		$parentRacks[] = $parentData['entity_id'];
@@ -2623,7 +2623,7 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 	if ($ip_bin === $hl_ip)
 		$class .= ' highlight';
 	$fmt = ip6_format ($ip_bin);
-	echo "<tr class='$class'><td><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "<tr class='$class'><td><a class='anchor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
 	$editable = permitted ('ipaddress', 'properties', 'editAddress')
 		? 'editable'
 		: '';
@@ -2652,7 +2652,7 @@ function renderSeparator ($first, $last, $hl_ip)
 		echo "<tr><td colspan=4 class=tdleft></td></tr>\n";
 }
 
-// calculates page number which contains given $ip (used by renderIPv6NetworkAddresses)
+// calculates page number that contains given $ip (used by renderIPv6NetworkAddresses)
 function getPageNumOfIPv6 ($list, $ip_bin, $maxperpage)
 {
 	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
@@ -2721,7 +2721,7 @@ function renderIPv4NetworkAddresses ($range)
 			$addr = $range['addrlist'][$ip_bin];
 		else
 		{
-			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='anchor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
@@ -2739,7 +2739,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		$tr_class .= ' ' . $addr['class'];
 		echo "<tr class='tdleft $tr_class'>";
-		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td><a class='anchor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
@@ -2859,7 +2859,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
 		echo "<tr class='$tr_class'>";
-		echo "<td><a class='ancor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td><a class='anchor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name'])
 			&& permitted ('ipaddress', 'properties', 'editAddress')
@@ -5165,7 +5165,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		global $pTable;
 		$myPredicates = array();
 		$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
-		// Repack matching predicates in a way, which tagOnChain() understands.
+		// Repack matching predicates in a way that tagOnChain() understands.
 		foreach (array_keys ($pTable) as $pname)
 			if (preg_match ("/${psieve}/", $pname))
 				$myPredicates[] = array ('id' => $pname, 'tag' => $pname);
@@ -6062,18 +6062,18 @@ function showPathAndSearch ($pageno, $tabno)
 		if (! isset ($title['params']['tab']))
 			$title['params']['tab'] = 'default';
 		$is_first = TRUE;
-		$ancor_tail = '';
+		$anchor_tail = '';
 		foreach ($title['params'] as $param_name => $param_value)
 		{
 			if ($param_name == '#')
 			{
-				$ancor_tail = '#' . $param_value;
+				$anchor_tail = '#' . $param_value;
 				continue;
 			}
 			$item .= ($is_first ? '' : '&') . "${param_name}=${param_value}";
 			$is_first = FALSE;
 		}
-		$item .= $ancor_tail;
+		$item .= $anchor_tail;
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 
@@ -6477,7 +6477,7 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'object')
 		{
 			echo '<td>';
-			// hide any object, which is already in the table
+			// hide any object that is already in the table
 			$options = array();
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
@@ -6936,14 +6936,14 @@ function renderObject8021QPorts ($object_id)
 			foreach ($sockets[$port_name][0] as $tmp)
 				$socket_columns .= '<td>' . $tmp . '</td>';
 		}
-		$ancor = '';
+		$anchor = '';
 		$tdclass = '';
 		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
 			$tdclass .= 'class="border_highlight"';
-			$ancor = "name='port-$hl_port_id'";
+			$anchor = "name='port-$hl_port_id'";
 		}
-		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $ancor>${port_name}</a></td>" . $socket_columns;
+		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>" . $socket_columns;
 		echo "<td${td_extra}>${text_left}</td><td class=tdright nowrap${td_extra}>${text_right}</td></tr>";
 		if (!array_key_exists ($port_name, $sockets))
 			continue;
@@ -7050,7 +7050,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
 	$options = array();
-	// Offer only options, which are listed in domain and fit into VST.
+	// Offer only options that are listed in domain and fit into VST.
 	// Never offer immune VLANs regardless of VST filter for this port.
 	// Also exclude current VLAN from the options, unless current port
 	// mode is "trunk" (in this case it should be possible to set VST-
@@ -7181,8 +7181,8 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			// they are shown among radio options, but disabled, so that the user cannot
 			// break traffic of these VLANs. In addition to that, when port's native VLAN
 			// is set to one of these alien VLANs, the whole group of radio buttons is
-			// disabled. These measures make it harder for the system to break a VLAN,
-			// which is explicitly protected from it.
+			// disabled. These measures make it harder for the system to break a VLAN
+			// that is explicitly protected from it.
 			if
 			(
 				$native_options[$vlanport['native']]['vlan_type'] == 'alien' or
@@ -7368,7 +7368,7 @@ function renderVLANIPLinks ($some_id)
 				'domain_id' => $vlan['domain_id'],
 				'vlan_id' => $vlan['vlan_id'],
 			);
-		// Any VLAN can link to any network, which isn't yet linked to current domain.
+		// Any VLAN can link to any network that isn't yet linked to current domain.
 		// get free IP nets
 		$netlist_func  = $ip_ver == 'ipv6' ? 'getVLANIPv6Options' : 'getVLANIPv4Options';
 		foreach ($netlist_func ($vlan['domain_id']) as $net_id)
@@ -7700,14 +7700,14 @@ END
 			break;
 		}
 
-		$ancor = '';
+		$anchor = '';
 		$td_class = '';
 		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
-			$ancor = "name='port-$hl_port_id'";
+			$anchor = "name='port-$hl_port_id'";
 			$td_class = ' border_highlight';
 		}
-		echo "<tr class='${trclass}'><td class='tdleft${td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $ancor>${port_name}</a></td>";
+		echo "<tr class='${trclass}'><td class='tdleft${td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>";
 		if (!count ($radio_attrs))
 		{
 			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
@@ -8021,7 +8021,7 @@ function renderDiscoveredNeighbors ($object_id)
 				amplifyCell($dp_remote_object);
 				$dp_neighbor['port'] = shortenIfName ($dp_neighbor['port'], NULL, $dp_remote_object['id']);
 
-				// get port list which names match CDP portname
+				// get list of ports that have name matching CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
 				foreach ($dp_remote_object['ports'] as $port)
 					if ($port['name'] == $dp_neighbor['port'])
@@ -8272,13 +8272,13 @@ function formatAttributeValue ($record)
 	return $result;
 }
 
-function addAutoScrollScript ($ancor_name)
+function addAutoScrollScript ($anchor_name)
 {
 	addJS (<<<END
 $(document).ready(function() {
-	var ancor = document.getElementsByName('$ancor_name')[0];
-	if (ancor)
-		ancor.scrollIntoView(false);
+	var anchor = document.getElementsByName('$anchor_name')[0];
+	if (anchor)
+		anchor.scrollIntoView(false);
 });
 END
 	, TRUE);
@@ -9196,7 +9196,7 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 4: relationships which violate ObjectParentCompat Rules
+	// check 4: relationships that violate ObjectParentCompat Rules
 	$invalids = array ();
 	$result = usePreparedSelectBlade
 	(
@@ -9234,7 +9234,7 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 5: Links which violate PortCompat Rules
+	// check 5: Links that violate PortCompat Rules
 	$invalids = array ();
 	$result = usePreparedSelectBlade
 	(

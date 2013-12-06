@@ -6,7 +6,7 @@
 
 /*
  *
- *  This file contains HTML-generating funcitons which are needed in ajax handler
+ *  This file contains HTML-generating functions required by AJAX handlers.
  *
  *
 */

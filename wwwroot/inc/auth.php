@@ -331,7 +331,7 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
 		return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
 	// authenticated_via_ldap_cache()'s way of locking can sometimes result in
-	// a PDO error condition, which convertPDOException() was not able to dispatch.
+	// a PDO error condition that convertPDOException() was not able to dispatch.
 	// To avoid reaching printPDOException() (which prints backtrace with password
 	// argument in cleartext), any remaining PDO condition is converted locally.
 	try

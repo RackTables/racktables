@@ -467,7 +467,7 @@ function transformRequestData()
 	// Escape any globals before we ever try to use them, but keep a copy of originals.
 	$sic = array();
 	// walk through merged GET and POST instead of REQUEST array because it
-	// can contain cookies with data which could not be decoded from UTF-8
+	// can contain cookies with data that could not be decoded from UTF-8
 	foreach (($_POST + $_GET) as $key => $value)
 	{
 		if (is_array ($value))

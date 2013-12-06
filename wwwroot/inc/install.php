@@ -483,7 +483,7 @@ function get_pseudo_file ($name)
 		$query[] = "CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned NOT NULL,
   -- Default value intentionally breaks the constraint, this blocks
-  -- any insertion, which doesn't have 'object_tid' on the column list.
+  -- any insertion that doesn't have 'object_tid' on the column list.
   `object_tid` int(10) unsigned NOT NULL default '0',
   `attr_id` int(10) unsigned NOT NULL,
   `string_value` char(255) default NULL,
@@ -1663,8 +1663,8 @@ WHERE O.objtype_id = 1562";
 ('IPV4LB_LISTSRC','false','string','yes','no','no','List source: IPv4 load balancers'),
 ('IPV4OBJ_LISTSRC','not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})','string','yes','no','no','List source: IPv4-enabled objects'),
 ('IPV4NAT_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_798}','string','yes','no','no','List source: IPv4 NAT performers'),
-('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which asset tag should be set'),
-('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which common name should be set'),
+('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: objects for that asset tag should be set'),
+('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: objects for that common name should be set'),
 ('RACKS_PER_ROW','12','uint','yes','no','yes','Racks per row'),
 ('FILTER_PREDICATE_SIEVE','','string','yes','no','yes','Predicate sieve regex(7)'),
 ('FILTER_DEFAULT_ANDOR','and','string','no','no','yes','Default list filter boolean operation (or/and)'),

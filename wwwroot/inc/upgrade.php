@@ -1376,6 +1376,8 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "ALTER TABLE `EntityLink` DROP KEY `EntityLink-compound`, ADD KEY `EntityLink-compound` (`child_entity_type`,`child_entity_id`,`parent_entity_type`)";
 			$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entity_type`, `child_entity_id`) SELECT `entity_type`, `entity_id`, 'file', `file_id` FROM `FileLink`";
 			$query[] = "DROP TABLE `FileLink`";
+			$query[] = "UPDATE Config SET description = 'List source: objects for that asset tag should be set' WHERE varname = 'ASSETWARN_LISTSRC'";
+			$query[] = "UPDATE Config SET description = 'List source: objects for that common name should be set' WHERE varname = 'NAMEWARN_LISTSRC'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
