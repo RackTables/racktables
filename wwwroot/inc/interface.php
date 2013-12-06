@@ -4424,7 +4424,7 @@ function render8021QReport ()
 	$header = '<tr><th>&nbsp;</th>';
 	foreach ($domains as $domain_id => $domain_name)
 	{
-		foreach (getDomainVLANs ($domain_id) as $vlan_id => $vlan_info)
+		foreach (getDomainVLANList ($domain_id) as $vlan_id => $vlan_info)
 			$vlanstats[$vlan_id][$domain_id] = $vlan_info;
 		$header .= '<th>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
 	}
@@ -7582,7 +7582,7 @@ END
 	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
 	$plan = sortPortList ($plan);
-	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
+	$domvlans = array_keys (getDomainVLANList ($vswitch['domain_id']));
 	$default_port = array
 	(
 		'mode' => 'access',

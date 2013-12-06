@@ -4837,7 +4837,7 @@ function getVLANDomain ($vdid)
 	if (!$ret = $result->fetch (PDO::FETCH_ASSOC))
 		throw new EntityNotFoundException ('VLAN domain', $vdid);
 	unset ($result);
-	$ret['vlanlist'] = getDomainVLANs ($vdid);
+	$ret['vlanlist'] = getDomainVLANList ($vdid);
 	$ret['switchlist'] = array();
 	$result = usePreparedSelectBlade
 	(
@@ -4851,6 +4851,7 @@ function getVLANDomain ($vdid)
 	return $ret;
 }
 
+// TODO: this function is very inefficient. Consider use of getDomainVLANList instead
 function getDomainVLANs ($vdom_id)
 {
 	$result = usePreparedSelectBlade
