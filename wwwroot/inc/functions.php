@@ -169,11 +169,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 
 function isInteger ($arg, $allow_zero = FALSE)
 {
-	if (! is_numeric ($arg))
-		return FALSE;
-	if (! $allow_zero and ! $arg)
-		return FALSE;
-	return TRUE;
+	return is_numeric ($arg) && ($allow_zero || $arg != 0);
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
@@ -266,9 +262,7 @@ function assertPCREArg ($argname)
 
 function isPCRE ($arg)
 {
-	if (! isset ($arg) or FALSE === @preg_match ($arg, 'test'))
-		return FALSE;
-	return TRUE;
+	return isset ($arg) && FALSE !== @preg_match ($arg, 'test');
 }
 
 function genericAssertion ($argname, $argtype)
@@ -683,10 +677,7 @@ function mergeGridFormToRack (&$rackData)
 // Throws exception if $prefix_len is invalid
 function ip_mask ($prefix_len, $is_ipv6)
 {
-	if ($is_ipv6)
-		return ip6_mask ($prefix_len);
-	else
-		return ip4_mask ($prefix_len);
+	return $is_ipv6 ? ip6_mask ($prefix_len) : ip4_mask ($prefix_len);
 }
 
 // netmask conversion from length to binary string
@@ -921,13 +912,10 @@ function l2addressFromDatabase ($string)
 	{
 		case 12: // Ethernet
 		case 16: // FireWire/Fibre Channel
-			$ret = implode (':', str_split ($string, 2));
-			break;
+			return implode (':', str_split ($string, 2));
 		default:
-			$ret = $string;
-			break;
+			return $string;
 	}
-	return $ret;
 }
 
 // The following 2 functions return previous and next rack IDs for
@@ -937,18 +925,14 @@ function getPrevIDforRack ($row_id, $rack_id)
 {
 	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
-	if (isset ($rackList[$rack_id]['prev_key']))
-		return $rackList[$rack_id]['prev_key'];
-	return NULL;
+	return isset ($rackList[$rack_id]['prev_key']) ? $rackList[$rack_id]['prev_key'] : NULL;
 }
 
 function getNextIDforRack ($row_id, $rack_id)
 {
 	$rackList = listCells ('rack', $row_id);
 	doubleLink ($rackList);
-	if (isset ($rackList[$rack_id]['next_key']))
-		return $rackList[$rack_id]['next_key'];
-	return NULL;
+	return isset ($rackList[$rack_id]['next_key']) ? $rackList[$rack_id]['next_key'] : NULL;
 }
 
 // This function finds previous and next array keys for each array key and
@@ -1919,13 +1903,12 @@ function getRackCodeStats ()
 			default:
 				break;
 		}
-	$ret = array
+	return array
 	(
 		'Definition sentences' => $defc,
 		'Grant sentences' => $grantc,
 		'Context mod sentences' => $modc
 	);
-	return $ret;
 }
 
 function getRackImageWidth ()
@@ -2365,10 +2348,7 @@ function ip4_bin2int ($ip_bin)
 function ip4_bin2db ($ip_bin)
 {
 	$ip_int = ip4_bin2int ($ip_bin);
-	if ($ip_int < 0)
-		return sprintf ('%u', 0x00000000 + $ip_int);
-	else
-		return $ip_int;
+	return $ip_int >= 0 ? $ip_int : sprintf ('%u', 0x00000000 + $ip_int);
 }
 
 function ip_last ($net)
@@ -2615,8 +2595,7 @@ function makeIPTree ($netlist)
 	}
 	unset ($stack);
 
-	$tree = treeFromList ($netlist); // medium call
-	return $tree;
+	return treeFromList ($netlist);
 }
 
 function prepareIPTree ($netlist, $expanded_id = 0)
@@ -4486,13 +4465,8 @@ function acceptable8021QConfig ($port)
 	case 'trunk':
 		return TRUE;
 	case 'access':
-		if
-		(
-			count ($port['allowed']) == 1 and
-			in_array ($port['native'], $port['allowed'])
-		)
-			return TRUE;
-		// fall through
+		return count ($port['allowed']) == 1 &&
+			in_array ($port['native'], $port['allowed']);
 	default:
 		return FALSE;
 	}
@@ -6087,11 +6061,8 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
 
 function validTagName ($s, $allow_autotag = FALSE)
 {
-	if (preg_match (TAGNAME_REGEXP, $s))
-		return TRUE;
-	if ($allow_autotag && preg_match (AUTOTAGNAME_REGEXP, $s))
-		return TRUE;
-	return FALSE;
+	return preg_match (TAGNAME_REGEXP, $s) ||
+		($allow_autotag && preg_match (AUTOTAGNAME_REGEXP, $s));
 }
 
 // returns html string with parent location names
@@ -6116,8 +6087,7 @@ function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 			$name = $location_tree[$id]['name'] . $spacer . $name;
 		$id = $location_tree[$id]['parent_id'];
 	}
-	$name = substr ($name, 0, 0 - strlen ($spacer));
-	return $name;
+	return substr ($name, 0, 0 - strlen ($spacer));
 }
 
 function cmp_array_sizes ($a, $b)
