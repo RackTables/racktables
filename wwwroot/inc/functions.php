@@ -1195,7 +1195,7 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 	// performance gain compared to other patterns of array_push/array_unshift/
 	// array_reverse/array_pop/array_shift conjunction.
 	$myid = array_shift ($trace);
-	if (!count ($trace)) // not yet reached the target
+	if (count ($trace)) // not yet reached the target
 		$self ($tree[$myid]['kids'], $trace, $key, $value, $threshold);
 	else // just did
 	{
