@@ -474,13 +474,13 @@ function rectHeight ($rackData, $startRow, $template_idx)
 			// the first row.
 			if ($template[$template_idx][$locidx])
 			{
-				if (isset ($rackData[$startRow - $height][$locidx]['skipped']))
-					break 2;
-				if (isset ($rackData[$startRow - $height][$locidx]['rowspan']))
-					break 2;
-				if (isset ($rackData[$startRow - $height][$locidx]['colspan']))
-					break 2;
-				if ($rackData[$startRow - $height][$locidx]['state'] != 'T')
+				if
+				(
+					isset ($rackData[$startRow - $height][$locidx]['skipped']) ||
+					isset ($rackData[$startRow - $height][$locidx]['rowspan']) ||
+					isset ($rackData[$startRow - $height][$locidx]['colspan']) ||
+					$rackData[$startRow - $height][$locidx]['state'] != 'T'
+				)
 					break 2;
 				if ($object_id == 0)
 					$object_id = $rackData[$startRow - $height][$locidx]['object_id'];
@@ -494,9 +494,6 @@ function rectHeight ($rackData, $startRow, $template_idx)
 		$height++;
 	}
 	while ($startRow - $height > 0);
-#	echo "for startRow==${startRow} and template==(" . ($template[$template_idx][0] ? 'T' : 'F');
-#	echo ', ' . ($template[$template_idx][1] ? 'T' : 'F') . ', ' . ($template[$template_idx][2] ? 'T' : 'F');
-#	echo ") height==${height}<br>\n";
 	return $height;
 }
 
@@ -507,9 +504,7 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 	global $template, $templateWidth;
 	$colspan = 0;
 	for ($height = 0; $height < $maxheight; $height++)
-	{
 		for ($locidx = 0; $locidx < 3; $locidx++)
-		{
 			if ($template[$template_idx][$locidx])
 			{
 				// Add colspan/rowspan to the first row met and mark the following ones to skip.
@@ -526,9 +521,6 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 						$rackData[$startRow - $height][$locidx]['rowspan'] = $maxheight;
 				}
 			}
-		}
-	}
-	return;
 }
 
 // This function sets rowspan/solspan/skipped atom attributes for renderRack()
@@ -723,8 +715,7 @@ function ip4_mask ($prefix_len)
 
 	if ($prefix_len >= 0 and $prefix_len <= 32)
 		return $mask[$prefix_len];
-	else
-		throw new InvalidArgException ('prefix_len', $prefix_len);
+	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
 
 // netmask conversion from length to binary string
@@ -866,8 +857,7 @@ function ip6_mask ($prefix_len)
 
 	if ($prefix_len >= 0 and $prefix_len <= 128)
 		return $mask[$prefix_len];
-	else
-		throw new InvalidArgException ('prefix_len', $prefix_len);
+	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
 
 // Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
@@ -971,8 +961,6 @@ function sortTokenize ($a, $b)
 		$b = preg_replace('/([a-zA-Z])([0-9])/','\\1 \\2',$b);
 	}
 
-
-
 	$ar = explode(' ', $a);
 	$br = explode(' ', $b);
 	for ($i=0; $i<count($ar) && $i<count($br); $i++)
@@ -1064,7 +1052,8 @@ function getRSUforRack ($data)
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			$counter[$data[$unit_no][$locidx]['state']]++;
-	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	return ($counter['T'] + $counter['W'] + $counter['U']) /
+		($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
 // Same for row.
@@ -1083,7 +1072,8 @@ function getRSUforRow ($rowData)
 			for ($locidx = 0; $locidx < 3; $locidx++)
 				$counter[$data[$unit_no][$locidx]['state']]++;
 	}
-	return ($counter['T'] + $counter['W'] + $counter['U']) / ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	return ($counter['T'] + $counter['W'] + $counter['U']) /
+		($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
 # Detect URLs and email addresses in the string and replace them with href anchors
@@ -1198,13 +1188,16 @@ function getAutoPorts ($type_id)
 // Use pre-served trace to traverse the tree, then place given node where it belongs.
 function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 {
+	$self = __FUNCTION__;
 	// This function needs the trace to be followed FIFO-way. The fastest
 	// way to do so is to use array_push() for putting values into the
 	// list and array_shift() for getting them out. This exposed up to 11%
 	// performance gain compared to other patterns of array_push/array_unshift/
 	// array_reverse/array_pop/array_shift conjunction.
 	$myid = array_shift ($trace);
-	if (!count ($trace)) // reached the target
+	if (!count ($trace)) // not yet reached the target
+		$self ($tree[$myid]['kids'], $trace, $key, $value, $threshold);
+	else // just did
 	{
 		if (!$threshold or ($threshold and $tree[$myid]['kidc'] + 1 < $threshold))
 			$tree[$myid]['kids'][$key] = $value;
@@ -1212,11 +1205,6 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 		// after that.
 		if (++$tree[$myid]['kidc'] == $threshold)
 			$tree[$myid]['kids'] = array();
-	}
-	else // not yet
-	{
-		$self = __FUNCTION__;
-		$self ($tree[$myid]['kids'], $trace, $key, $value, $threshold);
 	}
 }
 
@@ -1483,15 +1471,9 @@ function redirectIfNecessary ()
 
 function prepareNavigation()
 {
-	global
-		$pageno,
-		$tabno;
-	$pageno = (isset ($_REQUEST['page'])) ? $_REQUEST['page'] : 'index';
-
-	if (isset ($_REQUEST['tab']))
-		$tabno = $_REQUEST['tab'];
-	else
-		$tabno = 'default';
+	global $pageno, $tabno;
+	$pageno = isset ($_REQUEST['page']) ? $_REQUEST['page'] : 'index';
+	$tabno = isset ($_REQUEST['tab']) ? $_REQUEST['tab'] : 'default';
 }
 
 function fixContext ($target = NULL)
@@ -1678,7 +1660,8 @@ function shrinkSubtree ($tree, $used_tags, $preselect, $realm)
 			! $item['kidc']
 		)
 			unset($tree[$i]);
-		else {
+		else
+		{
 			if (isset ($used_tags[$item['id']]) && $used_tags[$item['id']])
 				$item['refcnt'][$realm] = $used_tags[$item['id']];
 			else
@@ -2049,7 +2032,9 @@ function iptree_construct ($node)
 {
 	$self = __FUNCTION__;
 
-	if (!isset ($node['right']))
+	if (isset ($node['right']))
+		return array_merge ($self ($node['left']), $self ($node['right']));
+	else
 	{
 		if (!isset ($node['kids']))
 		{
@@ -2059,8 +2044,6 @@ function iptree_construct ($node)
 		}
 		return array ($node);
 	}
-	else
-		return array_merge ($self ($node['left']), $self ($node['right']));
 }
 
 // returns TRUE if inet_ntop and inet_pton functions exist and support IPv6
@@ -2649,29 +2632,21 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 // Convert entity name to human-readable value
 function formatRealmName ($realm)
 {
-	switch ($realm)
-	{
-		case 'ipv4net':
-			return 'IPv4 Network';
-		case 'ipv6net':
-			return 'IPv6 Network';
-		case 'ipv4rspool':
-			return 'IPv4 RS Pool';
-		case 'ipv4vs':
-			return 'IPv4 Virtual Service';
-		case 'ipvs':
-			return 'IP Virtual Service';
-		case 'object':
-			return 'Object';
-		case 'rack':
-			return 'Rack';
-		case 'row':
-			return 'Row';
-		case 'location':
-			return 'Location';
-		case 'user':
-			return 'User';
-	}
+	$realmstr = array
+	(
+		'ipv4net' => 'IPv4 Network',
+		'ipv6net' => 'IPv6 Network',
+		'ipv4rspool' => 'IPv4 RS Pool',
+		'ipv4vs' => 'IPv4 Virtual Service',
+		'ipvs' => 'IP Virtual Service',
+		'object' => 'Object',
+		'rack' => 'Rack',
+		'row' => 'Row',
+		'location' => 'Location',
+		'user' => 'User',
+	);
+	if (array_key_exists ($realm, $realmstr))
+		return $realmstr[$realm];
 	return 'invalid';
 }
 
@@ -2795,9 +2770,9 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 	{
 		$screenlist = array();
 		foreach (explode (';', getConfigVar ('VENDOR_SIEVE')) as $sieve)
-			if (preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs)){
+			if (preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs))
 				$screenlist[] = $regs[1];
-			}
+
 		foreach (array_keys ($ret) as $vendor)
 			if (in_array ($vendor, $screenlist))
 			{
@@ -3821,10 +3796,9 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 		foreach ($cell[$family] as $ip_bin => $allocation)
 			if ($net_id = getIPAddressNetworkId ($ip_bin))
 			{
-				if (! isset($seen_nets[$net_id]))
-					$seen_nets[$net_id]	= 1;
-				else
+				if (isset ($seen_nets[$net_id]))
 					continue;
+				$seen_nets[$net_id] = 1;
 				$net = spotEntity ("${family}net", $net_id);
 				foreach ($net['8021q'] as $vlan)
 					if (! isset ($employed[$vlan['vlan_id']]))
@@ -4196,19 +4170,16 @@ function exec8021QDeploy ($object_id, $do_push)
 
 function strerror8021Q ($errno)
 {
-	switch ($errno)
-	{
-	case E_8021Q_VERSION_CONFLICT:
-		return 'pull failed due to version conflict';
-	case E_8021Q_PULL_REMOTE_ERROR:
-		return 'pull failed due to remote error';
-	case E_8021Q_PUSH_REMOTE_ERROR:
-		return 'push failed due to remote error';
-	case E_8021Q_SYNC_DISABLED:
-		return 'sync disabled by operator';
-	default:
-		return "unknown error code ${errno}";
-	}
+	$errstr = array
+	(
+		E_8021Q_VERSION_CONFLICT => 'pull failed due to version conflict',
+		E_8021Q_PULL_REMOTE_ERROR => 'pull failed due to remote error',
+		E_8021Q_PUSH_REMOTE_ERROR => 'push failed due to remote error',
+		E_8021Q_SYNC_DISABLED => 'sync disabled by operator',
+	);
+	if (array_key_exists ($errno, $errstr))
+		return $errstr[$errno];
+	return "unknown error code ${errno}";
 }
 
 function saveDownlinksReverb ($object_id, $requested_changes)
@@ -5168,13 +5139,11 @@ function alterConfigWithUserPreferences()
 	global $configCache;
 	global $remote_username;
 	foreach (loadUserConfigCache($remote_username) as $key => $row)
-	{
 		if ($configCache[$key]['is_userdefined'] == 'yes')
 		{
 			$configCache[$key]['varvalue'] = $row['varvalue'];
 			$configCache[$key]['is_altered'] = 'yes';
 		}
-	}
 }
 
 // Returns true if varname has a different value or varname is new
@@ -5185,7 +5154,8 @@ function isConfigVarChanged ($varname, $varvalue)
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if ($varname == '')
 		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
-	if (!isset ($configCache[$varname])) return true;
+	if (!isset ($configCache[$varname]))
+		return TRUE;
 	if ($configCache[$varname]['vartype'] == 'uint')
 		return $configCache[$varname]['varvalue'] !== 0 + $varvalue;
 	else
