@@ -4536,7 +4536,7 @@ function compareDecomposedPortNames ($porta, $portb)
 	else
 	{
 		global $portsort_intersections;
-		$prefix_diff = numCompare (strcmp ($porta['prefix'], $portb['prefix']));
+		$prefix_diff = numCompare ($porta['prefix'], $portb['prefix']);
 		$index_diff = 0;
 		$a_parent = $b_parent = ''; // concatenation of 0..(n-1) numeric indices
 		$separator = '';
