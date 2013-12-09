@@ -2645,9 +2645,7 @@ function formatRealmName ($realm)
 		'location' => 'Location',
 		'user' => 'User',
 	);
-	if (array_key_exists ($realm, $realmstr))
-		return $realmstr[$realm];
-	return 'invalid';
+	return array_key_exists ($realm, $realmstr) ? $realmstr[$realm] : 'invalid';
 }
 
 // Convert filesize to appropriate unit and make it human-readable
@@ -4177,9 +4175,7 @@ function strerror8021Q ($errno)
 		E_8021Q_PUSH_REMOTE_ERROR => 'push failed due to remote error',
 		E_8021Q_SYNC_DISABLED => 'sync disabled by operator',
 	);
-	if (array_key_exists ($errno, $errstr))
-		return $errstr[$errno];
-	return "unknown error code ${errno}";
+	return array_key_exists ($errno, $errstr) ? $errstr[$errno] : "unknown error code ${errno}";
 }
 
 function saveDownlinksReverb ($object_id, $requested_changes)
