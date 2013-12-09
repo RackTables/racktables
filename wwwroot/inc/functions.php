@@ -1951,15 +1951,27 @@ function findRouters ($addrlist)
 	return $ret;
 }
 
+function numSign ($x)
+{
+	if ($x < 0)
+		return -1;
+	if ($x > 0)
+		return 1;
+	return 0;
+}
+
+function numCompare ($a, $b)
+{
+	return numSign ($a - $b);
+}
+
 // compare binary IPs (IPv4 are less than IPv6)
 // valid return values are: 1, 0, -1
 function IPCmp ($ip_binA, $ip_binB)
 {
 	if (strlen ($ip_binA) !== strlen ($ip_binB))
-		return strlen ($ip_binA) < strlen ($ip_binB) ? -1 : 1;
-	$ret = strcmp ($ip_binA, $ip_binB);
-	$ret = ($ret > 0 ? 1 : ($ret < 0 ? -1 : 0));
-	return $ret;
+		return numCompare (strlen ($ip_binA), strlen ($ip_binB));
+	return numSign (strcmp ($ip_binA, $ip_binB));
 }
 
 // Compare networks. When sorting a tree, the records on the list will have
@@ -4520,13 +4532,11 @@ function compareDecomposedPortNames ($porta, $portb)
 {
 	$ret = 0;
 	if ($porta['numidx'] != $portb['numidx'])
-		$ret = ($porta['numidx'] - $portb['numidx'] > 0 ? 1 : -1);
+		$ret = numCompare ($porta['numidx'], $portb['numidx']);
 	else
 	{
 		global $portsort_intersections;
-		$prefix_diff = strcmp ($porta['prefix'], $portb['prefix']);
-		if ($prefix_diff != 0)
-			$prefix_diff = ($prefix_diff > 0 ? 1 : -1);
+		$prefix_diff = numCompare (strcmp ($porta['prefix'], $portb['prefix']));
 		$index_diff = 0;
 		$a_parent = $b_parent = ''; // concatenation of 0..(n-1) numeric indices
 		$separator = '';
@@ -4540,7 +4550,7 @@ function compareDecomposedPortNames ($porta, $portb)
 			}
 			if ($porta['index'][$i] != $portb['index'][$i])
 			{
-				$index_diff = ($porta['index'][$i] - $portb['index'][$i] > 0 ? 1 : -1);
+				$index_diff = numCompare ($porta['index'][$i], $portb['index'][$i]);
 				break;
 			}
 		}
@@ -4555,13 +4565,13 @@ function compareDecomposedPortNames ($porta, $portb)
 			$ret = $index_diff;
 		// if all of name fields are equal, compare by some additional port fields
 		elseif ($porta['iif_id'] != $portb['iif_id'])
-			$ret = ($porta['iif_id'] - $portb['iif_id'] > 0 ? 1 : -1);
+			$ret = numCompare ($porta['iif_id'], $portb['iif_id']);
 		elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
-			$ret = ($result > 0 ? 1 : -1);
+			$ret = numSign ($result);
 		elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
-			$ret = ($result > 0 ? 1 : -1);
+			$ret = numSign ($result);
 		elseif ($porta['id'] != $portb['id'])
-			$ret = ($porta['id'] - $portb['id'] > 0 ? 1 : -1);
+			$ret = numCompare ($porta['id'], $portb['id']);
 	}
 	return $ret;
 }
@@ -6058,8 +6068,7 @@ function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 
 function cmp_array_sizes ($a, $b)
 {
-	$diff = count ($a) - count ($b);
-	return $diff < 0 ? -1 : ($diff > 0 ? 1 : 0);
+	return numCompare (count ($a), count ($b));
 }
 
 // parses the value of MGMT_PROTOS config variable and returns an array
