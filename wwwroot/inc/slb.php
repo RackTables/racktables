@@ -592,7 +592,6 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 
 function commitDeleteVS ($id = 0)
 {
-	// TODO: replace this with DB triggers
 	releaseFiles ('ipv4vs', $id);
 	destroyTagsForEntity ('ipv4vs', $id);
 	usePreparedDeleteBlade ('IPv4VS', array ('id' => $id));
@@ -658,7 +657,6 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $tagidl
 
 function commitDeleteRSPool ($pool_id = 0)
 {
-	// TODO: replace this with DB triggers
 	releaseFiles ('ipv4rspool', $pool_id);
 	destroyTagsForEntity ('ipv4rspool', $pool_id);
 	usePreparedDeleteBlade ('IPv4RSPool', array ('id' => $pool_id));

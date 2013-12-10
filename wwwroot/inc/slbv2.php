@@ -631,7 +631,6 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 
 function commitDeleteVSG ($id)
 {
-	// TODO: replace this with DB triggers
 	releaseFiles ('ipvs', $id);
 	destroyTagsForEntity ('ipvs', $id);
 	usePreparedDeleteBlade ('VS', array ('id' => $id));

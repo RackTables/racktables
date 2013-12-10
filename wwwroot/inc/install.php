@@ -576,13 +576,13 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL,
+  `parent_entity_type` enum('location','object','rack','row') NOT NULL,
   `parent_entity_id` int(10) unsigned NOT NULL,
-  `child_entity_type` enum('file','location','object','rack','row') NOT NULL,
+  `child_entity_type` enum('location','object','rack','row') NOT NULL,
   `child_entity_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
-  KEY `EntityLink-compound` (`child_entity_type`,`child_entity_id`,`parent_entity_type`)
+  KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `File` (
@@ -598,6 +598,17 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `FileLink` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `file_id` int(10) unsigned NOT NULL,
+  `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL default 'object',
+  `entity_id` int(10) NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `FileLink-file_id` (`file_id`),
+  UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
+  CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `IPv4Address` (

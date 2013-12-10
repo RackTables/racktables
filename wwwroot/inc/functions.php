@@ -613,7 +613,7 @@ function applyRackProblemMask (&$rackData)
 function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
-	$parents = getEntityRelatives ('parents', 'object', $object_id, 'object');
+	$parents = getEntityRelatives ('parents', 'object', $object_id);
 	$parent_ids = array();
 	foreach ($parents as $parent)
 		$parent_ids[] = $parent['entity_id'];

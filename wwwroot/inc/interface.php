@@ -687,7 +687,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 	if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
-	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id'], 'object');
+	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
 	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
 	if (count($objectChildren) > 0)
 	{
@@ -854,7 +854,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	}
 	echo "</table>\n";
 	// Get a list of all of objects Zero-U mounted to this rack
-	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id, 'object');
+	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id);
 	if (count ($zeroUObjects) > 0)
 	{
 		echo "<br><table width='75%' class=rack border=0 cellspacing=0 cellpadding=1>\n";
@@ -956,7 +956,7 @@ function renderEditObjectForm()
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
-		$parents = getEntityRelatives ('parents', 'object', $object_id, 'object');
+		$parents = getEntityRelatives ('parents', 'object', $object_id);
 		foreach ($parents as $link_id => $parent_details)
 		{
 			if (!isset($label))
@@ -1261,15 +1261,14 @@ function renderObject ($object_id)
 			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
 		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
 	}
-
-	// Contains
-	$children = array();
-	foreach (getEntityRelatives ('children', 'object', $object_id) as $child)
-		if ($child['entity_type'] != 'file')
-			$children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
+	$children = getEntityRelatives ('children', 'object', $object_id);
 	if (count ($children))
-		$summary['Contains'] = implode ('<br>', $children);
-
+	{
+		$fmt_children = array();
+		foreach ($children as $child)
+			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
+		$summary['Contains'] = implode ('<br>', $fmt_children);
+	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	foreach (getAttrValues ($object_id) as $record)
@@ -1986,9 +1985,11 @@ function renderRackSpaceForObject ($object_id)
 
 	// Get a list of all of this object's parents,
 	// then trim the list to only include parents that are racks
+	$objectParents = getEntityRelatives('parents', 'object', $object_id);
 	$parentRacks = array();
-	foreach (getEntityRelatives('parents', 'object', $object_id, 'rack') as $parentData)
-		$parentRacks[] = $parentData['entity_id'];
+	foreach ($objectParents as $parentData)
+		if ($parentData['entity_type'] == 'rack')
+			$parentRacks[] = $parentData['entity_id'];
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
@@ -8913,7 +8914,6 @@ function renderDataIntegrityReport ()
 	// check 1.1: children 
 	$realms = array
 	(
-		'file' => 'File',
 		'location' => 'Location',
 		'object' => 'RackObject',
 		'rack' => 'Rack',
@@ -8956,27 +8956,14 @@ function renderDataIntegrityReport ()
 	}
 
 	// check 1.2: parents 
-	$realms = array
-	(
-		'ipv4net' => array ('table' => 'IPv4Network', 'column' => 'id'),
-		'ipv4rspool' => array ('table' => 'IPv4RSPool', 'column' => 'id'),
-		'ipv4vs' => array ('table' => 'IPv4VS', 'column' => 'id'),
-		'ipv6net' => array ('table' => 'IPv6Network', 'column' => 'id'),
-		'ipvs' => array ('table' => 'VS', 'column' => 'id'),
-		'location' => array ('table' => 'Location', 'column' => 'id'),
-		'object' => array ('table' => 'RackObject', 'column' => 'id'),
-		'rack' => array ('table' => 'Rack', 'column' => 'id'),
-		'row' => array ('table' => 'Row', 'column' => 'id'),
-		'user' => array ('table' => 'UserAccount', 'column' => 'user_id')
-	);
 	$orphans = array ();
-	foreach ($realms as $realm => $details)
+	foreach ($realms as $realm => $table)
 	{ 
 		$result = usePreparedSelectBlade
 		(
 			'SELECT EL.* FROM EntityLink EL ' .
-			"LEFT JOIN ${details['table']} ON EL.parent_entity_id = ${details['table']}.${details['column']} " .
-			"WHERE EL.parent_entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
+			"LEFT JOIN ${table} ON EL.parent_entity_id = ${table}.id " .
+			"WHERE EL.parent_entity_type = ? AND ${table}.id IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -9317,6 +9304,46 @@ function renderDataIntegrityReport ()
 			$realm_name = formatRealmName ($orphan['entity_realm']);
 			echo "<tr class=row_${order}>";
 			echo "<td>${orphan['tag']}</td>";
+			echo "<td>${realm_name}</td>";
+			echo "<td>${orphan['entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 6: FileLink rows referencing non-existent parents 
+	// re-use the realms list from the TagStorage check, with a few mods
+	unset ($realms['file'], $realms['vst']);
+	$realms['row'] = array ('table' => 'Row', 'column' => 'id');
+	$orphans = array ();
+	foreach ($realms as $realm => $details)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT FL.*, F.name FROM FileLink FL ' .
+			'LEFT JOIN File F ON FL.file_id = F.id ' .
+			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
+			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['entity_type']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['name']}</td>";
 			echo "<td>${realm_name}</td>";
 			echo "<td>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
