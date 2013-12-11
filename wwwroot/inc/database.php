@@ -4555,33 +4555,42 @@ function findFileByName ($filename)
 	return $row !== FALSE ? $row['id'] : NULL;
 }
 
-// guarantees there is a locked row for $form_username
-function acquireLDAPCache ($form_username, $password_hash, $expiry = 0, $deep = 0)
+function fetchLDAPCacheRow ($username, $extrasql = '')
 {
-	$self = __FUNCTION__;
-	global $dbxlink;
-	usePreparedExecuteBlade ("INSERT IGNORE INTO LDAPCache (presented_username) VALUES (?)", array ($form_username));
-	$dbxlink->beginTransaction();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT TIMESTAMPDIFF(SECOND, first_success, now()) AS success_age, ' .
 		'TIMESTAMPDIFF(SECOND, last_retry, now()) AS retry_age, displayed_name, memberof, successful_hash ' .
-		'FROM LDAPCache WHERE presented_username = ? FOR UPDATE',
-		array ($form_username)
+		'FROM LDAPCache WHERE presented_username = ? ' . $extrasql,
+		array ($username)
 	);
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	if ($row)
 	{
-		if ($row['successful_hash'] === $password_hash && $row['success_age'] < $expiry)
-		{
-			$row['memberof'] = unserialize (base64_decode ($row['memberof']));
-			return $row;
-		}
-		return NULL;
+		$members = unserialize (base64_decode ($row['memberof']));
+		$row['memberof'] = is_array ($members) ? $members : array();
 	}
-	if ($deep < 2)
-		// maybe another instance deleted our row before we've locked it. Try again
-		return $self ($form_username, $password_hash, $expiry, $deep + 1);
-	// the problem still persists after 2 tries, throw an exception
+	return $row;
+}
+
+// locks LDAPCache row for given username or throws an exception
+function acquireLDAPCache ($username, $max_tries = 2)
+{
+	$self = __FUNCTION__;
+	global $dbxlink;
+
+	// guarantee there is a row to lock
+	usePreparedExecuteBlade ("INSERT IGNORE INTO LDAPCache (presented_username) VALUES (?)", array ($username));
+	$dbxlink->beginTransaction();
+
+	if ($row = fetchLDAPCacheRow ($username, 'FOR UPDATE'))
+		return $row;
+
+	// maybe another instance deleted our row before we've locked it. Try again
+	if ($max_tries > 0)
+		return $self ($username, $password_hash, $expiry, $max_tries - 1);
+
+	// the problem still persists after retries, throw an exception
 	throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
 }
 
@@ -4592,30 +4601,28 @@ function releaseLDAPCache ()
 }
 
 // This actually changes only last_retry.
-function touchLDAPCacheRecord ($form_username)
+function touchLDAPCacheRecord ($username)
 {
-	usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($form_username));
+	usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($username));
 }
 
-function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
+function replaceLDAPCacheRecord ($username, $password_hash, $dname, $memberof)
 {
-	usePreparedUpdateBlade ('LDAPCache',
+	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $username));
+	usePreparedInsertBlade ('LDAPCache',
 		array
 		(
+			'presented_username' => $username,
 			'successful_hash' => $password_hash,
 			'displayed_name' => $dname,
 			'memberof' => base64_encode (serialize ($memberof)),
-		),
-		array
-		(
-			'presented_username' => $form_username,
 		)
 	);
 }
 
-function deleteLDAPCacheRecord ($form_username)
+function deleteLDAPCacheRecord ($username)
 {
-	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $form_username));
+	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $username));
 }
 
 // Age all records older, than cache_expiry seconds, and all records made in future.
