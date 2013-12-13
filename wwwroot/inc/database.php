@@ -2404,7 +2404,7 @@ function spotNetworkByIP ($ip_bin, $masklen = NULL)
 function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 {
 	$row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen);
-	return $row !== NULL ? $row['id'] : NULL;
+	return $row === NULL ? NULL : $row['id'];
 }
 
 function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
@@ -2428,7 +2428,7 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 		'order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array (ip4_bin2db ($ip_bin), $masklen));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row : NULL;
+	return $row === FALSE ? NULL : $row;
 }
 
 // Return the id of the smallest IPv6 network containing the given IPv6 address
@@ -2436,7 +2436,7 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 {
 	$row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen);
-	return $row !== NULL ? $row['id'] : NULL;
+	return $row === NULL ? NULL : $row['id'];
 }
 
 function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
@@ -2444,7 +2444,7 @@ function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip_bin, $ip_bin, $masklen));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row : NULL;
+	return $row === FALSE ? NULL : $row;
 }
 
 // This function is actually used not only to update, but also to create records,
@@ -3272,8 +3272,7 @@ function getObjectParentCompat ()
 function objectTypeMayHaveParent ($objtype_id)
 {
 	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM ObjectParentCompat WHERE child_objtype_id = ?', array ($objtype_id));
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0] > 0;
+	return $result->fetchColumn() > 0;
 }
 
 // Add a pair to the ObjectParentCompat table.
@@ -4216,8 +4215,8 @@ function destroyIPv6Prefix ($id)
 function loadScript ($name)
 {
 	$result = usePreparedSelectBlade ("select script_text from Script where script_name = ?", array ($name));
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row !== FALSE ? $row[0] : NULL;
+	$script_text = $result->fetchColumn();
+	return $script_text === FALSE ? NULL : $script_text;
 }
 
 function saveScript ($name = '', $text)
@@ -4417,8 +4416,7 @@ function getFileCache ($file_id)
 		'WHERE File.id = ? and File.thumbnail IS NOT NULL',
 		array ($file_id)
 	);
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row['thumbnail'] : FALSE;
+	return $result->fetchColumn();
 }
 
 function commitAddFileCache ($file_id, $contents)
@@ -4551,8 +4549,8 @@ function getChapterList ()
 function findFileByName ($filename)
 {
 	$result = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row['id'] : NULL;
+	$file_id = $result->fetchColumn();
+	return $file_id === FALSE ? NULL : $file_id;
 }
 
 function fetchLDAPCacheRow ($username, $extrasql = '')
@@ -4635,8 +4633,8 @@ function discardLDAPCache ($maxage = 0)
 function getUserIDByUsername ($username)
 {
 	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHERE user_name = ?', array ($username));
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row['user_id'] : NULL;
+	$user_id = $result->fetchColumn();
+	return $user_id === FALSE ? NULL : $user_id;
 }
 
 # Derive a complete cell structure from the given username regardless
@@ -4871,7 +4869,7 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 		array ($object_id)
 	);
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row !== FALSE ? $row : NULL;
+	return $row === FALSE ? NULL : $row;
 }
 
 function getStored8021QConfig ($object_id, $instance = 'desired')
