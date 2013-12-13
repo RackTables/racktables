@@ -142,6 +142,9 @@ function renderEditVS ($vs_id)
 	printOpFormIntro ('updVS');
 	echo '<table border=0 align=center>';
 	echo '<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value="' . htmlspecialchars ($vsinfo['name'], ENT_QUOTES) . '"></td></tr>';
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	echo '<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['vsconfig']) . '</textarea></td></tr>';
 	echo '<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['rsconfig']) . '</textarea></td></tr>';
 	echo '<tr><th></th><th>';
@@ -645,12 +648,14 @@ function renderNewVSGForm ()
 {
 	startPortlet ('Add new VS group');
 	printOpFormIntro ('add');
-	echo '<table border=0 cellpadding=10 cellspacing=0 align=center>';
-	echo '<tr valign=bottom><th>name</th><th>Assign tags</th></tr>';
-	echo '<tr valign=top><td><input type=text name=name><p>';
+	echo '<table border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo '<tr valign=bottom><th>Name:</th><td class="tdleft">';
+	echo '<input type=text name=name></td></tr>';
+	echo '<tr><th>Tags:</th><td class="tdleft">';
+	printTagsPicker ();
+	echo '</td></tr>';
+	echo '</table>';
 	printImageHREF ('CREATE', 'create virtual service', TRUE);
-	echo '</p></td><td>';
-	renderNewEntityTags ('ipvs');
-	echo '</td></tr></table></form>';
+	echo '</form>';
 	finishPortlet();
 }

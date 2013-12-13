@@ -911,8 +911,8 @@ function renderNewRackForm ($row_id)
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name tabindex=1></td>";
-	echo "<td rowspan=4>Assign tags:<br>";
-	renderNewEntityTags ('rack');
+	echo "<td rowspan=4>Tags:<br>";
+	printTagsPicker ();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 tabindex=2 value='${default_height}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no tabindex=4></td></tr>\n";
@@ -926,7 +926,7 @@ function renderNewRackForm ($row_id)
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
 	echo "<td rowspan=3 valign=top>Assign tags:<br>";
-	renderNewEntityTags ('rack');
+	printTagsPicker ();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (required):</th><td class=tdleft><textarea name=names cols=40 rows=25></textarea></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
@@ -953,6 +953,9 @@ function renderEditObjectForm()
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
@@ -1070,6 +1073,9 @@ function renderEditRackForm ($rack_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='${rack['height']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no value='${rack['asset_no']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	// optional attributes
 	$values = getAttrValues ($rack_id);
 	$num_attrs = count($values);
@@ -2504,24 +2510,23 @@ END
 	, TRUE);
 
 	startPortlet ('Add new');
-	echo '<table border=0 cellpadding=10 align=center>';
 	printOpFormIntro ('add');
-	// tags column
-	echo '<tr><td rowspan=5><h3>assign tags</h3>';
-	renderNewEntityTags ($realm);
-	echo '</td>';
+	echo '<table border=0 cellpadding=5 cellspacing=0 align=center>';
+
 	// inputs column
 	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-	echo "<th class=tdright>prefix</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
-	echo '<tr><th class=tdright>VLAN</th><td class=tdleft>';
+	echo "<th class=tdright>Prefix:</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
+	echo '<tr><th class=tdright>VLAN:</th><td class=tdleft>';
 	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 2)) . '</td></tr>';
-	echo "<tr><th class=tdright>name</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
-	echo '<tr><td class=tdright><input type=checkbox name="is_connected" id="is_connected" tabindex=4></td>';
-	echo '<th class=tdleft><label for="is_connected">reserve subnet-router anycast address</label></th></tr>';
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
+	echo '<tr><th class=tdright>Tags:</th><td class="tdleft">';
+	printTagsPicker ();
+	echo '</td></tr>';
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=4></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE, 5);
 	echo '</td></tr>';
-	echo "</form></table><br><br>\n";
+	echo "</table></form><br><br>\n";
 	finishPortlet();
 }
 
@@ -2925,17 +2930,20 @@ function renderIPNetworkProperties ($id)
 	global $pageno;
 	$netdata = spotEntity ($pageno, $id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
-	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	printOpFormIntro ('editRange');
-	echo '<tr><td class=tdright><label for=nameinput>Name:</label></td>';
+	echo "<table border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+	echo '<tr><th class=tdright><label for=nameinput>Name:</label></th>';
 	echo "<td class=tdleft><input type=text name=name id=nameinput size=80 maxlength=255 value='";
 	echo htmlspecialchars ($netdata['name'], ENT_QUOTES, 'UTF-8') . "'></tr>";
-	echo '<tr><td class=tdright><label for=commentinput>Comment:</label></td>';
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
+	echo '<tr><th class=tdright><label for=commentinput>Comment:</label></th>';
 	echo "<td class=tdleft><textarea name=comment id=commentinput cols=80 rows=25>\n";
 	echo htmlspecialchars ($netdata['comment'], ENT_QUOTES, 'UTF-8') . "</textarea></tr>";
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</td></form></tr></table>\n";
+	echo "</td></tr></table></form>\n";
 
 	echo '<center>';
 	if (! isIPNetworkEmpty ($netdata))
@@ -3292,7 +3300,7 @@ function renderAddMultipleObjectsForm ()
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
-			renderNewEntityTags ('object');
+			printTagsPicker ();
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
@@ -3311,7 +3319,7 @@ function renderAddMultipleObjectsForm ()
 	echo "</td></tr>";
 	echo "<tr><th>Tags</th></tr>";
 	echo "<tr><td valign=top>";
-	renderNewEntityTags ('object');
+	printTagsPicker ();
 	echo "</td></tr>";
 	echo "<tr><td colspan=2><input type=submit name=got_very_fast_data value='Go!'></td></tr></table>\n";
 	echo "</form>\n";
@@ -3689,10 +3697,10 @@ function renderUserListEditor ()
 		startPortlet ('Add new');
 		printOpFormIntro ('createUser');
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
-		echo '<tr><th>&nbsp;</th><th>&nbsp;</th><th>Assign tags</th></tr>';
+		echo '<tr><th>&nbsp;</th><th>&nbsp;</th><th>Tags</th></tr>';
 		echo '<tr><th class=tdright>Username</th><td class=tdleft><input type=text size=64 name=username tabindex=100></td>';
 		echo '<td rowspan=4>';
-		renderNewEntityTags ('user');
+		printTagsPicker ();
 		echo '</td></tr>';
 		echo '<tr><th class=tdright>Real name</th><td class=tdleft><input type=text size=64 name=realname tabindex=101></td></tr>';
 		echo '<tr><th class=tdright>Password</th><td class=tdleft><input type=password size=64 name=password tabindex=102></td></tr>';
@@ -3938,6 +3946,9 @@ function renderEditLocationForm ($location_id)
 	printSelect ($locations, array ('name' => 'parent_id'), $location['parent_id']);
 	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${location['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	// optional attributes
 	$values = getAttrValues ($location_id);
 	$num_attrs = count($values);
@@ -5037,62 +5048,6 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 		}
 }
 
-function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
-{
-	startPortlet ($title);
-	echo  '<a class="toggleTreeMode" style="display:none" href="#"></a>';
-	echo '<table border=0 cellspacing=0 cellpadding=3 align=center class="tagtree">';
-	printOpFormIntro ('saveTags');
-	printTagCheckboxTable ('taglist', $preselect, array(), $tags, $realm);
-	echo '<tr><td class=tdleft>';
-	printImageHREF ('SAVE', 'Save changes', TRUE);
-	echo "</form></td><td class=tdright>";
-	if (!count ($preselect))
-		printImageHREF ('CLEAR gray');
-	else
-	{
-		printOpFormIntro ('saveTags', array ('taglist[]' => ''));
-		printImageHREF ('CLEAR', 'Reset all tags', TRUE);
-		echo '</form>';
-	}
-	echo '</td></tr></table>';
-	finishPortlet();
-}
-
-function renderEntityTags ($entity_id)
-{
-	global $tagtree, $taglist, $target_given_tags, $pageno, $etype_by_pageno;
-	echo '<table border=0 width="100%"><tr>';
-
-	if (count ($taglist) > getConfigVar ('TAGS_QUICKLIST_THRESHOLD'))
-	{
-		$minilist = getTagChart (getConfigVar ('TAGS_QUICKLIST_SIZE'), $etype_by_pageno[$pageno], $target_given_tags);
-		// It could happen, that none of existing tags have been used in the current realm.
-		if (count ($minilist))
-		{
-			$js_code = "tag_cb.setTagShortList ({";
-			$is_first = TRUE;
-			foreach ($minilist as $tag)
-			{
-				if (! $is_first)
-					$js_code .= ",";
-				$is_first = FALSE;
-				$js_code .= "\n\t${tag['id']} : 1";
-			}
-			$js_code .= "\n});\n$(document).ready(tag_cb.compactTreeMode);";
-			addJS ('js/tag-cb.js');
-			addJS ($js_code, TRUE);
-		}
-	}
-
-	// do not do anything about empty tree, trigger function ought to work this out
-	echo '<td class=pcright>';
-	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
-	echo '</td>';
-
-	echo '</tr></table>';
-}
-
 // This one is going to replace the tag filter.
 function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_params = array())
 {
@@ -5266,20 +5221,6 @@ END
 	finishPortlet();
 }
 
-// Dump all tags in a single SELECT element.
-function renderNewEntityTags ($for_realm = '')
-{
-	global $taglist, $tagtree;
-	if (!count ($taglist))
-	{
-		echo "No tags defined";
-		return;
-	}
-	echo '<div class=tagselector><table border=0 align=center cellspacing=0 class="tagtree">';
-	printTagCheckboxTable ('taglist', array(), array(), $tagtree, $for_realm);
-	echo '</table></div>';
-}
-
 function renderTagRollerForRow ($row_id)
 {
 	$a = rand (1, 20);
@@ -5291,7 +5232,7 @@ function renderTagRollerForRow ($row_id)
 	echo "rack row.<br>The tag(s) selected below will be ";
 	echo "appended to already assigned tag(s) of each particular entity. </td></tr>";
 	echo "<tr><th>Tags</th><td>";
-	renderNewEntityTags();
+	printTagsPicker ();
 	echo "</td></tr>";
 	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";
@@ -5573,10 +5514,13 @@ function renderFileDownloader ($file_id)
 function renderFileProperties ($file_id)
 {
 	$file = spotEntity ('file', $file_id);
-	echo '<table border=0 align=center>';
 	printOpFormIntro ('updateFile');
+	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
 	echo htmlspecialchars ($file['type']) . "'></td></tr>";
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='";
 	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>\n";
@@ -5586,7 +5530,7 @@ function renderFileProperties ($file_id)
 	echo '</td></tr>';
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
-	echo '</th></tr></form></table>';
+	echo '</th></tr></table></form>';
 }
 
 function renderFileBrowser ()
@@ -5603,12 +5547,12 @@ function renderFileManager ()
 		startPortlet ('Upload new');
 		printOpFormIntro ('addFile', array (), TRUE);
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>";
-		echo '<tr><th colspan=2>Comment</th><th>Assign tags</th></tr>';
-		echo '<tr><td valign=top colspan=2><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td>';
-		echo '<td rowspan=2>';
-		renderNewEntityTags ('file');
+		echo '<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td></tr>';
+		echo '<tr><th class=tdright>Tags:</td><td class=tdleft>';
+		printTagsPicker ();
 		echo '</td></tr>';
-		echo "<tr><td class=tdleft><label>File: <input type='file' size='10' name='file' tabindex=100></label></td><td class=tdcenter>";
+		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file' tabindex=100></td></td>";
+		echo "<tr><td colspan=2>";
 		printImageHREF ('CREATE', 'Upload file', TRUE, 102);
 		echo '</td></tr>';
 		echo "</table></form><br>";
@@ -7895,6 +7839,9 @@ function renderVSTRulesEditor ($vst_id)
 	}
 	printOpFormIntro ('upd');
 	echo '<table cellspacing=0 cellpadding=5 align=center class="widetable template-rules">';
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft style='border-top: none;'>";
+	printTagsPicker ();
+	echo "</td></tr>";
 	echo '<tr><th></th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'Add rule') . '</a></th></tr>';
 	global $port_role_options;
@@ -9355,6 +9302,18 @@ function renderDataIntegrityReport ()
 
 	if (! $violations)
 		echo '<h2>No integrity violations found</h2>';
+}
+
+function renderUserProperties ($user_id)
+{
+	printOpFormIntro ('edit');
+	echo '<table border=0 align=center>';
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
+	echo "<tr><th class=submit colspan=2>";
+	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	echo '</th></tr></table></form>';
 }
 
 ?>

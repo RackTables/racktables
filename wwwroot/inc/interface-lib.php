@@ -1012,4 +1012,56 @@ function serializeFileLinks ($links, $scissors = FALSE)
 	return $ret;
 }
 
+function printTagsPicker ($preselect=NULL)
+{
+	printTagsPickerInput ();
+	printTagsPickerUl ($preselect);
+	enableTagsPicker ();
+}
+
+function printTagsPickerInput ($input_name="taglist")
+{
+	# use data-attribute as identifier for tagit
+	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
+	echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
+}
+
+function printTagsPickerUl ($preselect=NULL, $input_name="taglist")
+{
+	global $target_given_tags;
+	if ($preselect === NULL)
+		$preselect = $target_given_tags;
+	foreach ($preselect as &$value) # readable time format
+		$value['time_parsed'] = formatAge ($value['time']);
+	usort ($preselect, 'cmpTags');
+	$preselect_hidden = "";
+	unset($value);
+	foreach ($preselect as $value){
+		$preselect_hidden .= "<input type=hidden name=" . $input_name . "[] value=" . $value['id'] . ">";
+	}
+	echo $preselect_hidden; # print preselected tags id that used in case javascript problems
+	echo "<ul data-tagit='yes' data-tagit-valuename='" . $input_name . "' data-tagit-preselect='" . json_encode($preselect) . "' class='tagit-vertical'></ul>";
+}
+
+function enableTagsPicker ()
+{
+	global $taglist;
+	static $taglist_inserted;
+	includeJQueryUI ();
+	addCSS ('css/tagit.css');
+	addJS ('js/tag-it.js');
+	addJS ('js/tag-it-local.js');
+	if (! $taglist_inserted)
+	{
+		$taglist_filtred = $taglist;
+		foreach ($taglist_filtred as &$tag) # remove unused fields
+		{
+			foreach (array_keys ($tag) as $key)
+			if (! in_array ($key, array("tag", "is_assignable", "trace")))
+				unset($tag[$key]);
+		}
+		addJS ('var taglist = ' . json_encode ($taglist_filtred) . ';', TRUE);
+		$taglist_inserted = TRUE;
+	}
+}
 ?>
