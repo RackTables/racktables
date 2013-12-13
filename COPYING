@@ -115,3 +115,9 @@ under the MIT license.
 
 RackTables uses CodeMirror by Marijn Haverbeke: http://codemirror.net/.
 This library is released under a MIT style license.
+
+----------------------8<----------------------8<----------------------
+
+RackTables uses TagIt! jQuery widget by Levy Carneiro Jr.:
+http://aehlke.github.com/tag-it/.
+This library is released under the MIT license.
