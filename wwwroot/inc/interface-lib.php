@@ -768,13 +768,26 @@ function getTagClassName ($tagid)
 
 function serializeTags ($chain, $baseurl = '')
 {
+	global $taglist;
 	$tmp = array();
 	usort ($chain, 'cmpTags');
 	foreach ($chain as $taginfo)
 	{
 		$title = '';
 		if (isset ($taginfo['user']) and isset ($taginfo['time']))
-			$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
+			$title = htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES);
+		if (isset($taginfo['parent_id']))
+		{
+			$tag_trace = $taglist[$taginfo['id']]['trace'];
+			$parent_info = array ();
+			foreach ($tag_trace as $tag_id)
+				$parent_info[] = $taglist[$tag_id]['tag'];
+			if ($title)
+				$title .= "\n";
+			$title .= implode (" \xE2\x86\x92  ", $parent_info); # right arrow
+		}
+		if ($title)
+			$title = "title='$title'";
 
 		$class = '';
 		if (isset ($taginfo['id']))
