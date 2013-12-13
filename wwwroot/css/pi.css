@@ -192,6 +192,18 @@ td.sticker {
 	background-color: #ffa0a0;
 }
 
+.oddeven_table tr:nth-child(even) {
+	background-color: #d0d0d0;
+}
+
+.oddeven_table tr:nth-child(odd) {
+	background-color: #e8e8e8;
+}
+
+table.oddeven_table table:not(.oddeven_table) tr {
+	background-color: inherit !important;
+}
+
 tr.has_problems_even {
 	background-color: #ffa0a0;
 }
