@@ -2497,7 +2497,7 @@ function renderIPNewNetForm ()
 	$regexp = addslashes ($regexp);
 	addJS (<<<END
 $(document).ready(function () {
-	$('form#add' input[name="range"]).attr('match', '$regexp');
+	$('form#add input[name="range"]').attr('match', '$regexp');
 	Validate.init();
 });
 END
