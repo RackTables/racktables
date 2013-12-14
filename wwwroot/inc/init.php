@@ -139,7 +139,7 @@ $op = '';
 // load additional plugins
 ob_start();
 foreach (glob("$racktables_plugins_dir/*.php") as $filename)
-    require_once $filename;
+	require_once $filename;
 // display plugins output if it contains something but newlines
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))

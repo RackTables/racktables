@@ -6268,8 +6268,8 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipv4net':
 	case 'ipv6net':
-        global $pageno;
-        switch ($pageno)
+		global $pageno;
+		switch ($pageno)
 		{
 			case 'ipaddress':
 				$net = spotNetworkByIP (ip_parse ($_REQUEST['ip']));
@@ -6296,7 +6296,7 @@ function dynamic_title_decoder ($path_position)
 	case 'ipv4space':
 	case 'ipv6space':
 		global $pageno;
-        switch ($pageno)
+		switch ($pageno)
 		{
 			case 'ipaddress':
 				$net_id = getIPAddressNetworkId (ip_parse ($_REQUEST['ip']));

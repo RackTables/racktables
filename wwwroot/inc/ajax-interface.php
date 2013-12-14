@@ -232,7 +232,7 @@ function updateIPNameAJAX()
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
 	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears name
-    $comment = (empty ($addr['comment']) ? '' : $addr['comment']);
+	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
 	updateAddress ($ip_bin, $sic['text'], $reserved, $comment);
 	echo 'OK';
 }
