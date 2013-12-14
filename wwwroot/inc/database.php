@@ -4586,7 +4586,7 @@ function acquireLDAPCache ($username, $max_tries = 2)
 
 	// maybe another instance deleted our row before we've locked it. Try again
 	if ($max_tries > 0)
-		return $self ($username, $password_hash, $expiry, $max_tries - 1);
+		return $self ($username, $max_tries - 1);
 
 	// the problem still persists after retries, throw an exception
 	throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
