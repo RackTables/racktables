@@ -1107,7 +1107,7 @@ function string_insert_hrefs ($p_string)
 		$t_url_part1 = "${t_url_chars}";
 		$t_url_part2 = "(?:\(${t_url_chars_in_parens}*\)|\[${t_url_chars_in_brackets}*\]|${t_url_chars2})";
 
-		$s_url_regex = "/(${t_url_protocol}(${t_url_part1}*?${t_url_part2}+))/sue";
+		$s_url_regex = "/(${t_url_protocol}(${t_url_part1}*?${t_url_part2}+))/su";
 
 		# URL replacement
 		$t_url_href    = "href=\"'.rtrim('\\1','.').'\"";
@@ -1118,7 +1118,17 @@ function string_insert_hrefs ($p_string)
 	}
 
 	# Find any URL in a string and replace it by a clickable link
-	$p_string = preg_replace ($s_url_regex, $s_url_replace, $p_string);
+	$p_string = preg_replace_callback
+	(
+		$s_url_regex,
+		function ($m)
+		{
+			$t_url_href    = 'href="' . rtrim($m[1], '.') . '"';
+			$s_url_replace = "<a ${t_url_href}>$m[1]</a> [<a ${t_url_href} target=\"_blank\">^</a>]";
+			return $s_url_replace;
+		},
+		$p_string
+	);
 
 	# Find any email addresses in the string and replace them with a clickable
 	# mailto: link, making sure that we skip processing of any existing anchor
