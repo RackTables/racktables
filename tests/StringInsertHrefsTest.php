@@ -19,33 +19,39 @@ class StringInsertHrefsTest extends PHPUnit_Framework_TestCase
 			setConfigVar ('DETECT_URLS', $this->detect_urls_var);
 	}
 
-	public function testStringInsertHrefs ()
+	/**
+	 * @dataProvider provider
+	 */
+	public function testStringInsertHrefs ($input, $output)
 	{
-		$cases = array
+		$this->assertEquals (string_insert_hrefs ($input), $output);
+	}
+
+	public function provider ()
+	{
+		return array
 		(
-			'no_href' => array
+			array
 			(
-				'input'  => 'This is a string with no links.',
-				'output' => 'This is a string with no links.'
+				'This is a string with no links.',
+				'This is a string with no links.'
 			),
-			'short_hostname' => array
+			array
 			(
-				'input'  => 'http://server/wiki/index.php/objectname',
-				'output' => '<a href="http://server/wiki/index.php/objectname">http://server/wiki/index.php/objectname</a> [<a href="http://server/wiki/index.php/objectname" target="_blank">^</a>]'
+				'http://server/wiki/index.php/objectname',
+				'<a href="http://server/wiki/index.php/objectname">http://server/wiki/index.php/objectname</a> [<a href="http://server/wiki/index.php/objectname" target="_blank">^</a>]'
 			),
-			'auth_creds' => array
+			array
 			(
-				'input'  => 'http://user:pass@www.example.tld/',
-				'output' => '<a href="http://user:pass@www.example.tld/">http://user:pass@www.example.tld/</a> [<a href="http://user:pass@www.example.tld/" target="_blank">^</a>]'
+				'http://user:pass@www.example.tld/',
+				'<a href="http://user:pass@www.example.tld/">http://user:pass@www.example.tld/</a> [<a href="http://user:pass@www.example.tld/" target="_blank">^</a>]'
 			),
-			'mailto' => array
+			array
 			(
-				'input'  => 'username@example.tld',
-				'output' => '<a href="mailto:username@example.tld">username@example.tld</a>'
+				'username@example.tld',
+				'<a href="mailto:username@example.tld">username@example.tld</a>'
 			)
 		);
-		foreach ($cases as $case)
-			$this->assertEquals (string_insert_hrefs ($case['input']), $case['output']);
 	}
 }
 ?>
