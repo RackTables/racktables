@@ -2880,7 +2880,7 @@ function resolve8021QConflicts ()
 			$F[$sic["pn_${i}"]] = array
 			(
 				'mode' => $sic["rm_${i}"],
-				'allowed' => array_key_exists ("ra_${i}", $sic) ? $sic["ra_${i}"] : array(),
+				'allowed' => array_fetch ($sic, "ra_${i}", array()),
 				'native' => $sic["rn_${i}"],
 				'decision' => $sic["i_${i}"],
 			);
@@ -3440,8 +3440,12 @@ function tableHandler()
 		$retcode = 48;
 		break;
 	case 'DELETE':
-		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		usePreparedDeleteBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist'), $conjunction);
+		usePreparedDeleteBlade
+		(
+			$opspec['table'],
+			buildOpspecColumns ($opspec, 'arglist'),
+			array_fetch ($opspec, 'conjunction', 'AND')
+		);
 		$retcode = 49;
 		break;
 	case 'UPDATE':
@@ -3450,7 +3454,7 @@ function tableHandler()
 			$opspec['table'],
 			buildOpspecColumns ($opspec, 'set_arglist'),
 			buildOpspecColumns ($opspec, 'where_arglist'),
-			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
+			array_fetch ($opspec, 'conjunction', 'AND')
 		);
 		$retcode = 51;
 		break;

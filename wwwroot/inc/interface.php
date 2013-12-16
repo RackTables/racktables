@@ -6845,7 +6845,7 @@ function renderObject8021QPorts ($object_id)
 	global $pageno, $tabno, $sic;
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
-	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
+	$req_port_name = array_fetch ($sic, 'port_name', '');
 	$desired_config = apply8021QOrder ($vswitch, getStored8021QConfig ($object_id, 'desired'));
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
 	$desired_config = sortPortList	($desired_config);
@@ -7754,7 +7754,7 @@ function renderObject8021QSyncPorts ($object, $D)
 	# OPTIONSs for existing 802.1Q ports
 	foreach (sortPortList ($D) as $portname => $portconfig)
 		$enabled["disable ${portname}"] = "${portname} ("
-			. (array_key_exists ($portname, $allethports) ? $allethports[$portname] : 'N/A')
+			. array_fetch ($allethports, $portname, 'N/A')
 			. ') ' . serializeVLANPack ($portconfig);
 	# OPTIONs for potential 802.1Q ports
 	$disabled = array();

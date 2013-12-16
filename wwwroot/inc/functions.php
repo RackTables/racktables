@@ -914,13 +914,13 @@ function l2addressFromDatabase ($string)
 function getPrevIDforRack ($row_id, $rack_id)
 {
 	$rackList = doubleLink (listCells ('rack', $row_id));
-	return isset ($rackList[$rack_id]['prev_key']) ? $rackList[$rack_id]['prev_key'] : NULL;
+	return array_fetch ($rackList[$rack_id], 'prev_key', NULL);
 }
 
 function getNextIDforRack ($row_id, $rack_id)
 {
 	$rackList = doubleLink (listCells ('rack', $row_id));
-	return isset ($rackList[$rack_id]['next_key']) ? $rackList[$rack_id]['next_key'] : NULL;
+	return array_fetch ($rackList[$rack_id], 'next_key', NULL);
 }
 
 // This function finds previous and next array keys for each array key and
@@ -2666,7 +2666,7 @@ function formatRealmName ($realm)
 		'location' => 'Location',
 		'user' => 'User',
 	);
-	return array_key_exists ($realm, $realmstr) ? $realmstr[$realm] : 'invalid';
+	return array_fetch ($realmstr, $realm, 'invalid');
 }
 
 // Convert filesize to appropriate unit and make it human-readable
@@ -3959,8 +3959,8 @@ function get8021QSyncOptions
 				$ret[$pn] = array
 				(
 					'status' => 'martian_conflict',
-					'left' => array_key_exists ($pn, $C) ? $C[$pn] : array ('mode' => 'none'),
-					'right' => array_key_exists ($pn, $R) ? $R[$pn] : array ('mode' => 'none'),
+					'left' => array_fetch ($C, $pn, array ('mode' => 'none')),
+					'right' => array_fetch ($R, $pn, array ('mode' => 'none')),
 				);
 			continue;
 		}
@@ -3969,8 +3969,8 @@ function get8021QSyncOptions
 			$ret[$pn] = array
 			(
 				'status' => 'martian_conflict',
-				'left' => array_key_exists ($pn, $C) ? $C[$pn] : array ('mode' => 'none'),
-				'right' => array_key_exists ($pn, $R) ? $R[$pn] : array ('mode' => 'none'),
+				'left' => array_fetch ($C, $pn, array ('mode' => 'none')),
+				'right' => array_fetch ($R, $pn, array ('mode' => 'none')),
 			);
 			continue;
 		}
@@ -4196,7 +4196,7 @@ function strerror8021Q ($errno)
 		E_8021Q_PUSH_REMOTE_ERROR => 'push failed due to remote error',
 		E_8021Q_SYNC_DISABLED => 'sync disabled by operator',
 	);
-	return array_key_exists ($errno, $errstr) ? $errstr[$errno] : "unknown error code ${errno}";
+	return array_fetch ($errstr, $errno, "unknown error code ${errno}");
 }
 
 function saveDownlinksReverb ($object_id, $requested_changes)
@@ -5586,6 +5586,12 @@ function array_sub ($a, $b)
 		if (! array_key_exists($key, $b))
 			$ret[$key] = $value;
 	return $ret;
+}
+
+// returns the requested element value or the default value if not found
+function array_fetch ($array, $key, $default_value)
+{
+	return array_key_exists ($key, $array) ? $array[$key] : $default_value;
 }
 
 // Registers additional ophandler on page-tab-opname triplet.

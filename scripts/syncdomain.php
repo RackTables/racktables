@@ -44,7 +44,7 @@ default:
 	usage();
 }
 
-$max = array_key_exists ('max', $options) ? $options['max'] : 0;
+$max = array_fetch ($options, 'max', 0);
 $verbose = array_key_exists ('verbose', $options);
 
 $switch_list = array();
