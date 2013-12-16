@@ -913,21 +913,19 @@ function l2addressFromDatabase ($string)
 // or renderRow().
 function getPrevIDforRack ($row_id, $rack_id)
 {
-	$rackList = listCells ('rack', $row_id);
-	doubleLink ($rackList);
+	$rackList = doubleLink (listCells ('rack', $row_id));
 	return isset ($rackList[$rack_id]['prev_key']) ? $rackList[$rack_id]['prev_key'] : NULL;
 }
 
 function getNextIDforRack ($row_id, $rack_id)
 {
-	$rackList = listCells ('rack', $row_id);
-	doubleLink ($rackList);
+	$rackList = doubleLink (listCells ('rack', $row_id));
 	return isset ($rackList[$rack_id]['next_key']) ? $rackList[$rack_id]['next_key'] : NULL;
 }
 
 // This function finds previous and next array keys for each array key and
 // modifies its argument accordingly.
-function doubleLink (&$array)
+function doubleLink ($array)
 {
 	$prev_key = NULL;
 	foreach (array_keys ($array) as $key)
@@ -939,6 +937,7 @@ function doubleLink (&$array)
 		}
 		$prev_key = $key;
 	}
+	return $array;
 }
 
 function sortTokenize ($a, $b)
