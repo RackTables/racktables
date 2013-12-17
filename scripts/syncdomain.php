@@ -101,19 +101,17 @@ fclose ($fp);
 $switch_queue = array();
 foreach ($switch_list as $object_id)
 {
+	$cell = spotEntity ('object', $object_id);
+	$new_disabled = ! considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC');
 	$queue = detectVLANSwitchQueue (getVLANSwitchInfo ($object_id));
-	if ($queue == 'disabled' || in_array ($queue, $todo[$options['mode']]))
-	{
-		$cell = spotEntity ('object', $object_id);
-		if (considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC'))
-			$switch_queue[] = $cell;
-		elseif ($vswitch['last_errno'] != E_8021Q_SYNC_DISABLED)
-			usePreparedExecuteBlade
-			(
-				'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
-				array (E_8021Q_SYNC_DISABLED, $object_id)
-			);
-	}
+	if ($queue != 'disabled' && $new_disabled)
+		usePreparedExecuteBlade
+		(
+			'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
+			array (E_8021Q_SYNC_DISABLED, $object_id)
+		);
+	elseif (in_array ($queue, $todo[$options['mode']]))
+		$switch_queue[] = $cell;
 }
 
 // YOU SHOULD NOT USE DB FUNCTIONS BELOW IN THE PARENT PROCESS
