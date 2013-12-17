@@ -51,13 +51,13 @@ if (! isset ($local_staticdir)) // the directory where RT will search static fil
 	$local_staticdir = $racktables_plugins_dir;
 
 // init connection to memcache
-$memcached = new Memcached( 'slow_cache');
+$memcached = new Memcached ('slow_cache');
 global $_memcachedHost, $_memcachedPort;
-$memcached->setOption( Memcached::OPT_TCP_NODELAY, true);
-$memcached->setOption( Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
-$memcached->setOption( Memcached::OPT_COMPRESSION, false);
-$memcached->setOption( Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
-$memcached->addServer( $_memcachedHost, $_memcachedPort);
+$memcached->setOption (Memcached::OPT_TCP_NODELAY, true);
+$memcached->setOption (Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
+$memcached->setOption (Memcached::OPT_COMPRESSION, false);
+$memcached->setOption (Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+$memcached->addServer ($_memcachedHost, $_memcachedPort);
 
 
 // (re)connects to DB, stores PDO object in $dbxlink global var

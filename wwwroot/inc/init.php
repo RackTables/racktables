@@ -56,8 +56,8 @@ if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
-if ( isKeyInCache( 'RackCode')) {
-  $rackCode = getKeyInCache( 'RackCode');
+if (isKeyInCache ('RackCode')) {
+  $rackCode = getKeyInCache ('RackCode');
 } else {
   $rackCodeCache = loadScript ('RackCodeCache');
   if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
@@ -74,7 +74,7 @@ if ( isKeyInCache( 'RackCode')) {
       $rackCode = getRackCode (loadScript ('RackCode'));
     }
   }
-  setKeyInCache( 'RackCode', $rackCode);
+  setKeyInCache ('RackCode', $rackCode);
 }
 
 // avoid notices being thrown
@@ -97,14 +97,13 @@ $tagRelCache = array();
 
 $fastCache = array();
 $taglist = getTagList();
-// $tagtree = treeFromList ($taglist);
 
-if ( isKeyInCache( 'TagListSorted')) {
-  $tagtree = getKeyInCache( 'TagListSorted');
+if (isKeyInCache ('TagListSorted')) {
+  $tagtree = getKeyInCache ('TagListSorted');
 } else {
   $tagtree = treeFromList ($taglist);
-  setKeyInCache( 'TagListSorted', $tagtree);
-  setKeyInCache( 'TagList', $taglist);
+  setKeyInCache ('TagListSorted', $tagtree);
+  setKeyInCache ('TagList', $taglist);
 }
 
 $auto_tags = array();
