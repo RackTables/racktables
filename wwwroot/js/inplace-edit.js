@@ -120,29 +120,25 @@ function onFormSubmit () {
 	btn.replaceWith('<img src="?module=chrome&uri=pix/ajax-loader.gif" title="Please wait" />');
 	waiting_response = true;
 
-	var op = '';
-	var item_id = '';
+	var data = {
+		'module': 'ajax',
+		'text': text
+	};
 	var list = span[0].className.split (/\s+/);
 	for (var i in list) {
 		var cn = list[i];
 		var m;
-		if (m = cn.match (/^id-(.*)/)) {
-			item_id = m[1];
-		}
-		else if (m = cn.match (/^op-(.*)/)) {
-			op = m[1];
+		if (m = cn.match (/^(.+?)-(.*)/)) {
+			data[m[1]] = m[2];
 		}
 	}
+	if (! ('ac' in data))
+		data['ac'] = data['op'];
 
 	$.ajax({
 		type: 'POST',
 		url: 'index.php',
-		data: {
-			'module': 'ajax',
-			'ac': op,
-			'id': item_id,
-			'text': text
-		},
+		data: data,
 		success: function(data, textStatus, XMLHttpRequest) {
 			if (data == 'OK')
 				span.html(text);

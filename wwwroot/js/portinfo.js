@@ -11,15 +11,14 @@ bk_event = null;
 		conf: {'Show ports configuration': {onclick: menuItemClicked, className: 'itemname-conf'}},
 		mac: {'Show learned MACs': {onclick: menuItemClicked, className: 'itemname-mac'}}
 	};
-	var pushed = false;
+	var portinfo_enabled = false;
 	for (var i in enabled_elements) {
 		var name = enabled_elements[i];
-		if (menu_item_candidates[name] != null) {
-			port_cmenu_items.push(menu_item_candidates[name]);
-			pushed = true;
-		}
+		port_cmenu_items.push(menu_item_candidates[name]);
+		if (menu_item_candidates[name] != null && name.match (/^(link|conf|mac)$/))
+			portinfo_enabled = true;
 	}
-	if (pushed) {
+	if (portinfo_enabled) {
 		port_cmenu_items.unshift($.contextMenu.separator);
 		port_cmenu_items.unshift({'Show all info': {onclick: showAllClicked, className: 'itemname-all'}});
 	}
@@ -28,7 +27,8 @@ bk_event = null;
 function showAllClicked(menuItem, menu) {
 	for (var i in enabled_elements) {
 		var name = enabled_elements[i];
-		menuItemClicked($('.context-menu-item.itemname-' + name)[0], menu);
+		if (name.match (/^(link|conf|mac)$/))
+			menuItemClicked($('.context-menu-item.itemname-' + name)[0], menu);
 	}
 }
 

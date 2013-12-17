@@ -1,3 +1,52 @@
+0.20.6 2013-11-29
+	bugfix: "sshnokey" gateway had a bug
+	bugfix: SLB config was generated incrorrectly when multiple 
+		rspools were linked with the same balancer-vsg pair
+	bugfix: change blade orientation of Cisco 6509-V-E (#985)
+	bugfix: default values of some LDAP options weren't being used
+	bugfix: update of Cisco WS-C4948 SNMPsync port definitions (#977) by Mark Wilkinson
+	bugfix: jQuery.UI static files were not accessible (by Aleksandr Balezin)
+	bugfix: 404 response header for missing static files was incorrect (by Aleksandr Balezin)
+	bugfix: IOS CLI prompt detection (#1033)
+	bugfix: SLB IP assignments were stored even if a balancer object was deleted
+	bugfix: exception when searching for a alien IP address
+	bugfix: DB deadlocks in LDAP authentication when opening many tabs simultaneously
+	bugfix: object searching and updating may fail (#1031)
+	bugfix: strict standards message when managing locations or rows (#1065)
+	bugfix: ports of zero-U objects were not listed as candidates when linking ports (#917)
+	bugfix: blade objects with problems should be colored red (#1071) by Mark Wilkinson
+	update: display friendlier message when attempting to NAT non-existent IP (#963)
+	update: support of Huawei CE5800 series switch
+	update: mgmt link on FQDN (telnet, ssh, rdp) now supports any protocol (MGMT_PROTOS config var)
+	update: replace CodePress highlighter with CodeMirror (by Mark Jazmik)
+	update: display links to newly created rows & locations (#883)
+	update: add collapse/expand feature to location filter (#901)
+	update: display location tree in breadcrumbs (#905)
+	update: display location parents in the rack list when mounting an object (#925)
+	update: display location parents in the row list when editing a rack (#993)
+	update: sort by location and row name when mounting an object (#1021)
+	update: add a link to the View Rack page (#947)
+	update: support blades of varying sizes in the same chassis (#923) by Mark Wilkinson
+	update: add F5 VIPRION models to dictionary (#987)
+	update: SNMP support for Cisco ME-3400EG-2CS-A (#939), WS-C2960CG-8TC-L (#933),
+		WS-CBS3012-IBM/-I (#871), WS-C3560-8PC (#975), WS-C2950-12 (#973),
+		WS-C2950G-24-DC (#981), WS-C3560GV2-48TS (#983), WS-C2950SX-24 (#991),
+		WS-C2960-8TC-L (#1063), HP ProCurve J9028B (#941), J9022A (#767),
+		Netgear GS724TP (#1001), TL-SL5428E (#1015),
+		Brocade TurboIron 24X (#1055) by Mark Wilkinson
+		3Com 4500 family of switches (#1083) by Rafael Driutti
+		Cisco WS-C3560V2-24PS (#1049), Netgear FS726TP (#859) by Aaron Dummer
+	update: port link popup now has asset no search field (#949) by Thomas Uhde
+	update: searches now examine 'dictionary' attributes (#1003)
+	update: exclude some elements when printing to paper (#464)
+	update: add resource pool info to the Virtual Resources cluster portlet (#915)
+	update: remove the 'unmounted' autotag from objects inside a container (#1061)
+	update: virtual objects may use 'asset tag' and 'visible label' attributes (#1069)
+	update: display all containers and mount points on list objects page (#1081)
+	update: cell filter pages display fast if no filters specified
+		(the MAX_UNFILTERED_ENTITIES config variable must be set)
+	update: port type could now be changed even if port is linked
+	new feature: bulk selection and deslection of object rackspace checkboxes by Matthew Kelch
 0.20.5 2013-06-23
 	bugfix: 500 server error if protocol was not specified in
 		terminal_settings subroutine
@@ -15,6 +64,7 @@
 	bugfix: user-overrided config values were displayed in global config editor form
 	bugfix: API: built-in hook functions were not called in 'before' and 'after' modes
 	bugfix: Linux host's port status fetching was broken (#903)
+	bugfix: recognize unqualified hostnames in URLs (#1023)
 	update: search improvements:
 		- redirect to object when search by IP lead to valid allocation
 		- if search result is same type of object, preserve opened tab

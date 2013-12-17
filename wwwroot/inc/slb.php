@@ -415,7 +415,7 @@ class MacroParser
 					{
 						$ret .= substr ($text, $pos, $exp_start - $pos);
 						$pos = $exp_start + 1;
-						$mname_begin = $pos;
+						$state = 1;
 						if ($pos < $len)
 						{
 							if ($text[$pos] == '{')
@@ -423,17 +423,13 @@ class MacroParser
 								$state = 2;
 								$pos++;
 							}
-							else
+							elseif ($text[$pos] == '?')
 							{
-								$state = 1;
-								if ($text[$pos] == '?')
-								{
-									$lazy = 1;
-									$pos++;
-								}
+								$lazy = 1;
+								$pos++;
 							}
-							$mname_begin = $pos;
 						}
+						$mname_begin = $pos;
 					}
 					break;
 				case 1: // simple expansion (%ABC%) ending
@@ -516,7 +512,7 @@ class MacroParser
 			}
 
 		if ($state != 0)
-			$ret .= substr ($text, $exp_start - 1);
+			$ret .= substr ($text, $exp_start);
 		return $ret;
 	}
 

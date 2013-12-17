@@ -21,10 +21,10 @@ function ios12ReadCDPStatus ($input)
 			break;
 		case preg_match ('/^Interface: (.+),  ?Port ID \(outgoing port\): (.+)$/', $line, $matches):
 			if (array_key_exists ('device', $ret['current']))
-				$ret[ios12ShortenIfName ($matches[1])][] = array
+				$ret[shortenIfName ($matches[1])][] = array
 				(
 					'device' => $ret['current']['device'],
-					'port' => ios12ShortenIfName ($matches[2]),
+					'port' => $matches[2],
 				);
 			unset ($ret['current']);
 			break;
@@ -47,14 +47,13 @@ function ios12ReadLLDPStatus ($input)
 		if (!$got_header)
 			continue;
 
-		$matches = preg_split ('/\s+/', $line);
+		$matches = preg_split ('/\s+/', trim ($line));
 
 		switch (count ($matches))
 		{
 		case 5:
 			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
-			$local_port = ios12ShortenIfName ($local_port);
-			$remote_port = ios12ShortenIfName ($remote_port);
+			$local_port = shortenIfName ($local_port);
 			$ret[$local_port][] = array
 			(
 				'device' => $remote_name,
@@ -76,10 +75,10 @@ function xos12ReadLLDPStatus ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^LLDP Port ([[:digit:]]+) detected \d+ neighbor$/', $line, $matches):
-			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			$ret['current']['local_port'] = shortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^      Port ID     : "(.+)"$/', $line, $matches):
-			$ret['current']['remote_port'] = ios12ShortenIfName ($matches[1]);
+			$ret['current']['remote_port'] = $matches[1];
 			break;
 		case preg_match ('/^    - System Name: "(.+)"$/', $line, $matches):
 			if
@@ -101,7 +100,7 @@ function xos12ReadLLDPStatus ($input)
 	return $ret;
 }
 
-function vrp5xReadLLDPStatus ($input)
+function vrpReadLLDPStatus ($input)
 {
 	$ret = array();
 	$valid_subtypes = array
@@ -115,8 +114,8 @@ function vrp5xReadLLDPStatus ($input)
 		$matches = array();
 		switch (TRUE)
 		{
-		case preg_match ('/^(.+) has \d+ neighbors:$/', $line, $matches):
-			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+		case preg_match ('/^(.+) has \d+ neighbor(\(s\)|s):$/', $line, $matches):
+			$ret['current']['local_port'] = shortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^Port ?ID ?(?:sub)?type\s*:\s*([^ ]+)/i', $line, $matches):
 			$ret['current']['PortIdSubtype'] = $matches[1];
@@ -144,7 +143,7 @@ function vrp5xReadLLDPStatus ($input)
 					$ret[$ret['current']['local_port']][] = array
 					(
 						'device' => $matches[1],
-						'port' => ios12ShortenIfName ($port),
+						'port' => $port,
 					);
 			}
 			unset ($ret['current']);
@@ -153,64 +152,6 @@ function vrp5xReadLLDPStatus ($input)
 		}
 	}
 	unset ($ret['current']);
-	return $ret;
-}
-
-function nxos4ReadLLDPStatus ($input)
-{
-	$ret = array();
-	$current = array();
-	$if_name = NULL;
-	$sys_descr = NULL;
-	$port_descr = NULL;
-	foreach (explode ("\n", $input) as $line)
-	{
-		$line = trim ($line);
-		if ($line == '')
-		{
-			if (isset ($if_name) and isset ($current['port']) and isset ($current['device']))
-			{
-				// Juniper MX routers sends SNMP if-id in PortID TLV. Use Port Description instead
-				if (isset ($port_descr) && preg_match ('/juniper/i', $sys_descr) && preg_match ('/^\d+$/', $current['port']))
-				{
-					$port_descr = preg_replace ('/[^\x20-z]/', '', $port_descr); // cut non-printable chars
-					$current['port'] = ios12ShortenIfName ($port_descr);
-				}
-				$ret[$if_name][] = $current;
-			}
-			$current = array();
-			$if_name = NULL;
-			$sys_descr = NULL;
-			$port_descr = NULL;
-		}
-		else
-		{
-			$pair = explode (': ', $line);
-			if (count ($pair) >= 2 and isset ($pair[1]))
-			{
-				list ($key, $value) = $pair;
-				$value = trim ($value, "\x06\x10\x13");
-				switch ($key)
-				{
-					case 'Port id':
-						$current['port'] = ios12ShortenIfName ($value);
-						break;
-					case 'Port Description':
-						$port_descr = $value;
-						break;
-					case 'System Description':
-						$sys_descr = $value;
-						break;
-					case 'System Name':
-						$current['device'] = $value;
-						break;
-					case 'Local Port id':
-						$if_name = ios12ShortenIfName ($value);
-						break;
-				}
-			}
-		}
-	}
 	return $ret;
 }
 
@@ -249,7 +190,7 @@ function ftos8ReadLLDPStatus ($input)
 				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
-					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
+					'port' => $ret['current']['remote_port'],
 				);
 			unset ($ret['current']['remote_subtype']);
 			unset ($ret['current']['remote_port']);
@@ -274,7 +215,7 @@ function eos4ReadLLDPStatus ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^Interface (.+) detected \d+ LLDP neighbors/', $line, $matches):
-			$ret['current']['local_port'] = ios12ShortenIfName ($matches[1]);
+			$ret['current']['local_port'] = shortenIfName ($matches[1]);
 			break;
 		case preg_match ('/^    - Port ID type: (.+)$/', $line, $matches):
 			$ret['current']['remote_subtype'] = $matches[1];
@@ -294,7 +235,7 @@ function eos4ReadLLDPStatus ($input)
 				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $matches[1],
-					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
+					'port' => $ret['current']['remote_port'],
 				);
 			unset ($ret['current']['remote_subtype']);
 			unset ($ret['current']['remote_port']);
@@ -314,7 +255,7 @@ function ros11ReadLLDPStatus ($input)
 		switch (1)
 		{
 		case preg_match ('/^Local port: (.+)$/', $line, $m):
-			$ret['current']['local_port'] = ios12ShortenIfName ($m[1]);
+			$ret['current']['local_port'] = shortenIfName ($m[1]);
 			break;
 		case preg_match ('/^Port ID: (.+)$/', $line, $m):
 			$ret['current']['remote_port'] = $m[1];
@@ -329,7 +270,7 @@ function ros11ReadLLDPStatus ($input)
 				$ret[$ret['current']['local_port']][] = array
 				(
 					'device' => $m[1],
-					'port' => ios12ShortenIfName ($ret['current']['remote_port']),
+					'port' => $ret['current']['remote_port'],
 				);
 			unset ($ret['current']['remote_port']);
 			break;
@@ -370,7 +311,7 @@ function ios12ScanTopLevel (&$work, $line)
 	switch (TRUE)
 	{
 	case (preg_match ('@^interface ((Ethernet|FastEthernet|GigabitEthernet|TenGigabitEthernet|[Pp]ort-channel)[[:digit:]]+(/[[:digit:]]+)*)$@', $line, $matches)):
-		$port_name = ios12ShortenIfName ($matches[1]);
+		$port_name = shortenIfName ($matches[1]);
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'ios12-get8021q-readport'; // switch to interface block reading
@@ -389,7 +330,7 @@ function ios12ReadSwitchPortList (&$work, $line)
 		$work['current_switchport'] = $m[1];
 	elseif (preg_match ('@^\s*Switchport:\s+(Enabled)@', $line, $m) && isset ($work['current_switchport']))
 	{
-		$work['switchports'][] = ios12ShortenIfName ($work['current_switchport']);
+		$work['switchports'][] = shortenIfName ($work['current_switchport']);
 		unset ($work['current_switchport']);
 	}
 	return 'ios12-get8021q-swports';
@@ -747,7 +688,7 @@ function vrp53ScanTopLevel (&$work, $line)
 			$work['vlanlist'][] = $vlan_id;
 		return 'vrp53-get8021q-top';
 	case (preg_match ('@^interface ((Ethernet|GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
-		$port_name = ios12ShortenIfName ($matches[1]);
+		$port_name = shortenIfName ($matches[1]);
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'vrp53-get8021q-readport';
@@ -871,7 +812,7 @@ function vrp55Read8021QConfig ($input)
 					$ret['vlanlist'][] = $vlan_id;
 				break;
 			case (preg_match ('@^interface ((Ethernet|GigabitEthernet|XGigabitEthernet|Eth-Trunk)([[:digit:]]+(/[[:digit:]]+)*))$@', $line, $matches)):
-				$port_name = ios12ShortenIfName ($matches[1]);
+				$port_name = shortenIfName ($matches[1]);
 				$ret['current'] = array
 				(
 					'port_name' => $port_name,
@@ -968,6 +909,124 @@ function vrp55Read8021QConfig ($input)
 		}
 		$ret['portconfig'][$port_name][] = array ('type' => $line_class, 'line' => $line);
 	}
+	return $ret;
+}
+
+function vrp85Read8021QConfig ($input)
+{
+	$ret = array
+	(
+		'vlanlist' => array(),
+		'portdata' => array(),
+		'portconfig' => array(),
+	);
+	$state = 'vlans';
+	$current = array();
+
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = rtrim ($line);
+		do switch ($state)
+		{
+			case 'vlans':
+				if (preg_match ('/^VLAN ID: (.*)/', $line, $m))
+				{
+					$current['vlanlist'] = ' ' . $m[1];
+					$state = 'vlans-nextline';
+				}
+				elseif (preg_match('/^-+$/', $line))
+				{
+					// commit $current into vlanlist
+					$range = preg_replace ('/\s+to\s+/', '-', $current['vlanlist']);
+					$range = trim (preg_replace('/\s+/', ',', $range), ',-');
+					$ret['vlanlist'] = $range == '' ? array() : iosParseVLANString ($range);
+					$current = array();
+
+					$state = 'ports';
+				}
+				break;
+			case 'vlans-nextline':
+				if (preg_match('/^\s+(\d.*)/', $line, $m))
+					$current['vlanlist'] .= ' ' . $m[1];
+				else
+				{
+					$state = 'vlans';
+					continue 2;
+				}
+				break;
+			case 'ports':
+				if (isset ($current['name']))
+				{
+					if (preg_match('/^\s+(\d.*)/', $line, $m))
+						$current['allowed'] .= ' ' . $m[1];
+					else
+					{
+						// port-channel members are displayed in 'display port vlan' with PVID = 0.
+						if ($current['native'] >= VLAN_MIN_ID && $current['native'] <= VLAN_MAX_ID)
+						{
+							// commit $current into portdata
+							$data = array
+							(
+								'mode' => $current['mode'],
+								'native' => $current['native'],
+								'allowed' => array(),
+							);
+							$range = trim (preg_replace('/\s+/', ',', $current['allowed']), ',-');
+							$data['allowed'] = $range == '' ? array() : iosParseVLANString ($range);
+							if ($data['mode'] == 'access')
+								$data['allowed'] = array ($current['native']);
+							elseif ($data['mode'] == 'trunk')
+							{
+								if (! in_array ($data['native'], $data['allowed']))
+									$data['native'] = 0;
+							}
+							else
+							{
+								$data['allowed'] = array();
+								$data['native'] = 0;
+							}
+							$ret['portdata'][$current['name']] = $data;
+						}
+						$current = array();
+					}
+				}
+				if (preg_match ('/^</', $line))
+					$state = 'conf';
+				elseif (preg_match ('/^(\S+)\s+(\w+)\s+(\d+)\s+(.*)$/', $line, $m))
+				{
+					$current['name'] = shortenIfName ($m[1]);
+					$current['mode'] = ($m[2] == 'access' || $m[2] == 'trunk') ? $m[2] : 'none';
+					$current['native'] = intval ($m[3]);
+					$current['allowed'] = $m[4];
+				}
+				break;
+			case 'conf':
+				if (preg_match ('/^interface (\S+)$/', $line, $m))
+				{
+					$current['name'] = shortenIfName ($m[1]);
+					$current['lines'] = array (array ('type' => 'line-header', 'line' => $line));
+					$state = 'iface';
+				}
+				break;
+			case 'iface':
+				$line_class = ($line == '#') ? 'line-header' : 'line-other';
+				if (preg_match ('/^\s*port (trunk|link-type|default vlan)/', $line))
+					$line_class = 'line-8021q';
+				$current['lines'][] = array ('type' => $line_class, 'line' => $line);
+				if ($line == '#')
+				{
+					// commit $current into portconfig
+					$ret['portconfig'][$current['name']] = $current['lines'];
+					$current = array();
+					$state = 'conf';
+				}
+				break;
+			default:
+				throw new RackTablesError ("Unknown FSM state '$state'", RackTablesError::INTERNAL);
+		}
+		while (FALSE);
+	}
+
 	return $ret;
 }
 
@@ -1108,9 +1167,6 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 	foreach ($queue as $cmd)
 		switch ($cmd['opcode'])
 		{
-		case 'getlldpstatus':
-			$ret .= "show lldp neighbors detail\n";
-			break;
 		case 'set mode':
 			if ($cmd['arg2'] == 'trunk')
 			{
@@ -1429,6 +1485,101 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		// query list
 		case 'get8021q':
+			$ret .= "display current-configuration\n";
+			break;
+		case 'getlldpstatus':
+			$ret .= "display lldp neighbor\n";
+			break;
+		case 'getportstatus':
+			$ret .= "display interface brief\n";
+			break;
+		case 'getmaclist':
+			$ret .= "display mac-address dynamic\n";
+			break;
+		case 'getallconf':
+			$ret .= "display current-configuration\n";
+			break;
+		default:
+			throw new InvalidArgException ('opcode', $cmd['opcode']);
+		}
+	return $ret;
+}
+
+function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
+{
+	$ret = '';
+	foreach ($queue as $cmd)
+		switch ($cmd['opcode'])
+		{
+		case 'create VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			break;
+		case 'destroy VLAN':
+			if ($cmd['arg1'] != 1)
+				$ret .= "undo vlan ${cmd['arg1']}\n";
+			break;
+		case 'add allowed':
+		case 'rem allowed':
+			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
+			$ret .= "interface ${cmd['port']}\n";
+			foreach (listToRanges ($cmd['vlans']) as $range)
+				$ret .=  "${undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+					"\n";
+			$ret .= "quit\n";
+			break;
+		case 'set native':
+			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'set access':
+			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			break;
+		case 'unset native':
+			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			break;
+		case 'unset access':
+			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			break;
+		case 'set mode':
+			// VRP 5.50's meaning of "trunk" is much like the one of IOS
+			// (unlike the way VRP 5.30 defines "trunk" and "hybrid"),
+			// but it is necessary to undo configured VLANs on a port
+			// for mode change command to succeed.
+			$before = array
+			(
+				'access' => "undo port trunk allow-pass vlan all\n" .
+					"port trunk allow-pass vlan 1\n" .
+					"undo port trunk pvid vlan\n",
+				'trunk' => "undo port default vlan\n",
+			);
+			$after = array
+			(
+				'access' => '',
+				'trunk' => "undo port trunk allow-pass vlan 1\n",
+			);
+			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= $before[$cmd['arg2']];
+			$ret .= "port link-type ${cmd['arg2']}\n";
+			$ret .= $after[$cmd['arg2']];
+			$ret .= "quit\n";
+			break;
+		case 'begin configuration':
+			$ret .= "system-view immediately\n";
+			break;
+		case 'end configuration':
+			$ret .= "return\n";
+			break;
+		case 'save configuration':
+			$ret .= "save\nY\n";
+			break;
+		case 'cite':
+			$ret .= $cmd['arg1'];
+			break;
+		// query list
+		case 'get8021q':
+			$ret .= "display vlan summary\n";
+			$ret .= "display port vlan\n";
 			$ret .= "display current-configuration\n";
 			break;
 		case 'getlldpstatus':
@@ -2159,7 +2310,7 @@ function ftos8Read8021QConfig ($input)
 		{
 			$iface = array
 			(
-				'name' => ios12ShortenIfName (str_replace (' ', '', $m[1])),
+				'name' => shortenIfName (str_replace (' ', '', $m[1])),
 				'lines' => array(),
 				'is_switched' => FALSE,
 				'vlan' => 1 === preg_match ('/^Vlan (\d+)$/', $m[1], $m2) ? $m2[1] : 0,
@@ -2208,7 +2359,7 @@ function ftos8Read8021QConfig ($input)
 						if ($constraints[0] <= $constraints[1])
 							for ($i = $constraints[0]; $i <= $constraints[1]; $i++)
 							{
-								$if_name = ios12ShortenIfName ($pref . $i);
+								$if_name = shortenIfName ($pref . $i);
 								$ret['portdata'][$if_name]['allowed'][] = $iface['vlan'];
 								if ($untagged)
 									$ret['portdata'][$if_name]['native'] = $iface['vlan'];
@@ -2289,7 +2440,7 @@ function eos4Read8021QConfig ($input)
 						$ret['vlanlist'][] = $vlan_id;
 				break;
 			case preg_match ('/^interface ((Ethernet|Port-Channel)\d+)$/', $line, $matches):
-				$portname = ios12ShortenIfName ($matches[1]);
+				$portname = shortenIfName ($matches[1]);
 				$ret['current'] = array
 				(
 					'port_name' => $portname,
@@ -2530,7 +2681,7 @@ function ros11Read8021QPorts (&$work, $line)
 		{
 			# 802.1Q configuration text uses the short form of interface names, other
 			# configuration text may use the long form. Translate to merge the latter.
-			$work['portconfig'][ios12ShortenIfName ($portname)] = array_merge ($work['portconfig'][$portname], $work['current']['lines']);
+			$work['portconfig'][shortenIfName ($portname)] = array_merge ($work['portconfig'][$portname], $work['current']['lines']);
 			foreach ($work['current']['config'] as $param => $val)
 				if ($param != 'allowed') # overwrite
 					$work['portdata'][$portname][$param] = $val;
@@ -2567,7 +2718,7 @@ function ciscoReadInterfaceStatus ($text)
 				}
 				break;
 			case 'readPort':
-				$portname = ios12ShortenIfName (trim (substr ($line, 0, $name_field_borders['from'])));
+				$portname = shortenIfName (trim (substr ($line, 0, $name_field_borders['from'])));
 				$rest = trim (substr ($line, $name_field_borders['from'] + $name_field_borders['length'] + 1));
 				$field_list = preg_split('/\s+/', $rest);
 				if (count ($field_list) < 4)
@@ -2612,7 +2763,7 @@ function vrpReadInterfaceStatus ($text)
 				if ($field_list[0] == '')
 					array_shift ($field_list);
 				list ($portname, $status_raw) = $field_list;
-				$portname = ios12ShortenIfName ($portname);
+				$portname = shortenIfName ($portname);
 
 				if ($status_raw == 'up' || $status_raw == 'down')
 					$status = $status_raw;
@@ -2765,7 +2916,7 @@ function ftos8ReadInterfaceStatus ($text)
 				$status = strtolower ($fields['Status']);
 				if ($status != 'up' && $status != 'down')
 					$status = 'disabled';
-				$portname = ios12ShortenIfName (str_replace (' ', '', $fields['Port']));
+				$portname = shortenIfName (str_replace (' ', '', $fields['Port']));
 				$result[$portname] = array
 				(
 					'status' => $status,
@@ -2799,7 +2950,7 @@ function eos4ReadInterfaceStatus ($text)
 					$status = 'down';
 				else
 					$status = 'disabled';
-				$result[ios12ShortenIfName ($fields['Port'])] = array
+				$result[shortenIfName ($fields['Port'])] = array
 				(
 					'status' => $status,
 					'speed' => $fields['Speed'],
@@ -2876,7 +3027,9 @@ function ios12ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/(\d+)\s+([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s.*?(\S+)$/', trim ($line), $matches))
 					break;
-				$portname = ios12ShortenIfName ($matches[3]);
+				if ($matches[3] == 'Drop') // 802.1X issue - no port name
+					break;
+				$portname = shortenIfName ($matches[3]);
 				$result[$portname][] = array
 				(
 					'mac' => $matches[2],
@@ -2905,7 +3058,7 @@ function nxos4ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/(\d+)\s+([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s.*?(\S+)$/', trim ($line), $matches))
 					break;
-				$portname = ios12ShortenIfName ($matches[3]);
+				$portname = shortenIfName ($matches[3]);
 				$result[$portname][] = array
 				(
 					'mac' => $matches[2],
@@ -2934,7 +3087,7 @@ function vrp53ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)\s+(\S+)/', trim ($line), $matches))
 					break;
-				$portname = ios12ShortenIfName ($matches[3]);
+				$portname = shortenIfName ($matches[3]);
 				$result[$portname][] = array
 				(
 					'mac' => str_replace ('-', '.', $matches[1]),
@@ -2948,7 +3101,7 @@ function vrp53ReadMacList ($text)
 	return $result;
 }
 
-function vrp55ReadMacList ($text)
+function vrpReadMacList ($text)
 {
 	$result = array();
 	$state = 'headerSearch';
@@ -2963,7 +3116,7 @@ function vrp55ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/([a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4})\s+(\d+)(?:(?:\s+\S+){2}|\/\S*)\s+(\S+)/', trim ($line), $matches))
 					break;
-				$portname = ios12ShortenIfName ($matches[3]);
+				$portname = shortenIfName ($matches[3]);
 				$result[$portname][] = array
 				(
 					'mac' => str_replace ('-', '.', $matches[1]),
@@ -3044,7 +3197,7 @@ function ftos8ReadMacList ($text)
 			case 'readPort':
 				if (! preg_match ('/^(\d+)\s+((?:[a-f0-9]{2}:){5}[a-f0-9]{2})\s+Dynamic\s+(\S+ (?:\S+)?)/', trim ($line), $matches))
 					break;
-				$portname = ios12ShortenIfName (str_replace (' ', '', $matches[3]));
+				$portname = shortenIfName (str_replace (' ', '', $matches[3]));
 				$mac = preg_replace ('/([a-f0-9]{2}):([a-f0-9]{2})/', '$1$2', $matches[2]);
 				$result[$portname][] = array
 				(
@@ -3070,7 +3223,7 @@ function eos4ReadMacList ($text)
 			if (substr ($line, 0, 19) == 'Total Mac Addresses') # end of table
 				break;
 			if (preg_match ('/^ *(\d+)\s+(\S+)\s+DYNAMIC\s+(\S+)\s/', $line, $m))
-				$result[ios12ShortenIfName ($m[3])][] = array
+				$result[shortenIfName ($m[3])][] = array
 				(
 					'mac' => $m[2],
 					'vid' => $m[1],
@@ -3089,7 +3242,7 @@ function ros11ReadMacList ($text)
 		if (! $got_header)
 			$got_header = (1 == preg_match('/Vlan\s+Mac Address\s+Port\s+Type\b/', $line));
 		elseif (preg_match ('/\b(\d+)\s+([a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2})\s+(\S+)\b/', $line, $m))
-			$result[ios12ShortenIfName ($m[3])][] = array
+			$result[shortenIfName ($m[3])][] = array
 			(
 				'mac' => $m[2],
 				'vid' => $m[1],
@@ -3162,7 +3315,7 @@ function fdry5SpotConfigText ($input)
 	return $input;
 }
 
-function vrp5xSpotConfigText ($input)
+function vrpSpotConfigText ($input)
 {
 	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input, 1);
 }
@@ -3210,9 +3363,9 @@ function jun10ReadLLDPStatus ($input)
 		elseif ($line == "")
 			$lldp_mode = FALSE;
 		elseif ($lldp_mode && preg_match ('/^(\S+)\s+([0-9a-f:]{17})\s+(.*?)\s+(\S+)\s*$/', $line, $m))
-			$ret[ios12ShortenIfName ($m[1])][] = array
+			$ret[shortenIfName ($m[1])][] = array
 			(
-				'port' => ios12ShortenIfName ($m[3]),
+				'port' => $m[3],
 				'device' => $m[4],
 			);
 	}
@@ -3234,8 +3387,8 @@ function iosxr4ReadLLDPStatus ($input)
 			$lldp_mode = FALSE;
 		elseif ($lldp_mode && preg_match ('/^(\S+)\s+([^\s\[\]]+)[^\s]*\s+\d+\s+\S+\s+(.*)$/', $line, $m))
 		{
-			$local_port = ios12ShortenIfName ($m[2]);
-			$remote_port = ios12ShortenIfName ($m[3]);
+			$local_port = shortenIfName ($m[2]);
+			$remote_port = $m[3];
 			if (!preg_match ('@^bundle-ether\d+$@', $remote_port) || preg_match ('@^bundle-ether\d+$@', $local_port))
 				$ret[$local_port][] = array
 				(

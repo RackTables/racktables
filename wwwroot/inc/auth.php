@@ -310,6 +310,18 @@ function saml_getAttributeValues ($attributes, $name)
 function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 {
 	global $LDAP_options, $debug_mode;
+	$LDAP_defaults = array
+	(
+		'group_attr' => 'memberof',
+		'group_filter' => '/^[Cc][Nn]=([^,]+)/',
+		'cache_refresh' => 300,
+		'cache_retry' => 15,
+		'cache_expiry' => 600,
+	);
+	foreach ($LDAP_defaults as $option_name => $option_value)
+		if (! array_key_exists ($option_name, $LDAP_options))
+			$LDAP_options[$option_name] = $option_value;
+
 	if
 	(
 		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
@@ -441,17 +453,6 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 function queryLDAPServer ($username, $password)
 {
 	global $LDAP_options;
-	$LDAP_defaults = array
-	(
-		'group_attr' => 'memberof',
-		'group_filter' => '/^[Cc][Nn]=([^,]+)/',
-		'cache_refresh' => 300,
-		'cache_retry' => 15,
-		'cache_expiry' => 600,
-	);
-	foreach ($LDAP_defaults as $option_name => $option_value)
-		if (! array_key_exists ($option_name, $LDAP_options))
-			$LDAP_options[$option_name] = $option_value;
 
 	if(extension_loaded('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);

@@ -98,12 +98,8 @@ function generateVSSection ($vs_parser)
 	%SLB_PORT_VS_CONF%
 	%SLB_VIP_VS_CONF%
 ");
-	$vip_bin = ip_checkparse ($vs_parser->expandMacro ('VIP'));
-	if ($vip_bin === FALSE)
-		$family_length = 4;
-	else
-		$family_length = strlen ($vip_bin);
-
+	$rs_count = 0;
+	$family_length = ($vs_parser->expandMacro ('IP_VER') == 6) ? 16 : 4;
 	foreach ($vs_parser->getRSList() as $rs)
 	{
 		if ($rs['inservice'] != 'yes')
@@ -128,6 +124,7 @@ function generateVSSection ($vs_parser)
 
 				for ($rsport = $port_range[0]; $rsport <= $port_range[1]; $rsport++)
 				{
+					$rs_count++;
 					$rs_parser = clone $parser;
 					$rs_parser->addMacro ('RSPORT', $rsport);
 					$ret .= $rs_parser->expand ("
@@ -146,7 +143,7 @@ function generateVSSection ($vs_parser)
 				}
 			}
 	}
-	return $ret;
+	return $rs_count ? $ret : '';
 }
 
 function generateSLBConfig2 ($triplet_list)
@@ -188,9 +185,9 @@ function generateSLBConfig2 ($triplet_list)
 			$vs_parser->addMacro ('VS_NAME', $vs_cell['name']);
 			$vs_parser->addMacro ('VS_RS_CONF', dos2unix ($vs_cell['rsconfig']));
 
-			$virtual_services = array();
 			foreach ($triplets as $triplet)
 			{
+				$virtual_services = array();
 				$tr_parser = clone $vs_parser;
 				$rs_cell = spotEntity ('ipv4rspool', $triplet['rspool_id']);
 				$tr_parser->addMacro ('RSP_ID', $rs_cell['id']);
@@ -219,7 +216,23 @@ function generateSLBConfig2 ($triplet_list)
 					if ($is_mark)
 					{
 						$p_parser->addMacro ('RS_HEADER', '%RSIP%');
-						$virtual_services[$p_parser->expandMacro ('VS_HEADER')] = generateVSSection ($p_parser);
+						// find enabled IP families to fill IP_VER
+						$seen_families = array();
+						foreach ($triplet['vips'] as $ip_row)
+						{
+							$family_length = strlen ($ip_row['vip']);
+							$seen_families[$family_length] = ($family_length == 16 ? 6 : 4);
+						}
+						if (! $seen_families)
+							$seen_families['unknown'] = '';
+						foreach ($seen_families as $ip_ver)
+						{
+							$fam_parser = clone $p_parser;
+							if ($ip_ver)
+								$fam_parser->addMacro ('IP_VER', $ip_ver);
+							if ('' != $vs_config = generateVSSection ($fam_parser))
+								$virtual_services["IPv${ip_ver} " . $fam_parser->expandMacro ('VS_HEADER')] = $vs_config;
+						}
 					}
 					else
 					{
@@ -239,16 +252,16 @@ function generateSLBConfig2 ($triplet_list)
 								}
 							$ip_parser->addMacro ('SLB_VIP_VS_CONF', dos2unix ($ip_row['vsconfig']));
 							$ip_parser->addMacro ('SLB_VIP_RS_CONF', dos2unix ($ip_row['rsconfig']));
-							$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = generateVSSection ($ip_parser);
-						}
+							if ('' != $vs_config = generateVSSection ($ip_parser))
+								$virtual_services[$port_row['proto'] . " " . $ip_parser->expandMacro ('VS_HEADER')] = $vs_config;
+						} // vips
 					}
-				}
+				} //ports
 
 				// group multiple virtual_services into vs_groups
 				$groups = array();
 				foreach ($virtual_services as $key => $content)
-					$groups[$content][] = preg_replace ('/^(TCP|UDP)\s+/', '', $key);
-				$gid = 1;
+					$groups[$content][] = preg_replace ('/^(TCP|UDP|IPv[46]?)\s+/', '', $key);
 				foreach ($groups as $content => $keys)
 				{
 					if (NULL !== ($new_content = callHook ('generateSLBConfig_stage2', $content, $keys)))
@@ -271,9 +284,9 @@ function generateSLBConfig2 ($triplet_list)
 						$ret .= $content . "}\n";
 					}
 				}
-			}
-		}
-	}
+			} // triplets
+		} // vs
+	} // balancers
 	return $ret;
 }
 
@@ -311,13 +324,14 @@ function makeUniqueVSGName ($seen_names, $keys, $vs_cell)
 			$cname .= '_fwm' . implode('_fwm', $seen_marks);
 		if (! array_key_exists ($cname, $seen_names))
 			$vsg_name = $cname;
+		else
+		{
+			$cname .= '_' . substr (sha1 (serialize ($keys)), 0, 6);
+			if (! array_key_exists ($cname, $seen_names))
+				$vsg_name = $cname;
+		}
 	}
-	if (! isset ($vsg_name))
-	{
-		$cname = $basename . '_' . substr (sha1 (serialize ($vsg['keys'])), 0, 6);
-		if (! array_key_exists ($cname, $seen_names))
-			$vsg_name = $cname;
-	}
+
 	if (! isset ($vsg_name))
 		throw new RackTablesError ("Could not produce unique VS group name for ${vs_cell['name']}", RackTablesError::INTERNAL);
 	return $vsg_name;

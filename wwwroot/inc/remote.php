@@ -26,22 +26,28 @@ $breedfunc = array
 	'fdry5-get8021q-readport'  => 'fdry5PickInterfaceSubcommand',
 	'fdry5-xlatepushq-main'    => 'fdry5TranslatePushQueue',
 	'fdry5-getallconf-main'    => 'fdry5SpotConfigText',
-	'vrp53-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp53-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp53-get8021q-main'      => 'vrp53ReadVLANConfig',
 	'vrp53-get8021q-top'       => 'vrp53ScanTopLevel',
 	'vrp53-get8021q-readport'  => 'vrp53PickInterfaceSubcommand',
 	'vrp53-getportstatus-main' => 'vrpReadInterfaceStatus',
 	'vrp53-getmaclist-main'    => 'vrp53ReadMacList',
 	'vrp53-xlatepushq-main'    => 'vrp53TranslatePushQueue',
-	'vrp53-getallconf-main'    => 'vrp5xSpotConfigText',
-	'vrp55-getlldpstatus-main' => 'vrp5xReadLLDPStatus',
+	'vrp53-getallconf-main'    => 'vrpSpotConfigText',
+	'vrp55-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp55-get8021q-main'      => 'vrp55Read8021QConfig',
 	'vrp55-getportstatus-main' => 'vrpReadInterfaceStatus',
-	'vrp55-getmaclist-main'    => 'vrp55ReadMacList',
+	'vrp55-getmaclist-main'    => 'vrpReadMacList',
 	'vrp55-xlatepushq-main'    => 'vrp55TranslatePushQueue',
-	'vrp55-getallconf-main'    => 'vrp5xSpotConfigText',
+	'vrp55-getallconf-main'    => 'vrpSpotConfigText',
+	'vrp85-getlldpstatus-main' => 'vrpReadLLDPStatus',
+	'vrp85-get8021q-main'      => 'vrp85Read8021QConfig',
+	'vrp85-getportstatus-main' => 'vrpReadInterfaceStatus',
+	'vrp85-getmaclist-main'    => 'vrpReadMacList',
+	'vrp85-xlatepushq-main'    => 'vrp85TranslatePushQueue',
+	'vrp85-getallconf-main'    => 'vrpSpotConfigText',
 	'nxos4-getcdpstatus-main'  => 'ios12ReadCDPStatus',
-	'nxos4-getlldpstatus-main' => 'nxos4ReadLLDPStatus',
+	'nxos4-getlldpstatus-main' => 'ios12ReadLLDPStatus',
 	'nxos4-get8021q-main'      => 'ios12ReadVLANConfig',
 	'nxos4-getportstatus-main' => 'ciscoReadInterfaceStatus',
 	'nxos4-getmaclist-main'    => 'nxos4ReadMacList',
@@ -109,6 +115,7 @@ $breed_by_swcode = array
 	258  => 'ios12', // IOS 12.4 (router OS)
 	1901 => 'ios12', // IOS 15.0
 	1963 => 'ios12', // IOS 15.1 (router OS)
+	2082 => 'ios12', // IOS 15.1
 	963  => 'nxos4', // NX-OS 4.0
 	964  => 'nxos4', // NX-OS 4.1
 	1365 => 'nxos4', // NX-OS 4.2
@@ -116,10 +123,14 @@ $breed_by_swcode = array
 	1411 => 'nxos4', // NX-OS 5.1
 	1809 => 'nxos4', // NX-OS 5.2
 	1643 => 'nxos4', // NX-OS 6.0
+	2028 => 'nxos4', // NX-OS 6.1
 	1352 => 'xos12', // Extreme XOS 12
 	1360 => 'vrp53', // Huawei VRP 5.3
 	1361 => 'vrp55', // Huawei VRP 5.5
 	1369 => 'vrp55', // Huawei VRP 5.7
+	2080 => 'vrp55', // Huawei VRP 5.11
+	2081 => 'vrp55', // Huawei VRP 5.12
+	2027 => 'vrp85', // Huawei VRP 8.5
 	1363 => 'fdry5', // IronWare 5
 	1367 => 'jun10', // 10S
 	1597 => 'jun10', // 10R
@@ -150,6 +161,7 @@ $linux_sw_ranges = array (
 	1331,1334,
 	1395,1396,
 	1417,1422,
+	1704,1709,
 );
 for ($i = 0; $i + 1 < count ($linux_sw_ranges); $i += 2)
 	for ($j = $linux_sw_ranges[$i]; $j <= $linux_sw_ranges[$i + 1]; $j++)
@@ -204,6 +216,8 @@ function queryDevice ($object_id, $command)
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
 
+	global $current_query_breed;
+	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
 	for ($i = 0; $i < 3; $i++)
 		try
 		{
@@ -218,6 +232,12 @@ function queryDevice ($object_id, $command)
 			sleep (3);
 			continue;
 		}
+		catch (Exception $e)
+		{
+			$current_query_breed = NULL;
+			throw $e;
+		}
+	$current_query_breed = NULL;
 
 	if (NULL !== ($subst = callHook ('alterDeviceQueryResult', $ret, $object_id, $command)))
 		$ret = $subst;
@@ -231,7 +251,19 @@ function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
 		throw new RTGatewayError ("undeclared function '${funcname}'");
-	return $funcname ($object_id, $crq, $vlan_names);
+	global $current_query_breed;
+	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
+	try
+	{
+		$ret = $funcname ($object_id, $crq, $vlan_names);
+	}
+	catch (Exception $e)
+	{
+		$current_query_breed = NULL;
+		throw $e;
+	}
+	$current_query_breed = NULL;
+	return $ret;
 }
 
 // takes settings struct (declared in queryTerminal) and CLI commands (plain text) as input by reference
@@ -270,6 +302,7 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings['prompt-delay'] = 'prompt_delay';
 			$params_from_settings['username'] = 'username';
 			$params_from_settings['password'] = 'password';
+			$params_from_settings[] = $settings['hostname'];
 			break;
 		case 'ssh':
 			$params_from_settings['sudo-user'] = 'sudo_user';
@@ -354,7 +387,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'ios12':
 		case 'ftos8':
 			$protocol = 'netcat'; // default is netcat mode
-			$prompt = '^(Login|Username|Password): $|^\S+[>#]$|\[[^][]*\]\? $'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|[Uu]sername|Password): $|^\S+[>#]$|\[[^][]*\]\? $'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'air12':
@@ -368,11 +401,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$commands = "skip-page-display\n" . $commands;
 			break;
 		case 'vrp55':
+		case 'vrp85':
 			$commands = "screen-length 0 temporary\n" . $commands;
 			/* fall-through */
 		case 'vrp53':
 			$protocol = 'telnet';
-			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|(?:\[Y\/N\]|\(Y\/N\)\[[YN]\]):?$';
+			$prompt = '^\[[^[\]]+\]$|^<[^<>]+>$|^(Username|Password):$|\[[Yy][^\[\]]*\]\s*:?\s*$';
 			break;
 		case 'nxos4':
 			$protocol = 'telnet';
@@ -594,6 +628,102 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 		elseif (preg_match ('/#\s*commit\s*$([^#]*?^error: .*?)$/sm', $output, $m))
 			throw new RTGatewayError ("Commit failed: ${m[1]}");
 	}
+}
+
+// if both $breed and $object_id are omitted, the breed could be auto-detected
+// in case shortenIfName is called from within queryDevice
+// (i.e. some function in deviceconfig.php)
+function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
+{
+	global $current_query_breed;
+	if (! isset ($breed))
+	{
+		if (isset ($object_id))
+			$breed = detectDeviceBreed ($object_id);
+		elseif (isset ($current_query_breed))
+			$breed = $current_query_breed;
+	}
+	switch ($breed)
+	{
+		case 'ios12':
+			return ios12ShortenIfName_real ($if_name);
+		case 'vrp53':
+		case 'vrp55':
+			return vrp5xShortenIfName ($if_name);
+		case 'vrp85':
+			return vrp85ShortenIfName ($if_name);
+		case 'iosxr4':
+			return iosxr4ShortenIfName ($if_name);
+	}
+	// default case is outside of switch()
+	return ios12ShortenIfName ($if_name);
+}
+
+function ios12ShortenIfName_real ($ifname)
+{
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
+}
+
+function vrp5xShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
+	$ifname = preg_replace ('@^(?:Ethernet|Eth)(.+)$@', 'ether\\1', $ifname);
+	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
+}
+
+function vrp85ShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	// VRP 8.5 has already shortened ifNames
+	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
+}
+
+function iosxr4ShortenIfName ($ifname)
+{
+	$ifname = preg_replace ('@^Mg(?:mtEth)?\s*(.*)$@', 'mg\\1', $ifname);
+	$ifname = preg_replace ('@^FastEthernet\s*(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet\s*(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigE\s*(.*)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^BE\s*(\d+)$@', 'bundle-ether\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	return $ifname;
+}
+
+// this function should be kept as-is for compatibility.
+// It is trying hard to complement every known breed.
+function ios12ShortenIfName ($ifname)
+{
+	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
+		return "Eth-Trunk${m[1]}";
+	$ifname = preg_replace ('@^(?:[Ee]thernet|Eth)(.+)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
+	$ifname = preg_replace ('@^(?:XGigabitEthernet|XGE)(.+)$@', 'xg\\1', $ifname);
+	$ifname = preg_replace ('@^LongReachEthernet(.+)$@', 'lo\\1', $ifname);
+	$ifname = preg_replace ('@^Management(.+)$@', 'ma\\1', $ifname);
+	$ifname = preg_replace ('@^Et(\d.*)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigE(.*)$@', 'te\\1', $ifname); // IOS XR4
+	$ifname = preg_replace ('@^Mg(?:mtEth)?(.*)$@', 'mg\\1', $ifname); // IOS XR4
+	$ifname = preg_replace ('@^BE(\d+)$@', 'bundle-ether\\1', $ifname); // IOS XR4
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
 }
 
 ?>

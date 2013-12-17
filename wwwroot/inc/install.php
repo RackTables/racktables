@@ -338,24 +338,39 @@ function init_database_static ()
 	echo 'Initializing the database...<br>';
 	echo '<table border=1>';
 	echo "<tr><th>section</th><th>queries</th><th>errors</th></tr>";
-	$errlist = array();
+	$failures = array();
 	foreach (array ('structure', 'dictbase') as $part)
 	{
 		echo "<tr><td>${part}</td>";
 		$nq = $nerrs = 0;
-		foreach (preg_split ("/;\s*\n/", get_pseudo_file ($part)) as $query)
+		foreach (get_pseudo_file ($part) as $q)
 		{
-			$query = trim($query);
-			if (empty ($query) or '--' == substr ($query, 0, 2))
+			if (empty ($q))
 				continue;
-			$nq++;
-			if ($dbxlink->exec ($query) === FALSE)
+			try
+			{
+				$result = $dbxlink->query ($q);
+				$nq++;
+			}
+			catch (PDOException $e)
 			{
 				$nerrs++;
-				$errlist[] = $query;
+				$errorInfo = $dbxlink->errorInfo();
+				$failures[] = array ($q, $errorInfo[2]);
 			}
 		}
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
+	}
+	if (!count ($failures))
+		echo "<strong><font color=green>done</font></strong>";
+	else
+	{
+		echo "<strong><font color=red>The following queries failed:</font></strong><br><pre>";
+		foreach ($failures as $f)
+		{
+			list ($q, $i) = $f;
+			echo "${q} -- ${i}\n";
+		}
 	}
 	// (re)load dictionary by pure PHP means w/o any external file
 	echo "<tr><td>dictionary</td>";
@@ -373,7 +388,7 @@ function init_database_static ()
 	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 
 	echo '</table>';
-	if (count ($errlist))
+	if (isset($errlist) && count ($errlist))
 	{
 		echo '<pre>The following queries failed:\n';
 		foreach ($errlist as $q)
@@ -430,29 +445,30 @@ function get_pseudo_file ($name)
 	switch ($name)
 	{
 	case 'structure':
-		return <<<END_OF_FILE
-alter database character set utf8;
-set names 'utf8';
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+		$query = array();
 
-CREATE TABLE `Atom` (
+		$query[] = "alter database character set utf8";
+		$query[] = "set names 'utf8'";
+		$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
+
+		$query[] = "CREATE TABLE `Atom` (
   `molecule_id` int(10) unsigned default NULL,
   `rack_id` int(10) unsigned default NULL,
   `unit_no` int(10) unsigned default NULL,
   `atom` enum('front','interior','rear') default NULL,
   CONSTRAINT `Atom-FK-molecule_id` FOREIGN KEY (`molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Attribute` (
+		$query[] = "CREATE TABLE `Attribute` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `type` enum('string','uint','float','dict','date') default NULL,
   `name` char(64) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `AttributeMap` (
+		$query[] = "CREATE TABLE `AttributeMap` (
   `objtype_id` int(10) unsigned NOT NULL default '1',
   `attr_id` int(10) unsigned NOT NULL default '1',
   `chapter_id` int(10) unsigned default NULL,
@@ -462,9 +478,9 @@ CREATE TABLE `AttributeMap` (
   KEY `chapter_id` (`chapter_id`),
   CONSTRAINT `AttributeMap-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`),
   CONSTRAINT `AttributeMap-FK-attr_id` FOREIGN KEY (`attr_id`) REFERENCES `Attribute` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `AttributeValue` (
+		$query[] = "CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned NOT NULL,
   -- Default value intentionally breaks the constraint, this blocks
   -- any insertion, which doesn't have 'object_tid' on the column list.
@@ -480,9 +496,9 @@ CREATE TABLE `AttributeValue` (
   KEY `object_tid-attr_id` (`object_tid`,`attr_id`),
   CONSTRAINT `AttributeValue-FK-map` FOREIGN KEY (`object_tid`, `attr_id`) REFERENCES `AttributeMap` (`objtype_id`, `attr_id`),
   CONSTRAINT `AttributeValue-FK-object` FOREIGN KEY (`object_id`, `object_tid`) REFERENCES `Object` (`id`, `objtype_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `CachedPAV` (
+		$query[] = "CREATE TABLE `CachedPAV` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
@@ -490,26 +506,26 @@ CREATE TABLE `CachedPAV` (
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `CachedPAV-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`) ON DELETE CASCADE,
   CONSTRAINT `CachedPAV-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `CachedPNV` (
+		$query[] = "CREATE TABLE `CachedPNV` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   UNIQUE KEY `port_id` (`object_id`,`port_name`),
   CONSTRAINT `CachedPNV-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `CachedPAV` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `CachedPVM` (
+		$query[] = "CREATE TABLE `CachedPVM` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
   CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `CactiGraph` (
+		$query[] = "CREATE TABLE `CactiGraph` (
   `object_id` int(10) unsigned NOT NULL,
   `server_id` int(10) unsigned NOT NULL,
   `graph_id` int(10) unsigned NOT NULL,
@@ -519,25 +535,25 @@ CREATE TABLE `CactiGraph` (
   KEY `graph_id` (`graph_id`),
   CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
   CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `CactiServer` (
+		$query[] = "CREATE TABLE `CactiServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `base_url` char(255) DEFAULT NULL,
   `username` char(64) DEFAULT NULL,
   `password` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Chapter` (
+		$query[] = "CREATE TABLE `Chapter` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
   `name` char(128) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Config` (
+		$query[] = "CREATE TABLE `Config` (
   `varname` char(32) NOT NULL,
   `varvalue` text NOT NULL,
   `vartype` enum('string','uint') NOT NULL default 'string',
@@ -546,9 +562,9 @@ CREATE TABLE `Config` (
   `is_userdefined` enum('yes','no') NOT NULL default 'no',
   `description` text,
   PRIMARY KEY  (`varname`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Dictionary` (
+		$query[] = "CREATE TABLE `Dictionary` (
   `chapter_id` int(10) unsigned NOT NULL,
   `dict_key` int(10) unsigned NOT NULL auto_increment,
   `dict_sticky` enum('yes','no') DEFAULT 'no',
@@ -556,9 +572,9 @@ CREATE TABLE `Dictionary` (
   PRIMARY KEY  (`dict_key`),
   UNIQUE KEY `dict_unique` (`chapter_id`,`dict_value`,`dict_sticky`),
   CONSTRAINT `Dictionary-FK-chapter_id` FOREIGN KEY (`chapter_id`) REFERENCES `Chapter` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `EntityLink` (
+		$query[] = "CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL,
   `parent_entity_id` int(10) unsigned NOT NULL,
@@ -567,9 +583,9 @@ CREATE TABLE `EntityLink` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
   KEY `EntityLink-compound` (`parent_entity_type`,`child_entity_type`,`child_entity_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `File` (
+		$query[] = "CREATE TABLE `File` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) NOT NULL,
   `type` char(255) NOT NULL,
@@ -582,9 +598,9 @@ CREATE TABLE `File` (
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `FileLink` (
+		$query[] = "CREATE TABLE `FileLink` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `file_id` int(10) unsigned NOT NULL,
   `entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL default 'object',
@@ -593,17 +609,17 @@ CREATE TABLE `FileLink` (
   KEY `FileLink-file_id` (`file_id`),
   UNIQUE KEY `FileLink-unique` (`file_id`,`entity_type`,`entity_id`),
   CONSTRAINT `FileLink-File_fkey` FOREIGN KEY (`file_id`) REFERENCES `File` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4Address` (
+		$query[] = "CREATE TABLE `IPv4Address` (
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
   `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4Allocation` (
+		$query[] = "CREATE TABLE `IPv4Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
@@ -611,9 +627,9 @@ CREATE TABLE `IPv4Allocation` (
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4LB` (
+		$query[] = "CREATE TABLE `IPv4LB` (
   `object_id` int(10) unsigned default NULL,
   `rspool_id` int(10) unsigned default NULL,
   `vs_id` int(10) unsigned default NULL,
@@ -626,9 +642,9 @@ CREATE TABLE `IPv4LB` (
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
   CONSTRAINT `IPv4LB-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `IPv4LB-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4Log` (
+		$query[] = "CREATE TABLE `IPv4Log` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `ip` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
@@ -636,9 +652,9 @@ CREATE TABLE `IPv4Log` (
   `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ip-date` (`ip`,`date`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv6Log` (
+		$query[] = "CREATE TABLE `IPv6Log` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `ip` binary(16) NOT NULL,
   `date` datetime NOT NULL,
@@ -646,9 +662,9 @@ CREATE TABLE `IPv6Log` (
   `message` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ip-date` (`ip`,`date`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4NAT` (
+		$query[] = "CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `proto` enum('TCP','UDP') NOT NULL default 'TCP',
   `localip` int(10) unsigned NOT NULL default '0',
@@ -661,9 +677,9 @@ CREATE TABLE `IPv4NAT` (
   KEY `remoteip` (`remoteip`),
   KEY `object_id` (`object_id`),
   CONSTRAINT `IPv4NAT-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4Network` (
+		$query[] = "CREATE TABLE `IPv4Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `ip` int(10) unsigned NOT NULL default '0',
   `mask` int(10) unsigned NOT NULL default '0',
@@ -671,9 +687,9 @@ CREATE TABLE `IPv4Network` (
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `base-len` (`ip`,`mask`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4RS` (
+		$query[] = "CREATE TABLE `IPv4RS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `inservice` enum('yes','no') NOT NULL default 'no',
   `rsip` varbinary(16) NOT NULL,
@@ -685,17 +701,17 @@ CREATE TABLE `IPv4RS` (
   KEY `rsip` (`rsip`),
   UNIQUE KEY `pool-endpoint` (`rspool_id`,`rsip`,`rsport`),
   CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4RSPool` (
+		$query[] = "CREATE TABLE `IPv4RSPool` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv4VS` (
+		$query[] = "CREATE TABLE `IPv4VS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `vip` varbinary(16) NOT NULL,
   `vport` smallint(5) unsigned default NULL,
@@ -705,17 +721,17 @@ CREATE TABLE `IPv4VS` (
   `rsconfig` text,
   PRIMARY KEY  (`id`),
   KEY `vip` (`vip`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv6Address` (
+		$query[] = "CREATE TABLE `IPv6Address` (
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
   `comment` char(255) NOT NULL default '',
   `reserved` enum('yes','no') default NULL,
   PRIMARY KEY  (`ip`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv6Allocation` (
+		$query[] = "CREATE TABLE `IPv6Allocation` (
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
@@ -723,9 +739,9 @@ CREATE TABLE `IPv6Allocation` (
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `IPv6Network` (
+		$query[] = "CREATE TABLE `IPv6Network` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `ip` binary(16) NOT NULL,
   `mask` int(10) unsigned NOT NULL,
@@ -734,9 +750,9 @@ CREATE TABLE `IPv6Network` (
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `ip` (`ip`,`mask`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `LDAPCache` (
+		$query[] = "CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,
   `successful_hash` char(40) NOT NULL,
   `first_success` timestamp NOT NULL default CURRENT_TIMESTAMP,
@@ -745,9 +761,9 @@ CREATE TABLE `LDAPCache` (
   `memberof` text,
   UNIQUE KEY `presented_username` (`presented_username`),
   KEY `scanidx` (`presented_username`,`successful_hash`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Link` (
+		$query[] = "CREATE TABLE `Link` (
   `porta` int(10) unsigned NOT NULL default '0',
   `portb` int(10) unsigned NOT NULL default '0',
   `cable` char(64) DEFAULT NULL,
@@ -756,14 +772,14 @@ CREATE TABLE `Link` (
   UNIQUE KEY `portb` (`portb`),
   CONSTRAINT `Link-FK-a` FOREIGN KEY (`porta`) REFERENCES `Port` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Link-FK-b` FOREIGN KEY (`portb`) REFERENCES `Port` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Molecule` (
+		$query[] = "CREATE TABLE `Molecule` (
   `id` int(10) unsigned NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `MountOperation` (
+		$query[] = "CREATE TABLE `MountOperation` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL default '0',
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
@@ -776,9 +792,9 @@ CREATE TABLE `MountOperation` (
   CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `MuninGraph` (
+		$query[] = "CREATE TABLE `MuninGraph` (
   `object_id` int(10) unsigned NOT NULL,
   `server_id` int(10) unsigned NOT NULL,
   `graph` char(255) NOT NULL,
@@ -788,15 +804,15 @@ CREATE TABLE `MuninGraph` (
   KEY `graph` (`graph`),
   CONSTRAINT `MuninGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `MuninServer` (`id`),
   CONSTRAINT `MuninGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `MuninServer` (
+		$query[] = "CREATE TABLE `MuninServer` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `base_url` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `ObjectLog` (
+		$query[] = "CREATE TABLE `ObjectLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int(10) unsigned NOT NULL,
   `user` char(64) NOT NULL,
@@ -806,15 +822,15 @@ CREATE TABLE `ObjectLog` (
   KEY `object_id` (`object_id`),
   KEY `date` (`date`),
   CONSTRAINT `ObjectLog-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `ObjectParentCompat` (
+		$query[] = "CREATE TABLE `ObjectParentCompat` (
   `parent_objtype_id` int(10) unsigned NOT NULL,
   `child_objtype_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `parent_child` (`parent_objtype_id`,`child_objtype_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Port` (
+		$query[] = "CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
@@ -831,9 +847,9 @@ CREATE TABLE `Port` (
   KEY `Port-FK-iif-oif` (`iif_id`,`type`),
   CONSTRAINT `Port-FK-iif-oif` FOREIGN KEY (`iif_id`, `type`) REFERENCES `PortInterfaceCompat` (`iif_id`, `oif_id`),
   CONSTRAINT `Port-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortAllowedVLAN` (
+		$query[] = "CREATE TABLE `PortAllowedVLAN` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
@@ -841,30 +857,30 @@ CREATE TABLE `PortAllowedVLAN` (
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `PortAllowedVLAN-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `PortVLANMode` (`object_id`, `port_name`) ON DELETE CASCADE,
   CONSTRAINT `PortAllowedVLAN-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortCompat` (
+		$query[] = "CREATE TABLE `PortCompat` (
   `type1` int(10) unsigned NOT NULL default '0',
   `type2` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `type1_2` (`type1`,`type2`),
   KEY `type2` (`type2`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortInnerInterface` (
+		$query[] = "CREATE TABLE `PortInnerInterface` (
   `id` int(10) unsigned NOT NULL,
   `iif_name` char(16) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `iif_name` (`iif_name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortInterfaceCompat` (
+		$query[] = "CREATE TABLE `PortInterfaceCompat` (
   `iif_id` int(10) unsigned NOT NULL,
   `oif_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
   CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortLog` (
+		$query[] = "CREATE TABLE `PortLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `port_id` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
@@ -873,26 +889,26 @@ CREATE TABLE `PortLog` (
   PRIMARY KEY (`id`),
   KEY `port_id-date` (`port_id`,`date`),
   CONSTRAINT `PortLog_ibfk_1` FOREIGN KEY (`port_id`) REFERENCES `Port` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortNativeVLAN` (
+		$query[] = "CREATE TABLE `PortNativeVLAN` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   UNIQUE KEY `port_id` (`object_id`,`port_name`),
   CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `PortVLANMode` (
+		$query[] = "CREATE TABLE `PortVLANMode` (
   `object_id` int(10) unsigned NOT NULL,
   `port_name` char(255) NOT NULL,
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
   CONSTRAINT `PortVLANMode-FK-object-port` FOREIGN KEY (`object_id`, `port_name`) REFERENCES `CachedPVM` (`object_id`, `port_name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Object` (
+		$query[] = "CREATE TABLE `Object` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` char(255) default NULL,
   `label` char(255) default NULL,
@@ -904,9 +920,9 @@ CREATE TABLE `Object` (
   UNIQUE KEY `asset_no` (`asset_no`),
   KEY `id-tid` (`id`,`objtype_id`),
   KEY `type_id` (`objtype_id`,`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `ObjectHistory` (
+		$query[] = "CREATE TABLE `ObjectHistory` (
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
   `label` char(255) default NULL,
@@ -918,9 +934,9 @@ CREATE TABLE `ObjectHistory` (
   `user_name` char(64) default NULL,
   KEY `id` (`id`),
   CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `RackSpace` (
+		$query[] = "CREATE TABLE `RackSpace` (
   `rack_id` int(10) unsigned NOT NULL default '0',
   `unit_no` int(10) unsigned NOT NULL default '0',
   `atom` enum('front','interior','rear') NOT NULL default 'interior',
@@ -930,22 +946,22 @@ CREATE TABLE `RackSpace` (
   KEY `RackSpace_object_id` (`object_id`),
   CONSTRAINT `RackSpace-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `RackSpace-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `RackThumbnail` (
+		$query[] = "CREATE TABLE `RackThumbnail` (
   `rack_id` int(10) unsigned NOT NULL,
   `thumb_data` blob,
   UNIQUE KEY `rack_id` (`rack_id`),
   CONSTRAINT `RackThumbnail-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `Script` (
+		$query[] = "CREATE TABLE `Script` (
   `script_name` char(64) NOT NULL,
   `script_text` longtext,
   PRIMARY KEY  (`script_name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `TagStorage` (
+		$query[] = "CREATE TABLE `TagStorage` (
   `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
@@ -957,9 +973,9 @@ CREATE TABLE `TagStorage` (
   KEY `TagStorage-FK-tag_id` (`tag_id`),
   KEY `tag_id-tag_is_assignable` (`tag_id`,`tag_is_assignable`),
   CONSTRAINT `TagStorage-FK-TagTree` FOREIGN KEY (`tag_id`, `tag_is_assignable`) REFERENCES `TagTree` (`id`, `is_assignable`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `TagTree` (
+		$query[] = "CREATE TABLE `TagTree` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `parent_id` int(10) unsigned default NULL,
   `is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
@@ -969,27 +985,27 @@ CREATE TABLE `TagTree` (
   KEY `TagTree-K-parent_id` (`parent_id`),
   KEY `id-is_assignable` (`id`,`is_assignable`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `UserAccount` (
+		$query[] = "CREATE TABLE `UserAccount` (
   `user_id` int(10) unsigned NOT NULL auto_increment,
   `user_name` char(64) NOT NULL default '',
   `user_password_hash` char(40) default NULL,
   `user_realname` char(64) default NULL,
   PRIMARY KEY  (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `UserConfig` (
+		$query[] = "CREATE TABLE `UserConfig` (
   `varname` char(32) NOT NULL,
   `varvalue` text NOT NULL,
   `user` char(64) NOT NULL,
   UNIQUE KEY `user_varname` (`user`,`varname`),
   KEY `varname` (`varname`),
   CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANDescription` (
+		$query[] = "CREATE TABLE `VLANDescription` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL default '0',
   `vlan_type` enum('ondemand','compulsory','alien') NOT NULL default 'ondemand',
@@ -998,16 +1014,16 @@ CREATE TABLE `VLANDescription` (
   KEY `vlan_id` (`vlan_id`),
   CONSTRAINT `VLANDescription-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VLANDescription-FK-vlan_id` FOREIGN KEY (`vlan_id`) REFERENCES `VLANValidID` (`vlan_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANDomain` (
+		$query[] = "CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `description` char(255) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANIPv4` (
+		$query[] = "CREATE TABLE `VLANIPv4` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
   `ipv4net_id` int(10) unsigned NOT NULL,
@@ -1015,9 +1031,9 @@ CREATE TABLE `VLANIPv4` (
   KEY `VLANIPv4-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv4-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv4-FK-ipv4net_id` FOREIGN KEY (`ipv4net_id`) REFERENCES `IPv4Network` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANIPv6` (
+		$query[] = "CREATE TABLE `VLANIPv6` (
   `domain_id` int(10) unsigned NOT NULL,
   `vlan_id` int(10) unsigned NOT NULL,
   `ipv6net_id` int(10) unsigned NOT NULL,
@@ -1025,9 +1041,9 @@ CREATE TABLE `VLANIPv6` (
   KEY `VLANIPv6-FK-compound` (`domain_id`,`vlan_id`),
   CONSTRAINT `VLANIPv6-FK-compound` FOREIGN KEY (`domain_id`, `vlan_id`) REFERENCES `VLANDescription` (`domain_id`, `vlan_id`) ON DELETE CASCADE,
   CONSTRAINT `VLANIPv6-FK-ipv6net_id` FOREIGN KEY (`ipv6net_id`) REFERENCES `IPv6Network` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANSTRule` (
+		$query[] = "CREATE TABLE `VLANSTRule` (
   `vst_id` int(10) unsigned NOT NULL,
   `rule_no` int(10) unsigned NOT NULL,
   `port_pcre` char(255) NOT NULL,
@@ -1036,9 +1052,9 @@ CREATE TABLE `VLANSTRule` (
   `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
   CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANSwitch` (
+		$query[] = "CREATE TABLE `VLANSwitch` (
   `object_id` int(10) unsigned NOT NULL,
   `domain_id` int(10) unsigned NOT NULL,
   `template_id` int(10) unsigned NOT NULL,
@@ -1057,31 +1073,31 @@ CREATE TABLE `VLANSwitch` (
   CONSTRAINT `VLANSwitch-FK-domain_id` FOREIGN KEY (`domain_id`) REFERENCES `VLANDomain` (`id`),
   CONSTRAINT `VLANSwitch-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`),
   CONSTRAINT `VLANSwitch-FK-template_id` FOREIGN KEY (`template_id`) REFERENCES `VLANSwitchTemplate` (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANSwitchTemplate` (
+		$query[] = "CREATE TABLE `VLANSwitchTemplate` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `mutex_rev` int(10) NOT NULL,
   `description` char(255) default NULL,
   `saved_by` char(64) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `description` (`description`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VLANValidID` (
+		$query[] = "CREATE TABLE `VLANValidID` (
   `vlan_id` int(10) unsigned NOT NULL default '1',
   PRIMARY KEY  (`vlan_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VS` (
+		$query[] = "CREATE TABLE `VS` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` char(255) DEFAULT NULL,
   `vsconfig` text,
   `rsconfig` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VSIPs` (
+		$query[] = "CREATE TABLE `VSIPs` (
   `vs_id` int(10) unsigned NOT NULL,
   `vip` varbinary(16) NOT NULL,
   `vsconfig` text,
@@ -1089,9 +1105,9 @@ CREATE TABLE `VSIPs` (
   PRIMARY KEY (`vs_id`,`vip`),
   KEY `vip` (`vip`),
   CONSTRAINT `VSIPs-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VSPorts` (
+		$query[] = "CREATE TABLE `VSPorts` (
   `vs_id` int(10) unsigned NOT NULL,
   `proto` enum('TCP','UDP','MARK') NOT NULL,
   `vport` int(10) unsigned NOT NULL,
@@ -1100,9 +1116,9 @@ CREATE TABLE `VSPorts` (
   PRIMARY KEY (`vs_id`,`proto`,`vport`),
   KEY `proto-vport` (`proto`,`vport`),
   CONSTRAINT `VS-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `VS` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VSEnabledIPs` (
+		$query[] = "CREATE TABLE `VSEnabledIPs` (
   `object_id` int(10) unsigned NOT NULL,
   `vs_id` int(10) unsigned NOT NULL,
   `vip` varbinary(16) NOT NULL,
@@ -1114,11 +1130,12 @@ CREATE TABLE `VSEnabledIPs` (
   KEY `vip` (`vip`),
   KEY `VSEnabledIPs-FK-vs_id-vip` (`vs_id`,`vip`),
   KEY `VSEnabledIPs-FK-rspool_id` (`rspool_id`),
+  CONSTRAINT `VSEnabledIPs-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledIPs-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledIPs-FK-vs_id-vip` FOREIGN KEY (`vs_id`, `vip`) REFERENCES `VSIPs` (`vs_id`, `vip`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE TABLE `VSEnabledPorts` (
+		$query[] = "CREATE TABLE `VSEnabledPorts` (
   `object_id` int(10) unsigned NOT NULL,
   `vs_id` int(10) unsigned NOT NULL,
   `proto` enum('TCP','UDP','MARK') NOT NULL,
@@ -1132,23 +1149,23 @@ CREATE TABLE `VSEnabledPorts` (
   CONSTRAINT `VSEnabledPorts-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledPorts-FK-rspool_id` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE,
   CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB";
 
-CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
+		$query[] = "CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
 FROM `Object` O
 LEFT JOIN (
   `Object` P INNER JOIN `EntityLink` EL
   ON EL.parent_entity_id = P.id AND P.objtype_id = 1562 AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'location'
 ) ON EL.child_entity_id = O.id
-WHERE O.objtype_id = 1562;
+WHERE O.objtype_id = 1562";
 
-CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS location_name
+		$query[] = "CREATE VIEW `Row` AS SELECT O.id, O.name, L.id AS location_id, L.name AS location_name
   FROM `Object` O
   LEFT JOIN `EntityLink` EL ON O.id = EL.child_entity_id AND EL.parent_entity_type = 'location' AND EL.child_entity_type = 'row'
   LEFT JOIN `Object` L ON EL.parent_entity_id = L.id AND L.objtype_id = 1562
-  WHERE O.objtype_id = 1561;
+  WHERE O.objtype_id = 1561";
 
-CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
+		$query[] = "CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O.comment,
   AV_H.uint_value AS height,
   AV_S.uint_value AS sort_order,
   RT.thumb_data,
@@ -1164,18 +1181,20 @@ CREATE VIEW `Rack` AS SELECT O.id, O.name AS name, O.asset_no, O.has_problems, O
   INNER JOIN `Object` R ON R.id = RL.parent_entity_id
   LEFT JOIN `EntityLink` LL ON R.id = LL.child_entity_id AND LL.parent_entity_type = 'location' AND LL.child_entity_type = 'row'
   LEFT JOIN `Object` L ON L.id = LL.parent_entity_id
-  WHERE O.objtype_id = 1560;
+  WHERE O.objtype_id = 1560";
 
-CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`
- WHERE `objtype_id` NOT IN (1560, 1561, 1562);
+		$query[] = "CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_problems, comment FROM `Object`
+ WHERE `objtype_id` NOT IN (1560, 1561, 1562)";
 
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-END_OF_FILE;
+		$query[] = "SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS";
+
+		return $query;
 ##########################################################################
 	case 'dictbase':
 		$db_version = CODE_VERSION;
-		return <<<END_OF_FILE
-INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
+		$query = array();
+
+		$query[] = "INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (1,'string','OEM S/N 1'),
 (2,'dict','HW type'),
 (3,'string','FQDN'),
@@ -1199,13 +1218,13 @@ INSERT INTO `Attribute` (`id`, `type`, `name`) VALUES
 (28,'string','Slot number'),
 (29,'uint','Sort order'),
 (30,'dict','Mgmt type'),
--- ^^^^^ Any new "default" attributes must go above this line! ^^^^^
+-- ^^^^^ Any new 'default' attributes must go above this line! ^^^^^
 -- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
 -- attributes are assigned IDs starting from 10000).
-(9999,'string','base MAC address');
+(9999,'string','base MAC address')";
 
-INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
+		$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','ObjectType'),
 (2,'yes','PortOuterInterface'),
 (11,'no','server models'),
@@ -1234,9 +1253,9 @@ INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (37,'no','wireless OS type'),
 (38,'no','management interface type'),
 -- Default chapters must have ID less than 10000, add them above this line.
-(9999,'no','multiplexer models');
+(9999,'no','multiplexer models')";
 
-INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`, `sticky`) VALUES
+		$query[] = "INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`, `sticky`) VALUES
 (2,1,NULL,'no'),
 (2,2,27,'no'),
 (2,3,NULL,'no'),
@@ -1381,9 +1400,9 @@ INSERT INTO `AttributeMap` (`objtype_id`, `attr_id`, `chapter_id`, `sticky`) VAL
 (1644,3,NULL,'no'),
 (1787,3,NULL,'no'),
 (1787,14,NULL,'no'),
-(1787,30,38,'yes');
+(1787,30,38,'yes')";
 
-INSERT INTO `PortInnerInterface` VALUES
+		$query[] = "INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
 (2,'SFP-100'),
 (3,'GBIC'),
@@ -1394,9 +1413,9 @@ INSERT INTO `PortInnerInterface` VALUES
 (8,'XFP'),
 (9,'SFP+'),
 (10,'QSFP+'),
-(11,'CFP');
+(11,'CFP')";
 
-INSERT INTO `ObjectParentCompat` VALUES
+		$query[] = "INSERT INTO `ObjectParentCompat` VALUES
 (3,13),
 (4,1504),
 (4,1507),
@@ -1408,9 +1427,9 @@ INSERT INTO `ObjectParentCompat` VALUES
 (1505,1506),
 (1505,1507),
 (1506,4),
-(1506,1504);
+(1506,1504)";
 
-INSERT INTO `PortInterfaceCompat` VALUES
+		$query[] = "INSERT INTO `PortInterfaceCompat` VALUES
 (2,1208),(2,1195),(2,1196),(2,1197),(2,1198),(2,1199),(2,1200),(2,1201),
 (3,1078),(3,24),(3,34),(3,1202),(3,1203),(3,1204),(3,1205),(3,1206),(3,1207),
 (4,1077),(4,24),(4,34),(4,1202),(4,1203),(4,1204),(4,1205),(4,1206),(4,1207),
@@ -1421,9 +1440,9 @@ INSERT INTO `PortInterfaceCompat` VALUES
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
 (10,1588),(10,1663),(10,1664),
 (11,1668),(11,1669),(11,1670),(11,1671),
-(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469);
+(1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
-INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
+		$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (17,17),
 (18,18),
 (19,19),
@@ -1621,14 +1640,13 @@ INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
 (1669,1669),
 (1670,1670),
 (1671,1671),
-(1642,1642);
+(1642,1642)";
 
-INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
+		$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
 ('MAXSELSIZE','30','uint','no','no','yes','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','no','Organization name'),
 ('ROW_SCALE','2','uint','no','no','yes','Picture scale for rack row display'),
-('PORTS_PER_ROW','12','uint','no','no','yes','Ports per row in VLANs tab'),
 ('IPV4_ADDRS_PER_PAGE','256','uint','no','no','yes','IPv4 addresses per page'),
 ('DEFAULT_RACK_HEIGHT','42','uint','yes','no','yes','Default rack height'),
 ('DEFAULT_SLB_VS_PORT','','uint','yes','no','yes','Default port of SLB virtual service'),
@@ -1646,7 +1664,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('EXT_IPV4_VIEW','yes','string','no','no','yes','Extended IPv4 view'),
 ('TREE_THRESHOLD','25','uint','yes','no','yes','Tree view auto-collapse threshold'),
 ('IPV4_JAYWALK','no','string','no','no','no','Enable IPv4 address allocations w/o covering network'),
-('ADDNEW_AT_TOP','yes','string','no','no','yes','Render "add new" line at top of the list'),
+('ADDNEW_AT_TOP','yes','string','no','no','yes','Render \"add new\" line at top of the list'),
 ('IPV4_TREE_SHOW_USAGE','no','string','no','no','yes','Show address usage in IPv4 tree'),
 ('PREVIEW_TEXT_MAXCHARS','10240','uint','yes','no','yes','Max chars for text file preview'),
 ('PREVIEW_TEXT_ROWS','25','uint','yes','no','yes','Rows for text file preview'),
@@ -1670,7 +1688,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('TAGS_TOPLIST_SIZE','50','uint','yes','no','yes','Tags top list size'),
 ('TAGS_QUICKLIST_SIZE','20','uint','no','no','yes','Tags quick list size'),
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','yes','Tags quick list threshold'),
-('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable "Add/update multiple ports" form'),
+('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable \"Add/update multiple ports\" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
 ('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
@@ -1686,7 +1704,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('8021Q_WRI_AFTER_CONFT_LISTSRC','false','string','no','no','no','802.1Q: save device configuration after deploy (RackCode)'),
 ('8021Q_INSTANT_DEPLOY','no','string','no','no','yes','802.1Q: instant deploy'),
 ('STATIC_FILTER','yes','string','no','no','yes','Enable Filter Caching'),
-('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable "Bulk Port" form'),
+('ENABLE_BULKPORT_FORM','yes','string','no','no','yes','Enable \"Bulk Port\" form'),
 ('CDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running CDP'),
 ('LLDP_RUNNERS_LISTSRC', '', 'string', 'yes', 'no', 'no', 'List of devices running LLDP'),
 ('SHRINK_TAG_TREE_ON_CLICK','yes','string','no','no','yes','Dynamically hide useless tags in tagtree'),
@@ -1694,9 +1712,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('SYNCDOMAIN_MAX_PROCESSES','0','uint','yes','no', 'no', 'How many worker proceses syncdomain cron script should create'),
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
-('SSH_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for SSH-managed objects'),
-('RDP_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for RDP-managed objects'),
-('TELNET_OBJS_LISTSRC','false','string','yes','no','yes','Rackcode filter for telnet-managed objects'),
+('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices'),
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links'),
 ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
@@ -1709,11 +1725,11 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
 ('REVERSED_RACKS_LISTSRC', 'false', 'string', 'yes', 'no', 'no', 'List of racks with reversed (top to bottom) units order'),
 ('NEAREST_RACKS_CHECKBOX', 'yes', 'string', 'yes', 'no', 'yes', 'Enable nearest racks in port list filter by default'),
-('DB_VERSION','${db_version}','string','no','yes','no','Database version.');
+('DB_VERSION','${db_version}','string','no','yes','no','Database version.')";
 
-INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}');
+		$query[] = "INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}')";
 
-INSERT INTO VLANValidID (vlan_id) VALUES
+		$query[] = "INSERT INTO VLANValidID (vlan_id) VALUES
 (1),
 (2),
 (3),
@@ -5807,8 +5823,9 @@ INSERT INTO VLANValidID (vlan_id) VALUES
 (4091),
 (4092),
 (4093),
-(4094);
-END_OF_FILE;
+(4094)";
+
+	return $query;
 	}
 }
 

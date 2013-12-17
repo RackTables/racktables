@@ -155,6 +155,8 @@ function getLocationSelectAJAX()
 	}
 	foreach ($locationtree as $location)
 	{
+		if ($location['id'] == $current_location_id)
+			continue;
 		echo "<option value=${location['id']} ";
 		if ($location['id'] == $selected_id)
 			echo 'selected ';

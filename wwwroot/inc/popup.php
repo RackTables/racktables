@@ -94,11 +94,25 @@ INNER JOIN (
 	// rack filter
 	if (! empty ($filter['racks']))
 	{
-		// include objects mounted directly in the specified racks, as well as children of those objects
-		$query .= 'AND p.object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (' .
-			questionMarks (count ($filter['racks'])) . ') ' .
-			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='object' AND child_entity_type = 'object' AND parent_entity_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (" .
-			questionMarks (count ($filter['racks'])) . '))) ';
+		// objects directly mounted in the racks
+		$query .= sprintf
+		(
+			'AND p.object_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (%s) ',
+			questionMarks (count ($filter['racks']))
+		);
+		// children of objects directly mounted in the racks
+		$query .= sprintf
+		(
+			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='object' AND child_entity_type = 'object' AND parent_entity_id IN (SELECT DISTINCT object_id FROM RackSpace WHERE rack_id IN (%s)) ",
+			questionMarks (count ($filter['racks']))
+		);
+		// zero-U objects mounted to the racks
+		$query .= sprintf
+		(
+			"UNION SELECT child_entity_id FROM EntityLink WHERE parent_entity_type='rack' AND child_entity_type='object' AND parent_entity_id IN (%s)) ",
+			questionMarks (count ($filter['racks']))
+		);
+		$qparams = array_merge ($qparams, $filter['racks']);
 		$qparams = array_merge ($qparams, $filter['racks']);
 		$qparams = array_merge ($qparams, $filter['racks']);
 	}
@@ -107,6 +121,12 @@ INNER JOIN (
 	{
 		$query .= 'AND o.name like ? ';
 		$qparams[] = '%' . $filter['objects'] . '%';
+	}
+	// asset_no filter
+	if (! empty ($filter['asset_no']))
+	{
+		$query .= 'AND o.asset_no like ? ';
+		$qparams[] = '%' . $filter['asset_no'] . '%';
 	}
 	// portname filter
 	if (! empty ($filter['ports']))
@@ -264,7 +284,7 @@ function handlePopupPortLink()
 			8, 
 			array
 			(
-				formatPortLink ($port_info['id'], $port_info['name'], NULL, NULL),
+				formatPortLink ($port_info['object_id'], NULL, $port_info['id'], $port_info['name']),
 				formatPort ($remote_port_info),
 			)
 		);
@@ -366,11 +386,14 @@ function renderPopupPortSelector()
 		'racks' => array(),
 		'objects' => '',
 		'ports' => '',
+		'asset_no' => '',
 	);
 	if (isset ($_REQUEST['filter-obj']))
 		$filter['objects'] = trim($_REQUEST['filter-obj']);
 	if (isset ($_REQUEST['filter-port']))
 		$filter['ports'] = trim($_REQUEST['filter-port']);
+	if (isset ($_REQUEST['filter-asset_no']))
+		$filter['asset_no'] = trim($_REQUEST['filter-asset_no']);
 	if ($in_rack)
 	{
 		$object = spotEntity ('object', $port_info['object_id']);
@@ -388,7 +411,8 @@ function renderPopupPortSelector()
 	(
 		! empty ($filter['racks'])  ||
 		! empty ($filter['objects']) ||
-		! empty ($filter['ports'])
+		! empty ($filter['ports']) ||
+		! empty ($filter['asset_no'])
 	)
 		$spare_ports = findSparePorts ($port_info, $filter);
 
@@ -401,6 +425,7 @@ function renderPopupPortSelector()
 	echo '<input type=hidden name="port" value="' . $port_id . '">';
 	echo '<table align="center" valign="bottom"><tr>';
 	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Asset tag:<br><input type=text size=8 name="filter-asset_no" value="' . htmlspecialchars ($filter['asset_no'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
 	echo '<td valign="bottom"><input type=submit value="show ports"></td>';

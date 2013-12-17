@@ -75,6 +75,12 @@ class EntityNotFoundException extends RackTablesError
 	}
 	public function dispatch()
 	{
+		global $debug_mode;
+		if ($debug_mode)
+		{
+			printGenericException ($this);
+			return;
+		}
 		showError ($this->message);
 		redirectUser (buildRedirectURL('index', 'default'));
 	}
@@ -227,6 +233,8 @@ function stringTrace($trace)
 					$printarg = 'NULL';
 				elseif (is_array ($arg))
 					$printarg = print_r ($arg, 1);
+				elseif (is_object ($arg))
+					$printarg = "Object(" . get_class ($arg) . ")";
 				else
 					$printarg = $arg;
 				$ret .= $printarg;

@@ -281,10 +281,22 @@ function renderRSPool ($pool_id)
 	$summary['VS configuration'] = '<div class="dashed slbconf">' . htmlspecialchars ($poolInfo['vsconfig']) . '</div>';
 	$summary['RS configuration'] = '<div class="dashed slbconf">' . htmlspecialchars ($poolInfo['rsconfig']) . '</div>';
 	renderEntitySummary ($poolInfo, 'Summary', $summary);
+	callHook ('portletRSPoolSrv', $pool_id);
 
+	echo "</td><td class=pcright>\n";
+	renderSLBTriplets2 ($poolInfo);
+	renderSLBTriplets ($poolInfo);
+	echo "</td></tr><tr><td colspan=2>\n";
+	renderFilesPortlet ('ipv4rspool', $pool_id);
+	echo "</td></tr></table>\n";
+}
+
+function portletRSPoolSrv ($pool_id)
+{
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
 	if ($poolInfo['rscount'])
 	{
-		$rs_list = getRSListInPool ($pool_id);
+		$rs_list = getRSListInPool ($poolInfo['id']);
 		$rs_table = callHook ('prepareRealServersTable', $rs_list);
 		startPortlet ("Real servers ({$poolInfo['rscount']})");
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -325,13 +337,6 @@ function renderRSPool ($pool_id)
 		echo "</table>\n";
 		finishPortlet();
 	}
-
-	echo "</td><td class=pcright>\n";
-	renderSLBTriplets2 ($poolInfo);
-	renderSLBTriplets ($poolInfo);
-	echo "</td></tr><tr><td colspan=2>\n";
-	renderFilesPortlet ('ipv4rspool', $pool_id);
-	echo "</td></tr></table>\n";
 }
 
 function prepareRealServersTable ($rs_list)
@@ -359,52 +364,49 @@ function prepareRealServersTable ($rs_list)
 		);
 }
 
-function renderRSPoolServerForm ($pool_id)
+function renderEditRSList ($rs_list)
 {
 	global $nextorder;
-	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
 
-	if ($poolInfo['rscount'])
+	echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+	echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>Comment</th><th>in service</th><th>configuration</th><th>&nbsp;</th></tr>\n";
+	// new RS form
+	printOpFormIntro ('addRS');
+	echo "<tr class=row_odd valign=top><td>";
+	printImageHREF ('add', 'Add new real server');
+	echo "</td><td><input type=text name=rsip></td>";
+	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
+	if ($default_port == 0)
+		$default_port = '';
+	echo "<td><input type=text name=rsport size=5 value='$default_port'></td>";
+	echo "<td><input type=text name=comment size=15></td>";
+	$checked = (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes') ? 'checked' : '';
+	echo "<td><input type=checkbox name=inservice $checked></td>";
+	echo "<td><textarea name=rsconfig></textarea></td><td>";
+	printImageHREF ('ADD', 'Add new real server', TRUE);
+	echo "</td></tr></form>\n";
+
+	$order = 'even';
+	foreach ($rs_list as $rsid => $rs)
 	{
-		startPortlet ("Manage RS list (${poolInfo['rscount']})");
-		echo "<table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-		echo "<tr><th>&nbsp;</th><th>Address</th><th>Port</th><th>Comment</th><th>in service</th><th>configuration</th><th>&nbsp;</th></tr>\n";
-		// new RS form
-		printOpFormIntro ('addRS');
-		echo "<tr class=row_odd valign=top><td>";
-		printImageHREF ('add', 'Add new real server');
-		echo "</td><td><input type=text name=rsip></td>";
-		$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
-		if ($default_port == 0)
-			$default_port = '';
-		echo "<td><input type=text name=rsport size=5 value='$default_port'></td>";
-		echo "<td><input type=text name=comment size=15></td>";
-		$checked = (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes') ? 'checked' : '';
+		printOpFormIntro ('updRS', array ('rs_id' => $rsid));
+		echo "<tr valign=top class=row_${order}><td>";
+		echo getOpLink (array('op'=>'delRS', 'id'=>$rsid), '', 'delete', 'Delete this real server');
+		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
+		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
+		echo "<td><input type=text name=comment size=15 value='${rs['comment']}'></td>";
+		$checked = $rs['inservice'] == 'yes' ? 'checked' : '';
 		echo "<td><input type=checkbox name=inservice $checked></td>";
-		echo "<td><textarea name=rsconfig></textarea></td><td>";
-		printImageHREF ('ADD', 'Add new real server', TRUE);
+		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
+		printImageHREF ('SAVE', 'Save changes', TRUE);
 		echo "</td></tr></form>\n";
-
-		$order = 'even';
-		foreach (getRSListInPool ($pool_id) as $rsid => $rs)
-		{
-			printOpFormIntro ('updRS', array ('rs_id' => $rsid));
-			echo "<tr valign=top class=row_${order}><td>";
-			echo getOpLink (array('op'=>'delRS', 'pool_id'=>$pool_id, 'id'=>$rsid), '', 'delete', 'Delete this real server');
-			echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
-			echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-			echo "<td><input type=text name=comment size=15 value='${rs['comment']}'></td>";
-			$checked = $rs['inservice'] == 'yes' ? 'checked' : '';
-			echo "<td><input type=checkbox name=inservice $checked></td>";
-			echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
-			printImageHREF ('SAVE', 'Save changes', TRUE);
-			echo "</td></tr></form>\n";
-			$order = $nextorder[$order];
-		}
-		echo "</table>\n";
-		finishPortlet();
+		$order = $nextorder[$order];
 	}
+	echo "</table>\n";
+}
 
+function portletRSPoolAddMany ($pool_id)
+{
 	startPortlet ('Add many');
 	printOpFormIntro ('addMany');
 	echo "<table border=0 align=center>\n<tr><td>";
@@ -419,6 +421,16 @@ function renderRSPoolServerForm ($pool_id)
 	echo "<tr><td colspan=3><textarea name=rawtext cols=100 rows=25></textarea></td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
+}
+
+function renderRSPoolServerForm ($pool_id)
+{
+	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
+	startPortlet ("Manage RS list (${poolInfo['rscount']})");
+	renderEditRSList (getRSListInPool ($pool_id));
+	finishPortlet();
+
+	portletRSPoolAddMany ($pool_id);
 }
 
 function getBulkRealsFormats()
