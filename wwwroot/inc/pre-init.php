@@ -5,11 +5,11 @@
 # licensing information.
 
 /*
-*
-* This file is a library needed by all modules of RackTables (installer, upgrader)
-* to make them able to find code and data.
-*
-*/
+ *
+ * This file is a library needed by all modules of RackTables (installer, upgrader)
+ * to make them able to find code and data.
+ *
+ */
 
 require_once 'exceptions.php';
 require_once 'interface-lib.php';
@@ -25,62 +25,62 @@ $racktables_rootdir = realpath (dirname (__FILE__) . '/..'); // you can not over
 # code, multiple instances" deploy, in which case the paths could be changed
 # in the custom entry point wrapper (like own index.php)
 if (! isset ($racktables_staticdir)) // the directory containing 'pix', 'js', 'css' dirs
-	$racktables_staticdir = $racktables_rootdir;
+		$racktables_staticdir = $racktables_rootdir;
 if (! isset ($racktables_gwdir)) // the directory containing the 'telnet' and 'ssh' scripts
-	$racktables_gwdir = realpath ($racktables_rootdir . '/../gateways');
-if (! isset ($racktables_confdir)) // the directory containing secret.php (default is wwwroot/inc)
-	$racktables_confdir = dirname (__FILE__);
-if (! isset ($path_to_secret_php)) // you can overrride the path to secret.php separately from $racktables_confdir (legacy feature)
-	$path_to_secret_php = $racktables_confdir . '/secret.php';
+		$racktables_gwdir = realpath ($racktables_rootdir . '/../gateways');
+		if (! isset ($racktables_confdir)) // the directory containing secret.php (default is wwwroot/inc)
+		$racktables_confdir = dirname (__FILE__);
+		if (! isset ($path_to_secret_php)) // you can overrride the path to secret.php separately from $racktables_confdir (legacy feature)
+		$path_to_secret_php = $racktables_confdir . '/secret.php';
 if (! isset ($racktables_plugins_dir)) // the directory where RT will load additional *.php files (like local.php) from
-	$racktables_plugins_dir = realpath ($racktables_rootdir . '/../plugins');
+		$racktables_plugins_dir = realpath ($racktables_rootdir . '/../plugins');
 
-// secret.php may be missing, generally it is OK
+		// secret.php may be missing, generally it is OK
 if (fileSearchExists ($path_to_secret_php))
 {
-	$found_secret_file = TRUE;
-	require_once $path_to_secret_php;
+		$found_secret_file = TRUE;
+		require_once $path_to_secret_php;
 }
 else
-	$found_secret_file = FALSE;
+$found_secret_file = FALSE;
 
 // determine local paths after loading of secret.php (maybe it has overrided racktables_plugins_dir)
 if (! isset ($local_gwdir)) // the directory where RT will search gateway scripts if not found in $racktables_gwdir
-	$local_gwdir = $racktables_plugins_dir . '/gateways';
+		$local_gwdir = $racktables_plugins_dir . '/gateways';
 if (! isset ($local_staticdir)) // the directory where RT will search static files (js/*, css/*, pix/*) if not found in $racktables_staticdir
-	$local_staticdir = $racktables_plugins_dir;
+		$local_staticdir = $racktables_plugins_dir;
 
-// init connection to memcache
-$memcached = new Memcached( 'slow_cache');
-global $_memcachedHost, $_memcachedPort;
-$memcached->setOption( Memcached::OPT_TCP_NODELAY, true);
-$memcached->setOption( Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
-$memcached->setOption( Memcached::OPT_COMPRESSION, false);
-$memcached->setOption( Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
-$memcached->addServer( $_memcachedHost, $_memcachedPort);
+		// init connection to memcache
+		$memcached = new Memcached( 'slow_cache');
+		global $_memcachedHost, $_memcachedPort;
+		$memcached->setOption( Memcached::OPT_TCP_NODELAY, true);
+		$memcached->setOption( Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
+		$memcached->setOption( Memcached::OPT_COMPRESSION, false);
+		$memcached->setOption( Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+		$memcached->addServer( $_memcachedHost, $_memcachedPort);
 
 
-// (re)connects to DB, stores PDO object in $dbxlink global var
+		// (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
 {
-	global $dbxlink, $pdo_dsn, $db_username, $db_password, $pdo_bufsize;
-	$dbxlink = NULL;
-	$drvoptions = array
-	(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::MYSQL_ATTR_INIT_COMMAND => 'set names "utf8"',
-                PDO::ATTR_PERSISTENT => true,
-	);
-	if (isset ($pdo_bufsize))
-		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
-	try
-	{
-		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password, $drvoptions);
-	}
-	catch (PDOException $e)
-	{
-		throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
-	}
+		global $dbxlink, $pdo_dsn, $db_username, $db_password, $pdo_bufsize;
+		$dbxlink = NULL;
+		$drvoptions = array
+				(
+				 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				 PDO::MYSQL_ATTR_INIT_COMMAND => 'set names "utf8"',
+				 PDO::ATTR_PERSISTENT => true,
+				);
+		if (isset ($pdo_bufsize))
+				$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
+		try
+		{
+				$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password, $drvoptions);
+		}
+		catch (PDOException $e)
+		{
+				throw new RackTablesError ("Database connection failed:\n\n" . $e->getMessage(), RackTablesError::INTERNAL);
+		}
 }
 
 // tries to guess the existance of the file before the php's include using the same searching method.
@@ -88,13 +88,13 @@ function connectDB()
 // like neither absolute nor relative.
 function fileSearchExists ($filename)
 {
-	if (! preg_match ('@^(\.+)?/@', $filename))
-	{
-		$this_file_dir = dirname (__FILE__);
-		if (file_exists ($this_file_dir . '/' . $filename))
-			return TRUE;
-	}
-	return file_exists ($filename);
+		if (! preg_match ('@^(\.+)?/@', $filename))
+		{
+				$this_file_dir = dirname (__FILE__);
+				if (file_exists ($this_file_dir . '/' . $filename))
+						return TRUE;
+		}
+		return file_exists ($filename);
 }
 
 ?>
