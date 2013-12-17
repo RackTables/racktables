@@ -56,20 +56,25 @@ if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
-$rackCodeCache = loadScript ('RackCodeCache');
-if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
-{
-	$rackCode = getRackCode (loadScript ('RackCode'));
-	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));
-}
-else
-{
-	$rackCode = unserialize (base64_decode ($rackCodeCache));
-	if ($rackCode === FALSE) // invalid cache
-	{
-		saveScript ('RackCodeCache', '');
-		$rackCode = getRackCode (loadScript ('RackCode'));
-	}
+if ( isKeyInCache( 'RackCode')) {
+  $rackCode = getKeyInCache( 'RackCode');
+} else {
+  $rackCodeCache = loadScript ('RackCodeCache');
+  if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
+  {
+    $rackCode = getRackCode (loadScript ('RackCode'));
+    saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));
+  }
+  else
+  {
+    $rackCode = unserialize (base64_decode ($rackCodeCache));
+    if ($rackCode === FALSE) // invalid cache
+    {
+      saveScript ('RackCodeCache', '');
+      $rackCode = getRackCode (loadScript ('RackCode'));
+    }
+  }
+  setKeyInCache( 'RackCode', $rackCode);
 }
 
 // avoid notices being thrown
@@ -90,8 +95,17 @@ $entityCache = array();
 // used by getExplicitTagsOnly()
 $tagRelCache = array();
 
+$fastCache = array();
 $taglist = getTagList();
-$tagtree = treeFromList ($taglist);
+// $tagtree = treeFromList ($taglist);
+
+if ( isKeyInCache( 'TagListSorted')) {
+  $tagtree = getKeyInCache( 'TagListSorted');
+} else {
+  $tagtree = treeFromList ($taglist);
+  setKeyInCache( 'TagListSorted', $tagtree);
+  setKeyInCache( 'TagList', $taglist);
+}
 
 $auto_tags = array();
 // Initial chain for the current user.
