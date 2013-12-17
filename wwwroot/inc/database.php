@@ -247,7 +247,7 @@ $port_role_options = array
 	'downlink' => 'system: downlink trunk',
 );
 
-$object_attribute_cache = array();
+// $object_attribute_cache = array();
 
 // Return list of locations directly under a specified location
 function getLocations ($location_id)
@@ -425,9 +425,13 @@ function listCells ($realm, $parent_id = 0)
 {
 	if (!$parent_id)
 	{
+/*
 		global $entityCache;
 		if (isset ($entityCache['complete'][$realm]))
 			return $entityCache['complete'][$realm];
+*/
+                if ( isKeyInCache( 'complete-'.$realm)) 
+                        return getKeyInCache( 'complete-'.$realm);
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
@@ -492,7 +496,8 @@ function listCells ($realm, $parent_id = 0)
 	unset($result);
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
-		unset ($entityCache['partial'][$realm]);
+                delKeyInCache( 'partial-'.$realm);
+//		unset ($entityCache['partial'][$realm]);
 	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
 		cacheAllObjectsAttributes();
 	foreach ($ret as $entity_id => &$entity)
@@ -541,10 +546,14 @@ function listCells ($realm, $parent_id = 0)
 		$entity = &$ret[$entity_id];
 		$entity['atags'] = generateEntityAutoTags ($entity);
 		if (!$parent_id)
-			$entityCache['complete'][$realm][$entity_id] = $entity;
+                        setKeyInCache( 'complete-'.$realm.'-'.$entity_id, $entity);
+//			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
-			$entityCache['partial'][$realm][$entity_id] = $entity;
+                        setKeyInCache( 'partial-'.$realm.'-'.$entity_id, $entity);
+//			$entityCache['partial'][$realm][$entity_id] = $entity;
 	}
+
+        setKeyInCache( 'complete-'.$realm, $ret);
 
 	return $ret;
 }
@@ -556,14 +565,20 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	global $entityCache;
 	if (! $ignore_cache)
 	{
-		if (isset ($entityCache['complete'][$realm]))
+//		if (isset ($entityCache['complete'][$realm]))
+                if ( isKeyInCache( 'complete-'.$realm)) { 
 		// Emphasize the absence of record, if listCells() has already been called.
-			if (isset ($entityCache['complete'][$realm][$id]))
-				return $entityCache['complete'][$realm][$id];
+//			if (isset ($entityCache['complete'][$realm][$id]))
+			if ( isKeyInCache ( 'complete-'.$realm.'-'.$id))
+				return getKeyInCache( 'complete-'.$realm.'-'.$id);
+//				return $entityCache['complete'][$realm][$id];
 			else
 				throw new EntityNotFoundException ($realm, $id);
-		elseif (isset ($entityCache['partial'][$realm][$id]))
-			return $entityCache['partial'][$realm][$id];
+//		elseif (isset ($entityCache['partial'][$realm][$id]))
+		} elseif ( isKeyInCache( 'partial-'.$realm.'-'.$id)) {
+			return getKeyInCache( 'partial-'.$realm.'-'.$id);
+//			return $entityCache['partial'][$realm][$id];
+                }
 	}
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
@@ -706,7 +721,8 @@ ORDER BY n2.ip, n2.mask
 		unset ($result);
 	}
 	$ret['atags'] = generateEntityAutoTags ($ret);
-	$entityCache['partial'][$realm][$id] = $ret;
+	// $entityCache['partial'][$realm][$id] = $ret;
+        setKeyInCache( 'partial-'.$realm.'-'.$id, $ret);
 	return $ret;
 }
 
@@ -933,6 +949,8 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	// Now tags...
 	produceTagsForNewRecord ('object', $taglist, $object_id);
 	recordObjectHistory ($object_id);
+        // cache consistency
+        delKeyInCache( 'complete-object');
 	return $object_id;
 }
 
@@ -953,6 +971,8 @@ function commitRenameObject ($object_id, $new_name)
 		)
 	);
 	recordObjectHistory ($object_id);
+        delKeyInCache( 'complete-object');
+        delKeyInCache( 'complete-object-'.$object_id);
 }
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
@@ -976,6 +996,8 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		)
 	);
 	recordObjectHistory ($object_id);
+        delKeyInCache( 'complete-object');
+        delKeyInCache( 'complete-object-'.$object_id);
 }
 
 // used by getEntityRelatives for sorting
@@ -3517,8 +3539,11 @@ function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0
 
 function cacheAllObjectsAttributes()
 {
-	global $object_attribute_cache;
+	// global $object_attribute_cache;
 	$object_attribute_cache = fetchAttrsForObjects();
+        foreach ( $object_attribute_cache as $_objId => $_attr) {
+          setKeyInCache( 'object_'.$_objId.'_attribute_cache', $_attr);
+        }
 }
 
 // Fetches a list of attributes for each object in $object_set array.
@@ -3584,25 +3609,34 @@ function fetchAttrsForObjects ($object_set = array())
 // Empty array is returned, if there are no attributes found.
 function getAttrValues ($object_id)
 {
+/*
 	global $object_attribute_cache;
 	if (isset ($object_attribute_cache[$object_id]))
 		return $object_attribute_cache[$object_id];
+*/
 
+	if ( isKeyInCache( 'object_'.$object_id.'_attribute_cache'))
+		return getKeyInCache( 'object_'.$object_id.'_attribute_cache');
 	$ret = fetchAttrsForObjects(array($object_id));
 	$attrs = array();
 	if (isset ($ret[$object_id]))
 	{
 		$attrs = $ret[$object_id];
-		$object_attribute_cache[$object_id] = $attrs;
+//		$object_attribute_cache[$object_id] = $attrs;
+                setKeyInCache( 'object_'.$object_id.'_attribute_cache', $attrs);
 	}
 	return $attrs;
 }
 
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
+/*
 	global $object_attribute_cache;
 	if (isset ($object_attribute_cache[$object_id]))
 		unset ($object_attribute_cache[$object_id]);
+*/
+	if ( isKeyInCache( 'object_'.$object_id.'_attribute_cache'))
+		delKeyInCache( 'object_'.$object_id.'_attribute_cache');
 	$result = usePreparedSelectBlade
 	(
 		"SELECT type AS attr_type, av.* FROM Attribute a " .
@@ -3788,16 +3822,26 @@ function usePreparedExecuteBlade ($query, $args = array())
 
 function loadConfigCache ()
 {
+        if ( isKeyInCache( 'ConfigCache')) {
+          return getKeyInCache( 'ConfigCache');
+        }
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue, vartype, is_hidden, emptyok, description, is_userdefined FROM Config ORDER BY varname');
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
+        $_tmp = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
+        setKeyInCache( 'ConfigCache', $_tmp);
+	return $_tmp;
 }
 
 function loadUserConfigCache ($username = NULL)
 {
 	if (!strlen ($username))
 		throw new InvalidArgException ('$username', $username);
+        if ( isKeyInCache( 'UserConfigCache-'.$username)) {
+          return getKeyInCache( 'UserConfigCache-'.$username);
+        }
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
+        $_tmp = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
+        setKeyInCache( 'UserConfigCache-'.$username, $_tmp);
+	return $_tmp;
 }
 
 function loadThumbCache ($rack_id = 0)
@@ -3973,6 +4017,9 @@ function generateEntityAutoTags ($cell)
 // Return a tag chain with all DB tags on it.
 function getTagList ()
 {
+        if ( isKeyInCache( 'TagList')) {
+          return getKeyInCache( 'TagList');
+        }
 	$ret = array();
 	$result = usePreparedSelectBlade
 	(
@@ -4003,6 +4050,7 @@ function getTagList ()
 					$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
 		}
 	}
+        setKeyInCache( 'TagList', $ret);
 	return $ret;
 }
 
@@ -5299,4 +5347,81 @@ function isTransactionActive()
 	}
 }
 
+function isKeyInCache( $_key) {
+    global $memcached;
+    global $fast_cache;
+
+    if ( isset( $fast_cache[ $_key])) {
+      return TRUE;
+    } else {
+      if (!($_keyValue = $memcached->get($_key))) {
+        if ($memcached->getResultCode() == Memcached::RES_NOTFOUND) {
+          return FALSE;
+        }
+        return FALSE;
+      } else {
+        return TRUE;
+      }
+    }
+}
+
+function setKeyInCache( $_key, $_value) {
+    global $memcached;
+    global $fastCache;
+
+    $fastCache[ $_key] = $_value;
+
+    if ( ( strpos( $_key, 'complete-') === 0) && ( substr_count( $_key, '-') == 1)) {
+      // when coming for a complete key, we will store also subkeys
+      foreach( $_value as $_curSubKey => $_curSubValue) {
+        $memcached->set($_key.'-'.$_curSubKey, $_curSubValue);   
+      }
+      // we will only store subkeys
+      return $memcached->set($_key, array_keys( $_value));
+    } else {
+      return $memcached->set($_key, $_value);
+    }
+}
+
+function getKeyInCache( $_key) {
+    global $memcached;
+    global $fastCache;
+
+    if ( isset( $fastCache[ $_key])) {
+      return $fastCache[ $_key];
+    } else {
+      if ( ( strpos( $_key, 'complete-') === 0) && ( substr_count( $_key, '-') == 1)) {
+        $_keysToFetch = $memcached->get($_key);
+        $_res = array();
+        foreach( $_keysToFetch as $_curKeyToFetch) {
+          $_res[ $_curKeyToFetch] = $memcached->get( $_key.'-'.$_curKeyToFetch);
+        }
+        // always populate fastCache with result from slow-cache ( memcached )
+        $fastCache[ $_key] = $_res;
+        return $_res;
+      } else {
+        // always populate fastCache with result from slow-cache ( memcached )
+        $fastCache[ $_key] = $memcached->get($_key);
+        return $fastCache[ $_key];
+      }
+    }
+}
+
+function delKeyInCache( $_key) {
+    global $memcached;
+    global $fastCache;
+   
+    unset( $fastCache[ $_key]);
+ 
+    if ( ( strpos( $_key, 'complete-') === 0) && ( substr_count( $_key, '-') == 1)) {
+      $_keysToDelete = $memcached->get($_key);
+      $_res = array();
+      foreach( $_keysToFetch as $_curKeyToFetch) {
+        $memcached->delete( $_key.'-'.$_curKeyToFetch);
+      }
+      return $memcached->delete($_key);
+    } else {
+      return $memcached->delete($_key);
+    }
+}
 ?>
