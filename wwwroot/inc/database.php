@@ -3664,7 +3664,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		// AttributeValue row present in table
 		if ($value == '')
 			usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
-		else
+		elseif ($row[$column] !== $value)
 			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	}
 	elseif ($value != '')
