@@ -191,6 +191,12 @@ particular device list using a RackCode filter. The default value
 servers and "telnet://switch.fqdn" for network switches.
 ENDOFTEXT
 ,
+
+	'0.20.7' => <<<ENDOFTEXT
+The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
+the IP addressing feature for all object types except those listed.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -234,6 +240,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.4',
 		'0.20.5',
 		'0.20.6',
+		'0.20.7',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1361,6 +1368,17 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "DELETE FROM Config WHERE varname = 'PORTS_PER_ROW'";
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.20.7':
+			// enable IP addressing for all object types unless specifically excluded
+			$query[] = "UPDATE `Config` SET varvalue = 'not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})' WHERE varname = 'IPV4OBJ_LISTSRC'";
+
+			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `parent_entity_type` ENUM('location','object','rack','row') NOT NULL";
+			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `child_entity_type` ENUM('location','object','rack','row') NOT NULL";
+
+			$query[] = "UPDATE Config SET description = 'List source: objects for that asset tag should be set' WHERE varname = 'ASSETWARN_LISTSRC'";
+			$query[] = "UPDATE Config SET description = 'List source: objects for that common name should be set' WHERE varname = 'NAMEWARN_LISTSRC'";
+			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
+			break;
 		case 'dictionary':
 			$query = reloadDictionary();
 			break;
@@ -1430,7 +1448,6 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query failed with error ' . $errorInfo[2]);
 	}
 	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
-	unset ($result);
 	if (count ($rows) != 1 || !strlen ($rows[0][0]))
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
 	$ret = $rows[0][0];

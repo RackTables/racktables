@@ -835,7 +835,7 @@ function vrp55Read8021QConfig ($input)
 			$ret['current']['link-type'] = $matches[1];
 			break;
 		// Native VLAN is configured differently for each link-type case, but
-		// VRP is known to filter off clauses, which don't make sense for
+		// VRP is known to filter off clauses that don't make sense for
 		// current link-type. This way any interface section should contain
 		// only one kind of "set native" clause (but if this constraint breaks,
 		// we get a problem).

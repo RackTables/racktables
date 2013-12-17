@@ -247,8 +247,6 @@ $port_role_options = array
 	'downlink' => 'system: downlink trunk',
 );
 
-// $object_attribute_cache = array();
-
 // Return list of locations directly under a specified location
 function getLocations ($location_id)
 {
@@ -274,8 +272,7 @@ function getRowInfo ($row_id)
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
-	else
-		throw new EntityNotFoundException ('rackrow', $row_id);
+	throw new EntityNotFoundException ('rackrow', $row_id);
 }
 
 function getAllRows ()
@@ -322,7 +319,7 @@ function getRacks ($row_id)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
-# Return rack and row details for those objects on the list, which have
+# Return rack and row details for those objects on the list that have
 # at least one rackspace atom allocated to them.
 function getMountInfo ($object_ids)
 {
@@ -434,11 +431,6 @@ function listCells ($realm, $parent_id = 0)
 {
 	if (!$parent_id)
 	{
-/*
-		global $entityCache;
-		if (isset ($entityCache['complete'][$realm]))
-			return $entityCache['complete'][$realm];
-*/
                 if ( isKeyInCache( 'complete-'.$realm)) 
                         return getKeyInCache( 'complete-'.$realm);
 	}
@@ -506,7 +498,6 @@ function listCells ($realm, $parent_id = 0)
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
                 delKeyInCache( 'partial-'.$realm);
-//		unset ($entityCache['partial'][$realm]);
 	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
 		cacheAllObjectsAttributes();
 	foreach ($ret as $entity_id => &$entity)
@@ -556,10 +547,8 @@ function listCells ($realm, $parent_id = 0)
 		$entity['atags'] = generateEntityAutoTags ($entity);
 		if (!$parent_id)
                         setKeyInCache( 'complete-'.$realm.'-'.$entity_id, $entity);
-//			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
                         setKeyInCache( 'partial-'.$realm.'-'.$entity_id, $entity);
-//			$entityCache['partial'][$realm][$entity_id] = $entity;
 	}
 
         setKeyInCache( 'complete-'.$realm, $ret);
@@ -573,19 +562,14 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 {
 	if (! $ignore_cache)
 	{
-//		if (isset ($entityCache['complete'][$realm]))
                 if ( isKeyInCache( 'complete-'.$realm)) { 
 		// Emphasize the absence of record, if listCells() has already been called.
-//			if (isset ($entityCache['complete'][$realm][$id]))
 			if ( isKeyInCache ( 'complete-'.$realm.'-'.$id))
 				return getKeyInCache( 'complete-'.$realm.'-'.$id);
-//				return $entityCache['complete'][$realm][$id];
 			else
 				throw new EntityNotFoundException ($realm, $id);
-//		elseif (isset ($entityCache['partial'][$realm][$id]))
 		} elseif ( isKeyInCache( 'partial-'.$realm.'-'.$id)) {
 			return getKeyInCache( 'partial-'.$realm.'-'.$id);
-//			return $entityCache['partial'][$realm][$id];
                 }
 	}
 	global $SQLSchema;
@@ -729,7 +713,6 @@ ORDER BY n2.ip, n2.mask
 		unset ($result);
 	}
 	$ret['atags'] = generateEntityAutoTags ($ret);
-	// $entityCache['partial'][$realm][$id] = $ret;
         setKeyInCache( 'partial-'.$realm.'-'.$id, $ret);
 	return $ret;
 }
@@ -1036,7 +1019,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	$ret = array();
 	foreach ($rows as $row)
 	{
-		// get info of the relative (only objects supported now, others may be added later)
+		// get info of the relative
 		$relative = spotEntity ($row['entity_type'], $row['entity_id']);
 		switch ($row['entity_type'])
 		{
@@ -1048,6 +1031,16 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 			case 'rack':
 				$page = 'rack';
 				$id_name = 'rack_id';
+				$name = $relative['name'];
+				break;
+			case 'row':
+				$page = 'row';
+				$id_name = 'row_id';
+				$name = $relative['name'];
+				break;
+			case 'location':
+				$page = 'location';
+				$id_name = 'location_id';
 				$name = $relative['name'];
 				break;
 		}
@@ -1407,7 +1400,7 @@ function resetRackSortOrder ($row_id)
 }
 
 // This function accepts rack data returned by amplifyCell(), validates and applies changes
-// supplied in $_REQUEST and returns resulting array. Only those changes are examined, which
+// supplied in $_REQUEST and returns resulting array. Only those changes are examined that
 // correspond to current rack ID.
 // 1st arg is rackdata, 2nd arg is unchecked state, 3rd arg is checked state.
 // If 4th arg is present, object_id fields will be updated accordingly to the new state.
@@ -1479,7 +1472,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 	return FALSE;
 }
 
-// This function builds a list of rack-unit-atom records, which are assigned to
+// This function builds a list of rack-unit-atom records assigned to
 // the requested object.
 function getMoleculeForObject ($object_id)
 {
@@ -2413,9 +2406,8 @@ function spotNetworkByIP ($ip_bin, $masklen = NULL)
 // masks (they aren't going to be the right pick).
 function getIPv4AddressNetworkId ($ip_bin, $masklen = 32)
 {
-	if ($row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen))
-		return $row['id'];
-	return NULL;
+	$row = callHook ('fetchIPv4AddressNetworkRow', $ip_bin, $masklen);
+	return $row === NULL ? NULL : $row['id'];
 }
 
 function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
@@ -2438,27 +2430,24 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 		"and mask < ? " .
 		'order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array (ip4_bin2db ($ip_bin), $masklen));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row === FALSE ? NULL : $row;
 }
 
 // Return the id of the smallest IPv6 network containing the given IPv6 address
 // ($ip is an instance of IPv4Address class) or NULL, if nothing was found.
 function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 {
-	if ($row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen))
-		return $row['id'];
-	return NULL;
+	$row = callHook ('fetchIPv6AddressNetworkRow', $ip_bin, $masklen);
+	return $row === NULL ? NULL : $row['id'];
 }
 
 function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 {
 	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip_bin, $ip_bin, $masklen));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row === FALSE ? NULL : $row;
 }
 
 // This function is actually used not only to update, but also to create records,
@@ -3006,8 +2995,8 @@ function getObjectAttrsSearchResults ($what)
 	return $ret;
 }
 
-// Search stickers and return a list of pairs "object_id-attribute_id",
-// which matched. A partilar object_id could be returned more than once, if it has
+// Search stickers and return a list of pairs "object_id-attribute_id"
+// that matched. A partilar object_id could be returned more than once, if it has
 // multiple matching stickers. Search is only performed on "string" or "dict" attributes.
 function getStickerSearchResults ($tablename, $what)
 {
@@ -3177,9 +3166,7 @@ function searchByMgmtHostname ($string)
 	// second attempt: search for FQDN part, separated by dot.
 	$result = usePreparedSelectBlade ('SELECT object_id FROM AttributeValue WHERE attr_id = 3 AND string_value LIKE ? LIMIT 2', array ("$string.%"));
 	$rows = $result->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1)
-		return NULL;
-	return $rows[0][0];
+	return count ($rows) == 1 ? $rows[0][0] : NULL;
 }
 
 // returns an array of object ids
@@ -3288,10 +3275,7 @@ function getObjectParentCompat ()
 function objectTypeMayHaveParent ($objtype_id)
 {
 	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM ObjectParentCompat WHERE child_objtype_id = ?', array ($objtype_id));
-	$row = $result->fetch (PDO::FETCH_NUM);
-	if ($row[0] > 0)
-		return TRUE;
-	return FALSE;
+	return $result->fetchColumn() > 0;
 }
 
 // Add a pair to the ObjectParentCompat table.
@@ -3421,7 +3405,7 @@ function getRackspaceStats ()
 
 /*
 
-The following allows figuring out records in TagStorage, which refer to non-existing entities:
+The following allows figuring out records in TagStorage that refer to non-existing entities:
 
 mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
 mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
@@ -3430,7 +3414,7 @@ mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where
 mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
 mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
 
-Accordingly, these are the records, which refer to non-existent tags:
+Accordingly, these are the records that refer to non-existent tags:
 
 mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id is null;
 
@@ -3637,11 +3621,6 @@ function fetchAttrsForObjects ($object_set = array())
 // Empty array is returned, if there are no attributes found.
 function getAttrValues ($object_id)
 {
-/*
-	global $object_attribute_cache;
-	if (isset ($object_attribute_cache[$object_id]))
-		return $object_attribute_cache[$object_id];
-*/
 
 	if ( isKeyInCache( 'object_'.$object_id.'_attribute_cache'))
 		return getKeyInCache( 'object_'.$object_id.'_attribute_cache');
@@ -3658,11 +3637,6 @@ function getAttrValues ($object_id)
 
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
-/*
-	global $object_attribute_cache;
-	if (isset ($object_attribute_cache[$object_id]))
-		unset ($object_attribute_cache[$object_id]);
-*/
 	if ( isKeyInCache( 'object_'.$object_id.'_attribute_cache'))
 		delKeyInCache( 'object_'.$object_id.'_attribute_cache');
 	$result = usePreparedSelectBlade
@@ -3695,7 +3669,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		// AttributeValue row present in table
 		if ($value == '')
 			usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
-		else
+		elseif ($row[$column] !== $value)
 			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), array ('object_id' => $object_id, 'attr_id' => $attr_id));
 	}
 	elseif ($value != '')
@@ -4003,7 +3977,7 @@ function generateEntityAutoTags ($cell)
 			break;
 		case 'user':
 			# {$username_XXX} autotag is generated always, but {$userid_XXX}
-			# appears only for accounts, which exist in local database.
+			# appears only for accounts that exist in local database.
 			$ret[] = array ('tag' => '$username_' . $cell['user_name']);
 			if (isset ($cell['user_id']))
 				$ret[] = array ('tag' => '$userid_' . $cell['user_id']);
@@ -4117,7 +4091,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 }
 
 // Add records into TagStorage, if this makes sense (IOW, they don't appear
-// on the implicit list already). Then remove any other records, which
+// on the implicit list already). Then remove any other records that
 // appear on the "implicit" side of the chain. This will make sure,
 // that both the tag base is still minimal and all requested tags appear on
 // the resulting tag chain.
@@ -4125,7 +4099,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
 	// Put the current explicit sub-chain into a buffer and merge all tags from
-	// the extra chain, which aren't there yet.
+	// the extra chain that aren't there yet.
 	$oldchain = array();
 	$newchain = array();
 	foreach (loadEntityTags ($realm, $entity_id) as $oldtag)
@@ -4260,11 +4234,8 @@ function destroyIPv6Prefix ($id)
 function loadScript ($name)
 {
 	$result = usePreparedSelectBlade ("select script_text from Script where script_name = ?", array ($name));
-	$row = $result->fetch (PDO::FETCH_NUM);
-	if ($row !== FALSE)
-		return $row[0];
-	else
-		return NULL;
+	$script_text = $result->fetchColumn();
+	return $script_text === FALSE ? NULL : $script_text;
 }
 
 function saveScript ($name = '', $text)
@@ -4401,7 +4372,7 @@ function getNATv4ForObject ($object_id)
 	return $ret;
 }
 
-// Return a list of files, which are not linked to the specified record. This list
+// Return a list of files that are not linked to the specified record. This list
 // will be used by printSelect().
 function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 {
@@ -4464,9 +4435,7 @@ function getFileCache ($file_id)
 		'WHERE File.id = ? and File.thumbnail IS NOT NULL',
 		array ($file_id)
 	);
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)) == NULL)
-		return FALSE;
-	return $row['thumbnail'];
+	return $result->fetchColumn();
 }
 
 function commitAddFileCache ($file_id, $contents)
@@ -4512,7 +4481,7 @@ function getFileStats ()
 		'FROM File ' .
 		'WHERE id NOT IN (SELECT file_id FROM FileLink)'
 	);
-	$ret["Unattached files"] = $result->fetchColumn ();
+	$ret["Unlinked files"] = $result->fetchColumn ();
 	unset ($result);
 
 	// Find total number of files
@@ -4599,44 +4568,47 @@ function getChapterList ()
 function findFileByName ($filename)
 {
 	$result = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
-	if (($row = $result->fetch (PDO::FETCH_ASSOC)))
-		return $row['id'];
-
-	return NULL;
+	$file_id = $result->fetchColumn();
+	return $file_id === FALSE ? NULL : $file_id;
 }
 
-// guarantees there is a locked row for $form_username
-function acquireLDAPCache ($form_username, $password_hash, $expiry = 0, $deep = 0)
+function fetchLDAPCacheRow ($username, $extrasql = '')
 {
-	$self = __FUNCTION__;
-	global $dbxlink;
-	usePreparedExecuteBlade ("INSERT IGNORE INTO LDAPCache (presented_username) VALUES (?)", array ($form_username));
-	$dbxlink->beginTransaction();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT TIMESTAMPDIFF(SECOND, first_success, now()) AS success_age, ' .
 		'TIMESTAMPDIFF(SECOND, last_retry, now()) AS retry_age, displayed_name, memberof, successful_hash ' .
-		'FROM LDAPCache WHERE presented_username = ? FOR UPDATE',
-		array ($form_username)
+		'FROM LDAPCache WHERE presented_username = ? ' . $extrasql,
+		array ($username)
 	);
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	if ($row)
 	{
-		if ($row['successful_hash'] === $password_hash && $row['success_age'] < $expiry)
-		{
-			$row['memberof'] = unserialize (base64_decode ($row['memberof']));
-			return $row;
-		}
-		return NULL;
+		$members = unserialize (base64_decode ($row['memberof']));
+		$row['memberof'] = is_array ($members) ? $members : array();
 	}
-	else
-	{
-		if ($deep < 2)
-			// maybe another instance deleted our row before we've locked it. Try again
-			return $self ($form_username, $password_hash, $expiry, $deep + 1);
-		else
-			// the problem still persists after 2 tries, throw an exception
-			throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
-	}
+	return $row;
+}
+
+// locks LDAPCache row for given username or throws an exception
+function acquireLDAPCache ($username, $max_tries = 2)
+{
+	$self = __FUNCTION__;
+	global $dbxlink;
+
+	// guarantee there is a row to lock
+	usePreparedExecuteBlade ("INSERT IGNORE INTO LDAPCache (presented_username) VALUES (?)", array ($username));
+	$dbxlink->beginTransaction();
+
+	if ($row = fetchLDAPCacheRow ($username, 'FOR UPDATE'))
+		return $row;
+
+	// maybe another instance deleted our row before we've locked it. Try again
+	if ($max_tries > 0)
+		return $self ($username, $max_tries - 1);
+
+	// the problem still persists after retries, throw an exception
+	throw new RackTablesError ("Unable to acquire lock on LDAPCache", RackTablesError::INTERNAL);
 }
 
 function releaseLDAPCache ()
@@ -4646,30 +4618,28 @@ function releaseLDAPCache ()
 }
 
 // This actually changes only last_retry.
-function touchLDAPCacheRecord ($form_username)
+function touchLDAPCacheRecord ($username)
 {
-	usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($form_username));
+	usePreparedExecuteBlade ('UPDATE LDAPCache SET last_retry=NOW() WHERE presented_username=?', array ($username));
 }
 
-function replaceLDAPCacheRecord ($form_username, $password_hash, $dname, $memberof)
+function replaceLDAPCacheRecord ($username, $password_hash, $dname, $memberof)
 {
-	usePreparedUpdateBlade ('LDAPCache',
+	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $username));
+	usePreparedInsertBlade ('LDAPCache',
 		array
 		(
+			'presented_username' => $username,
 			'successful_hash' => $password_hash,
 			'displayed_name' => $dname,
 			'memberof' => base64_encode (serialize ($memberof)),
-		),
-		array
-		(
-			'presented_username' => $form_username,
 		)
 	);
 }
 
-function deleteLDAPCacheRecord ($form_username)
+function deleteLDAPCacheRecord ($username)
 {
-	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $form_username));
+	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $username));
 }
 
 // Age all records older, than cache_expiry seconds, and all records made in future.
@@ -4682,9 +4652,8 @@ function discardLDAPCache ($maxage = 0)
 function getUserIDByUsername ($username)
 {
 	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHERE user_name = ?', array ($username));
-	if ($row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row['user_id'];
-	return NULL;
+	$user_id = $result->fetchColumn();
+	return $user_id === FALSE ? NULL : $user_id;
 }
 
 # Derive a complete cell structure from the given username regardless
@@ -4841,7 +4810,7 @@ function getVLANDomain ($vdid)
 	if (!$ret = $result->fetch (PDO::FETCH_ASSOC))
 		throw new EntityNotFoundException ('VLAN domain', $vdid);
 	unset ($result);
-	$ret['vlanlist'] = getDomainVLANs ($vdid);
+	$ret['vlanlist'] = getDomainVLANList ($vdid);
 	$ret['switchlist'] = array();
 	$result = usePreparedSelectBlade
 	(
@@ -4855,6 +4824,7 @@ function getVLANDomain ($vdid)
 	return $ret;
 }
 
+// TODO: this function is very inefficient. Consider use of getDomainVLANList instead
 function getDomainVLANs ($vdom_id)
 {
 	$result = usePreparedSelectBlade
@@ -4917,9 +4887,8 @@ function getVLANSwitchInfo ($object_id, $extrasql = '')
 		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
 		array ($object_id)
 	);
-	if ($result and $row = $result->fetch (PDO::FETCH_ASSOC))
-		return $row;
-	return NULL;
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row === FALSE ? NULL : $row;
 }
 
 function getStored8021QConfig ($object_id, $instance = 'desired')
@@ -4986,7 +4955,7 @@ function getVLANInfo ($vlan_ck)
 	return $ret;
 }
 
-// return list of network IDs, which are not bound to the given VLAN domain
+// return list of network IDs that are not bound to the given VLAN domain
 function getVLANIPv4Options ($except_vdid)
 {
 	$prepared = usePreparedSelectBlade
@@ -4999,7 +4968,7 @@ function getVLANIPv4Options ($except_vdid)
 	return reduceSubarraysToColumn ($prepared->fetchAll (PDO::FETCH_ASSOC), 'id');
 }
 
-// return list of network IDs, which are not bound to the given VLAN domain
+// return list of network IDs that are not bound to the given VLAN domain
 function getVLANIPv6Options ($except_vdid)
 {
 	$prepared = usePreparedSelectBlade
@@ -5072,7 +5041,7 @@ function commitReduceVLANIPv6 ($vlan_ck, $ipv6net_id)
 	);
 }
 
-// Return a list of switches, which have specific VLAN configured on
+// Return a list of switches that have specific VLAN configured on
 // any port (each switch with the list of such ports).
 function getVLANConfiguredPorts ($vlan_ck)
 {
@@ -5225,9 +5194,7 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	$query = "SELECT ${SQLinfo['keycolumn']} AS id FROM ${SQLinfo['table']} WHERE ${SQLinfo['table']}.${column}=? LIMIT 2";
 	$result = usePreparedSelectBlade ($query, array ($value));
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	if (count ($rows) != 1)
-		return NULL;
-	return $rows[0]['id'];
+	return count ($rows) == 1 ? $rows[0]['id'] : NULL;
 }
 
 // returns an array of attribute_id`s wich use specified chapter id.
@@ -5371,7 +5338,7 @@ function touchVLANSwitch ($switch_id)
 	);
 }
 
-# Return list of rows for objects, which have the date stored in the given
+# Return list of rows for objects that have the date stored in the given
 # attribute belonging to the given range (relative to today's date).
 function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 {

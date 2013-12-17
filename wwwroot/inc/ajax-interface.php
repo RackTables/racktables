@@ -6,7 +6,7 @@
 
 /*
  *
- *  This file contains HTML-generating funcitons which are needed in ajax handler
+ *  This file contains HTML-generating functions required by AJAX handlers.
  *
  *
 */
@@ -232,7 +232,7 @@ function updateIPNameAJAX()
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
 	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears name
-    $comment = (empty ($addr['comment']) ? '' : $addr['comment']);
+	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
 	updateAddress ($ip_bin, $sic['text'], $reserved, $comment);
 	echo 'OK';
 }

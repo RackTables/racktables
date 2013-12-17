@@ -260,7 +260,7 @@ function getLexemsFromRawText ($text)
 // After parsing the input successfully a list of SYNT_GRANT and SYNT_DEFINITION
 // trees is returned.
 //
-// P.S. The above is true for input, which is a complete and correct RackCode text.
+// P.S. The above is true for input that is a complete and correct RackCode text.
 // Other inputs may produce different combinations of lex/synt structures. Calling
 // function must check the parse tree itself.
 function getParseTreeFromLexems ($lexems)
@@ -452,7 +452,7 @@ function getParseTreeFromLexems ($lexems)
 			// UNARY_EXPRESSION ::= true | false | TAG | AUTOTAG | PREDICATE
 			if
 			(
-				$stacktop['type'] == 'LEX_TAG' or // first look for tokens, which are most
+				$stacktop['type'] == 'LEX_TAG' or // first look for tokens that are most
 				$stacktop['type'] == 'LEX_AUTOTAG' or // likely to appear in the text
 				$stacktop['type'] == 'LEX_PREDICATE' or // supplied by user
 				$stacktop['type'] == 'LEX_TRUE' or
@@ -828,7 +828,7 @@ function locateSyntaxError ($stack)
 {
 	// The first SYNT_CODETEXT node, if is present, holds stuff already
 	// successfully processed. Its line counter shows, where the last reduction
-	// took place (it _might_ be the same line, which causes the syntax error).
+	// took place (it _might_ be the same line that causes the syntax error).
 	// The next node (it's very likely to exist) should have its line counter
 	// pointing to the place, where the first (of 1 or more) error is located.
 	if (isset ($stack[0]['type']) and $stack[0]['type'] == 'SYNT_CODETEXT')
@@ -996,7 +996,7 @@ function findTagWarnings ($expr)
 	}
 }
 
-// Check context modifiers, warn about those, which try referencing non-existent tags.
+// Check context modifiers, warn about those that try referencing non-existent tags.
 function findCtxModWarnings ($modlist)
 {
 	$ret = array();

@@ -6,8 +6,8 @@
 
 /*
 
-"Ophandler" in RackTables stands for "operation handler", or a function,
-which handles execution of "operation" (in the meaning explained in
+"Ophandler" in RackTables stands for "operation handler", or a function
+that handles execution of "operation" (in the meaning explained in
 navigation.php). Most of the ophandlers are meant to perform one specific
 action, for example, to set a name of an object. Each such action often
 requires a set of parameters (e. g. ID of the object and the new name),
@@ -20,7 +20,7 @@ assorted classes. Namely, an "InvalidRequestArgException" class means, that
 at least one of the parameters provided by the user is not acceptable. This
 is a "soft" error, which gets displayed in the standard message area of
 otherwise usual interface. A different case is "InvalidArgException", which
-means, that one of the internal functions detected its argument(s) invalid
+means that one of the internal functions detected its argument(s) invalid
 or corrupted, and that argument(s) did not come from user's input (and thus
 cannot be fixed without fixing a bug in the code). Such "hard" errors don't
 get special early handling and end up in the default catching block. The
@@ -401,7 +401,7 @@ $opspec_list['chapter-edit-del'] = array
 	(
 		// Technically dict_key is enough to delete, but including chapter_id into
 		// WHERE clause makes sure, that the action actually happends for the same
-		// chapter, which authorization was granted for.
+		// chapter that authorization was granted for.
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
 		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
@@ -1086,7 +1086,7 @@ function updateObjectAllocation ()
 	$object_id = getBypassValue();
 	$changecnt = 0;
 	// Get a list of all of this object's parents,
-	// then trim the list to only include parents which are racks
+	// then trim the list to only include parents that are racks
 	$objectParents = getEntityRelatives('parents', 'object', $object_id);
 	$parentRacks = array();
 	foreach ($objectParents as $parentData)
@@ -1191,7 +1191,7 @@ function updateObject ()
 function updateObjectAttributes ($object_id)
 {
 	global $dbxlink;
-    $type_id = getObjectType ($object_id);
+	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
 	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
 	for ($i = 0; $i < $num_attrs; $i++)
@@ -1434,7 +1434,7 @@ function resetUIConfig()
 	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
 	setConfigVar ('VENDOR_SIEVE', '');
 	setConfigVar ('IPV4LB_LISTSRC', 'false');
-	setConfigVar ('IPV4OBJ_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_12} or {$typeid_445} or {$typeid_447} or {$typeid_798} or {$typeid_1504} or {$typeid_1507} or {$typeid_1787}');
+	setConfigVar ('IPV4OBJ_LISTSRC','not ({$typeid_3} or {$typeid_9} or {$typeid_10} or {$typeid_11})');
 	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
 	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
 	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
@@ -2510,7 +2510,6 @@ function linkFileToEntity ()
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
 
-	$fi = spotEntity ('file', $sic['file_id']);
 	usePreparedInsertBlade
 	(
 		'FileLink',
@@ -2521,6 +2520,7 @@ function linkFileToEntity ()
 			'entity_id' => getBypassValue(),
 		)
 	);
+	$fi = spotEntity ('file', $sic['file_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
@@ -2880,7 +2880,7 @@ function resolve8021QConflicts ()
 			$F[$sic["pn_${i}"]] = array
 			(
 				'mode' => $sic["rm_${i}"],
-				'allowed' => array_key_exists ("ra_${i}", $sic) ? $sic["ra_${i}"] : array(),
+				'allowed' => array_fetch ($sic, "ra_${i}", array()),
 				'native' => $sic["rn_${i}"],
 				'decision' => $sic["i_${i}"],
 			);
@@ -2924,7 +2924,7 @@ function resolve8021QConflicts ()
 				if ($port['decision'] == 'left')
 					// confirm deletion of local copy
 					$ndone += del8021QPort ($vswitch['object_id'], $port_name);
-				// otherwise ignore a decision, which doesn't address a conflict
+				// otherwise ignore a decision that doesn't address a conflict
 		}
 	}
 	catch (InvalidRequestArgException $e)
@@ -3015,7 +3015,7 @@ function updVSTRule()
 	}
 	catch (Exception $e)
 	{
-		// Every case, which is soft-processed in process.php, will have the working copy available for a retry.
+		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 		{
 			@session_start();
@@ -3296,7 +3296,7 @@ function deleteVlan()
 	assertStringArg ('vlan_ck');
 	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
 	if (! empty ($confports))
-		throw new RackTablesError ("You can not delete vlan which has assosiated ports");
+		throw new RackTablesError ("You can not delete VLAN that has assosiated ports");
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
@@ -3334,7 +3334,7 @@ function doVSMigrate()
 	usePreparedDeleteBlade ('VSEnabledIPs', array ('vs_id' => $vs_id));
 	usePreparedDeleteBlade ('VSEnabledPorts', array ('vs_id' => $vs_id));
 
-	// remove all VIPs and ports which are in $plan,and create new ones
+	// remove all VIPs and ports that are in $plan and create new ones
 	foreach ($plan['vips'] as $vip)
 	{
 		usePreparedDeleteBlade ('VSIPs', array ('vs_id' => $vs_id, 'vip' => $vip['vip']));
@@ -3440,8 +3440,12 @@ function tableHandler()
 		$retcode = 48;
 		break;
 	case 'DELETE':
-		$conjunction = array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND';
-		usePreparedDeleteBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist'), $conjunction);
+		usePreparedDeleteBlade
+		(
+			$opspec['table'],
+			buildOpspecColumns ($opspec, 'arglist'),
+			array_fetch ($opspec, 'conjunction', 'AND')
+		);
 		$retcode = 49;
 		break;
 	case 'UPDATE':
@@ -3450,7 +3454,7 @@ function tableHandler()
 			$opspec['table'],
 			buildOpspecColumns ($opspec, 'set_arglist'),
 			buildOpspecColumns ($opspec, 'where_arglist'),
-			array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
+			array_fetch ($opspec, 'conjunction', 'AND')
 		);
 		$retcode = 51;
 		break;

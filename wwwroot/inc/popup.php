@@ -4,7 +4,7 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-// Return a list of rack IDs, which are P or less positions
+// Return a list of rack IDs that are P or less positions
 // far from the given rack in its row.
 function getProximateRacks ($rack_id, $proximity = 0)
 {
@@ -12,8 +12,7 @@ function getProximateRacks ($rack_id, $proximity = 0)
 	if ($proximity > 0)
 	{
 		$rack = spotEntity ('rack', $rack_id);
-		$rackList = listCells ('rack', $rack['row_id']);
-		doubleLink ($rackList);
+		$rackList = doubleLink (listCells ('rack', $rack['row_id']));
 		$todo = $proximity;
 		$cur_item = $rackList[$rack_id];
 		while ($todo and array_key_exists ('prev_key', $cur_item))
@@ -175,7 +174,7 @@ INNER JOIN (
 	return $ret;
 }
 
-// Return a list of all objects which are possible parents
+// Return a list of all objects that are possible parents
 //    Special case for VMs and VM Virtual Switches
 //        - only select Servers with the Hypervisor attribute set to Yes
 function findObjectParentCandidates ($object_id)

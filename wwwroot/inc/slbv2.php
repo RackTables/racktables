@@ -370,7 +370,7 @@ function isVIPEnabled ($vip, $vip_list)
 	return FALSE;
 }
 
-// returns list of ipv4vs ids which have one of the IPs or fwmarks of group $group_id
+// returns list of ipv4vs ids that have one of the IPs or fwmarks of group $group_id
 function getVSIDsByGroup ($group_id)
 {
 	$ret = array();
@@ -636,7 +636,7 @@ function commitDeleteVSG ($id)
 	usePreparedDeleteBlade ('VS', array ('id' => $id));
 }
 
-// returns an array of object_ids which have links to a given VS
+// returns an array of object_ids that have links to a given VS
 // may be used as 'refcnt'
 function getVSLinkedObjects ($vs_id)
 {

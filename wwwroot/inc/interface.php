@@ -999,7 +999,10 @@ function renderEditObjectForm()
 			else
 				echo '&nbsp;';
 			echo '</td>';
-			echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
+			echo "<th class=sticker>${record['name']}";
+			if ($record['type'] == 'date')
+				echo ' (' . datetimeFormatHint (getConfigVar ('DATETIME_FORMAT')) . ')';
+			echo ':</th><td class=tdleft>';
 			switch ($record['type'])
 			{
 				case 'uint':
@@ -1203,7 +1206,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 	if ($is_highlighted)
 		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='ancor interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 	if ($port['remote_object_id'])
@@ -1981,7 +1984,7 @@ function renderRackSpaceForObject ($object_id)
 			}
 
 	// Get a list of all of this object's parents,
-	// then trim the list to only include parents which are racks
+	// then trim the list to only include parents that are racks
 	$objectParents = getEntityRelatives('parents', 'object', $object_id);
 	$parentRacks = array();
 	foreach ($objectParents as $parentData)
@@ -2382,11 +2385,14 @@ function renderIPSpace()
 	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
 	$cellfilter = getCellFilter();
 
+	// expand request can take either natural values or "ALL". Zero means no expanding.
+	$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
+
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
 	$netlist = array();
-	if (! ($cellfilter['is_empty'] && renderEmptyResults($cellfilter, 'IP nets', getEntitiesCount ($realm))))
+	if (! ($cellfilter['is_empty'] && ! $eid && renderEmptyResults($cellfilter, 'IP nets', getEntitiesCount ($realm))))
 	{
 		$top = NULL;
 		foreach (listCells ($realm) as $net)
@@ -2400,8 +2406,6 @@ function renderIPSpace()
 			$netlist[$net['id']] = $net;
 		}
 		$netcount = count ($netlist);
-		// expand request can take either natural values or "ALL". Zero means no expanding.
-		$eid = isset ($_REQUEST['eid']) ? $_REQUEST['eid'] : 0;
 		$tree = prepareIPTree ($netlist, $eid);
 
 		if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
@@ -2620,7 +2624,7 @@ function renderEmptyIPv6 ($ip_bin, $hl_ip)
 	if ($ip_bin === $hl_ip)
 		$class .= ' highlight';
 	$fmt = ip6_format ($ip_bin);
-	echo "<tr class='$class'><td><a class='ancor' name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
+	echo "<tr class='$class'><td><a name='ip-$fmt' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt)) . "'>" . $fmt;
 	$editable = permitted ('ipaddress', 'properties', 'editAddress')
 		? 'editable'
 		: '';
@@ -2649,7 +2653,7 @@ function renderSeparator ($first, $last, $hl_ip)
 		echo "<tr><td colspan=4 class=tdleft></td></tr>\n";
 }
 
-// calculates page number which contains given $ip (used by renderIPv6NetworkAddresses)
+// calculates page number that contains given $ip (used by renderIPv6NetworkAddresses)
 function getPageNumOfIPv6 ($list, $ip_bin, $maxperpage)
 {
 	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
@@ -2718,7 +2722,7 @@ function renderIPv4NetworkAddresses ($range)
 			$addr = $range['addrlist'][$ip_bin];
 		else
 		{
-			echo "<tr class='tdleft $tr_class'><td class=tdleft><a class='ancor' name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
+			echo "<tr class='tdleft $tr_class'><td class=tdleft><a name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
@@ -2736,7 +2740,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		$tr_class .= ' ' . $addr['class'];
 		echo "<tr class='tdleft $tr_class'>";
-		echo "<td><a class='ancor $history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
@@ -2856,7 +2860,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
 		echo "<tr class='$tr_class'>";
-		echo "<td><a class='ancor $history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name'])
 			&& permitted ('ipaddress', 'properties', 'editAddress')
@@ -4421,7 +4425,7 @@ function render8021QReport ()
 	$header = '<tr><th>&nbsp;</th>';
 	foreach ($domains as $domain_id => $domain_name)
 	{
-		foreach (getDomainVLANs ($domain_id) as $vlan_id => $vlan_info)
+		foreach (getDomainVLANList ($domain_id) as $vlan_id => $vlan_info)
 			$vlanstats[$vlan_id][$domain_id] = $vlan_info;
 		$header .= '<th>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
 	}
@@ -5162,7 +5166,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		global $pTable;
 		$myPredicates = array();
 		$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
-		// Repack matching predicates in a way, which tagOnChain() understands.
+		// Repack matching predicates in a way that tagOnChain() understands.
 		foreach (array_keys ($pTable) as $pname)
 			if (preg_match ("/${psieve}/", $pname))
 				$myPredicates[] = array ('id' => $pname, 'tag' => $pname);
@@ -6059,18 +6063,18 @@ function showPathAndSearch ($pageno, $tabno)
 		if (! isset ($title['params']['tab']))
 			$title['params']['tab'] = 'default';
 		$is_first = TRUE;
-		$ancor_tail = '';
+		$anchor_tail = '';
 		foreach ($title['params'] as $param_name => $param_value)
 		{
 			if ($param_name == '#')
 			{
-				$ancor_tail = '#' . $param_value;
+				$anchor_tail = '#' . $param_value;
 				continue;
 			}
 			$item .= ($is_first ? '' : '&') . "${param_name}=${param_value}";
 			$is_first = FALSE;
 		}
-		$item .= $ancor_tail;
+		$item .= $anchor_tail;
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 
@@ -6264,8 +6268,8 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipv4net':
 	case 'ipv6net':
-        global $pageno;
-        switch ($pageno)
+		global $pageno;
+		switch ($pageno)
 		{
 			case 'ipaddress':
 				$net = spotNetworkByIP (ip_parse ($_REQUEST['ip']));
@@ -6292,7 +6296,7 @@ function dynamic_title_decoder ($path_position)
 	case 'ipv4space':
 	case 'ipv6space':
 		global $pageno;
-        switch ($pageno)
+		switch ($pageno)
 		{
 			case 'ipaddress':
 				$net_id = getIPAddressNetworkId (ip_parse ($_REQUEST['ip']));
@@ -6474,7 +6478,7 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'object')
 		{
 			echo '<td>';
-			// hide any object, which is already in the table
+			// hide any object that is already in the table
 			$options = array();
 			foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
 				if (!in_array ($object_id, $all_vswitches))
@@ -6841,7 +6845,7 @@ function renderObject8021QPorts ($object_id)
 	global $pageno, $tabno, $sic;
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
-	$req_port_name = array_key_exists ('port_name', $sic) ? $sic['port_name'] : '';
+	$req_port_name = array_fetch ($sic, 'port_name', '');
 	$desired_config = apply8021QOrder ($vswitch, getStored8021QConfig ($object_id, 'desired'));
 	$cached_config = getStored8021QConfig ($object_id, 'cached');
 	$desired_config = sortPortList	($desired_config);
@@ -6933,14 +6937,14 @@ function renderObject8021QPorts ($object_id)
 			foreach ($sockets[$port_name][0] as $tmp)
 				$socket_columns .= '<td>' . $tmp . '</td>';
 		}
-		$ancor = '';
+		$anchor = '';
 		$tdclass = '';
 		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
 			$tdclass .= 'class="border_highlight"';
-			$ancor = "name='port-$hl_port_id'";
+			$anchor = "name='port-$hl_port_id'";
 		}
-		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $ancor>${port_name}</a></td>" . $socket_columns;
+		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>" . $socket_columns;
 		echo "<td${td_extra}>${text_left}</td><td class=tdright nowrap${td_extra}>${text_right}</td></tr>";
 		if (!array_key_exists ($port_name, $sockets))
 			continue;
@@ -7047,7 +7051,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
 	$options = array();
-	// Offer only options, which are listed in domain and fit into VST.
+	// Offer only options that are listed in domain and fit into VST.
 	// Never offer immune VLANs regardless of VST filter for this port.
 	// Also exclude current VLAN from the options, unless current port
 	// mode is "trunk" (in this case it should be possible to set VST-
@@ -7178,8 +7182,8 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			// they are shown among radio options, but disabled, so that the user cannot
 			// break traffic of these VLANs. In addition to that, when port's native VLAN
 			// is set to one of these alien VLANs, the whole group of radio buttons is
-			// disabled. These measures make it harder for the system to break a VLAN,
-			// which is explicitly protected from it.
+			// disabled. These measures make it harder for the system to break a VLAN
+			// that is explicitly protected from it.
 			if
 			(
 				$native_options[$vlanport['native']]['vlan_type'] == 'alien' or
@@ -7365,7 +7369,7 @@ function renderVLANIPLinks ($some_id)
 				'domain_id' => $vlan['domain_id'],
 				'vlan_id' => $vlan['vlan_id'],
 			);
-		// Any VLAN can link to any network, which isn't yet linked to current domain.
+		// Any VLAN can link to any network that isn't yet linked to current domain.
 		// get free IP nets
 		$netlist_func  = $ip_ver == 'ipv6' ? 'getVLANIPv6Options' : 'getVLANIPv4Options';
 		foreach ($netlist_func ($vlan['domain_id']) as $net_id)
@@ -7579,7 +7583,7 @@ END
 	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
 	$plan = sortPortList ($plan);
-	$domvlans = array_keys (getDomainVLANs ($vswitch['domain_id']));
+	$domvlans = array_keys (getDomainVLANList ($vswitch['domain_id']));
 	$default_port = array
 	(
 		'mode' => 'access',
@@ -7697,14 +7701,14 @@ END
 			break;
 		}
 
-		$ancor = '';
+		$anchor = '';
 		$td_class = '';
 		if (isset ($hl_port_name) and $hl_port_name == $port_name)
 		{
-			$ancor = "name='port-$hl_port_id'";
+			$anchor = "name='port-$hl_port_id'";
 			$td_class = ' border_highlight';
 		}
-		echo "<tr class='${trclass}'><td class='tdleft${td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $ancor>${port_name}</a></td>";
+		echo "<tr class='${trclass}'><td class='tdleft${td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>";
 		if (!count ($radio_attrs))
 		{
 			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
@@ -7750,7 +7754,7 @@ function renderObject8021QSyncPorts ($object, $D)
 	# OPTIONSs for existing 802.1Q ports
 	foreach (sortPortList ($D) as $portname => $portconfig)
 		$enabled["disable ${portname}"] = "${portname} ("
-			. (array_key_exists ($portname, $allethports) ? $allethports[$portname] : 'N/A')
+			. array_fetch ($allethports, $portname, 'N/A')
 			. ') ' . serializeVLANPack ($portconfig);
 	# OPTIONs for potential 802.1Q ports
 	$disabled = array();
@@ -8018,7 +8022,7 @@ function renderDiscoveredNeighbors ($object_id)
 				amplifyCell($dp_remote_object);
 				$dp_neighbor['port'] = shortenIfName ($dp_neighbor['port'], NULL, $dp_remote_object['id']);
 
-				// get port list which names match CDP portname
+				// get list of ports that have name matching CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
 				foreach ($dp_remote_object['ports'] as $port)
 					if ($port['name'] == $dp_neighbor['port'])
@@ -8269,13 +8273,13 @@ function formatAttributeValue ($record)
 	return $result;
 }
 
-function addAutoScrollScript ($ancor_name)
+function addAutoScrollScript ($anchor_name)
 {
 	addJS (<<<END
 $(document).ready(function() {
-	var ancor = document.getElementsByName('$ancor_name')[0];
-	if (ancor)
-		ancor.scrollIntoView(false);
+	var anchor = document.getElementsByName('$anchor_name')[0];
+	if (anchor)
+		anchor.scrollIntoView(false);
 });
 END
 	, TRUE);
@@ -8730,16 +8734,19 @@ function renderExpirations ()
 				continue;
 			}
 			echo '<tr valign=top><th align=center>Count</th><th align=center>Name</th>';
-			echo "<th align=center>Asset Tag</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
+			echo "<th align=center>Asset Tag</th><th align=center>OEM S/N 1</th><th align=center>Date Warranty <br> Expires</th></tr>\n";
 			foreach ($result as $row)
 			{
 				$date_value = datetimestrFromTimestamp ($row['uint_value']);
 
 				$object = spotEntity ('object', $row['object_id']);
+				$attributes = getAttrValues ($object['id']);
+				$oem_sn_1 = array_key_exists (1, $attributes) ? $attributes[1]['a_value'] : '&nbsp;';
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
 				echo "<td>${count}</td>";
 				echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 				echo "<td>${object['asset_no']}</td>";
+				echo "<td>${oem_sn_1}</td>";
 				echo "<td>${date_value}</td>";
 				echo "</tr>\n";
 				$order = $nextorder[$order];
@@ -8888,6 +8895,466 @@ function renderMuninServersEditor()
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
 	echo '</table>';
+}
+
+// The validity of some data cannot be guaranteed using foreign keys.
+// Display any invalid rows that have crept in.
+// TODO:
+//    - check for IP addresses whose subnet does not exist in IPvXNetwork (X = 4 or 6)
+//        - IPvXAddress, IPvXAllocation, IPvXLog, IPvXRS, IPvXVS
+//    - provide links/buttons to delete invalid rows
+//    - verify that the current DDL is correct for each DB element
+//        - columns, indexes, foreign keys, views, character sets
+function renderDataIntegrityReport ()
+{
+	global $nextorder;
+	$violations = FALSE;
+
+	// check 1: EntityLink rows referencing not-existent relatives
+	// check 1.1: children 
+	$realms = array
+	(
+		'location' => 'Location',
+		'object' => 'RackObject',
+		'rack' => 'Rack',
+		'row' => 'Row'
+	);
+	$orphans = array ();
+	foreach ($realms as $realm => $table)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT EL.* FROM EntityLink EL ' .
+			"LEFT JOIN ${table} ON EL.child_entity_id = ${table}.id " .
+			"WHERE EL.child_entity_type = ? AND ${table}.id IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['parent_entity_type']);
+			$parent = spotEntity ($orphan['parent_entity_type'], $orphan['parent_entity_id']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${realm_name}: ${parent['name']}</td>";
+			echo "<td>${orphan['child_entity_type']}</td>";
+			echo "<td>${orphan['child_entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 1.2: parents 
+	$orphans = array ();
+	foreach ($realms as $realm => $table)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT EL.* FROM EntityLink EL ' .
+			"LEFT JOIN ${table} ON EL.parent_entity_id = ${table}.id " .
+			"WHERE EL.parent_entity_type = ? AND ${table}.id IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['child_entity_type']);
+			$child = spotEntity ($orphan['child_entity_type'], $orphan['child_entity_id']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${realm_name}: ${child['name']}</td>";
+			echo "<td>${orphan['parent_entity_type']}</td>";
+			echo "<td>${orphan['parent_entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3: multiple tables referencing non-existent dictionary entries
+	// check 3.1: AttributeMap
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' . 
+		'FROM AttributeMap AM ' .
+		'LEFT JOIN Attribute A ON AM.attr_id = A.id ' .
+		'LEFT JOIN Chapter C ON AM.chapter_id = C.id ' .
+		'LEFT JOIN Dictionary D ON AM.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['attr_name']}</td>";
+			echo "<td>${orphan['chapter_name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.2: Object
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT O.* FROM Object O ' .
+		'LEFT JOIN Dictionary D ON O.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['id']}</td>";
+			echo "<td>${orphan['name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.3: ObjectHistory
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OH.* FROM ObjectHistory OH ' .
+		'LEFT JOIN Dictionary D ON OH.objtype_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['id']}</td>";
+			echo "<td>${orphan['name']}</td>";
+			echo "<td>${orphan['objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.4: ObjectParentCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OPC.*, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
+		'FROM ObjectParentCompat OPC ' .
+		'LEFT JOIN Dictionary PD ON OPC.parent_objtype_id = PD.dict_key ' .
+		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' . 
+		'WHERE PD.dict_key IS NULL OR CD.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['parent_name']}</td>";
+			echo "<td>${orphan['parent_objtype_id']}</td>";
+			echo "<td>${orphan['child_name']}</td>";
+			echo "<td>${orphan['child_objtype_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.5: PortCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT PC.*, 1D.dict_value AS type1_name, 2D.dict_value AS type2_name ' .
+		'FROM PortCompat PC ' .
+		'LEFT JOIN Dictionary 1D ON PC.type1 = 1D.dict_key ' .
+		'LEFT JOIN Dictionary 2D ON PC.type2 = 2D.dict_key ' .
+		'WHERE 1D.dict_key IS NULL OR 2D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Port Compatibility rules: Invalid From or To Type (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>From</th><th>From Type ID</th><th>To</th><th>To Type ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['type1_name']}</td>";
+			echo "<td>${orphan['type1']}</td>";
+			echo "<td>${orphan['type2_name']}</td>";
+			echo "<td>${orphan['type2']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 3.6: PortInterfaceCompat
+	$orphans = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT PIC.*, PII.iif_name ' .
+		'FROM PortInterfaceCompat PIC ' .
+		'LEFT JOIN PortInnerInterface PII ON PIC.iif_id = PII.id ' .
+		'LEFT JOIN Dictionary D ON PIC.oif_id = D.dict_key ' .
+		'WHERE D.dict_key IS NULL'
+	);
+	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('Enabled Port Types: Invalid Outer Interface (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Inner Interface</th><th>Outer Interface ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['iif_name']}</td>";
+			echo "<td>${orphan['oif_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 4: relationships that violate ObjectParentCompat Rules
+	$invalids = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT CO.id AS child_id, CO.objtype_id AS child_type_id, CD.dict_value AS child_type, CO.name AS child_name, ' . 
+		'PO.id AS parent_id, PO.objtype_id AS parent_type_id, PD.dict_value AS parent_type, PO.name AS parent_name ' .
+		'FROM Object CO ' .
+		'LEFT JOIN EntityLink EL ON CO.id = EL.child_entity_id ' .
+		'LEFT JOIN Object PO ON EL.parent_entity_id = PO.id ' .
+		'LEFT JOIN ObjectParentCompat OPC ON PO.objtype_id = OPC.parent_objtype_id ' .
+		'LEFT JOIN Dictionary PD ON PO.objtype_id = PD.dict_key ' .
+		'LEFT JOIN Dictionary CD ON CO.objtype_id = CD.dict_key ' .
+		"WHERE EL.parent_entity_type = 'object' AND EL.child_entity_type = 'object' " .
+		'AND OPC.parent_objtype_id IS NULL'
+	);
+	$invalids = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Objects: Violate Object Container Compatibility rules (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Contained Obj Name</th><th>Contained Obj Type</th><th>Container Obj Name</th><th>Container Obj Type</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['child_name']}</td>";
+			echo "<td>${invalid['child_type']}</td>";
+			echo "<td>${invalid['parent_name']}</td>";
+			echo "<td>${invalid['parent_type']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 5: Links that violate PortCompat Rules
+	$invalids = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, DA.dict_value AS porta_type, ' . 
+		'OB.id AS objb_id, OB.name AS objb_name, L.portb AS portb_id, PB.name AS portb_name, DB.dict_value AS portb_type ' .
+		'FROM Link L ' .
+		'LEFT JOIN Port PA ON L.porta = PA.id ' .
+		'LEFT JOIN Object OA ON PA.object_id = OA.id ' .
+		'LEFT JOIN Dictionary DA ON PA.type = DA.dict_key ' .
+		'LEFT JOIN Port PB ON L.portb = PB.id ' .
+		'LEFT JOIN Object OB ON PB.object_id = OB.id ' .
+		'LEFT JOIN Dictionary DB ON PB.type = DB.dict_key ' .
+		'LEFT JOIN PortCompat PC on PA.type = PC.type1 AND PB.type = PC.type2 ' .
+		'WHERE PC.type1 IS NULL OR PC.type2 IS NULL'
+	);
+	$invalids = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Port Links: Violate Port Compatibility Rules (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Object A</th><th>Port A Name</th><th>Port A Type</th><th>Object B</th><th>Port B Name</th><th>Port B Type</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['obja_name']}</td>";
+			echo "<td>${invalid['porta_name']}</td>";
+			echo "<td>${invalid['porta_type']}</td>";
+			echo "<td>${invalid['objb_name']}</td>";
+			echo "<td>${invalid['portb_name']}</td>";
+			echo "<td>${invalid['portb_type']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 6: TagStorage rows referencing non-existent parents 
+	$realms = array
+	(
+		'file' => array ('table' => 'File', 'column' => 'id'),
+		'ipv4net' => array ('table' => 'IPv4Network', 'column' => 'id'),
+		'ipv4rspool' => array ('table' => 'IPv4RSPool', 'column' => 'id'),
+		'ipv4vs' => array ('table' => 'IPv4VS', 'column' => 'id'),
+		'ipv6net' => array ('table' => 'IPv6Network', 'column' => 'id'),
+		'ipvs' => array ('table' => 'VS', 'column' => 'id'),
+		'location' => array ('table' => 'Location', 'column' => 'id'),
+		'object' => array ('table' => 'RackObject', 'column' => 'id'),
+		'rack' => array ('table' => 'Rack', 'column' => 'id'),
+		'user' => array ('table' => 'UserAccount', 'column' => 'user_id'),
+		'vst' => array ('table' => 'VLANSwitchTemplate', 'column' => 'id'),
+	);
+	$orphans = array ();
+	foreach ($realms as $realm => $details)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT TS.*, TT.tag FROM TagStorage TS ' .
+			'LEFT JOIN TagTree TT ON TS.tag_id = TT.id ' .
+			"LEFT JOIN ${details['table']} ON TS.entity_id = ${details['table']}.${details['column']} " .
+			"WHERE TS.entity_realm = ? AND ${details['table']}.${details['column']} IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['entity_realm']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['tag']}</td>";
+			echo "<td>${realm_name}</td>";
+			echo "<td>${orphan['entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 6: FileLink rows referencing non-existent parents 
+	// re-use the realms list from the TagStorage check, with a few mods
+	unset ($realms['file'], $realms['vst']);
+	$realms['row'] = array ('table' => 'Row', 'column' => 'id');
+	$orphans = array ();
+	foreach ($realms as $realm => $details)
+	{ 
+		$result = usePreparedSelectBlade
+		(
+			'SELECT FL.*, F.name FROM FileLink FL ' .
+			'LEFT JOIN File F ON FL.file_id = F.id ' .
+			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
+			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
+			array ($realm)
+		);
+		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+		unset ($result);
+		$orphans = array_merge ($orphans, $rows);
+	}
+	if (count ($orphans))
+	{
+		$violations = TRUE;
+		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		$order = 'odd';
+		foreach ($orphans as $orphan)
+		{
+			$realm_name = formatRealmName ($orphan['entity_type']);
+			echo "<tr class=row_${order}>";
+			echo "<td>${orphan['name']}</td>";
+			echo "<td>${realm_name}</td>";
+			echo "<td>${orphan['entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	if (! $violations)
+		echo '<h2>No integrity violations found</h2>';
 }
 
 ?>

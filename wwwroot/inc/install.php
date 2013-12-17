@@ -483,7 +483,7 @@ function get_pseudo_file ($name)
 		$query[] = "CREATE TABLE `AttributeValue` (
   `object_id` int(10) unsigned NOT NULL,
   -- Default value intentionally breaks the constraint, this blocks
-  -- any insertion, which doesn't have 'object_tid' on the column list.
+  -- any insertion that doesn't have 'object_tid' on the column list.
   `object_tid` int(10) unsigned NOT NULL default '0',
   `attr_id` int(10) unsigned NOT NULL,
   `string_value` char(255) default NULL,
@@ -576,9 +576,9 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `EntityLink` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_entity_type` enum('ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user') NOT NULL,
+  `parent_entity_type` enum('location','object','rack','row') NOT NULL,
   `parent_entity_id` int(10) unsigned NOT NULL,
-  `child_entity_type` enum('file','location','object','rack','row') NOT NULL,
+  `child_entity_type` enum('location','object','rack','row') NOT NULL,
   `child_entity_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `EntityLink-unique` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`),
@@ -1672,10 +1672,10 @@ WHERE O.objtype_id = 1562";
 ('PREVIEW_IMAGE_MAXPXS','320','uint','yes','no','yes','Max pixels per axis for image file preview'),
 ('VENDOR_SIEVE','','string','yes','no','yes','Vendor sieve configuration'),
 ('IPV4LB_LISTSRC','false','string','yes','no','no','List source: IPv4 load balancers'),
-('IPV4OBJ_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_12} or {\$typeid_445} or {\$typeid_447} or {\$typeid_798} or {\$typeid_965} or {\$typeid_1397} or {\$typeid_1502} or {\$typeid_1503} or {\$typeid_1504} or {\$typeid_1507} or {\$typeid_1787}','string','yes','no','no','List source: IPv4-enabled objects'),
+('IPV4OBJ_LISTSRC','not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})','string','yes','no','no','List source: IPv4-enabled objects'),
 ('IPV4NAT_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8} or {\$typeid_798}','string','yes','no','no','List source: IPv4 NAT performers'),
-('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which asset tag should be set'),
-('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: object, for which common name should be set'),
+('ASSETWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: objects for that asset tag should be set'),
+('NAMEWARN_LISTSRC','{\$typeid_4} or {\$typeid_7} or {\$typeid_8}','string','yes','no','no','List source: objects for that common name should be set'),
 ('RACKS_PER_ROW','12','uint','yes','no','yes','Racks per row'),
 ('FILTER_PREDICATE_SIEVE','','string','yes','no','yes','Predicate sieve regex(7)'),
 ('FILTER_DEFAULT_ANDOR','and','string','no','no','yes','Default list filter boolean operation (or/and)'),

@@ -1,0 +1,11 @@
+This directory stores PHPUnit tests.
+
+#############################
+#          WARNING          #
+#############################
+Do not run these tests against a production instance of RackTables!
+Data may be added, modified or deleted as part of the tests.
+If you understand the risk, edit bootstrap.php and delete the warning lines.
+
+To run a test from the command-line:
+$ phpunit TestName

@@ -331,7 +331,7 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
 		return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
 	// authenticated_via_ldap_cache()'s way of locking can sometimes result in
-	// a PDO error condition, which convertPDOException() was not able to dispatch.
+	// a PDO error condition that convertPDOException() was not able to dispatch.
 	// To avoid reaching printPDOException() (which prints backtrace with password
 	// argument in cleartext), any remaining PDO condition is converted locally.
 	try
@@ -364,6 +364,28 @@ function authenticated_via_ldap_nocache ($username, $password, &$ldap_displaynam
 	return FALSE;
 }
 
+// check that LDAP cache row contains correct password and is not expired
+// if check_for_refreshing = TRUE, also checks that cache row does not need refreshing
+function isLDAPCacheValid ($cache_row, $password_hash, $check_for_refreshing = FALSE)
+{
+	global $LDAP_options;
+	return
+		is_array ($cache_row) &&
+		$cache_row['successful_hash'] === $password_hash &&
+		$cache_row['success_age'] < $LDAP_options['cache_expiry'] &&
+		(
+			// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
+			// expect authentication success, unless it's well-timed to perform a retry,
+			// which may sometimes bring a NAK decision.
+			! $check_for_refreshing ||
+			(
+				$cache_row['success_age'] < $LDAP_options['cache_refresh'] ||
+				isset ($cache_row['retry_age']) &&
+				$cache_row['retry_age'] < $LDAP_options['cache_retry']
+			)
+		);
+}
+
 // Idem, but consider existing data in cache and modify/discard it, when necessary.
 // Remember to have releaseLDAPCache() called before any return statement.
 // Perform cache maintenance on each update.
@@ -377,66 +399,57 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 		discardLDAPCache();
 		saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
 	}
-	$oldinfo = acquireLDAPCache ($username, sha1 ($password), $LDAP_options['cache_expiry']);
-	if ($oldinfo === NULL) // cache miss
+
+	$user_data = array(); // fill auto_tags and ldap_displayname from this array
+	$password_hash = sha1 ($password);
+
+	// first try to get cache row without locking it (quick way)
+	$cache_row = fetchLDAPCacheRow ($username);
+	if (isLDAPCacheValid ($cache_row, $password_hash, TRUE))
+		$user_data = $cache_row; // cache HIT
+	else
 	{
-		// On cache miss execute complete procedure and return the result. In case
-		// of successful authentication put a record into cache.
-		$newinfo = queryLDAPServer ($username, $password);
-		if ($newinfo['result'] == 'ACK')
+		// cache miss or expired. Try to lock LDAPCache for $username
+		$cache_row = acquireLDAPCache ($username);
+		if (isLDAPCacheValid ($cache_row, $password_hash, TRUE))
+			$user_data = $cache_row; // cache HIT, but with DB lock
+		else
 		{
-			$ldap_displayname = $newinfo['displayed_name'];
-			foreach ($newinfo['memberof'] as $autotag)
-				$auto_tags[] = array ('tag' => $autotag);
-			replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
-			releaseLDAPCache();
-			discardLDAPCache ($LDAP_options['cache_expiry']);
-			return TRUE;
+			$ldap_answer = queryLDAPServer ($username, $password);
+			switch ($ldap_answer['result'])
+			{
+			case 'ACK':
+				replaceLDAPCacheRecord ($username, $password_hash, $ldap_answer['displayed_name'], $ldap_answer['memberof']);
+				$user_data = $ldap_answer;
+				break;
+			case 'NAK': // The record isn't valid any more.
+				// TODO: negative result caching
+				deleteLDAPCacheRecord ($username);
+				break;
+			case 'CAN': // LDAP query failed, use old value till next retry
+				if (isLDAPCacheValid ($cache_row, $password_hash, FALSE))
+				{
+					touchLDAPCacheRecord ($username);
+					$user_data = $cache_row;
+				}
+				else
+					deleteLDAPCacheRecord ($username);
+				break;
+			default:
+				throw new RackTablesError ('structure error', RackTablesError::INTERNAL);
+			}
 		}
 		releaseLDAPCache();
-		return FALSE;
+		discardLDAPCache ($LDAP_options['cache_expiry']); // clear expired rows of other users
 	}
-	// cache HIT
-	// There are two confidence levels of cache hits: "certain" and "uncertain". In either case
-	// expect authentication success, unless it's well-timed to perform a retry,
-	// which may sometimes bring a NAK decision.
-	if ($oldinfo['success_age'] < $LDAP_options['cache_refresh'] or $oldinfo['retry_age'] < $LDAP_options['cache_retry'])
+
+	if ($user_data)
 	{
-		releaseLDAPCache();
-		$ldap_displayname = $oldinfo['displayed_name'];
-		foreach ($oldinfo['memberof'] as $autotag)
+		$ldap_displayname = $user_data['displayed_name'];
+		foreach ($user_data['memberof'] as $autotag)
 			$auto_tags[] = array ('tag' => $autotag);
 		return TRUE;
 	}
-	// Either refresh threshold or retry threshold reached.
-	$newinfo = queryLDAPServer ($username, $password);
-	switch ($newinfo['result'])
-	{
-	case 'ACK': // refresh existing record
-		$ldap_displayname = $newinfo['displayed_name'];
-		foreach ($newinfo['memberof'] as $autotag)
-			$auto_tags[] = array ('tag' => $autotag);
-		replaceLDAPCacheRecord ($username, sha1 ($password), $newinfo['displayed_name'], $newinfo['memberof']);
-		releaseLDAPCache();
-		discardLDAPCache ($LDAP_options['cache_expiry']);
-		return TRUE;
-	case 'NAK': // The record isn't valid any more.
-		deleteLDAPCacheRecord ($username);
-		releaseLDAPCache();
-		discardLDAPCache ($LDAP_options['cache_expiry']);
-		return FALSE;
-	case 'CAN': // retry failed, do nothing, use old value till next retry
-		$ldap_displayname = $oldinfo['displayed_name'];
-		foreach ($oldinfo['memberof'] as $autotag)
-			$auto_tags[] = array ('tag' => $autotag);
-		touchLDAPCacheRecord ($username);
-		releaseLDAPCache();
-		discardLDAPCache ($LDAP_options['cache_expiry']);
-		return TRUE;
-	default:
-		throw new RackTablesError ('structure error', RackTablesError::INTERNAL);
-	}
-	// This is never reached.
 	return FALSE;
 }
 

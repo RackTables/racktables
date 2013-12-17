@@ -6,7 +6,7 @@
 
 /*
 
-The purpose of this file is to contain functions, which generate a complete
+The purpose of this file is to contain functions that generate a complete
 HTTP response body and are either "dead ends" or depend on just a small
 amount of other code (which should eventually be placed in a sort of
 "first order" library file).
@@ -454,8 +454,8 @@ function proxyCactiRequest ($server_id, $graph_id)
 
 function proxyMuninRequest ($server_id, $graph)
 {
-    $object = spotEntity ('object', $server_id);
-    list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
+	$object = spotEntity ('object', $server_id);
+	list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
 
 	$ret = array();
 	$servers = getMuninServers();
