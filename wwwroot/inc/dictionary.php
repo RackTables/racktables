@@ -40,10 +40,7 @@ function isInnoDBSupported ()
 	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
 	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
 	$dbxlink->query("DROP TABLE `innodb_test`");
-	if ($row['Engine'] == 'InnoDB')
-		return TRUE;
-
-	return FALSE;
+	return $row['Engine'] == 'InnoDB';
 }
 
 function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'trerror')
