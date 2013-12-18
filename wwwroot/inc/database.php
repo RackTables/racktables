@@ -5408,18 +5408,10 @@ function isKeyInCache( $_key)
 	global $fast_cache;
 
 	if (isset( $fast_cache[ $_key])) 
-	{
 		return TRUE;
-	} else {
-		if (!($_keyValue = $memcached->get($_key))) 
-		{
-			if ($memcached->getResultCode() == Memcached::RES_NOTFOUND) 
-				return FALSE;
-			return FALSE;
-		} else {
-			return TRUE;
-		}
-	}
+	if (!($_keyValue = $memcached->get($_key))) 
+		return FALSE;
+	return TRUE;
 }
 
 function setKeyInCache ($_key, $_value) 
@@ -5447,23 +5439,20 @@ function getKeyInCache ($_key)
 	global $fastCache;
 
 	if (isset ($fastCache[$_key])) 
-	{
 		return $fastCache[$_key];
+	if ( (strpos ($_key, 'complete-') === 0) && (substr_count ($_key, '-') == 1)) 
+	{
+		$_keysToFetch = $memcached->get ($_key);
+		$_res = array();
+		foreach($_keysToFetch as $_curKeyToFetch) 
+			$_res[$_curKeyToFetch] = $memcached->get ($_key.'-'.$_curKeyToFetch);
+		// always populate fastCache with result from slow-cache ( memcached )
+		$fastCache[$_key] = $_res;
+		return $_res;
 	} else {
-		if ( (strpos ($_key, 'complete-') === 0) && (substr_count ($_key, '-') == 1)) 
-		{
-			$_keysToFetch = $memcached->get ($_key);
-			$_res = array();
-			foreach($_keysToFetch as $_curKeyToFetch) 
-				$_res[$_curKeyToFetch] = $memcached->get ($_key.'-'.$_curKeyToFetch);
-			// always populate fastCache with result from slow-cache ( memcached )
-			$fastCache[$_key] = $_res;
-			return $_res;
-		} else {
-			// always populate fastCache with result from slow-cache ( memcached )
-			$fastCache[$_key] = $memcached->get ($_key);
-			return $fastCache[$_key];
-		}
+		// always populate fastCache with result from slow-cache ( memcached )
+		$fastCache[$_key] = $memcached->get ($_key);
+		return $fastCache[$_key];
 	}
 }
 
