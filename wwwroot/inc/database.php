@@ -1332,6 +1332,10 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('CactiGraph', array ('object_id' => $object_id));
 # Munin graphs
 	usePreparedDeleteBlade ('MuninGraph', array ('object_id' => $object_id));
+	delKeyInCache ('complete-object');
+	delKeyInCache ('partial-object');
+	delKeyInCache ('complete-object-'.$object_id);
+
 }
 
 function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_has_problems, $new_asset_no, $new_comment)
