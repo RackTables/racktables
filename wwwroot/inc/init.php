@@ -56,7 +56,8 @@ if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
-if (isKeyInCache ('RackCode')) {
+if (isKeyInCache ('RackCode')) 
+{
   $rackCode = getKeyInCache ('RackCode');
 } else {
   $rackCodeCache = loadScript ('RackCodeCache');
@@ -98,7 +99,8 @@ $tagRelCache = array();
 $fastCache = array();
 $taglist = getTagList();
 
-if (isKeyInCache ('TagListSorted')) {
+if (isKeyInCache ('TagListSorted')) 
+{
   $tagtree = getKeyInCache ('TagListSorted');
 } else {
   $tagtree = treeFromList ($taglist);
