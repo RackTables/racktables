@@ -5476,11 +5476,14 @@ function delKeyInCache ($_key)
 
 	if ( (strpos($_key, 'complete-') === 0) && (substr_count ($_key, '-') == 1)) 
 	{
-		$_keysToDelete = $memcached->get ($_key);
-		$_res = array();
-		foreach($_keysToDelete as $_curKeyToDelete) 
-			$memcached->delete ($_key.'-'.$_curKeyToDelete);
-		return $memcached->delete ($_key);
+		if ( isKeyInCache( $_key) 
+		{
+			$_keysToDelete = $memcached->get ($_key);
+			$_res = array();
+			foreach($_keysToDelete as $_curKeyToDelete) 
+				$memcached->delete ($_key.'-'.$_curKeyToDelete);
+			return $memcached->delete ($_key);
+		}
 	} else {
 		return $memcached->delete ($_key);
 	}
