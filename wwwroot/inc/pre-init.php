@@ -50,6 +50,16 @@ if (! isset ($local_gwdir)) // the directory where RT will search gateway script
 if (! isset ($local_staticdir)) // the directory where RT will search static files (js/*, css/*, pix/*) if not found in $racktables_staticdir
 	$local_staticdir = $racktables_plugins_dir;
 
+// init connection to memcache
+$memcached = new Memcached ('slow_cache');
+global $_memcachedHost, $_memcachedPort;
+$memcached->setOption (Memcached::OPT_TCP_NODELAY, true);
+$memcached->setOption (Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_CONSISTENT);
+$memcached->setOption (Memcached::OPT_COMPRESSION, false);
+$memcached->setOption (Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+$memcached->addServer ($_memcachedHost, $_memcachedPort);
+
+
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
 {
@@ -59,6 +69,7 @@ function connectDB()
 	(
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::MYSQL_ATTR_INIT_COMMAND => 'set names "utf8"',
+                PDO::ATTR_PERSISTENT => true,
 	);
 	if (isset ($pdo_bufsize))
 		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
