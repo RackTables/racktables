@@ -5474,8 +5474,8 @@ function delKeyInCache ($_key)
 	{
 		$_keysToDelete = $memcached->get ($_key);
 		$_res = array();
-		foreach($_keysToFetch as $_curKeyToFetch) 
-			$memcached->delete ($_key.'-'.$_curKeyToFetch);
+		foreach($_keysToDelete as $_curKeyToDelete) 
+			$memcached->delete ($_key.'-'.$_curKeyToDelete);
 		return $memcached->delete ($_key);
 	} else {
 		return $memcached->delete ($_key);
