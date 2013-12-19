@@ -115,7 +115,10 @@ function init_config ()
 		$unix_socket = '/var/lib/mysql/mysql.sock',
 		$database = 'racktables_db',
 		$username = 'racktables_user',
-		$password = ''
+		$password = '',
+		$enable_memcache = TRUE,
+		$memcached_host = 'localhost',
+		$memcached_port = '11211'
 	)
 	{
 		echo "<input type=hidden name=save_config value=1>\n";
@@ -139,6 +142,12 @@ function init_config ()
 		echo "<td><input type=text name=mysql_username id=mysql_username value='${username}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_password>password:</label></td>";
 		echo "<td><input type=password name=mysql_password id=mysql_password value='${password}'></td></tr>\n";
+		echo '<tr><td><label for=enable_memcache>Enable Memcached</label></td>';
+		echo '<td><input type=radio name=enable_memcache value=yes id=enable_memcache' . ($enable_memcache ? 'yes' : ' checked') . '></td></tr>';
+		echo "<tr><td><label for=memcached_host>memcached_host:</label></td>";
+		echo "<td><input type=text name=memcached_host id=memcached_host value='${memcached_host}'></td></tr>\n";
+		echo "<tr><td><label for=memcached_port>memcached_port:</label></td>";
+		echo "<td><input type=text name=memcached_port id=memcached_port value='${memcached_port}'></td></tr>\n";
 		echo '</table>';
 	}
 	global $path_to_secret_php;
@@ -165,7 +174,10 @@ function init_config ()
 			$_REQUEST['mysql_socket'],
 			$_REQUEST['mysql_db'],
 			$_REQUEST['mysql_username'],
-			$_REQUEST['mysql_password']
+			$_REQUEST['mysql_password'],
+			$_REQUEST['enable_memcache'],
+			$_REQUEST['memcached_host'],
+			$_REQUEST['memcached_port']
 		);
 		echo '<h2 class=trerror>Missing database/username parameter!</h2>';
 		return FALSE;
@@ -180,7 +192,10 @@ function init_config ()
 			$_REQUEST['mysql_socket'],
 			$_REQUEST['mysql_db'],
 			$_REQUEST['mysql_username'],
-			$_REQUEST['mysql_password']
+			$_REQUEST['mysql_password'],
+			$_REQUEST['enable_memcache'],
+			$_REQUEST['memcached_host'],
+			$_REQUEST['memcached_port']
 		);
 		echo '<h2 class=trerror>Missing TCP hostname parameter!</h2>';
 		return FALSE;
@@ -195,7 +210,10 @@ function init_config ()
 			$_REQUEST['mysql_socket'],
 			$_REQUEST['mysql_db'],
 			$_REQUEST['mysql_username'],
-			$_REQUEST['mysql_password']
+			$_REQUEST['mysql_password'],
+			$_REQUEST['enable_memcache'],
+			$_REQUEST['memcached_host'],
+			$_REQUEST['memcached_port']
 		);
 		echo '<h2 class=trerror>Missing UNIX socket parameter!</h2>';
 		return FALSE;
@@ -232,12 +250,40 @@ function init_config ()
 			$_REQUEST['mysql_socket'],
 			$_REQUEST['mysql_db'],
 			$_REQUEST['mysql_username'],
-			$_REQUEST['mysql_password']
+			$_REQUEST['mysql_password'],
+			$_REQUEST['enable_memcache'],
+			$_REQUEST['memcached_host'],
+			$_REQUEST['memcached_port']
 		);
 		echo "<h2 class=trerror>Database connection failed. Check parameters and try again.</h2>\n";
 		echo "PDO DSN: <tt class=trwarning>${pdo_dsn}</tt><br>";
 		return FALSE;
 	}
+	if ($_REQUEST['enable_memcache'] == 'yes') 
+	{
+		// we need to validate memcache connection
+		$m = new Memcached();
+		$m->addServer ($_REQUEST['memcached_host'], $_REQUEST['memcached_port']);
+		$_memcacheCheck = array_values( $m->getVersion());
+		if ($_memcacheCheck[ 0] == '255.255.255')
+		{
+			print_form
+			(
+				$_REQUEST['conn'] == 'conn_tcp',
+				$_REQUEST['mysql_host'],
+				$_REQUEST['mysql_port'],
+				$_REQUEST['mysql_socket'],
+				$_REQUEST['mysql_db'],
+				$_REQUEST['mysql_username'],
+				$_REQUEST['mysql_password'],
+				$_REQUEST['enable_memcache'],
+				$_REQUEST['memcached_host'],
+				$_REQUEST['memcached_port']
+			);
+			echo "<h2 class=trerror>Connection to Memcached server failed. Check parameters and try again.</h2>\n";
+			return FALSE;
+		}		
+	} 
 
 	$conf = fopen ($path_to_secret_php, 'w+');
 	if ($conf === FALSE)
@@ -252,6 +298,12 @@ function init_config ()
 	fwrite ($conf, "# Setting MySQL client buffer size may be required to make downloading work for\n");
 	fwrite ($conf, "# larger files, but it does not work with mysqlnd.\n");
 	fwrite ($conf, "# \$pdo_bufsize = 50 * 1024 * 1024;\n\n");
+	if ($_REQUEST['enable_memcache'] == 'yes')
+		fwrite ($conf, "\$_memcachedEnable = TRUE;\n");
+	else
+		fwrite ($conf, "\$_memcachedEnable = FALSE;\n");
+	fwrite ($conf, "\$_memcachedHost = '" . $_REQUEST['memcached_host'] . "';\n");
+	fwrite ($conf, "\$_memcachedPort = '" . $_REQUEST['memcached_port'] . "';\n");
 	fwrite ($conf, <<<ENDOFTEXT
 
 \$user_auth_src = 'database';
