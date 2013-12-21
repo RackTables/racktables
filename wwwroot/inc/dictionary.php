@@ -36,11 +36,13 @@ function reloadDictionary ($release = NULL)
 function isInnoDBSupported ()
 {
 	global $dbxlink;
-	// create a temp table
+	// create a temp table and a trigger
 	$dbxlink->query("CREATE TABLE `innodb_test` (`id` int) ENGINE=InnoDB");
-	$row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
+	$innodb_row = $dbxlink->query("SHOW TABLE STATUS LIKE 'innodb_test'")->fetch(PDO::FETCH_ASSOC);
+	$dbxlink->query("CREATE TRIGGER `trigger_test` BEFORE INSERT ON `innodb_test` FOR EACH ROW BEGIN END");
+	$trigger_row = $dbxlink->query("SELECT COUNT(*) AS count FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA() AND TRIGGER_NAME = 'trigger_test'")->fetch(PDO::FETCH_ASSOC);
 	$dbxlink->query("DROP TABLE `innodb_test`");
-	return $row['Engine'] == 'InnoDB';
+	return ($innodb_row['Engine'] == 'InnoDB' and $trigger_row['count'] == 1);
 }
 
 function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'trerror')

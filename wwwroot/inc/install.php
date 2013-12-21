@@ -1151,6 +1151,34 @@ function get_pseudo_file ($name)
   CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
 
+		$link_trigger_body = <<<ENDOFTRIGGER
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+
+  IF NEW.porta = NEW.portb THEN
+    # forbid connecting a port to itself
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    # force porta < portb
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+
+  # lock ports to prevent concurrent link establishment
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta FOR UPDATE;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb FOR UPDATE;
+
+  # only permit the link if ports are compatibile
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+ENDOFTRIGGER;
+		$query[] = "CREATE TRIGGER `Link-before-insert` BEFORE INSERT ON `Link` FOR EACH ROW $link_trigger_body";
+		$query[] = "CREATE TRIGGER `Link-before-update` BEFORE UPDATE ON `Link` FOR EACH ROW $link_trigger_body";
+
 		$query[] = "CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
 FROM `Object` O
 LEFT JOIN (

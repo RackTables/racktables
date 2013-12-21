@@ -101,6 +101,10 @@ and initialize the application.
 
 *** Upgrading to 0.20.7 ***
 
+Database triggers are used for some data consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
 The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
 the IP addressing feature for all object types except those listed.
 

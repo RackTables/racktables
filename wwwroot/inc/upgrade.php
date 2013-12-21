@@ -193,6 +193,10 @@ ENDOFTEXT
 ,
 
 	'0.20.7' => <<<ENDOFTEXT
+Database triggers are used for some data consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
 The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
 the IP addressing feature for all object types except those listed.
 ENDOFTEXT
@@ -1369,6 +1373,40 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.7':
+			if (! isInnoDBSupported ())
+			{
+				showUpgradeError ('Cannot upgrade because triggers are not supported by your MySQL server.', __FUNCTION__);
+				die;
+			}
+
+			$link_trigger_body = <<<ENDOFTRIGGER
+BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+
+  IF NEW.porta = NEW.portb THEN
+    # forbid connecting a port to itself
+    SET NEW.porta = NULL;
+  ELSEIF NEW.porta > NEW.portb THEN
+    # force porta < portb
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+
+  # lock ports to prevent concurrent link establishment
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta FOR UPDATE;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb FOR UPDATE;
+
+  # only permit the link if ports are compatibile
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+ENDOFTRIGGER;
+			$query[] = "CREATE TRIGGER `Link-before-insert` BEFORE INSERT ON `Link` FOR EACH ROW $link_trigger_body";
+			$query[] = "CREATE TRIGGER `Link-before-update` BEFORE UPDATE ON `Link` FOR EACH ROW $link_trigger_body";
+
 			// enable IP addressing for all object types unless specifically excluded
 			$query[] = "UPDATE `Config` SET varvalue = 'not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})' WHERE varname = 'IPV4OBJ_LISTSRC'";
 
