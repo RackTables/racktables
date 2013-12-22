@@ -160,12 +160,30 @@ $iftable_processors['generic-port-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-any-10TX'] = array
+(
+	'pattern' => '@^([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 18,
+	'label' => '\\1x',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-any-100TX'] = array
 (
 	'pattern' => '@^FastEthernet(\d+)$@',
 	'replacement' => 'fa\\1',
 	'dict_key' => 19,
 	'label' => 'fa\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-a-to-b-100TX'] = array
+(
+	'pattern' => '@^(A|B)$@',
+	'replacement' => '\\1',
+	'dict_key' => 19,
+	'label' => '\\1x',
 	'try_next_proc' => FALSE,
 );
 
@@ -2245,6 +2263,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2960S-F48LPS-L: 48 RJ-45/10-100TX + 4 SFP/1000',
 		'processors' => array ('catalyst-stack-1-to-4-SFP', 'catalyst-chassis-mgmt', 'catalyst-stack-any-100TX'),
 	),
+	'9.5.18' => array
+	(
+		'dict_key' => 2094,
+		'text' => 'WS-C1924-A: 24 RJ-45/10TX + 2 100TX',
+		'processors' => array ('catalyst-a-to-b-100TX', 'catalyst-any-10TX'),
+	),
 	'9.5.42' => array
 	(
 		'dict_key' => 1796,
@@ -3152,6 +3176,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
+	case preg_match ('/^9\.5\.18/', $sysObjectID):
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
 		$major_line = preg_replace ('/^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*/', '\\1', $exact_release);
 		$ios_codes = array

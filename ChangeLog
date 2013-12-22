@@ -1,10 +1,12 @@
 0.20.7
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)
+	bugfix: browse objects page was broken if an object's container was unnamed (#1115)
 	update: enable IP addressing for all object types unless specifically excluded
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,
-		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum
+		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum,
+		Cisco WS-C1924 (#1111)
 	update: add the data integrity report
 	update: upgrade CodeMirror to version 3.20
 	update: include OEM S/N 1 in expirations report (by Matthew Castanien)
