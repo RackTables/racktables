@@ -618,6 +618,15 @@ $iftable_processors['procurve-23-to-24-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['procurve-25-to-26-combo-1000SFP'] = array
+(
+	'pattern' => '@^(25|26)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['procurve-modular-100TX'] = array
 (
 	'pattern' => '@^([A-Z][[:digit:]]+)$@',
@@ -2416,8 +2425,8 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'11.2.3.7.11.34' => array
 	(
 		'dict_key' => 864,
-		'text' => 'J8164A: 24 RJ-45/10-100TX POE + 2 RJ-45/10-100-1000T(X)',
-		'processors' => array ('procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
+		'text' => 'J4900A: 24 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('procurve-25-to-26-combo-1000SFP', 'procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.35' => array
 	(
@@ -2436,6 +2445,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 866,
 		'text' => 'J4899B: 48 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.45' => array
+	(
+		'dict_key' => 864,
+		'text' => 'J4900B: 24 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('procurve-25-to-26-combo-1000SFP', 'procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.53' => array
 	(
