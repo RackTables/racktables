@@ -2161,7 +2161,7 @@ function renderDepot ()
 	elseif (! ($cellfilter['is_empty'] && renderEmptyResults ($cellfilter, 'objects', $objects_count)))
 	{
 		$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
-		// 2st attempt: do not render all fetched objects if rendering empty result is enabled
+		// 2nd attempt: do not render all fetched objects if rendering empty result is enabled
 		if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
@@ -2184,7 +2184,7 @@ function renderDepot ()
 				$places = array();
 				if (array_key_exists ($obj['id'], $containerinfo))
 					foreach ($containerinfo[$obj['id']] as $ci)
-						$places[] = mkA ($ci['container_name'], 'object', $ci['container_id']);
+						$places[] = mkA ($ci['container_dname'], 'object', $ci['container_id']);
 				if (array_key_exists ($obj['id'], $mountinfo))
 					foreach ($mountinfo[$obj['id']] as $mi)
 						$places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);

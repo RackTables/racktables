@@ -429,31 +429,26 @@ function fillBypassValues ($pageno, &$args)
 // Objects of some types should be explicitly shown as
 // anonymous (labelless). This function is a single place where the
 // decision about displayed name is made.
+function formatObjectDisplayedName ($name, $objtype_id)
+{
+	return ($name != '') ? $name : sprintf ('[%s]', decodeObjectType ($objtype_id, 'o'));
+}
+
+// Set the dname attribute within a cell
 function setDisplayedName (&$cell)
 {
 	if ($cell['realm'] == 'object')
 	{
-		if ($cell['name'] != '')
-			$cell['dname'] = $cell['name'];
-		else
-			$cell['dname'] = '[' . decodeObjectType ($cell['objtype_id'], 'o') . ']';
-		// If the object has a container, apply the same logic to the container name
-		$cell['container_dname'] = NULL;
+		$cell['dname'] = formatObjectDisplayedName ($cell['name'], $cell['objtype_id']);
+		// If the object has a container, set its dname as well
 		if ($cell['container_id'])
-		{
-			if ($cell['container_name'] != '')
-				$cell['container_dname'] = $cell['container_name'];
-			else
-				$cell['container_dname'] = '[' . decodeObjectType ($cell['container_objtype_id'], 'o') . ']';
-		}
+			$cell['container_dname'] = formatObjectDisplayedName ($cell['container_name'], $cell['container_objtype_id']);
 	}
 	elseif ($cell['realm'] == 'ipv4vs')
-	{
 		if ($cell['proto'] == 'MARK')
-			$cell['dname'] = "fwmark: " . implode ('', unpack('N', substr ($cell['vip_bin'], 0, 4)));
+			$cell['dname'] = 'fwmark: ' . implode ('', unpack ('N', substr ($cell['vip_bin'], 0, 4)));
 		else
 			$cell['dname'] = $cell['vip'] . ':' . $cell['vport'] . '/' . $cell['proto'];
-	}
 }
 
 // This function finds height of solid rectangle of atoms that are all

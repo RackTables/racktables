@@ -80,7 +80,9 @@ INSERT INTO `Object` (`id`, `name`, `label`, `objtype_id`, `asset_no`, `has_prob
 (978,'London',NULL,1562,NULL,'no',NULL),
 (979,'sw-a1',NULL,8,NULL,'no',NULL),
 (980,'sw-a2',NULL,8,NULL,'no',NULL),
-(981,'sw-d1',NULL,8,NULL,'no',NULL);
+(981,'sw-d1',NULL,8,NULL,'no',NULL),
+(982,NULL,NULL,3,NULL,'no',NULL),
+(983,'London modem 1',NULL,13,NULL,'no',NULL);
 
 INSERT INTO `Atom` (`molecule_id`, `rack_id`, `unit_no`, `atom`) VALUES
 (1,967,35,'front'),
@@ -100,7 +102,8 @@ INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entit
 ('location',977,'row',965),
 ('location',978,'row',966),
 ('rack',968,'object',979),
-('rack',969,'object',980);
+('rack',969,'object',980),
+('object',982,'object',983);
 
 INSERT INTO `AttributeValue` (`object_id`, `object_tid`, `attr_id`, `string_value`, `uint_value`, `float_value`) VALUES
 (905,7,2,NULL,269,NULL),
@@ -1553,7 +1556,10 @@ INSERT INTO `RackSpace` (`rack_id`, `unit_no`, `atom`, `state`, `object_id`) VAL
 (972,34,'interior','T',962),
 (972,34,'rear','T',962),
 (967,35,'front','T',981),
-(967,35,'interior','T',981);
+(967,35,'interior','T',981),
+(967,17,'front','T',982),
+(967,17,'interior','T',982),
+(967,17,'rear','T',982);
 
 INSERT INTO `Script` (`script_name`, `script_text`) VALUES
 ('DefaultRSConfig','CONNECT_TIMEOUT=1\nCONNECT_PORT=%RSPORT%\nCHECK_TCP=`TCP_CHECK {\n	connect_port %CONNECT_PORT%\n	connect_timeout %CONNECT_TIMEOUT% \n}\'\n%CHECK%\n'),

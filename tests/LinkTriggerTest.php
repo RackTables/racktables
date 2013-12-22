@@ -4,7 +4,6 @@
 //   - porta != portb
 //   - porta < portb
 //   - porta is compatibile with portb
-
 class LinkTriggerTest extends PHPUnit_Framework_TestCase
 {
 	protected $autoports_config_var = NULL;

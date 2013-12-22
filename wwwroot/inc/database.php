@@ -407,21 +407,21 @@ function getContainerInfo ($object_ids)
 		return array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT EL.child_entity_id, EL.parent_entity_id, O.name ' .
+		'SELECT EL.child_entity_id, EL.parent_entity_id, RO.name, RO.objtype_id ' .
 		'FROM EntityLink EL ' .
-		'LEFT JOIN Object O ON EL.parent_entity_id = O.id ' .
+		'LEFT JOIN RackObject RO ON EL.parent_entity_id = RO.id ' .
 		'WHERE EL.child_entity_id IN (' . questionMarks (count ($object_ids)) . ') ' .
 		"AND EL.parent_entity_type = 'object' " .
 		"AND EL.child_entity_type = 'object' " .
-		'ORDER BY O.name',
+		'ORDER BY RO.name',
 		$object_ids
 	);
 	$ret = array ();
 	foreach ($result as $row)
 		$ret[$row['child_entity_id']][] = array
 		(
-			'container_id'   => $row['parent_entity_id'],
-			'container_name' => $row['name']
+			'container_id'    => $row['parent_entity_id'],
+			'container_dname' => formatObjectDisplayedName ($row['name'], $row['objtype_id'])
 		);
 	unset ($result);
 	return $ret;
