@@ -160,6 +160,24 @@ $iftable_processors['generic-port-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['generic-any-1000T'] = array
+(
+	'pattern' => '@^([[:digit:]]+)$@',
+	'replacement' => '\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['generic-21-to-24-combo-1000SFP'] = array
+(
+	'pattern' => '@^(21|22|23|24)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['catalyst-any-10TX'] = array
 (
 	'pattern' => '@^([[:digit:]]+)$@',
@@ -2663,6 +2681,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SMC8150L2: 46 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('smc-combo-45-to-48', 'nortel-any-1000T'),
 	),
+	'207.1.4' => array
+	(
+		'dict_key' => 2095,
+		'text' => 'AT-GS950/24: 20 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('generic-21-to-24-combo-1000SFP', 'generic-any-1000T'),
+	),
 	'207.1.14.53' => array
 	(
 		'dict_key' => 1720,
@@ -3228,6 +3252,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		break;
 	case preg_match ('/^9\.5\.42/', $sysObjectID): // Catalyst 2948 running CatOS
 	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SF series
+	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		checkPIC ('1-16');
@@ -3288,22 +3313,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		break;
-	case preg_match ('/^4526\.100\.4\.(6|10)/', $sysObjectID): // NETGEAR (without console)
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		break;
-	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
-		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		break;
-	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
-		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
-		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
-		break;
 	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
 		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
@@ -3318,11 +3327,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (preg_match ('/^Juniper Networks, Inc. ex4200-48t internet router/', $sysDescr))
 			updateStickerForCell ($objectInfo, 2, 907);
 		break;
-	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
-		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
-		break;
 	case preg_match ('/^1991\.1\.3\.53\.1\.2$/', $sysObjectID): // TurboIron 24X
+	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		checkPIC ('1-681');
 		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
@@ -3429,6 +3435,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
+	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
 	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
@@ -3480,6 +3487,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^171\.10\.76\.10/', $sysObjectID): // D-Link DGS-1210-24
+	case preg_match ('/^207\.1\.4\./', $sysObjectID): // Allied Telesyn AT-GS950/24
+	case preg_match ('/^4526\.100\.4\.(6|10)/', $sysObjectID): // NETGEAR (without console)
 		// one AC port, no console
 		checkPIC ('1-16');
 		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
