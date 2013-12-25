@@ -8899,19 +8899,19 @@ function renderMuninServersEditor()
 
 // The validity of some data cannot be guaranteed using foreign keys.
 // Display any invalid rows that have crept in.
-// TODO:
+// Possible enhancements:
 //    - check for IP addresses whose subnet does not exist in IPvXNetwork (X = 4 or 6)
 //        - IPvXAddress, IPvXAllocation, IPvXLog, IPvXRS, IPvXVS
 //    - provide links/buttons to delete invalid rows
 //    - verify that the current DDL is correct for each DB element
-//        - columns, indexes, foreign keys, views, character sets
+//        - columns, indexes, character sets
 function renderDataIntegrityReport ()
 {
 	global $nextorder;
 	$violations = FALSE;
 
 	// check 1: EntityLink rows referencing not-existent relatives
-	// check 1.1: children 
+	// check 1.1: children
 	$realms = array
 	(
 		'location' => 'Location',
@@ -8921,7 +8921,7 @@ function renderDataIntegrityReport ()
 	);
 	$orphans = array ();
 	foreach ($realms as $realm => $table)
-	{ 
+	{
 		$result = usePreparedSelectBlade
 		(
 			'SELECT EL.* FROM EntityLink EL ' .
@@ -8955,10 +8955,10 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 1.2: parents 
+	// check 1.2: parents
 	$orphans = array ();
 	foreach ($realms as $realm => $table)
-	{ 
+	{
 		$result = usePreparedSelectBlade
 		(
 			'SELECT EL.* FROM EntityLink EL ' .
@@ -8997,7 +8997,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' . 
+		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' .
 		'FROM AttributeMap AM ' .
 		'LEFT JOIN Attribute A ON AM.attr_id = A.id ' .
 		'LEFT JOIN Chapter C ON AM.chapter_id = C.id ' .
@@ -9093,7 +9093,7 @@ function renderDataIntegrityReport ()
 		'SELECT OPC.*, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
 		'FROM ObjectParentCompat OPC ' .
 		'LEFT JOIN Dictionary PD ON OPC.parent_objtype_id = PD.dict_key ' .
-		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' . 
+		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' .
 		'WHERE PD.dict_key IS NULL OR CD.dict_key IS NULL'
 	);
 	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -9187,7 +9187,7 @@ function renderDataIntegrityReport ()
 	$invalids = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT CO.id AS child_id, CO.objtype_id AS child_type_id, CD.dict_value AS child_type, CO.name AS child_name, ' . 
+		'SELECT CO.id AS child_id, CO.objtype_id AS child_type_id, CD.dict_value AS child_type, CO.name AS child_name, ' .
 		'PO.id AS parent_id, PO.objtype_id AS parent_type_id, PD.dict_value AS parent_type, PO.name AS parent_name ' .
 		'FROM Object CO ' .
 		'LEFT JOIN EntityLink EL ON CO.id = EL.child_entity_id ' .
@@ -9225,7 +9225,7 @@ function renderDataIntegrityReport ()
 	$invalids = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, DA.dict_value AS porta_type, ' . 
+		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, DA.dict_value AS porta_type, ' .
 		'OB.id AS objb_id, OB.name AS objb_name, L.portb AS portb_id, PB.name AS portb_name, DB.dict_value AS portb_type ' .
 		'FROM Link L ' .
 		'LEFT JOIN Port PA ON L.porta = PA.id ' .
@@ -9262,7 +9262,7 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 6: TagStorage rows referencing non-existent parents 
+	// check 6: TagStorage rows referencing non-existent parents
 	$realms = array
 	(
 		'file' => array ('table' => 'File', 'column' => 'id'),
@@ -9279,7 +9279,7 @@ function renderDataIntegrityReport ()
 	);
 	$orphans = array ();
 	foreach ($realms as $realm => $details)
-	{ 
+	{
 		$result = usePreparedSelectBlade
 		(
 			'SELECT TS.*, TT.tag FROM TagStorage TS ' .
@@ -9313,13 +9313,13 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 6: FileLink rows referencing non-existent parents 
+	// check 7: FileLink rows referencing non-existent parents
 	// re-use the realms list from the TagStorage check, with a few mods
 	unset ($realms['file'], $realms['vst']);
 	$realms['row'] = array ('table' => 'Row', 'column' => 'id');
 	$orphans = array ();
 	foreach ($realms as $realm => $details)
-	{ 
+	{
 		$result = usePreparedSelectBlade
 		(
 			'SELECT FL.*, F.name FROM FileLink FL ' .
@@ -9346,6 +9346,142 @@ function renderDataIntegrityReport ()
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${realm_name}</td>";
 			echo "<td>${orphan['entity_id']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 8: missing triggers
+	$triggers= array
+	(
+		'Link-before-insert' => 'Link',
+		'Link-before-update' => 'Link'
+	);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT TRIGGER_NAME, EVENT_OBJECT_TABLE ' .
+		'FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA()'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	$existing_triggers = $missing_triggers = array ();
+	foreach ($rows as $row)
+		$existing_triggers[$row['TRIGGER_NAME']] = $row['EVENT_OBJECT_TABLE'];
+	foreach ($triggers as $trigger => $table)
+		if (! array_key_exists ($trigger, $existing_triggers))
+			$missing_triggers[$trigger] = $table;
+	if (count ($missing_triggers))
+	{
+		$violations = TRUE;
+		startPortlet ('Missing Triggers (' . count ($missing_triggers) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Table</th><th>Trigger</th></tr>\n";
+		$order = 'odd';
+		foreach ($missing_triggers as $trigger => $table)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${table}</td>";
+			echo "<td>${trigger}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 9: missing foreign keys
+	$fkeys= array
+	(
+		'Atom-FK-molecule_id' => 'Atom',
+		'Atom-FK-rack_id' => 'Atom',
+		'AttributeMap-FK-chapter_id' => 'AttributeMap',
+		'AttributeMap-FK-attr_id' => 'AttributeMap',
+		'AttributeValue-FK-map' => 'AttributeValue',
+		'AttributeValue-FK-object' => 'AttributeValue',
+		'CachedPAV-FK-object-port' => 'CachedPAV',
+		'CachedPAV-FK-vlan_id' => 'CachedPAV',
+		'CachedPNV-FK-compound' => 'CachedPNV',
+		'CachedPVM-FK-object_id' => 'CachedPVM',
+		'CactiGraph-FK-server_id' => 'CactiGraph',
+		'CactiGraph-FK-server_id' => 'CactiGraph',
+		'Dictionary-FK-chapter_id' => 'Dictionary',
+		'FileLink-File_fkey' => 'FileLink',
+		'IPv4Allocation-FK-object_id' => 'IPv4Allocation',
+		'IPv4LB-FK-vs_id' => 'IPv4LB',
+		'IPv4LB-FK-object_id' => 'IPv4LB',
+		'IPv4LB-FK-rspool_id' => 'IPv4LB',
+		'IPv4NAT-FK-object_id' => 'IPv4NAT',
+		'IPv4RS-FK' => 'IPv4RS',
+		'IPv6Allocation-FK-object_id' => 'IPv6Allocation',
+		'Link-FK-a' => 'Link',
+		'Link-FK-b' => 'Link',
+		'MountOperation-FK-object_id' => 'MountOperation',
+		'MountOperation-FK-old_molecule_id' => 'MountOperation',
+		'MountOperation-FK-new_molecule_id' => 'MountOperation',
+		'MuninGraph-FK-server_id' => 'MuninGraph',
+		'MuninGraph-FK-server_id' => 'MuninGraph',
+		'ObjectHistory-FK-object_id' => 'ObjectHistory',
+		'ObjectLog-FK-object_id' => 'ObjectLog',
+		'Port-FK-iif-oif' => 'Port',
+		'Port-FK-object_id' => 'Port',
+		'PortAllowedVLAN-FK-object-port' => 'PortAllowedVLAN',
+		'PortAllowedVLAN-FK-vlan_id' => 'PortAllowedVLAN',
+		'PortInterfaceCompat-FK-iif_id' => 'PortInterfaceCompat',
+		'PortLog_ibfk_1' => 'PortLog',
+		'PortNativeVLAN-FK-compound' => 'PortNativeVLAN',
+		'PortVLANMode-FK-object-port' => 'PortVLANMode',
+		'RackSpace-FK-rack_id' => 'RackSpace',
+		'RackSpace-FK-object_id' => 'RackSpace',
+		'TagStorage-FK-TagTree' => 'TagStorage',
+		'TagTree-K-parent_id' => 'TagTree',
+		'UserConfig-FK-varname' => 'UserConfig',
+		'VLANDescription-FK-domain_id' => 'VLANDescription',
+		'VLANDescription-FK-vlan_id' => 'VLANDescription',
+		'VLANIPv4-FK-compound' => 'VLANIPv4',
+		'VLANIPv4-FK-ipv4net_id' => 'VLANIPv4',
+		'VLANIPv6-FK-compound' => 'VLANIPv6',
+		'VLANIPv6-FK-ipv6net_id' => 'VLANIPv6',
+		'VLANSTRule-FK-vst_id' => 'VLANSTRule',
+		'VLANSwitch-FK-domain_id' => 'VLANSwitch',
+		'VLANSwitch-FK-object_id' => 'VLANSwitch',
+		'VLANSwitch-FK-template_id' => 'VLANSwitch',
+		'VSEnabledIPs-FK-object_id' => 'VSEnabledIPs',
+		'VSEnabledIPs-FK-rspool_id' => 'VSEnabledIPs',
+		'VSEnabledIPs-FK-vs_id-vip' => 'VSEnabledIPs',
+		'VSEnabledPorts-FK-object_id' => 'VSEnabledPorts',
+		'VSEnabledPorts-FK-rspool_id' => 'VSEnabledPorts',
+		'VSEnabledPorts-FK-vs_id-proto-vport' => 'VSEnabledPorts',
+		'VSIPs-vs_id' => 'VSIPs',
+		'VS-vs_id' => 'VSPorts'
+	);
+	$result = usePreparedSelectBlade
+	(
+		'SELECT CONSTRAINT_NAME, TABLE_NAME ' .
+		'FROM information_schema.TABLE_CONSTRAINTS ' .
+		"WHERE CONSTRAINT_SCHEMA = SCHEMA() AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	$existing_fkeys = $missing_fkeys = array ();
+	foreach ($rows as $row)
+		$existing_fkeys[$row['CONSTRAINT_NAME']] = $row['TABLE_NAME'];
+	foreach ($fkeys as $fkey => $table)
+		if (! array_key_exists ($fkey, $existing_fkeys))
+			$missing_fkeys[$fkey] = $table;
+	if (count ($missing_fkeys))
+	{
+		$violations = TRUE;
+		startPortlet ('Missing Foreign Keys (' . count ($missing_fkeys) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Table</th><th>Key</th></tr>\n";
+		$order = 'odd';
+		foreach ($missing_fkeys as $fkey => $table)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${table}</td>";
+			echo "<td>${fkey}</td>";
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}
