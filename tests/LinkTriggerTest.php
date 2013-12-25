@@ -51,7 +51,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testCreateLinkToSelf ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->porta, 'portb' => $this->porta)
@@ -63,7 +62,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testUpdateLinkToSelf ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->porta, 'portb' => $this->portb)
@@ -77,7 +75,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 
 	public function testCreateLinkWithPortAGreaterThanPortB ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->portb, 'portb' => $this->porta)
@@ -92,7 +89,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 
 	public function testUpdateLinkWithPortAGreaterThanPortB ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->porta, 'portb' => $this->portb)
@@ -115,7 +111,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testCreateLinkBetweenIncompatiblePorts ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->porta, 'portb' => $this->portc)
@@ -127,7 +122,6 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testUpdateLinkBetweenIncompatiblePorts ()
 	{
-		global $dbxlink;
 		usePreparedInsertBlade (
 			'Link',
 			array ('porta' => $this->porta, 'portb' => $this->portb)
