@@ -486,17 +486,18 @@ function renderNewRSPoolForm ()
 {
 	startPortlet ('Add new RS pool');
 	printOpFormIntro ('add');
-	echo "<table border=0 cellpadding=10 cellspacing=0 align=center>";
-	echo "<tr><th class=tdright>Name</th>";
+	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	echo "<tr><th class=tdright>Name:</th>";
 	echo "<td class=tdleft><input type=text name=name tabindex=101></td><td>";
-	printImageHREF ('CREATE', 'create real server pool', TRUE, 104);
-	echo "</td><th>Assign tags</th></tr>";
-	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=102></textarea></td>";
-	echo "<td rowspan=2>";
-	renderNewEntityTags ('ipv4rspool');
+	echo "</td></tr><th class=tdright>Tags:</th><td class='tdleft'>";
+	printTagsPicker ();
 	echo "</td></tr>";
-	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>";
-	echo "</table></form>";
+	echo "<tr><th class=tdright>VS config:</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=102></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>\n";
+	echo "<tr><td colspan=2>";
+	printImageHREF ('CREATE', 'create real server pool', TRUE, 104);
+	echo "</td></tr>";
+	echo "</table></form>\n";
 	finishPortlet();
 }
 
@@ -536,23 +537,26 @@ function renderNewVSForm ()
 {
 	startPortlet ('Add new virtual service');
 	printOpFormIntro ('add');
-	echo "<table border=0 cellpadding=10 cellspacing=0 align=center>\n";
-	echo "<tr valign=bottom><td>&nbsp;</td><th>VIP</th><th>port</th><th>proto</th><th>name</th><th>&nbsp;</th><th>Assign tags</th></tr>";
-	echo '<tr valign=top><td>&nbsp;</td>';
-	echo "<td><input type=text name=vip tabindex=101></td>";
 	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
+	global $vs_proto;
 	if ($default_port == 0)
 		$default_port = '';
-	echo "<td><input type=text name=vport size=5 value='${default_port}' tabindex=102></td><td>";
-	global $vs_proto;
-	$vs_keys = array_keys ($vs_proto);
-	printSelect ($vs_proto, array ('name' => 'proto'), array_shift ($vs_keys));
-	echo '</td><td><input type=text name=name tabindex=104></td><td>';
+	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip tabindex=101></td>";
+	echo "<tr><th class=tdright>Port:</th><td class=tdleft>";
+	echo "<input type=text name=vport size=5 value='${default_port}' tabindex=102></td></tr>";
+	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
+	printSelect ($vs_proto, array ('name' => 'proto'), array_shift (array_keys ($vs_proto)));
+	echo "</td></tr>";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name tabindex=104></td><td>";
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>";
+	echo "<tr><th class=tdrigh>VS configuration:</th><td class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdrigh>RS configuration:</th><td class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
-	echo "</td><td rowspan=3>";
-	renderNewEntityTags ('ipv4vs');
-	echo "</td></tr><tr><th>VS configuration</th><td colspan=5 class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td>";
-	echo "<tr><th>RS configuration</th><td colspan=5 class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "</td></tr>";
 	echo '</table></form>';
 	finishPortlet();
 }
@@ -562,7 +566,10 @@ function renderEditRSPool ($pool_id)
 	$poolinfo = spotEntity ('ipv4rspool', $pool_id);
 	printOpFormIntro ('updIPv4RSP');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${poolinfo['vsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${poolinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
@@ -590,12 +597,15 @@ function renderEditVService ($vsid)
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
-	echo "<tr><th class=tdright>port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
-	echo "<tr><th class=tdright>proto:</th><td class=tdleft>";
+	echo "<tr><th class=tdright>Port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
 	global $vs_proto;
 	printSelect ($vs_proto, array ('name' => 'proto'), $vsinfo['proto']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
+	printTagsPicker ();
+	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea tabindex=6 name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";

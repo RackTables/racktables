@@ -215,34 +215,6 @@ $opspec_list['object-munin-del'] = array
 		array ('url_argname' => 'graph', 'assertion' => 'string'),
 	),
 );
-$opspec_list['ipv4net-properties-editRange'] = array
-(
-	'table' => 'IPv4Network',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'name', 'assertion' => 'string0'),
-		array ('url_argname' => 'comment', 'assertion' => 'string0'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint')
-	),
-);
-$opspec_list['ipv6net-properties-editRange'] = array
-(
-	'table' => 'IPv6Network',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'name', 'assertion' => 'string0'),
-		array ('url_argname' => 'comment', 'assertion' => 'string0'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint')
-	),
-);
 $opspec_list['ipv4rspool-editrslist-delRS'] = array
 (
 	'table' => 'IPv4RS',
@@ -250,36 +222,6 @@ $opspec_list['ipv4rspool-editrslist-delRS'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['ipv4rspool-edit-updIPv4RSP'] = array
-(
-	'table' => 'IPv4RSPool',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'name', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'pool_id', 'table_colname' => 'id', 'assertion' => 'uint')
-	),
-);
-$opspec_list['file-edit-updateFile'] = array
-(
-	'table' => 'File',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'file_name', 'table_colname' => 'name', 'assertion' => 'string'),
-		array ('url_argname' => 'file_type', 'table_colname' => 'type', 'assertion' => 'string'),
-		array ('url_argname' => 'file_comment', 'table_colname' => 'comment', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'file_id', 'table_colname' => 'id', 'assertion' => 'uint')
 	),
 );
 $opspec_list['parentmap-edit-add'] = array
@@ -924,8 +866,7 @@ function addIPv4Prefix ()
 {
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
-
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
 	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
@@ -936,8 +877,7 @@ function addIPv6Prefix ()
 {
 	assertStringArg ('range');
 	assertStringArg ('name', TRUE);
-
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
 	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
@@ -1153,6 +1093,7 @@ function updateObjectAllocation ()
 $msgcode['updateObject']['OK'] = 51;
 function updateObject ()
 {
+	$taglist = genericAssertion ('taglist', 'array0');
 	genericAssertion ('num_attrs', 'uint0');
 	genericAssertion ('object_name', 'string0');
 	genericAssertion ('object_label', 'string0');
@@ -1184,6 +1125,7 @@ function updateObject ()
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	$dbxlink->commit();
+	rebuildTagChainForEntity ('object', $object_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1249,7 +1191,7 @@ function updateObjectAttributes ($object_id)
 
 function addMultipleObjects()
 {
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = genericAssertion ('taglist', 'array0');
 	$max = getConfigVar ('MASSCOUNT');
 	for ($i = 0; $i < $max; $i++)
 	{
@@ -1292,7 +1234,7 @@ function addMultipleObjects()
 
 function addLotOfObjects()
 {
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = genericAssertion ('taglist', 'array0');
 	assertUIntArg ('global_type_id', TRUE);
 	assertStringArg ('namelist', TRUE);
 	$global_type_id = $_REQUEST['global_type_id'];
@@ -1674,6 +1616,7 @@ function updateVService ()
 {
 	global $sic;
 	assertUIntArg ('vs_id');
+	$taglist = genericAssertion ('taglist', 'array0');
 	$vip_bin = assertIPArg ('vip');
 	genericAssertion ('proto', 'enum/ipproto');
 	if ($_REQUEST['proto'] == 'MARK')
@@ -1692,17 +1635,20 @@ function updateVService ()
 		$sic['vsconfig'],
 		$sic['rsconfig']
 	);
+	rebuildTagChainForEntity ('ipvs', $_REQUEST['vs_id'], buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function updateVS ()
 {
+	$taglist = genericAssertion ('taglist', 'array0');
 	$vs_id = assertUIntArg ('vs_id');
 	$name = assertStringArg ('name');
 	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
 	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
 
 	usePreparedUpdateBlade ('VS', array ('name' => $name, 'vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('id' => $vs_id));
+	rebuildTagChainForEntity ('ipvs', $vs_id, buildTagChainFromIds ($taglist), TRUE);
 	showSuccess ("Service updated successfully");
 }
 
@@ -2057,19 +2003,6 @@ function generateAutoPorts ()
 	return buildRedirectURL (NULL, 'ports');
 }
 
-$msgcode['saveEntityTags']['OK'] = 43;
-function saveEntityTags ()
-{
-	global $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
-	$realm = $etype_by_pageno[$pageno];
-	$entity_id = getBypassValue();
-	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
-	rebuildTagChainForEntity ($realm, $entity_id, buildTagChainFromIds ($taglist), TRUE);
-	showFuncMessage (__FUNCTION__, 'OK');
-}
-
 $msgcode['rollTags']['OK'] = 67;
 $msgcode['rollTags']['ERR'] = 149;
 function rollTags ()
@@ -2180,10 +2113,12 @@ function updateLocation ()
 
 	if ($pageno == 'location')
 	{
+		$taglist = genericAssertion ('taglist', 'array0');
 		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 		assertStringArg ('comment', TRUE);
 		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
 		updateObjectAttributes ($_REQUEST['location_id']);
+		rebuildTagChainForEntity ('location', $_REQUEST['location_id'], buildTagChainFromIds ($taglist), TRUE);
 	}
 	else
 		commitRenameObject ($_REQUEST['location_id'], $_REQUEST['name']);
@@ -2289,7 +2224,7 @@ function deleteRow ()
 $msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
-	$taglist = isset ($_REQUEST['taglist']) && is_array ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
+	$taglist = genericAssertion ('taglist', 'array0');
 
 	// The new rack(s) should be placed on the bottom of the list, sort-wise
 	$rowInfo = getRowInfo($_REQUEST['row_id']);
@@ -2354,7 +2289,7 @@ function updateRack ()
 	assertUIntArg ('height');
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
-
+	$taglist = genericAssertion ('taglist', 'array0');
 	$rack_id = getBypassValue();
 	usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	commitUpdateRack
@@ -2368,6 +2303,7 @@ function updateRack ()
 		$_REQUEST['comment']
 	);
 	updateObjectAttributes ($rack_id);
+	rebuildTagChainForEntity ('rack', $rack_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
@@ -2990,6 +2926,7 @@ function updVSTRule()
 	}
 
 	global $port_role_options, $sic;
+	$taglist = genericAssertion ('taglist', 'array0');
 	assertUIntArg ('mutex_rev', TRUE);
 	$data = genericAssertion ('template_json', 'json');
 	$rule_no = 0;
@@ -3023,6 +2960,7 @@ function updVSTRule()
 		}
 		throw $e;
 	}
+	rebuildTagChainForEntity ('vst', $_REQUEST['vst_id'], buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3462,6 +3400,89 @@ function tableHandler()
 		throw new InvalidArgException ('opspec/action', $opspec['action']);
 	}
 	showOneLiner ($retcode);
+}
+$msgcode['updateFile']['OK'] = 6;
+function updateFile ()
+{
+	$file_id = getBypassValue();
+	$file_name = genericAssertion ('file_name', 'string');
+	$file_type = genericAssertion ('file_type', 'string');
+	$file_comment = genericAssertion ('file_comment', 'string0');
+	$taglist = genericAssertion ('taglist', 'array0');
+	usePreparedUpdateBlade
+	(
+		'File',
+		array ('name' => $file_name, 'type' => $file_type, 'comment' => $file_comment),
+		array ('id' => $file_id),
+		array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
+	);
+	rebuildTagChainForEntity ('file', $file_id, buildTagChainFromIds ($taglist), TRUE);
+	showFuncMessage (__FUNCTION__, 'OK', array ($file_name));
+}
+
+$msgcode['editIPv4Net']['OK'] = 6;
+function editIPv4Net ()
+{
+	$net_id = getBypassValue();
+	$name = genericAssertion ('name', 'string0');
+	$comment = genericAssertion ('comment', 'string0');
+	$taglist = genericAssertion ('taglist', 'array0');
+	usePreparedUpdateBlade
+	(
+		'IPv4Network',
+		array ('name' => $name, 'comment' => $comment),
+		array ('id' => $net_id)
+	);
+	rebuildTagChainForEntity ('ipv4net', $net_id, buildTagChainFromIds ($taglist), TRUE);
+	$netdata = spotEntity ('ipv4net', $net_id);
+	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
+}
+
+$msgcode['editIPv6Net']['OK'] = 6;
+function editIPv6Net ()
+{
+	$net_id = getBypassValue();
+	$name = genericAssertion ('name', 'string0');
+	$comment = genericAssertion ('comment', 'string0');
+	$taglist = genericAssertion ('taglist', 'array0');
+	usePreparedUpdateBlade
+	(
+		'IPv6Network',
+		array ('name' => $name, 'comment' => $comment),
+		array ('id' => $net_id)
+	);
+	rebuildTagChainForEntity ('ipv6net', $net_id, buildTagChainFromIds ($taglist), TRUE);
+	$netdata = spotEntity ('ipv6net', $net_id);
+	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
+}
+
+$msgcode['updIPv4RSP']['OK'] = 6;
+function updIPv4RSP ()
+{
+	$rspool_id = getBypassValue();
+	$name = genericAssertion ('name', 'string0');
+	$vsconfig = genericAssertion ('vsconfig', 'string0');
+	$rsconfig = genericAssertion ('rsconfig', 'string0');
+	$taglist = genericAssertion ('taglist', 'array0');
+	usePreparedUpdateBlade
+	(
+		"IPv4RSPool",
+		array ('name' => $name, 'vsconfig' => $comment, 'rsconfig' => $vsconfig),
+		array ('id' => $rspool_id)
+	);
+	rebuildTagChainForEntity ('ipv4rspool', $rspool_id, buildTagChainFromIds ($taglist), TRUE);
+	showFuncMessage (__FUNCTION__, 'OK', array($_REQUEST['name']));
+}
+
+$msgcode['editUserProperties']['OK'] = 6;
+function editUserProperties ()
+{
+	$taglist = genericAssertion ('taglist', 'array0');
+	$user_id = getBypassValue();
+	rebuildTagChainForEntity ('user', $user_id, buildTagChainFromIds ($taglist), TRUE);
+	$user = spotEntity ('user', $user_id);
+	print_r($user);
+	showFuncMessage (__FUNCTION__, 'OK', array($user['user_name']));
 }
 
 ?>
