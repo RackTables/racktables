@@ -1379,13 +1379,64 @@ CREATE TABLE `VSEnabledPorts` (
 				die;
 			}
 
+			// for the UNIQUE key to work, portb needs to be > porta
+			$result = $dbxlink->query ('SELECT porta, portb FROM `Link` WHERE porta > portb');
+			$links = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			foreach ($links as $link)
+				$query[] = "UPDATE `Link` SET `porta`=${link['portb']}, `portb`=${link['porta']} WHERE `porta`=${link['porta']} AND `portb`=${link['portb']}";
+
+			// add triggers
+			$entitylink_trigger_body = <<<ENDOFTRIGGER
+EntityLinkTrigger:BEGIN
+  DECLARE parent_objtype, child_objtype, count INTEGER;
+
+  # forbid linking an entity to itself
+  IF NEW.parent_entity_type = NEW.child_entity_type AND NEW.parent_entity_id = NEW.child_entity_id THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  # in some scenarios, only one parent is allowed
+  CASE CONCAT(NEW.parent_entity_type, '.', NEW.child_entity_type)
+    WHEN 'location.location' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'location' AND child_entity_id = NEW.child_entity_id;
+    WHEN 'location.row' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'row' AND child_entity_id = NEW.child_entity_id;
+    WHEN 'row.rack' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'row' AND child_entity_type = 'rack' AND child_entity_id = NEW.child_entity_id;
+    ELSE
+      # some other scenario, assume it is valid
+      SET count = 0;
+  END CASE; 
+  IF count > 0 THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  IF NEW.parent_entity_type = 'object' AND NEW.child_entity_type = 'object' THEN
+    # lock objects to prevent concurrent link establishment
+    SELECT objtype_id INTO parent_objtype FROM Object WHERE id = NEW.parent_entity_id FOR UPDATE;
+    SELECT objtype_id INTO child_objtype FROM Object WHERE id = NEW.child_entity_id FOR UPDATE;
+
+    # only permit the link if object types are compatibile
+    SELECT COUNT(*) INTO count FROM ObjectParentCompat WHERE parent_objtype_id = parent_objtype AND child_objtype_id = child_objtype;
+    IF count = 0 THEN
+      SET NEW.parent_entity_id = NULL;
+    END IF;
+  END IF;
+END;
+ENDOFTRIGGER;
+			$query[] = "CREATE TRIGGER `EntityLink-before-insert` BEFORE INSERT ON `EntityLink` FOR EACH ROW $entitylink_trigger_body";
+			$query[] = "CREATE TRIGGER `EntityLink-before-update` BEFORE UPDATE ON `EntityLink` FOR EACH ROW $entitylink_trigger_body";
 			$link_trigger_body = <<<ENDOFTRIGGER
-BEGIN
+LinkTrigger:BEGIN
   DECLARE tmp, porta_type, portb_type, count INTEGER;
 
   IF NEW.porta = NEW.portb THEN
     # forbid connecting a port to itself
     SET NEW.porta = NULL;
+    LEAVE LinkTrigger;
   ELSEIF NEW.porta > NEW.portb THEN
     # force porta < portb
     SET tmp = NEW.porta;

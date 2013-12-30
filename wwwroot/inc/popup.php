@@ -237,7 +237,7 @@ function renderPopupObjectSelector()
 	echo '<br>';
 	echo "<input type=submit value='Proceed' onclick='".
 		"if (getElementById(\"parents\").value != \"\") {".
-		"	opener.location=\"?module=redirect&page=object&tab=edit&op=linkEntities&object_id=${object_id}&child_entity_type=object&child_entity_id=${object_id}&parent_entity_type=object&parent_entity_id=\"+getElementById(\"parents\").value; ".
+		"	opener.location=\"?module=redirect&page=object&tab=edit&op=linkObjects&object_id=${object_id}&child_entity_type=object&child_entity_id=${object_id}&parent_entity_type=object&parent_entity_id=\"+getElementById(\"parents\").value; ".
 		"	window.close();}'>";
 	echo '</form></div>';
 }

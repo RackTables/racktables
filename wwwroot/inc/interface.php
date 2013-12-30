@@ -427,7 +427,9 @@ function renderRackspace ()
 			// Zero value effectively disables the limit.
 			$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 			$order = 'odd';
-			if (count ($rows))
+			if (! count ($rows))
+				echo "<h2>No rows found</h2>\n";
+			else
 			{
 				echo '<table border=0 cellpadding=10 class=cooltable>';
 				echo '<tr><th class=tdleft>Location</th><th class=tdleft>Row</th><th class=tdleft>Racks</th></tr>';
@@ -445,22 +447,29 @@ function renderRackspace ()
 						continue;
 					$rackListIdx = 0;
 					echo "<tr class=row_${order}><th class=tdleft>";
+					$locationIdx = 0;
 					$locationTree = '';
 					while ($location_id)
 					{
-							$parentLocation = spotEntity ('location', $location_id);
-							$locationTree = "&raquo; <a href='" .
-								makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
-								"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
-								$locationTree;
-							$location_id = $parentLocation['parent_id'];
+						if ($locationIdx == 20)
+						{
+							showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
+							break;
+						}
+						$parentLocation = spotEntity ('location', $location_id);
+						$locationTree = "&raquo; <a href='" .
+							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
+							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
+							$locationTree;
+						$location_id = $parentLocation['parent_id'];
+						$locationIdx++;
 					}
 					$locationTree = substr ($locationTree, 8);
 					echo $locationTree;
 					echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
 					echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
-					if (!count ($rackList))
-						echo "<td>(empty row)</td>";
+					if (! count ($rackList))
+						echo '<td>(empty row)</td>';
 					else
 						foreach ($rackList as $rack)
 						{
@@ -483,8 +492,6 @@ function renderRackspace ()
 				}
 				echo "</table>\n";
 			}
-			else
-				echo "<h2>No rows found</h2>\n";
 		}
 	}
 	echo '</td><td class=pcright width="25%">';
@@ -965,7 +972,7 @@ function renderEditObjectForm()
 			echo "<th class=tdright>${label}</th><td class=tdleft>";
 			echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-			echo getOpLink (array('op'=>'unlinkEntities', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
+			echo getOpLink (array('op'=>'unlinkObjects', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
 			echo "</td></tr>\n";
 			$label = '&nbsp;';
 		}
@@ -4953,6 +4960,7 @@ END
 		foreach ($otags as $taginfo)
 		{
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
+			echo "<input type=hidden name=is_assignable value=${taginfo['is_assignable']}>";
 			echo '<tr>';
 			echo '<td>' . $taginfo['tag'] . '</td>';
 			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taglist[$taginfo['id']]['parent_id']) . '</td>';
@@ -9482,6 +9490,114 @@ function renderDataIntegrityReport ()
 			echo "<tr class=row_${order}>";
 			echo "<td>${table}</td>";
 			echo "<td>${fkey}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 10: circular references
+	//     - all affected members of the tree are displayed
+	//     - it would be beneficial to only display the offending records
+	// check 10.1: locations
+	$invalids = array ();
+	$locations = listCells ('location');
+	foreach ($locations as $location)
+	{
+		try
+		{
+			$children = getLocationChildrenList ($location['id']);
+		}
+		catch (RackTablesError $e)
+		{
+			$invalids[] = $location;
+		}
+	}
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Locations: Tree Contains Circular References (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Child ID</th><th>Child Location</th><th>Parent ID</th><th>Parent Location</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['id']}</td>";
+			echo "<td>${invalid['name']}</td>";
+			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td>${invalid['parent_name']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 10.2: objects
+	$invalids = array ();
+	$objects = listCells ('object');
+	foreach ($objects as $object)
+	{
+		try
+		{
+			$children = getObjectContentsList ($object['id']);
+		}
+		catch (RackTablesError $e)
+		{
+			$invalids[] = $object;
+		}
+	}
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Contained ID</th><th>Contained Object</th><th>Container ID</th><th>Container Object</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['id']}</td>";
+			echo "<td>${invalid['name']}</td>";
+			echo "<td>${invalid['container_id']}</td>";
+			echo "<td>${invalid['container_name']}</td>";
+			echo "</tr>\n";
+			$order = $nextorder[$order];
+		}
+		echo "</table>\n";
+		finishPortLet ();
+	}
+
+	// check 10.3: tags
+	$invalids = array ();
+	$tags = getTagList ();
+	foreach ($tags as $tag)
+	{
+		try
+		{
+			$children = getTagChildrenList ($tag['id']);
+		}
+		catch (RackTablesError $e)
+		{
+			$invalids[] = $tag;
+		}
+	}
+	if (count ($invalids))
+	{
+		$violations = TRUE;
+		startPortlet ('Tags: Tree Contains Circular References (' . count ($invalids) . ')');
+		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<tr><th>Child ID</th><th>Child Tag</th><th>Parent ID</th><th>Parent Tag</th></tr>\n";
+		$order = 'odd';
+		foreach ($invalids as $invalid)
+		{
+			echo "<tr class=row_${order}>";
+			echo "<td>${invalid['id']}</td>";
+			echo "<td>${invalid['tag']}</td>";
+			echo "<td>${invalid['parent_id']}</td>";
+			printf('<td>%s</td>', $tags[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}

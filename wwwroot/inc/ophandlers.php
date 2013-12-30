@@ -53,19 +53,7 @@ $msgcode = array();
 global $opspec_list;
 $opspec_list = array();
 
-$opspec_list['object-edit-linkEntities'] = array
-(
-	'table' => 'EntityLink',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'parent_entity_type', 'assertion' => 'string'), # FIXME enum
-		array ('url_argname' => 'parent_entity_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'child_entity_type', 'assertion' => 'string'), # FIXME enum
-		array ('url_argname' => 'child_entity_id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['object-edit-unlinkEntities'] = array
+$opspec_list['object-edit-unlinkObjects'] = array
 (
 	'table' => 'EntityLink',
 	'action' => 'DELETE',
@@ -439,21 +427,6 @@ $opspec_list['tagtree-edit-destroyTag'] = array
 	'table' => 'TagTree',
 	'action' => 'DELETE',
 	'arglist' => array
-	(
-		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['tagtree-edit-updateTag'] = array
-(
-	'table' => 'TagTree',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
-		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
-	),
-	'where_arglist' => array
 	(
 		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
@@ -1331,6 +1304,23 @@ function addLotOfObjects()
 	}
 }
 
+function linkObjects ()
+{
+	assertStringArg ('parent_entity_type');
+	assertUIntArg ('parent_entity_id');
+	assertStringArg ('child_entity_type');
+	assertUIntArg ('child_entity_id');
+
+	commitLinkEntities
+	(
+		$_REQUEST['parent_entity_type'],
+		$_REQUEST['parent_entity_id'],
+		$_REQUEST['child_entity_type'],
+		$_REQUEST['child_entity_id']
+	);
+	showSuccess ('Container set successfully');
+}
+
 $msgcode['deleteObject']['OK'] = 7;
 function deleteObject ()
 {
@@ -2055,6 +2045,16 @@ function generateAutoPorts ()
 	executeAutoPorts ($object['id'], $object['objtype_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, 'ports');
+}
+
+function updateTag ()
+{
+	assertUIntArg ('tag_id');
+	genericAssertion ('tag_name', 'tag');
+	assertUIntArg ('parent_id', TRUE);
+	genericAssertion ('is_assignable', 'enum/yesno');
+	commitUpdateTag ($_REQUEST['tag_id'], $_REQUEST['tag_name'], $_REQUEST['parent_id'], $_REQUEST['is_assignable']);
+	showSuccess ('Tag updated successfully');
 }
 
 $msgcode['saveEntityTags']['OK'] = 43;

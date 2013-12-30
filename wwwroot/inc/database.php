@@ -1059,31 +1059,82 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 	return $ret;
 }
 
-# This function is recursive and returns only object IDs.
-function getObjectContentsList ($object_id)
+// This function is recursive and returns only object IDs.
+function getObjectContentsList ($object_id, $children = array ())
 {
-	$ret = array();
+	$self = __FUNCTION__;
 	$result = usePreparedSelectBlade
 	(
 		'SELECT child_entity_id FROM EntityLink ' .
 		'WHERE parent_entity_type = "object" AND child_entity_type = "object" AND parent_entity_id = ?',
 		array ($object_id)
 	);
-	# Free this result before the called copy builds its one.
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($rows as $row)
 	{
-		if (in_array ($row['child_entity_id'], $ret))
-			throw new RackTablesError ("Cyclic dependency for object ${object_id}", RackTablesError::INTERNAL);
-		$ret[] = $row['child_entity_id'];
-		$ret = array_merge ($ret, call_user_func (__FUNCTION__, $row['child_entity_id']));
+		if (in_array ($row['child_entity_id'], $children))
+			throw new RackTablesError ("Circular reference for object ${object_id}", RackTablesError::INTERNAL);
+		$children[] = $row['child_entity_id'];
+		$children = array_merge ($children, $self ($row['child_entity_id'], $children));
 	}
-	return $ret;
+	return $children;
+}
+
+// This function is recursive and returns only location IDs.
+function getLocationChildrenList ($location_id, $children = array ())
+{
+	$self = __FUNCTION__;
+	$result = usePreparedSelectBlade ('SELECT id FROM Location WHERE parent_id = ?', array ($location_id));
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		if (in_array ($row['id'], $children))
+			throw new RackTablesError ("Circular reference for location ${location_id}", RackTablesError::INTERNAL);
+		$children[] = $row['id'];
+		$children = array_merge ($children, $self ($row['id'], $children));
+	}
+	return $children;
+}
+
+// This function is recursive and returns only tag IDs.
+function getTagChildrenList ($tag_id, $children = array ())
+{
+	$self = __FUNCTION__;
+	$result = usePreparedSelectBlade ('SELECT id FROM TagTree WHERE parent_id = ?', array ($tag_id));
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	foreach ($rows as $row)
+	{
+		if (in_array ($row['id'], $children))
+			throw new RackTablesError ("Circular reference for tag ${tag_id}", RackTablesError::INTERNAL);
+		$children[] = $row['id'];
+		$children = array_merge ($children, $self ($row['id'], $children));
+	}
+	return $children;
 }
 
 function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_entity_type, $child_entity_id)
 {
+	// a location's parent may not be one of its children
+	if
+	(
+		$parent_entity_type == 'location' and
+		$child_entity_type == 'location' and
+		in_array ($parent_entity_id, getLocationChildrenList ($child_entity_id))
+	)
+		throw new RackTablesError ("Circular reference for location ${parent_entity_id}", RackTablesError::INTERNAL);
+
+	// an object's container may not be one of its contained objects
+	if
+	(
+		$parent_entity_type == 'object' and
+		$child_entity_type == 'object' and
+		in_array ($parent_entity_id, getObjectContentsList ($child_entity_id))
+	)
+		throw new RackTablesError ("Circular reference for object ${parent_entity_id}", RackTablesError::INTERNAL);
+
 	usePreparedInsertBlade
 	(
 		'EntityLink',
@@ -1103,14 +1154,40 @@ function commitUpdateEntityLink
 	$new_parent_entity_type, $new_parent_entity_id, $new_child_entity_type, $new_child_entity_id
 )
 {
-	usePreparedExecuteBlade
+	// a location's parent may not be one of its children
+	if
 	(
-		'UPDATE EntityLink SET parent_entity_type=?, parent_entity_id=?, child_entity_type=?, child_entity_id=? ' .
-		'WHERE parent_entity_type=? AND parent_entity_id=? AND child_entity_type=? AND child_entity_id=?',
+		$new_parent_entity_type == 'location' and
+		$new_child_entity_type == 'location' and
+		in_array ($new_parent_entity_id, getLocationChildrenList ($new_child_entity_id))
+	)
+		throw new RackTablesError ("Circular reference for location ${new_parent_entity_id}", RackTablesError::INTERNAL);
+
+	// an object's container may not be one of its contained objects
+	if
+	(
+		$new_parent_entity_type == 'object' and
+		$new_child_entity_type == 'object' and
+		in_array ($new_parent_entity_id, getObjectContentsList ($new_child_entity_id))
+	)
+		throw new RackTablesError ("Circular reference for object ${new_parent_entity_id}", RackTablesError::INTERNAL);
+
+	usePreparedUpdateBlade
+	(
+		'EntityLink',
 		array
 		(
-			$new_parent_entity_type, $new_parent_entity_id, $new_child_entity_type, $new_child_entity_id,
-			$old_parent_entity_type, $old_parent_entity_id, $old_child_entity_type, $old_child_entity_id
+			'parent_entity_type' => $new_parent_entity_type,
+			'parent_entity_id' => $new_parent_entity_id,
+			'child_entity_type' => $new_child_entity_type,
+			'child_entity_id' => $new_child_entity_id
+		),
+		array
+		(
+			'parent_entity_type' => $old_parent_entity_type,
+			'parent_entity_id' => $old_parent_entity_id,
+			'child_entity_type' => $old_child_entity_type,
+			'child_entity_id' => $old_child_entity_id
 		)
 	);
 }
@@ -4047,6 +4124,25 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 {
 	usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
+}
+
+function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
+{
+	// a tag's parent may not be one of its children
+	if ($parent_id > 0 && in_array ($parent_id, getTagChildrenList ($tag_id)))
+		throw new RackTablesError ("Circular reference for tag ${tag_id}", RackTablesError::INTERNAL);
+
+	usePreparedUpdateBlade
+	(
+		'TagTree',
+		array
+		(
+			'tag' => $tag_name,
+			'parent_id' => $parent_id == 0 ? NULL : $parent_id,
+			'is_assignable' => $is_assignable
+		),
+		array ('id' => $tag_id)
+	);
 }
 
 // Push a record into TagStorage unconditionally.

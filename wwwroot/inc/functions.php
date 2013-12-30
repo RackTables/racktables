@@ -6065,13 +6065,20 @@ function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 	// prepend parent location(s) to given location string
 	$name = '';
 	$id = $location_id;
+	$locationIdx = 0;
 	while (isset ($id))
 	{
+		if ($locationIdx == 20)
+		{
+			showWarning ('Warning: There is likely a circular reference in the location tree.');
+			break;
+		}
 		if ($link)
 			$name = mkA ($location_tree[$id]['name'], 'location', $id) . $spacer . $name;
 		else
 			$name = $location_tree[$id]['name'] . $spacer . $name;
 		$id = $location_tree[$id]['parent_id'];
+		$locationIdx++;
 	}
 	return substr ($name, 0, 0 - strlen ($spacer));
 }
