@@ -61,7 +61,8 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testCreateLinkToSelf ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$porta)
 		);
@@ -72,11 +73,13 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testUpdateLinkToSelf ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$portb)
 		);
-		usePreparedUpdateBlade (
+		usePreparedUpdateBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$porta),
 			array ('porta' => self::$porta, 'portb' => self::$portb)
@@ -85,7 +88,8 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 
 	public function testCreateLinkWithPortAGreaterThanPortB ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$portb, 'portb' => self::$porta)
 		);
@@ -99,11 +103,13 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 
 	public function testUpdateLinkWithPortAGreaterThanPortB ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$portb)
 		);
-		usePreparedUpdateBlade (
+		usePreparedUpdateBlade
+		(
 			'Link',
 			array ('porta' => self::$portb, 'portb' => self::$porta),
 			array ('porta' => self::$porta, 'portb' => self::$portb)
@@ -121,7 +127,8 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testCreateLinkBetweenIncompatiblePorts ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$portc)
 		);
@@ -132,11 +139,13 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testUpdateLinkBetweenIncompatiblePorts ()
 	{
-		usePreparedInsertBlade (
+		usePreparedInsertBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$portb)
 		);
-		usePreparedUpdateBlade (
+		usePreparedUpdateBlade
+		(
 			'Link',
 			array ('porta' => self::$porta, 'portb' => self::$portc),
 			array ('porta' => self::$porta, 'portb' => self::$portb)
