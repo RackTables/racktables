@@ -4333,10 +4333,18 @@ function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin,
 		throw new InvalidRequestArgException ('localip_bin', $localip_bin, 'Non-existent ip');
 	if (NULL === getIPv4AddressNetworkId ($remoteip_bin))
 		throw new InvalidRequestArgException ('remoteip_bin', $remoteip_bin, 'Non-existent ip');
-	if ( ($localport <= 0) or ($localport >= 65536) )
-		throw new InvalidRequestArgException ('localport', $localport, 'Invaild port');
-	if ( ($remoteport <= 0) or ($remoteport >= 65536) )
-		throw new InvalidRequestArgException ('remoteport', $remoteport, 'Invaild port');
+	if ( $proto == "ALL" )
+	{
+		$localport = 0;
+		$remoteport = 0;
+	}
+	else
+	{
+		if ( $localport <= 0 or $localport >= 65536 )
+			throw new InvalidRequestArgException ('localport', $localport, 'Invaild port');
+		if ( $remoteport <= 0 or $remoteport >= 65536 )
+			throw new InvalidRequestArgException ('remoteport', $remoteport, 'Invaild port');
+	}
 
 	return usePreparedInsertBlade
 	(

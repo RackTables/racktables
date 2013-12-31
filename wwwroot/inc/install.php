@@ -666,7 +666,7 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `IPv4NAT` (
   `object_id` int(10) unsigned NOT NULL default '0',
-  `proto` enum('TCP','UDP') NOT NULL default 'TCP',
+  `proto` enum('TCP','UDP','ALL') NOT NULL default 'TCP',
   `localip` int(10) unsigned NOT NULL default '0',
   `localport` smallint(5) unsigned NOT NULL default '0',
   `remoteip` int(10) unsigned NOT NULL default '0',

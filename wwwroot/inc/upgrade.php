@@ -1506,6 +1506,7 @@ ENDOFTRIGGER;
 
 			$query[] = "UPDATE Config SET description = 'List source: objects for that asset tag should be set' WHERE varname = 'ASSETWARN_LISTSRC'";
 			$query[] = "UPDATE Config SET description = 'List source: objects for that common name should be set' WHERE varname = 'NAMEWARN_LISTSRC'";
+			$query[] = "ALTER TABLE `IPv4NAT` MODIFY COLUMN `proto` ENUM('TCP','UDP','ALL')";
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
