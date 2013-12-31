@@ -13,6 +13,7 @@
 	update: upgrade CodeMirror to version 3.20
 	update: include OEM S/N 1 in expirations report (by Matthew Castanien)
 	update: display a datetime format hint for date attributes (#1051)
+	update: display location tree in object breadcrumbs (#1125)
 0.20.6 2013-11-29
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 

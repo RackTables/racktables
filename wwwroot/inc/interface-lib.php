@@ -806,7 +806,7 @@ function finishPortlet ()
 function getPageName ($page_code)
 {
 	global $page;
-	$title = isset ($page[$page_code]['title']) ? $page[$page_code]['title'] : callHook ('dynamic_title_decoder' ,$page_code);
+	$title = isset ($page[$page_code]['title']) ? $page[$page_code]['title'] : callHook ('dynamic_title_decoder', $page_code);
 	if (is_array ($title))
 		$title = $title['name'];
 	return $title;

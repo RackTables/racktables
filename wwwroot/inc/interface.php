@@ -6086,17 +6086,33 @@ function showPathAndSearch ($pageno, $tabno)
 		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 
-		// location bread crumbs insert for Rows and Racks
-		if ($no == 'row')
+		// insert location bread crumbs
+		switch ($no)
 		{
+		case 'object':
+			$object = spotEntity ('object', $title['params']['object_id']);
+			if ($object['rack_id'])
+			{
+				$rack = spotEntity ('rack', $object['rack_id']);
+				$items[] = mkA ($rack['name'], 'rack', $rack['id']);
+				$items[] = mkA ($rack['row_name'], 'row', $rack['row_id']);
+				if ($rack['location_id'])
+				{
+					$trail = getLocationTrail ($rack['location_id']);
+					if (! empty ($trail))
+						$items[] = $trail;
+				}
+			}
+			break;
+		case 'row':
 			$trail = getLocationTrail ($title['params']['location_id']);
-			if(!empty ($trail))
+			if (! empty ($trail))
 				$items[] = $trail;
-		}
-		if($no == 'location')
-		{
+			break;
+		case 'location':
 			// overwrite the bread crumb for current location with whole path
 			$items[count ($items)-1] = getLocationTrail ($title['params']['location_id']);
+			break;
 		}
 	}
 	// Search form.
