@@ -3151,7 +3151,7 @@ function renderNATv4ForObject ($object_id)
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo '</td><td>';
-		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP'), array ('name' => 'proto'));
+		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP', 'ALL' => 'ALL'), array ('name' => 'proto'));
 		echo "<select name='localip' tabindex=1>";
 
 		foreach ($alloclist as $ip_bin => $alloc)
