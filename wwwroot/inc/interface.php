@@ -4854,11 +4854,14 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		'ipv4rspool' => ' IPv4 real server pool(s)',
 		'vst' => ' VLAN switch template(s)',
 	);
+	$trclass = '';
+	if ($level == 0)
+		$trclass .= ' separator';
+	$trclass .= $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' trnull' : ' trwarning');
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
-	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' class=trnull' : ' class=trwarning');
-	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	$stats = array ("tag ID = ${taginfo['id']}");
@@ -4912,7 +4915,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 function renderTagTree ()
 {
 	global $tagtree;
-	echo '<center><table>';
+	echo '<center><table class=tagtree>';
 	foreach ($tagtree as $taginfo)
 		renderTagRowForViewer ($taginfo);
 	echo '</table></center>';
