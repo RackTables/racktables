@@ -366,7 +366,7 @@ END;
 	{
 		echo "<tr><td class=tagbox style='padding-left: 0px'><label>";
 		echo "<input type=checkbox name='location'  onClick=checkAll(this)> Toggle all";
-		echo "<img src=pix/1x1t.gif onLoad=collapseAll(this)>"; // dirty hack to collapse all when page is displayed
+		echo "<img src=?module=chrome&uri=pix/1x1t.gif onLoad=collapseAll(this)>"; // dirty hack to collapse all when page is displayed
 		echo "</label></td></tr>\n";
 		echo "<tr><td class=tagbox><hr>\n";
 		renderLocationCheckbox (treeFromList ($locationlist));
