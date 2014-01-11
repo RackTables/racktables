@@ -1031,11 +1031,10 @@ function printTagsPickerUl ($preselect=NULL, $input_name="taglist")
 	global $target_given_tags;
 	if ($preselect === NULL)
 		$preselect = $target_given_tags;
-	foreach ($preselect as &$value) # readable time format
-		$value['time_parsed'] = formatAge ($value['time']);
+	foreach ($preselect as $key => $value) # readable time format
+		$preselect[$key]['time_parsed'] = formatAge ($value['time']);
 	usort ($preselect, 'cmpTags');
 	$preselect_hidden = "";
-	unset($value);
 	foreach ($preselect as $value){
 		$preselect_hidden .= "<input type=hidden name=" . $input_name . "[] value=" . $value['id'] . ">";
 	}
@@ -1053,14 +1052,10 @@ function enableTagsPicker ()
 	addJS ('js/tag-it-local.js');
 	if (! $taglist_inserted)
 	{
-		$taglist_filtred = $taglist;
-		foreach ($taglist_filtred as &$tag) # remove unused fields
-		{
-			foreach (array_keys ($tag) as $key)
-			if (! in_array ($key, array("tag", "is_assignable", "trace")))
-				unset($tag[$key]);
-		}
-		addJS ('var taglist = ' . json_encode ($taglist_filtred) . ';', TRUE);
+		$taglist_filtered = array();
+		foreach ($taglist as $key => $taginfo) # remove unused fields
+			$taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
+		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
 		$taglist_inserted = TRUE;
 	}
 }
