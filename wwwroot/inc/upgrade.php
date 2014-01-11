@@ -199,6 +199,12 @@ MySQL 5.1.7.
 
 The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
 the IP addressing feature for all object types except those listed.
+
+Tags could now be assigned on the Edit/Properties tab using a text input with
+auto-completion. Type a star '*' to view full tag tree in auto-complete menu.
+It is worth to add the following line to the permissions script if the
+old-fashioned 'Tags' tab is not needed any more:
+  deny {\$tab_tags} # this hides 'Tags' tab
 ENDOFTEXT
 ,
 );
