@@ -153,6 +153,7 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 		{
 			s.push(tags_to_name[tag_trace[k]]);
 		}
+		s.push(tag);
 		var result = s.join(" \u2192 "); // right arrow
 		return result;
 	}

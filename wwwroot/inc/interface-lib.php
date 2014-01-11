@@ -778,15 +778,15 @@ function serializeTags ($chain, $baseurl = '')
 			$title = htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES);
 		if (isset($taginfo['parent_id']))
 		{
-			$tag_trace = $taglist[$taginfo['id']]['trace'];
-			$parent_info = array ();
-			foreach ($tag_trace as $tag_id)
+			$parent_info = array();
+			foreach ($taglist[$taginfo['id']]['trace'] as $tag_id)
 				$parent_info[] = $taglist[$tag_id]['tag'];
-			if ($title)
+			$parent_info[] = $taginfo['tag'];
+			if (strlen ($title))
 				$title .= "\n";
 			$title .= implode (" \xE2\x86\x92  ", $parent_info); # right arrow
 		}
-		if ($title)
+		if (strlen ($title))
 			$title = "title='$title'";
 
 		$class = '';
