@@ -901,8 +901,6 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 	$class = trim ($class);
 	if (! empty ($class))
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
-	if (! empty ($comment))
-		$ret .= 'title="' . htmlspecialchars($comment, ENT_QUOTES) . '"';
 	$ret .= '>';
 	if (! empty ($img_name))
 	{
