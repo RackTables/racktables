@@ -4,6 +4,7 @@
 	bugfix: browse objects page was broken if an object's container was unnamed (#1115)
 	bugfix: some pages would not load because PHP's maximum execution time was
 		exceeded, caused by a circular reference in the location tree (#1123)
+	bugfix: do HTML escaping on error pages (reported by Lukas Reschke)
 	update: enable IP addressing for all object types unless specifically excluded
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,

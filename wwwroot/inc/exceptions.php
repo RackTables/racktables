@@ -100,8 +100,10 @@ class InvalidArgException extends RackTablesError
 {
 	function __construct ($name, $value, $reason=NULL)
 	{
-		$message = "Argument '${name}' of value " . var_export ($value, TRUE) . ' is invalid';
-		$message .= is_null ($reason) ? '.' : " (${reason}).";
+		$message = 'Argument \'' . niftyString ($name) . '\'' .
+			' of value ' . niftyString (var_export ($value, TRUE), 200) .
+			' is invalid' . (is_null ($reason) ? '' : ' (' . niftyString ($reason, 100) . ')') .
+			'.';
 		parent::__construct ($message, parent::INTERNAL);
 		$this->name = $name;
 		$this->value = $value;
@@ -208,9 +210,7 @@ function dumpArray($arr)
 {
 	echo '<table class="exceptionParametersDump">';
 	foreach($arr as $key=>$value)
-	{
-		echo "<tr><th>$key</th><td>$value</td></tr>";
-	}
+		echo '<tr><th>' . niftyString ($key) . '</th><td>' . niftyString ($value, 100) . '</td></tr>';
 	echo '</table>';
 }
 
