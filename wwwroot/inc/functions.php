@@ -367,13 +367,15 @@ function genericAssertion ($argname, $argtype)
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
+	// 'vlan' -- any valid VLAN ID except the default
+	// 'vlan1' -- any valid VLAN ID including the default
 	case 'vlan':
 	case 'vlan1':
 		assertUIntArg ($argname);
 		if ($argtype == 'vlan' and $sic[$argname] == VLAN_DFL_ID)
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN cannot be changed');
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
 		if ($sic[$argname] > VLAN_MAX_ID or $sic[$argname] < VLAN_MIN_ID)
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'out of valid range');
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'rackcode/expr':
 		if ('' == assertStringArg ($argname, TRUE))
