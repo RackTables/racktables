@@ -276,10 +276,6 @@ function genericAssertion ($argname, $argtype)
 		return assertStringArg ($argname, TRUE);
 	case 'uint':
 		return assertUIntArg ($argname);
-	case 'uint-uint':
-		if (! preg_match ('/^([1-9][0-9]*)-([1-9][0-9]*)$/', assertStringArg ($argname), $m))
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'illegal format');
-		return $m;
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
 	case 'inet':
@@ -375,6 +371,15 @@ function genericAssertion ($argname, $argtype)
 		if ($argtype == 'vlan' and $sic[$argname] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
 		if ($sic[$argname] > VLAN_MAX_ID or $sic[$argname] < VLAN_MIN_ID)
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
+		return $sic[$argname];
+	case 'uint-vlan':
+	case 'uint-vlan1':
+		if (! preg_match ('/^([1-9][0-9]*)-([1-9][0-9]*)$/', assertStringArg ($argname), $m))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
+		if ($argtype == 'uint-vlan' and $m[2] == VLAN_DFL_ID)
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
+		if ($m[2] > VLAN_MAX_ID or $m[2] < VLAN_MIN_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'rackcode/expr':

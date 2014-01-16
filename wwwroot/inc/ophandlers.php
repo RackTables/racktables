@@ -910,7 +910,7 @@ function addIPv4Prefix ()
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
-	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
+	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
 	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv4net', $net_id) . ' has been created');
 }
@@ -922,7 +922,7 @@ function addIPv6Prefix ()
 
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	global $sic;
-	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : $sic['vlan_ck'];
+	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
 	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
 }
@@ -2806,7 +2806,7 @@ $msgcode['bindVLANtoIPv4']['OK'] = 48;
 function bindVLANtoIPv4 ()
 {
 	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-uint');
+	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
 	commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2816,7 +2816,7 @@ $msgcode['bindVLANtoIPv6']['OK'] = 48;
 function bindVLANtoIPv6 ()
 {
 	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-uint');
+	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
 	commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2826,7 +2826,7 @@ $msgcode['unbindVLANfromIPv4']['OK'] = 49;
 function unbindVLANfromIPv4 ()
 {
 	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-uint');
+	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
 	commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2836,7 +2836,7 @@ $msgcode['unbindVLANfromIPv6']['OK'] = 49;
 function unbindVLANfromIPv6 ()
 {
 	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-uint');
+	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
 	commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -3277,7 +3277,7 @@ function unlinkPort ()
 
 function clearVlan()
 {
-	assertStringArg ('vlan_ck');
+	genericAssertion ('vlan_ck', 'uint-vlan1');
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 
 	$n_cleared = 0;
@@ -3303,7 +3303,7 @@ function clearVlan()
 
 function deleteVlan()
 {
-	assertStringArg ('vlan_ck');
+	genericAssertion ('vlan_ck', 'uint-vlan');
 	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
 	if (! empty ($confports))
 		throw new RackTablesError ("You can not delete VLAN that has assosiated ports");

@@ -731,7 +731,7 @@ $delayauth['vlandomain-8021qorder-del'] = TRUE;
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';
-$page['vlan']['bypass_type'] = 'string';
+$page['vlan']['bypass_type'] = 'uint-vlan1';
 $tab['vlan']['default'] = 'View';
 $tab['vlan']['edit'] = 'Edit';
 $tab['vlan']['ipv4'] = 'IPv4';
