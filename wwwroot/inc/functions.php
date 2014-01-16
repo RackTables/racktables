@@ -1717,6 +1717,13 @@ function getTagIDListForNode ($treenode)
 	return $ret;
 }
 
+function applyCellFilter ($realm, $cellfilter, $parent_id = NULL)
+{
+	if ($res = callHook ('applyCellFilter_hook', $realm, $cellfilter, $parent_id))
+		return $res;
+	return filterCellList (listCells ($realm, $parent_id), $cellfilter['expression']);
+}
+
 function getCellFilter ()
 {
 	global $sic;

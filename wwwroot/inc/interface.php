@@ -407,7 +407,7 @@ function renderRackspace ()
 		$rackCount = 0;
 		foreach (getAllRows() as $row_id => $rowInfo)
 		{
-			$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+			$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
 			$found_racks = array_merge ($found_racks, $rackList);
 			$rows[] = array (
 				'location_id' => $rowInfo['location_id'],
@@ -629,7 +629,7 @@ function renderRow ($row_id)
 {
 	$rowInfo = getRowInfo ($row_id);
 	$cellfilter = getCellFilter();
-	$rackList = filterCellList (listCells ('rack', $row_id), $cellfilter['expression']);
+	$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 
@@ -2167,7 +2167,7 @@ function renderDepot ()
 	// 1st attempt: do not fetch all objects if cellfilter is empty and rendering empty result is enabled
 	elseif (! ($cellfilter['is_empty'] && renderEmptyResults ($cellfilter, 'objects', $objects_count)))
 	{
-		$objects = filterCellList (listCells ('object'), $cellfilter['expression']);
+		$objects = applyCellFilter ('object', $cellfilter);
 		// 2nd attempt: do not render all fetched objects if rendering empty result is enabled
 		if (! renderEmptyResults ($cellfilter, 'objects', count($objects)))
 		{
@@ -3656,9 +3656,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 	global $nextorder;
 	$order = 'odd';
 	$cellfilter = getCellFilter();
-	if (! isset ($celllist))
-		$celllist = listCells ($realm);
-	$celllist = filterCellList ($celllist, $cellfilter['expression']);
+	$celllist = applyCellFilter ($realm, $cellfilter);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
