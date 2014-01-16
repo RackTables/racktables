@@ -1923,17 +1923,16 @@ function markupIPAddrList (&$addrlist)
 			'regular' => 0, // connected host
 			'router' => 0   // connected gateway
 		);
+		$nallocs = 0;
 		foreach ($addrlist[$ip_bin]['allocs'] as $a)
+		{
 			$refc[$a['type']]++;
-		$nvirtloopback = ($refc['shared'] + $refc['virtual'] + $refc['router'] > 0) ? 1 : 0; // modulus of virtual + shared + router
+			$nallocs++;
+		}
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
-		$nrealms = $nreserved + $nvirtloopback + $refc['regular']; // last is connected allocation
-
-		if ($nrealms == 1)
-			$addrlist[$ip_bin]['class'] = 'trbusy';
-		elseif ($nrealms > 1)
+		if ($nallocs > 1 && $nallocs != $refc['shared'] || $nallocs && $nreserved)
 			$addrlist[$ip_bin]['class'] = 'trerror';
-		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'reserved', 'allocs', 'inpf', 'outpf')))
+		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'inpf', 'outpf'))) // these fields don't trigger the 'busy' status
 			$addrlist[$ip_bin]['class'] = 'trbusy';
 		else
 			$addrlist[$ip_bin]['class'] = '';
