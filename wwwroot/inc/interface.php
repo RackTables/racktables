@@ -5483,7 +5483,7 @@ function renderMyQuickLinks ()
 function renderFileSummary ($file)
 {
 	$summary = array();
-	$summary['Type'] = $file['type'];
+	$summary['Type'] = niftyString ($file['type']);
 	$summary['Size'] =
 	(
 		isolatedPermission ('file', 'download', $file) ?
