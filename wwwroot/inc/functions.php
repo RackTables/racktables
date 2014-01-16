@@ -1760,6 +1760,7 @@ function getCellFilter ()
 		break;
 	default:
 		showWarning ('Invalid and/or switch value in submitted form');
+		session_commit();
 		return NULL;
 	}
 	// Both tags and predicates that don't exist, should be
@@ -1830,6 +1831,7 @@ function getCellFilter ()
 		$ret['andor'] = getConfigVar ('FILTER_DEFAULT_ANDOR');
 	else
 		$ret['urlextra'] .= '&andor=' . $ret['andor'];
+	session_commit();
 	return $ret;
 }
 
