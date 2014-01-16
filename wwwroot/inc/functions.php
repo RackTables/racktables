@@ -184,7 +184,7 @@ function assertDateArg ($argname, $ok_if_empty = FALSE)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw convertToIRAE ($e, $argname);
+		throw $e->newIRAE ($argname);
 	}
 }
 
@@ -222,7 +222,7 @@ function assertIPArg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw convertToIRAE ($e, $argname);
+		throw $e->newIRAE ($argname);
 	}
 }
 
@@ -235,7 +235,7 @@ function assertIPv4Arg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw convertToIRAE ($e, $argname);
+		throw $e->newIRAE ($argname);
 	}
 }
 
@@ -248,7 +248,7 @@ function assertIPv6Arg ($argname)
 	}
 	catch (InvalidArgException $e)
 	{
-		throw convertToIRAE ($e, $argname);
+		throw $e->newIRAE ($argname);
 	}
 }
 
@@ -5949,22 +5949,15 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 
 # Convert InvalidArgException to InvalidRequestArgException with a choice of
 # replacing the reference to the failed argument or leaving it unchanged.
+#
+# DEPRECATED, use InvalidArgException::newIRAE()
 function convertToIRAE ($iae, $override_argname = NULL)
 {
 	if (! ($iae instanceof InvalidArgException))
 		throw new InvalidArgException ('iae', '(object)', 'not an instance of InvalidArgException class');
-
-	if (is_null ($override_argname))
-	{
-		$reported_argname = $iae->getName();
-		$reported_argvalue = $iae->getValue();
-	}
-	else
-	{
-		$reported_argname = $override_argname;
-		$reported_argvalue = $_REQUEST[$override_argname];
-	}
-	return new InvalidRequestArgException ($reported_argname, $reported_argvalue, $iae->getReason());
+	return is_null ($override_argname) ?
+		$iae->newIRAESameArgument() : # for backward compatibility only
+		$iae->newIRAE ($override_argname);
 }
 
 # Produce a textual date/time from a given UNIX timestamp

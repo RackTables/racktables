@@ -98,6 +98,16 @@ class ERetryNeeded extends RackTablesError
 // this simplifies construction of RackTablesError, but is never caught
 class InvalidArgException extends RackTablesError
 {
+	// derive an instance of InvalidRequestArgException
+	function newIRAE ($argname)
+	{
+		return new InvalidRequestArgException ($argname, $_REQUEST[$argname], $this->reason);
+	}
+	// for backward compatibility only, remove together with convertToIRAE()
+	function newIRAESameArgument()
+	{
+		return new InvalidRequestArgException ($this->name, $this->value, $this->reason);
+	}
 	function __construct ($name, $value, $reason=NULL)
 	{
 		$message = 'Argument \'' . niftyString ($name) . '\'' .
@@ -108,18 +118,6 @@ class InvalidArgException extends RackTablesError
 		$this->name = $name;
 		$this->value = $value;
 		$this->reason = $reason;
-	}
-	public function getName()
-	{
-		return $this->name;
-	}
-	public function getValue()
-	{
-		return $this->value;
-	}
-	public function getReason()
-	{
-		return $this->reason;
 	}
 }
 
