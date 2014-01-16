@@ -66,7 +66,6 @@ class RackTablesError extends Exception
 	}
 }
 
-// this simplifies construction of RackTablesError, but is never caught
 class EntityNotFoundException extends RackTablesError
 {
 	function __construct($entity, $id)
@@ -95,7 +94,6 @@ class ERetryNeeded extends RackTablesError
 	}
 }
 
-// this simplifies construction of RackTablesError, but is never caught
 class InvalidArgException extends RackTablesError
 {
 	// derive an instance of InvalidRequestArgException
