@@ -1699,7 +1699,7 @@ function renderIPForObject ($object_id)
 	}
 	echo '<th>type</th>';
 	echo '<th>misc</th>';
-	echo '<th>&nbsp</th>';
+	echo '<th>&nbsp;</th>';
 	echo '</tr>';
 
 	$alloc_list = ''; // most of the output is stored here
@@ -6727,7 +6727,7 @@ function renderVLANDomainListEditor ()
 		echo '</td></tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (getVLANDomainStats() as $vdom_id => $dominfo)
@@ -7813,7 +7813,7 @@ function renderVSTListEditor()
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (listCells ('vst') as $vst_id => $vst_info)
@@ -8146,11 +8146,11 @@ function renderDiscoveredNeighbors ($object_id)
 					'</td>';
 				$initial_row = FALSE;
 			}
-			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF ($portinfo_local) : '&nbsp') . "</td>";
+			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF ($portinfo_local) : '&nbsp;') . "</td>";
 			echo "<td>" . formatIfTypeVariants ($variants, "ports_${inputno}") . "</td>";
 			echo "<td>${dp_neighbor['device']}</td>";
 			echo "<td>" . ($portinfo_remote ? formatPortLink ($dp_remote_object_id, NULL, $portinfo_remote['id'], $portinfo_remote['name']) : $dp_neighbor['port'] ) . "</td>";
-			echo "<td>" . ($portinfo_remote ?  formatPortIIFOIF ($portinfo_remote) : '&nbsp') . "</td>";
+			echo "<td>" . ($portinfo_remote ?  formatPortIIFOIF ($portinfo_remote) : '&nbsp;') . "</td>";
 			echo "<td>";
 			if (! empty ($variants))
 			{
