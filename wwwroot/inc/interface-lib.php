@@ -768,13 +768,26 @@ function getTagClassName ($tagid)
 
 function serializeTags ($chain, $baseurl = '')
 {
+	global $taglist;
 	$tmp = array();
 	usort ($chain, 'cmpTags');
 	foreach ($chain as $taginfo)
 	{
 		$title = '';
 		if (isset ($taginfo['user']) and isset ($taginfo['time']))
-			$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
+			$title = htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES);
+		if (isset($taginfo['parent_id']))
+		{
+			$parent_info = array();
+			foreach ($taglist[$taginfo['id']]['trace'] as $tag_id)
+				$parent_info[] = $taglist[$tag_id]['tag'];
+			$parent_info[] = $taginfo['tag'];
+			if (strlen ($title))
+				$title .= "\n";
+			$title .= implode (" \xE2\x86\x92  ", $parent_info); # right arrow
+		}
+		if (strlen ($title))
+			$title = "title='$title'";
 
 		$class = '';
 		if (isset ($taginfo['id']))
@@ -1016,4 +1029,51 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 		($usetags ? '</span>' : '');
 }
 
+function printTagsPicker ($preselect=NULL)
+{
+	printTagsPickerInput ();
+	printTagsPickerUl ($preselect);
+	enableTagsPicker ();
+}
+
+function printTagsPickerInput ($input_name="taglist")
+{
+	# use data-attribute as identifier for tagit
+	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
+	echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
+}
+
+function printTagsPickerUl ($preselect=NULL, $input_name="taglist")
+{
+	global $target_given_tags;
+	if ($preselect === NULL)
+		$preselect = $target_given_tags;
+	foreach ($preselect as $key => $value) # readable time format
+		$preselect[$key]['time_parsed'] = formatAge ($value['time']);
+	usort ($preselect, 'cmpTags');
+	$preselect_hidden = "";
+	foreach ($preselect as $value){
+		$preselect_hidden .= "<input type=hidden name=" . $input_name . "[] value=" . $value['id'] . ">";
+	}
+	echo $preselect_hidden; # print preselected tags id that used in case javascript problems
+	echo "<ul data-tagit='yes' data-tagit-valuename='" . $input_name . "' data-tagit-preselect='" . json_encode($preselect) . "' class='tagit-vertical'></ul>";
+}
+
+function enableTagsPicker ()
+{
+	global $taglist;
+	static $taglist_inserted;
+	includeJQueryUI ();
+	addCSS ('css/tagit.css');
+	addJS ('js/tag-it.js');
+	addJS ('js/tag-it-local.js');
+	if (! $taglist_inserted)
+	{
+		$taglist_filtered = array();
+		foreach ($taglist as $key => $taginfo) # remove unused fields
+			$taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
+		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
+		$taglist_inserted = TRUE;
+	}
+}
 ?>
