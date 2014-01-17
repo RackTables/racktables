@@ -59,6 +59,7 @@ function suggest_search (term) {
 	var results = [];
 	if (term == "*") {
 		if (typeof(this.options.tags_trace) != 'undefined' && this.options.tags_trace.length > 0) {
+			this.tagInput.autocomplete('widget').addClass('indented');
 			var roots = [];
 			var tree_styles = {};
 			tree_styles[0] = [];
@@ -70,7 +71,6 @@ function suggest_search (term) {
 			var changes = 1;
 			var i = 0;
 			var taglist_tmp = $.extend(1, this.options.taglist);
-			$(this.options.dynamic_style).appendTo('head');
 			while (changes) {
 				i++;
 				tree_styles[i] = [];
@@ -90,16 +90,6 @@ function suggest_search (term) {
 					}
 				}
 			}
-			// generate style with indents depended from depth
-			for (level in tree_styles) {
-				if (tree_styles[level].length == 0)
-					continue;
-				width = 1 + level * 15;
-				class_str = "";
-				for (index in tree_styles[level])
-					class_str += ".etag-" + tree_styles[level][index] + " a, ";
-				this.options.dynamic_style.append(class_str.slice(0,-2) + " {padding-left:" + width + "px !important;}");
-				}
 			results = roots;
 		}
 		else {
@@ -144,7 +134,6 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 	var all_tags = [];
 	var available_tags = [];
 	var selected = [];
-	var dynamic_style = $('<style>');
 
 	function getHelp(tag) {
 		s = [];
@@ -163,12 +152,11 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 		result.push("tag-" + tags_name_to_id[tag]);
 		result.push("etag-" + tags_name_to_id[tag]);
 		if (typeof tags_trace[tag] != 'undefined')
-		{
 			tag_trace = tags_trace[tag];
-		}
 		else
 			tag_trace = [];
 		$.each(tag_trace, function (index, value) {result.push("tag-" + value);});
+		result.push("tag-level" + tag_trace.length);
 		return result;
 	}
 	
@@ -271,6 +259,7 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 	}
 
 	function suggest_wrapper (request, response) {
+		this.tagInput.autocomplete('widget').removeClass('indented');
 		var results = suggest.call(this, request, response);
 		response.call(this, results);
 		return results;
@@ -345,7 +334,6 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 			autocomplete: {
 								autoFocus: true,
 								source: suggest_wrapper,
-								search: function(event, ui) {$(dynamic_style).remove();},
 								open: autocomplete_open,
 								create: function(event, ui){
 									$(this).data("autocomplete")._renderItem = function(ul, item) {
@@ -366,7 +354,6 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 			tags_trace: tags_trace,
 			tags_to_name: tags_to_name,
 			tags_name_to_id: tags_name_to_id,
-			dynamic_style: dynamic_style,
 			taglist: taglist,
 		});
 		$(ul).closest("form").find("input:hidden[name='" + value_name + "[]" + "']").remove(); // remove extra data

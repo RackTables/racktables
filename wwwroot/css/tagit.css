@@ -169,3 +169,15 @@ a div {
 	color: inherit;
 	text-decoration: inherit;
 }
+
+.tagit-autocomplete.indented .tag-level0  { padding-left: 1px   !important; }
+.tagit-autocomplete.indented .tag-level1  { padding-left: 16px  !important; }
+.tagit-autocomplete.indented .tag-level2  { padding-left: 31px  !important; }
+.tagit-autocomplete.indented .tag-level3  { padding-left: 46px  !important; }
+.tagit-autocomplete.indented .tag-level4  { padding-left: 61px  !important; }
+.tagit-autocomplete.indented .tag-level5  { padding-left: 76px  !important; }
+.tagit-autocomplete.indented .tag-level6  { padding-left: 101px !important; }
+.tagit-autocomplete.indented .tag-level7  { padding-left: 116px !important; }
+.tagit-autocomplete.indented .tag-level8  { padding-left: 131px !important; }
+.tagit-autocomplete.indented .tag-level9  { padding-left: 146px !important; }
+.tagit-autocomplete.indented .tag-level10 { padding-left: 161px !important; }
