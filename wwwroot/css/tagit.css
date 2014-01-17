@@ -164,9 +164,9 @@ ul.tagit li.tagit-choice .tagit-close .text-icon, ul.tagit-vertical li.tagit-cho
 	font-weight:inherit !important;
 }
 
-a div {
-	font-family: inherit;
+.tagit-menu-item a {
 	color: inherit;
+	font-size: small;
 	text-decoration: inherit;
 }
 
