@@ -188,6 +188,14 @@ td.sticker {
 	background-color: #e8e8e8;
 }
 
+.row_even.has_problems {
+	background-color: #ffa0a0;
+}
+
+.row_odd.has_problems {
+	background-color: #fbbcbc;
+}
+
 .row_error {
 	background-color: #ffa0a0;
 }

@@ -2189,7 +2189,8 @@ function renderDepot ()
 			$containerinfo = getContainerInfo ($idlist);
 			foreach ($objects as $obj)
 			{
-				echo "<tr class='row_${order} tdleft' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
+				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
+				echo "<tr class='row_${order} tdleft ${problem}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo "</td><td>${obj['label']}</td>";
