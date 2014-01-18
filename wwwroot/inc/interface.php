@@ -78,6 +78,18 @@ $attrtypes = array
 	'date' => '[T] date'
 );
 
+function showLogoutURL ()
+{
+	$https = (isset ($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') ? 's' : '';
+	$port = (! in_array ($_SERVER['SERVER_PORT'], array (80, 443))) ? ':' . $_SERVER['SERVER_PORT'] : '';
+	$pathinfo = pathinfo ($_SERVER['REQUEST_URI']);
+	$dirname = $pathinfo['dirname'];
+	// add a trailing slash if the installation resides in a subdirectory
+	if ($dirname != '/')
+		$dirname .= '/';
+	printf ('http%s://logout@%s%s?logout', $https, $_SERVER['SERVER_NAME'], $dirname);
+}
+
 $quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
 
 function renderQuickLinks()
@@ -101,7 +113,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <body>
 <div class="maintable">
  <div class="mainheader">
-  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='?logout'>logout</a> ]</div>
+  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
  </div>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
