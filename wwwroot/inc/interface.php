@@ -630,24 +630,29 @@ function renderRow ($row_id)
 	$rowInfo = getRowInfo ($row_id);
 	$cellfilter = getCellFilter();
 	$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
+
+	$summary = array ();
+	$summary['Name'] = $rowInfo['name'];
+	if ($rowInfo['location_id'])
+		$summary['Location'] = mkA ($rowInfo['location'], 'location', $rowInfo['location_id']);
+	$summary['Racks'] = $rowInfo['count'];
+	$summary['Units'] = $rowInfo['sum'];
+	$summary['% used'] = getProgressBar (getRSUforRow ($rackList));
+	foreach (getAttrValues ($row_id) as $record)
+		if
+		(
+			$record['value'] != '' and
+			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+		)
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 
 	// Left portlet with row information.
 	echo "<tr><td class=pcleft>";
-	startPortlet ($rowInfo['name']);
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
-	if ($rowInfo['location_id'])
-		echo "<tr><th width='50%' class=tdright>Location:</th><td class=tdleft>".mkA ($rowInfo['location'], 'location', $rowInfo['location_id'])."</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Racks:</th><td class=tdleft>${rowInfo['count']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>Units:</th><td class=tdleft>${rowInfo['sum']}</td></tr>\n";
-	echo "<tr><th width='50%' class=tdright>% used:</th><td class=tdleft>";
-	renderProgressBar (getRSUforRow ($rackList));
-	echo "</td></tr>\n";
-	echo "</table><br>\n";
-	finishPortlet();
+	renderEntitySummary ($rowInfo, 'Summary', $summary);
 	renderCellFilterPortlet ($cellfilter, 'rack', $rackList, array ('row_id' => $row_id));
-
 	renderFilesPortlet ('row',$row_id);
 	echo "</td><td class=pcright>";
 
@@ -679,6 +684,72 @@ function renderRow ($row_id)
 	echo "</tr></table>\n";
 	finishPortlet();
 	echo "</td></tr></table>";
+}
+
+function renderEditRowForm ($row_id)
+{
+	$row = getRowInfo ($row_id);
+
+	startPortlet ('Attributes');
+	printOpFormIntro ('updateRow');
+	echo '<table border=0 align=center>';
+	echo '<tr><td>&nbsp;</td><th class=tdright>Location:</th><td class=tdleft>';
+	$locations = array ();
+	$locations[0] = '-- NOT SET --';
+	foreach (listCells ('location') as $id => $locationInfo)
+		$locations[$id] = $locationInfo['name'];
+	natcasesort ($locations);
+	printSelect ($locations, array ('name' => 'location_id'), $row['location_id']);
+	echo "</td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${row['name']}'></td></tr>\n";
+
+	// optional attributes
+	$values = getAttrValues ($row_id);
+	$num_attrs = count ($values);
+	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
+	$i = 0;
+	foreach ($values as $record)
+	{
+		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+		echo '<tr><td>';
+		if (strlen ($record['value']))
+			echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
+        else
+			echo '&nbsp;';
+		echo '</td>';
+		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
+		switch ($record['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				echo "<input type=text name=${i}_value value='${record['value']}'>";
+				break;
+			case 'dict':
+				$chapter = readChapter ($record['chapter_id'], 'o');
+				$chapter[0] = '-- NOT SET --';
+				$chapter = cookOptgroups ($chapter, 1562, $record['key']);
+				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
+				break;
+		}
+		echo "</td></tr>\n";
+		$i++;
+	}
+	if ($row['count'] == 0)
+	{
+		echo '<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>';
+		echo getOpLink (array ('op'=>'deleteRow'), '', 'destroy', 'Delete row', 'need-confirmation');
+		echo "&nbsp;</td></tr>\n";
+	}
+	echo "<tr><td class=submit colspan=3>";
+	printImageHREF ('SAVE', 'Save changes', TRUE);
+	echo "</td></tr>\n";
+	echo '</form></table><br>';
+	finishPortlet();
+
+	startPortlet ('History');
+	renderObjectHistory ($row_id);
+	finishPortlet();
 }
 
 // Used by renderRack()
@@ -4283,7 +4354,6 @@ function renderEditAttrMapForm ()
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
 		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
-		unset ($objtypes[1561]); // attributes may not be assigned to rows yet
 		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id', 'tabindex' => 101));
 		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)

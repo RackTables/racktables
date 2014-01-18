@@ -2198,6 +2198,9 @@ function addRow ()
 }
 
 $msgcode['updateRow']['OK'] = 6;
+// This function is used by two forms:
+//  - renderEditRowForm - all attributes may be modified
+//  - renderRackspaceRowEditor - only the name and location may be modified
 function updateRow ()
 {
 	assertUIntArg ('row_id');
@@ -2205,6 +2208,10 @@ function updateRow ()
 	assertStringArg ('name');
 
 	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, NULL, NULL, NULL);
+
+	global $pageno;
+	if ($pageno == 'row')
+		updateObjectAttributes ($_REQUEST['row_id']);
 
 	$rowData = spotEntity ('row', $_REQUEST['row_id']);
 
