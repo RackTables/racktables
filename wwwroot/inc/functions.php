@@ -345,7 +345,7 @@ function genericAssertion ($argname, $argtype)
 		return $sic[$argname];
 	case 'enum/alloc_type':
 		assertStringArg ($argname);
-		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router')))
+		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router', 'point2point')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
 	case 'enum/dqcode':
@@ -1935,7 +1935,8 @@ function markupIPAddrList (&$addrlist)
 			'shared' => 0,  // virtual
 			'virtual' => 0, // loopback
 			'regular' => 0, // connected host
-			'router' => 0   // connected gateway
+			'router' => 0,   // connected gateway
+			'point2point' => 0,
 		);
 		$nallocs = 0;
 		foreach ($addrlist[$ip_bin]['allocs'] as $a)
@@ -2569,6 +2570,29 @@ function loadIPAddrList (&$node)
 	}
 	$node['addrc'] = count ($node['addrlist']);
 	$node['own_addrc'] = count ($node['own_addrlist']);
+}
+
+// returns list of PtP-typed allocs from $addrlist indexed by ip_bin
+function getPtPNeighbors ($ip_bin, $addrlist)
+{
+	$ret = array();
+	if (isset ($addrlist[$ip_bin]))
+	{
+		$found_ptp_alloc = FALSE;
+		foreach ($addrlist[$ip_bin]['allocs'] as $alloc)
+			if ($alloc['type'] == 'point2point')
+			{
+				$found_ptp_alloc = TRUE;
+				break;
+			}
+		if ($found_ptp_alloc)
+			foreach ($addrlist as $i_ip_bin => $i_address)
+				if ($ip_bin !== $i_ip_bin)
+					foreach ($i_address['allocs'] as $alloc)
+						if ($alloc['type'] == 'point2point')
+							$ret[$i_ip_bin][] = $alloc;
+	}
+	return $ret;
 }
 
 // returns the array of structure described by constructIPAddress

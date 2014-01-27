@@ -23,6 +23,7 @@
 	update: use suggest-menu for tag assignment
 	update: show tag trace in tag title
 	new feature: add IPv4 natting for all protocols (#971) by Tim Wilkes/Mark Wilkinson
+	new feature: display point-to-point peers when using new 'Point-to-point' IP allocation type
 0.20.6 2013-11-29
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 

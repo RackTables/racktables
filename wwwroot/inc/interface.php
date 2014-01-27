@@ -24,6 +24,7 @@ $aat = array
 	'virtual' => 'Loopback',
 	'shared' => 'Shared',
 	'router' => 'Router',
+	'point2point' => 'Point-to-point',
 );
 // address allocation code, IPv4 addresses and objects view
 $aac_right = array
@@ -32,6 +33,7 @@ $aac_right = array
 	'virtual' => '<span class="aac-right" title="' . $aat['virtual'] . '">L</span>',
 	'shared' => '<span class="aac-right" title="' . $aat['shared'] . '">S</span>',
 	'router' => '<span class="aac-right" title="' . $aat['router'] . '">R</span>',
+	'point2point' => '<span class="aac-right" title="' . $aat['point2point'] . '">P</span>',
 );
 // address allocation code, IPv4 networks view
 $aac_left = array
@@ -40,6 +42,7 @@ $aac_left = array
 	'virtual' => '<span class="aac-left" title="' . $aat['virtual'] . '">L:</span>',
 	'shared' => '<span class="aac-left" title="' . $aat['shared'] . '">S:</span>',
 	'router' => '<span class="aac-left" title="' . $aat['router'] . '">R:</span>',
+	'point2point' => '<span class="aac-left" title="' . $aat['point2point'] . '">P:</span>',
 );
 
 $vtdecoder = array
@@ -271,12 +274,24 @@ function getRenderedAlloc ($object_id, $alloc)
 		$prefix = $separator;
 	}
 	foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
-	{
-		if ($allocpeer['object_id'] == $object_id)
-			continue;
-		$ret['td_peers'] .= $prefix . makeIPAllocLink ($ip_bin, $allocpeer);
-		$prefix = $separator;
-	}
+		if ($allocpeer['object_id'] != $object_id)
+		{
+			$ret['td_peers'] .= $prefix . makeIPAllocLink ($ip_bin, $allocpeer);
+			$prefix = $separator;
+		}
+		elseif ($allocpeer['type'] == 'point2point' && isset ($netinfo))
+		{
+			// show PtP peers in the IP network
+			if (! isset ($netinfo['own_addrlist']))
+				loadIPAddrList ($netinfo);
+			foreach (getPtPNeighbors ($ip_bin, $netinfo['own_addrlist']) as $p_ip_bin => $p_alloc_list)
+				foreach ($p_alloc_list as $p_alloc)
+				{
+					$ret['td_peers'] .= $prefix . '&harr;&nbsp;' . makeIPAllocLink ($p_ip_bin, $p_alloc);
+					$prefix = $separator;
+				}
+		}
+
 	$ret['td_peers'] .= '</td>';
 
 	return $ret;
