@@ -2077,12 +2077,21 @@ function iptree_construct ($node)
 	}
 }
 
-// returns TRUE if inet_ntop and inet_pton functions exist and support IPv6
+// returns TRUE if inet_ntop and inet_pton functions exist
 function is_inet_avail()
 {
 	static $ret = NULL;
 	if (! isset ($ret))
-		$ret = is_callable ('inet_pton') && ! is_callable ('inet_ntop') && defined ('AF_INET6');
+		$ret = is_callable ('inet_pton') && is_callable ('inet_ntop');
+	return $ret;
+}
+
+// returns TRUE if inet_ntop and inet_pton functions exist and support IPv6
+function is_inet6_avail()
+{
+	static $ret = NULL;
+	if (! isset ($ret))
+		$ret = is_inet_avail() && defined ('AF_INET6');
 	return $ret;
 }
 
@@ -2118,7 +2127,7 @@ function ip6_format ($ip_bin)
 		if (16 != strlen ($ip_bin))
 			break;
 
-		if (is_inet_avail())
+		if (is_inet6_avail())
 		{
 			$ret = @inet_ntop ($ip_bin);
 			if ($ret !== FALSE)
@@ -2175,17 +2184,18 @@ function ip6_format ($ip_bin)
 
 function ip_parse ($ip)
 {
-	if (is_inet_avail())
+	try
 	{
-		if (FALSE !== ($ret = @inet_pton ($ip)))
-			return $ret;
+		if (FALSE !== strpos ($ip, ':'))
+			return ip6_parse ($ip);
+		else
+			return ip4_parse ($ip);
 	}
-	elseif (FALSE !== strpos ($ip, ':'))
-		return ip6_parse ($ip);
-	else
-		return ip4_parse ($ip);
-
-	throw new InvalidArgException ('ip', $ip, "Invalid IP address");
+	catch (InvalidArgException $e)
+	{
+		// re-throw with general error message, without specifying an IP family
+		throw new InvalidArgException ('ip', $ip, "Invalid IP address");
+	}
 }
 
 function ip4_parse ($ip)
@@ -2206,7 +2216,7 @@ function ip4_parse ($ip)
 function ip6_parse ($ip)
 {
 	do {
-		if (is_inet_avail())
+		if (is_inet6_avail())
 		{
 			if (FALSE !== ($ret = @inet_pton ($ip)))
 				return $ret;
