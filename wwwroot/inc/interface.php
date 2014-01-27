@@ -264,20 +264,18 @@ function getRenderedAlloc ($object_id, $alloc)
 	// render peers td
 	$ret['td_peers'] = "<td class='$td_class'>";
 	$prefix = '';
+	$separator = '; ';
 	if ($alloc['addrinfo']['reserved'] == 'yes')
 	{
 		$ret['td_peers'] .= $prefix . '<strong>RESERVED</strong>';
-		$prefix = '; ';
+		$prefix = $separator;
 	}
 	foreach ($alloc['addrinfo']['allocs'] as $allocpeer)
 	{
 		if ($allocpeer['object_id'] == $object_id)
 			continue;
-		$ret['td_peers'] .= $prefix . "<a href='" . makeHref (array ('page' => 'object', 'object_id' => $allocpeer['object_id'])) . "'>";
-		if (isset ($allocpeer['osif']) and strlen ($allocpeer['osif']))
-			$ret['td_peers'] .= $allocpeer['osif'] . '@';
-		$ret['td_peers'] .= $allocpeer['object_name'] . '</a>';
-		$prefix = '; ';
+		$ret['td_peers'] .= $prefix . makeIPAllocLink ($ip_bin, $allocpeer);
+		$prefix = $separator;
 	}
 	$ret['td_peers'] .= '</td>';
 
@@ -2854,9 +2852,7 @@ function renderIPv4NetworkAddresses ($range)
 		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac_left[$ref['type']];
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
-			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
-			echo "${ref['object_name']}</a>";
+			echo makeIPAllocLink ($ip_bin, $ref, TRUE);
 			$delim = '; ';
 		}
 		if ($delim != '')
@@ -2973,9 +2969,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['allocs'] as $ref)
 		{
 			echo $delim . $aac_left[$ref['type']];
-			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
-			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
-			echo "${ref['object_name']}</a>";
+			echo makeIPAllocLink ($ip_bin, $ref, TRUE);
 			$delim = '; ';
 		}
 		if ($delim != '')
@@ -3107,7 +3101,7 @@ function renderIPAddress ($ip_bin)
 			if (isset ($_REQUEST['hl_object_id']) and $_REQUEST['hl_object_id'] == $bond['object_id'])
 				$tr_class .= ' highlight';
 			echo "<tr class='$tr_class'>" .
-				"<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'tab' => 'default', 'hl_ip' => $address['ip'])) . "'>${bond['object_name']}</td>" .
+				"<td>" . makeIPAllocLink ($ip_bin, $bond) . "</td>" .
 				"<td>${bond['name']}</td>" .
 				"<td><strong>" . $aat[$bond['type']] . "</strong></td>" .
 				"</tr>\n";
@@ -3222,7 +3216,7 @@ function renderIPAddressAllocations ($ip_bin)
 			echo "<tr class='$class'>";
 			printOpFormIntro ('upd', array ('object_id' => $bond['object_id']));
 			echo "<td>" . getOpLink (array ('op' => 'del', 'object_id' => $bond['object_id'] ), '', 'delete', 'Unallocate address') . "</td>";
-			echo "<td><a href='" . makeHref (array ('page' => 'object', 'object_id' => $bond['object_id'], 'hl_ip' => $address['ip'])) . "'>${bond['object_name']}</td>";
+			echo "<td>" . makeIPAllocLink ($ip_bin, $bond) . "</td>";
 			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
 			printSelect ($aat, array ('name' => 'bond_type'), $bond['type']);
 			echo "</td><td>";

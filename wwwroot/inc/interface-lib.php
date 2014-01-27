@@ -1076,4 +1076,19 @@ function enableTagsPicker ()
 		$taglist_inserted = TRUE;
 	}
 }
+
+function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
+{
+	$object_name = ! isset ($object_name) || ! strlen ($object_name) ?
+		formatEntityName (spotEntity ('object', $alloc['object_id'])) :
+		$alloc['object_name'];
+	$title = $display_ifname ?
+		'' :
+		"{$alloc['name']} @ {$object_name}";
+	return
+		'<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $alloc['object_id'], 'hl_ip' => ip_format ($ip_bin))) . '"' .
+		' title="' . htmlspecialchars ($title, ENT_QUOTES) . '"' .
+		">" . ($display_ifname ? $alloc['name'] . '@' : '') . $object_name . "</a>";
+}
+
 ?>
