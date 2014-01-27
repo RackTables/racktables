@@ -810,9 +810,14 @@ a.noclick {
 	display: block;
 }
 
-.aac {
+.aac-right {
 	font-weight: bold;
 	margin-left: 1em;
+}
+
+.aac-left {
+	font-weight: bold;
+	margin-right: 0.5em;
 }
 
 .logentry {

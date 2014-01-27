@@ -26,20 +26,20 @@ $aat = array
 	'router' => 'Router',
 );
 // address allocation code, IPv4 addresses and objects view
-$aac = array
+$aac_right = array
 (
 	'regular' => '',
-	'virtual' => '<span class="aac">L</span>',
-	'shared' => '<span class="aac">S</span>',
-	'router' => '<span class="aac">R</span>',
+	'virtual' => '<span class="aac-right" title="' . $aat['virtual'] . '">L</span>',
+	'shared' => '<span class="aac-right" title="' . $aat['shared'] . '">S</span>',
+	'router' => '<span class="aac-right" title="' . $aat['router'] . '">R</span>',
 );
 // address allocation code, IPv4 networks view
-$aac2 = array
+$aac_left = array
 (
 	'regular' => '',
-	'virtual' => '<strong>L:</strong>',
-	'shared' => '<strong>S:</strong>',
-	'router' => '<strong>R:</strong>',
+	'virtual' => '<span class="aac-left" title="' . $aat['virtual'] . '">L:</span>',
+	'shared' => '<span class="aac-left" title="' . $aat['shared'] . '">S:</span>',
+	'router' => '<span class="aac-left" title="' . $aat['router'] . '">R:</span>',
 );
 
 $vtdecoder = array
@@ -207,7 +207,7 @@ function getRenderedAlloc ($object_id, $alloc)
 	}
 
 	// render IP address td
-	global $aac;
+	global $aac_right;
 	$netinfo = spotNetworkByIP ($ip_bin);
 	$ret['td_ip'] = "<td class='tdleft'>";
 	if (isset ($netinfo))
@@ -227,7 +227,7 @@ function getRenderedAlloc ($object_id, $alloc)
 	}
 	else
 		$ret['td_ip'] .= "<span class='$ip_class' $ip_title>$dottedquad</span>";
-	$ret['td_ip'] .= $aac[$alloc['type']];
+	$ret['td_ip'] .= $aac_right[$alloc['type']];
 	if (strlen ($alloc['addrinfo']['name']))
 		$ret['td_ip'] .= ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
 	$ret['td_ip'] .= '</td>';
@@ -246,7 +246,7 @@ function getRenderedAlloc ($object_id, $alloc)
 
 		// render "routed by" td
 		if ($display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') == 'none'))
-			$ret['td_routed_by'] = '';
+			$ret['td_routed_by'] = '<td>&nbsp;</td>';
 		else
 		{
 			loadIPAddrList ($netinfo);
@@ -1445,9 +1445,9 @@ function renderObject ($object_id)
 		startPortlet ('IP addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
-			echo "<tr><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
+			echo "<tr class=tdleft><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
-			echo "<tr><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
+			echo "<tr class=tdleft><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
 
 		// group IP allocations by interface name instead of address family
 		$allocs_by_iface = array();
@@ -2773,7 +2773,7 @@ function renderIPNetworkAddresses ($range)
 
 function renderIPv4NetworkAddresses ($range)
 {
-	global $pageno, $tabno, $aac2;
+	global $pageno, $tabno, $aac_left;
 	$startip = ip4_bin2int ($range['ip_bin']);
 	$endip = ip4_bin2int (ip_last ($range));
 
@@ -2853,7 +2853,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		foreach ($addr['allocs'] as $ref)
 		{
-			echo $delim . $aac2[$ref['type']];
+			echo $delim . $aac_left[$ref['type']];
 			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
@@ -2892,7 +2892,7 @@ function renderIPv4NetworkAddresses ($range)
 
 function renderIPv6NetworkAddresses ($netinfo)
 {
-	global $pageno, $tabno, $aac2;
+	global $pageno, $tabno, $aac_left;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
@@ -2972,7 +2972,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		}
 		foreach ($addr['allocs'] as $ref)
 		{
-			echo $delim . $aac2[$ref['type']];
+			echo $delim . $aac_left[$ref['type']];
 			echo "<a href='".makeHref(array('page'=>'object', 'object_id'=>$ref['object_id'], 'tab' => 'default', 'hl_ip'=>$addr['ip']))."'>";
 			echo $ref['name'] . (!strlen ($ref['name']) ? '' : '@');
 			echo "${ref['object_name']}</a>";
@@ -5618,7 +5618,6 @@ function renderFilePreview ($pcode)
 // File-related functions
 function renderFile ($file_id)
 {
-	global $nextorder, $aac;
 	$file = spotEntity ('file', $file_id);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
