@@ -2203,7 +2203,7 @@ function ip4_parse ($ip)
 {
 	if (is_inet_avail())
 	{
-		if (FALSE !== ($ret = @inet_pton ($ip)))
+		if (FALSE !== ($ret = @inet_pton ($ip)) && strlen ($ret) == 4)
 			return $ret;
 	}
 	elseif (FALSE !== ($int = ip2long ($ip)))
@@ -2219,7 +2219,7 @@ function ip6_parse ($ip)
 	do {
 		if (is_inet6_avail())
 		{
-			if (FALSE !== ($ret = @inet_pton ($ip)))
+			if (FALSE !== ($ret = @inet_pton ($ip)) && strlen ($ret) == 16)
 				return $ret;
 			break;
 		}
