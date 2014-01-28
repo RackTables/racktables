@@ -106,6 +106,8 @@ function generateVSSection ($vs_parser)
 			continue;
 		$parser = clone $vs_parser;
 		$parser->addMacro ('RSIP', $rs['rsip']);
+		if (isset ($rs['rsport']))
+			$parser->addMacro ('RSPORT', $rs['rsport']);
 		$parser->addMacro ('RS_COMMENT', $rs['comment']);
 		$parser->addMacro ('RS_RS_CONF', $rs['rsconfig']);
 
