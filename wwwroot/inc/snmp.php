@@ -2536,6 +2536,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9028B: 22 RJ-45/10-100-1000T(X) + 2 combo-gig',
 		'processors' => array ('smc2-combo-23-to-24', 'smc2-any-1000T'),
 	),
+	'11.2.3.7.11.84' => array
+	(
+		'dict_key' => 2096,
+		'text' => 'J9146A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig + varying uplinks',
+		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.85' => array
 	(
 		'dict_key' => 1600,
