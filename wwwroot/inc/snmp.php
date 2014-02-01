@@ -2476,10 +2476,16 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J8773A: modular system',
 		'processors' => array ('procurve-modular-1000T'),
 	),
+	'11.2.3.7.11.58' => array
+	(
+		'dict_key' => 876,
+		'text' => 'J8692A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.62' => array
 	(
 		'dict_key' => 855,
-		'text' => 'J9020A: 48 RJ-45/10-100TX + 2 RJ-45/10-1000-1000T(x) + 2 SFP-1000',
+		'text' => 'J9020A: 48 RJ-45/10-100TX + 2 RJ-45/10-1000-1000T(X) + 2 SFP-1000',
 		'processors' => array ('procurve-51-to-52-1000SFP', 'procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.63' => array
@@ -3292,6 +3298,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			78 => '1-29',
 			79 => '1-29',
 			80 => '1-29',
+			84 => '1-29',
 			86 => '1-29',
 			87 => '1-29',
 			94 => '1-29',
@@ -3299,6 +3306,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			19 => '1-681', # DB-9 RS-232
 			31 => '1-681',
 			34 => '1-681',
+			58 => '1-681',
 		);
 		if (array_key_exists ($matches[1], $console_per_product))
 		{

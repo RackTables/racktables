@@ -12,7 +12,7 @@
 		Linksys SRW248G4 by Rafael Driutti,
 		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum,
 		AT-GS950/24 (#1105), Cisco WS-C1924 (#1111), HP J4900B (#1107),
-		J9146A (#1143)
+		J8692A & J9146A (#1143)
 	update: add the data integrity report
 	update: duplicate IP allocations of all types except 'shared' are highlighted red
 	update: upgrade CodeMirror to version 3.20
