@@ -2179,6 +2179,19 @@ $dictionary = array
 	2094 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 1924'),
 	2095 => array ('chapter_id' => 12, 'dict_value' => 'Allied Telesis%GPASS%AT-GS950/24'),
 	2096 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2910-24G-PoE J9146A'),
+	2097 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8132'),
+	2098 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8132F'),
+	2099 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8164'),
+	2100 => array ('chapter_id' => 12, 'dict_value' => 'Dell PowerConnect%GPASS%8164F'),
+	2101 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.2 | http://www.openbsd.org/52.html]]'),
+	2102 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.3 | http://www.openbsd.org/53.html]]'),
+	2103 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.4 | http://www.openbsd.org/54.html]]'),
+	2104 => array ('chapter_id' => 13, 'dict_value' => 'FreeBSD%GSKIP%FreeBSD 10.x'),
+	2105 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 5.1'),
+	2106 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 5.5'),
+	2107 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 13.04'),
+	2108 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 13.10'),
+	2109 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 14.04 LTS'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
