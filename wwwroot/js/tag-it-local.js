@@ -59,7 +59,8 @@ function suggest_search (term) {
 	var results = [];
 	if (term == "*") {
 		if (typeof(this.options.tags_trace) != 'undefined' && this.options.tags_trace.length > 0) {
-			this.tagInput.autocomplete('widget').addClass('indented');
+			if (typeof(this.tagInput) != 'undefined')
+				this.tagInput.autocomplete('widget').addClass('indented');
 			var roots = [];
 			var tree_styles = {};
 			tree_styles[0] = [];
@@ -259,7 +260,8 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 	}
 
 	function suggest_wrapper (request, response) {
-		this.tagInput.autocomplete('widget').removeClass('indented');
+		if (typeof(this.tagInput) != 'undefined')
+			this.tagInput.autocomplete('widget').removeClass('indented');
 		var results = suggest.call(this, request, response);
 		response.call(this, results);
 		return results;
