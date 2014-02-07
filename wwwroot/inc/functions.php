@@ -2052,29 +2052,22 @@ function iptree_fill (&$netdata)
 {
 	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
 		return;
-	// If we really have nested prefixes, they must fit into the tree.
-	$worktree = $netdata;
-	foreach ($netdata['kids'] as $pfx)
-		iptree_embed ($worktree, $pfx);
-	$netdata['kids'] = iptree_construct ($worktree);
-	$netdata['kidc'] = count ($netdata['kids']);
-}
 
-function iptree_construct ($node)
-{
-	$self = __FUNCTION__;
-
-	if (isset ($node['right']))
-		return array_merge ($self ($node['left']), $self ($node['right']));
-	else
+	foreach ($netdata['spare_ranges'] as $mask => $list)
 	{
-		if (!isset ($node['kids']))
-		{
-			$node['kids'] = array();
-			$node['kidc'] = 0;
-			$node['name'] = '';
-		}
-		return array ($node);
+		$spare_mask = $mask;
+		// align spare IPv6 nets by nibble boundary
+		if (strlen ($netdata['ip_bin']) == 16 && $mask % 4)
+			$spare_mask = $mask + 4 - ($mask % 4);
+		foreach ($list as $ip_bin)
+			foreach (splitNetworkByMask (constructIPRange ($ip_bin, $mask), $spare_mask) as $spare)
+				$netdata['kids'][] = $spare + array('kids' => array(), 'kidc' => 0, 'name' => '');
+	}
+
+	if (count ($netdata['kids']) != $netdata['kidc'])
+	{
+		$netdata['kidc'] = count ($netdata['kids']);
+		usort ($netdata['kids'], 'IPNetworkCmp');
 	}
 }
 
@@ -2492,34 +2485,6 @@ function constructIPAddress ($ip_bin)
 			)
 		);
 	return $ret;
-}
-
-function iptree_embed (&$node, $pfx)
-{
-	$self = __FUNCTION__;
-
-	// hit?
-	if (0 == IPNetworkCmp ($node, $pfx))
-	{
-		$node = $pfx;
-		return;
-	}
-	if ($node['mask'] == $pfx['mask'])
-		throw new RackTablesError ('the recurring loop lost control', RackTablesError::INTERNAL);
-
-	// split?
-	if (!isset ($node['right']))
-	{
-		$node['left']  = constructIPRange ($node['ip_bin'], $node['mask'] + 1);
-		$node['right'] = constructIPRange (ip_last ($node), $node['mask'] + 1);
-	}
-
-	if (IPNetContainsOrEqual ($node['left'], $pfx))
-		$self ($node['left'], $pfx);
-	elseif (IPNetContainsOrEqual ($node['right'], $pfx))
-		$self ($node['right'], $pfx);
-	else
-		throw new RackTablesError ('cannot decide between left and right', RackTablesError::INTERNAL);
 }
 
 function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
@@ -6148,6 +6113,19 @@ function compileExpression ($code, $do_cache_lookup = TRUE)
 		$ret = $parse['load'];
 	$exprCache[$code] = $ret;
 	return $ret;
+}
+
+// returns an array of IP ranges of size $dst_mask > $netinfo['mask'], or array ($netinfo)
+function splitNetworkByMask ($netinfo, $dst_mask)
+{
+	$self = __FUNCTION__;
+    if ($netinfo['mask'] >= $dst_mask)
+        return array ($netinfo);
+
+    return array_merge (
+        $self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
+        $self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
+    );
 }
 
 ?>
