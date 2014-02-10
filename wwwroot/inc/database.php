@@ -754,8 +754,13 @@ function amplifyCell (&$record, $dummy = NULL)
 		$result = usePreparedSelectBlade ($query, array ($record['id'], $record['height']));
 		global $loclist;
 		$mounted_objects = array();
+		// fetch Zero-U mounted objects
+		foreach (getEntityRelatives ('children', 'rack', $record['id']) as $child_row)
+			if ($child_row['entity_type'] == 'object')
+				$mounted_objects[$child_row['entity_id']] = TRUE;
+
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-		$record['isDeletable'] = (count ($rows)) ? FALSE : TRUE;
+		unset ($result);
 		foreach ($rows as $row)
 		{
 			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
@@ -764,8 +769,9 @@ function amplifyCell (&$record, $dummy = NULL)
 			if ($row['state'] == 'T' and $row['object_id'] != NULL)
 				$mounted_objects[$row['object_id']] = TRUE;
 		}
+
+		$record['isDeletable'] = (count ($rows) || count ($mounted_objects)) ? FALSE : TRUE;
 		$record['mountedObjects'] = array_keys ($mounted_objects);
-		unset ($result);
 		break;
 	case 'vst':
 		$record['rules'] = array();

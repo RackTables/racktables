@@ -7,6 +7,7 @@
 	bugfix: do HTML escaping on error pages (reported by Lukas Reschke)
 	bugfix: logout link didn't work in some scenarios (#1129)
 	bugfix: system functions for translating IPs were not used even being available
+	bugfix: Zero-U-mounted objects were not counted in rack summary
 	update: enable IP addressing for all object types unless specifically excluded
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,
