@@ -6115,6 +6115,16 @@ function compileExpression ($code, $do_cache_lookup = TRUE)
 	return $ret;
 }
 
+// a caching wrapper around detectDeviceBreed and shortenIfName
+function shortenPortName ($if_name, $object_id)
+{
+	static $breed_cache = array();
+	if (! array_key_exists($object_id, $breed_cache))
+		$breed_cache[$object_id] = detectDeviceBreed ($object_id);
+	$breed = $breed_cache[$object_id];
+	return $breed == '' ? $if_name : shortenIfName ($if_name, $breed);
+}
+
 // returns an array of IP ranges of size $dst_mask > $netinfo['mask'], or array ($netinfo)
 function splitNetworkByMask ($netinfo, $dst_mask)
 {

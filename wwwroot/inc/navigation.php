@@ -229,6 +229,7 @@ $ophandler['object']['ports']['addBulkPorts'] = 'addBulkPorts';
 $ophandler['object']['ports']['useup'] = 'tableHandler';
 $ophandler['object']['ports']['delPort'] = 'tableHandler';
 $ophandler['object']['ports']['deleteAll'] = 'tableHandler';
+$ophandler['object']['ports']['renameAll'] = 'renameObjectPorts';
 $ophandler['object']['ports']['unlinkPort'] = 'unlinkPort';
 $ophandler['object']['ip']['upd'] = 'updIPAllocation';
 $ophandler['object']['ip']['add'] = 'addIPAllocation';

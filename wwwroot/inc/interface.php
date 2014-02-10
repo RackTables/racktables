@@ -1311,11 +1311,15 @@ function renderRackProblems ($rack_id)
 
 function renderObjectPortRow ($port, $is_highlighted)
 {
+	// highlight port name with yellow if it's name is not canonical
+	$canon_pn = shortenPortName ($port['name'], $port['object_id']);
+	$name_class = $canon_pn == $port['name'] ? '' : 'trwarning';
+
 	echo '<tr';
 	if ($is_highlighted)
 		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "><td class='tdleft' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
+	echo "><td class='tdleft $name_class' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 	if ($port['remote_object_id'])
@@ -1652,6 +1656,14 @@ function renderPortsForObject ($object_id)
 	// clear ports link
 	echo getOpLink (array ('op'=>'deleteAll'), 'Clear port list', 'clear', '', 'need-confirmation');
 
+	// rename ports link
+	$n_ports_to_rename = 0;
+	foreach ($object['ports'] as $port)
+		if ($port['name'] != shortenPortName ($port['name'], $object['id']))
+			$n_ports_to_rename++;
+	if ($n_ports_to_rename)
+		echo '<p>' . getOpLink (array ('op'=>'renameAll'), "Auto-rename $n_ports_to_rename ports", 'recalc', 'Use RackTables naming convention for this device type') . '</p>';
+
 	if (isset ($_REQUEST['hl_port_id']))
 	{
 		assertUIntArg ('hl_port_id');
@@ -1661,13 +1673,17 @@ function renderPortsForObject ($object_id)
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($object['ports'] as $port)
 	{
+		// highlight port name with yellow if it's name is not canonical
+		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
+		$name_class = $canon_pn == $port['name'] ? '' : 'trwarning';
+
 		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
 		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-		echo "<td class='tdleft' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
+		echo "<td class='tdleft $name_class' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=8></td>";
 		echo "<td><input type=text name=label value='${port['label']}'></td>";
 		echo '<td>';
 		if ($port['iif_id'] != 1)

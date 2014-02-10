@@ -3515,4 +3515,23 @@ function editUserProperties ()
 	showFuncMessage (__FUNCTION__, 'OK', array($user['user_name']));
 }
 
+function renameObjectPorts()
+{
+	$object_id = getBypassValue();
+	$n = 0;
+	foreach (getObjectPortsAndLinks ($object_id) as $port)
+	{
+		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
+		if ($canon_pn != $port['name'])
+		{
+			commitUpdatePort ($object_id, $port['id'], $canon_pn, $port['oif_id'], $port['label'], $port['l2address'], $port['reservation_comment']);
+			$n++;
+		}
+	}
+	if ($n)
+		showSuccess ("Renamed $n ports");
+	else
+		showNotice ("Nothing renamed");
+}
+
 ?>
