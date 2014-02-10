@@ -1238,6 +1238,35 @@ function renderEditRackForm ($rack_id)
 	finishPortlet();
 }
 
+// populates the $summary array with the sum of power attributes of the objects mounted into the rack
+function populateRackPower ($rackData, &$summary)
+{
+	$power_attrs = array(
+		7, // 'float','max. current, Ampers'
+		13, // 'float','max power, Watts'
+	);
+	$sum = array();
+	if (! isset ($rackData['mountedObjects']))
+		amplifyCell ($rackData);
+	foreach ($rackData['mountedObjects'] as $object_id)
+	{
+		$attrs = getAttrValues ($object_id);
+		foreach ($power_attrs as $attr_id)
+			if (isset ($attrs[$attr_id]) && $attrs[$attr_id]['type'] == 'float')
+			{
+				if (! isset ($sum[$attr_id]))
+				{
+					$sum[$attr_id]['sum'] = 0.0;
+					$sum[$attr_id]['name'] = $attrs[$attr_id]['name'];
+				}
+				$sum[$attr_id]['sum'] += $attrs[$attr_id]['value'];
+			}
+	}
+	foreach ($sum as $attr)
+		if ($attr['sum'] > 0.0)
+			$summary[$attr['name']] = $attr['sum'];
+}
+
 // used by renderGridForm() and renderRackPage()
 function renderRackInfoPortlet ($rackData)
 {
@@ -1249,6 +1278,7 @@ function renderRackInfoPortlet ($rackData)
 		$summary['Asset tag'] = $rackData['asset_no'];
 	if ($rackData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
+	populateRackPower ($rackData, $summary);
 	// Display populated attributes, but skip 'height' since it's already displayed above
 	// and skip 'sort_order' because it's modified using AJAX
 	foreach (getAttrValues ($rackData['id']) as $record)
