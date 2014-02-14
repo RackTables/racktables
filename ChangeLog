@@ -9,6 +9,7 @@
 	bugfix: system functions for translating IPs were not used even being available
 	bugfix: Zero-U-mounted objects were not counted in rack summary
 	bugfix: fix of sorting issue with national characters by Thomas Uhde (#837)
+	bugfix: LLDP parser fixed for Huawei VRP 8.5
 	update: enable IP addressing for all object types unless specifically excluded
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,

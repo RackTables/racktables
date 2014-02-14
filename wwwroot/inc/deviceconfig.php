@@ -106,8 +106,11 @@ function vrpReadLLDPStatus ($input)
 	$valid_subtypes = array
 	(
 		'interfaceName',
+		'Interface Name',
 		'interfaceAlias',
+		'Interface Alias',
 		'local',
+		'Local',
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -115,16 +118,16 @@ function vrpReadLLDPStatus ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^(.+) has \d+ neighbor(\(s\)|s):$/', $line, $matches):
-			$ret['current']['local_port'] = shortenIfName ($matches[1]);
+			$ret['current']['local_port'] = shortenIfName (trim ($matches[1]));
 			break;
-		case preg_match ('/^Port ?ID ?(?:sub)?type\s*:\s*([^ ]+)/i', $line, $matches):
-			$ret['current']['PortIdSubtype'] = $matches[1];
+		case preg_match ('/^Port ?ID ?(?:sub)?type\s*:\s*(.*)$/i', $line, $matches):
+			$ret['current']['PortIdSubtype'] = trim ($matches[1]);
 			break;
 		case preg_match ('/^Port ?ID\s*:\s*(.+)$/i', $line, $matches):
-			$ret['current']['PortId'] = $matches[1];
+			$ret['current']['PortId'] = trim ($matches[1]);
 			break;
 		case preg_match ('/^Port description\s*:\s*(.*)$/i', $line, $matches):
-			$ret['current']['PortDescription'] = $matches[1];
+			$ret['current']['PortDescription'] = trim ($matches[1]);
 			break;
 		case preg_match ('/^Sys(?:tem)? ?name\s*:\s*(.+)$/i', $line, $matches):
 			if
@@ -142,7 +145,7 @@ function vrpReadLLDPStatus ($input)
 				if (isset ($port))
 					$ret[$ret['current']['local_port']][] = array
 					(
-						'device' => $matches[1],
+						'device' => trim ($matches[1]),
 						'port' => $port,
 					);
 			}
