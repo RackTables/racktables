@@ -3443,8 +3443,7 @@ function updateFile ()
 	(
 		'File',
 		array ('name' => $file_name, 'type' => $file_type, 'comment' => $file_comment),
-		array ('id' => $file_id),
-		array_key_exists ('conjunction', $opspec) ? $opspec['conjunction'] : 'AND'
+		array ('id' => $file_id)
 	);
 	rebuildTagChainForEntity ('file', $file_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK', array ($file_name));
@@ -3497,7 +3496,7 @@ function updIPv4RSP ()
 	usePreparedUpdateBlade
 	(
 		"IPv4RSPool",
-		array ('name' => $name, 'vsconfig' => $comment, 'rsconfig' => $vsconfig),
+		array ('name' => $name, 'vsconfig' => $vsconfig, 'rsconfig' => $rsconfig),
 		array ('id' => $rspool_id)
 	);
 	rebuildTagChainForEntity ('ipv4rspool', $rspool_id, buildTagChainFromIds ($taglist), TRUE);
