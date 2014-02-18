@@ -595,7 +595,7 @@ function getRenderedIPv4NetCapacity ($range)
 		$total = ip4_range_size ($range);
 
 		// compute $a_total: own range size, without subranges
-		if ($range['kidc'] == 0)
+		if (! isset ($range['kidc']) or $range['kidc'] == 0)
 			$a_total = $total;
 		else
 		{
