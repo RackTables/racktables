@@ -18,7 +18,7 @@
 		J8692A & J9146A (#1143)
 	update: add the data integrity report
 	update: duplicate IP allocations of all types except 'shared' are highlighted red
-	update: upgrade CodeMirror to version 3.20
+	update: upgrade CodeMirror to version 3.22
 	update: include OEM S/N 1 in expirations report (by Matthew Castanien)
 	update: display a datetime format hint for date attributes (#1051)
 	update: display location tree in object breadcrumbs (#1125)
