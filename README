@@ -99,6 +99,10 @@ and initialize the application.
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.20.7-memcache ***
+
+Now using Memcache as cache back-end.
+
 *** Upgrading to 0.20.7 ***
 
 Database triggers are used for some data consistency measures.  The database

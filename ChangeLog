@@ -1,3 +1,5 @@
+0.20.7-memcache
+	new-feature: added MemCached as cache back-end
 0.20.7
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)
