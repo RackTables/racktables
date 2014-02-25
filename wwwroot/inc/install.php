@@ -9,9 +9,10 @@ function renderInstallerHTML()
 $stepfunc[1] = 'not_already_installed';
 $stepfunc[2] = 'platform_is_ok';
 $stepfunc[3] = 'init_config';
-$stepfunc[4] = 'init_database_static';
-$stepfunc[5] = 'init_database_dynamic';
-$stepfunc[6] = 'congrats';
+$stepfunc[4] = 'check_config_access';
+$stepfunc[5] = 'init_database_static';
+$stepfunc[6] = 'init_database_dynamic';
+$stepfunc[7] = 'congrats';
 
 if (isset ($_REQUEST['step']))
 	$step = $_REQUEST['step'];
@@ -301,6 +302,29 @@ ENDOFTEXT
 	fclose ($conf);
 	echo "The configuration file has been written successfully.<br>";
 	return TRUE;
+}
+
+function check_config_access()
+{
+	global $path_to_secret_php;
+	if (! is_writable ($path_to_secret_php) and is_readable ($path_to_secret_php))
+	{
+		echo 'The configuration file ownership/permissions seem to be OK.<br>';
+		return TRUE;
+	}
+	echo 'Please set ownership (<tt>chown</tt>) and/or permissions (<tt>chmod</tt>) ';
+	echo "of <tt>${path_to_secret_php}</tt> on the server filesystem as follows:";
+	echo '<div align=left><ul>';
+	echo '<li>The file MUST NOT be writable by the httpd process.</li>';
+	echo '<li>The file MUST be readable by the httpd process.</li>';
+	echo '<li>The file should not be readable by anyone except the httpd process.</li>';
+	echo '<li>The file should not be writable by anyone.</li>';
+	echo '</ul></div>';
+	echo 'For example, if httpd runs as user "nobody" and group "nogroup", commands ';
+	echo 'similar to the following may work (though not guaranteed to, please consider ';
+	echo 'only as an example):';
+	echo '<pre>chown nobody:nogroup secret.php; chmod 400 secret.php</pre>';
+	return FALSE;
 }
 
 function connect_to_db_or_die ()
