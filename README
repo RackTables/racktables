@@ -48,6 +48,13 @@ section of "/etc/my.cnf" file and restart mysqld.
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/my.cnf" file and restart mysqld.
 
+*** CentOS 5
+* MySQL: yum install mysql-server mysql
+* Apache/PHP: httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring \
+              php53-bcmath
+* To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
+section of "/etc/my.cnf" file and restart mysqld.
+
 *** FreeBSD 8
 * Apache/PHP:
 # make -C /usr/ports/www/apache13-modssl install
