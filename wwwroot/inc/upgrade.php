@@ -193,6 +193,11 @@ ENDOFTEXT
 ,
 
 	'0.20.7' => <<<ENDOFTEXT
+From now on the minimum (oldest) release of PHP that can run RackTables is
+5.2.10. In particular, to continue running RackTables on CentOS 5 it is
+necessary to replace its php* RPM packages with respective php53* packages
+before the upgrade (except the JSON package, which PHP 5.3 provides internally).
+
 Database triggers are used for some data consistency measures.  The database
 user account must have the 'TRIGGER' privilege, which was introduced in
 MySQL 5.1.7.
