@@ -30,6 +30,7 @@
 	update: button to fix non-canonical port names (#827)
 	update: explicitly require PHP version 5.2.10 or newer (see #1139)
 	update: leave secret.php in a safer state upon install
+	update: syncdomain.php now provides some new CLI options and better lockfile handling
 	new feature: add IPv4 natting for all protocols (#971) by Tim Wilkes/Mark Wilkinson
 	new feature: display point-to-point peers when using new 'Point-to-point' IP allocation type
 	new feature: display rack power consumption as sum of mounted objects'
