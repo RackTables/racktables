@@ -1,4 +1,4 @@
-0.20.7
+0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)
 	bugfix: browse objects page was broken if an object's container was unnamed (#1115)
