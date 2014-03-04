@@ -636,6 +636,10 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 // (i.e. some function in deviceconfig.php)
 function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 {
+	// this is a port name we invented in snmp.php, do not translate it
+	if (preg_match ('/^AC-in(-[12])?$/', $if_name))
+		return $if_name;
+
 	global $current_query_breed;
 	if (! isset ($breed))
 	{
@@ -644,6 +648,7 @@ function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 		elseif (isset ($current_query_breed))
 			$breed = $current_query_breed;
 	}
+
 	switch ($breed)
 	{
 		case 'ios12':
