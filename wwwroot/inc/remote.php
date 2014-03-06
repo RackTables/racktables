@@ -600,9 +600,13 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			$gateway_log = substr ($gateway_log, -MAX_GW_LOGSIZE);
 
 	}
-	$ret = proc_close ($child);
+	// we need to destroy our global link to the resource here.
+	// PHP's proc_close implementation does nothing itself: it only returns
+	// the value saved by the resource destructor. If the resource was not
+	// destroyed (refcnt > 0), the return value is incorrect.
 	$script_child_res = NULL;
-	return $ret;
+
+	return proc_close ($child);
 }
 
 function getRunning8021QConfig ($object_id)
