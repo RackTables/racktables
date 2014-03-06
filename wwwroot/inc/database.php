@@ -944,6 +944,22 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 		)
 	);
 	$object_id = lastInsertID();
+	switch ($new_type_id)
+	{
+		case 1560:
+			$realm = 'rack';
+			break;
+		case 1561:
+			$realm = 'row';
+			break;
+		case 1562:
+			$realm = 'localtion';
+			break;
+		default:
+			$realm = 'object';
+	}
+	lastCreated ($realm, $object_id);
+
 	// Do AutoPorts magic
 	if ($realm == 'object')
 		executeAutoPorts ($object_id, $new_type_id);
@@ -1705,6 +1721,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 				'l2address' => nullEmptyStr ($db_l2address),
 			)
 		);
+		lastCreated ('port', lastInsertID());
 		if ($do_locks)
 			$dbxlink->exec ('UNLOCK TABLES');
 	}
@@ -3300,7 +3317,9 @@ function commitCreateUserAccount ($username, $realname, $password)
 			'user_password_hash' => $password,
 		)
 	);
-	return lastInsertID();
+	$user_id = lastInsertID();
+	lastCreated ('user', $user_id);
+	return $user_id;
 }
 
 function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password)
@@ -4255,6 +4274,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 		)
 	);
 	$network_id = lastInsertID();
+	lastCreated ('ipv4net', $network_id);
 
 	if ($is_connected and $mask < 31)
 	{
@@ -4294,6 +4314,8 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 		)
 	);
 	$network_id = lastInsertID();
+	lastCreated ('ipv6net', lastInsertID());
+
 	# RFC3513 2.6.1 - Subnet-Router anycast
 	if ($is_connected)
 		updateV6Address ($net['ip_bin'], 'Subnet-Router anycast', 'yes');

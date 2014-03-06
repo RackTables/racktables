@@ -1559,6 +1559,7 @@ function addVService ()
 		)
 	);
 	$vs_id = lastInsertID();
+	lastCreated ('ipv4vs', $vs_id);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
@@ -1570,6 +1571,7 @@ function addVSG ()
 	$name = assertStringArg ('name');
 	usePreparedInsertBlade ('VS', array ('name' => $name));
 	$vs_id = lastInsertID();
+	lastCreated ('ipvs', $vs_id);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipvs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipvs', $vs_id);
@@ -2703,12 +2705,14 @@ function createVLANDomain ()
 			'description' => $sic['vdom_descr'],
 		)
 	);
+	$domain_id = lastInsertID();
+	lastCreated ('vdom', $domain_id);
 	usePreparedInsertBlade
 	(
 		'VLANDescription',
 		array
 		(
-			'domain_id' => lastInsertID(),
+			'domain_id' => $domain_id,
 			'vlan_id' => VLAN_DFL_ID,
 			'vlan_type' => 'compulsory',
 			'vlan_descr' => 'default',
@@ -3430,7 +3434,30 @@ function tableHandler()
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
+		switch ($opspec['table'])
+		{
+			case 'Attribute':
+				$realm = 'attr';
+				break;
+			case 'Chapter':
+				$realm = 'chapter';
+				break;
+			case 'Dictionary':
+				$realm = 'dict';
+				break;
+			case 'TagTree':
+				$realm = 'tag';
+				break;
+			case 'VLANSwitchTemplate':
+				$realm = 'vst';
+				break;
+			default:
+				$realm = NULL;
+		}
 		usePreparedInsertBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist'));
+		if (isset ($realm))
+			lastCreated ($realm, lastInsertID());
+
 		$retcode = 48;
 		break;
 	case 'DELETE':
