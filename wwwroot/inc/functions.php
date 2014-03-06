@@ -6138,4 +6138,24 @@ function splitNetworkByMask ($netinfo, $dst_mask)
     );
 }
 
+// this function is used both to remember and to retrieve the last created entity's ID
+// it stores given id in the static var, and returns the stored value is called without args
+// used in plugins to make additional work on created entity in the chained ophandler
+// returns an array of realm-ID pairs
+function lastCreated ($realm = NULL, $id = NULL)
+{
+	static $last_ids = array();
+	if (isset ($realm) && isset ($id))
+		$last_ids[] = array('realm' => $realm, 'id' => $id);
+	return $last_ids;
+}
+
+// returns last id of a given type from lastCreated() result array
+function getLastCreatedId ($realm)
+{
+	foreach (array_reverse (lastCreated()) as $item)
+		if ($item['realm'] == $realm)
+			return $item['id'];
+}
+
 ?>
