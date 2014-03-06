@@ -493,7 +493,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 
 function callScript ($gwname, $params, $in, &$out, &$errors)
 {
-	global $racktables_gwdir, $local_gwdir, $gateway_log;
+	global $racktables_gwdir, $local_gwdir, $gateway_log, $script_child_res;
 	if (isset ($gateway_log))
 		$gateway_log = '';
 
@@ -543,6 +543,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	);
 	if (! is_resource ($child))
 		throw new RTGatewayError ("cant execute $binary");
+	$script_child_res = $child;
 
 	$buff_size = 4096;
 	$write_left = array ($pipes[0]);
@@ -599,7 +600,9 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			$gateway_log = substr ($gateway_log, -MAX_GW_LOGSIZE);
 
 	}
-	return proc_close ($child);
+	$ret = proc_close ($child);
+	$script_child_res = NULL;
+	return $ret;
 }
 
 function getRunning8021QConfig ($object_id)
