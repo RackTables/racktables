@@ -3,3 +3,4 @@ wwwroot/inc/local.php
 /.project
 tags
 plugins/*
+wwwroot/pix/*
