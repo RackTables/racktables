@@ -3859,13 +3859,13 @@ function renderUserListEditor ()
 	$accounts = listCells ('user');
 	startPortlet ('Manage existing (' . count ($accounts) . ')');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>Username</th><th>Real name</th><th>Password</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>Username</th><th>Real name</th><th>New password (use old if blank)</th><th>&nbsp;</th></tr>';
 	foreach ($accounts as $account)
 	{
 		printOpFormIntro ('updateUser', array ('user_id' => $account['user_id']));
 		echo "<tr><td><input type=text name=username value='${account['user_name']}' size=16></td>";
 		echo "<td><input type=text name=realname value='${account['user_realname']}' size=24></td>";
-		echo "<td><input type=password name=password value='${account['user_password_hash']}' size=40></td><td>";
+		echo "<td><input type=password name=password size=40></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></form></tr>';
 	}

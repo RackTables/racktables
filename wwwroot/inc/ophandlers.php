@@ -940,11 +940,10 @@ function updateUser ()
 	genericAssertion ('user_id', 'uint');
 	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
-	$new_password = assertStringArg ('password');
+	$new_password = assertStringArg ('password', TRUE);
 	$userinfo = spotEntity ('user', $_REQUEST['user_id']);
-	// Update user password only if provided password is not the same as current password hash.
-	if ($new_password != $userinfo['user_password_hash'])
-		$new_password = sha1 ($new_password);
+	// Set new password only if provided.
+	$new_password = mb_strlen ($new_password) ? sha1 ($new_password) : $userinfo['user_password_hash'];
 	commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
 	// if user account renaming is being performed, change key value in UserConfig table
 	if ($userinfo['user_name'] !== $username)
