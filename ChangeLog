@@ -1,3 +1,5 @@
+0.20.8
+	bugfix: properly format comment text for racks
 0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)

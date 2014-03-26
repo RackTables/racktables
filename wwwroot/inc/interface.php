@@ -1287,9 +1287,13 @@ function renderRackInfoPortlet ($rackData)
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
 	$summary['Objects'] = count ($rackData['mountedObjects']);
 	$summary['tags'] = '';
-	if (strlen ($rackData['comment']))
-		$summary['Comment'] = $rackData['comment'];
 	renderEntitySummary ($rackData, 'summary', $summary);
+	if ($rackData['comment'] != '')
+	{
+		startPortlet ('Comment');
+		echo '<div class=commentblock>' . string_insert_hrefs ($rackData['comment']) . '</div>';
+		finishPortlet ();
+	}
 }
 
 // This is a universal editor of rack design/waste.
