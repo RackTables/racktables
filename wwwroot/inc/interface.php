@@ -4052,9 +4052,13 @@ function renderLocationPage ($location_id)
 		)
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary['tags'] = '';
-	if (strlen ($locationData['comment']))
-		$summary['Comment'] = $locationData['comment'];
 	renderEntitySummary ($locationData, 'Summary', $summary);
+	if ($locationData['comment'] != '')
+	{
+		startPortlet ('Comment');
+		echo '<div class=commentblock>' . string_insert_hrefs ($locationData['comment']) . '</div>';
+		finishPortlet ();
+	}
 	renderFilesPortlet ('location', $location_id);
 	echo '</td>';
 
