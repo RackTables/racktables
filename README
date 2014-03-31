@@ -31,6 +31,8 @@ section of "/etc/mysql/my.cnf" file and restart mysqld.
 *** Debian 7 with nginx
 * MySQL: aptitude install mysql-server-5.1
 * nginx: aptitude install nginx php5-fpm
+* Remember to adjust server_name in server {} section, otherwise your logout link
+* will point to localhost (and thus fail).
 * Notice, that fpm.sock is advised, keep the rest on default configuration, or
 * tweak to your needs. You may need to set fastcgi_read_timeout 600; if you use
 * some external addons like fping, which may take some time in certain situations.
