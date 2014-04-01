@@ -470,7 +470,7 @@ function queryLDAPServer ($username, $password)
 	if(extension_loaded('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);
 
-	$connect = @ldap_connect ($LDAP_options['server'], $LDAP_options['port']);
+	$connect = @ldap_connect ($LDAP_options['server'], array_fetch ($LDAP_options, 'port', 389));
 	if ($connect === FALSE)
 		return array ('result' => 'CAN');
 
