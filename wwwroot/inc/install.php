@@ -1072,7 +1072,7 @@ function get_pseudo_file ($name)
   `rule_no` int(10) unsigned NOT NULL,
   `port_pcre` char(255) NOT NULL,
   `port_role` enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none',
-  `wrt_vlans` char(255) default NULL,
+  `wrt_vlans` text,
   `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
   CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
