@@ -3807,7 +3807,10 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 	global $nextorder;
 	$order = 'odd';
 	$cellfilter = getCellFilter();
-	$celllist = applyCellFilter ($realm, $cellfilter);
+	if (! isset ($celllist))
+		$celllist = applyCellFilter ($realm, $cellfilter);
+	else
+		$celllist = filterCellList ($celllist, $cellfilter['expression']);
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
