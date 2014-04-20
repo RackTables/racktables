@@ -1,6 +1,7 @@
 0.21.0
 	update: SNMP support for Cisco 2960X-24PS-L, 2960X-24PD-L
 	update: syncdomain.php now provides some new CLI options and better lockfile handling
+	update: new {$client_x.x.x.x} auto tag containing client's IP
 0.20.8
 	bugfix: properly format comment text for locations and racks
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)

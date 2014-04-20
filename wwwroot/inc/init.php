@@ -94,6 +94,9 @@ $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 
 $auto_tags = array();
+if (! isCLIMode() && isset ($_SERVER['REMOTE_ADDR']))
+	$auto_tags[] = array ('tag' => '$client_' . $_SERVER['REMOTE_ADDR']);
+
 // Initial chain for the current user.
 $user_given_tags = array();
 
