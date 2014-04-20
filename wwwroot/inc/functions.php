@@ -1077,6 +1077,13 @@ function getRSUforRow ($rowData)
 		($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
 }
 
+function string_insert_hrefs_callback ($m)
+{
+	$t_url_href    = 'href="' . rtrim($m[1], '.') . '"';
+	$s_url_replace = "<a ${t_url_href}>$m[1]</a> [<a ${t_url_href} target=\"_blank\">^</a>]";
+	return $s_url_replace;
+}
+
 # Detect URLs and email addresses in the string and replace them with href anchors
 # (adopted from MantisBT, core/string_api.php:string_insert_hrefs).
 function string_insert_hrefs ($p_string)
@@ -1122,12 +1129,7 @@ function string_insert_hrefs ($p_string)
 	$p_string = preg_replace_callback
 	(
 		$s_url_regex,
-		function ($m)
-		{
-			$t_url_href    = 'href="' . rtrim($m[1], '.') . '"';
-			$s_url_replace = "<a ${t_url_href}>$m[1]</a> [<a ${t_url_href} target=\"_blank\">^</a>]";
-			return $s_url_replace;
-		},
+		'string_insert_hrefs_callback',
 		$p_string
 	);
 
