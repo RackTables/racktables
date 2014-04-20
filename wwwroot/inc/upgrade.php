@@ -1607,6 +1607,8 @@ ENDOFTRIGGER;
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.8':
+			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";
+
 			$query[] = "
 CREATE TABLE `PortOuterInterface` (
   `id` int(10) unsigned NOT NULL auto_increment,
