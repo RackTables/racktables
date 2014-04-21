@@ -219,6 +219,11 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
+
+	'0.21.0' => <<<ENDOFTEXT
+The minimum (oldest) supported release of PHP is 5.3.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can

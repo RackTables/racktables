@@ -119,6 +119,10 @@ and initialize the application.
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.21.0 ***
+
+The minimum (oldest) supported release of PHP is 5.3.
+
 *** Upgrading to 0.20.7 ***
 
 From now on the minimum (oldest) release of PHP that can run RackTables is
