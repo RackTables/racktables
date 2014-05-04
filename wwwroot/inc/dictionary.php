@@ -2235,6 +2235,10 @@ $dictionary = array
 	2147 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R420'),
 	2148 => array ('chapter_id' => 12, 'dict_value' => '[[Juniper%GPASS%EX4200-24PX | http://www.juniper.net/products_and_services/ex_series/index.html]]'),
 	2149 => array ('chapter_id' => 12, 'dict_value' => '[[Juniper%GPASS%EX4200-48PX | http://www.juniper.net/products_and_services/ex_series/index.html]]'),
+	2150 => array ('chapter_id' => 25, 'dict_value' => 'Cisco%GPASS%AIR-LAP1142N'),
+	2151 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 11'),
+	2152 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 12'),
+	2153 => array ('chapter_id' => 9999, 'dict_value' => '[[Alcatel-Lucent%GPASS%1642 EMC | http://www.alcatel-lucent.com/products/1642-edge-multiplexer-compact]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
