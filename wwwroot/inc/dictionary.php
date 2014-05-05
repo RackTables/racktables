@@ -2044,6 +2044,21 @@ $dictionary = array
 	2151 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 11'),
 	2152 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 12'),
 	2153 => array ('chapter_id' => 9999, 'dict_value' => '[[Alcatel-Lucent%GPASS%1642 EMC | http://www.alcatel-lucent.com/products/1642-edge-multiplexer-compact]]'),
+	2154 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%Z9000'),
+	2155 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%Z9500'),
+	2156 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N4032'),
+	2157 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N4032F'),
+	2158 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N4064'),
+	2159 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N4064F'),
+	2160 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N3024'),
+	2161 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N3024F'),
+	2162 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N3024P'),
+	2163 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N3048'),
+	2164 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N3048P'),
+	2165 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N2024'),
+	2166 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N2024P'),
+	2167 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N2048'),
+	2168 => array ('chapter_id' => 12, 'dict_value' => 'Dell%GPASS%N2048P'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
