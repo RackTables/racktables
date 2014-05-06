@@ -82,15 +82,10 @@ try {
 		{
 			dispatchImageRequest();
 		}
-		catch (RTPermissionDenied $e)
-		{
-			ob_clean();
-			renderAccessDeniedImage();
-		}
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderErrorImage();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError;
 		}
 		break;
 
@@ -152,7 +147,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 
@@ -168,7 +163,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 
