@@ -17,6 +17,18 @@ require_once 'slb-interface.php';
 
 define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alnum:]]+[[:alnum:]_.-]*/)*[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
+function castRackImageException ($e)
+{
+	$m = array
+	(
+		'EntityNotFoundException' => 'rack_not_found',
+		'RTPermissionDenied' => 'access_denied',
+		'InvalidRequestArgException' => 'rack_arg_error',
+	);
+	$c = get_class ($e);
+	return array_key_exists ($c, $m) ? new RTImageError ($m[$c]) : $e;
+}
+
 function dispatchImageRequest()
 {
 	genericAssertion ('img', 'string');
@@ -26,16 +38,30 @@ function dispatchImageRequest()
 	case 'minirack': // rack security context
 		$pageno = 'rack';
 		$tabno = 'default';
-		fixContext();
-		assertPermission();
+		try
+		{
+			fixContext();
+			assertPermission();
+		}
+		catch (RackTablesError $e)
+		{
+			throw castRackImageException ($e);
+		}
 		dispatchMiniRackThumbRequest (getBypassValue());
 		break;
 	case 'midirack': // rack security context
 		$pageno = 'rack';
 		$tabno = 'default';
-		fixContext();
-		assertPermission();
-		genericAssertion ('scale', 'uint');
+		try
+		{
+			fixContext();
+			assertPermission();
+			genericAssertion ('scale', 'uint');
+		}
+		catch (RackTablesError $e)
+		{
+			throw castRackImageException ($e);
+		}
 		# Scaling implies no caching, there is no special dispatching.
 		header ('Content-type: image/png');
 		printRackThumbImage (getBypassValue(), $_REQUEST['scale']);
@@ -70,33 +96,22 @@ function dispatchImageRequest()
 		proxyMuninRequest ($_REQUEST['server_id'], $_REQUEST['graph']);
 		break;
 	default:
-		renderErrorImage();
+		throw new InvalidRequestArgException ('img', $_REQUEST['img']);
 	}
 }
 
+// XXX: deprecated
 function renderErrorImage ()
 {
 	header("Content-type: image/png");
-	// "ERROR", 76x17, red on white
-	echo base64_decode
-	(
-		'iVBORw0KGgoAAAANSUhEUgAAAEwAAAARCAYAAAB3h0oCAAAAAXNSR0IArs4c6QAAALBJREFUWMPt' .
-		'WFsOwCAIG4v3vzL7WEyWxQdVwM1A4l/F2iHVETPzESGOMyTAInURRP0suUhb2FIho/jWXO38w4KN' .
-		'LPDGEt2jlgPBZxFKc2o8UT7Lj6SkAmfw1nx+28MkVWQlcjT9EOwjLqnpaNImi+I1j/YSl5RY/gx+' .
-		'VCCF/MnkCz4JZQtvEUXx1nyW9jCUlPVLbTJ/3MO2dsnWRq2Nwl2wTarM51rhsVEnDhT/w7C4APaJ' .
-		'ZhkIGYaUAAAAAElFTkSuQmCC'
-	);
+	echo base64_decode (IMG_76x17_ERROR);
 }
 
+// XXX: deprecated
 function renderAccessDeniedImage()
 {
 	header ('Content-type: image/png');
-	// 1x1, single black pixel
-	echo base64_decode
-	(
-		'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAAxJREFUCNdj' .
-		'YGBgAAAABAABJzQnCgAAAABJRU5ErkJggg=='
-	);
+	echo base64_decode (IMG_1x1_BLACK);
 }
 
 // Having a local caching array speeds things up. A little.
@@ -111,6 +126,18 @@ function colorFromHex ($image, $hex)
 	$c = imagecolorallocate ($image, $r, $g, $b);
 	$colorcache[$hex] = $c;
 	return $c;
+}
+
+function createTrueColorOrThrow ($context, $width, $height)
+{
+	// Sometimes GD is missing even though it was available at install time.
+	if
+	(
+		! function_exists ('imagecreatetruecolor') or
+		FALSE === $img = @imagecreatetruecolor ($width, $height)
+	)
+		throw new RTImageError ($context);
+	return $img;
 }
 
 # Generate a complete HTTP response for a 1:1 minirack image, use and update
@@ -146,8 +173,7 @@ function printRackThumbImage ($rack_id, $scale = 1)
 	$offset[2] = 3 + $rtwidth[0] + $rtwidth[1];
 	$totalheight = 3 + 3 + $rackData['height'] * 2;
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
-	$img = @imagecreatetruecolor ($totalwidth, $totalheight)
-		or die("Cannot Initialize new GD image stream");
+	$img = createTrueColorOrThrow ('rack_php_gd_error', $totalwidth, $totalheight);
 	# It was measured, that caching palette in an array is faster, than
 	# calling colorFromHex() multiple times. It matters, when user's
 	# browser is trying to fetch many minirack images in parallel.
@@ -197,8 +223,8 @@ function printRackThumbImage ($rack_id, $scale = 1)
 function renderProgressBarImage ($done)
 {
 	if ($done > 100)
-		throw new InvalidArgException ('done', $done);
-	$img = @imagecreatetruecolor (100, 10);
+		throw new RTImageError ('pbar_arg_error');
+	$img = createTrueColorOrThrow ('pbar_php_gd_error', 100, 10);
 	switch (isset ($_REQUEST['theme']) ? $_REQUEST['theme'] : 'rackspace')
 	{
 		case 'sparenetwork':
@@ -231,7 +257,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 {
 	$width = 100;
 	$height = 10;
-	$img = @imagecreatetruecolor ($width, 10);
+	$img = createTrueColorOrThrow ('pbar_php_gd_error', $width, 10);
 	$offsets = array ($px1, $px2, $px3, $width - $px1 - $px2 - $px3);
 	$colors = array
 	(
@@ -246,7 +272,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 		$off = $offsets[$i];
 		$clr = $colors[$i];
 		if ($pos + $off > $width or $off < 0)
-			throw new InvalidArgException ('px' . $i, $offsets[$i]);
+			throw new RTImageError ('pbar_arg_error');
 		if ($off > 0)
 			imagefilledrectangle ($img, $pos, 0, $pos + $off, $height, $clr);
 		$pos += $off;
@@ -288,19 +314,11 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 	imagedestroy ($img);
 }
 
+// XXX: deprecated
 function renderProgressBarError()
 {
 	header ('Content-type: image/png');
-	// 100x10, red on pink, "progr. bar error"
-	echo base64_decode
-	(
-		'iVBORw0KGgoAAAANSUhEUgAAAGQAAAAKCAYAAABCHPt+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A' .
-		'/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sDERYTJrBhF8sAAACvSURBVEjH' .
-		'7VdRDoAgCMXmQbz/qbhJfdnMQQiDTZ3vL6MHvEA03Yg3rIRSABBhV1xwMBXyp/JatFVYq7La1Hft' .
-		'N709xcXxWLqE4tbGr+GXdNDqw8STxSS0z9S695ZD+e05pXhHt8RRHqtebIdoRPASM2K+ePi18Gjz' .
-		'Yuwz7AKpM2cpmjPUVx3qf0OIqyLKvl+POMp6+R3Jy9oxnD4C0nsPiTrfb35viO2QiOF6foYKD57g' .
-		'f1uXQb2mAAAAAElFTkSuQmCC'
-	);
+	echo base64_decode (IMG_100x10_PBAR_ERROR);
 }
 
 function renderImagePreview ($file_id)

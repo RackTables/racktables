@@ -4,6 +4,86 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
+define
+(
+	'IMG_100x10_PBAR_ERROR', // 100x10, red on pink, "progr. bar error"
+	'iVBORw0KGgoAAAANSUhEUgAAAGQAAAAKCAYAAABCHPt+AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A' .
+	'/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sDERYTJrBhF8sAAACvSURBVEjH' .
+	'7VdRDoAgCMXmQbz/qbhJfdnMQQiDTZ3vL6MHvEA03Yg3rIRSABBhV1xwMBXyp/JatFVYq7La1Hft' .
+	'N709xcXxWLqE4tbGr+GXdNDqw8STxSS0z9S695ZD+e05pXhHt8RRHqtebIdoRPASM2K+ePi18Gjz' .
+	'Yuwz7AKpM2cpmjPUVx3qf0OIqyLKvl+POMp6+R3Jy9oxnD4C0nsPiTrfb35viO2QiOF6foYKD57g' .
+	'f1uXQb2mAAAAAElFTkSuQmCC'
+);
+define
+(
+	'IMG_100x10_PHP_GD_NA', // 100x10, red on pink: "PHP-GD is N/A"
+	'iVBORw0KGgoAAAANSUhEUgAAAGQAAAAKCAYAAABCHPt+AAAAw0lEQVRIx+1XwQ3AIAjUxkHcfyo3' .
+	'aV8kligino2mkvRhERHOQ/R3Src7soxcv4o2xuW3GGDBpfTW5WP+T7K1+OJSW6/lR7t/zfhzQDQg' .
+	'IGwp4dJ8rkMkp2cNmgvwu0fJ4kFKQUs6ApdAo6+2Tk0HYgOeIfmGSxS32iJtLMBZmQRgSZgWVAug' .
+	'VomSmDF6OfPTL905mgQDm4XgVpNS8L31vMdPa75UurRNxtaA1BLSUx7RJzoHhXeLJRYPlC1/HoYT' .
+	'uy+DPGgNeJs7N+Q1AAAAAElFTkSuQmCC'
+);
+define
+(
+	'IMG_100x10_ARG_ERROR', // 100x10, red on pink: "argument error"
+	'iVBORw0KGgoAAAANSUhEUgAAAGQAAAAKCAYAAABCHPt+AAAApElEQVRIx+1WUQ6AIAjF1kG8/6m4' .
+	'iX2xNUYKSKnN9xc2RODxSAWxwN+RMwDiEqEesDEVzq6uI1D3tWxk5x1L30//cp/Wu+5nElM0b/G8' .
+	'18FKf0GkhNbsUsIsfnnhLPfXRpbWlzY2ZyFiGTJKF2b0NWRkeTo/GpEiPZHgv8sQSRdqdksCJb3Q' .
+	'xCuNIauvlr51IH269i60fq7HkJ5tbGNgQXYRTLgAuI9qHc8aWHAAAAAASUVORK5CYII='
+);
+define
+(
+	'IMG_45x90_PHP_GD_NA', // 45x90, red on pink: "ERROR: PHP-GD is not available"
+	'iVBORw0KGgoAAAANSUhEUgAAAC0AAABaCAYAAAAsPd/jAAABmElEQVRo3u2aS47DIAxA24qD9P6n' .
+	'4iadFVKG8T+hTKuH1AUBk4dtAja9v3p/3T6sPG4fWIAGGmiggQYaaKCB/kbo9qv2fP7t0bvcNp57' .
+	'bWdlXWhPaH7Zsa61DahjPSq71T00QK9Ilhc1HTWl5QIZMEtWGafmHhnfz1giKPsom1t7gdR2rFtg' .
+	'1rgm9Fgo43cWfF6AEWuOfsr4d1IIQAMNNNBAAw000ED/t2jcC7Ok8CoSqUdiPys6F8ZrKdBo8GrJ' .
+	'SoGAF51P7XvcY55QNG0hajoabWci6qtlTPfwZhz1YwusGMG3t7tCdr0IE2pb/HmO9JNWJBoH+hLo' .
+	'So5uO3Q2E7pQGV9wfeFpREo6Vq8qpERj0Jq177Q3uHQYmjcU7fkS6Fnbq3z9cp/ufQtsXdPVT59l' .
+	'oaRPs40D/VZo55LHXRul260Vh37cIxLYajtZtL8VJ3qblNJ+Lu8R7a/1s+SNeuz/Htb5YeWG5P4L' .
+	'IQsU7V+dqLGoW0gj2mnsrKa9nIhyzGUbBxpooIEGGmiggQYaaKCBBhpooAPlB5v19Mx7m4CJAAAA' .
+	'AElFTkSuQmCC'
+);
+define
+(
+	'IMG_45x90_RACK_NOT_FOUND', // 45x90, red on pink: "ERROR: rack doesn't exist"
+	'iVBORw0KGgoAAAANSUhEUgAAAC0AAABaCAYAAAAsPd/jAAABgElEQVRo3u2ZWxLCIAxFtcNC3P+q' .
+	'upP6xQyDSQgkWq2HGT8oj56GwCXxfuz7cfuxst1+sAANNNBAAw000EADfUXo8vLk8Xjtte9yW30+' .
+	'aouOHUKPBvUva+taW4Vq696xp7qHBjgqwsoXV0dtKS0XmAGzxgrzrLvHjO/PrIRj7BZabu0FUltb' .
+	't8CseU3oulHqLwreb0DPatZ+wvx3UghAAw000EADDTTQQCeVlSABS39F3iMSiGrB6SgYngyCS+iT' .
+	'+5dJuQsLagE4Dh3ZYIvAuT5dIeovEs2fbukerk/ELFicaBzoFOig9F7X0s583wVlXPvaGbmWct3e' .
+	'vzqUZGVxK1Y7kUeu27p0Dkt92/7G+X2uuHz8lue5QI1cJR1auxtoltN8NQKq+DQyDvSp0G+Q//dD' .
+	'W0fc4gf9UTSuybWllKMrwYTolCVgTYJHEXhC+iDH0pKYaMBJcl5SN5fX0sETpSwBa3Jt3dISfRoZ' .
+	'BxpooIEGGmiggQYaaKCBBhpooB3lCc5C4kpZ4AwVAAAAAElFTkSuQmCC'
+);
+define
+(
+	'IMG_45x90_MALF_REQ', // 45x90, red on pink: "ERROR: malformed request"
+	'iVBORw0KGgoAAAANSUhEUgAAAC0AAABaCAYAAAAsPd/jAAABdUlEQVRo3u2aSw6FIAxF9YWFuP9V' .
+	'sRPfiMQoLS0gojkkDvifQPHS6rrHuC8vS7/lhQlooIEGGmiggQYa6C9Ch0vJtl1bxZivS+Wluta+' .
+	'RehSp/Nkx7xUl6COeWvfR81DAiylzM4HU0NpKzUT8IBpfTPj1JuHx/Y9O2Ho+2vabmmCXN0xr4Fp' .
+	'46rQ6aCkpxX8fAAtu5naZcZfCSEADTTQQAMNNNBAA13piViuuU3e+AgfkbhHybmVnE+Ls5sLKUi+' .
+	'YVXcwxKLOOZLsZAzsGWc22260wGzhiJClwm0ENcNh3b8Smtnw5jwxoGeHtp5eFnp52Xcs501Et/w' .
+	'Pq9/T1sk3lM+1dW0t8QPge54jx4DnQu6x2iK9iPjQAM9+X3kQzLu8ZYlSS993JfGznGc3vWhu0x7' .
+	'/UnJE1f+RAg9bKzZVp1+ox26lxxL4zg+6AfzRB459pRrki7YdF8ZL/wRg7jMfA1lpYEGGmiggQYa' .
+	'aKCBBhpooIHW0h8839XO8L3K4AAAAABJRU5ErkJggg=='
+);
+define
+(
+	'IMG_1x1_BLACK', // 1x1, single black pixel
+	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAAxJREFUCNdj' .
+	'YGBgAAAABAABJzQnCgAAAABJRU5ErkJggg=='
+);
+define
+(
+	'IMG_76x17_ERROR', // 76x17, red on white: "ERROR"
+	'iVBORw0KGgoAAAANSUhEUgAAAEwAAAARCAYAAAB3h0oCAAAAAXNSR0IArs4c6QAAALBJREFUWMPt' .
+	'WFsOwCAIG4v3vzL7WEyWxQdVwM1A4l/F2iHVETPzESGOMyTAInURRP0suUhb2FIho/jWXO38w4KN' .
+	'LPDGEt2jlgPBZxFKc2o8UT7Lj6SkAmfw1nx+28MkVWQlcjT9EOwjLqnpaNImi+I1j/YSl5RY/gx+' .
+	'VCCF/MnkCz4JZQtvEUXx1nyW9jCUlPVLbTJ/3MO2dsnWRq2Nwl2wTarM51rhsVEnDhT/w7C4APaJ' .
+	'ZhkIGYaUAAAAAElFTkSuQmCC'
+);
+
 // The default approach is to treat an error as fatal, in which case
 // some message is output and the user is left there. Inheriting classes
 // represent more specific cases, some of which can be handled in a
@@ -199,6 +279,32 @@ class RackCodeError extends RackTablesError
 	public function dispatch()
 	{
 		parent::genHTMLPage ('RackCode error', '<h2>RackCode error on line ' . $this->lineno . '</h2><br>' . $this->message);
+	}
+}
+
+// Whether there is a failure to produce a normal image, this class will emit one
+// of the hardcoded last-resort images without the dependency on PHP-GD.
+class RTImageError extends RackTablesError
+{
+	protected $imgbin;
+	function __construct ($subject)
+	{
+		$map = array
+		(
+			'pbar_error' => IMG_100x10_PBAR_ERROR,
+			'pbar_php_gd_error' => IMG_100x10_PHP_GD_NA,
+			'pbar_arg_error' => IMG_100x10_ARG_ERROR,
+			'rack_php_gd_error' => IMG_45x90_PHP_GD_NA,
+			'rack_not_found' => IMG_45x90_RACK_NOT_FOUND,
+			'rack_arg_error' => IMG_45x90_MALF_REQ,
+			'access_denied' => IMG_1x1_BLACK,
+		);
+		$this->imgbin = base64_decode (array_fetch ($map, $subject, IMG_76x17_ERROR));
+	}
+	public function dispatch()
+	{
+		header ('Content-type: image/png');
+		echo $this->imgbin;
 	}
 }
 
