@@ -90,7 +90,7 @@ function showLogoutURL ()
 	// add a trailing slash if the installation resides in a subdirectory
 	if ($dirname != '/')
 		$dirname .= '/';
-	printf ('http%s://logout@%s%s?logout', $https, $_SERVER['SERVER_NAME'], $dirname);
+	printf ('?logout', $https, $_SERVER['SERVER_NAME'], $dirname);
 }
 
 $quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
