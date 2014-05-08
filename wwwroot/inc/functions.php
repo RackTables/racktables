@@ -866,7 +866,7 @@ function ip6_mask ($prefix_len)
 // in the provided string, an empty string for an empty string or raise an exception.
 function l2addressForDatabase ($string)
 {
-	$string = strtoupper ($string);
+	$string = strtoupper (trim ($string));
 	$ret = '';
 	switch (TRUE)
 	{
