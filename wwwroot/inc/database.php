@@ -4847,6 +4847,11 @@ function getPortIIFOptions()
 	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'iif_name');
 }
 
+function getPortOIFOptions()
+{
+	return readChapter (CHAP_PORTTYPE);
+}
+
 function commitSupplementPIC ($iif_id, $oif_id)
 {
 	usePreparedInsertBlade

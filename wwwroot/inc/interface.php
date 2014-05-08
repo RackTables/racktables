@@ -3909,9 +3909,9 @@ function renderOIFCompatEditor()
 		echo '<tr><th class=tdleft>';
 		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type1'));
+		printSelect (getPortOIFOptions(), array ('name' => 'type1'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'type2'));
+		printSelect (getPortOIFOptions(), array ('name' => 'type2'));
 		echo '</th></tr></form>';
 	}
 
@@ -4983,7 +4983,7 @@ function renderLivePTR ($id)
 function renderAutoPortsForm ($object_id)
 {
 	$info = spotEntity ('object', $object_id);
-	$ptlist = readChapter (CHAP_PORTTYPE, 'a');
+	$ptlist = getPortOIFOptions();
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<caption>The following ports can be quickly added:</caption>";
 	echo "<tr><th>type</th><th>name</th></tr>";
@@ -6578,7 +6578,7 @@ function renderIIFOIFCompatEditor()
 		echo '</th><th class=tdleft>';
 		printSelect (getPortIIFOptions(), array ('name' => 'iif_id'));
 		echo '</th><th class=tdleft>';
-		printSelect (readChapter (CHAP_PORTTYPE), array ('name' => 'oif_id'));
+		printSelect (getPortOIFOptions(), array ('name' => 'oif_id'));
 		echo '</th></tr></form>';
 	}
 
