@@ -4463,7 +4463,7 @@ function renderEditAttributesForm ()
 		global $attrtypes;
 		printSelect ($attrtypes, array ('name' => 'attr_type', 'tabindex' => 101));
 		echo '</td><td>';
-		printImageHREF ('add', 'Create attribute', TRUE, 102);
+		printImageHREF ('create', 'Create attribute', TRUE, 102);
 		echo '</td></tr></form>';
 	}
 	startPortlet ('Optional attributes');
