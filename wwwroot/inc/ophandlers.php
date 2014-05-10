@@ -262,6 +262,37 @@ $opspec_list['portifcompat-edit-del'] = array
 		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['portoifs-edit-add'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'oif_name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['portoifs-edit-del'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portoifs-edit-upd'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'oif_name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['attrs-editmap-del'] = array
 (
 	'table' => 'AttributeMap',

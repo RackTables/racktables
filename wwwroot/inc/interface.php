@@ -4291,6 +4291,85 @@ function renderChapterEditor ($tgt_chapter_no)
 	echo "</table>\n";
 }
 
+function renderPortOIFViewer()
+{
+	global $nextorder;
+	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Outer Interface</th></tr>';
+	$order = 'odd';
+	$refcnt = getPortOIFRefc();
+	foreach (getPortOIFOptions() as $oif_id => $oif_name)
+	{
+		echo "<tr class=row_${order}>";
+		echo '<td class=tdleft>' . getImageHREF ($oif_id < 2000 ? 'computer' : 'favorite') . '</td>';
+		echo "<td class=tdright>${oif_id}</td>";
+		echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
+		echo '<td class=tdleft>' . niftyString ($oif_name, 48) . '</td>';
+		echo '</tr>';
+		$order = $nextorder[$order];
+	}
+	echo '</table>';
+}
+
+function renderPortOIFEditor()
+{
+	function printNewitemTR()
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td>&nbsp;</td>';
+		echo '<td>&nbsp;</td>';
+		echo '<td>&nbsp;</td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 110) . '</td>';
+		echo '<td class=tdleft><input type=text size=48 name=oif_name tabindex=100></td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 110) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo '<tr><th class=tdleft>Origin</th><th>Key</th><th>Refcnt</th><th>&nbsp;</th><th>Outer Interface</th><th>&nbsp;</th></tr>';
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR();
+	$refcnt = getPortOIFRefc();
+	foreach (getPortOIFOptions() as $oif_id => $oif_name)
+	{
+		echo '<tr>';
+		if ($oif_id < 2000)
+		{
+			echo '<td class=tdleft>' . getImageHREF ('computer') . '</td>';
+			echo "<td class=tdleft>${oif_id}</td>";
+			echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
+			echo '<td>&nbsp;</td>';
+			echo '<td class=tdleft>' . niftyString ($oif_name, 48) . '</td>';
+			echo '<td>&nbsp;</td>';
+		}
+		else
+		{
+			printOpFormIntro ('upd', array ('id' => $oif_id));
+			echo '<td class=tdleft>' . getImageHREF ('favorite') . '</td>';
+			echo "<td class=tdleft>${oif_id}</td>";
+			if ($refcnt[$oif_id])
+			{
+				echo "<td class=tdright>${refcnt[$oif_id]}</td>";
+				echo '<td class=tdleft>' . getImageHREF ('nodestroy', 'cannot remove') . '</td>';
+			}
+			else
+			{
+				echo '<td>&nbsp;</td>';
+				echo '<td class=tdleft>';
+				echo getOpLink (array ('op' => 'del', 'id' => $oif_id), '', 'destroy', 'remove');
+				echo '</td>';
+			}
+			echo '<td class=tdleft><input type=text size=48 name=oif_name value="' . niftyString ($oif_name, 48) . '"></td>';
+			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
+			echo '</form>';
+		}
+		echo '</tr>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR();
+	echo '</table>';
+}
+
 // We don't allow to rename/delete a sticky chapter and we don't allow
 // to delete a non-empty chapter.
 function renderChaptersEditor ()
@@ -9295,70 +9374,6 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 3.5: PortCompat
-	$orphans = array ();
-	$result = usePreparedSelectBlade
-	(
-		'SELECT PC.*, 1D.dict_value AS type1_name, 2D.dict_value AS type2_name ' .
-		'FROM PortCompat PC ' .
-		'LEFT JOIN Dictionary 1D ON PC.type1 = 1D.dict_key ' .
-		'LEFT JOIN Dictionary 2D ON PC.type2 = 2D.dict_key ' .
-		'WHERE 1D.dict_key IS NULL OR 2D.dict_key IS NULL'
-	);
-	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
-	unset ($result);
-	if (count ($orphans))
-	{
-		$violations = TRUE;
-		startPortlet ('Port Compatibility rules: Invalid From or To Type (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
-		echo "<tr><th>From</th><th>From Type ID</th><th>To</th><th>To Type ID</th></tr>\n";
-		$order = 'odd';
-		foreach ($orphans as $orphan)
-		{
-			echo "<tr class=row_${order}>";
-			echo "<td>${orphan['type1_name']}</td>";
-			echo "<td>${orphan['type1']}</td>";
-			echo "<td>${orphan['type2_name']}</td>";
-			echo "<td>${orphan['type2']}</td>";
-			echo "</tr>\n";
-			$order = $nextorder[$order];
-		}
-		echo "</table>\n";
-		finishPortLet ();
-	}
-
-	// check 3.6: PortInterfaceCompat
-	$orphans = array ();
-	$result = usePreparedSelectBlade
-	(
-		'SELECT PIC.*, PII.iif_name ' .
-		'FROM PortInterfaceCompat PIC ' .
-		'LEFT JOIN PortInnerInterface PII ON PIC.iif_id = PII.id ' .
-		'LEFT JOIN Dictionary D ON PIC.oif_id = D.dict_key ' .
-		'WHERE D.dict_key IS NULL'
-	);
-	$orphans = $result->fetchAll (PDO::FETCH_ASSOC);
-	unset ($result);
-	if (count ($orphans))
-	{
-		$violations = TRUE;
-		startPortlet ('Enabled Port Types: Invalid Outer Interface (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
-		echo "<tr><th>Inner Interface</th><th>Outer Interface ID</th></tr>\n";
-		$order = 'odd';
-		foreach ($orphans as $orphan)
-		{
-			echo "<tr class=row_${order}>";
-			echo "<td>${orphan['iif_name']}</td>";
-			echo "<td>${orphan['oif_id']}</td>";
-			echo "</tr>\n";
-			$order = $nextorder[$order];
-		}
-		echo "</table>\n";
-		finishPortLet ();
-	}
-
 	// check 4: relationships that violate ObjectParentCompat Rules
 	$invalids = array ();
 	$result = usePreparedSelectBlade
@@ -9401,15 +9416,15 @@ function renderDataIntegrityReport ()
 	$invalids = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, DA.dict_value AS porta_type, ' .
-		'OB.id AS objb_id, OB.name AS objb_name, L.portb AS portb_id, PB.name AS portb_name, DB.dict_value AS portb_type ' .
+		'SELECT OA.id AS obja_id, OA.name AS obja_name, L.porta AS porta_id, PA.name AS porta_name, POIA.oif_name AS porta_type, ' .
+		'OB.id AS objb_id, OB.name AS objb_name, L.portb AS portb_id, PB.name AS portb_name, POIB.oif_name AS portb_type ' .
 		'FROM Link L ' .
 		'LEFT JOIN Port PA ON L.porta = PA.id ' .
 		'LEFT JOIN Object OA ON PA.object_id = OA.id ' .
-		'LEFT JOIN Dictionary DA ON PA.type = DA.dict_key ' .
+		'LEFT JOIN PortOuterInterface POIA ON PA.type = POIA.id ' .
 		'LEFT JOIN Port PB ON L.portb = PB.id ' .
 		'LEFT JOIN Object OB ON PB.object_id = OB.id ' .
-		'LEFT JOIN Dictionary DB ON PB.type = DB.dict_key ' .
+		'LEFT JOIN PortOuterInterface POIB ON PB.type = POIB.id ' .
 		'LEFT JOIN PortCompat PC on PA.type = PC.type1 AND PB.type = PC.type2 ' .
 		'WHERE PC.type1 IS NULL OR PC.type2 IS NULL'
 	);
@@ -9604,7 +9619,10 @@ function renderDataIntegrityReport ()
 		'Port-FK-object_id' => 'Port',
 		'PortAllowedVLAN-FK-object-port' => 'PortAllowedVLAN',
 		'PortAllowedVLAN-FK-vlan_id' => 'PortAllowedVLAN',
+		'PortCompat-FK-oif_id1' => 'PortCompat',
+		'PortCompat-FK-oif_id2' => 'PortCompat',
 		'PortInterfaceCompat-FK-iif_id' => 'PortInterfaceCompat',
+		'PortInterfaceCompat-FK-oif_id' => 'PortInterfaceCompat',
 		'PortLog_ibfk_1' => 'PortLog',
 		'PortNativeVLAN-FK-compound' => 'PortNativeVLAN',
 		'PortVLANMode-FK-object-port' => 'PortVLANMode',

@@ -35,7 +35,6 @@ $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
 define ('CHAP_OBJTYPE', 1);
-define ('CHAP_PORTTYPE', 2);
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
 define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
