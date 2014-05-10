@@ -252,6 +252,16 @@ $opspec_list['portmap-edit-del'] = array
 		array ('url_argname' => 'type2', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['portifcompat-edit-add'] = array
+(
+	'table' => 'PortInterfaceCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['portifcompat-edit-del'] = array
 (
 	'table' => 'PortInterfaceCompat',
@@ -2570,15 +2580,6 @@ function updateFileText ()
 	global $sic;
 	commitReplaceFile ($shortInfo['id'], $sic['file_text']);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
-}
-
-$msgcode['addIIFOIFCompat']['OK'] = 48;
-function addIIFOIFCompat ()
-{
-	assertUIntArg ('iif_id');
-	assertUIntArg ('oif_id');
-	commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']);
-	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 $msgcode['addIIFOIFCompatPack']['OK'] = 37;
