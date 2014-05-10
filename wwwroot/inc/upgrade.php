@@ -1627,6 +1627,25 @@ CREATE TABLE `PortOuterInterface` (
 			$query[] = "ALTER TABLE PortInterfaceCompat ADD CONSTRAINT `PortInterfaceCompat-FK-oif_id` FOREIGN KEY (oif_id) REFERENCES PortOuterInterface (id)";
 			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (type1) REFERENCES PortOuterInterface (id)";
 			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (type2) REFERENCES PortOuterInterface (id)";
+			// Add more 40G and 100G standards.
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
+(1660,'40GBase-FR'),
+(1662,'40GBase-ER4'),
+(1672,'100GBase-SR4'),
+(1673,'100GBase-KR4'),
+(1674,'100GBase-KP4')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+(10,1660),
+(10,1662),
+(11,1672),
+(11,1673),
+(11,1674)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES
+(1660,1660),
+(1662,1662),
+(1672,1672),
+(1673,1673),
+(1674,1674)";
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
