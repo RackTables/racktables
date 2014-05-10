@@ -847,7 +847,7 @@ SELECT
 	Port.iif_id,
 	Port.type AS oif_id,
 	(SELECT PortInnerInterface.iif_name FROM PortInnerInterface WHERE PortInnerInterface.id = Port.iif_id) AS iif_name,
-	(SELECT Dictionary.dict_value FROM Dictionary WHERE Dictionary.dict_key = Port.type) AS oif_name,
+	(SELECT PortOuterInterface.oif_name FROM PortOuterInterface WHERE PortOuterInterface.id = Port.type) AS oif_name,
 	IF(la.porta, la.cable, lb.cable) AS cableid,
 	IF(la.porta, pa.id, pb.id) AS remote_id,
 	IF(la.porta, pa.name, pb.name) AS remote_name,
@@ -3344,9 +3344,9 @@ function getPortOIFCompat ($ignore_cache = FALSE)
 		return $cache;
 
 	$query =
-		"select type1, type2, d1.dict_value as type1name, d2.dict_value as type2name from " .
-		"PortCompat as pc inner join Dictionary as d1 on pc.type1 = d1.dict_key " .
-		"inner join Dictionary as d2 on pc.type2 = d2.dict_key " .
+		"SELECT type1, type2, POI1.oif_name AS type1name, POI2.oif_name AS type2name FROM " .
+		"PortCompat AS pc INNER JOIN PortOuterInterface AS POI1 ON pc.type1 = POI1.id " .
+		"INNER JOIN PortOuterInterface AS POI2 ON pc.type2 = POI2.id " .
 		'ORDER BY type1name, type2name';
 	$result = usePreparedSelectBlade ($query);
 	$cache = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -3559,12 +3559,6 @@ function getChapterRefc ($chapter_id, $keylist)
 		$query = 'select dict_key as uint_value, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
 			"(select count(*) from Object where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ?";
 		break;
-	case CHAP_PORTTYPE:
-		// PortOuterInterface chapter is referenced by PortCompat, PortInterfaceCompat and Port tables
-		$query = 'select dict_key as uint_value, (select count(*) from PortCompat where type1 = dict_key or type2 = dict_key) + ' .
-			'(select count(*) from Port where type = dict_key) + (SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = dict_key) as refcnt ' .
-			"from Dictionary where chapter_id = ?";
-		break;
 	default:
 		// Find the list of all assigned values of dictionary-addressed attributes, each with
 		// chapter/word keyed reference counters.
@@ -3580,6 +3574,22 @@ function getChapterRefc ($chapter_id, $keylist)
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['uint_value']] = $row['refcnt'];
 	return $ret;
+}
+
+// Return references counter for each of the given OIF IDs. This includes not
+// only PortCompat and PortInterfaceCompat but also Port even though the latter
+// is not based on PortOuterInterface directly.
+function getPortOIFRefc()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT POI.id, (' .
+		'(SELECT COUNT(*) FROM PortCompat WHERE type1 = id OR type2 = id) + ' .
+		'(SELECT COUNT(*) FROM Port WHERE type = POI.id) + ' .
+		'(SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = POI.id)' .
+		') AS refcnt FROM PortOuterInterface AS POI'
+	);
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'refcnt');
 }
 
 // Return a list of all stickers with sticker map applied. Each sticker records will
@@ -4806,9 +4816,9 @@ function getPortInterfaceCompat()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT iif_id, iif_name, oif_id, dict_value AS oif_name ' .
-		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface ON id = iif_id ' .
-		'INNER JOIN Dictionary ON dict_key = oif_id ' .
+		'SELECT iif_id, iif_name, oif_id, oif_name ' .
+		'FROM PortInterfaceCompat INNER JOIN PortInnerInterface AS PII ON PII.id = iif_id ' .
+		'INNER JOIN PortOuterInterface AS POI ON POI.id = oif_id ' .
 		'ORDER BY iif_name, oif_name'
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
@@ -4825,8 +4835,8 @@ function getExistingPortTypeOptions ($port_id)
 	{
 		$remote_portinfo = getPortInfo ($portinfo['remote_id']);
 		$result = usePreparedSelectBlade ("
-SELECT DISTINCT oif_id, dict_value AS oif_name
-FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key
+SELECT DISTINCT oif_id, oif_name
+FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
 LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ?
 LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ?
 WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
@@ -4838,8 +4848,8 @@ ORDER BY oif_name
 	else
 	{
 		$result = usePreparedSelectBlade ("
-SELECT oif_id, dict_value AS oif_name
-FROM PortInterfaceCompat INNER JOIN Dictionary ON oif_id = dict_key
+SELECT oif_id, oif_name
+FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
 WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
 ORDER BY oif_name
 ", array ($port_id)
@@ -4870,7 +4880,8 @@ function getPortIIFOptions()
 
 function getPortOIFOptions()
 {
-	return readChapter (CHAP_PORTTYPE);
+	$result = usePreparedSelectBlade ('SELECT id, oif_name FROM PortOuterInterface ORDER BY oif_name');
+	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'oif_name');
 }
 
 function commitSupplementPIC ($iif_id, $oif_id)
@@ -4886,10 +4897,10 @@ function getPortIIFStats ($args)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT dict_value AS title, COUNT(id) AS max, ' .
+		'SELECT oif_name AS title, COUNT(Port.id) AS max, ' .
 		'COUNT(reservation_comment) + ' .
-		'SUM((SELECT COUNT(*) FROM Link WHERE id IN (porta, portb))) AS current ' .
-		'FROM Port INNER JOIN Dictionary ON type = dict_key ' .
+		'SUM((SELECT COUNT(*) FROM Link WHERE Port.id IN (porta, portb))) AS current ' .
+		'FROM Port INNER JOIN PortOuterInterface AS POI ON type = POI.id ' .
 		'WHERE iif_id = ? GROUP BY type',
 		array_slice ($args, 0, 1) // array with only the first argument
 	);

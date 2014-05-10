@@ -268,6 +268,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.5',
 		'0.20.6',
 		'0.20.7',
+		'0.20.8',
 		'0.21.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
@@ -1610,6 +1611,29 @@ ENDOFTRIGGER;
 			$query[] = "SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS";
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.8':
+			$query[] = "
+CREATE TABLE `PortOuterInterface` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `oif_name` char(48) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oif_name` (`oif_name`)
+) ENGINE=InnoDB
+";
+			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
+			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
+			// and 10GBase-KR. Make respective changes and make primary key auto
+			// increment start at 2000.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '10GBase-KX4' WHERE id = 41";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1999, '10GBase-KR')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1999, 1999)";
+			$query[] = "DELETE FROM Dictionary WHERE chapter_id = 2";
+			$query[] = "DELETE FROM Chapter WHERE id = 2";
+			$query[] = "ALTER TABLE PortInterfaceCompat ADD CONSTRAINT `PortInterfaceCompat-FK-oif_id` FOREIGN KEY (oif_id) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (type1) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (type2) REFERENCES PortOuterInterface (id)";
+			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.21.0':
 			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";

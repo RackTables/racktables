@@ -559,6 +559,16 @@ $ophandler['portifcompat']['edit']['del'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['addPack'] = 'addIIFOIFCompatPack';
 $ophandler['portifcompat']['edit']['delPack'] = 'delIIFOIFCompatPack';
 
+$page['portoifs']['title'] = 'Port outer interfaces';
+$page['portoifs']['parent'] = 'config';
+$tab['portoifs']['default'] = 'View';
+$tab['portoifs']['edit'] = 'Edit';
+$tabhandler['portoifs']['default'] = 'renderPortOIFViewer';
+$tabhandler['portoifs']['edit'] = 'renderPortOIFEditor';
+$ophandler['portoifs']['edit']['add'] = 'tableHandler';
+$ophandler['portoifs']['edit']['del'] = 'tableHandler';
+$ophandler['portoifs']['edit']['upd'] = 'tableHandler';
+
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
 $tab['attrs']['default'] = 'View';
