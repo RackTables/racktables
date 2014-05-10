@@ -4208,7 +4208,7 @@ function renderChapter ($tgt_chapter_no)
 	{
 		echo "<tr class=row_${order}><td>";
 		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
-		echo "</td><td>${key}</td><td>";
+		echo "</td><td class=tdright>${key}</td><td>";
 		if ($refcnt[$key])
 		{
 			$cfe = '';
@@ -4270,12 +4270,12 @@ function renderChapterEditor ($tgt_chapter_no)
 		if ($key < 50000)
 		{
 			printImageHREF ('computer');
-			echo "</td><td>${key}</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
+			echo "</td><td class=tdright>${key}</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
 			continue;
 		}
 		printOpFormIntro ('upd', array ('dict_key' => $key));
 		printImageHREF ('favorite');
-		echo "</td><td>${key}</td><td>";
+		echo "</td><td class=tdright>${key}</td><td>";
 		// Prevent deleting words currently used somewhere.
 		if ($refcnt[$key])
 			printImageHREF ('nodelete', 'referenced ' . $refcnt[$key] . ' time(s)');
