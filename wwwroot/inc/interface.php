@@ -4645,13 +4645,13 @@ function renderPortsReport ()
 {
 	$tmp = array();
 	foreach (getPortIIFOptions() as $iif_id => $iif_name)
-		if (count (getPortIIFStats (array ($iif_id))))
+		if (count (getPortIIFStats ($iif_id)))
 			$tmp[] = array
 			(
 				'title' => $iif_name,
 				'type' => 'meters',
 				'func' => 'getPortIIFStats',
-				'args' => array ($iif_id),
+				'args' => $iif_id,
 			);
 	renderReports ($tmp);
 }
