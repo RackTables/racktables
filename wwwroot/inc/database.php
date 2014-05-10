@@ -4894,7 +4894,7 @@ function commitSupplementPIC ($iif_id, $oif_id)
 	);
 }
 
-function getPortIIFStats ($args)
+function getPortIIFStats ($iif_id)
 {
 	$result = usePreparedSelectBlade
 	(
@@ -4903,7 +4903,7 @@ function getPortIIFStats ($args)
 		'SUM((SELECT COUNT(*) FROM Link WHERE Port.id IN (porta, portb))) AS current ' .
 		'FROM Port INNER JOIN PortOuterInterface AS POI ON type = POI.id ' .
 		'WHERE iif_id = ? GROUP BY type',
-		array_slice ($args, 0, 1) // array with only the first argument
+		array ($iif_id)
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
