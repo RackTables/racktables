@@ -71,6 +71,7 @@ $breedfunc = array
 	'jun10-xlatepushq-main'    => 'jun10TranslatePushQueue',
 	'jun10-getallconf-main'    => 'jun10SpotConfigText',
 	'jun10-getlldpstatus-main' => 'jun10ReadLLDPStatus',
+	'jun10-getportstatus-main' => 'jun10ReadInterfaceStatus',
 	'ftos8-xlatepushq-main'    => 'ftos8TranslatePushQueue',
 	'ftos8-getlldpstatus-main' => 'ftos8ReadLLDPStatus',
 	'ftos8-getmaclist-main'    => 'ftos8ReadMacList',
