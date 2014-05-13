@@ -753,7 +753,7 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 			$work['portdata'][$port_name] = array
 			(
 				'allowed' => $work['current']['allowed'],
-				'native' => $work['current']['native'],
+				'native' => in_array ($work['current']['native'], $work['current']['allowed']) ? $work['current']['native'] : 0,
 				'mode' => 'trunk',
 			);
 			break;
@@ -771,8 +771,6 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 		$work['current']['native'] = $matches[1];
 		if (!array_key_exists ('allowed', $work['current']))
 			$work['current']['allowed'] = array();
-		if (!in_array ($matches[1], $work['current']['allowed']))
-			$work['current']['allowed'][] = $matches[1];
 		break;
 	case (preg_match ('@^ port link-type (.+)$@', $line, $matches)):
 		$work['current']['link-type'] = $matches[1];
@@ -844,8 +842,6 @@ function vrp55Read8021QConfig ($input)
 		// we get a problem).
 		case preg_match ('/^ port (default|trunk pvid) vlan ([[:digit:]]+)$/', $line, $matches):
 			$ret['current']['native'] = $matches[2];
-			if (!in_array ($ret['current']['native'], $ret['current']['allowed']))
-				$ret['current']['allowed'][] = $ret['current']['native'];
 			break;
 		case preg_match ('/^ port trunk allow-pass vlan (.+)$/', $line, $matches):
 			foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
