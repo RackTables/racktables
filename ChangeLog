@@ -3,6 +3,7 @@
 	update: syncdomain.php now provides some new CLI options and better lockfile handling
 	update: new {$client_x.x.x.x} auto tag containing client's IP
 	update: explicitly require PHP version 5.3.0 or newer
+	update: link status feature is available on Juniper
 0.20.8
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks

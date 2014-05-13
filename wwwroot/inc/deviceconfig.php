@@ -1755,6 +1755,9 @@ show configuration interfaces
 			$ret .= "show lldp neighbors\n";
 			$ret .= "# object_id=$dummy_object_id";
 			break;
+		case 'getportstatus':
+			$ret .= "show interfaces terse\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -3002,6 +3005,39 @@ function ros11ReadInterfaceStatus ($text)
 			throw new RackTablesError ('state error', RackTablesError::INTERNAL);
 		}
 	return $ret;
+}
+
+function jun10ReadInterfaceStatus ($input)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $input) as $line)
+	{
+		$line = trim ($line);
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/^Interface\s+Admin\s+Link\s+Proto\s+Local\s+Remote/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (preg_match('/^{/', $line) || preg_match('/^\S+>/', $line))
+					break 2;
+				$field_list = preg_split('/\s+/', $line);
+				if (count ($field_list) < 3)
+					continue;
+				$portname = $field_list[0];
+				$admin_status = ($field_list[1] == 'up' || $field_list[1] == 'down') ? $field_list[1] : 'disabled';
+				$link_status = ($field_list[2] == 'up' || $field_list[2] == 'down') ? $field_list[2] : 'disabled';
+
+				$result[$portname] = array
+				(
+					'status' => $link_status,
+				);
+				break;
+		}
+	}
+	return $result;
 }
 
 function maclist_sort ($a, $b)
