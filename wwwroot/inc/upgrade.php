@@ -1646,6 +1646,11 @@ CREATE TABLE `PortOuterInterface` (
 (1672,1672),
 (1673,1673),
 (1674,1674)";
+			// Refine 1G OIF list: fix spelling and add a new standard.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '1000Base-LX10' WHERE id = 1205";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (42, '1000Base-EX')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (42, 42)";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (3, 42), (4,42)";
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
