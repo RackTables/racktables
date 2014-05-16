@@ -1272,6 +1272,9 @@ show vlan brief
 		case 'getmaclist':
 			$ret .= "show mac address-table dynamic\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "show mac address-table dynamic interface {$cmd['arg1']}\n";
+			break;
 		case 'getallconf':
 			$ret .= "show running-config\n";
 			break;
@@ -1402,6 +1405,9 @@ function vrp53TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getmaclist':
 			$ret .= "display mac-address dynamic\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "display mac-address dynamic {$cmd['arg1']}\n";
+			break;
 		case 'getallconf':
 			$ret .= "display current-configuration\n";
 			break;
@@ -1494,6 +1500,9 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getmaclist':
 			$ret .= "display mac-address dynamic\n";
+			break;
+		case 'getportmaclist':
+			$ret .= "display mac-address dynamic {$cmd['arg1']}\n";
 			break;
 		case 'getallconf':
 			$ret .= "display current-configuration\n";
@@ -1589,6 +1598,9 @@ function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getmaclist':
 			$ret .= "display mac-address dynamic\n";
+			break;
+		case 'getportmaclist':
+			$ret .= "display mac-address dynamic interface {$cmd['arg1']}\n";
 			break;
 		case 'getallconf':
 			$ret .= "display current-configuration\n";
@@ -1790,6 +1802,9 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 		case 'getmaclist':
 			$ret .= "show mac-address-table dynamic\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "show mac-address-table dynamic interface {$cmd['arg1']}\n";
+			break;
 		case 'get8021q':
 			$ret .= "show running-config interface\n";
 			break;
@@ -1940,6 +1955,9 @@ function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getmaclist':
 			$ret .= "show mac-address-table dynamic\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "show mac-address-table dynamic interface {$cmd['arg1']}\n";
+			break;
 		case 'cite':
 			$ret .= $cmd['arg1'];
 			break;
@@ -2038,6 +2056,9 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getmaclist':
 			$ret .= "show mac address-table dynamic\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "show mac address-table dynamic interface {$cmd['arg1']}\n";
+			break;
 		case 'cite':
 			$ret .= $cmd['arg1'];
 			break;
@@ -2063,6 +2084,9 @@ function dlinkTranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getmaclist':
 			$ret .= "show fdb\n";
 			break;
+		case 'getportmaclist':
+			$ret .= "show fdb port {$cmd['arg1']}\n";
+			break;
 		case 'get8021q':
 			$ret .= "show vlan\n";
 			break;
@@ -2086,6 +2110,9 @@ function linuxTranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getmaclist':
 			$ret .= "sudo /usr/sbin/arp -an\n";
+			break;
+		case 'getportmaclist':
+			$ret .= "sudo /usr/sbin/arp -ani {$cmd['arg1']}\n";
 			break;
 		case 'get8021q':
 			$ret .= "sudo /sbin/ip -o a\n";
