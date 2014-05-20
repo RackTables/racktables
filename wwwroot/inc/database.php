@@ -961,9 +961,10 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	lastCreated ($realm, $object_id);
 
 	// Do AutoPorts magic
-	executeAutoPorts ($object_id, $new_type_id);
+	if ($realm == 'object')
+		executeAutoPorts ($object_id, $new_type_id);
 	// Now tags...
-	produceTagsForNewRecord ('object', $taglist, $object_id);
+	produceTagsForNewRecord ($realm, $taglist, $object_id);
 	recordObjectHistory ($object_id);
 	return $object_id;
 }
