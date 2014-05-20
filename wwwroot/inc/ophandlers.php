@@ -2263,7 +2263,6 @@ function addRack ()
 		assertUIntArg ('height1');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
-		produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 		// Set the height and sort order
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
@@ -2292,7 +2291,6 @@ function addRack ()
 		foreach ($names2 as $cname)
 		{
 			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
-			produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 			// Set the height and sort order
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
