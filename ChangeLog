@@ -9,6 +9,7 @@
 	bugfix: properly format comment text for locations and racks
 	bugfix: the tab IP SLB/Load balancers displayed all the objects in system
 	bugfix: Native vlan on Huawei trunk ports no longer gets to the allowed vlans list
+	bugfix: Data Integrity report hit memory limit
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
 	update: move port outer interfaces from the dictionary
 0.20.7 2014-03-03
