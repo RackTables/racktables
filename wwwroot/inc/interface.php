@@ -6635,39 +6635,97 @@ function dynamic_title_decoder ($path_position)
 	}
 }
 
-function renderIIFOIFCompat()
+function renderTwoColumnCompatTableViewer ($compat, $left, $right)
 {
 	global $nextorder;
-	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th class=tdleft>inner interface</th><th></th><th class=tdleft>outer interface</th><th></th></tr>';
-	$last_iif_id = 0;
-	$order = 'even';
-	foreach (getPortInterfaceCompat() as $record)
+	$last_lkey = NULL;
+	$order = 'odd';
+	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo "<tr><th>Key</th><th class=tdleft>${left['header']}</th><th>Key</th><th class=tdleft>${right['header']}</th></tr>";
+	foreach ($compat as $item)
 	{
-		if ($last_iif_id != $record['iif_id'])
+		if ($last_lkey !== $item[$left['key']])
 		{
 			$order = $nextorder[$order];
-			$last_iif_id = $record['iif_id'];
+			$last_lkey = $item[$left['key']];
 		}
-		echo "<tr class=row_${order}><td class=tdleft>${record['iif_name']}</td><td>${record['iif_id']}</td><td class=tdleft>${record['oif_name']}</td><td>${record['oif_id']}</td></tr>";
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdright>${item[$left['key']]}</td>";
+		echo '<td class=tdleft>' . niftyString ($item[$left['value']], $left['width']) . '</td>';
+		echo "<td class=tdright>${item[$right['key']]}</td>";
+		echo '<td class=tdleft>' . niftyString ($item[$right['value']], $right['width']) . '</td>';
+		echo '</tr>';
 	}
+	echo '</table>';
+}
+
+function renderIIFOIFCompat()
+{
+	echo '<br>';
+	renderTwoColumnCompatTableViewer
+	(
+		getPortInterfaceCompat(),
+		array
+		(
+			'header' => 'Inner interface',
+			'key' => 'iif_id',
+			'value' => 'iif_name',
+			'width' => 16,
+		),
+		array
+		(
+			'header' => 'Outer interface',
+			'key' => 'oif_id',
+			'value' => 'oif_name',
+			'width' => 48,
+		)
+	);
+	echo '<br>';
+}
+
+function renderTwoColumnCompatTableEditor ($compat, $left, $right)
+{
+	function printNewitemTR ($lkey, $loptions, $rkey, $roptions)
+	{
+		printOpFormIntro ('add');
+		echo '<tr><th class=tdleft>';
+		printImageHREF ('add', 'add pair', TRUE, 200);
+		echo '</th><th class=tdleft>';
+		printSelect ($loptions, array ('name' => $lkey, 'tabindex' => 100));
+		echo '</th><th class=tdleft>';
+		printSelect ($roptions, array ('name' => $rkey, 'tabindex' => 110));
+		echo '</th></tr></form>';
+	}
+
+	global $nextorder;
+	$last_lkey = NULL;
+	$order = 'odd';
+	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo "<tr><th>&nbsp;</th><th class=tdleft>${left['header']}</th><th class=tdleft>${right['header']}</th></tr>";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR ($left['key'], $left['options'], $right['key'], $right['options']);
+	foreach ($compat as $item)
+	{
+		if ($last_lkey !== $item[$left['key']])
+		{
+			$order = $nextorder[$order];
+			$last_lkey = $item[$left['key']];
+		}
+		echo "<tr class=row_${order}>";
+		echo '<td>';
+		echo getOpLink (array ('op' => 'del', $left['key'] => $item[$left['key']], $right['key'] => $item[$right['key']]), '', 'delete', 'remove pair');
+		echo '</td>';
+		echo '<td class=tdleft>' . niftyString ($item[$left['value']], $left['width']) . '</td>';
+		echo '<td class=tdleft>' . niftyString ($item[$right['value']], $right['width']) . '</td>';
+		echo '</tr>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR ($left['key'], $left['options'], $right['key'], $right['options']);
 	echo '</table>';
 }
 
 function renderIIFOIFCompatEditor()
 {
-	function printNewitemTR()
-	{
-		printOpFormIntro ('add');
-		echo '<tr><th class=tdleft>';
-		printImageHREF ('add', 'add pair', TRUE);
-		echo '</th><th class=tdleft>';
-		printSelect (getPortIIFOptions(), array ('name' => 'iif_id'));
-		echo '</th><th class=tdleft>';
-		printSelect (getPortOIFOptions(), array ('name' => 'oif_id'));
-		echo '</th></tr></form>';
-	}
-
 	startPortlet ('WDM standard by interface');
 	$iif = getPortIIFOptions();
 	global $nextorder, $wdm_packs;
@@ -6690,27 +6748,26 @@ function renderIIFOIFCompatEditor()
 	finishPortlet();
 
 	startPortlet ('interface by interface');
-	global $nextorder;
-	$last_iif_id = 0;
-	$order = 'even';
-	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>&nbsp;</th><th class=tdleft>inner interface</th><th class=tdleft>outer interface</th></tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewitemTR();
-	foreach (getPortInterfaceCompat() as $record)
-	{
-		if ($last_iif_id != $record['iif_id'])
-		{
-			$order = $nextorder[$order];
-			$last_iif_id = $record['iif_id'];
-		}
-		echo "<tr class=row_${order}><td>";
-		echo getOpLink (array ('op' => 'del', 'iif_id' => $record['iif_id'], 'oif_id' => $record['oif_id']), '', 'delete', 'remove pair');
-		echo "</td><td class=tdleft>${record['iif_name']}</td><td class=tdleft>${record['oif_name']}</td></tr>";
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewitemTR();
-	echo '</table>';
+	renderTwoColumnCompatTableEditor
+	(
+		getPortInterfaceCompat(),
+		array
+		(
+			'header' => 'inner interface',
+			'key' => 'iif_id',
+			'value' => 'iif_name',
+			'width' => 16,
+			'options' => getPortIIFOptions(),
+		),
+		array
+		(
+			'header' => 'outer interface',
+			'key' => 'oif_id',
+			'value' => 'oif_name',
+			'width' => 48,
+			'options' => getPortOIFOptions()
+		)
+	);
 	finishPortlet();
 }
 
