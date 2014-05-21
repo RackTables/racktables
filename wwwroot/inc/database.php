@@ -1082,7 +1082,7 @@ function getObjectContentsList ($object_id, $children = array ())
 		if (in_array ($row['child_entity_id'], $children))
 			throw new RackTablesError ("Circular reference for object ${object_id}", RackTablesError::INTERNAL);
 		$children[] = $row['child_entity_id'];
-		$children = array_merge ($children, $self ($row['child_entity_id'], $children));
+		$children = array_unique (array_merge ($children, $self ($row['child_entity_id'], $children)));
 	}
 	return $children;
 }
@@ -1099,7 +1099,7 @@ function getLocationChildrenList ($location_id, $children = array ())
 		if (in_array ($row['id'], $children))
 			throw new RackTablesError ("Circular reference for location ${location_id}", RackTablesError::INTERNAL);
 		$children[] = $row['id'];
-		$children = array_merge ($children, $self ($row['id'], $children));
+		$children = array_unique (array_merge ($children, $self ($row['id'], $children)));
 	}
 	return $children;
 }
@@ -1116,7 +1116,7 @@ function getTagChildrenList ($tag_id, $children = array ())
 		if (in_array ($row['id'], $children))
 			throw new RackTablesError ("Circular reference for tag ${tag_id}", RackTablesError::INTERNAL);
 		$children[] = $row['id'];
-		$children = array_merge ($children, $self ($row['id'], $children));
+		$children = array_unique (array_merge ($children, $self ($row['id'], $children)));
 	}
 	return $children;
 }
