@@ -1753,7 +1753,6 @@ show configuration interfaces
 			break;
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors\n";
-			$ret .= "# object_id=$dummy_object_id";
 			break;
 		case 'getportstatus':
 			$ret .= "show interfaces terse\n";
