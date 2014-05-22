@@ -3585,7 +3585,8 @@ function getPortOIFRefc()
 	$result = usePreparedSelectBlade
 	(
 		'SELECT POI.id, (' .
-		'(SELECT COUNT(*) FROM PortCompat WHERE type1 = id OR type2 = id) + ' .
+		'(SELECT COUNT(*) FROM PortCompat WHERE type1 = id) + ' .
+		'(SELECT COUNT(*) FROM PortCompat WHERE type2 = id) + ' .
 		'(SELECT COUNT(*) FROM Port WHERE type = POI.id) + ' .
 		'(SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = POI.id)' .
 		') AS refcnt FROM PortOuterInterface AS POI'
