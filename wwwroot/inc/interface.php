@@ -2587,8 +2587,15 @@ function renderIPSpace()
 				echo "collapsing all ($all / $auto)";
 			else
 			{
-				$netinfo = spotEntity ($realm, $eid);
-				echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
+				try
+				{
+					$netinfo = spotEntity ($realm, $eid);
+					echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
+				}
+				catch (EntityNotFoundException $e)
+				{
+					// ignore invalid eid error
+				}
 			}
 			echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 			echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
