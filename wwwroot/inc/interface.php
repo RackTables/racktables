@@ -110,7 +110,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 {
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head><title><?php echo getPageName ($pageno); ?></title>
+<head><title><?php echo getTitle ($pageno); ?></title>
 <?php printPageHeaders(); ?>
 </head>
 <body>
@@ -6318,7 +6318,7 @@ function showPathAndSearch ($pageno, $tabno)
 			$is_first = FALSE;
 		}
 		$item .= $anchor_tail;
-		$item .= "'>" . niftyString ($title['name']) . "</a>";
+		$item .= "'>" . $title['name'] . "</a>";
 		$items[] = $item;
 
 		// insert location bread crumbs
@@ -6363,10 +6363,13 @@ function showPathAndSearch ($pageno, $tabno)
 	echo implode(' : ', array_reverse ($items));
 }
 
-// XXX: deprecated
 function getTitle ($pageno)
 {
-	return getPageName ($pageno);
+	global $page;
+	if (isset ($page[$pageno]['title']))
+		return $page[$pageno]['title'];
+	$tmp = callHook ('dynamic_title_decoder', $pageno);
+	return $tmp['name'];
 }
 
 function showTabs ($pageno, $tabno)
