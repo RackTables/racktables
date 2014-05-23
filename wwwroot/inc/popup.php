@@ -44,13 +44,13 @@ SELECT
 	p.iif_id,
 	p.type as oif_id,
 	pii.iif_name,
-	d.dict_value as oif_name,
+	poi.oif_name,
 	p.object_id,
 	o.name as object_name
 FROM Port p
 INNER JOIN Object o ON o.id = p.object_id
 INNER JOIN PortInnerInterface pii ON p.iif_id = pii.id
-INNER JOIN Dictionary d ON d.dict_key = p.type
+INNER JOIN PortOuterInterface poi ON poi.id = p.type
 ";
 	// porttype filter (non-strict match)
 	$query .= "
