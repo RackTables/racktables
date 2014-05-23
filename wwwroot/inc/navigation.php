@@ -812,6 +812,7 @@ $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
 $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
 $ajaxhandler['get-port-link'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-mac'] = 'getPortInfoAJAX';
+$ajaxhandler['get-port-portmac'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-conf'] = 'getPortInfoAJAX';
 $ajaxhandler['upd-ip-name'] = 'updateIPNameAJAX';
 $ajaxhandler['upd-ip-comment'] = 'updateIPCommentAJAX';
