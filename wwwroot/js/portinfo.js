@@ -9,7 +9,8 @@ bk_event = null;
 	var menu_item_candidates = {
 		link: {'Show links status': {onclick: menuItemClicked, className: 'itemname-link'}},
 		conf: {'Show ports configuration': {onclick: menuItemClicked, className: 'itemname-conf'}},
-		mac: {'Show learned MACs': {onclick: menuItemClicked, className: 'itemname-mac'}}
+		mac: {'Show device learned MACs': {onclick: menuItemClicked, className: 'itemname-mac'}},
+		portmac: {'Show port learned MACs': {onclick: menuItemClicked, className: 'itemname-portmac'}}
 	};
 	var portinfo_enabled = false;
 	for (var i in enabled_elements) {
@@ -63,6 +64,8 @@ function setItemIcon(menuItem, iconName) {
 		iconURL = 'index.php?module=chrome&uri=pix/ajax-loader.gif';
 	else if (iconName == 'ok')
 		iconURL = 'index.php?module=chrome&uri=pix/checkbox_yes.png';
+	else
+		iconURL = '';
 	$(menuItem).children('.' + $.contextMenu.innerDivClassName).css("background-image", "url(" + iconURL + ")");
 }
 
@@ -76,6 +79,8 @@ function menuItemClicked(menuItem, menu) {
 	if (! matches)
 		return;
 	var type = matches[1];
+	var per_port_cmd = type == 'portmac';
+	var portnameElem = $(this).siblings('.interactive-portname')[0];
 
 	var bSuccessIcon = false;
 	$.ajax({
@@ -103,23 +108,30 @@ function menuItemClicked(menuItem, menu) {
 		data: {
 			'module': 'ajax',
 			'ac': 'get-port-' + type,
-			'object_id': getQueryString('object_id')
+			'object_id': getQueryString('object_id'),
+			'port_name': getPortName(portnameElem)
 		},
 		dataType: 'json',
 		success: function(data, textStatus, XMLHttpRequest) {
 			if (! data)
 				return;
 			bSuccessIcon = true;
-			setItemIcon(menuItem, 'ok');
+
+			if (per_port_cmd)
+				setItemIcon(menuItem, '');
+			else
+				setItemIcon(menuItem, 'ok');
+
 			if (type == 'link')
 				applyLinkData(data);
-			else if (type == 'mac')
+			else if (type == 'mac' || type == 'portmac')
 				applyMacData(data);
 			else if (type == 'conf')
 				applyConfData(data);
 		}
 	});
-	disableMenuItem(menuItem);
+	if (!per_port_cmd)
+		disableMenuItem(menuItem);
 }
 
 function rememberCursorPosition(event) {
@@ -156,11 +168,20 @@ function applyMacData(data) {
 		if (item != null) {
 			var prepended;
 			if (item['inline'])
-				appended = $('<div />').addClass('mac-count').html(item['inline']).appendTo($(this).parent());
+			{
+				var obj = $(this).parent().find('.mac-count');
+				if (!obj.length)
+					appended = $('<div />').addClass('mac-count').html(item['inline']).appendTo($(this).parent());
+				else
+					appended = obj.html(item['inline']);
+			}
 			if (item['popup'] && appended) {
-				if (! seen_portnames[portname])
-					seen_portnames[portname] = $('<div />').addClass('popup-box mac-list').html(item['popup']).appendTo('body');
-				appended.thumbPopup(seen_portnames[portname]);
+				var obj = $("[id='maclist-popup-"+portname+"']");
+				if (! obj.size())
+					obj = $('<div />').addClass('popup-box mac-list').attr('id', 'maclist-popup-'+portname).html(item['popup']).appendTo('body');
+				else
+					obj.html(item['popup']);
+				appended.thumbPopup(obj);
 			}
 		}
 	});

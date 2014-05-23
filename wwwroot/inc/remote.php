@@ -217,9 +217,19 @@ function assertBreedFunction ($breed, $command)
 	return $breedfunc["${breed}-${command}-main"];
 }
 
-function queryDevice ($object_id, $command)
+function queryDevice ($object_id, $command, $args = array())
 {
-	$query = translateDeviceCommands ($object_id, array (array ('opcode' => $command)));
+	$request = array ('opcode' => $command);
+	if (is_array ($args) && count ($args))
+	{
+		$i = 1;
+		foreach ($args as $arg)
+		{
+			$request["arg$i"] = $arg;
+			$i++;
+		}
+	}
+	$query = translateDeviceCommands ($object_id, array ($request));
 	if ($command == 'xlatepushq')
 		return $query;
 	$breed = assertDeviceBreed ($object_id);

@@ -8749,6 +8749,7 @@ function switchportInfoJS($object_id)
 		'link' => array ('op' => 'get_link_status', 'gw' => 'getportstatus'),
 		'conf' => array ('op' => 'get_port_conf', 'gw' => 'get8021q'),
 		'mac' =>  array ('op' => 'get_mac_list', 'gw' => 'getmaclist'),
+		'portmac' => array ('op' => 'get_port_mac_list', 'gw' => 'getportmaclist'),
 	);
 	$breed = detectDeviceBreed ($object_id);
 	$allowed_ops = array();

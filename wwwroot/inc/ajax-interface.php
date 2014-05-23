@@ -58,7 +58,16 @@ function formatPortLinkHints ($object_id)
 function formatPortMacHints ($object_id)
 {
 	$result = array();
-	$macList = queryDevice ($object_id, 'getmaclist');
+	if ($_REQUEST['ac'] == 'get-port-portmac')
+	{
+		$port_name = $_REQUEST['port_name'];
+		$ports = reduceSubarraysToColumn (getObjectPortsAndLinks($_REQUEST['object_id']), 'name');
+		$macList = in_array($port_name, $ports) ?
+				queryDevice ($object_id, 'getportmaclist', array ($port_name)) :
+				array();
+	}
+	else
+		$macList = queryDevice ($object_id, 'getmaclist');
 	foreach ($macList as $portname => $list)
 	{
 		$list = $macList[$portname];
@@ -188,12 +197,14 @@ function getPortInfoAJAX()
 	(
 		'get-port-link' => 'formatPortLinkHints',
 		'get-port-mac'  => 'formatPortMacHints',
+		'get-port-portmac' => 'formatPortMacHints',
 		'get-port-conf' => 'formatPortConfigHints',
 	);
 	$opmap = array
 	(
 		'get-port-link' => 'get_link_status',
 		'get-port-mac'  => 'get_mac_list',
+		'get-port-portmac' => 'get_port_mac_list',
 		'get-port-conf' => 'get_port_conf',
 	);
 	genericAssertion ('object_id', 'uint');
