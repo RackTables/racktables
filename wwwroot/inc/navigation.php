@@ -39,7 +39,7 @@ $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
 	array ('files', 'reports', 'ipv4slb', '8021q'),
-	array ('config', 'objectlog', 'virtual'),
+	array ('config', 'objectlog', 'virtual', 'cables'),
 );
 
 $page['index']['title'] = 'Main page';
@@ -661,6 +661,29 @@ $ophandler['munin']['servers']['add'] = 'tableHandler';
 $ophandler['munin']['servers']['del'] = 'tableHandler';
 $ophandler['munin']['servers']['upd'] = 'tableHandler';
 
+$page['cableconf']['title'] = 'Patch cables';
+$page['cableconf']['parent'] = 'config';
+$tab['cableconf']['default'] = 'View';
+$tab['cableconf']['connectors'] = 'Edit connectors';
+$tab['cableconf']['cabletypes'] = 'Edit cable types';
+$tab['cableconf']['conncompat'] = 'Connector compatibility';
+$tab['cableconf']['oifcompat'] = 'Outer interface compatibility';
+$tabhandler['cableconf']['default'] = 'renderPatchCableConfiguration';
+$tabhandler['cableconf']['connectors'] = 'renderPatchCableConnectorEditor';
+$tabhandler['cableconf']['cabletypes'] = 'renderPatchCableTypeEditor';
+$tabhandler['cableconf']['conncompat'] = 'renderPatchCableConnectorCompatEditor';
+$tabhandler['cableconf']['oifcompat'] = 'renderPatchCableOIFCompatEditor';
+$ophandler['cableconf']['connectors']['add'] = 'tableHandler';
+$ophandler['cableconf']['connectors']['del'] = 'tableHandler';
+$ophandler['cableconf']['connectors']['upd'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['add'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['del'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['upd'] = 'tableHandler';
+$ophandler['cableconf']['conncompat']['add'] = 'tableHandler';
+$ophandler['cableconf']['conncompat']['del'] = 'tableHandler';
+$ophandler['cableconf']['oifcompat']['add'] = 'tableHandler';
+$ophandler['cableconf']['oifcompat']['del'] = 'tableHandler';
+
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
@@ -806,6 +829,22 @@ $page['virtual']['title'] = 'Virtual Resources';
 $page['virtual']['parent'] = 'index';
 $tab['virtual']['default'] = 'Summary';
 $tabhandler['virtual']['default'] = 'renderVirtualResourcesSummary';
+
+$page['cables']['title'] = 'Patch cables';
+$page['cables']['parent'] = 'index';
+$tab['cables']['default'] = 'View';
+$tab['cables']['amount'] = 'Consume/replenish';
+$tab['cables']['heaps'] = 'Configure heaps';
+$trigger['cables']['amount'] = 'triggerPatchCableHeapsConfigured';
+$tabhandler['cables']['default'] = 'renderPatchCableHeapSummary';
+$tabhandler['cables']['amount'] = 'renderPatchCableHeapAmount';
+$tabhandler['cables']['heaps'] = 'renderPatchCableHeapEditor';
+$ophandler['cables']['heaps']['add'] = 'tableHandler';
+$ophandler['cables']['heaps']['del'] = 'tableHandler';
+$ophandler['cables']['heaps']['upd'] = 'tableHandler';
+$ophandler['cables']['amount']['dec'] = 'consumePatchCable';
+$ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
+$ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
 
 $ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';

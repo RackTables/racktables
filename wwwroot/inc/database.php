@@ -5560,4 +5560,135 @@ function getEntitiesCount ($realm)
 	return $result->fetch (PDO::FETCH_COLUMN, 0);
 }
 
+function getPatchCableConnectorList()
+{
+	$result = usePreparedSelectBlade ('SELECT id, origin, connector FROM PatchCableConnector ORDER BY connector');
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getPatchCableConnectorOptions()
+{
+	$ret = array();
+	foreach (getPatchCableConnectorList() as $item)
+		$ret[$item['id']] = $item['connector'] . ($item['origin'] == 'custom' ? ' (custom)' : '');
+	return $ret;
+}
+
+function getPatchCableTypeList()
+{
+	$result = usePreparedSelectBlade ('SELECT id, origin, pctype FROM PatchCableType ORDER BY pctype');
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getPatchCableTypeOptions()
+{
+	$ret = array();
+	foreach (getPatchCableTypeList() as $item)
+		$ret[$item['id']] = $item['pctype'] . ($item['origin'] == 'custom' ? ' (custom)' : '');
+	return $ret;
+}
+
+function getPatchCableHeapSummary()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT PCH.id, end1_conn_id, PCC1.connector AS end1_connector, pctype_id, pctype, ' .
+		'end2_conn_id, PCC2.connector AS end2_connector, amount, length, description, ' .
+		'COUNT(PCHL.id) AS logc FROM PatchCableHeap AS PCH ' .
+		'INNER JOIN PatchCableType AS PCT ON PCH.pctype_id = PCT.id ' .
+		'INNER JOIN PatchCableConnector AS PCC1 ON end1_conn_id = PCC1.id ' .
+		'INNER JOIN PatchCableConnector AS PCC2 ON end2_conn_id = PCC2.id ' .
+		'LEFT JOIN PatchCableHeapLog AS PCHL ON PCH.id = PCHL.heap_id ' .
+		'GROUP BY PCH.id ' .
+		'ORDER BY pctype, end1_connector, end2_connector, description, id '
+	);
+	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC));
+}
+
+function getPatchCableHeapOptionsForOIF ($oif_id)
+{
+	$result = usePreparedSelectBlade ('SELECT pctype_id FROM PatchCableOIFCompat WHERE oif_id = ?', array ($oif_id));
+	$pctypes = reduceSubarraysToColumn ($result->fetchAll (PDO::FETCH_ASSOC), 'pctype_id');
+	unset ($result);
+	$ret = array();
+	foreach (getPatchCableHeapSummary() as $item)
+		if ($item['amount'] > 0 && in_array ($item['pctype_id'], $pctypes))
+			$ret[$item['id']] = formatPatchCableHeapAsPlainText ($item);
+	return $ret;
+}
+
+function getPatchCableConnectorCompat()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT pctype_id, pctype, connector_id, connector FROM PatchCableConnectorCompat ' .
+		'INNER JOIN PatchCableType AS PCT ON pctype_id = PCT.id ' .
+		'INNER JOIN PatchCableConnector AS PCC ON connector_id = PCC.id ' .
+		'ORDER BY pctype, connector'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getPatchCableOIFCompat()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT pctype_id, pctype, oif_id, oif_name FROM PatchCableOIFCompat ' .
+		'INNER JOIN PatchCableType AS PCT ON pctype_id = PCT.id ' .
+		'INNER JOIN PortOuterInterface AS POI ON oif_id = POI.id ' .
+		'ORDER BY pctype, oif_name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function commitModifyPatchCableAmount ($heap_id, $by_amount)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	usePreparedExecuteBlade
+	(
+		'UPDATE PatchCableHeap SET amount = amount + ? WHERE id = ? AND amount + ? >= 0',
+		array ($by_amount, $heap_id, $by_amount)
+	);
+	addPatchCableHeapLogEntry ($heap_id, "amount adjusted by ${by_amount}");
+	return $dbxlink->commit();
+}
+
+function commitSetPatchCableAmount ($heap_id, $new_amount)
+{
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	usePreparedUpdateBlade
+	(
+		'PatchCableHeap',
+		array ('amount' => $new_amount),
+		array ('id' => $heap_id)
+	);
+	addPatchCableHeapLogEntry ($heap_id, "amount set to ${new_amount}");
+	return $dbxlink->commit();
+}
+
+function getPatchCableHeapLogEntries ($heap_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT date, user, message FROM PatchCableHeapLog WHERE heap_id = ? ORDER BY date DESC',
+		array ($heap_id)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function addPatchCableHeapLogEntry ($heap_id, $message)
+{
+	global $disable_logging;
+	if (isset ($disable_logging) && $disable_logging)
+		return;
+	global $remote_username;
+	usePreparedExecuteBlade
+	(
+		"INSERT INTO PatchCableHeapLog (heap_id, date, user, message) VALUES (?, NOW(), ?, ?)",
+		array ($heap_id, $remote_username, $message)
+	);
+}
+
 ?>

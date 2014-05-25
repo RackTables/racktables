@@ -15,6 +15,7 @@
 	bugfix: LLDP neighbors was empty for some Juniper devices
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
 	update: move port outer interfaces from the dictionary
+	new feature: patch cables accounting
 0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)
