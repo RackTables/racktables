@@ -13,6 +13,7 @@
 	update: new {$client_x.x.x.x} auto tag containing client's IP
 	update: link status feature is available on Juniper
 	update: new port menu item: "Show port learned MACs"
+	new feature: patch cables accounting
 0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)

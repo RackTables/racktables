@@ -277,6 +277,10 @@ function genericAssertion ($argname, $argtype)
 		return assertUIntArg ($argname);
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
+	case 'decimal':
+		if (! preg_match ('/^\d+(\.\d+)?$/', assertStringArg ($argname)))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
+		return $sic[$argname];
 	case 'inet':
 		return assertIPArg ($argname);
 	case 'inet4':
@@ -6157,6 +6161,14 @@ function getLastCreatedId ($realm)
 	foreach (array_reverse (lastCreated()) as $item)
 		if ($item['realm'] == $realm)
 			return $item['id'];
+}
+
+function formatPatchCableHeapAsPlainText ($heap)
+{
+	$text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
+	if ($heap['description'] != '')
+		$text .=  " (${heap['description']})";
+	return niftyString ($text, 512);
 }
 
 ?>

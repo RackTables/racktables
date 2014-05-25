@@ -595,6 +595,155 @@ $opspec_list['munin-servers-upd'] = array
 		array ('url_argname' => 'id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['cables-heaps-add'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'amount', 'fix_argvalue' => 0),
+		array ('url_argname' => 'length', 'assertion' => 'decimal'),
+		array ('url_argname' => 'description', 'assertion' => 'string0'),
+	),
+);
+$opspec_list['cables-heaps-del'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cables-heaps-upd'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'amount', 'assertion' => 'uint0'),
+		array ('url_argname' => 'length', 'assertion' => 'decimal'),
+		array ('url_argname' => 'description', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-connectors-add'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'connector', 'assertion' => 'string'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-connectors-del'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-connectors-upd'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'connector', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-add'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype', 'assertion' => 'string'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-del'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-upd'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'pctype', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-conncompat-add'] = array
+(
+	'table' => 'PatchCableConnectorCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-conncompat-del'] = array
+(
+	'table' => 'PatchCableConnectorCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-oifcompat-add'] = array
+(
+	'table' => 'PatchCableOIFCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-oifcompat-del'] = array
+(
+	'table' => 'PatchCableOIFCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
 
 $msgcode['addPortForwarding']['OK'] = 48;
 function addPortForwarding ()
@@ -3585,6 +3734,29 @@ function renameObjectPorts()
 		showSuccess ("Renamed $n ports");
 	else
 		showNotice ("Nothing renamed");
+}
+
+function consumePatchCable()
+{
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), -1))
+		showSuccess ('consumed OK');
+	else
+		showError ('could not consume');
+}
+
+function replenishPatchCable()
+{
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), 1))
+		showSuccess ('replenished OK');
+	else
+		showError ('could not replenish');
+}
+
+$msgcode['setPatchCableAmount']['OK'] = 51;
+function setPatchCableAmount()
+{
+	commitSetPatchCableAmount (genericAssertion ('id', 'uint'), genericAssertion ('amount', 'uint0'));
+	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 ?>

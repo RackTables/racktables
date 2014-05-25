@@ -278,6 +278,19 @@ function handlePopupPortLink()
 		if ($remote_port_info['oif_id'] != $type_remote)
 			commitUpdatePortOIF ($remote_port_info['id'], $type_remote);
 		linkPorts ($port_info['id'], $remote_port_info['id'], $_REQUEST['cable']);
+		// patch cable?
+		if (array_key_exists ('heap_id', $_REQUEST))
+		{
+			// Leave the compatibility constraints check up to the foreign keys.
+			if (0 != $heap_id = genericAssertion ('heap_id', 'uint0'))
+			{
+				$heaps = getPatchCableHeapSummary();
+				if (commitModifyPatchCableAmount ($heap_id, -1))
+					showSuccess ('consumed a patch cable from ' . formatPatchCableHeapAsPlainText ($heaps[$heap_id]));
+				else
+					showError ('failed to consume a patch cable');
+			}
+		}
 		showOneLiner 
 		(
 			8, 
@@ -439,6 +452,11 @@ function renderPopupPortSelector()
 	{
 		echo getSelect ($spare_ports, array ('name' => 'remote_port', 'size' => getConfigVar ('MAXSELSIZE')), NULL, FALSE);
 		echo "<p>Cable ID: <input type=text id=cable name=cable>";
+		// suggest patch cables where it makes sense
+		$heaps = getPatchCableHeapOptionsForOIF ($port_info['oif_id']);
+		if (count ($heaps))
+			// Use + instead of array_merge() to avoid renumbering the keys.
+			echo '<p>Patch cable: ' . getSelect (array (0 => 'none') + $heaps, array ('name' => 'heap_id'));
 		echo "<p><input type='submit' value='Link' name='do_link'>";
 	}
 	finishPortlet();
