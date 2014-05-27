@@ -663,7 +663,7 @@ function renderRow ($row_id)
 	$summary['Racks'] = $rowInfo['count'];
 	$summary['Units'] = $rowInfo['sum'];
 	$summary['% used'] = getProgressBar (getRSUforRow ($rackList));
-	foreach (getAttrValues ($row_id) as $record)
+	foreach (getAttrValuesSorted ($row_id) as $record)
 		if
 		(
 			$record['value'] != '' and
@@ -729,7 +729,7 @@ function renderEditRowForm ($row_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${row['name']}'></td></tr>\n";
 
 	// optional attributes
-	$values = getAttrValues ($row_id);
+	$values = getAttrValuesSorted ($row_id);
 	$num_attrs = count ($values);
 	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
 	$i = 0;
@@ -1088,7 +1088,7 @@ function renderEditObjectForm()
 	}
 	// optional attributes
 	$i = 0;
-	$values = getAttrValues ($object_id);
+	$values = getAttrValuesSorted ($object_id);
 	if (count($values) > 0)
 	{
 		foreach ($values as $record)
@@ -1180,7 +1180,7 @@ function renderEditRackForm ($rack_id)
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	// optional attributes
-	$values = getAttrValues ($rack_id);
+	$values = getAttrValuesSorted ($rack_id);
 	$num_attrs = count($values);
 	$num_attrs = $num_attrs-2; // subtract for the 'height' and 'sort_order' attributes
 	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
@@ -1281,7 +1281,7 @@ function renderRackInfoPortlet ($rackData)
 	populateRackPower ($rackData, $summary);
 	// Display populated attributes, but skip 'height' since it's already displayed above
 	// and skip 'sort_order' because it's modified using AJAX
-	foreach (getAttrValues ($rackData['id']) as $record)
+	foreach (getAttrValuesSorted ($rackData['id']) as $record)
 		if ($record['id'] != 27 && $record['id'] != 29 && strlen ($record['value']))
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
@@ -1418,7 +1418,7 @@ function renderObject ($object_id)
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
-	foreach (getAttrValues ($object_id) as $record)
+	foreach (getAttrValuesSorted ($object_id) as $record)
 		if
 		(
 			strlen ($record['value']) and
@@ -4054,7 +4054,7 @@ function renderLocationPage ($location_id)
 	$summary['Rows'] = count($locationData['rows']);
 	if ($locationData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
-	foreach (getAttrValues ($locationData['id']) as $record)
+	foreach (getAttrValuesSorted ($locationData['id']) as $record)
 		if
 		(
 			$record['value'] != '' and
@@ -4112,7 +4112,7 @@ function renderEditLocationForm ($location_id)
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	// optional attributes
-	$values = getAttrValues ($location_id);
+	$values = getAttrValuesSorted ($location_id);
 	$num_attrs = count($values);
 	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
 	$i = 0;
