@@ -3682,7 +3682,6 @@ function fetchAttrsForObjects ($object_set = array())
 		"left join Chapter as C on AM.chapter_id = C.id";
 	if (count ($object_set))
 		$query .= ' WHERE O.id IN (' . implode (', ', $object_set) . ')';
-	$query .= " ORDER BY A.name, A.type";
 
 	$result = usePreparedSelectBlade ($query);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -3741,6 +3740,33 @@ function getAttrValues ($object_id)
 		$object_attribute_cache[$object_id] = $attrs;
 	}
 	return $attrs;
+}
+
+// returns the same data as getAttrValues, but sorts the result array
+// by the attr_name using SQL server's collation
+function getAttrValuesSorted ($object_id)
+{
+	static $attr_order = NULL;
+	if (! isset ($attr_order))
+	{
+		$attr_order = array();
+		$result = usePreparedSelectBlade ("SELECT id FROM Attribute ORDER by name");
+		$i = 0;
+		foreach ($result->fetchAll (PDO::FETCH_COLUMN, 0) as $attr_id)
+			$attr_order[$attr_id] = $i++;
+		unset ($result);
+	}
+
+	$ret = getAttrValues ($object_id);
+	uksort ($ret,
+		function ($a, $b) use ($attr_order) {
+			return numCompare (
+				array_fetch ($attr_order, $a, 0),
+				array_fetch ($attr_order, $b, 0)
+			);
+		}
+	);
+	return $ret;
 }
 
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
