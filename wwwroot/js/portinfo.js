@@ -4,6 +4,7 @@ enabled_elements_count = enabled_elements.length;
 port_cmenu_items = [];
 wait_count = 0;
 bk_event = null;
+port_clicked = null;
 
 (function () {
 	var menu_item_candidates = {
@@ -28,8 +29,10 @@ bk_event = null;
 function showAllClicked(menuItem, menu) {
 	for (var i in enabled_elements) {
 		var name = enabled_elements[i];
-		if (name.match (/^(link|conf|mac)$/))
+		if (name.match (/^(link|conf|mac)$/)) {
+			port_clicked = this;
 			menuItemClicked($('.context-menu-item.itemname-' + name)[0], menu);
+		}
 	}
 }
 
@@ -70,6 +73,8 @@ function setItemIcon(menuItem, iconName) {
 }
 
 function menuItemClicked(menuItem, menu) {
+	if (!port_clicked)
+		port_clicked = this;
 	// if the item is already disabled, do not react on click
 	if ($(menuItem).hasClass($.contextMenu.disabledItemClassName))
 		return;
@@ -80,7 +85,8 @@ function menuItemClicked(menuItem, menu) {
 		return;
 	var type = matches[1];
 	var per_port_cmd = type == 'portmac';
-	var portnameElem = $(this).siblings('.interactive-portname')[0];
+	var portnameElem = $(port_clicked).siblings('.interactive-portname')[0];
+	port_clicked = null;
 
 	var bSuccessIcon = false;
 	$.ajax({
