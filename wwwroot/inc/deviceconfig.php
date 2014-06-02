@@ -3357,11 +3357,11 @@ function jun10ReadLLDPStatus ($input)
 	foreach (explode ("\n", $input) as $line)
 	{
 		$line = rtrim ($line);
-		if (preg_match ('/^Local Interface\s+Chassis Id\s+Port info\s+System Name$/', $line))
+		if (preg_match ('/^Local Interface.*\s+Chassis Id\s+Port info\s+System Name$/', $line))
 			$lldp_mode = TRUE;
 		elseif ($line == "")
 			$lldp_mode = FALSE;
-		elseif ($lldp_mode && preg_match ('/^(\S+)\s+([0-9a-f:]{17})\s+(.*?)\s+(\S+)\s*$/', $line, $m))
+		elseif ($lldp_mode && preg_match ('/^(\S+).*\s+([0-9a-f:]{17})\s+(.*?)\s+(\S+)\s*$/', $line, $m))
 			$ret[shortenIfName ($m[1])][] = array
 			(
 				'port' => $m[3],
