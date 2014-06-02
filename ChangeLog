@@ -12,6 +12,7 @@
 	bugfix: Native vlan on Huawei trunk ports no longer gets to the allowed vlans list
 	bugfix: Data Integrity report hit memory limit
 	bugfix: creating racks with tags cause warnings in TagStorage: Missing Parents integrity report
+	bugfix: LLDP neighbors was empty for some Juniper devices
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
 	update: move port outer interfaces from the dictionary
 0.20.7 2014-03-03
