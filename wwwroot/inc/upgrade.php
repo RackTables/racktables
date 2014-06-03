@@ -1619,7 +1619,7 @@ CREATE TABLE `PortOuterInterface` (
   `oif_name` char(48) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `oif_name` (`oif_name`)
-) ENGINE=InnoDB
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 ";
 			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
 			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
