@@ -1811,6 +1811,8 @@ CREATE TABLE `PatchCableOIFCompat` (
 (21,8),(22,8), -- MPO-24/APC
 (23,14), -- SFP-1000
 (24,15),(25,15),(26,15),(27,15) -- SFP+";
+			// add rules for Cisco UCS objects
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1787,8),(1787,1502)";
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.21.0':

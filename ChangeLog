@@ -8,6 +8,7 @@
 	bugfix: Data Integrity report hit memory limit
 	bugfix: creating racks with tags cause warnings in TagStorage: Missing Parents integrity report
 	bugfix: LLDP neighbors was empty for some Juniper devices
+	bugfix: add object container compatibility rules for Cisco UCS (#1245) 
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
 	update: move port outer interfaces from the dictionary
 	update: syncdomain.php now provides some new CLI options and better lockfile handling
