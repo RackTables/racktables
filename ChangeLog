@@ -1,10 +1,5 @@
 0.21.0
-	update: SNMP support for Cisco 2960X-24PS-L, 2960X-24PD-L
-	update: syncdomain.php now provides some new CLI options and better lockfile handling
-	update: new {$client_x.x.x.x} auto tag containing client's IP
 	update: explicitly require PHP version 5.3.0 or newer
-	update: link status feature is available on Juniper
-	update: new port menu item: "Show port learned MACs"
 0.20.8
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks
@@ -15,6 +10,11 @@
 	bugfix: LLDP neighbors was empty for some Juniper devices
 	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
 	update: move port outer interfaces from the dictionary
+	update: syncdomain.php now provides some new CLI options and better lockfile handling
+	update: SNMP support for Cisco 2960X-24PS-L, 2960X-24PD-L
+	update: new {$client_x.x.x.x} auto tag containing client's IP
+	update: link status feature is available on Juniper
+	update: new port menu item: "Show port learned MACs"
 	new feature: patch cables accounting
 0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
