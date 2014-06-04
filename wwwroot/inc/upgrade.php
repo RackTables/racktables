@@ -1613,6 +1613,8 @@ ENDOFTRIGGER;
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.8':
+			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";
+
 			$query[] = "
 CREATE TABLE `PortOuterInterface` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -1812,8 +1814,6 @@ CREATE TABLE `PatchCableOIFCompat` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.21.0':
-			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";
-
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
