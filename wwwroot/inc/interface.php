@@ -9904,12 +9904,12 @@ function getPatchCableHeapCursorCode ($heap, $zoom_heap_id)
 	if ($heap['id'] == $zoom_heap_id)
 	{
 		$imagename = 'Zooming';
-		$imagetext = 'zoom out';
+		$imagetext = 'hide event log';
 	}
 	else
 	{
 		$imagename = 'Zoom';
-		$imagetext = 'zoom in';
+		$imagetext = 'display event log';
 		$linkparams['zoom_heap_id'] = $heap['id'];
 	}
 	return '<a href="' . makeHref ($linkparams) . '">'  . getImageHREF ($imagename, $imagetext) . '</a>';
