@@ -3,3 +3,11 @@ wwwroot/inc/local.php
 /.project
 tags
 plugins/*
+
+# vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
