@@ -4963,6 +4963,7 @@ function renderLivePTR ($id)
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
 	$range = spotEntity ('ipv4net', $id);
 	loadIPAddrList ($range);
+	$can_import = permitted (NULL, NULL, 'importPTRData');
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
@@ -4987,12 +4988,18 @@ function renderLivePTR ($id)
 	echo "</center>";
 
 	// FIXME: address counter could be calculated incorrectly in some cases
-	printOpFormIntro ('importPTRData', array ('addrcount' => ($endip - $startip + 1)));
+	if ($can_import)
+	{
+		printOpFormIntro ('importPTRData', array ('addrcount' => ($endip - $startip + 1)));
+		$idx = 1;
+		$box_counter = 1;
+	}
 
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
-	echo "<tr><th>address</th><th>current name</th><th>DNS data</th><th>import</th></tr>\n";
-	$idx = 1;
-	$box_counter = 1;
+	echo '<tr><th>address</th><th>current name</th><th>DNS data</th>';
+	if ($can_import)
+		echo '<th>import</th>';
+	echo '</tr>';
 	$cnt_match = $cnt_mismatch = $cnt_missing = 0;
 	for ($ip = $startip; $ip <= $endip; $ip++)
 	{
@@ -5004,9 +5011,12 @@ function renderLivePTR ($id)
 		$ptrname = gethostbyaddr ($straddr);
 		if ($ptrname == $straddr)
 			$ptrname = '';
-		echo "<input type=hidden name=addr_${idx} value=${straddr}>\n";
-		echo "<input type=hidden name=descr_${idx} value=${ptrname}>\n";
-		echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
+		if ($can_import)
+		{
+			echo "<input type=hidden name=addr_${idx} value=${straddr}>\n";
+			echo "<input type=hidden name=descr_${idx} value=${ptrname}>\n";
+			echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
+		}
 		echo '<tr';
 		$print_cbox = FALSE;
 		// Ignore network and broadcast addresses
@@ -5036,20 +5046,29 @@ function renderLivePTR ($id)
 		if (isset ($range['addrlist'][$ip_bin]['class']) and strlen ($range['addrlist'][$ip_bin]['class']))
 			echo ' ' . $range['addrlist'][$ip_bin]['class'];
 		echo "'>" . mkA ($straddr, 'ipaddress', $straddr) . '</td>';
-		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td><td>";
-		if ($print_cbox)
-			echo "<input type=checkbox name=import_${idx} tabindex=${idx} id=atom_1_" . $box_counter++ . "_1>";
-		else
-			echo '&nbsp;';
-		echo "</td></tr>\n";
-		$idx++;
+		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td>";
+		if ($can_import)
+		{
+			echo '<td>';
+			if ($print_cbox)
+				echo "<input type=checkbox name=import_${idx} tabindex=${idx} id=atom_1_" . $box_counter++ . "_1>";
+			else
+				echo '&nbsp;';
+			echo '</td>';
+			$idx++;
+		}
+		echo "</tr>\n";
 	}
-	echo "<tr><td colspan=3 align=center><input type=submit value='Import selected records'></td><td>";
-	addJS ('js/racktables.js');
-	echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, ${box_counter})\">(toggle selection)</a>" : '&nbsp;';
-	echo "</td></tr>";
+	if ($can_import && $box_counter > 1)
+	{
+		echo '<tr><td colspan=3 align=center><input type=submit value="Import selected records"></td><td>';
+		addJS ('js/racktables.js');
+		echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, ${box_counter})\">(toggle selection)</a>" : '&nbsp;';
+		echo '</td></tr>';
+	}
 	echo "</table>";
-	echo "</form>";
+	if ($can_import)
+		echo '</form>';
 	finishPortlet();
 
 	echo "</td><td class=pcright>";
