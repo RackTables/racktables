@@ -627,7 +627,6 @@ $opspec_list['cables-heaps-upd'] = array
 		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'amount', 'assertion' => 'uint0'),
 		array ('url_argname' => 'length', 'assertion' => 'decimal'),
 		array ('url_argname' => 'description', 'assertion' => 'string0'),
 	),
