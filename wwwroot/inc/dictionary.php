@@ -2070,6 +2070,9 @@ $dictionary = array
 	2177 => array ('chapter_id' => 13, 'dict_value' => '[[Univention%GSKIP%Univention Corporate Server 3.2 (borgfeld) | http://docs.univention.de/release-notes-3.2-2-de.html]]'),
 	2178 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP8941 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP8941]]'),
 	2179 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP8959EU3 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP8959EU3]]'),
+	2180 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.0]]'),
+	2181 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.1]]'),
+	2182 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.2 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.2]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
