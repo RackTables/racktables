@@ -219,6 +219,7 @@ function assertBreedFunction ($breed, $command)
 
 function queryDevice ($object_id, $command, $args = array())
 {
+	$ret = NULL;
 	$request = array ('opcode' => $command);
 	if (is_array ($args) && count ($args))
 	{
@@ -263,6 +264,8 @@ function queryDevice ($object_id, $command, $args = array())
 
 	if (NULL !== ($subst = callHook ('alterDeviceQueryResult', $ret, $object_id, $command)))
 		$ret = $subst;
+	if (! isset ($ret))
+		throw new RTGatewayError ("No result from $command");
 	return $ret;
 }
 
