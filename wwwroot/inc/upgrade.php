@@ -264,6 +264,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.6',
 		'0.20.7',
 		'0.20.8',
+		'0.20.9',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1808,6 +1809,9 @@ CREATE TABLE `PatchCableOIFCompat` (
 			// add rules for Cisco UCS objects
 			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1787,8),(1787,1502)";
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.9':
+			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

@@ -2257,6 +2257,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-mgmt',
 		),
 	),
+	'9.1.1245' => array
+	(
+		'dict_key' => 2211,
+		'text' => 'CGS-2520-24TC: 24 RJ-45/10-100T(X) + 2 combo gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.1257' => array
 	(
 		'dict_key' => 1391,
