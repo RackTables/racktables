@@ -2511,6 +2511,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J8692A: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
 		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
+	'11.2.3.7.11.59' => array
+	(
+		'dict_key' => 877,
+		'text' => 'J8693A: 44 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'11.2.3.7.11.62' => array
 	(
 		'dict_key' => 855,
