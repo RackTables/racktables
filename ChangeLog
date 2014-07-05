@@ -1,6 +1,6 @@
 0.20.9
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), HP J8693A (#1251),
-		Linksys SRW2024P (#1183)
+		HP J9728A (#1255), Linksys SRW2024P (#1183)
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks

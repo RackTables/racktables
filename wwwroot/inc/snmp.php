@@ -2640,6 +2640,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9452A: 48 RJ-45/10-100-1000T + 2 SFP-10000+',
 		'processors' => array ('procurve-49-to-52-10000SFP+', 'procurve-chassis-1000T'),
 	),
+	'11.2.3.7.11.154' => array
+	(
+		'dict_key' => 2213,
+		'text' => 'J9728A: 44 RJ-45/10-100-1000T + 4 combo-gig',
+		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
 	'43.1.16.4.3.8' => array
 	(
 		'dict_key' => 780,
@@ -3354,10 +3360,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			87 => '1-29',
 			94 => '1-29',
 			95 => '1-29',
+			154 => '1-29',
 			19 => '1-681', # DB-9 RS-232
 			31 => '1-681',
 			34 => '1-681',
 			58 => '1-681',
+			59 => '1-681',
 		);
 		if (array_key_exists ($matches[1], $console_per_product))
 		{
