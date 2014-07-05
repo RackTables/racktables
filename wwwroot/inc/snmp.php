@@ -25,6 +25,15 @@ $iftable_processors['generic-fa-any-100TX'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['generic-g12-and-g24-combo-1000SFP'] = array
+(
+	'pattern' => '@^g(12|24)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
 $iftable_processors['generic-g45-to-g48-combo-1000SFP'] = array
 (
 	'pattern' => '@^g(45|46|47|48)$@',
@@ -2986,6 +2995,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
 	),
+	'3955.6.1.2024.1' => array
+	(
+		'dict_key' => 2212,
+		'text' => 'Linksys SRW2024P: 22 RJ-45/10-100-1000T(X) + 2 combo ports',
+		'processors' => array ('generic-g12-and-g24-combo-1000SFP', 'generic-g-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
 	'3955.6.1.2048.1' => array
 	(
 		'dict_key' => 1624,
@@ -3482,7 +3498,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
-	case preg_match ('/^3955\.6\.1\.2048\.1/', $sysObjectID): // Linksys
+	case preg_match ('/^3955\.6\.1\.20(24|48)\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
 	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
 	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
