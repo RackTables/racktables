@@ -2983,6 +2983,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'CE5850-48T4S2Q-EI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
 		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
+	'2011.2.239.5' => array
+	(
+		'dict_key' => 1772,
+		'text' => 'CE6850-48S4Q-EI: 48 4 SFP+ slots + 4 QSFP+ slots',
+		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
 	'2636.1.1.1.2.29' => array
 	(
 		'dict_key' => 925,
