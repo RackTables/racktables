@@ -510,6 +510,15 @@ $iftable_processors['catalyst-stack-25-to-28-SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-stack-49-to-52-SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(49|50|51|52)$@',
+	'replacement' => 'gi\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\1 port \\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-stack-1-to-4-SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/([1-4])$@',
@@ -2319,6 +2328,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2112,
 		'text' => 'WS-C2960X-24PD-L: 24 RJ-45/10-100-1000T(X) + 2 SFP+/10000',
 		'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+
+	),
+	'9.1.1696' => array
+	(
+		'dict_key' => 2116,
+		'text' => 'WS-C2960X-48LPS-L: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
+		'processors' => array ('catalyst-stack-49-to-52-SFP', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
 
 	),
 	'9.1.1697' => array
