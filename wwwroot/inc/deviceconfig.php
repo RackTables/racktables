@@ -2616,6 +2616,9 @@ function iosxr4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors\n";
 			break;
+		case 'getportstatus':
+			$ret .= "show interfaces brief\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -3460,6 +3463,36 @@ function iosxr4ReadLLDPStatus ($input)
 	}
 
 	return $ret;
+}
+
+function iosxr4ReadInterfaceStatus ($input)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $input) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch' && preg_match("/^\s*-{10+}\s*$/", $line):
+				$state = 'readPort';
+				break;
+			case 'readPort' && preg_match ("/^\s+([A-Za-z0-9\/]+)\s+([a-z-]+)\s+([a-z-]+)/", $line, $m):
+				$portname = shortenIfName ($m[1]);
+				$line_state = $m[3];
+				if ($line_state == 'up')
+					$status = 'up';
+				elseif ($line_state == 'down')
+					$status = 'down';
+				else
+					$status = 'disabled';
+				$result[$portname] = array
+				(
+					'status' => $status
+				);
+				break;
+		}
+	}
+	return $result;
 }
 
 ?>

@@ -108,6 +108,7 @@ $breedfunc = array
 	'iosxr4-xlatepushq-main'   => 'iosxr4TranslatePushQueue',
 	'iosxr4-getallconf-main'   => 'iosxr4SpotConfigText',
 	'iosxr4-getlldpstatus-main'=> 'iosxr4ReadLLDPStatus',
+	'iosxr4-getportstatus-main'=> 'iosxr4ReadInterfaceStatus',
 	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
 	'ucs-getinventory-main'    => 'ucsReadInventory',
 );
