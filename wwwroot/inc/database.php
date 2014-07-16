@@ -4385,12 +4385,21 @@ function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
 		throw new InvalidArgException ('$name', $name);
-	usePreparedExecuteBlade
+	if (!isset ($text))
+		return deleteScript ($name);
+	return usePreparedExecuteBlade
 	(
 		'INSERT INTO Script (script_name, script_text) VALUES (?, ?) ' .
 		'ON DUPLICATE KEY UPDATE script_text=?',
 		array ($name, $text, $text)
 	);
+}
+
+function deleteScript ($name)
+{
+	if (!strlen ($name))
+		throw new InvalidArgException ('$name', $name);
+	return usePreparedDeleteBlade ('Script', array ('script_name' => $name));
 }
 
 function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin, $remoteport, $proto, $description)
