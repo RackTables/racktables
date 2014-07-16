@@ -2026,15 +2026,22 @@ function showMessageOrError ()
 // renders two tables: port link status and learned MAC list
 function renderPortsInfo($object_id)
 {
+	$breed = detectDeviceBreed ($object_id);
 	try
 	{
 		if (permitted (NULL, NULL, 'get_link_status'))
-			$linkStatus = queryDevice ($object_id, 'getportstatus');
+		{
+			if (validBreedFunction ($breed, 'getportstatus'))
+				$linkStatus = queryDevice ($object_id, 'getportstatus');
+		}
 		else
 			showWarning ("You don't have permission to view ports link status");
 
 		if (permitted (NULL, NULL, 'get_mac_list'))
-			$macList = sortPortList (queryDevice ($object_id, 'getmaclist'));
+		{
+			if (validBreedFunction ($breed, 'getmaclist'))
+				$macList = sortPortList (queryDevice ($object_id, 'getmaclist'));
+		}
 		else
 			showWarning ("You don't have permission to view learned MAC list");
 	}
