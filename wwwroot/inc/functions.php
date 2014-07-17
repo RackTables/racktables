@@ -4474,8 +4474,26 @@ function acceptable8021QConfig ($port)
 	}
 }
 
-function authorize8021QChangeRequests ($before, $changes)
+function nativeVlanChangePermitted ($pn, $from_vid, $to_vid, $op = NULL)
 {
+	$before = array ($pn => array (
+		'mode' => 'access',
+		'native' => $from_vid,
+		'allowed' => array ($from_vid),
+	));
+	$changes = array ($pn => array (
+		'mode' => 'access',
+		'native' => $to_vid,
+		'allowed' => array ($to_vid),
+	));
+
+	return count (authorize8021QChangeRequests ($before, $changes, $op)) != 0;
+}
+
+function authorize8021QChangeRequests ($before, $changes, $op = NULL)
+{
+	if (NULL !== $ret = callHook ('authorize8021QChangeRequests_hook', $before, $changes, $op))
+		return $ret;
 	global $script_mode;
 	if (isset ($script_mode) and $script_mode)
 		return $changes;
@@ -4483,10 +4501,10 @@ function authorize8021QChangeRequests ($before, $changes)
 	foreach ($changes as $pn => $change)
 	{
 		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
 				continue 2; // next port
 		foreach (array_diff ($change['allowed'], $before[$pn]['allowed']) as $added_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
 				continue 2; // next port
 		$ret[$pn] = $change;
 	}

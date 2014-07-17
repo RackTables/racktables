@@ -7355,7 +7355,6 @@ function renderObject8021QPorts ($object_id)
 // and modify $nports, when this text was a series of INPUTs.
 function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$nports)
 {
-	static $permissions_cache = array();
 	// don't render a form for access ports, when a trunk port is zoomed
 	if ($req_port_name != '')
 		return '&nbsp;';
@@ -7366,29 +7365,14 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	)
 		return formatVLANAsLabel ($vdom['vlanlist'][$port['native']]);
 
-	static $vlanpermissions = array();
-	if (!array_key_exists ($port['native'], $vlanpermissions))
+	static $vlanpermissions = array(); // index: from_vid. value: to_list
+	$from = $port['native'];
+	if (!array_key_exists ($from, $vlanpermissions))
 	{
-		$vlanpermissions[$port['native']] = array();
+		$vlanpermissions[$from] = array();
 		foreach (array_keys ($vdom['vlanlist']) as $to)
-		{
-			$from_key = 'from_' . $port['native'];
-			$to_key = 'to_' . $to;
-			if (isset ($permissions_cache[$from_key]))
-				$allowed_from = $permissions_cache[$from_key];
-			else
-				$allowed_from = $permissions_cache[$from_key] = permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$fromvlan_' . $port['native']), array ('tag' => '$vlan_' . $port['native'])));
-			if ($allowed_from)
-			{
-				if (isset ($permissions_cache[$to_key]))
-					$allowed_to = $permissions_cache[$to_key];
-				else
-					$allowed_to = $permissions_cache[$to_key] = permitted (NULL, NULL, 'save8021QConfig', array (array ('tag' => '$tovlan_' . $to), array ('tag' => '$vlan_' . $to)));
-
-				if ($allowed_to)
-					$vlanpermissions[$port['native']][] = $to;
-			}
-		}
+			if (nativeVlanChangePermitted ($port_name, $from, $to, 'save8021QConfig'))
+				$vlanpermissions[$from][] = $to;
 	}
 	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
@@ -7401,9 +7385,9 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 		if
 		(
-			($vlan_id != $port['native'] or $port['mode'] == 'trunk') and
+			($vlan_id != $from or $port['mode'] == 'trunk') and
 			$vlan_info['vlan_type'] != 'alien' and
-			in_array ($vlan_id, $vlanpermissions[$port['native']]) and
+			in_array ($vlan_id, $vlanpermissions[$from]) and
 			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 		)
 			$options[$vlan_id] = formatVLANAsOption ($vlan_info);
