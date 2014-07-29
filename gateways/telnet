@@ -59,13 +59,16 @@ my $session = Net::Telnet->new (
 use IO::Select;
 my $sel = new IO::Select($session);
 
+$|=1;
 my $buff = '';
 my $nohang_read;
 until ($session->eof) {
 	# read output from the device
     eval {
-		$buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
-	};
+        my $chunk = $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+        $buff .= $chunk;
+        print $chunk;
+    };
 	if ($@) {
 		# check if there is something else in <STDIN>
 		if (defined <STDIN>) {
@@ -76,7 +79,7 @@ until ($session->eof) {
 		}
 	}
     $nohang_read = 0;
-	print $1 if ($buff =~ s/(.*\n)//s);
+	$buff =~ s/(.*\n)//s;
 
     next unless ($buff =~ $prompt_re);
     # send pending commands to the device
@@ -95,4 +98,3 @@ until ($session->eof) {
         last;
     }
 }
-print $buff;
