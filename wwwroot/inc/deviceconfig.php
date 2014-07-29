@@ -100,6 +100,42 @@ function xos12ReadLLDPStatus ($input)
 	return $ret;
 }
 
+function xos12ReadInterfaceStatus ($input)
+{
+	$ret = array();
+	foreach (explode ("\n", $input) as $line)
+		if (preg_match('/^(\d+)\s+([ED])[a-zA-Z-]+\s+(active|ready)\s+/', $line, $m))
+		{
+			$portname = shortenIfName ($m[1]);
+			if ($m[3] == 'active')
+				$status = 'up';
+			elseif ($m[2] == 'E')
+				$status = 'down';
+			else
+				$status = 'disabled';
+			$ret[$portname]['status'] = $status;
+		}
+	return $ret;
+}
+
+function xos12ReadMacList ($input)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $input) as $line)
+		if (preg_match('/((?:[\da-f]{2}:){5}[\da-f]{2})\s+\S+\((\d{4})\).*\s+(\d+)\s*$/', $line, $m))
+		{
+			$portname = shortenIfName ($m[3]);
+			$result[$portname][] = array(
+				'mac' => $m[1],
+				'vid' => intval ($m[2]),
+			);
+		}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
+}
+
 function vrpReadLLDPStatus ($input)
 {
 	$ret = array();
@@ -1675,6 +1711,15 @@ function xos12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		case 'getallconf':
 			$ret .= "show configuration\n";
+			break;
+		case 'getportstatus':
+			$ret .= "show ports information\n";
+			break;
+		case 'getmaclist':
+			$ret .= "show fdb\n";
+			break;
+		case 'getportmaclist':
+			$ret .= "show fdb ports {$cmd['arg1']}\n";
 			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);

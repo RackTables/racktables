@@ -4,6 +4,7 @@
 		Huawei CE6850-48S4Q-EI
 	update: link status feature is available on Cisco IOS XR (ASR)
 	update: remember last successful LDAP server to minimize LDAP auth delay
+	update: link status, MAC list support for ExtremeXOS
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks
