@@ -2030,7 +2030,6 @@ $dictionary = array
 	2138 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 48PST-S'),
 	2139 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 24PC-S'),
 	2140 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 24LC-S'),
-	2142 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 48TC-S'),
 	2141 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 24TC-S'),
 	2142 => array ('chapter_id' => 14, 'dict_value' => 'Cisco IOS 15.2'),
 	2143 => array ('chapter_id' => 13, 'dict_value' => 'Red Hat Enterprise%GSKIP%RHEL V7'),
@@ -2109,6 +2108,7 @@ $dictionary = array
 	2216 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS5610-52X | http://www.edge-core.com/ProdDtl.asp?sno=436&AS5610-52X%20with%20ONIE]]'),
 	2217 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS5600-52X | http://www.edge-core.com/ProdDtl.asp?sno=423&AS5600-52X%20with%20ONIE]]'),
 	2218 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS4600-54T | http://www.edge-core.com/ProdDtl.asp?sno=425&AS4600-54T%20with%20ONIE]]'),
+	2219 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 48TC-S'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
