@@ -2104,6 +2104,11 @@ $dictionary = array
 	2211 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%CGS-2520-24TC'),
 	2212 => array ('chapter_id' => 12, 'dict_value' => 'Linksys%GPASS%SRW2024P'),
 	2213 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2920-48G J9728A'),
+	2214 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS6700-32X | http://www.edge-core.com/ProdDtl.asp?sno=435&AS6700-32X%20with%20ONIE]]'),
+	2215 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS6701-32X | http://www.edge-core.com/ProdDtl.asp?sno=435&AS6700-32X%20with%20ONIE]]'),
+	2216 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS5610-52X | http://www.edge-core.com/ProdDtl.asp?sno=436&AS5610-52X%20with%20ONIE]]'),
+	2217 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS5600-52X | http://www.edge-core.com/ProdDtl.asp?sno=423&AS5600-52X%20with%20ONIE]]'),
+	2218 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS4600-54T | http://www.edge-core.com/ProdDtl.asp?sno=425&AS4600-54T%20with%20ONIE]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
