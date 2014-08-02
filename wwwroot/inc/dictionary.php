@@ -2109,6 +2109,12 @@ $dictionary = array
 	2217 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS5600-52X | http://www.edge-core.com/ProdDtl.asp?sno=423&AS5600-52X%20with%20ONIE]]'),
 	2218 => array ('chapter_id' => 12, 'dict_value' => '[[Edge-Core%GPASS%AS4600-54T | http://www.edge-core.com/ProdDtl.asp?sno=425&AS4600-54T%20with%20ONIE]]'),
 	2219 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-Plus 48TC-S'),
+	2220 => array ('chapter_id' => 31, 'dict_value' => 'Cisco%GPASS%UCS 5108 AC2 Blade Chassis%L4,2H%'),
+	2221 => array ('chapter_id' => 31, 'dict_value' => 'Cisco%GPASS%UCS 5108 DC2 Blade Chassis%L4,2H%'),
+	2222 => array ('chapter_id' => 31, 'dict_value' => 'Cisco%GPASS%UCS 5108 HVDC Blade Chassis%L4,2H%'),
+	2223 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B260 M4'),
+	2224 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B460 M4'),
+	2225 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B200 M4'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

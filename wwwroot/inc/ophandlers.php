@@ -3283,6 +3283,14 @@ $ucsproductmap = array
 	'UCS-FI-6248UP' => 1757, # 6248 FI
 	'UCS-FI-6296UP' => 1758, # 6296 FI
 	'N20-C6508' => 1735, # 5108 chassis
+	'UCSB-5108-AC2' => 2220, # 5108-AC2 chassis
+	'UCSB-5108-DC2' => 2221, # 5108-DC2 chassis
+	'UCSB-5108-HVDC' => 2222, # 5108-HVDC chassis
+	'UCSB-B420-M3' => 1744,   # B420 M3
+	'UCSB-B22-M3'  => 1745,   # B22 M3
+	'UCSB-B260-M4' => 2223,   # B260 M4
+	'UCSB-B460-M4' => 2224,   # B460 M4
+	'UCSB-B200-M4' => 2225,   # B200 M4
 );
 
 function autoPopulateUCS()
