@@ -1598,7 +1598,7 @@ $dictionary = array
 	1706 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 11.04'),
 	1707 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 11.10'),
 	1708 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 12.04 LTS'),
-	1709 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 7.0 (wheezy) | http://debian.org/releases/wheezy/]]'),
+	1709 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 7 (wheezy) | http://debian.org/releases/wheezy/]]'),
 	1710 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 2960-24TC-L'),
 	1711 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2520-24-PoE J9138A'),
 	1712 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R210 II'),
