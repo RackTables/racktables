@@ -472,7 +472,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 
 function proxyMuninRequest ($server_id, $graph)
 {
-	$object = spotEntity ('object', $server_id);
+	$object = spotEntity ('object', getBypassValue());
 	list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
 
 	$ret = array();
