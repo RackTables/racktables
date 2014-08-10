@@ -193,8 +193,35 @@ ENDOFTEXT
 ,
 
 	'0.20.7' => <<<ENDOFTEXT
+From now on the minimum (oldest) release of PHP that can run RackTables is
+5.2.10. In particular, to continue running RackTables on CentOS 5 it is
+necessary to replace its php* RPM packages with respective php53* packages
+before the upgrade (except the JSON package, which PHP 5.3 provides internally).
+
+Database triggers are used for some data consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
+
 The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
 the IP addressing feature for all object types except those listed.
+
+Tags could now be assigned on the Edit/Properties tab using a text input with
+auto-completion. Type a star '*' to view full tag tree in auto-complete menu.
+It is worth to add the following line to the permissions script if the
+old-fashioned 'Tags' tab is not needed any more:
+  deny {\$tab_tags} # this hides 'Tags' tab
+
+This release converts collation of all DB fields to the utf8_unicode_ci. This
+procedure may take some time, and could fail if there are rows that differ only
+by letter case. If this happen, you'll see the failed SQL query in upgrade report
+with the "Duplicate entry" error message. Feel free to continue using your
+installation. If desired so, you could eliminate the case-duplicating rows
+and re-apply the failed query.
+ENDOFTEXT
+,
+
+	'0.21.0' => <<<ENDOFTEXT
+The minimum (oldest) supported release of PHP is 5.3.
 ENDOFTEXT
 ,
 );
@@ -241,6 +268,9 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.5',
 		'0.20.6',
 		'0.20.7',
+		'0.20.8',
+		'0.20.9',
+		'0.21.0',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1369,6 +1399,131 @@ CREATE TABLE `VSEnabledPorts` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.6' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.7':
+			if (! isInnoDBSupported ())
+			{
+				showUpgradeError ('Cannot upgrade because triggers are not supported by your MySQL server.', __FUNCTION__);
+				die;
+			}
+
+			// for the UNIQUE key to work, portb needs to be > porta
+			$result = $dbxlink->query ('SELECT porta, portb FROM `Link` WHERE porta > portb');
+			$links = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+			foreach ($links as $link)
+				$query[] = "UPDATE `Link` SET `porta`=${link['portb']}, `portb`=${link['porta']} WHERE `porta`=${link['porta']} AND `portb`=${link['portb']}";
+
+			// add triggers
+			$query[] = "
+CREATE TRIGGER `EntityLink-before-insert` BEFORE INSERT ON `EntityLink` FOR EACH ROW
+EntityLinkTrigger:BEGIN
+  DECLARE parent_objtype, child_objtype, count INTEGER;
+
+  # forbid linking an entity to itself
+  IF NEW.parent_entity_type = NEW.child_entity_type AND NEW.parent_entity_id = NEW.child_entity_id THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  # in some scenarios, only one parent is allowed
+  CASE CONCAT(NEW.parent_entity_type, '.', NEW.child_entity_type)
+    WHEN 'location.location' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'location' AND child_entity_id = NEW.child_entity_id;
+    WHEN 'location.row' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'row' AND child_entity_id = NEW.child_entity_id;
+    WHEN 'row.rack' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'row' AND child_entity_type = 'rack' AND child_entity_id = NEW.child_entity_id;
+    ELSE
+      # some other scenario, assume it is valid
+      SET count = 0;
+  END CASE; 
+  IF count > 0 THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  IF NEW.parent_entity_type = 'object' AND NEW.child_entity_type = 'object' THEN
+    # lock objects to prevent concurrent link establishment
+    SELECT objtype_id INTO parent_objtype FROM Object WHERE id = NEW.parent_entity_id FOR UPDATE;
+    SELECT objtype_id INTO child_objtype FROM Object WHERE id = NEW.child_entity_id FOR UPDATE;
+
+    # only permit the link if object types are compatibile
+    SELECT COUNT(*) INTO count FROM ObjectParentCompat WHERE parent_objtype_id = parent_objtype AND child_objtype_id = child_objtype;
+    IF count = 0 THEN
+      SET NEW.parent_entity_id = NULL;
+    END IF;
+  END IF;
+END;
+";
+			$query[] = "
+CREATE TRIGGER `EntityLink-before-update` BEFORE UPDATE ON `EntityLink` FOR EACH ROW
+EntityLinkTrigger:BEGIN
+  DECLARE parent_objtype, child_objtype, count INTEGER;
+
+  # forbid linking an entity to itself
+  IF NEW.parent_entity_type = NEW.child_entity_type AND NEW.parent_entity_id = NEW.child_entity_id THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  # in some scenarios, only one parent is allowed
+  CASE CONCAT(NEW.parent_entity_type, '.', NEW.child_entity_type)
+    WHEN 'location.location' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'location' AND child_entity_id = NEW.child_entity_id AND id != NEW.id;
+    WHEN 'location.row' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'location' AND child_entity_type = 'row' AND child_entity_id = NEW.child_entity_id AND id != NEW.id;
+    WHEN 'row.rack' THEN
+      SELECT COUNT(*) INTO count FROM EntityLink WHERE parent_entity_type = 'row' AND child_entity_type = 'rack' AND child_entity_id = NEW.child_entity_id AND id != NEW.id;
+    ELSE
+      # some other scenario, assume it is valid
+      SET count = 0;
+  END CASE; 
+  IF count > 0 THEN
+    SET NEW.parent_entity_id = NULL;
+    LEAVE EntityLinkTrigger;
+  END IF;
+
+  IF NEW.parent_entity_type = 'object' AND NEW.child_entity_type = 'object' THEN
+    # lock objects to prevent concurrent link establishment
+    SELECT objtype_id INTO parent_objtype FROM Object WHERE id = NEW.parent_entity_id FOR UPDATE;
+    SELECT objtype_id INTO child_objtype FROM Object WHERE id = NEW.child_entity_id FOR UPDATE;
+
+    # only permit the link if object types are compatibile
+    SELECT COUNT(*) INTO count FROM ObjectParentCompat WHERE parent_objtype_id = parent_objtype AND child_objtype_id = child_objtype;
+    IF count = 0 THEN
+      SET NEW.parent_entity_id = NULL;
+    END IF;
+  END IF;
+END;
+";
+			$link_trigger_body = <<<ENDOFTRIGGER
+LinkTrigger:BEGIN
+  DECLARE tmp, porta_type, portb_type, count INTEGER;
+
+  IF NEW.porta = NEW.portb THEN
+    # forbid connecting a port to itself
+    SET NEW.porta = NULL;
+    LEAVE LinkTrigger;
+  ELSEIF NEW.porta > NEW.portb THEN
+    # force porta < portb
+    SET tmp = NEW.porta;
+    SET NEW.porta = NEW.portb;
+    SET NEW.portb = tmp;
+  END IF; 
+
+  # lock ports to prevent concurrent link establishment
+  SELECT type INTO porta_type FROM Port WHERE id = NEW.porta FOR UPDATE;
+  SELECT type INTO portb_type FROM Port WHERE id = NEW.portb FOR UPDATE;
+
+  # only permit the link if ports are compatibile
+  SELECT COUNT(*) INTO count FROM PortCompat WHERE (type1 = porta_type AND type2 = portb_type) OR (type1 = portb_type AND type2 = porta_type);
+  IF count = 0 THEN
+    SET NEW.porta = NULL;
+  END IF;
+END;
+ENDOFTRIGGER;
+			$query[] = "CREATE TRIGGER `Link-before-insert` BEFORE INSERT ON `Link` FOR EACH ROW $link_trigger_body";
+			$query[] = "CREATE TRIGGER `Link-before-update` BEFORE UPDATE ON `Link` FOR EACH ROW $link_trigger_body";
+
 			// enable IP addressing for all object types unless specifically excluded
 			$query[] = "UPDATE `Config` SET varvalue = 'not ({\$typeid_3} or {\$typeid_9} or {\$typeid_10} or {\$typeid_11})' WHERE varname = 'IPV4OBJ_LISTSRC'";
 
@@ -1377,7 +1532,295 @@ CREATE TABLE `VSEnabledPorts` (
 
 			$query[] = "UPDATE Config SET description = 'List source: objects for that asset tag should be set' WHERE varname = 'ASSETWARN_LISTSRC'";
 			$query[] = "UPDATE Config SET description = 'List source: objects for that common name should be set' WHERE varname = 'NAMEWARN_LISTSRC'";
+			$query[] = "ALTER TABLE `IPv4NAT` MODIFY COLUMN `proto` ENUM('TCP','UDP','ALL')";
+
+			// add new 'point2point' alloc type
+			$query[] = "ALTER TABLE `IPv4Allocation` MODIFY `type` enum('regular','shared','virtual','router','point2point') NOT NULL DEFAULT 'regular'";
+			$query[] = "ALTER TABLE `IPv6Allocation` MODIFY `type` enum('regular','shared','virtual','router','point2point') NOT NULL DEFAULT 'regular'";
+
+			// update to use utf8_unicode_ci collation
+			// http://bugs.racktables.org/view.php?id=837
+			$query[] = "ALTER DATABASE DEFAULT CHARACTER SET UTF8 COLLATE utf8_unicode_ci";
+
+			$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
+			$query[] = "ALTER TABLE `Atom` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Attribute` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `AttributeMap` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `AttributeValue` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `CachedPAV` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `CachedPNV` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `CachedPVM` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `CactiGraph` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `CactiServer` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Chapter` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Config` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Dictionary` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `EntityLink` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `File` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `FileLink` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4Address` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4Allocation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4LB` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4Log` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv6Log` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4NAT` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4Network` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4RS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4RSPool` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv4VS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv6Address` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv6Allocation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv6Network` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `LDAPCache` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Link` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Molecule` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `MountOperation` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `MuninGraph` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `MuninServer` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `ObjectLog` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `ObjectParentCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Port` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortAllowedVLAN` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortInnerInterface` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortInterfaceCompat` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortLog` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortNativeVLAN` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `PortVLANMode` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Object` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `ObjectHistory` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `RackSpace` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `RackThumbnail` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `Script` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `TagStorage` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `TagTree` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `UserAccount` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `UserConfig` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANDescription` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANDomain` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANIPv4` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANIPv6` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANSTRule` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANSwitch` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANSwitchTemplate` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VLANValidID` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VS` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VSIPs` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VSPorts` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VSEnabledIPs` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `VSEnabledPorts` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci";
+			$query[] = "SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.8':
+			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";
+
+			$query[] = "
+CREATE TABLE `PortOuterInterface` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `oif_name` char(48) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oif_name` (`oif_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+";
+			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
+			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
+			// and 10GBase-KR. Make respective changes and make primary key auto
+			// increment start at 2000.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '10GBase-KX4' WHERE id = 41";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1999, '10GBase-KR')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1999, 1999)";
+			$query[] = "DELETE FROM Dictionary WHERE chapter_id = 2";
+			$query[] = "DELETE FROM Chapter WHERE id = 2";
+			$query[] = "ALTER TABLE PortInterfaceCompat ADD CONSTRAINT `PortInterfaceCompat-FK-oif_id` FOREIGN KEY (oif_id) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (type1) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (type2) REFERENCES PortOuterInterface (id)";
+			// Add more 40G and 100G standards.
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
+(1660,'40GBase-FR'),
+(1662,'40GBase-ER4'),
+(1672,'100GBase-SR4'),
+(1673,'100GBase-KR4'),
+(1674,'100GBase-KP4')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+(10,1660),
+(10,1662),
+(11,1672),
+(11,1673),
+(11,1674)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES
+(1660,1660),
+(1662,1662),
+(1672,1672),
+(1673,1673),
+(1674,1674)";
+			// Refine 1G OIF list: fix spelling and add a new standard.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '1000Base-LX10' WHERE id = 1205";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (42, '1000Base-EX')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (42, 42)";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (3, 42), (4,42)";
+			// patch cables
+		$query[] = "
+CREATE TABLE `PatchCableConnector` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `connector` char(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `connector_per_origin` (`connector`,`origin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableType` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `pctype` char(64) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableConnectorCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `connector_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`connector_id`),
+  KEY `connector_id` (`connector_id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-connector_id` FOREIGN KEY (`connector_id`) REFERENCES `PatchCableConnector` (`id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableHeap` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pctype_id` int(10) unsigned NOT NULL,
+  `end1_conn_id` int(10) unsigned NOT NULL,
+  `end2_conn_id` int(10) unsigned NOT NULL,
+  `amount` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `length` decimal(5,2) unsigned NOT NULL DEFAULT '1.00',
+  `description` char(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compat1` (`pctype_id`,`end1_conn_id`),
+  KEY `compat2` (`pctype_id`,`end2_conn_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat1` FOREIGN KEY (`pctype_id`, `end1_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat2` FOREIGN KEY (`pctype_id`, `end2_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableHeapLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `heap_id` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` char(64) NOT NULL,
+  `message` char(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `heap_id-date` (`heap_id`,`date`),
+  CONSTRAINT `PatchCableHeapLog-FK-heap_id` FOREIGN KEY (`heap_id`) REFERENCES `PatchCableHeap` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableOIFCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `oif_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`oif_id`),
+  KEY `oif_id` (`oif_id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-oif_id` FOREIGN KEY (`oif_id`) REFERENCES `PortOuterInterface` (`id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "INSERT INTO PatchCableConnector (id, origin, connector) VALUES
+(1,'default','FC/PC'),(2,'default','FC/APC'),
+(3,'default','LC/PC'),(4,'default','LC/APC'),
+(5,'default','MPO-12/PC'),(6,'default','MPO-12/APC'),
+(7,'default','MPO-24/PC'),(8,'default','MPO-24/APC'),
+(9,'default','SC/PC'),(10,'default','SC/APC'),
+(11,'default','ST/PC'),(12,'default','ST/APC'),
+(13,'default','T568/8P8C/RJ45'),
+(14,'default','SFP-1000'),
+(15,'default','SFP+'),
+(999,'default','CX4/SFF-8470')";
+		$query[] = "INSERT INTO PatchCableType (id, origin, pctype) VALUES
+(1,'default','duplex OM1'),
+(2,'default','duplex OM2'),
+(3,'default','duplex OM3'),
+(4,'default','duplex OM4'),
+(5,'default','duplex OS1'),
+(6,'default','duplex OS2'),
+(7,'default','simplex OM1'),
+(8,'default','simplex OM2'),
+(9,'default','simplex OM3'),
+(10,'default','simplex OM4'),
+(11,'default','simplex OS1'),
+(12,'default','simplex OS2'),
+(13,'default','Cat.5 TP'),
+(14,'default','Cat.6 TP'),
+(15,'default','Cat.6a TP'),
+(16,'default','Cat.7 TP'),
+(17,'default','Cat.7a TP'),
+(18,'default','12-fiber OM3'),
+(19,'default','12-fiber OM4'),
+(20,'default','10Gb/s CX4 coax'),
+(21,'default','24-fiber OM3'),
+(22,'default','24-fiber OM4'),
+(23,'default','1Gb/s 50cm shielded'),
+(24,'default','10Gb/s 24AWG twinax'),
+(25,'default','10Gb/s 26AWG twinax'),
+(26,'default','10Gb/s 28AWG twinax'),
+(27,'default','10Gb/s 30AWG twinax'),
+(999,'default','Cat.3 TP')";
+		$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
+(13,18),(14,18),(15,18),(16,18),(17,18),(999,18), -- 10Base-T: Cat.3+ TP
+(11,1198),(12,1198),(11,1199),(12,1199),          -- 100Base-BX10: 1xSMF
+(5,1197),(6,1197),                                -- 100Base-LX10: 2xSMF
+(5,1200),(6,1200),                                -- 100Base-EX: 2xSMF
+(5,1201),(6,1201),                                -- 100Base-ZX: 2xSMF
+(1,1195),(2,1195),(3,1195),(4,1195),              -- 100Base-FX: 2xMMF
+(1,1196),(2,1196),(3,1196),(4,1196),              -- 100Base-SX: 2xMMF
+(13,19),(14,19),(15,19),(16,19),(17,19),          -- 100Base-TX: Cat.5+ TP
+(11,1206),(12,1206),(11,1207),(12,1207),          -- 1000Base-BX10: 1xSMF
+(5,1204),(6,1204),                                -- 1000Base-LX: 2xSMF
+(5,1205),(6,1205),                                -- 1000Base-LX10: 2xSMF
+(1,1202),(2,1202),(3,1202),(4,1202),              -- 1000Base-SX: 2xMMF
+(1,1203),(2,1203),(3,1203),(4,1203),              -- 1000Base-SX+: 2xMMF
+(13,24),(14,24),(15,24),(16,24),(17,24),          -- 1000Base-T: Cat.5+ TP
+(5,34),(6,34),                                    -- 1000Base-ZX: 2xSMF
+(23,1077),                                        -- 1000Base direct attach: shielded
+(1,30),(2,30),(3,30),(4,30),                      -- 10GBase-SR: 2xMMF
+(5,36),(6,36),                                    -- 10GBase-LR: 2xSMF
+(5,35),(6,35),                                    -- 10GBase-ER: 2xSMF
+(5,38),(6,38),                                    -- 10GBase-ZR: 2xSMF
+(1,39),(2,39),(3,39),(4,39),(5,39),(6,39),        -- 10GBase-LX4: 2xMMF/2xSMF
+(1,37),(2,37),(3,37),(4,37),                      -- 10GBase-LRM: 2xMMF
+(14,1642),(15,1642),(16,1642),(17,1642),          -- 10GBase-T: Cat.6+ TP
+(20,40),                                          -- 10GBase-CX4: coax
+(24,1084),(25,1084),(26,1084),(27,1084),          -- 10GBase direct attach: twinax
+(18,1663),(19,1663),                              -- 40GBase-SR4: 8xMMF
+(5,1664),(6,1664),                                -- 40GBase-LR4: 2xSMF
+(5,1662),(6,1662),                                -- 40GBase-ER4: 2xSMF
+(5,1660),(6,1660),                                -- 40GBase-FR: 2xSMF
+(21,1669),(22,1669),                              -- 100GBase-SR10: 20xMMF
+(18,1672),(19,1672),                              -- 100GBase-SR4: 8xMMF
+(5,1670),(6,1670),                                -- 100GBase-LR4: 2xSMF
+(5,1671),(6,1671)                                 -- 100GBase-ER4: 2xSMF";
+		$query[] = "INSERT INTO PatchCableConnectorCompat (pctype_id, connector_id) VALUES
+(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1), -- FC/PC
+(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2),(12,2), -- FC/APC
+(1,3),(2,3),(3,3),(4,3),(5,3),(6,3),(7,3),(8,3),(9,3),(10,3),(11,3),(12,3), -- LC/PC
+(1,4),(2,4),(3,4),(4,4),(5,4),(6,4),(7,4),(8,4),(9,4),(10,4),(11,4),(12,4), -- LC/APC
+(1,9),(2,9),(3,9),(4,9),(5,9),(6,9),(7,9),(8,9),(9,9),(10,9),(11,9),(12,9), -- SC/PC
+(1,10),(2,10),(3,10),(4,10),(5,10),(6,10),(7,10),(8,10),(9,10),(10,10),(11,10),(12,10), -- SC/APC
+(1,11),(2,11),(3,11),(4,11),(5,11),(6,11),(7,11),(8,11),(9,11),(10,11),(11,11),(12,11), -- ST/PC
+(1,12),(2,12),(3,12),(4,12),(5,12),(6,12),(7,12),(8,12),(9,12),(10,12),(11,12),(12,12), -- ST/APC
+(13,13),(14,13),(15,13),(16,13),(17,13),(999,13), -- T568
+(18,5),(19,5), -- MPO-12/PC
+(18,6),(19,6), -- MPO-12/APC
+(20,999), -- CX4
+(21,7),(22,7), -- MPO-24/PC
+(21,8),(22,8), -- MPO-24/APC
+(23,14), -- SFP-1000
+(24,15),(25,15),(26,15),(27,15) -- SFP+";
+			// add rules for Cisco UCS objects
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1787,8),(1787,1502)";
+			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.9':
+			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.0':
+			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

@@ -1,0 +1,28 @@
+var annotated =
+[
+    [ "APCPowerSwitch", "class_a_p_c_power_switch.html", "class_a_p_c_power_switch" ],
+    [ "EntityNotFoundException", "class_entity_not_found_exception.html", "class_entity_not_found_exception" ],
+    [ "ERetryNeeded", "class_e_retry_needed.html", "class_e_retry_needed" ],
+    [ "InvalidArgException", "class_invalid_arg_exception.html", "class_invalid_arg_exception" ],
+    [ "InvalidRequestArgException", "class_invalid_request_arg_exception.html", "class_invalid_request_arg_exception" ],
+    [ "MacroParser", "class_macro_parser.html", "class_macro_parser" ],
+    [ "RackCodeError", "class_rack_code_error.html", "class_rack_code_error" ],
+    [ "RackTablesError", "class_rack_tables_error.html", "class_rack_tables_error" ],
+    [ "RTDatabaseError", "class_r_t_database_error.html", "class_r_t_database_error" ],
+    [ "RTGatewayError", "class_r_t_gateway_error.html", "class_r_t_gateway_error" ],
+    [ "RTImageError", "class_r_t_image_error.html", "class_r_t_image_error" ],
+    [ "RTPermissionDenied", "class_r_t_permission_denied.html", "class_r_t_permission_denied" ],
+    [ "RTSNMP", "class_r_t_s_n_m_p.html", "class_r_t_s_n_m_p" ],
+    [ "RTSNMPDevice", "class_r_t_s_n_m_p_device.html", "class_r_t_s_n_m_p_device" ],
+    [ "RTSNMPv1", "class_r_t_s_n_m_pv1.html", "class_r_t_s_n_m_pv1" ],
+    [ "RTSNMPv2", "class_r_t_s_n_m_pv2.html", "class_r_t_s_n_m_pv2" ],
+    [ "RTSNMPv3", "class_r_t_s_n_m_pv3.html", "class_r_t_s_n_m_pv3" ],
+    [ "SLBTriplet", "class_s_l_b_triplet.html", "class_s_l_b_triplet" ],
+    [ "TemplateException", "class_template_exception.html", null ],
+    [ "TemplateHelper", "interface_template_helper.html", "interface_template_helper" ],
+    [ "TemplateHelperAbstract", "class_template_helper_abstract.html", "class_template_helper_abstract" ],
+    [ "TemplateInMemory", "class_template_in_memory.html", "class_template_in_memory" ],
+    [ "TemplateManager", "class_template_manager.html", "class_template_manager" ],
+    [ "TemplateModule", "class_template_module.html", "class_template_module" ],
+    [ "TemplatePseudo", "class_template_pseudo.html", "class_template_pseudo" ]
+];

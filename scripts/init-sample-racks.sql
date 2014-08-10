@@ -80,7 +80,9 @@ INSERT INTO `Object` (`id`, `name`, `label`, `objtype_id`, `asset_no`, `has_prob
 (978,'London',NULL,1562,NULL,'no',NULL),
 (979,'sw-a1',NULL,8,NULL,'no',NULL),
 (980,'sw-a2',NULL,8,NULL,'no',NULL),
-(981,'sw-d1',NULL,8,NULL,'no',NULL);
+(981,'sw-d1',NULL,8,NULL,'no',NULL),
+(982,NULL,NULL,3,NULL,'no',NULL),
+(983,'London modem 1',NULL,13,NULL,'no',NULL);
 
 INSERT INTO `Atom` (`molecule_id`, `rack_id`, `unit_no`, `atom`) VALUES
 (1,967,35,'front'),
@@ -100,7 +102,8 @@ INSERT INTO `EntityLink` (`parent_entity_type`, `parent_entity_id`, `child_entit
 ('location',977,'row',965),
 ('location',978,'row',966),
 ('rack',968,'object',979),
-('rack',969,'object',980);
+('rack',969,'object',980),
+('object',982,'object',983);
 
 INSERT INTO `AttributeValue` (`object_id`, `object_tid`, `attr_id`, `string_value`, `uint_value`, `float_value`) VALUES
 (905,7,2,NULL,269,NULL),
@@ -1553,7 +1556,10 @@ INSERT INTO `RackSpace` (`rack_id`, `unit_no`, `atom`, `state`, `object_id`) VAL
 (972,34,'interior','T',962),
 (972,34,'rear','T',962),
 (967,35,'front','T',981),
-(967,35,'interior','T',981);
+(967,35,'interior','T',981),
+(967,17,'front','T',982),
+(967,17,'interior','T',982),
+(967,17,'rear','T',982);
 
 INSERT INTO `Script` (`script_name`, `script_text`) VALUES
 ('DefaultRSConfig','CONNECT_TIMEOUT=1\nCONNECT_PORT=%RSPORT%\nCHECK_TCP=`TCP_CHECK {\n	connect_port %CONNECT_PORT%\n	connect_timeout %CONNECT_TIMEOUT% \n}\'\n%CHECK%\n'),
@@ -1733,3 +1739,54 @@ INSERT INTO `VSEnabledPorts` VALUES (928,1,'TCP',80,1,NULL,NULL);
 INSERT INTO `VSEnabledPorts` VALUES (928,1,'TCP',443,1,NULL,NULL);
 INSERT INTO `VSEnabledPorts` VALUES (929,1,'TCP',80,1,NULL,NULL);
 INSERT INTO `VSEnabledPorts` VALUES (929,1,'TCP',443,1,NULL,NULL);
+
+INSERT INTO `PatchCableHeap` (id, pctype_id, end1_conn_id, end2_conn_id, amount, length, description) VALUES
+(1,2,9,9,97,2.00,''),
+(2,2,9,3,98,2.00,''),
+(3,13,13,13,100,1.00,'blue'),
+(4,13,13,13,100,1.00,'green'),
+(5,13,13,13,98,1.00,'yellow'),
+(6,13,13,13,49,2.00,'gray'),
+(7,27,15,15,10,0.50,'direct attach'),
+(8,25,15,15,20,2.00,'direct attach'),
+(9,24,15,15,15,7.00,'direct attach'),
+(10,20,999,999,5,2.00,''),
+(11,18,5,5,9,5.00,'fiber ribbon'),
+(12,22,7,7,11,10.00,'fiber ribbon'),
+(13,11,1,11,5,0.50,'converter'),
+(14,11,1,9,4,1.00,'converter');
+
+INSERT INTO `PatchCableHeapLog` (id, heap_id, date, user, message) VALUES
+(1,14,'2014-06-15 00:10:24','admin','amount set to 5'),
+(2,13,'2014-06-15 00:10:28','admin','amount set to 5'),
+(3,2,'2014-06-15 00:10:34','admin','amount set to 100'),
+(4,1,'2014-06-15 00:10:42','admin','amount set to 100'),
+(5,3,'2014-06-15 00:10:49','admin','amount set to 100'),
+(6,6,'2014-06-15 00:10:56','admin','amount set to 50'),
+(7,4,'2014-06-15 00:10:59','admin','amount set to 100'),
+(8,5,'2014-06-15 00:11:01','admin','amount set to 100'),
+(9,12,'2014-06-15 00:11:07','admin','amount set to 10'),
+(10,11,'2014-06-15 00:11:09','admin','amount set to 10'),
+(11,10,'2014-06-15 00:11:12','admin','amount set to 5'),
+(12,7,'2014-06-15 00:11:16','admin','amount set to 2'),
+(13,8,'2014-06-15 00:11:28','admin','amount set to 20'),
+(14,9,'2014-06-15 00:11:34','admin','amount set to 15'),
+(15,7,'2014-06-15 00:14:22','admin','amount adjusted by 1'),
+(16,7,'2014-06-15 00:14:24','admin','amount adjusted by 1'),
+(17,7,'2014-06-15 00:14:25','admin','amount adjusted by 1'),
+(18,7,'2014-06-15 00:14:26','admin','amount adjusted by 1'),
+(19,7,'2014-06-15 00:14:27','admin','amount adjusted by 1'),
+(20,7,'2014-06-15 00:14:29','admin','amount adjusted by 1'),
+(21,7,'2014-06-15 00:14:30','admin','amount adjusted by 1'),
+(22,7,'2014-06-15 00:14:31','admin','amount adjusted by 1'),
+(23,6,'2014-06-15 00:14:35','admin','amount adjusted by -1'),
+(24,12,'2014-06-15 00:14:38','admin','amount adjusted by 1'),
+(25,11,'2014-06-15 00:14:40','admin','amount adjusted by -1'),
+(26,1,'2014-06-15 00:14:42','admin','amount adjusted by -1'),
+(27,1,'2014-06-15 00:14:44','admin','amount adjusted by -1'),
+(28,1,'2014-06-15 00:14:45','admin','amount adjusted by -1'),
+(29,2,'2014-06-15 00:14:47','admin','amount adjusted by -1'),
+(30,2,'2014-06-15 00:14:50','admin','amount adjusted by -1'),
+(31,5,'2014-06-15 00:14:51','admin','amount adjusted by -1'),
+(32,5,'2014-06-15 00:14:52','admin','amount adjusted by -1'),
+(33,14,'2014-06-15 00:14:57','admin','amount adjusted by -1');

@@ -2,21 +2,21 @@
 
 class StringInsertHrefsTest extends PHPUnit_Framework_TestCase
 {
-	protected $detect_urls_var = NULL;
+	protected static $detect_urls_var;
 
-	public function setUp ()
+	public static function setUpBeforeClass ()
 	{
 		// make sure DETECT_URLS is set to yes
-		$this->detect_urls_var = getConfigVar ('DETECT_URLS'); 
-		if ($this->detect_urls_var != 'yes')
+		self::$detect_urls_var = getConfigVar ('DETECT_URLS'); 
+		if (self::$detect_urls_var != 'yes')
 			setConfigVar ('DETECT_URLS', 'yes');
 	}
 
-	public function tearDown ()
+	public static function tearDownAfterClass ()
 	{
 		// restore DETECT_URLS to original setting
-		if ($this->detect_urls_var != 'yes')
-			setConfigVar ('DETECT_URLS', $this->detect_urls_var);
+		if (self::$detect_urls_var != 'yes')
+			setConfigVar ('DETECT_URLS', self::$detect_urls_var);
 	}
 
 	/**

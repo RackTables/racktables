@@ -45,7 +45,29 @@ try {
 		// empties color message buffer).
 		$contents = ob_get_contents();
 		ob_clean();
-		renderInterfaceHTML ($pageno, $tabno, $contents);
+		$tplm = TemplateManager::getInstance();
+		if ($tplm->getMainModule() != null)
+		{
+			//All calls below use the template engine to output their content
+			showPathAndSearch($pageno,$tabno,true); //generate PathAndSearch
+			showTabs($pageno, $tabno, true); //generate TabList
+			showMessageOrError(true); //show all Messages
+			renderQuickLinks(); //show QuickLinks
+			
+			$mod = $tplm->getMainModule();
+			
+			//Set needed vars for the main mod
+			$mod->setOutput('RemoteDisplayname', $remote_displayname);
+			$mod->setOutput('Enterprise', getConfigVar ('enterprise'));
+			$mod->setOutput('PageTitle', getTitle ($pageno));
+			
+			$tplm->run(true);
+
+		}
+		else
+		{
+			renderInterfaceHTML ($pageno, $tabno, $contents);
+		}
 		break;
 
 	case 'chrome':
@@ -82,15 +104,10 @@ try {
 		{
 			dispatchImageRequest();
 		}
-		catch (RTPermissionDenied $e)
-		{
-			ob_clean();
-			renderAccessDeniedImage();
-		}
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderErrorImage();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError;
 		}
 		break;
 
@@ -152,7 +169,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 
@@ -168,7 +185,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 

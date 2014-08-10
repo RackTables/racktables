@@ -1,6 +1,6 @@
 RackTables - datacenter and server room management framework
 
-Copyright (c) 2013 Alexey Andriyanov, Aaron Dummer, Denis Ovsienko and
+Copyright (c) 2013-2014 Alexey Andriyanov, Aaron Dummer, Denis Ovsienko and
                    contributors
 Copyright (c) 2011-2012 Denis Ovsienko, Alexey Andriyanov, Aaron Dummer,
                    Jonathan Thurman and contributors
@@ -115,3 +115,9 @@ under the MIT license.
 
 RackTables uses CodeMirror by Marijn Haverbeke: http://codemirror.net/.
 This library is released under a MIT style license.
+
+----------------------8<----------------------8<----------------------
+
+RackTables uses TagIt! jQuery widget by Levy Carneiro Jr.:
+http://aehlke.github.com/tag-it/.
+This library is released under the MIT license.

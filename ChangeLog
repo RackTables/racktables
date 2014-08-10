@@ -1,14 +1,61 @@
-0.20.7
+0.21.0
+	update: explicitly require PHP version 5.3.0 or newer
+0.20.9
+	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
+		HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183)
+0.20.8 2014-06-07
+	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
+	bugfix: properly format comment text for locations and racks
+	bugfix: the tab IP SLB/Load balancers displayed all the objects in system
+	bugfix: Native vlan on Huawei trunk ports no longer gets to the allowed vlans list
+	bugfix: Data Integrity report hit memory limit
+	bugfix: creating racks with tags cause warnings in TagStorage: Missing Parents integrity report
+	bugfix: LLDP neighbors was empty for some Juniper devices
+	bugfix: add object container compatibility rules for Cisco UCS (#1245) 
+	update: allow connecting to a non-standard LDAP port (by Michał Sochoń)
+	update: move port outer interfaces from the dictionary
+	update: syncdomain.php now provides some new CLI options and better lockfile handling
+	update: SNMP support for Cisco 2960X-24PS-L, 2960X-24PD-L
+	update: new {$client_x.x.x.x} auto tag containing client's IP
+	update: link status feature is available on Juniper
+	update: new port menu item: "Show port learned MACs"
+	new feature: patch cables accounting
+0.20.7 2014-03-03
 	bugfix: IP tree expansion button was broken when MAX_UNFILTERED_ENTITIES was set
 	bugfix: fix URL detection bug introduced in bugfix to #1023 (#1103)
+	bugfix: browse objects page was broken if an object's container was unnamed (#1115)
+	bugfix: some pages would not load because PHP's maximum execution time was
+		exceeded, caused by a circular reference in the location tree (#1123)
+	bugfix: do HTML escaping on error pages (reported by Lukas Reschke)
+	bugfix: logout link didn't work in some scenarios (#1129)
+	bugfix: system functions for translating IPs were not used even being available
+	bugfix: Zero-U-mounted objects were not counted in rack summary
+	bugfix: fix of sorting issue with national characters by Thomas Uhde (#837)
+	bugfix: LLDP parser fixed for Huawei VRP 8.5
 	update: enable IP addressing for all object types unless specifically excluded
 	update: SNMP support for 3Com 4510G-24, Cisco SF302-08MP, 
 		Linksys SRW248G4 by Rafael Driutti,
-		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum
+		3Com 4200G 48-port (#1093), 5500G-EI 48-port (#1095) by Rainer Stumbaum,
+		AT-GS950/24 (#1105), Cisco WS-C1924 (#1111), HP J4900B (#1107),
+		J8692A & J9146A (#1143)
 	update: add the data integrity report
-	update: upgrade CodeMirror to version 3.20
+	update: duplicate IP allocations of all types except 'shared' are highlighted red
+	update: upgrade CodeMirror to version 3.22
 	update: include OEM S/N 1 in expirations report (by Matthew Castanien)
 	update: display a datetime format hint for date attributes (#1051)
+	update: display location tree in object breadcrumbs (#1125)
+	update: allow rows to have properties (#1133)
+	update: objects with problems colored red on browse objects page (#1137)
+	update: use suggest-menu for tag assignment
+	update: show tag trace in tag title
+	update: spare IPv6 prefixes are limited to nibble boundary (#959)
+	update: button to fix non-canonical port names (#827)
+	update: explicitly require PHP version 5.2.10 or newer (see #1139)
+	update: leave secret.php in a safer state upon install
+	new feature: add IPv4 natting for all protocols (#971) by Tim Wilkes/Mark Wilkinson
+	new feature: display point-to-point peers when using new 'Point-to-point' IP allocation type
+	new feature: display rack power consumption as sum of mounted objects'
+		"max power" and "max current" attribute values (#701)
 0.20.6 2013-11-29
 	bugfix: "sshnokey" gateway had a bug
 	bugfix: SLB config was generated incrorrectly when multiple 

@@ -1,4 +1,9 @@
 <phpunit backupGlobals="false"
          backupStaticAttributes="false"
          bootstrap="bootstrap.php">
+  <testsuites>
+    <testsuite name="all">
+      <directory suffix="Test.php">./</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

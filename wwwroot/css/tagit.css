@@ -1,0 +1,183 @@
+ul.autocomplete-menu {
+	border: 1px dashed #3C78B5;
+	background-color: #FFF;
+	overflow-y: auto;
+	overflow-x: auto;
+	display: inline-block;
+	margin: 0 auto;
+	max-height: 500px;
+	margin-top: -5px;
+}
+
+ul.tagit {
+	padding: 1px 5px;
+	overflow: auto;
+	margin-left: inherit; /* usually we don't want the regular ul margins. */
+	margin-right: inherit;
+	display: table-row;
+	list-style-type: none;
+	background-color: #e8e8e8;
+}
+
+ul.tagit-vertical {
+	margin-left: 2px;
+	margin-right: 2px;
+	overflow: hidden;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-left: 1px;
+	background-color: #e8e8e8;
+}
+
+ul.tagit-horizontal {
+	margin-left: 2px;
+	margin-right: 2px;
+	overflow: hidden;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-left: 1px;
+	background-color: #e8e8e8;
+}
+
+ul.tagit-horizontal li {
+	display: inline-block;
+	margin: 2px 5px 2px 0;
+	vertical-align: middle;
+	list-style-type: none;
+	height: 100%;
+}
+
+ul.tagit li {
+	display: inline-block;
+	float: left;
+	margin: 2px 5px 2px 0;
+	vertical-align: middle;
+	list-style-type: none;
+	height: 100%;
+}
+
+ul.tagit-vertical li {
+	margin: 1px 5px 1px 0;
+	height: 100%;
+	display: block;
+	text-align: left;
+}
+
+ul.tagit li span {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+ul.tagit li.tagit-choice, ul.tagit-vertical li.tagit-choice {
+	position: relative;
+	line-height: inherit;
+}
+
+ul.tagit li.tagit-choice-read-only, ul.tagit-vertical li.tagit-choice-read-only {
+	padding: .2em .5em .2em .5em;
+}
+
+ul.tagit li.tagit-choice-editable, ul.tagit-vertical li.tagit-choice-editable {
+	padding: .2em 18px .2em 0px;
+}
+
+ul.tagit li.tagit-new, ul.tagit-vertical li.tagit-new {
+	padding: .25em 4px .25em 0;
+}
+
+ul.tagit li.tagit-choice a.tagit-label, ul.tagit-vertical li.tagit-choice a.tagit-label,  ul.tagit-horizontal li.tagit-choice a.tagit-label {
+	cursor: pointer;
+	text-decoration: none;
+}
+ul.tagit li.tagit-choice .tagit-close, ul.tagit-vertical li.tagit-choice .tagit-close {
+	cursor: pointer;
+	right: .1em;
+	top: 50%;
+	margin-left: 3px;
+	line-height: 17px;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+/* used for some custom themes that don't need image icons */
+ul.tagit li.tagit-choice .tagit-close .text-icon, ul.tagit-vertical li.tagit-choice .tagit-close .text-icon, ul.tagit-horizontal li.tagit-choice .tagit-close .text-icon {
+	display: none;
+}
+
+.icon-close {
+	background-image: url(?module=chrome&uri=pix/jquery-ui-1.8.22.redmond/ui-icons_469bdd_256x240.png);
+	background-position: -80px -128px;
+	height: 16px;
+	width: 16px;
+	background-repeat: no-repeat;
+	overflow: hidden;
+	text-indent: -99999px;
+	display: inline-block;
+}
+
+.icon-folder-open {
+	background-image: url(?module=chrome&uri=pix/jquery-ui-1.8.22.redmond/ui-icons_469bdd_256x240.png);
+	background-position: -16px -96px;
+	height: 16px;
+	width: 16px;
+	background-repeat: no-repeat;
+	overflow: hidden;
+	text-indent: -99999px;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.disabled a {
+	cursor: default !important;
+	color: grey !important;
+}
+
+.context-menu-item {
+	font-size: 12px ! important;
+}
+
+.tagit-menu {
+	list-style: none;
+	padding: 2px;
+	margin: 0;
+	display: block;
+	float: left;
+}
+
+.tagit-menu .tagit-menu {
+	margin-top: -3px;
+}
+
+.tagit-menu .tagit-menu-item {
+	margin:0;
+	padding: 0;
+	zoom: 1;
+	float: left;
+	clear: left;
+	width: 100%;
+	color: black;
+	cursor: pointer;
+}
+
+.ui-menu .tagit-menu-item a.ui-state-hover,
+.ui-menu .tagit-menu-item a.ui-state-active {
+	font-weight:inherit !important;
+}
+
+.tagit-menu-item a {
+	color: inherit;
+	font-size: small;
+	text-decoration: inherit;
+}
+
+.tagit-autocomplete.indented .tag-level0  { padding-left: 1px   !important; }
+.tagit-autocomplete.indented .tag-level1  { padding-left: 16px  !important; }
+.tagit-autocomplete.indented .tag-level2  { padding-left: 31px  !important; }
+.tagit-autocomplete.indented .tag-level3  { padding-left: 46px  !important; }
+.tagit-autocomplete.indented .tag-level4  { padding-left: 61px  !important; }
+.tagit-autocomplete.indented .tag-level5  { padding-left: 76px  !important; }
+.tagit-autocomplete.indented .tag-level6  { padding-left: 101px !important; }
+.tagit-autocomplete.indented .tag-level7  { padding-left: 116px !important; }
+.tagit-autocomplete.indented .tag-level8  { padding-left: 131px !important; }
+.tagit-autocomplete.indented .tag-level9  { padding-left: 146px !important; }
+.tagit-autocomplete.indented .tag-level10 { padding-left: 161px !important; }

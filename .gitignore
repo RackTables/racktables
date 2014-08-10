@@ -3,3 +3,18 @@ wwwroot/inc/local.php
 /.project
 tags
 plugins/*
+
+.settings/*
+.buildpath
+.project
+wwwroot/tpl/testplate/*
+wwwroot/test.php
+wwwroot/tpl.log
+
+# vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~

@@ -334,4 +334,9 @@ function trigger_ucs()
 	) ? 'std' : '';
 }
 
+function triggerPatchCableHeapsConfigured()
+{
+	return count (getPatchCableHeapSummary()) ? 'std' : '';
+}
+
 ?>

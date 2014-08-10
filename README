@@ -11,9 +11,9 @@ look for the respective links at project's web-site (racktables.org).
 *** I. SERVER ***
 
 RackTables requires a MySQL server version 5.x built with InnoDB and
-Unicode support and configured appropriately. It also requires an Apache
-httpd with PHP 5 module and several PHP extensions. Below is a list of
-known-good distributions with respective setup notes.
+Unicode support and configured appropriately. By default RackTables is 
+developed on Apache httpd with PHP 5 module and several PHP extensions.
+Below is a list of known-good distributions with respective setup notes.
 
 *** Fedora 8-16
 * MySQL: yum install mysql-server mysql
@@ -25,6 +25,19 @@ section of "/etc/my.cnf" file and restart mysqld.
 *** Debian 6
 * MySQL: aptitude install mysql-server-5.1
 * Apache/PHP: aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp
+* To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
+section of "/etc/mysql/my.cnf" file and restart mysqld.
+
+*** Debian 7 with nginx
+* MySQL: aptitude install mysql-server-5.1
+* nginx: aptitude install nginx php5-fpm
+* Remember to adjust server_name in server {} section, otherwise your logout link
+* will point to localhost (and thus fail).
+* Notice, that fpm.sock is advised, keep the rest on default configuration, or
+* tweak to your needs. You may need to set fastcgi_read_timeout 600; if you use
+* some external addons like fping, which may take some time in certain situations.
+* Please note that setting aggresive caching for php scripts may result in stale
+* content - so maximum of 60 seconds is advised, but by default it is not enabled.
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/mysql/my.cnf" file and restart mysqld.
 
@@ -45,6 +58,13 @@ section of "/etc/my.cnf" file and restart mysqld.
 *** Scientific Linux 6
 * MySQL: yum install mysql-server mysql
 * Apache/PHP: httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath
+* To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
+section of "/etc/my.cnf" file and restart mysqld.
+
+*** CentOS 5
+* MySQL: yum install mysql-server mysql
+* Apache/PHP: httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring \
+              php53-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
 section of "/etc/my.cnf" file and restart mysqld.
 
@@ -99,10 +119,36 @@ and initialize the application.
 *                                                     *
 *******************************************************
 
+*** Upgrading to 0.21.0 ***
+
+The minimum (oldest) supported release of PHP is 5.3.
+
 *** Upgrading to 0.20.7 ***
+
+From now on the minimum (oldest) release of PHP that can run RackTables is
+5.2.10. In particular, to continue running RackTables on CentOS 5 it is
+necessary to replace its php* RPM packages with respective php53* packages
+before the upgrade (except the JSON package, which PHP 5.3 provides internally).
+
+Database triggers are used for some data consistency measures.  The database
+user account must have the 'TRIGGER' privilege, which was introduced in
+MySQL 5.1.7.
 
 The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
 the IP addressing feature for all object types except those listed.
+
+Tags could now be assigned on the Edit/Properties tab using a text input with
+auto-completion. Type a star '*' to view full tag tree in auto-complete menu.
+It is worth to add the following line to the permissions script if the
+old-fashioned 'Tags' tab is not needed any more:
+  deny {$tab_tags} # this hides 'Tags' tab
+
+This release converts collation of all DB fields to the utf8_unicode_ci. This
+procedure may take some time, and could fail if there are rows that differ only
+by letter case. If this happen, you'll see the failed SQL query in upgrade report
+with the "Duplicate entry" error message. Feel free to continue using your
+installation. If desired so, you could eliminate the case-duplicating rows
+and re-apply the failed query.
 
 *** Upgrading to 0.20.6 ***
 
