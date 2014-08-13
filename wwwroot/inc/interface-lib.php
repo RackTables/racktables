@@ -289,7 +289,6 @@ $page_by_realm['user'] = 'userlist';
 
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $parent = NULL, $placeholder = "printSelect")
 {
-    //echo getSelect ($optionList, $select_attrs, $selected_id);
     if($parent == NULL)
         return getSelect ($optionList, $select_attrs, $selected_id);
     else
@@ -1106,16 +1105,14 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
 
     //Initalize TemplateManager
     $tplm = TemplateManager::getInstance();
-    //$tplm->setTemplate("vanilla");
+    
     if($parent == null)
         $mod = $tplm->generateModule("RenderEntitySummary");
     else
         $mod = $tplm->generateSubmodule($placeholder, "RenderEntitySummary", $parent);
     $mod->setNamespace('',true);
     $mod->setLock(true);
-    //startPortlet ($title);
     $mod->setOutput("Title", $title);
-    //echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 
 
     foreach ($values as $name => $value)
@@ -1130,7 +1127,6 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
             $value = array_shift ($value);
             $loopMod->addOutput("Val", $value);
             $loopMod->setOutput("SingleValue", true);
-            //echo $value;
             continue;
         }
         if (is_array ($value))
@@ -1165,13 +1161,10 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
             //		printTagTRs ($cell, $baseurl);
         }
         //	else
-        //		echo "<tr><th width='50%' class='$class'>$name</th><td class=tdleft>$value</td></tr>";
     }
 
     if($parent == null)
         return $mod->run();
-    //echo "</table>\n";
-    //finishPortlet();
 }
 
 function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = '', $parent = null, $placeholder = '')
@@ -1285,7 +1278,6 @@ function renderNetVLAN ($cell)
     $mod = $tplm->generateModule("RenderNetVLAN", true);
     $mod->setOutput("Noun", $noun);
     $mod->setOutput("Links",  implode (', ', $links));
-    //echo "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
     return $mod->run();
 }
 
@@ -1345,12 +1337,9 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 
     $mod = $tplm->generateModule("PrintOpFormIntro",  false, array("opname" => $opname, "pageno" => $pageno, "tabno" => $tabno));
 
-//	echo "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
     if ($upload)
         $mod->setOutput("isUpload", true);
-//		echo " enctype='multipart/form-data'";
 
-//	echo ">";
     fillBypassValues ($pageno, $extra);
     $loopArray = array();
     foreach ($extra as $inputname => $inputvalue)
@@ -1427,8 +1416,6 @@ function printTagsPickerInput ($input_name="taglist", $parent = NULL, $placehold
         $mod = $tplm->generateSubmodule($placeholder, 'TagsPickerInput', $parent, false, array('Input_Name' => $input_name));
     $mod->setNamespace('', true);
     //$mod->setLock(true);
-    //echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
-    //echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
 
     if($parent==null)
         return $mod->run();
@@ -1463,8 +1450,6 @@ function printTagsPickerUl ($preselect=NULL, $input_name="taglist", $parent = NU
     }
     $mod->setOutput('ValueIds', $allValueIds);
     $mod->setOutput('JSON', json_encode($preselect));
-    //echo $preselect_hidden; # print preselected tags id that used in case javascript problems
-    //echo "<ul data-tagit='yes' data-tagit-valuename='" . $input_name . "' data-tagit-preselect='" . json_encode($preselect) . "' class='tagit-vertical'></ul>";
 
     if($parent==null)
         return $mod->run();

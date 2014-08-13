@@ -3,7 +3,6 @@
 	<?php $this->getH("PrintOpFormIntro", array('importDPData')); ?>
 	<br><table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr><th colspan=2>local port</th><th></th><th>remote device</th><th colspan=2>remote port</th><th><input type="checkbox" checked id="cb-toggle"></th></tr>
-	
 	<?php while ($this->loop('AllNeighbors')) : ?>
 		<tr class="<?php $this->tr_class ?>">	
 		<?php if ($this->is("isInitialRow", true)) { ?>

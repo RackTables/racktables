@@ -2827,8 +2827,7 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
     if ($object_type_id != 0)
     {
         $screenlist = array();
-        foreach (explode ('; ', getConfigVar ('
-                                              VENDOR_SIEVE')) as $sieve)
+        foreach (explode ('; ', getConfigVar ('VENDOR_SIEVE')) as $sieve)
         if (preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs))
             $screenlist[] = $regs[1];
 
@@ -6091,10 +6090,8 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
             echo "<option value=${subLocation['id']}";
             if ($subLocation['id'] == $parent_id)
                 $mod->addOutput('Selected', 'selected');
-            //echo ' selected';
             $mod->addOutput('Content', str_repeat ('&raquo; ', $level) . $subLocation['
                             name'])	;
-            //echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
             if ($subLocation['kidc'] > 0)
             $self ($subLocation, $level, $parent_id, $location_id, $mod);
         }
@@ -6126,8 +6123,7 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
             // link: if each name should be wrapped in an href
 function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
             {
-            $locations = listCells ('
-            location');
+            $locations = listCells('location');
 
             static $location_tree = array ();
             if (count ($location_tree) == 0)

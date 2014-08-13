@@ -1,5 +1,4 @@
 <?php if (defined("RS_TPL")) {?>
-
 	<table cellspacing="0" align="center" width="50%">
 	<tr><td>&nbsp;</td><th>Server</th><th>Graph</th><th>Caption</th><td>&nbsp;</td></tr>
 	<?php $this->getH('PrintOpFormIntro', 'add'); ?>
@@ -12,8 +11,6 @@
 	</td></tr></form>
 	</table>
 	<br/><br/>
-
-
 <?php } else { ?>
 Don't use this page directly, it's supposed <br />
 to get loaded within the main page. <br />

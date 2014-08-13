@@ -12,7 +12,19 @@
 	<?php } ?>
 	<th>&nbsp;</th></tr>  
 	<?php $this->AddNewTop ?>
-	<?php $this->AllMinusLines ?>
+	<?php while ($this->loop('AllMinusLines')) : ?>
+		<tr>
+		<?php if ($this->is("isNoObject",true)) { ?>
+			<td><?php $this->objMkA ?></td>
+		<?php } ?> 
+		<?php if ($this->is("isNoVLANDomain",true)) { ?>
+			<td><?php $this->vlanDMkA ?></td>
+		<?php } ?> 
+		<?php if ($this->is("isNoVST",true)) { ?>
+			<td><?php $this->vstMkA ?></td>
+		<?php } ?> 
+		<td><?php $this->cutblock ?></td></tr>
+	<?php endwhile ?>
 	<?php $this->AddNewBottom ?>
 	</table>
 <?php } else { ?>

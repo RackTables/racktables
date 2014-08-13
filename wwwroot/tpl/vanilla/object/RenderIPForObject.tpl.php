@@ -18,19 +18,19 @@
 		<?php } ?> 
 		
 		<?php while ($this->loop('printNewItemTR_mod')) : ?>
-				<?php $this->getH("PrintOpFormIntro", array('add')); ?>
-				<tr><td>
-				<?php $this->getH("PrintImageHref", array('add', 'allocate', TRUE)); ?>
-				</td>
-				<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>
-				<td class=tdleft><input type=text name='ip' tabindex=101></td>
-				<?php if ($this->is("isExt_ipv4", true)) { ?>
-					<td colspan=2>&nbsp;</td>
-				<?php } ?> 
-				<td><?php $this->bondPrintSel ?></td>
-				</td><td>&nbsp;</td><td>
-				<?php $this->getH("PrintImageHref", array('add', 'allocate', TRUE, 103)); ?>
-				</td></tr></form>
+			<?php $this->getH("PrintOpFormIntro", array('add')); ?>
+			<tr><td>
+			<?php $this->getH("PrintImageHref", array('add', 'allocate', TRUE)); ?>
+			</td>
+			<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>
+			<td class=tdleft><input type=text name='ip' tabindex=101></td>
+			<?php if ($this->is("isExt_ipv4", true)) { ?>
+				<td colspan=2>&nbsp;</td>
+			<?php } ?> 
+			<td><?php $this->bondPrintSel ?></td>
+			</td><td>&nbsp;</td><td>
+			<?php $this->getH("PrintImageHref", array('add', 'allocate', TRUE, 103)); ?>
+			</td></tr></form>
 		<?php endwhile ?>
 		
 		<?php if (!$this->is('isAddNewOnTop', true)) { ?>

@@ -3,8 +3,29 @@
 	<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>
 	<tr><th></th><th>Match endpoint</th><th>Translate to</th><th>Target object</th><th>Comment</th><th>&nbsp;</th></tr>
 	<?php $this->printNewItemTop_mod ?>
-	<?php $this->AllNatv4Ports ?>
+	
+	<?php while ($this->loop('AllNatv4Ports')) : ?>
+		<tr class='<?php $this->class ?>'>
+		<td><?php $this->opLink ?></td>
+		<td><?php $this->proto ?>/<?php $this->osif ?><?php $this->portpair_local_mod ?>
+		<?php if ($this->is("local_addr_name")) { ?>
+			(<?php $this->local_addr_name ?>)
+		<?php } ?>
+		<td><?php $this->portpair_remote_mod ?></td> 
+		<td class='description'>
+		<?php $this->mkAList ?>
+		<?php if ($this->is("remote_addr_name")) { ?>
+			(<?php $this->remote_addr_name ?>)
+		<?php } ?> 
+		<?php $this->opFormIntro ?>
+		</td><td class='description'>
+		<input type='text' name='description' value='<?php $this->description ?>'></td><td>
+		<?php $this->saveImg ?>
+		</td></form></tr>
+	<?php endwhile ?>
+	
 	<?php $this->printNewItemBottom_mod ?>
+	
 	</table><br><br>
 	<?php if ($this->is("hasFocusNat4",true)) { ?>
 		<center><h2>arriving NAT connections</h2></center>
