@@ -325,7 +325,8 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	try
 	{
 		// Destroy the cache each time config changes.
-		if (sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
+		if ($LDAP_options['cache_expiry'] != 0 &&
+			sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
 		{
 			discardLDAPCache();
 			saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
@@ -519,7 +520,8 @@ function queryLDAPServer ($username, $password)
 	}
 	if (!isset ($success_server))
 		return array ('result' => 'CAN');
-	if ($last_successful_server !== $success_server)
+	if ($LDAP_options['cache_expiry'] != 0 &&
+		$last_successful_server !== $success_server)
 		saveScript ('LDAPLastSuccessfulServer', $success_server);
 
 	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
