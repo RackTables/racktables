@@ -3638,6 +3638,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9728A: 44 RJ-45/10-100-1000T + 4 combo-gig',
 		'processors' => array ('procurve-45-to-48-combo-1000SFP', 'procurve-chassis-1000T'),
 	),
+	'43.1.8.72' => array
+	(
+		'dict_key' => 2176,
+		'text' => '1910G 24-port: 24 RJ-45/10-100-1000T(X) + 4 SFP combo-gig',
+		'processors' => array ('3com-25-to-26-1000SFP', '3com-27-to-28-1000SFP', '3com-any-1000T'),
+	),
 	'43.1.16.4.3.8' => array
 	(
 		'dict_key' => 780,
@@ -4707,6 +4713,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		checkPIC ('1-16');
 		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
+	case preg_match ('/^43\.1\.8\.72/', $sysObjectID): // 3Com
 	case preg_match ('/^43\.1\.16\.4\.3\./', $sysObjectID): // 3Com
 		$sw_version = preg_replace('/^.* Version 3Com OS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
