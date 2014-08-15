@@ -6074,8 +6074,6 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
     {
         $tplm = TemplateManager::getInstance();
 
-
-
         foreach ($location['kids'] as $subLocation)
         {
             if ($subLocation['id'] == $location_id)
@@ -6095,11 +6093,11 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
             if ($subLocation['kidc'] > 0)
             $self ($subLocation, $level, $parent_id, $location_id, $mod);
         }
-        }
-            else
-            {
-            foreach ($location['kids'] as $subLocation)
-            {
+    }
+    else
+    {
+        foreach ($location['kids'] as $subLocation)
+        {
             if ($subLocation['id'] == $location_id)
             continue;
             echo "<option value=${subLocation['id']}";
@@ -6110,143 +6108,143 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
             if ($subLocation['kidc'] > 0)
             $self ($subLocation, $level, $parent_id, $location_id);
         }
-        }
-        }
+    }
+}
 
-            function validTagName ($s, $allow_autotag = FALSE)
-            {
-            return preg_match (TAGNAME_REGEXP, $s) ||
-            ($allow_autotag && preg_match (AUTOTAGNAME_REGEXP, $s));
-        }
+function validTagName ($s, $allow_autotag = FALSE)
+{
+    return preg_match (TAGNAME_REGEXP, $s) ||
+    ($allow_autotag && preg_match (AUTOTAGNAME_REGEXP, $s));
+}
 
-            // returns html string with parent location names
-            // link: if each name should be wrapped in an href
+// returns html string with parent location names
+// link: if each name should be wrapped in an href
 function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
-            {
-            $locations = listCells('location');
+{
+    $locations = listCells('location');
 
-            static $location_tree = array ();
-            if (count ($location_tree) == 0)
-            foreach ($locations as $location)
-            $location_tree[$location['id']] = array ('parent_id' => $location['parent_id'], 'name' => $location['name']);
+    static $location_tree = array ();
+    if (count ($location_tree) == 0)
+    foreach ($locations as $location)
+        $location_tree[$location['id']] = array ('parent_id' => $location['parent_id'], 'name' => $location['name']);
 
-            // prepend parent location(s) to given location string
-            $name = '';
-            $id = $location_id;
-            $locationIdx = 0;
-            while (isset ($id))
-            {
-            if ($locationIdx == 20)
-            {
-showWarning ('Warning:
+    // prepend parent location(s) to given location string
+    $name = '';
+    $id = $location_id;
+    $locationIdx = 0;
+    while (isset ($id))
+    {
+        if ($locationIdx == 20)
+        {
+            showWarning ('Warning:
             There is likely a circular reference in the location tree.');
             break;
         }
-            if ($link)
-            $name = mkA ($location_tree[$id]['name'], 'location', $id) . $spacer . $name;
-            else
-            $name = $location_tree[$id]['name'] . $spacer . $name;
-            $id = $location_tree[$id]['parent_id'];
-            $locationIdx++;
-        }
-            return substr ($name, 0, 0 - strlen ($spacer));
-        }
+        if ($link)
+        $name = mkA ($location_tree[$id]['name'], 'location', $id) . $spacer . $name;
+        else
+        $name = $location_tree[$id]['name'] . $spacer . $name;
+        $id = $location_tree[$id]['parent_id'];
+        $locationIdx++;
+    }
+    return substr ($name, 0, 0 - strlen ($spacer));
+}
 
-            function cmp_array_sizes ($a, $b)
-            {
-            return numCompare (count ($a), count ($b));
-        }
+function cmp_array_sizes ($a, $b)
+{
+    return numCompare (count ($a), count ($b));
+}
 
-            // parses the value of MGMT_PROTOS config variable and returns an array
-            // indexed by protocol name with corresponding textual RackCode values
-            function getMgmtProtosConfig ($ignore_cache = FALSE)
-            {
-            static $cache = NULL;
-            if (!$ignore_cache && isset ($cache))
-            return $cache;
+// parses the value of MGMT_PROTOS config variable and returns an array
+// indexed by protocol name with corresponding textual RackCode values
+function getMgmtProtosConfig ($ignore_cache = FALSE)
+{
+    static $cache = NULL;
+    if (!$ignore_cache && isset ($cache))
+       return $cache;
 
-            $cache = array();
-            $config = getConfigVar ('MGMT_PROTOS');
-            foreach (explode ('; ', $config) as $item)
-            {
-            $item = trim ($item);
-            if (! strlen ($item))
-            continue;
-            if (preg_match('
-/^(\S+)\s*:
-            \s*(.*)$/', $item, $m))
-            $cache[$m[1]] = $m[2];
-        }
-            return $cache;
-        }
+    $cache = array();
+    $config = getConfigVar ('MGMT_PROTOS');
+    foreach (explode ('; ', $config) as $item)
+    {
+        $item = trim ($item);
+        if (! strlen ($item))
+        continue;
+        if (preg_match('
+        /^(\S+)\s*:
+        \s*(.*)$/', $item, $m))
+        $cache[$m[1]] = $m[2];
+    }
+    return $cache;
+}
 
-            // returns compiled RackCode expression or NULL if syntax error occurs
-            // caches the result in $exprCache global
-            function compileExpression ($code, $do_cache_lookup = TRUE)
-            {
-            global $exprCache;
-            if (! is_array ($exprCache))
-            $exprCache = array();
-            if ($do_cache_lookup && array_key_exists($code, $exprCache))
-            return $exprCache[$code];
+// returns compiled RackCode expression or NULL if syntax error occurs
+// caches the result in $exprCache global
+function compileExpression ($code, $do_cache_lookup = TRUE)
+{
+    global $exprCache;
+    if (! is_array ($exprCache))
+        $exprCache = array();
+    if ($do_cache_lookup && array_key_exists($code, $exprCache))
+        return $exprCache[$code];
 
-            $ret = NULL;
-            $parse = spotPayload ($code, 'SYNT_EXPR');
-            if ($parse['result'] == 'ACK')
-            $ret = $parse['load'];
-            $exprCache[$code] = $ret;
-            return $ret;
-        }
+    $ret = NULL;
+    $parse = spotPayload ($code, 'SYNT_EXPR');
+    if ($parse['result'] == 'ACK')
+        $ret = $parse['load'];
+    $exprCache[$code] = $ret;
+    return $ret;
+}
 
-            // a caching wrapper around detectDeviceBreed and shortenIfName
-            function shortenPortName ($if_name, $object_id)
-            {
-            static $breed_cache = array();
-            if (! array_key_exists($object_id, $breed_cache))
-            $breed_cache[$object_id] = detectDeviceBreed ($object_id);
-            $breed = $breed_cache[$object_id];
-            return $breed == '' ? $if_name : shortenIfName ($if_name, $breed);
-        }
+// a caching wrapper around detectDeviceBreed and shortenIfName
+function shortenPortName ($if_name, $object_id)
+{
+    static $breed_cache = array();
+    if (! array_key_exists($object_id, $breed_cache))
+        $breed_cache[$object_id] = detectDeviceBreed ($object_id);
+    $breed = $breed_cache[$object_id];
+    return $breed == '' ? $if_name : shortenIfName ($if_name, $breed);
+}
 
-            // returns an array of IP ranges of size $dst_mask > $netinfo['mask'], or array ($netinfo)
-            function splitNetworkByMask ($netinfo, $dst_mask)
-            {
-            $self = __FUNCTION__;
-            if ($netinfo['mask'] >= $dst_mask)
-            return array ($netinfo);
+// returns an array of IP ranges of size $dst_mask > $netinfo['mask'], or array ($netinfo)
+function splitNetworkByMask ($netinfo, $dst_mask)
+{
+    $self = __FUNCTION__;
+    if ($netinfo['mask'] >= $dst_mask)
+        return array ($netinfo);
 
-            return array_merge (
-            $self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
-            $self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
-            );
-        }
+    return array_merge (
+    $self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
+    $self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
+    );
+}
 
-            // this function is used both to remember and to retrieve the last created entity's ID
+// this function is used both to remember and to retrieve the last created entity's ID
 // it stores given id in the static var, and returns the stored value is called without args
 // used in plugins to make additional work on created entity in the chained ophandler
 // returns an array of realm-ID pairs
-            function lastCreated ($realm = NULL, $id = NULL)
-            {
-                static $last_ids = array();
-                if (isset ($realm) && isset ($id))
-                    $last_ids[] = array('realm' => $realm, 'id' => $id);
-                return $last_ids;
-            }
+function lastCreated ($realm = NULL, $id = NULL)
+{
+    static $last_ids = array();
+    if (isset ($realm) && isset ($id))
+        $last_ids[] = array('realm' => $realm, 'id' => $id);
+    return $last_ids;
+}
 
 // returns last id of a given type from lastCreated() result array
-            function getLastCreatedId ($realm)
-            {
-                foreach (array_reverse (lastCreated()) as $item)
-                if ($item['realm'] == $realm)
-                    return $item['id'];
-            }
+function getLastCreatedId ($realm)
+{
+    foreach (array_reverse (lastCreated()) as $item)
+    if ($item['realm'] == $realm)
+        return $item['id'];
+}
 
-            function formatPatchCableHeapAsPlainText ($heap)
-            {
-                $text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
-                if ($heap['description'] != '')
-                    $text .=  " (${heap['description']})";
-                return niftyString ($text, 512);
-            }
+function formatPatchCableHeapAsPlainText ($heap)
+{
+    $text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
+    if ($heap['description'] != '')
+        $text .=  " (${heap['description']})";
+    return niftyString ($text, 512);
+}
 
-            ?>
+?>

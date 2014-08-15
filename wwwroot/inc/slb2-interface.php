@@ -6,10 +6,7 @@
 
 function renderVSGList ()
 {
-	//renderCellList ('ipvs', 'VS groups');
 	$tplm = TemplateManager::getInstance();
-	//$tplm->setTemplate("vanilla");
-	//$main = $tplm->createMainModule("index");
 		
 	renderCellList ('ipvs', 'VS groups', FALSE, NULL, $tplm->getMainModule(), "Payload");
 }
@@ -24,11 +21,10 @@ function formatVSPort ($port, $plain_text = FALSE)
 
 	if (!$plain_text && FALSE !== $srv){
 		$tplm = TemplateManager::getInstance();
-		//$tplm->setTemplate("vanilla");
+
 		$mod = $tplm->generateModule("formatVSPortInMemory",  true, array("name" => $name, "srv" => $srv));
 		return $mod->run();
 	}
-//		return '<span title="' . $name . '">' . $srv . '</span>';
 	else
 		return $name;
 }
@@ -39,12 +35,10 @@ function formatVSIP ($vip, $plain_text = FALSE)
 	if ($plain_text)
 		return $fmt_ip;
 	$tplm = TemplateManager::getInstance();
-	//$tplm->setTemplate("vanilla");
 	
 	$mod = $tplm->generateModule("FormatVSIPInMem", true, array("href" => makeHref (array ('page' => 'ipaddress', 'ip' => $fmt_ip)), 
 		   "fmt_ip" => $fmt_ip));
 
-//	$ret = '<a href="' . makeHref (array ('page' => 'ipaddress', 'ip' => $fmt_ip)) . '">' . $fmt_ip . '</a>';
 	return $mod->run();
 }
 
@@ -66,20 +60,16 @@ function renderVS ($vsid)
 	$summary['tags'] = '';
 	
 	$smod = $tplm->generateModule('VSSLBList',true);
-	//$ips = '<ul class="slb-checks">';
+	
 	foreach ($vsinfo['vips'] as $vip)
 		$tplm->generateSubmodule('List', 'VSSLBListElement', $smod, true, array('Content'=>formatVSIP ($vip) . getPopupSLBConfig ($vip)));
-		//$ips .= '<li>' . formatVSIP ($vip) . getPopupSLBConfig ($vip) . '</li>';
-	//$ips .= '</ul>';
+	
 	$summary['IPs'] = $smod->run();
 
-	
 	$smod = $tplm->generateModule('VSSLBList',true);
-	//$ports = '<ul class="slb-checks">';
 	foreach ($vsinfo['ports'] as $port)
 		$tplm->generateSubmodule('List', 'VSSLBListElement', $smod, true, array('Content'=>formatVSPort ($port) . getPopupSLBConfig ($port)));
-		//$ports .= '<li>' . formatVSPort ($port) . getPopupSLBConfig ($port) . '</li>';
-	//$ports .= '</ul>';
+	
 	$summary['Ports'] = $smod->run();
 
 	renderEntitySummary ($vsinfo, 'Summary', $summary, $mod, 'Summary');
@@ -95,7 +85,6 @@ function renderTripletForm ($bypass_id)
 
 	$tplm = TemplateManager::getInstance();
 	
-	//renderSLBTriplets2 ($cell, TRUE);
 	renderSLBTriplets2 ($cell, TRUE, NULL, $tplm->getMainModule(), 'Payload');
 }
 
@@ -104,9 +93,7 @@ function renderPopupTripletForm ($triplet, $port, $vip, $row, TemplateModule $pa
 {
 	//Port to template engine
 	$tplm = TemplateManager::getInstance();
-	//if($parent === NULL)
-	//	$tplm->setTemplate("vanilla");
-
+	
 	if($parent === NULL)	
 		$mod = $tplm->generateModule("RenderPopupTripletForm");
 	else
@@ -120,9 +107,7 @@ function renderPopupTripletForm ($triplet, $port, $vip, $row, TemplateModule $pa
 	$mod->setOutput("rspool_id", htmlspecialchars ($triplet['rspool_id'], ENT_QUOTES));
 	$mod->setOutput("isArray", (is_array ($row) ? ' checked' : ''));
 	$mod->setOutput("issetPortTxt", (isset ($port) ? 'Enable port' : 'Enable IP'));
-		 
-//	printOpFormIntro (isset ($port) ? 'updPort' : 'updIp');
-
+	
 	if (isset ($port))
 	{
 		$mod->setOutput("issetPort", true);
@@ -162,8 +147,6 @@ function renderPopupVSPortForm ($port, $used = 0, $parent = null, $placeholder =
 	$mod->addOutput('Vsconfig', htmlspecialchars ($port['vsconfig']));
 	$mod->addOutput('Rsconfig', htmlspecialchars ($port['rsconfig']));
 
-	//printOpFormIntro ('updPort', $keys);
-
 	if($parent==null)
 		return $mod->run();
 }
@@ -188,7 +171,6 @@ function renderPopupVSVIPForm ($vip, $used = 0,$parent = null, $placeholder = 'P
 	$mod->addOutput('Vsconfig', htmlspecialchars ($vip['vsconfig']));
 	$mod->addOutput('Rsconfig', htmlspecialchars ($vip['rsconfig']));
 		 
-	//printOpFormIntro ('updIP', array ('ip' => $fmt_ip));
 	if($parent==null)
 		return $mod->run();
 }
@@ -212,10 +194,6 @@ function renderEditVS ($vs_id)
 
 	printTagsPicker(null, $mod, 'TagsPicker');
 
-	//printOpFormIntro ('updVS');
-	//printTagsPicker ();
-	//printImageHREF ('SAVE', 'Save changes', TRUE);
-
 	// delete link
 	$triplets = getTriplets ($vsinfo);
 	if (count ($triplets) > 0)
@@ -225,19 +203,10 @@ function renderEditVS ($vs_id)
 		$mod->addOutput('ID', $vsinfo['id']);
 		$mod->addOutput('Deletable', true);
 	}
-		
-
-	//TODO remove or port JS
-	//addJS ('js/jquery.thumbhover.js');
-	//addJS ('js/slb_editor.js');
 
 	// second form - ports and IPs settings
 
-	//printOpFormIntro ('addPort');
 	getSelect ($vs_proto, array ('name' => 'proto'), null, true, $mod, 'NewPortSelect');
-
-
-	//printOpFormIntro ('addIP');
 
 	$outarr = array();
 	foreach ($vsinfo['ports'] as $port)
@@ -248,7 +217,6 @@ function renderEditVS ($vs_id)
 				$used++;
 		$outarr[] = array('Port'=>formatVSPort ($port),
 						  'SLBConfig'=> getPopupSLBConfig ($port), 'PopupVsPort' => renderPopupVSPortForm ($port, $used));
-		//renderPopupVSPortForm ($port, $used);
 	}
 	$mod->addOutput('VSPorts', $outarr);
 
@@ -262,7 +230,6 @@ function renderEditVS ($vs_id)
 				$used++;
 		$outarr[] = array('IP'=>formatVSIP($vip),
 						  'SLBConfig'=>getPopupSLBConfig ($vip), 'PopupVSVIP' => renderPopupVSVIPForm ($vip, $used));
-		//renderPopupVSVIPForm ($vip, $used);
 	}
 	$mod->addOutput('VSIps', $outarr);
 
@@ -331,8 +298,6 @@ function groupTriplets ($tr_list)
 function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateModule $parent = null , $placeholder = "RenderedSLBTriplets2")
 {
 	$tplm = TemplateManager::getInstance();
-	//if($parent==null)
-	//	$tplm->setTemplate("vanilla");
 
 	if($parent == null)	
 		$mod = $tplm->generateModule("RenderSLBTriplets2");
@@ -385,15 +350,12 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 		$mod->setOutput("showTriplets", true);
 		$headersArray = array();
 		$mod->setOutput("countTriplets", count($triplets));
-//		startPortlet ('VS group instances (' . count ($triplets) . ')');
+
 		foreach ($headers as $realm => $header)
 			if ($realm != $cell['realm'])
 				$headersArray[] = array("header" => $header);
 		$mod->setOutput("headersArray", $headersArray);
 	}
-
-//	addJS ('js/slb_editor.js');
-//	addJS ('js/jquery.thumbhover.js');
 
 	$class = 'slb-checks';
 	if ($editable)
@@ -412,7 +374,6 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 		amplifyCell ($vs_cell);
 
 		$tripletArray = array("order" => $order, "slb_object_id" => $slb['object_id'], "slb_vs_id" => $slb['vs_id'], "slb_rspool_id" => $slb['rspool_id']);
-
 
 		$cellOutputArray = array();
 		foreach (array_keys ($headers) as $realm)
@@ -435,7 +396,6 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 
 				$slb_cell = spotEntity ($realm, $slb[$fields[$realm]]);
 				$cellOutputArray[] = array("span_html" => $span_html, "slb_cell" => renderSLBEntityCell ($slb_cell));
-//				renderSLBEntityCell ($slb_cell);
 			}
 		}
 		$tripletArray["cellOutputArray"] = $cellOutputArray;
@@ -452,7 +412,6 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 			$singlePort["popupSLBConfig"] = getPopupSLBConfig ($row);
 
 			if ($editable)
-//				renderPopupTripletForm ($slb, $port, NULL, $row);
 				$singlePort["tripletForm"] = renderPopupTripletForm ($slb, $port, NULL, $row);
 			$portOutputArray[] = $singlePort;
 		}
@@ -479,7 +438,6 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 						'Cont'  => htmlspecialchars($row['prio'])))->run();
 			}
 
-
 			$vipOutput["popupSLBConfig"] = getPopupSLBConfig ($row);
 			if ($editable)
 				$vipOutput["tripletForm"] = renderPopupTripletForm ($slb, NULL, $vip, $row);
@@ -497,23 +455,11 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL, TemplateMo
 				'vs_id' => $slb['vs_id'],
 				'rspool_id' => $slb['rspool_id'],
 			));
-//			printOpFormIntro ('del', array (
-//				'object_id' => $slb['object_id'],
-//				'vs_id' => $slb['vs_id'],
-//				'rspool_id' => $slb['rspool_id'],
-//			));
-//			printImageHREF ('DELETE', 'Remove triplet', TRUE);
 		}
 
 		$order = $nextorder[$order];
 		$smod = $tplm->generatePseudoSubmodule('AllTriplets', $mod, $tripletArray);
 	}
-
-
-//	if (count ($triplets))
-//	{
-//		finishPortlet();
-//	}
 
 	if ($editable && getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		callHook ('renderNewTripletForm', $realm1, $realm2, $mod, 'NewTripletFormBot');
@@ -534,7 +480,6 @@ function renderSLBFormAJAX()
 	$mod = $tplm->generateSubmodule('Payload', 'RenderSLBFormAJAX');
 	$mod->setNamespace('slb2_interface');
 
-	//printOpFormIntro ($action['op'], $orig_request);
 	$mod->setOutput('Action', $action['op']);
 	$mod->setOutput('Orig_Req', $orig_request);
 	$realm_list = array_diff (array ('ipvs', 'object', 'ipv4rspool'), array ($pageno));
@@ -553,7 +498,6 @@ function renderSLBFormAJAX()
 				$slb_cell = spotEntity ('ipvs', $orig_request['vs_id']);
 				break;
 		}
-		//renderSLBEntityCell ($slb_cell);
 		$allCellsOut[] = array('EntityCell' => renderSLBEntityCell ($slb_cell));
 	}
 	$mod->setOutput('AllCells', $allCellsOut);
@@ -576,7 +520,6 @@ function renderSLBFormAJAX()
 		$allVipsOut[] = array('Key' => $key, 'Value' => htmlspecialchars ($key, ENT_QUOTES));
 	}
 	$mod->setOutput('AllVips', $allVipsOut);
-	//printImageHREF ('ADD', 'Configure LB', TRUE);
 }
 
 function getTripletConfigAJAX()
@@ -627,8 +570,6 @@ function renderNewTripletForm ($realm1, $realm2, $parent = null, $placeholder = 
 	$realm2_data = get_realm_data ($realm2);
 	
 	$tplm = TemplateManager::getInstance();
-	//if($parent==null)
-	//	$tplm->setTemplate("vanilla");
 	
 	if($parent==null)	
 		$mod = $tplm->generateModule('RenderNewTripletForm');
@@ -637,20 +578,15 @@ function renderNewTripletForm ($realm1, $realm2, $parent = null, $placeholder = 
 	
 	$mod->setNamespace('slb2_interface');
 	
-	
-	//startPortlet ('Add new VS group');
 	if (count ($realm1_data['list']) && count ($realm2_data['list']))
 		$mod->addOutput('isPrintOpFormIntro', true);
 		 
-	//	printOpFormIntro ('addLink');
 	$mod->addOutput('realm1Name', $realm1_data['name']);
-	//printSelect ($realm1_data['list'], $realm1_data['options']);
 	$mod->addOutput('realm1List', $realm1_data['list']);
 	$mod->addOutput('realm1Opt', $realm1_data['options']);
 	
 	if (count ($realm1_data['list']) && count ($realm2_data['list']))
 		$mod->addOutput('isAdd', true);
-	//	printImageHREF ('ADD', 'Configure LB', TRUE, 120);
 	else
 	{
 		$names = array();
@@ -661,13 +597,11 @@ function renderNewTripletForm ($realm1, $realm2, $parent = null, $placeholder = 
 		$message = 'Please create ' . (implode (' and ', $names)) . '.';
 		showNotice ($message);
 		$mod->addOutput('Message', $message);
-	//	printImageHREF ('DENIED', $message, FALSE);
 	}
 	$mod->addOutput('realm2Name', $realm2_data['name']);
 	$mod->addOutput('realm2List', $realm2_data['list']);
 	$mod->addOutput('realm2Opt', $realm2_data['options']);
-	//printSelect ($realm2_data['list'], $realm2_data['options']);
-//	finishPortlet();
+	
 	if($parent==null)
 		return $mod->run();
 }
@@ -681,9 +615,6 @@ function getPopupSLBConfig ($row, TemplateModule $parent = null, $placeholder = 
 	
 	$tplm = TemplateManager::getInstance();
 	
-	//if($parent==null)
-	//	$tplm->setTemplate("vanilla");
-
 	if($parent==null)	
 		$mod = $tplm->generateModule("GetPopupSLBConfig");
 	else
@@ -691,22 +622,14 @@ function getPopupSLBConfig ($row, TemplateModule $parent = null, $placeholder = 
 
 	$mod->setNamespace("slb2_interface");
 
-//	$ret = '';
-//	$ret .= '<div class="slbconf-btn">…</div>';
-//	$ret .= '<div class="slbconf popup-box">';
 	if ($do_vs)
 	{
 		$mod->setOutput("row_vsconfig", $row['vsconfig']);
-//		$ret .= '<h1>VS config:</h1>';
-//		$ret .= $row['vsconfig'];
 	}
 	if ($do_rs)
 	{
 		$mod->setOutput("row_rsconfig", $row['rsconfig']);
-//		$ret .= '<h1>RS config:</h1>';
-//		$ret .= $row['rsconfig'];
 	}
-//	$ret .= '</div>';
 
 	static $js_added = FALSE;
 	if (!$js_added)
@@ -715,15 +638,6 @@ function getPopupSLBConfig ($row, TemplateModule $parent = null, $placeholder = 
 		$tplm->createMainModule();
 		$jsMod = $tplm->generateSubmodule('Payload', 'GetPopupSLBConfig_LoadJS');
 		$jsMod->setNamespace("slb2_interface");
-//		addJS ('js/jquery.thumbhover.js');
-//		addJS (<<<END
-//	$(document).ready (function () {
-//	$('.slbconf-btn').each (function () {
-//		$(this).thumbPopup($(this).siblings('.slbconf.popup-box'), { showFreezeHint: false });
-//	});
-//});
-//END
-///		, TRUE);
 	}
 	if($parent == null)
 		return $mod->run();
@@ -756,11 +670,8 @@ function renderIPVSConvert ($vs_id)
 	
 	$mod->setNamespace('ipvs',true);
 
-	//startPortlet ("Found " . count ($old_vs_list) . " matching VS");
-	//printOpFormIntro ('convert');
 	if (count ($used_tags))
 	{
-		//$mod->addOutput('hasUsedTags', true);
 		$arr = array();
 		foreach ($used_tags as $taginfo)
 			$arr[] = array('ID'=>htmlspecialchars ($taginfo['id'], ENT_QUOTES), 'Tags'=>serializeTags (array ($taginfo)));
@@ -778,37 +689,17 @@ function renderIPVSConvert ($vs_id)
 		foreach ($list as $vsinfo)
 		{
 			$arr[] = array('ID'=>htmlspecialchars ($vsinfo['id'], ENT_QUOTES), 'SLBEntityCell'=>renderSLBEntityCell ($vsinfo));
-			//renderSLBEntityCell ($vsinfo);
 		}
 		$smod->addOutput('List', $arr);
 	}
-	//printImageHREF ('next', "Import settings of the selected services", TRUE);
-	//finishPortlet();
 }
 
 function renderNewVSGForm ()
 {
 
 	$tplm = TemplateManager::getInstance();
-	//$tplm->setTemplate("vanilla");
-	//$tplm->createMainModule("index");
 	
 	$mod = $tplm->generateSubmodule('Payload','RenderNewVSGForm');
 	$mod->setNamespace("ipv4slb");
 	printTagsPicker (null, $mod, 'TagsPicker');
-
-/*
-	startPortlet ('Add new VS group');
-	printOpFormIntro ('add');
-	echo '<table border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo '<tr valign=bottom><th>Name:</th><td class="tdleft">';
-	echo '<input type=text name=name></td></tr>';
-	echo '<tr><th>Tags:</th><td class="tdleft">';
-	printTagsPicker ();
-	echo '</td></tr>';
-	echo '</table>';
-	printImageHREF ('CREATE', 'create virtual service', TRUE);
-	echo '</form>';
-	finishPortlet();
-*/
 }

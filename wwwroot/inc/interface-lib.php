@@ -298,7 +298,6 @@ function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL,
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
 function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $treat_single_special = TRUE, $parent = NULL, $placeholder = "getSelect")
 {
-    //$ret = '';
     if (!array_key_exists ('name', $select_attrs))
         return '';
     // handle two corner cases in a specific way
@@ -306,15 +305,13 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
         return '(none)';
 
     $tplm = TemplateManager::getInstance();
-    //$tplm->setTemplate("vanilla");
-
+    
     if (count ($optionList) == 1 && $treat_single_special)
     {
         foreach ($optionList as $key => $value)
         break;
         $mod = $tplm->generateModule("GetSelectInLine",  true, array("selectName" => $select_attrs['name'], "keyValue" => $key, "value" => $value ));
         $mod->setNamespace("");
-//		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;
         return $mod->run();
     }
     if($parent == null)
@@ -325,20 +322,18 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 
     if (!array_key_exists ('id', $select_attrs))
         $select_attrs['id'] = $select_attrs['name'];
-//	$ret .= '<select';
+
     $selectedOutArray = array();
     foreach ($select_attrs as $attr_name => $attr_value)
-    $selectedOutArray[] = array('attr_name' =>  $attr_name, "attr_val" => $attr_value );
-//		$ret .= " ${attr_name}=${attr_value}";
+        $selectedOutArray[] = array('attr_name' =>  $attr_name, "attr_val" => $attr_value );
+    
     $mod->setOutput("selectedList", $selectedOutArray);
-//	$ret .= '>';
     $allOptionsArray = array();
     foreach ($optionList as $dict_key => $dict_value)
-    $allOptionsArray[] = array("dict_key" => $dict_key, "isSelected" =>  ($dict_key == $selected_id ? ' selected' : ''), "dict_val" => $dict_value );
-//		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+        $allOptionsArray[] = array("dict_key" => $dict_key, "isSelected" =>  ($dict_key == $selected_id ? ' selected' : ''), "dict_val" => $dict_value );
+
     $mod->setOutput("allOptions", $allOptionsArray);
-//	$ret .= '</select>';
-//	return $ret;
+
     if($parent == null)
         return $mod->run();
 
@@ -509,21 +504,8 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array(), $pare
     foreach ($tree_config as $cfgoption_name => $cfgoption_value)
     $default_config[$cfgoption_name] = $cfgoption_value;
 # it is safe to call many times for the same file
-    /*addJS ('js/jquery.optionTree.js');
-    $ret  = "<input type=hidden name=${tree_name}>\n";
-    $ret .= "<script type='text/javascript'>\n";
-    $ret .= "\$(function() {\n";
-    $ret .= "    var option_tree = " . serializeJSTree ($tree_options) . ";\n";
-    $ret .= "    var options = " . serializeJSArray ($default_config) . ";\n";
-    $ret .= "    \$('input[name=${tree_name}]').optionTree(option_tree, options);\n";
-    $ret .= "});\n";
-    $ret .= "</script>\n";
-    return $ret;*/
-
-
+  
     $tplm = TemplateManager::getInstance();
-    //if($parent==null)
-    //	$tplm->setTemplate("vanilla");
 
     if($parent==null)
         $mod = $tplm->generateModule("GetOptionTree");
@@ -564,33 +546,16 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
                                              "Title" => (!strlen ($title) ? '' : " title='${title}'") ));
 
         return $mod->run();
-        /*	return
-        		"<input type=image name=submit class=icon " .
-        		"src='${img['path']}' " .
-        		"border=0 " .
-        		($tabindex ? "tabindex=${tabindex}" : '') .
-        		(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
-        		">";*/
     }
     else
     {
         $tplm = TemplateManager::getInstance();
-        //$tplm->setTemplate("vanilla");
 
         $mod = $tplm->generateModule("GetImageHrefNoInput", true,
                                      array( "SrcPath" => $img['path'],  "ImgWidth" => $img['width'], "ImgHeight" => $img['height'] ,
                                             "Title" => (!strlen ($title) ? '' : " title='${title}'") ));
 
         return $mod->run();
-        /*
-        		return
-        			"<img " .
-        			"src='${img['path']}' " .
-        			"width=${img['width']} " .
-        			"height=${img['height']} " .
-        			"border=0 " .
-        			(!strlen ($title) ? '' : "title='${title}'") .
-        			">";*/
     }
 }
 
@@ -738,8 +703,6 @@ function getRenderedIPv4NetCapacity ($range)
 {
     //Use TemplateEngine
     $tplm = TemplateManager::getInstance();
-    $tplm->setTemplate('vanilla');
-//	$tplm->createMainModule();
 
     $class = 'net-usage';
     if (isset ($range['addrc']))
@@ -798,8 +761,6 @@ function getRenderedIPv4NetCapacity ($range)
         $modtext->setOutput("title", $title);
         $modtext->setOutput("title2", $title2);
         $text = $modtext->run();
-        //	$text = "<img width='$width' height=10 border=0 title='$title2' src='?module=progressbar4&px1=$px1&px2=$px2&px3=$px3'>" .
-        //		" <small class='title'>$title</small>";
     }
     else
     {
@@ -879,8 +840,6 @@ function getRenderedIPv6NetCapacity ($range)
 
     //Use TemplateEngine
     $tplm = TemplateManager::getInstance();
-    //$tplm->setTemplate("vanilla");
-    //$tplm->createMainModule("index");
 
     $mod = $tplm->generateModule("RenderedIPv6NetCapacity", true);
     $mod->setOutput("class", $class);
@@ -889,7 +848,7 @@ function getRenderedIPv6NetCapacity ($range)
     $mod->setOutput("cnt", $cnt);
     $mod->setOutput("mult", $mult);
     $mod->setOutput("what", $what);
-    //return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}${cnt}${mult} ${what}" . "</div>";
+    
     return $mod->run();
 }
 
@@ -952,10 +911,8 @@ function getTagClassName ($tagid)
 
 function serializeTags ($chain, $baseurl = '', $parent = null, $placeholder = "SerializedTag")
 {
-
-
     $tplm = TemplateManager::getInstance();
-    //$tplm->setTemplate("vanilla");
+    
     global $taglist;
     $tmp = array();
     usort ($chain, 'cmpTags');
@@ -987,7 +944,6 @@ function serializeTags ($chain, $baseurl = '', $parent = null, $placeholder = "S
         {
             if($parent == null)
                 $mod = $tplm->generateModule('SerializedTag', true);
-            //	$mod = $tplm->generateSubmodule('Cont', 'SerializedTag', $globalPlc, true);
             else
                 $mod = $tplm->generateSubmodule($placeholder, 'SerializedTag', $parent, true);
         }
@@ -995,46 +951,22 @@ function serializeTags ($chain, $baseurl = '', $parent = null, $placeholder = "S
         {
             if($parent == null)
                 $mod = $tplm->generateModule('SerializedTagLink', true);
-            //	$mod = $tplm->generateSubmodule('Cont', 'SerializedTagLink', $globalPlc, true);
             else
                 $mod = $tplm->generateSubmodule($placeholder, 'SerializedTagLink', $parent, true);
 
             $mod->addOutput('BaseUrl', $baseurl);
             $mod->addOutput('ID', $taginfo['id']);
-            //$tag = 'a';
-            //$href = "href='${baseurl}cft[]=${taginfo['id']}'";
         }
-
-        //if (strlen ($title))
-        //	$title = "title='$title'";
 
         if (strlen ($title))
             $mod->addOutput('Title', $title);
         else
             $mod->addOutput('Title', '');
-        //$title = 'title="' . htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES) . '"';
-
-        //$class = '';
+        
         if (isset ($taginfo['id']))
             $mod->addOutput('Class', getTagClassName($taginfo['id']));
-        //$class = 'class="' . getTagClassName ($taginfo['id']) . '"';
-
-        //$href = '';
-        //if ($baseurl == '')
-        //	$tag = 'span';
-        //else
-        //{
-        //	$tag = 'a';
-        //	$href = "href='${baseurl}cft[]=${taginfo['id']}'";
-        //}
-        //$tmp[] = "<$tag $href $title $class>" . $taginfo['tag'] . "</$tag>";
+        
         $mod->addOutput('Tag', $taginfo['tag']);
-
-        /*if (array_key_exists($nr+1, $chain))
-        	$mod->addOutput('Delimiter', ', ');
-        else
-        	$mod->addOutput('Delimiter', '');*/
-
         $modCont .= $mod->run();
     }
 
@@ -1044,7 +976,6 @@ function serializeTags ($chain, $baseurl = '', $parent = null, $placeholder = "S
         $globalPlc->setOutput('Cont', $modCont);
         return $globalPlc->run();
     }
-    //return implode (', ', $tmp);
 }
 
 function startPortlet ($title = '')
@@ -1118,9 +1049,7 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
     foreach ($values as $name => $value)
     {
         $loopMod = $tplm->generateSubmodule("LoopMod", "RenderEntitySummary_LoopCont" , $mod);
-        //$loopMod->setNamespace("", true);
         $loopMod->defNamespace();
-
 
         if (is_array ($value) and count ($value) == 1)
         {
@@ -1158,7 +1087,6 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
 
             $loopMod->setOutput("Cell", $cell);
             $loopMod->setOutput("BaseUrl", $baseurl);
-            //		printTagTRs ($cell, $baseurl);
         }
         //	else
     }
@@ -1171,8 +1099,7 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 {
     //Initiate TemplateManager
     $tplm = TemplateManager::getInstance();
-    //$tplm->setTemplate("vanilla");
-
+  
     if($parent == null)
         $mod = $tplm->generateModule("GetOpLink");
     else
@@ -1183,11 +1110,9 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
     {
         $mod->setOutput("issetParams", true);
         $mod->setOutput("href", makeHrefProcess ($params));
-//		$ret = '<a href="' . makeHrefProcess ($params) . '"';
     }
     else
     {
-//		$ret = '<a href="#" onclick="return false;"';
         $class .= ' noclick';
     }
 
@@ -1195,33 +1120,24 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
     {
         $mod->setOutput("htmlComment", htmlspecialchars ($comment, ENT_QUOTES));
     }
-//		$ret .= ' title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
+
     $class = trim ($class);
 
     if (! empty ($class))
     {
         $mod->setOutput("htmlClass", htmlspecialchars ($class, ENT_QUOTES));
     }
-//		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
-//	if (! empty ($comment))
-//		$ret .= 'title="' . htmlspecialchars($comment, ENT_QUOTES) . '"';
-//	$ret .= '>';
 
     if (! empty ($img_name))
     {
         $mod->setOutput("loadImage", true);
         $mod->setOutput("imgName", $img_name);
         $mod->setOutput("comment", $comment);
-//		$ret .= getImageHREF ($img_name, $comment);
-//		if (! empty ($title))
-//			$ret .= ' ';
     }
     if (FALSE !== strpos ($class, 'need-confirmation'))
         $mod->setOutput("loadJs", true);
-//		addJS ('js/racktables.js');
+
     $mod->setOutput("title", $title);
-//	$ret .= $title . '</a>';
-//	return $ret;
     if($parent == null)
         return $mod->run();
 }
@@ -1248,8 +1164,6 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE, $parent 
 
 
     $tplm = TemplateManager::getInstance();
-    //if($parent==null)
-    //	$tplm->setTemplate("vanilla");
 
     if($parent==null)
         $mod = $tplm->generateModule("GetProgressBar", true);
@@ -1261,8 +1175,6 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE, $parent 
 
     if($parent == null)
         return $mod->run();
-//	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
-//	return $ret;
 }
 
 function renderNetVLAN ($cell)
@@ -1293,10 +1205,8 @@ function includeJQueryUI ($do_css = TRUE, $parent = NULL, $placeholder = "JQuery
     $mod->setNamespace('');
     $mod->setLock(true);
 
-//	addJS ('js/jquery-ui-1.8.21.min.js');
     if ($do_css)
         $mod->addOutput("Do_css", true);
-//		addCSS ('css/jquery-ui-1.8.22.redmond.css');s
     if($parent == null)
         return $mod->run();
 
@@ -1305,8 +1215,6 @@ function includeJQueryUI ($do_css = TRUE, $parent = NULL, $placeholder = "JQuery
 function getRenderedIPPortPair ($ip, $port = NULL, $parent = null, $placeholder = "RenderedIPPortPair")
 {
     $tplm = TemplateManager::getInstance();
-    //if($parent==null)
-    //	$tplm->setTemplate("vanilla");
 
     if($parent==null)
         $mod = $tplm->generateModule('RenderedIPPortPair', true);
@@ -1320,10 +1228,6 @@ function getRenderedIPPortPair ($ip, $port = NULL, $parent = null, $placeholder 
 
     if($parent==null)
         return $mod->run();
-    //return "<a href=\"" .
-    //	makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $ip)) .
-    //	"\">" . $ip . "</a>" .
-    //	(isset ($port) ? ":" . $port : "");
 }
 
 // Print common operation form prologue, include bypass argument, if
@@ -1344,7 +1248,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
     $loopArray = array();
     foreach ($extra as $inputname => $inputvalue)
     $loopArray[] = array("name" => htmlspecialchars ($inputname, ENT_QUOTES), "val" => htmlspecialchars ($inputvalue, ENT_QUOTES));
-//		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
+
     $mod->setOutput("loopArray", $loopArray);
     return $mod->run();
 }
@@ -1415,8 +1319,7 @@ function printTagsPickerInput ($input_name="taglist", $parent = NULL, $placehold
     else
         $mod = $tplm->generateSubmodule($placeholder, 'TagsPickerInput', $parent, false, array('Input_Name' => $input_name));
     $mod->setNamespace('', true);
-    //$mod->setLock(true);
-
+   
     if($parent==null)
         return $mod->run();
 
@@ -1439,14 +1342,12 @@ function printTagsPickerUl ($preselect=NULL, $input_name="taglist", $parent = NU
     foreach ($preselect as $key => $value) # readable time format
     $preselect[$key]['time_parsed'] = formatAge ($value['time']);
     usort ($preselect, 'cmpTags');
-    //$preselect_hidden = "";
-
+    
     $mod->setOutput('Input_Name', $input_name);
     $allValueIds = array();
     foreach ($preselect as $value)
     {
         $allValueIds[] = array('Id' => $value['id']);
-        //	$preselect_hidden .= "<input type=hidden name=" . $input_name . "[] value=" . $value['id'] . ">";
     }
     $mod->setOutput('ValueIds', $allValueIds);
     $mod->setOutput('JSON', json_encode($preselect));
@@ -1469,10 +1370,6 @@ function enableTagsPicker ($parent = null, $placeholder = 'TagPickerJS')
 
     $mod->setOutput('JQuery', includeJQueryUI (TRUE));
 
-    /*addCSS ('css/tagit.css');
-    addJS ('js/tag-it.js');
-    addJS ('js/tag-it-local.js');*/
-
     if (! $taglist_inserted)
     {
         $taglist_filtered = array();
@@ -1480,7 +1377,6 @@ function enableTagsPicker ($parent = null, $placeholder = 'TagPickerJS')
         $taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
         $mod->setOutput('Taglist',json_encode ($taglist_filtered));
 
-        //addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
         $taglist_inserted = TRUE;
     }
     if($parent == null)
@@ -1505,9 +1401,6 @@ function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
                                   'Title' => htmlspecialchars ($title, ENT_QUOTES),
                                   'IsDisplayName' => ($display_ifname ? $alloc['name'] . '@' : ''),
                                   'ObjectName' => $object_name))->run();
-    //	'<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $alloc['object_id'], 'hl_ip' => ip_format ($ip_bin))) . '"' .
-    //	' title="' . htmlspecialchars ($title, ENT_QUOTES) . '"' .
-    //	">" . ($display_ifname ? $alloc['name'] . '@' : '') . $object_name . "</a>";
 }
 
 ?>
