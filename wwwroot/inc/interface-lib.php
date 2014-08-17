@@ -790,7 +790,7 @@ function serializeTags ($chain, $baseurl = '')
 			$parent_info[] = $taginfo['tag'];
 			if (strlen ($title))
 				$title .= "\n";
-			$title .= implode (" \xE2\x86\x92  ", $parent_info); # right arrow
+			$title .= implode (" &rarr;  ", $parent_info);
 		}
 		if (strlen ($title))
 			$title = "title='$title'";
