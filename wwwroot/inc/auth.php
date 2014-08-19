@@ -653,29 +653,26 @@ function nested_groups (&$ret, $match, $connection)
         {
                 return false;		// If the group isn't found, exit function
         }
-        else
+        $info = @ldap_get_entries ($connection, $results);
+        ldap_free_result ($results);
+        $space = '';
+        foreach (explode (' ', $LDAP_options['displayname_attrs']) as $attr)
         {
-                $info = @ldap_get_entries ($connection, $results);
-                ldap_free_result ($results);
-                $space = '';
-                foreach (explode (' ', $LDAP_options['displayname_attrs']) as $attr)
-                {
-                        $ret['displayed_name'] .= $space . $info[0][$attr][0];
-                        $space = ' ';
-                }
-                // Pull group membership, if any was returned.
-                if (isset ($info[0][$LDAP_options['group_attr']]))
-                        for ($i = 0; $i < $info[0][$LDAP_options['group_attr']]['count']; $i++)
-                                if
-                                (
-                                        preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches)
-                                        and validTagName ('$lgcn_' . $matches[1], TRUE)
-                                )
-                                {
-                                        $ret['memberof'][] = '$lgcn_' . $matches[1];
-                                        nested_groups ($ret, $matches[1], $connection);		// Recursive call
-                                }
+                $ret['displayed_name'] .= $space . $info[0][$attr][0];
+                $space = ' ';
         }
+        // Pull group membership, if any was returned.
+        if (isset ($info[0][$LDAP_options['group_attr']]))
+                for ($i = 0; $i < $info[0][$LDAP_options['group_attr']]['count']; $i++)
+                        if
+                        (
+                                preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches)
+                                and validTagName ('$lgcn_' . $matches[1], TRUE)
+                        )
+                        {
+                                $ret['memberof'][] = '$lgcn_' . $matches[1];
+                                nested_groups ($ret, $matches[1], $connection);		// Recursive call
+                        }
 }
 
 
