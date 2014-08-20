@@ -170,8 +170,11 @@ if(is_array(glob("$racktables_plugins_dir/*.php")))
 
 // display plugins output if it contains something but newlines
 $tmp = ob_get_clean();
-if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
-    echo $tmp; //@TODO write output in 'payload'
+if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp)) {
+	if (TemplateManager::getInstance()->getMainModule() != null) {
+		TemplateManager::getInstance()->getMainModule()->addOutput("Payload", $tmp);
+	}
+}
 unset ($tmp);
 
 // These will be filled in by fixContext()
