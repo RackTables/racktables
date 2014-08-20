@@ -192,9 +192,9 @@ class TemplateManager
 		{
 			return true;
 		}
-		if (file_exists('./tpl/'. $template . '/' . $name . '.itpl.php'))
+		if (file_exists(dirname(__FILE__).'/../tpl/'. $template . '/' . $name . '.itpl.php'))
 		{
-			require_once('./tpl/'. $template . '/' . $name . '.itpl.php'); //Check for the template in its own file
+			require_once(dirname(__FILE__).'/../tpl/'. $template . '/' . $name . '.itpl.php'); //Check for the template in its own file
 		}
 		if (strpos($name,'/') !== false)
 		{
@@ -205,9 +205,9 @@ class TemplateManager
 				require_once('./tpl/'. $template . '/' . $dir . '/global.itpl.php'); //Check for the template in the global file
 			}				
 		}
-		if (file_exists('./tpl/'. $template . '/global.itpl.php'))
-		{
-			require_once('./tpl/'. $template . '/global.itpl.php'); //Check for the template in the global file
+		if (file_exists(dirname(__FILE__).'/../tpl/'. $template . '/global.itpl.php'))
+		{	
+			require_once(dirname(__FILE__).'/../tpl/'. $template . '/global.itpl.php'); //Check for the template in the global file
 		}
 		
 		if (!key_exists($name, $this->inmemory_templates))
@@ -511,8 +511,8 @@ class TemplateManager
 		{
 			if ($this->tpl != "")
 			{
-				if (file_exists("./tpl/" . $this->tpl . "/helpers.php"))
-					require_once './tpl/' . $this->tpl . "/helpers.php";
+				if (file_exists(dirname(__FILE__).'/../tpl/' . $this->tpl . '/helpers.php'))
+					require_once dirname(__FILE__).'/../tpl/' . $this->tpl . "/helpers.php";
 			}
 			if (!class_exists($classname))
 			{
@@ -851,24 +851,23 @@ class TemplateModule
 			return "";
 		}
 		
-		
 		$this->output = array_merge_recursive($this->runModules($this->output),$this->localRequirements);
 		
-		$this->output["css"] = './tpl/' . $this->tpl . '/css/';
-		$this->output["img"] = './tpl/' . $this->tpl . '/img/';
-		$this->output["js"] = './tpl/' . $this->tpl . '/js/';
+		$this->output["css"] = dirname(__FILE__) . '/../tpl/' . $this->tpl . '/css/';
+		$this->output["img"] = dirname(__FILE__) . '/../tpl/' . $this->tpl . '/img/';
+		$this->output["js"] = dirname(__FILE__) . '/../tpl/' . $this->tpl . '/js/';
 		
 		if ($this->namespace !=  "")
 		{
 			$this->module = $this->namespace . '/' . $this->module;
 		}
-		if (!file_exists('./tpl/' . $this->tpl . '/' . $this->module . '.tpl.php'))
+		if (!file_exists(dirname(__FILE__) . '/../tpl/' . $this->tpl . '/' . $this->module . '.tpl.php'))
 		{
 			throw new TemplateException("TplError: Module " . $this->module . " doesn't exist in " . $this->tpl);
 			return "";
 		}
 		ob_start();
-		include './tpl/' . $this->tpl . '/' . $this->module . '.tpl.php';
+		include dirname(__FILE__) . '/../tpl/' . $this->tpl . '/' . $this->module . '.tpl.php';
 		return ob_get_clean();
 	}
 	

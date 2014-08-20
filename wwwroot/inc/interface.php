@@ -292,8 +292,8 @@ function getRenderedAlloc ($object_id, $alloc)
             loadIPAddrList ($netinfo);
             $other_routers = array();
             foreach (findRouters ($netinfo['own_addrlist']) as $router)
-            if ($router['id'] != $object_id)
-                $other_routers[] = $router;
+                if ($router['id'] != $object_id)
+                    $other_routers[] = $router;
             if (count ($other_routers))
                 $ret['td_routed_by'] = printRoutersTD($other_routers, $display_routers);
             else
@@ -326,12 +326,12 @@ function getRenderedAlloc ($object_id, $alloc)
             if (! isset ($netinfo['own_addrlist']))
                 loadIPAddrList ($netinfo);
             foreach (getPtPNeighbors ($ip_bin, $netinfo['own_addrlist']) as $p_ip_bin => $p_alloc_list)
-            foreach ($p_alloc_list as $p_alloc)
-            {
-                $tplm->generateSubmodule('LocPeers', 'GlobalPlaceholder', $td_peers_mod, true, array(
-                                             'Cont' => $prefix . '&harr;&nbsp;' . makeIPAllocLink ($p_ip_bin, $p_alloc)));
-                $prefix = $separator;
-            }
+                foreach ($p_alloc_list as $p_alloc)
+                {
+                    $tplm->generateSubmodule('LocPeers', 'GlobalPlaceholder', $td_peers_mod, true, array(
+                                                 'Cont' => $prefix . '&harr;&nbsp;' . makeIPAllocLink ($p_ip_bin, $p_alloc)));
+                    $prefix = $separator;
+                }
         }
     }
 
@@ -631,12 +631,12 @@ function renderRow ($row_id)
     $summary['Units'] = $rowInfo['sum'];
     $summary['% used'] = getProgressBar (getRSUforRow ($rackList));
     foreach (getAttrValuesSorted ($row_id) as $record)
-    if
-    (
-        $record['value'] != '' and
-        permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
-    )
-        $summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+        if
+        (
+            $record['value'] != '' and
+            permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+        )
+            $summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 
     // Main layout starts.
     $tplm = TemplateManager::getInstance();
@@ -690,7 +690,7 @@ function renderEditRowForm ($row_id)
     $locations = array ();
     $locations[0] = '-- NOT SET --';
     foreach (listCells ('location') as $id => $locationInfo)
-    $locations[$id] = $locationInfo['name'];
+        $locations[$id] = $locationInfo['name'];
     natcasesort ($locations);
 
     $mod->setOutput('Location_ID', $row['location_id']);
@@ -867,7 +867,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0, $parent = 
                                 {
                                     $tmp = substr ($slotInfo[$s], 0, 1);
                                     foreach (str_split (substr ($slotInfo[$s], 1)) as $letter)
-                                    $tmp .= '<br>' . $letter;
+                                        $tmp .= '<br>' . $letter;
                                     $slotInfo[$s] = $tmp;
                                 }
                                 $slotDataMod->setOutput('mkASlotInfo', mkA ($slotInfo[$s], 'object', $slotData[$s]));
@@ -981,7 +981,7 @@ function renderRackSortForm ($row_id)
 
     $arr = array();
     foreach (getRacks($row_id) as $rack_id => $rackInfo)
-    $arr[] = array('RackId'=>$rack_id,'RackName'=>$rackInfo['name']);
+        $arr[] = array('RackId'=>$rack_id,'RackName'=>$rackInfo['name']);
 
     $mod->addOutput('racklist', $arr);
 }
@@ -1446,8 +1446,8 @@ function renderObject ($object_id)
         // group IP allocations by interface name instead of address family
         $allocs_by_iface = array();
         foreach (array ('ipv4', 'ipv6') as $ip_v)
-        foreach ($info[$ip_v] as $ip_bin => $alloc)
-        $allocs_by_iface[$alloc['osif']][$ip_bin] = $alloc;
+            foreach ($info[$ip_v] as $ip_bin => $alloc)
+                $allocs_by_iface[$alloc['osif']][$ip_bin] = $alloc;
 
         // sort allocs array by portnames
         $allPortsOut = array();
@@ -1640,8 +1640,8 @@ function renderPortsForObject ($object_id)
     // rename ports link
     $n_ports_to_rename = 0;
     foreach ($object['ports'] as $port)
-    if ($port['name'] != shortenPortName ($port['name'], $object['id']))
-        $n_ports_to_rename++;
+        if ($port['name'] != shortenPortName ($port['name'], $object['id']))
+            $n_ports_to_rename++;
     if ($n_ports_to_rename)
         echo '<p>' . getOpLink (array ('op'=>'renameAll'), "Auto-rename $n_ports_to_rename ports", 'recalc', 'Use RackTables naming convention for this device type') . '</p>';
 
@@ -2052,23 +2052,23 @@ function renderRackSpaceForObject ($object_id)
         $object = spotEntity ('object', $object_id);
         $matched_tags = array();
         foreach ($allRacksData as $rack)
-        foreach ($object['etags'] as $tag)
-        if (tagOnChain ($tag, $rack['etags']) or tagOnChain ($tag, $rack['itags']))
-        {
-            $matching_racks[$rack['id']] = $rack;
-            $matched_tags[$tag['id']] = $tag;
-            break;
-        }
+            foreach ($object['etags'] as $tag)
+                if (tagOnChain ($tag, $rack['etags']) or tagOnChain ($tag, $rack['itags']))
+                {
+                    $matching_racks[$rack['id']] = $rack;
+                    $matched_tags[$tag['id']] = $tag;
+                    break;
+                }
         // add current object's racks even if they dont match filter
         foreach ($workingRacksData as $rack_id => $rack)
-        if (! isset ($matching_racks[$rack_id]))
-            $matching_racks[$rack_id] = $rack;
+            if (! isset ($matching_racks[$rack_id]))
+                $matching_racks[$rack_id] = $rack;
         // if matching racks found, and rack list is reduced, show 'show all' link
         if (count ($matching_racks) and count ($matching_racks) != count ($allRacksData))
         {
             $filter_text = '';
             foreach ($matched_tags as $tag)
-            $filter_text .= (empty ($filter_text) ? '' : ' or ') . '{' . $tag['tag'] . '}';
+                $filter_text .= (empty ($filter_text) ? '' : ' or ') . '{' . $tag['tag'] . '}';
             $href_show_all = trim($_SERVER['REQUEST_URI'], '&');
             $href_show_all .= htmlspecialchars('&show_all_racks=1');
             $mod->addOutput("isShowAllAndMatching", true);
@@ -2080,11 +2080,11 @@ function renderRackSpaceForObject ($object_id)
 
     if (count ($allRacksData) <= getConfigVar ('RACK_PRESELECT_THRESHOLD'))
         foreach ($allRacksData as $rack)
-        if (!array_key_exists ($rack['id'], $workingRacksData))
-        {
-            amplifyCell ($rack);
-            $workingRacksData[$rack['id']] = $rack;
-        }
+            if (!array_key_exists ($rack['id'], $workingRacksData))
+            {
+                amplifyCell ($rack);
+                $workingRacksData[$rack['id']] = $rack;
+            }
     foreach (array_keys ($workingRacksData) as $rackId)
         applyObjectMountMask ($workingRacksData[$rackId], $object_id);
     renderRackMultiSelect ('rackmulti[]', $allRacksData, array_keys ($workingRacksData), $mod, "RackMultiSet");
@@ -2204,7 +2204,7 @@ function renderDepot ()
 # gather IDs of all objects and fetch rackspace info in one pass
             $idlist = array();
             foreach ($objects as $obj)
-            $idlist[] = $obj['id'];
+                $idlist[] = $obj['id'];
             $mountinfo = getMountInfo ($idlist);
             $containerinfo = getContainerInfo ($idlist);
 
@@ -2229,10 +2229,10 @@ function renderDepot ()
                 $places = array();
                 if (array_key_exists ($obj['id'], $containerinfo))
                     foreach ($containerinfo[$obj['id']] as $ci)
-                    $places[] = mkA ($ci['container_dname'], 'object', $ci['container_id']);
+                        $places[] = mkA ($ci['container_dname'], 'object', $ci['container_id']);
                 if (array_key_exists ($obj['id'], $mountinfo))
                     foreach ($mountinfo[$obj['id']] as $mi)
-                    $places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
+                        $places[] = mkA ($mi['row_name'], 'row', $mi['row_id']) . '/' . mkA ($mi['rack_name'], 'rack', $mi['rack_id']);
                 if (! count ($places))
                     $places[] = 'Unmounted';
                 $singleObj["Places"] = implode (', ', $places);
@@ -2634,14 +2634,14 @@ function renderIPNetwork ($id)
     $reuse_domain = considerConfiguredConstraint ($range, '8021Q_MULTILINK_LISTSRC');
     $domainclass = array();
     foreach (array_count_values (reduceSubarraysToColumn ($range['8021q'], 'domain_id')) as $domain_id => $vlan_count)
-    $domainclass[$domain_id] = $vlan_count == 1 ? '' : ($reuse_domain ? '{trwarning}' : '{trerror}');
+        $domainclass[$domain_id] = $vlan_count == 1 ? '' : ($reuse_domain ? '{trwarning}' : '{trerror}');
     foreach ($range['8021q'] as $item)
-    $summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id'])));
+        $summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id'])));
     if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
     {
         $summary['Routed by'] = '';
         foreach ($routers as $rtr)
-        $summary['Routed by'] .= renderRouterCell($rtr['ip_bin'], $rtr['iface'], spotEntity ('object', $rtr['id']));
+            $summary['Routed by'] .= renderRouterCell($rtr['ip_bin'], $rtr['iface'], spotEntity ('object', $rtr['id']));
     }
     $summary['tags'] = '';
     renderEntitySummary ($range, 'summary', $summary, $mod, 'Summary');
@@ -3110,21 +3110,21 @@ function renderIPAddress ($ip_bin)
         {
             $mod->addOutput('VSGListCount', count ($address['vsglist']));
             foreach ($address['vsglist'] as $vsg_id)
-            renderSLBEntityCell (spotEntity ('ipvs', $vsg_id), FALSE, $mod, 'SLBPortlet1');
+                renderSLBEntityCell (spotEntity ('ipvs', $vsg_id), FALSE, $mod, 'SLBPortlet1');
         }
 
         if (! empty ($address['vslist']))
         {
             $mod->addOutput('VSListCount', count ($address['vslist']));
             foreach ($address['vslist'] as $vs_id)
-            renderSLBEntityCell (spotEntity ('ipv4vs', $vs_id), FALSE, $mod, 'SLBPortlet2');
+                renderSLBEntityCell (spotEntity ('ipv4vs', $vs_id), FALSE, $mod, 'SLBPortlet2');
         }
 
         if (! empty ($address['rsplist']))
         {
             $mod->addOutput('RSPListCount', count ($address['rsplist']));
             foreach ($address['rsplist'] as $rsp_id)
-            renderSLBEntityCell (spotEntity ('ipv4rspool', $rsp_id), FALSE, $mod, 'SLBPortlet3');
+                renderSLBEntityCell (spotEntity ('ipv4rspool', $rsp_id), FALSE, $mod, 'SLBPortlet3');
         }
     }
 
@@ -3160,30 +3160,30 @@ function renderIPAddress ($ip_bin)
 
     if (! empty ($address['vsglist']))
         foreach ($address['vsglist'] as $vsg_id)
-        renderSLBTriplets2 (spotEntity ('ipvs', $vsg_id), FALSE, $ip_bin, $mod, 'VSGList');
+            renderSLBTriplets2 (spotEntity ('ipvs', $vsg_id), FALSE, $ip_bin, $mod, 'VSGList');
 
     if (! empty ($address['vslist']))
         renderSLBTriplets ($address, $mod, 'VSList');
 
     foreach (array ('outpf' => 'departing NAT rules', 'inpf' => 'arriving NAT rules') as $key => $title)
-    if (! empty ($address[$key]))
-    {
-        $placeholder = ($key == 'outpf' ? 'NATDeparting' : 'NATArriving');
-
-        foreach ($address[$key] as $rule)
+        if (! empty ($address[$key]))
         {
-            $smod = $tplm->generatePseudoSubmodule($placeholder, $mod);
-            $smod->setNamespace('ipaddress');
-            $smod->addOutput('Proto', $rule['proto']);
-            $smod->addOutput('FromIp', $rule['localip']);
-            $smod->addOutput('FromPort', $rule['localport']);
-            $smod->addOutput('FromLink', makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $rule['localip'])));
-            $smod->addOutput('ToIp', $rule['remoteip']);
-            $smod->addOutput('ToPort', $rule['remoteport']);
-            $smod->addOutput('ToLink', makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $rule['remoteip'])));
-            $smod->addOutput('Description', $rule['description']);
+            $placeholder = ($key == 'outpf' ? 'NATDeparting' : 'NATArriving');
+
+            foreach ($address[$key] as $rule)
+            {
+                $smod = $tplm->generatePseudoSubmodule($placeholder, $mod);
+                $smod->setNamespace('ipaddress');
+                $smod->addOutput('Proto', $rule['proto']);
+                $smod->addOutput('FromIp', $rule['localip']);
+                $smod->addOutput('FromPort', $rule['localport']);
+                $smod->addOutput('FromLink', makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $rule['localip'])));
+                $smod->addOutput('ToIp', $rule['remoteip']);
+                $smod->addOutput('ToPort', $rule['remoteport']);
+                $smod->addOutput('ToLink', makeHref (array ('page' => 'ipaddress',  'tab'=>'default', 'ip' => $rule['remoteip'])));
+                $smod->addOutput('Description', $rule['description']);
+            }
         }
-    }
 }
 
 function renderIPAddressProperties ($ip_bin)
@@ -3307,7 +3307,7 @@ function renderNATv4ForObject ($object_id)
         
         if (count ($address['allocs']))
             foreach ($address['allocs'] as $bond)
-            $singlePort['mkAList'] .= mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
+                $singlePort['mkAList'] .= mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
         
         elseif (strlen ($pf['remote_addr_name']))
         $singlePort['remote_addr_name'] = $pf['remote_addr_name'];
@@ -3379,8 +3379,8 @@ function renderAddMultipleObjectsForm ()
     // exclude location-related object types
     global $location_obj_types;
     foreach ($typelist['other'] as $key => $value)
-    if ($key > 0 && in_array($key, $location_obj_types))
-        unset($typelist['other'][$key]);
+        if ($key > 0 && in_array($key, $location_obj_types))
+            unset($typelist['other'][$key]);
 
     $mod->setOutput("formIntro", printOpFormIntro ('addObjects'));
     $objectListOutput = array();
@@ -3388,7 +3388,6 @@ function renderAddMultipleObjectsForm ()
     {
         $singleEntry = array();
         // Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-        //printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
         $singleEntry['niftySelect'] = printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
         $singleEntry['i'] = $i;
         $singleEntry['tabindex'] = $tabindex;
@@ -3478,8 +3477,8 @@ function renderSearchResults ($terms, $summary)
                 $foundObject->setOutput('ObjectsByAttr', true);
 
                 foreach ($obj['by_attr'] as $attr_name)
-                if ($attr_name != 'name')
-                    $outArray[] = array("Attr_Name" => $attr_name);
+                    if ($attr_name != 'name')
+                        $outArray[] = array("Attr_Name" => $attr_name);
 
 
                 $foundObject->setOutput("Objects_Attr", $outArray);
@@ -3507,20 +3506,19 @@ function renderSearchResults ($terms, $summary)
 
                 amplifyCell ($object);
                 foreach ($obj['by_port'] as $port_id => $text)
-
-                foreach ($object['ports'] as $port)
-                if ($port['id'] == $port_id)
-                {
-                    $port_href = '<a href="' . makeHref (array
-                                                         (
-                                                                 'page' => 'object',
-                                                                 'object_id' => $object['id'],
-                                                                 'hl_port_id' => $port_id
-                                                         )) . '">port ' . $port['name'] . '</a>';
-                    $outArray[] = array('Href' =>  $port_href,
-                                        'Text' => $text );
-                    break; // next reason
-                }
+                    foreach ($object['ports'] as $port)
+                        if ($port['id'] == $port_id)
+                        {
+                            $port_href = '<a href="' . makeHref (array
+                                                                 (
+                                                                         'page' => 'object',
+                                                                         'object_id' => $object['id'],
+                                                                         'hl_port_id' => $port_id
+                                                                 )) . '">port ' . $port['name'] . '</a>';
+                            $outArray[] = array('Href' =>  $port_href,
+                                                'Text' => $text );
+                            break; // next reason
+                        }
                 $foundObject->setOutput("Objects_Port", $outArray);
             }
 
@@ -3530,7 +3528,7 @@ function renderSearchResults ($terms, $summary)
                 $foundObject->setOutput('ObjectsByIface', true);
 
                 foreach ($obj['by_iface'] as $ifname)
-                $outArray[] = array( 'Ifname' => $ifname);
+                    $outArray[] = array( 'Ifname' => $ifname);
                 $foundObject->setOutput("Objects_Iface", $outArray);
             }
 
@@ -3540,7 +3538,7 @@ function renderSearchResults ($terms, $summary)
                 $foundObject->setOutput('ObjectsByNAT', true);
 
                 foreach ($obj['by_nat'] as $comment)
-                $outArray[] = array('Comment' => $comment);
+                    $outArray[] = array('Comment' => $comment);
                 $foundObject->setOutput("Objects_NAT", $outArray);
             }
 
@@ -3550,7 +3548,7 @@ function renderSearchResults ($terms, $summary)
                 $foundObject->setOutput('ObjectsByCableID', true);
 
                 foreach ($obj['by_cableid'] as $cableid)
-                $outArray[] = array('CableID' => $cableid);
+                    $outArray[] = array('CableID' => $cableid);
                 $foundObject->setOutput("Objects_CableID", $outArray);
             }
             $order = $nextorder[$order];
@@ -3756,7 +3754,6 @@ function renderSearchResults ($terms, $summary)
 // for changing rack design:           printAtomGrid ($data, 'A', 'F')
 // for adding rack problem:            printAtomGrid ($data, 'F', 'U')
 // for adding object problem:          printAtomGrid ($data, 'T', 'W')
-
 function renderAtomGrid ($data, $parent = null, $placeholder = 'AtomGrid')
 {
     $rack_id = $data['id'];
@@ -3912,7 +3909,6 @@ function renderOIFCompatViewer()
         $allPortCompatOut[] = array(	'Order' => $order,
                                         'Type1' => $pair['type1name'],
                                         'Type2' => $pair['type2name']);
-
     }
     $mod->addOutput("AllPortCompat", $allPortCompatOut);
 }
@@ -4073,13 +4069,13 @@ function renderLocationPage ($location_id)
     if ($locationData['has_problems'] == 'yes')
         $summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
     foreach (getAttrValuesSorted ($locationData['id']) as $record)
-    if
-    (
-        $record['value'] != '' and
-        permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
-    )
-        $summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
-    $summary['tags'] = '';
+        if
+        (
+            $record['value'] != '' and
+            permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+        )
+            $summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+        $summary['tags'] = '';
 
     if (strlen ($locationData['comment']))
         $summary['Comment'] = $locationData['comment'];
@@ -4097,7 +4093,7 @@ function renderLocationPage ($location_id)
     $mod->addOutput('CountRows', count ($locationData['rows']));
     $helperarray = array();
     foreach ($locationData['rows'] as $row_id => $name)
-    $helperarray[] = array('Link'=> mkA ($name, 'row', $row_id));
+        $helperarray[] = array('Link'=> mkA ($name, 'row', $row_id));
 
     if(count($helperarray)>0)
     {
@@ -4107,7 +4103,7 @@ function renderLocationPage ($location_id)
     $mod->addOutput('CountLocations', count ($locationData['locations']));
     $helperarray = array();
     foreach ($locationData['locations'] as $location_id => $name)
-    $helperarray[] = array('LocationLink' => mkA($name, 'location', $location_id) );
+        $helperarray[] = array('LocationLink' => mkA($name, 'location', $location_id) );
 
     if(count($helperarray) > 0 )
     {
@@ -4129,7 +4125,7 @@ function renderEditLocationForm ($location_id)
     $locations = array ();
     $locations[0] = '-- NOT SET --';
     foreach (listCells ('location') as $id => $locationInfo)
-    $locations[$id] = $locationInfo['name'];
+        $locations[$id] = $locationInfo['name'];
     natcasesort($locations);
 
     $mod->addOutput('Getselect', getSelect ($locations, array ('name' => 'parent_id'), $location['parent_id']));
@@ -4205,7 +4201,7 @@ function renderDictionary ()
 
     $chapterListOut = array();
     foreach (getChapterList() as $chapter_no => $chapter)
-    $chapterListOut[] = array('Link' => mkA ($chapter['name'], 'chapter', $chapter_no), 'Records' => $chapter['wordc']);
+        $chapterListOut[] = array('Link' => mkA ($chapter['name'], 'chapter', $chapter_no), 'Records' => $chapter['wordc']);
     $mod->addOutput("ChapterList", $chapterListOut);
 }
 
@@ -4371,11 +4367,11 @@ function renderChaptersEditor ()
 {
     $dict = getChapterList();
     foreach (array_keys ($dict) as $chapter_no)
-    $dict[$chapter_no]['mapped'] = FALSE;
+        $dict[$chapter_no]['mapped'] = FALSE;
     foreach (getAttrMap() as $attrinfo)
-    if ($attrinfo['type'] == 'dict')
-        foreach ($attrinfo['application'] as $app)
-        $dict[$app['chapter_no']]['mapped'] = TRUE;
+        if ($attrinfo['type'] == 'dict')
+            foreach ($attrinfo['application'] as $app)
+                $dict[$app['chapter_no']]['mapped'] = TRUE;
 
     $tplm = TemplateManager::getInstance();
 
@@ -4663,15 +4659,15 @@ function renderPortsReport ()
 {
     $tmp = array();
     foreach (getPortIIFOptions() as $iif_id => $iif_name)
-    if (count (getPortIIFStats ($iif_id)))
-        $tmp[] = array
-                 (
-                     'title' => $iif_name,
-                     'type' => 'meters',
-                     'func' => 'getPortIIFStats',
-                     'args' => $iif_id,
-                 );
-    renderReports ($tmp);
+        if (count (getPortIIFStats ($iif_id)))
+            $tmp[] = array
+                     (
+                         'title' => $iif_name,
+                         'type' => 'meters',
+                         'func' => 'getPortIIFStats',
+                         'args' => $iif_id,
+                     );
+        renderReports ($tmp);
 }
 
 function render8021QReport ()
@@ -4693,7 +4689,7 @@ function render8021QReport ()
     foreach ($domains as $domain_id => $domain_name)
     {
         foreach (getDomainVLANList ($domain_id) as $vlan_id => $vlan_info)
-        $vlanstats[$vlan_id][$domain_id] = $vlan_info;
+            $vlanstats[$vlan_id][$domain_id] = $vlan_info;
         $header .= '<th>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
     }
     $header .= '</tr>';
@@ -4846,7 +4842,6 @@ function renderTagStats ()
     {
         $singleTag = array('taginfo' => $taginfo['tag'], 'taginfoRefcnt' => $taginfo['refcnt']['total']);
         $singleTag['realms'] = '';
-
         foreach (array ('object', 'ipv4net', 'ipv6net', 'rack', 'ipv4vs', 'ipv4rspool', 'user', 'file') as $realm)
         {
             $realmMod = $tplm->generateModule('StdTableCell', true);
@@ -4870,26 +4865,24 @@ function renderTagStats ()
 function dragon ()
 {
     startPortlet ('Here be dragons');
-    ?>
-<div class=dragon><pre><font color="#00ff33	">
-\||/
-|  <font color="#ff0000">@</font>___oo
-/\  /\   / (__<font color=yellow>,,,,</font>|
-) /^\) ^\/ _)
-)   /^\/   _)
-)   _ /  / _)
-/\  )/\/ ||  | )_)
-&lt;
-&gt;
-|(<font color=white>,,</font>) )__)
-||      /    \)___)\
-| \____(      )___) )___
-\______(_______<font color=white>;;; </font> __<font color=white>;;; </font>
+?>
+<div class=dragon><pre><font color="#00ff33">
+                 \||/
+                 |  <font color="#ff0000">@</font>___oo
+       /\  /\   / (__<font color=yellow>,,,,</font>|
+      ) /^\) ^\/ _)
+      )   /^\/   _)
+      )   _ /  / _)
+  /\  )/\/ ||  | )_)
+ &lt;  &gt;      |(<font color=white>,,</font>) )__)
+  ||      /    \)___)\
+  | \____(      )___) )___
+   \______(_______<font color=white>;;;</font> __<font color=white>;;;</font>
 
 </font></pre></div>
-        <?php
-        finishPortlet();
-    }
+<?php
+    finishPortlet();
+}
 
 // $v is a $configCache item
 // prints HTML-formatted varname and description
@@ -5278,7 +5271,7 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
     $ret = array ($ret);
     if (array_key_exists ('kids', $taginfo))
         foreach ($taginfo['kids'] as $kid)
-        $ret = array_merge ($ret, call_user_func (__FUNCTION__, $inputname, $preselect, $neg_preselect, $kid, $refcnt_realm, $level + 1));
+            $ret = array_merge ($ret, call_user_func (__FUNCTION__, $inputname, $preselect, $neg_preselect, $kid, $refcnt_realm, $level + 1));
     return $ret;
 }
 
@@ -5287,46 +5280,46 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 {
     $tplm = TemplateManager::getInstance();
     foreach ($taglist as $taginfo)
-    foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
-    {
-
-        $tag_class = isset ($taginfo['id']) && isset ($taginfo['refcnt']) ? getTagClassName ($row['input_value']) : '';
-
-        if ($addto != null)
+        foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
         {
-            if($placeholder == "")
-                $tagobj = $tplm->generateSubmodule("checkbox", "TagTreeCell", $addto);
+
+            $tag_class = isset ($taginfo['id']) && isset ($taginfo['refcnt']) ? getTagClassName ($row['input_value']) : '';
+
+            if ($addto != null)
+            {
+                if($placeholder == "")
+                    $tagobj = $tplm->generateSubmodule("checkbox", "TagTreeCell", $addto);
+                else
+                    $tagobj = $tplm->generateSubmodule($placeholder, "TagTreeCell", $addto);
+            }
             else
-                $tagobj = $tplm->generateSubmodule($placeholder, "TagTreeCell", $addto);
-        }
-        else
-        {
-            $tagobj = $tplm->generateModule("TagTreeCell");
-        }
-        $tagobj->setNamespace("",true);
-        $tagobj->setLock();
-        $tagobj->setOutput("TrClass", 		$row['tr_class']);
-        $tagobj->setOutput("TdClass", 		$row['td_class']);
-        $tagobj->setOutput("LevelPx", 		$row['level'] * 16);
-        $tagobj->setOutput("InputClass",	$row['input_class']);
-        $tagobj->setOutput("InputName",		$row['input_name']);
-        $tagobj->setOutput("InputValue",	$row['input_value']);
-        if (array_key_exists ('input_extraattrs', $row))
-        {
-            $tagobj->setOutput("ExtraAttrs", ' ' . $row['input_extraattrs']);
-        }
-        else
-        {
-            $tagobj->setOutput("ExtraAttrs","");
-        }
-        $tagobj->setOutput("TagClass",		$tag_class);
-        $tagobj->setOutput("TagName", 		$row['text_tagname']);
+            {
+                $tagobj = $tplm->generateModule("TagTreeCell");
+            }
+            $tagobj->setNamespace("",true);
+            $tagobj->setLock();
+            $tagobj->setOutput("TrClass", 		$row['tr_class']);
+            $tagobj->setOutput("TdClass", 		$row['td_class']);
+            $tagobj->setOutput("LevelPx", 		$row['level'] * 16);
+            $tagobj->setOutput("InputClass",	$row['input_class']);
+            $tagobj->setOutput("InputName",		$row['input_name']);
+            $tagobj->setOutput("InputValue",	$row['input_value']);
+            if (array_key_exists ('input_extraattrs', $row))
+            {
+                $tagobj->setOutput("ExtraAttrs", ' ' . $row['input_extraattrs']);
+            }
+            else
+            {
+                $tagobj->setOutput("ExtraAttrs","");
+            }
+            $tagobj->setOutput("TagClass",		$tag_class);
+            $tagobj->setOutput("TagName", 		$row['text_tagname']);
 
-        if (array_key_exists ('text_refcnt', $row))
-        {
-            $tagobj->setOutput("RefCnt", 	$row['text_refcnt']);
+            if (array_key_exists ('text_refcnt', $row))
+            {
+                $tagobj->setOutput("RefCnt", 	$row['text_refcnt']);
+            }
         }
-    }
 
     if($addto == null)
     {
@@ -5438,7 +5431,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 
     $negated_chain = array();
     foreach ($preselect['negatedlist'] as $key)
-    $negated_chain[] = array ('id' => $key);
+        $negated_chain[] = array ('id' => $key);
     // tags block
     if (getConfigVar ('FILTER_SUGGEST_TAGS') == 'yes' or count ($preselect['tagidlist']))
     {
@@ -5481,8 +5474,8 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
         $psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
         // Repack matching predicates in a way, which tagOnChain() understands.
         foreach (array_keys ($pTable) as $pname)
-        if (preg_match ("/${psieve}/", $pname))
-            $myPredicates[] = array ('id' => $pname, 'tag' => $pname);
+            if (preg_match ("/${psieve}/", $pname))
+                $myPredicates[] = array ('id' => $pname, 'tag' => $pname);
         if (!count ($myPredicates))
             $tplm->generateSubmodule("TableContent", "CellFilterNoPredicates", $mod, true);
         else
@@ -5491,7 +5484,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
             // Repack preselect likewise.
             $myPreselect = array();
             foreach ($preselect['pnamelist'] as $pname)
-            $myPreselect[] = array ('id' => $pname);
+                $myPreselect[] = array ('id' => $pname);
             printTagCheckboxTable ('cfp', $myPreselect, $negated_chain, $myPredicates, '',  $mod, "TableContent");
         }
     }
@@ -5524,7 +5517,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
         $mod->setOutput('TabNo', $tabno);
         $bypass_out = '';
         foreach ($bypass_params as $bypass_name => $bypass_value)
-        $bypass_out .= '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
+            $bypass_out .= '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
         $mod->setOutput("HiddenParams", $bypass_out);
         // FIXME: The user will be able to "submit" the empty form even without a "submit"
         // input. To make things consistent, it is necessary to avoid pritning both <FORM>
@@ -5558,7 +5551,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
             $mod->setOutput("EnableReset",true);
             $bypass_out = '';
             foreach ($bypass_params as $bypass_name => $bypass_value)
-            $bypass_out .= '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
+                $bypass_out .= '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
             $mod->setOutput("HiddenParamsReset",$bypass_out);
         }
     }
@@ -5739,11 +5732,11 @@ function renderMyQuickLinks ()
     $active_items = explode (',', getConfigVar ('QUICK_LINK_PAGES'));
     $rowarray = array();
     foreach ($indexlayout as $row)
-    foreach ($row as $ypageno)
-    {
-        $checked_state = in_array ($ypageno, $active_items) ? 'checked' : '';
-        $rowarray[] = array('PageName' => getPageName ($ypageno), 'PageNo' => $ypageno, 'CheckedState' =>  $checked_state );
-    }
+        foreach ($row as $ypageno)
+        {
+            $checked_state = in_array ($ypageno, $active_items) ? 'checked' : '';
+            $rowarray[] = array('PageName' => getPageName ($ypageno), 'PageNo' => $ypageno, 'CheckedState' =>  $checked_state );
+        }
     $mod->setOutput('LoopArray', $rowarray);
 }
 
@@ -6076,9 +6069,9 @@ function printIPNetInfoTDs ($netinfo, $decor = array(), $parent, $placeholder)
         {
             $mod->addOutput('KnightLink', makeHref (array
                                                     (
-                                                            'page' => "ipv${ip_ver}space",
-                                                            'tab' => 'newrange',
-                                                            'set-prefix' => $formatted,
+                                                    'page' => "ipv${ip_ver}space",
+                                                    'tab' => 'newrange',
+                                                    'set-prefix' => $formatted,
                                                     )));
         }
     }
@@ -6484,7 +6477,7 @@ function showTabs ($pageno, $tabno)
         fillBypassValues ($pageno, $args);
         $extraargs = "";
         foreach ($args as $param_name => $param_value)
-        $extraargs.= "&" . urlencode ($param_name) . '=' . urlencode ($param_value);
+            $extraargs.= "&" . urlencode ($param_name) . '=' . urlencode ($param_value);
         $params = array("Page"=>$pageno,
                         "Tab"=>$tabidx,
                         "Args"=>$extraargs,
@@ -6904,15 +6897,15 @@ function render8021QOrderForm ($some_id)
         $hintcodes = array ('prev_vdid' => 'DEFAULT_VDOM_ID', 'prev_vstid' => 'DEFAULT_VST_ID', 'prev_objid' => NULL);
         $focus = array();
         foreach ($hintcodes as $hint_code => $option_name)
-        if (array_key_exists ($hint_code, $_REQUEST))
-        {
-            assertUIntArg ($hint_code);
-            $focus[$hint_code] = $_REQUEST[$hint_code];
-        }
-        elseif ($option_name != NULL)
-        $focus[$hint_code] = getConfigVar ($option_name);
-        else
-            $focus[$hint_code] = NULL;
+            if (array_key_exists ($hint_code, $_REQUEST))
+            {
+                assertUIntArg ($hint_code);
+                $focus[$hint_code] = $_REQUEST[$hint_code];
+            }
+            elseif ($option_name != NULL)
+                $focus[$hint_code] = getConfigVar ($option_name);
+            else
+                $focus[$hint_code] = NULL;
 
         $tplm = TemplateManager::getInstance();
         $mod = $tplm->generateModule("Render8021QOrderForm_PrintNew");
@@ -6924,15 +6917,15 @@ function render8021QOrderForm ($some_id)
             // hide any object that is already in the table
             $options = array();
             foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
-            if (!in_array ($object_id, $all_vswitches))
-            {
-                $ctx = getContext();
-                spreadContext (spotEntity ('object', $object_id));
-                $decision = permitted (NULL, NULL, 'del');
-                restoreContext ($ctx);
-                if ($decision)
-                    $options[$object_id] = $object_dname;
-            }
+                if (!in_array ($object_id, $all_vswitches))
+                {
+                    $ctx = getContext();
+                    spreadContext (spotEntity ('object', $object_id));
+                    $decision = permitted (NULL, NULL, 'del');
+                    restoreContext ($ctx);
+                    if ($decision)
+                        $options[$object_id] = $object_dname;
+                }
             $mod->addOutput("selected", getSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']));
         }
         if ($pageno != 'vlandomain')
@@ -6978,21 +6971,21 @@ function render8021QOrderForm ($some_id)
     case 'vlandomain':
         $vlandomain = getVLANDomain ($some_id);
         foreach ($vlandomain['switchlist'] as $vswitch)
-        $minuslines[$vswitch['object_id']] = array
-                                             (
-                                                     'vdom_id' => $some_id,
-                                                     'vst_id' => $vswitch['template_id'],
-                                             );
+            $minuslines[$vswitch['object_id']] = array
+                                                 (
+                                                         'vdom_id' => $some_id,
+                                                         'vst_id' => $vswitch['template_id'],
+                                                 );
         break;
     case 'vst':
         $vst = spotEntity ('vst', $some_id);
         amplifyCell ($vst);
         foreach ($vst['switches'] as $vswitch)
-        $minuslines[$vswitch['object_id']] = array
-                                             (
-                                                     'vdom_id' => $vswitch['domain_id'],
-                                                     'vst_id' => $some_id,
-                                             );
+            $minuslines[$vswitch['object_id']] = array
+                                                 (
+                                                         'vdom_id' => $vswitch['domain_id'],
+                                                         'vst_id' => $some_id,
+                                                 );
         break;
     default:
         throw new InvalidArgException ('pageno', $pageno, 'this function only works for a fixed set of values');
@@ -7092,14 +7085,14 @@ function render8021QStatus ()
         $stats = array();
         $columns = array ('vlanc', 'switchc', 'ipv4netc', 'portc');
         foreach ($columns as $cname)
-        $stats[$cname] = 0;
+            $stats[$cname] = 0;
 
         $allVDListOut = array();
         foreach ($vdlist as $vdom_id => $dominfo)
         {
             $singleDomInfo = array();
             foreach ($columns as $cname)
-            $stats[$cname] += $dominfo[$cname];
+                $stats[$cname] += $dominfo[$cname];
             $singleDomInfo['mkA'] = mkA (niftyString ($dominfo['description']), 'vlandomain', $vdom_id);
             $singleDomInfo['columnOut'] = '';
             foreach ($columns as $cname)
@@ -7116,7 +7109,7 @@ function render8021QStatus ()
             $mod->setOutput("isVDList", true);
             $allColumsOut = array();
             foreach ($columns as $cname)
-            $allColumsOut[] = array('cName' => $stats[$cname]);
+                $allColumsOut[] = array('cName' => $stats[$cname]);
         }
         $mod->setOutput("TotalColumnOut", $allColumsOut);
     }
@@ -7148,7 +7141,6 @@ function render8021QStatus ()
     foreach (get8021QDeployQueues() as $qcode => $qitems)
     {
         $allDeployQueuesOut[] = array('mkA' => mkA ($dqtitle[$qcode], 'dqueue', $qcode), 'countItems' => count ($qitems));
-
         $total += count ($qitems);
     }
 
@@ -7313,13 +7305,12 @@ function renderObject8021QPorts ($object_id)
 
     // port list
     $req_port_name == '' ? '<th width="25%">new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
-
-    $mod->addOutput("Vswitch", $vswitch['mutex_rev']);
-
     if ($req_port_name != '')
     {
         $mod->addOutput('IsReqPortName', true);
     }
+ 
+    $mod->addOutput("Vswitch", $vswitch['mutex_rev']);
 
     $object = spotEntity ('object', $object_id);
     amplifyCell ($object);
@@ -7332,20 +7323,20 @@ function renderObject8021QPorts ($object_id)
         addAutoScrollScript ("port-$hl_port_id", $mod, 'JSScripts');
     }
     foreach ($object['ports'] as $port)
-    if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
-    {
-        if (isset ($hl_port_id) and $hl_port_id == $port['id'])
-            $hl_port_name = $port['name'];
-        $socket = array ('interface' => formatPortIIFOIF ($port));
-        if ($port['remote_object_id'])
-            $socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
-        elseif (strlen ($port['reservation_comment']))
-        $socket['link'] = formatLoggedSpan ($port['last_truelog'], 'Rsv:', 'strong underline') . ' ' .
-                          formatLoggedSpan ($port['last_log'], $port['reservation_comment']);
-        else
-            $socket['link'] = '&nbsp;';
-        $sockets[$port['name']][] = $socket;
-    }
+        if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
+        {
+            if (isset ($hl_port_id) and $hl_port_id == $port['id'])
+                $hl_port_name = $port['name'];
+            $socket = array ('interface' => formatPortIIFOIF ($port));
+            if ($port['remote_object_id'])
+                $socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
+            elseif (strlen ($port['reservation_comment']))
+            $socket['link'] = formatLoggedSpan ($port['last_truelog'], 'Rsv:', 'strong underline') . ' ' .
+                              formatLoggedSpan ($port['last_log'], $port['reservation_comment']);
+            else
+                $socket['link'] = '&nbsp;';
+            $sockets[$port['name']][] = $socket;
+        }
     unset ($object);
     $nports = 0; // count only access ports
     switchportInfoJS ($object_id, $mod, 'JSScripts'); // load JS code to make portnames interactive
@@ -7588,18 +7579,18 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport, $paren
     // (regardless if these sets intersect or not).
     $allowed_options = array();
     foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
-    $allowed_options[$vlan_id] = array
-                                 (
-                                     'vlan_type' => $vlan_info['vlan_type'],
-                                     'text' => formatVLANAsLabel ($vlan_info),
-                                 );
-    foreach ($vlanport['allowed'] as $vlan_id)
-    if (!array_key_exists ($vlan_id, $allowed_options))
         $allowed_options[$vlan_id] = array
                                      (
-                                         'vlan_type' => 'none',
-                                         'text' => "unlisted VLAN ${vlan_id}",
+                                         'vlan_type' => $vlan_info['vlan_type'],
+                                         'text' => formatVLANAsLabel ($vlan_info),
                                      );
+    foreach ($vlanport['allowed'] as $vlan_id)
+        if (!array_key_exists ($vlan_id, $allowed_options))
+            $allowed_options[$vlan_id] = array
+                                         (
+                                             'vlan_type' => 'none',
+                                             'text' => "unlisted VLAN ${vlan_id}",
+                                         );
     ksort ($allowed_options);
     $allAllowedOptionsOut = array();
     foreach ($allowed_options as $vlan_id => $option)
@@ -7629,15 +7620,15 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport, $paren
 
         $native_options = array (0 => array ('vlan_type' => 'none', 'text' => '-- NONE --'));
         foreach ($vlanport['allowed'] as $vlan_id)
-        $native_options[$vlan_id] = array_key_exists ($vlan_id, $vdom['vlanlist']) ? array
-                                    (
-                                        'vlan_type' => $vdom['vlanlist'][$vlan_id]['vlan_type'],
-                                        'text' => formatVLANAsLabel ($vdom['vlanlist'][$vlan_id]),
-                                    ) : array
-                                    (
-                                        'vlan_type' => 'none',
-                                        'text' => "unlisted VLAN ${vlan_id}",
-                                    );
+            $native_options[$vlan_id] = array_key_exists ($vlan_id, $vdom['vlanlist']) ? array
+                                        (
+                                            'vlan_type' => $vdom['vlanlist'][$vlan_id]['vlan_type'],
+                                            'text' => formatVLANAsLabel ($vdom['vlanlist'][$vlan_id]),
+                                        ) : array
+                                        (
+                                            'vlan_type' => 'none',
+                                            'text' => "unlisted VLAN ${vlan_id}",
+                                        );
 
         $allNativeOptOut = array();
         foreach ($native_options as $vlan_id => $option)
@@ -7701,8 +7692,8 @@ function renderVLANInfo ($vlan_ck)
               );
     $allOthersOut = array();
     foreach ($others as $other)
-    if ($other['domain_id'] != $vlan['domain_id'])
-        $allOthersOut[] = array('vlanHyperlinks' => formatVLANAsHyperlink (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}")) );
+        if ($other['domain_id'] != $vlan['domain_id'])
+            $allOthersOut[] = array('vlanHyperlinks' => formatVLANAsHyperlink (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}")) );
     $mod->addOutput("allOthers", $allOthersOut);
 
     if (0 == count ($vlan['ipv4nets']) + count ($vlan['ipv6nets']))
@@ -7715,14 +7706,13 @@ function renderVLANInfo ($vlan_ck)
         $order = 'odd';
         $allNetsOut = array();
         foreach (array ('ipv4net', 'ipv6net') as $nettype)
-        foreach ($vlan[$nettype . 's'] as $netid)
-        {
-            $net = spotEntity ($nettype, $netid);
-            $allNetsOut[] = array('renderedCell' => renderCell ($net),
-                                  'niftyStr' => (mb_strlen ($net['comment']) ? niftyString ($net['comment']) : '&nbsp;'));
-
-            $order = $nextorder[$order];
-        }
+            foreach ($vlan[$nettype . 's'] as $netid)
+            {
+                $net = spotEntity ($nettype, $netid);
+                $allNetsOut[] = array('renderedCell' => renderCell ($net),
+                                      'niftyStr' => (mb_strlen ($net['comment']) ? niftyString ($net['comment']) : '&nbsp;'));
+                $order = $nextorder[$order];
+            }
         $mod->addOutput("allNets", $allNetsOut);
     }
 
@@ -7734,9 +7724,9 @@ function renderVLANInfo ($vlan_ck)
     {
         $object = spotEntity ('object', $switch_id);
         foreach ($portlist as $port_name)
-        if ($portinfo = getPortinfoByName ($object, $port_name))
-            if ($portinfo['linked'] && ! isset ($confports[$portinfo['remote_object_id']]))
-                $foreign_devices[$portinfo['remote_object_id']][] = $portinfo;
+            if ($portinfo = getPortinfoByName ($object, $port_name))
+                if ($portinfo['linked'] && ! isset ($confports[$portinfo['remote_object_id']]))
+                    $foreign_devices[$portinfo['remote_object_id']][] = $portinfo;
     }
     if (! empty ($foreign_devices))
     {
@@ -7819,12 +7809,12 @@ function renderVLANIPLinks ($some_id)
         $vlan = getVLANInfo ($some_id);
         $domainclass = array ($vlan['domain_id'] => 'trbusy');
         foreach ($vlan[$ip_ver . "nets"] as $net_id)
-        $minuslines[] = array
-                        (
-                            'net_id' => $net_id,
-                            'domain_id' => $vlan['domain_id'],
-                            'vlan_id' => $vlan['vlan_id'],
-                        );
+            $minuslines[] = array
+                            (
+                                'net_id' => $net_id,
+                                'domain_id' => $vlan['domain_id'],
+                                'vlan_id' => $vlan['vlan_id'],
+                            );
         // Any VLAN can link to any network that isn't yet linked to current domain.
         // get free IP nets
         $netlist_func  = $ip_ver == 'ipv6' ? 'getVLANIPv6Options' : 'getVLANIPv4Options';
@@ -7848,7 +7838,7 @@ function renderVLANIPLinks ($some_id)
 # number of VLANs linked and the current "reuse" setting.
         $domainclass = array();
         foreach (array_count_values (reduceSubarraysToColumn ($netinfo['8021q'], 'domain_id')) as $domain_id => $vlan_count)
-        $domainclass[$domain_id] = $vlan_count == 1 ? 'trbusy' : ($reuse_domain ? 'trwarning' : 'trerror');
+            $domainclass[$domain_id] = $vlan_count == 1 ? 'trbusy' : ($reuse_domain ? 'trwarning' : 'trerror');
 # Depending on the setting and the currently linked VLANs reduce the list of new
 # options by either particular VLANs or whole domains.
         $except = array();
@@ -7925,14 +7915,14 @@ function renderObject8021QSync ($object_id)
         $R = getRunning8021QConfig ($object_id);
         $plan = apply8021QOrder ($vswitch, get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
         foreach ($plan as $port)
-        if
-        (
-            $port['status'] == 'delete_conflict' or
-            $port['status'] == 'merge_conflict' or
-            $port['status'] == 'add_conflict' or
-            $port['status'] == 'martian_conflict'
-        )
-            $maxdecisions++;
+            if
+            (
+                $port['status'] == 'delete_conflict' or
+                $port['status'] == 'merge_conflict' or
+                $port['status'] == 'add_conflict' or
+                $port['status'] == 'martian_conflict'
+            )
+                $maxdecisions++;
     }
     catch (RTGatewayError $re)
     {
@@ -8013,11 +8003,11 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
         $mod->setOutput('Port_Id', $hl_port_id);
        
         foreach ($object['ports'] as $port)
-        if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
-        {
-            $hl_port_name = $port['name'];
-            break;
-        }
+            if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+            {
+                $hl_port_name = $port['name'];
+                break;
+            }
         unset ($object);
     }
 
@@ -8223,18 +8213,18 @@ function renderObject8021QSyncPorts ($object, $D, $placeholder, $parent)
 
     $allethports = array();
     foreach (array_filter ($object['ports'], 'isEthernetPort') as $port)
-    $allethports[$port['name']] = formatPortIIFOIF ($port);
+        $allethports[$port['name']] = formatPortIIFOIF ($port);
     $enabled = array();
 # OPTIONSs for existing 802.1Q ports
     foreach (sortPortList ($D) as $portname => $portconfig)
-    $enabled["disable ${portname}"] = "${portname} ("
-                                      . array_fetch ($allethports, $portname, 'N/A')
-                                      . ') ' . serializeVLANPack ($portconfig);
+        $enabled["disable ${portname}"] = "${portname} ("
+                                          . array_fetch ($allethports, $portname, 'N/A')
+                                          . ') ' . serializeVLANPack ($portconfig);
 # OPTIONs for potential 802.1Q ports
     $disabled = array();
     foreach (sortPortList ($allethports) as $portname => $iifoif)
-    if (! array_key_exists ("disable ${portname}", $enabled))
-        $disabled["enable ${portname}"] = "${portname} (${iifoif})";
+        if (! array_key_exists ("disable ${portname}", $enabled))
+            $disabled["enable ${portname}"] = "${portname} (${iifoif})";
 
     $mod->setOutput('Nifty_Select', getNiftySelect (array ('select ports to disable 802.1Q' => $enabled, 'select ports to enable 802.1Q' => $disabled),
                     array ('name' => 'ports[]', 'multiple' => 1, 'size' => getConfigVar ('MAXSELSIZE')),
@@ -8350,8 +8340,8 @@ function renderVSTRulesEditor ($vst_id)
     {
         $source_options = array();
         foreach (listCells ('vst') as $vst_id => $vst_info)
-        if ($vst_info['rulec'])
-            $source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
+            if ($vst_info['rulec'])
+                $source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
     }
 
     $tplm = TemplateManager::getInstance();
@@ -8401,30 +8391,30 @@ function renderDeployQueue()
     $tplm = TemplateManager::getInstance();
 
     foreach ($allq as $qcode => $data)
-    if ($dqcode == $qcode)
-    {
-        $mod = $tplm->generateSubmodule("Payload","DeployQueue");
-        $mod->setNamespace("", true);
-
-        $mod->setOutput("dqTitle",$dqtitle[$qcode]);
-        $mod->setOutput("countData", count ($data));
-
-        if (! count ($data))
+        if ($dqcode == $qcode)
         {
-            $mod->setOutput("continue", true);
-            continue;
-        }
-        $mod->setOutput("continue", false);
-        $dataArr =array();
-        foreach ($data as $item)
-        {
-            $dataArr[] = array("order" => $order, "renderedCell" => renderCell (spotEntity ('object', $item['object_id'])),
-                               "formatedAge" => formatAge ($item['last_change']));
+            $mod = $tplm->generateSubmodule("Payload","DeployQueue");
+            $mod->setNamespace("", true);
 
-            $order = $nextorder[$order];
+            $mod->setOutput("dqTitle",$dqtitle[$qcode]);
+            $mod->setOutput("countData", count ($data));
+
+            if (! count ($data))
+            {
+                $mod->setOutput("continue", true);
+                continue;
+            }
+            $mod->setOutput("continue", false);
+            $dataArr =array();
+            foreach ($data as $item)
+            {
+                $dataArr[] = array("order" => $order, "renderedCell" => renderCell (spotEntity ('object', $item['object_id'])),
+                                   "formatedAge" => formatAge ($item['last_change']));
+
+                $order = $nextorder[$order];
+            }
+            $mod->setOutput("dataArr", $dataArr);
         }
-        $mod->setOutput("dataArr", $dataArr);
-    }
 }
 
 function renderDiscoveredNeighbors ($object_id)
@@ -8452,8 +8442,8 @@ function renderDiscoveredNeighbors ($object_id)
     // reindex by port name
     $myports = array();
     foreach ($mydevice['ports'] as $port)
-    if (mb_strlen ($port['name']))
-        $myports[$port['name']][] = $port;
+        if (mb_strlen ($port['name']))
+            $myports[$port['name']][] = $port;
 
     // scroll to selected port
     if (isset ($_REQUEST['hl_port_id']))
@@ -8503,11 +8493,11 @@ function renderDiscoveredNeighbors ($object_id)
                 // get list of ports that have name matching CDP portname
                 $remote_ports = array(); // list of remote (by DP info) ports
                 foreach ($dp_remote_object['ports'] as $port)
-                if ($port['name'] == $dp_neighbor['port'])
-                {
-                    $portinfo_remote = $port;
-                    $remote_ports[] = $port;
-                }
+                    if ($port['name'] == $dp_neighbor['port'])
+                    {
+                        $portinfo_remote = $port;
+                        $remote_ports[] = $port;
+                    }
 
                 // check if ports with such names exist on devices
                 if (empty ($local_ports))
@@ -8524,58 +8514,58 @@ function renderDiscoveredNeighbors ($object_id)
 
                 // determine match or mismatch of local link
                 foreach ($local_ports as $portinfo_local)
-                if ($portinfo_local['remote_id'])
-                {
-                    if
-                    (
-                        $portinfo_local['remote_object_id'] == $dp_remote_object_id
-                        and $portinfo_local['remote_name'] == $dp_neighbor['port']
-                    )
+                    if ($portinfo_local['remote_id'])
                     {
-                        // set $portinfo_remote to corresponding remote port
-                        foreach ($remote_ports as $portinfo_remote)
-                        if ($portinfo_remote['id'] == $portinfo_local['remote_id'])
-                            break;
-                        $link_matches = TRUE;
-                        unset ($error_message);
+                        if
+                        (
+                            $portinfo_local['remote_object_id'] == $dp_remote_object_id
+                            and $portinfo_local['remote_name'] == $dp_neighbor['port']
+                        )
+                        {
+                            // set $portinfo_remote to corresponding remote port
+                            foreach ($remote_ports as $portinfo_remote)
+                                if ($portinfo_remote['id'] == $portinfo_local['remote_id'])
+                                    break;
+                            $link_matches = TRUE;
+                            unset ($error_message);
+                        }
+                        elseif ($portinfo_local['remote_object_id'] != $dp_remote_object_id)
+                        $error_message = "Remote device mismatch - port linked to "
+                                         . formatLinkedPort ($portinfo_local);
+                        else // ($portinfo_local['remote_name'] != $dp_neighbor['port'])
+                            $error_message = "Remote port mismatch - port linked to "
+                                             . formatPortLink ($portinfo_local['remote_object_id'], NULL, $portinfo_local['remote_id'], $portinfo_local['remote_name']);;
+                        break 2;
                     }
-                    elseif ($portinfo_local['remote_object_id'] != $dp_remote_object_id)
-                    $error_message = "Remote device mismatch - port linked to "
-                                     . formatLinkedPort ($portinfo_local);
-                    else // ($portinfo_local['remote_name'] != $dp_neighbor['port'])
-                        $error_message = "Remote port mismatch - port linked to "
-                                         . formatPortLink ($portinfo_local['remote_object_id'], NULL, $portinfo_local['remote_id'], $portinfo_local['remote_name']);;
-                    break 2;
-                }
 
                 // no local links found, try to search for remote links
                 foreach ($remote_ports as $portinfo_remote)
-                if ($portinfo_remote['remote_id'])
-                {
-                    $remote_link_html = formatLinkedPort ($portinfo_remote);
-                    $remote_port_html = formatPortLink ($portinfo_remote['object_id'], NULL, $portinfo_remote['id'], $portinfo_remote['name']);
-                    $error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
-                    break 2;
-                }
+                    if ($portinfo_remote['remote_id'])
+                    {
+                        $remote_link_html = formatLinkedPort ($portinfo_remote);
+                        $remote_port_html = formatPortLink ($portinfo_remote['object_id'], NULL, $portinfo_remote['id'], $portinfo_remote['name']);
+                        $error_message = "Remote port $remote_port_html is already linked to $remote_link_html";
+                        break 2;
+                    }
 
                 // no links found on both sides, search for a compatible port pair
                 $port_types = array();
                 foreach (array ('left' => $local_ports, 'right' => $remote_ports) as $side => $port_list)
-                foreach ($port_list as $portinfo)
-                {
-                    $tmp_types = ($portinfo['iif_id'] == 1) ?
-                                 array ($portinfo['oif_id'] => $portinfo['oif_name']) :
-                                 getExistingPortTypeOptions ($portinfo['id']);
-                    foreach ($tmp_types as $oif_id => $oif_name)
-                    $port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
-                }
+                    foreach ($port_list as $portinfo)
+                    {
+                        $tmp_types = ($portinfo['iif_id'] == 1) ?
+                                     array ($portinfo['oif_id'] => $portinfo['oif_name']) :
+                                     getExistingPortTypeOptions ($portinfo['id']);
+                        foreach ($tmp_types as $oif_id => $oif_name)
+                            $port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
+                    }
 
                 foreach ($port_types['left'] as $left_id => $left)
-                foreach ($port_types['right'] as $right_id => $right)
-                if (arePortTypesCompatible ($left_id, $right_id))
-                    foreach ($left as $left_port)
-                    foreach ($right as $right_port)
-                    $variants[] = array ('left' => $left_port, 'right' => $right_port);
+                    foreach ($port_types['right'] as $right_id => $right)
+                        if (arePortTypesCompatible ($left_id, $right_id))
+                            foreach ($left as $left_port)
+                                foreach ($right as $right_port)
+                                    $variants[] = array ('left' => $left_port, 'right' => $right_port);
                 if (! count ($variants)) // no compatible ports found
                     $error_message = "Incompatible port types";
             }
@@ -8690,7 +8680,7 @@ function formatIfTypeVariants ($variants, $select_name, $parent = null, $placeho
 
         $key = ''; // key sample: a_id:id,a_oif:id,b_id:id,b_oif:id
         foreach ($params as $i => $j)
-        $key .= "$i:$j,";
+            $key .= "$i:$j,";
         $key = trim($key, ",");
         $select[$key] = (count ($variants) == 1 ? '' : $text); // empty string if there is simple single variant
         $weights[$key] = $popularity_count;
@@ -8698,7 +8688,7 @@ function formatIfTypeVariants ($variants, $select_name, $parent = null, $placeho
     arsort ($weights, SORT_NUMERIC);
     $sorted_select = array();
     foreach (array_keys ($weights) as $key)
-    $sorted_select[$key] = $select[$key];
+        $sorted_select[$key] = $select[$key];
     if($parent == null)
         return getSelect ($sorted_select, array('name' => $select_name));
     else
@@ -8714,19 +8704,19 @@ function formatAttributeValue ($record)
     {
         if ($record['id'] == 3) // FQDN attribute
             foreach (getMgmtProtosConfig() as $proto => $filter)
-            try
-            {
-                if (considerGivenConstraint (NULL, $filter))
+                try
                 {
-                    $blank = (preg_match ('/^https?$/', $proto) ? 'target=_blank' : '');
-                    return "<a $blank title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
+                    if (considerGivenConstraint (NULL, $filter))
+                    {
+                        $blank = (preg_match ('/^https?$/', $proto) ? 'target=_blank' : '');
+                        return "<a $blank title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
+                    }
                 }
-            }
-            catch (RackTablesError $e)
-            {
-                // syntax error in $filter
-                continue;
-            }
+                catch (RackTablesError $e)
+                {
+                    // syntax error in $filter
+                    continue;
+                }
         return isset ($record['href']) ? "<a href=\"".$record['href']."\">${record['a_value']}</a>" : $record['a_value'];
     }
 
@@ -8952,17 +8942,17 @@ function switchportInfoJS($object_id, $parent = null, $placeholder = "switchport
     $breed = detectDeviceBreed ($object_id);
     $allowed_ops = array();
     foreach ($available_ops as $prefix => $data)
-    if
-    (
-        permitted ('object', 'liveports', $data['op']) and
-        validBreedFunction ($breed, $data['gw'])
-    )
-        $allowed_ops[] = $prefix;
+        if
+        (
+            permitted ('object', 'liveports', $data['op']) and
+            validBreedFunction ($breed, $data['gw'])
+        )
+            $allowed_ops[] = $prefix;
 
     // make JS array with allowed items
     $list = '';
     foreach ($allowed_ops as $item)
-    $list .= "'" . addslashes ($item) . "', ";
+        $list .= "'" . addslashes ($item) . "', ";
     $list = trim ($list, ", ");
 
     $tplm = TemplateManager::getInstance();
@@ -9043,7 +9033,8 @@ function renderObjectCactiGraphs ($object_id)
     $servers = getCactiServers();
     $options = array();
     foreach ($servers as $server)
-    $options[$server['id']] = "${server['id']}: ${server['base_url']}";
+        $options[$server['id']] = "${server['id']}: ${server['base_url']}";
+    
     if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && permitted('object','cacti','add'))
         printNewItemTR ($options, 'NewTop');
     foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
@@ -9083,7 +9074,7 @@ function renderObjectMuninGraphs ($object_id)
     $servers = getMuninServers();
     $options = array();
     foreach ($servers as $server)
-    $options[$server['id']] = "${server['id']}: ${server['base_url']}";
+        $options[$server['id']] = "${server['id']}: ${server['base_url']}";
     if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
         printNewItem ($options, 'NewTop');
 
@@ -9123,7 +9114,7 @@ function renderEditVlan ($vlan_ck)
     // get configured ports count
     $portc = 0;
     foreach (getVLANConfiguredPorts ($vlan_ck) as $subarray)
-    $portc += count ($subarray);
+        $portc += count ($subarray);
 
     $clear_line = '';
     $delete_line = '';
@@ -9395,7 +9386,6 @@ function renderDataIntegrityReport ()
             $allChildrenOrphansOut[] = $singleOrphanOut;
         }
         $mod->setOutput("ChildrenOrphans", $allChildrenOrphansOut);
-
     }
 
     // check 1.2: parents
@@ -9435,7 +9425,6 @@ function renderDataIntegrityReport ()
             $order = $nextorder[$order];
             $allParentsOrphansOut[] = $singleOrphanOut;
         }
-
         $mod->setOutput("ParentOrphans", $allParentsOrphansOut);
     }
 
@@ -9534,7 +9523,6 @@ function renderDataIntegrityReport ()
         }
         $mod->setOutput("AllObjectHistsOrphans", $allObjectHistsOut);
     }
-
 
     // check 3.4: ObjectParentCompat
     $orphans = array ();
@@ -9763,10 +9751,10 @@ function renderDataIntegrityReport ()
     unset ($result);
     $existing_triggers = $missing_triggers = array ();
     foreach ($rows as $row)
-    $existing_triggers[$row['TRIGGER_NAME']] = $row['EVENT_OBJECT_TABLE'];
+        $existing_triggers[$row['TRIGGER_NAME']] = $row['EVENT_OBJECT_TABLE'];
     foreach ($triggers as $trigger => $table)
-    if (! array_key_exists ($trigger, $existing_triggers))
-        $missing_triggers[$trigger] = $table;
+        if (! array_key_exists ($trigger, $existing_triggers))
+            $missing_triggers[$trigger] = $table;
     if (count ($missing_triggers))
     {
         $violations = TRUE;
@@ -9861,10 +9849,10 @@ function renderDataIntegrityReport ()
     unset ($result);
     $existing_fkeys = $missing_fkeys = array ();
     foreach ($rows as $row)
-    $existing_fkeys[$row['CONSTRAINT_NAME']] = $row['TABLE_NAME'];
+        $existing_fkeys[$row['CONSTRAINT_NAME']] = $row['TABLE_NAME'];
     foreach ($fkeys as $fkey => $table)
-    if (! array_key_exists ($fkey, $existing_fkeys))
-        $missing_fkeys[$fkey] = $table;
+        if (! array_key_exists ($fkey, $existing_fkeys))
+            $missing_fkeys[$fkey] = $table;
     if (count ($missing_fkeys))
     {
         $mod->setOutput('MissingKeys', count ($missing_fkeys));

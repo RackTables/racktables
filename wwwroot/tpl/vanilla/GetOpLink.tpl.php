@@ -17,7 +17,6 @@
 		<?php $this->getH("PrintImageHref", array( $this->_imgName, $this->_comment)); ?>  
 	<?php } ?> 
 	<?php $this->title ?></a>
-
 <?php } else { ?>
 Don't use this page directly, it's supposed <br />
 to get loaded within the main page. <br />
