@@ -15,7 +15,7 @@
 	<?php } ?>>
 	<?php if ($this->is("loadImage",true)) { ?>
 		<?php $this->getH("PrintImageHref", array( $this->_imgName, $this->_comment)); ?>  
-	<?php } ?> 
+	<?php } ?>
 	<?php $this->title ?></a>
 <?php } else { ?>
 Don't use this page directly, it's supposed <br />

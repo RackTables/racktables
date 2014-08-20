@@ -49,10 +49,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase
 		$this->expectOutputString($mod->run());
 		
 		echo '<div class=greynavbar>';
-		echo "<ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'>";
-		echo "<style type=\"text/css\">" . "\nTestCode\n</style>\n";
-		echo '</ul>';
-		echo '</div>';
+		echo "<ul id=foldertab style='margin-bottom: 0px; padding-top: 10px;'><style type=\"text/css\">TestCode</style></ul></div>";
 	}
 
 	// Test the if funciton of the module 
@@ -64,7 +61,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase
 																	 'loadImage' => false,
 																	 'title' => 'TITLE'));
 		$this->expectOutputString($mod->run());
-		echo "<a href='HREF' title='HTMLComment'>TITLE</a>";
+		echo '<a href="HREF" title="HTMLComment">TITLE</a>';
 	}
 
 	// Test the loop function of the module

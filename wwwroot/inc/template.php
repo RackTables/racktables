@@ -866,9 +866,10 @@ class TemplateModule
 			throw new TemplateException("TplError: Module " . $this->module . " doesn't exist in " . $this->tpl);
 			return "";
 		}
-		ob_start();
+		
+		ob_start();	
 		include dirname(__FILE__) . '/../tpl/' . $this->tpl . '/' . $this->module . '.tpl.php';
-		return ob_get_clean();
+		return str_replace(array("\r\n", "\r", "\n\t", "\t", '  ', '    ', '    '), '', ob_get_clean());
 	}
 	
 	/**
