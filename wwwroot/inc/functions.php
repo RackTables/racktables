@@ -151,6 +151,12 @@ $wdm_packs = array
 
 $log_messages = array(); // messages waiting for displaying
 
+function defineIfNotDefined ($constant, $value, $case_insensitive = FALSE)
+{
+	if (defined ($constant) === FALSE)
+		define ($constant, $value, $case_insensitive);
+}
+
 // This function assures that specified argument was passed
 // and is a number greater than zero.
 function assertUIntArg ($argname, $allow_zero = FALSE)
