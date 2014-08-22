@@ -1343,13 +1343,13 @@ class TemplateModule
 				
 			}
 		} else {
-			if ($this->reference_level == -1 && array_key_exists($name, $this->output) && is_array($this->output[$name])) {
+			if ($this->reference_level == -1 && array_key_exists($name, $this->output) && is_array($this->output[$name]) && array_key_exists($startvar, $this->output[$name])) {
 				++$this->reference_level;
 				$this->output_reference = array($this->output[$name][$startvar]);
 				$this->reference_origin = array($name);
 				$this->reference_next = array($startvar + 1);
 				return true;
-			} else if ($this->reference_level >= 0 && array_key_exists($name, $this->output_reference[$this->reference_level]) && is_array($this->output_reference[$this->reference_level][$name])) {
+			} else if ($this->reference_level >= 0 && array_key_exists($name, $this->output_reference[$this->reference_level]) && is_array($this->output_reference[$this->reference_level][$name]) && array_key_exists($startvar, $this->output_reference[$this->reference_level][$name])) {
 				++$this->reference_level;
 				$l = $this->reference_level;
 				$this->output_reference[$l] = $this->output_reference[$l - 1][$name][$startvar];
