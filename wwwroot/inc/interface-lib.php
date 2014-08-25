@@ -1035,17 +1035,24 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 		($usetags ? '</span>' : '');
 }
 
-function printTagsPicker ($preselect=NULL)
+function printTagsPicker ($preselect=NULL, $tabindex=NULL)
 {
-	printTagsPickerInput ();
+	printTagsPickerInput ("taglist", $tabindex);
 	printTagsPickerUl ($preselect);
 	enableTagsPicker ();
 }
 
-function printTagsPickerInput ($input_name="taglist")
+function printTagsPickerInput ($input_name="taglist", $tabindex=NULL)
 {
+	if ($tabindex !== NULL)
+		$tabindex_str = "tabindex=" . $tabindex;
+	else
+		$tabindex_str = "";
+
 	# use data-attribute as identifier for tagit
-	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
+	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes'
+			placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off'
+			role='textbox' aria-autocomplete='list' aria-haspopup='true' $tabindex_str>";
 	echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
 }
 

@@ -490,10 +490,10 @@ function renderNewRSPoolForm ()
 	echo "<tr><th class=tdright>Name:</th>";
 	echo "<td class=tdleft><input type=text name=name tabindex=101></td><td>";
 	echo "</td></tr><th class=tdright>Tags:</th><td class='tdleft'>";
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=102);
 	echo "</td></tr>";
-	echo "<tr><th class=tdright>VS config:</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=102></textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=104></textarea></td></tr>\n";
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'create real server pool', TRUE, 104);
 	echo "</td></tr>";
@@ -550,7 +550,7 @@ function renderNewVSForm ()
 	echo "</td></tr>";
 	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name tabindex=104></td><td>";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=105);
 	echo "</td></tr>";
 	echo "<tr><th class=tdrigh>VS configuration:</th><td class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th class=tdrigh>RS configuration:</th><td class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
@@ -604,12 +604,12 @@ function renderEditVService ($vsid)
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=5);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea tabindex=6 name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=6 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea tabindex=7 name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 7);
+	printImageHREF ('SAVE', 'Save changes', TRUE, 8);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
 

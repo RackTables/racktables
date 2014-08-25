@@ -1014,11 +1014,11 @@ function renderNewRackForm ($row_id)
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name tabindex=1></td>";
-	echo "<td rowspan=4>Tags:<br>";
-	printTagsPicker ();
-	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 tabindex=2 value='${default_height}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no tabindex=4></td></tr>\n";
+	echo "<tr><th class=tdright>Tags:</td><td class=tdleft>";
+	printTagsPicker (NULL, $tabindex=5);
+	echo "</td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
 	echo "</td></tr></table></form>";
@@ -1028,7 +1028,7 @@ function renderNewRackForm ($row_id)
 	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
-	echo "<td rowspan=3 valign=top>Assign tags:<br>";
+	echo "<tr><th class=tdright>Assign tags:</td><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (required):</th><td class=tdleft><textarea name=names cols=40 rows=25></textarea></td></tr>\n";
@@ -2688,9 +2688,9 @@ END
 	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 2)) . '</td></tr>';
 	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
 	echo '<tr><th class=tdright>Tags:</th><td class="tdleft">';
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=4);
 	echo '</td></tr>';
-	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=4></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=5></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE, 5);
 	echo '</td></tr>';
@@ -3464,7 +3464,7 @@ function renderAddMultipleObjectsForm ()
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
-			printTagsPicker ();
+			printTagsPicker (NULL, $tabindex=$tabindex);
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
@@ -3864,13 +3864,13 @@ function renderUserListEditor ()
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		echo '<tr><th>&nbsp;</th><th>&nbsp;</th><th>Tags</th></tr>';
 		echo '<tr><th class=tdright>Username</th><td class=tdleft><input type=text size=64 name=username tabindex=100></td>';
-		echo '<td rowspan=4>';
-		printTagsPicker ();
-		echo '</td></tr>';
 		echo '<tr><th class=tdright>Real name</th><td class=tdleft><input type=text size=64 name=realname tabindex=101></td></tr>';
 		echo '<tr><th class=tdright>Password</th><td class=tdleft><input type=password size=64 name=password tabindex=102></td></tr>';
+		echo '<tr><th class=tdright>Tags</th><td class=tdleft>';
+		printTagsPicker (NULL, $tabindex=103);
+		echo '</td></tr>';
 		echo '<tr><td colspan=2>';
-		printImageHREF ('CREATE', 'Add new account', TRUE, 103);
+		printImageHREF ('CREATE', 'Add new account', TRUE, 104);
 		echo '</td></tr>';
 		echo '</table></form>';
 		finishPortlet();
@@ -5844,17 +5844,17 @@ function renderFileProperties ($file_id)
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
 	echo htmlspecialchars ($file['type']) . "'></td></tr>";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=102);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='";
+	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=103 type=text name=file_name value='";
 	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=104 name=file_comment rows=10 cols=80>\n";
 	echo htmlspecialchars ($file['comment']) . "</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
 	echo getOpLink (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id'=>$file_id), '', 'destroy', 'Delete file', 'need-confirmation');
 	echo '</td></tr>';
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	printImageHREF ('SAVE', 'Save changes', TRUE, 105);
 	echo '</th></tr></table></form>';
 }
 
@@ -5874,11 +5874,11 @@ function renderFileManager ()
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>";
 		echo '<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>Tags:</td><td class=tdleft>';
-		printTagsPicker ();
+		printTagsPicker (NULL, $tabindex=102);
 		echo '</td></tr>';
-		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file' tabindex=100></td></td>";
+		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file' tabindex=103></td></td>";
 		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Upload file', TRUE, 102);
+		printImageHREF ('CREATE', 'Upload file', TRUE, 104);
 		echo '</td></tr>';
 		echo "</table></form><br>";
 		finishPortlet();
@@ -9875,7 +9875,7 @@ function renderUserProperties ($user_id)
 	printOpFormIntro ('edit');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
-	printTagsPicker ();
+	printTagsPicker (NULL, $tabindex=101);
 	echo "</td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
