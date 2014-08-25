@@ -508,17 +508,17 @@ function renderNewTripletForm ($realm1, $realm2)
 			case 'object':
 				$name = 'Load balancer';
 				$list = getNarrowObjectList ('IPV4LB_LISTSRC');
-				$options = array ('name' => 'object_id', 'tabindex' => 100);
+				$options = array ('name' => 'object_id');
 				break;
 			case 'ipvs':
 				$name = 'Virtual service';
 				$list = formatEntityList (listCells ('ipvs'));
-				$options = array ('name' => 'vs_id', 'tabindex' => 101);
+				$options = array ('name' => 'vs_id');
 				break;
 			case 'ipv4rspool':
 				$name = 'RS pool';
 				$list = formatEntityList (listCells ('ipv4rspool'));
-				$options = array ('name' => 'rspool_id', 'tabindex' => 102);
+				$options = array ('name' => 'rspool_id');
 				break;
 			default:
 				throw new InvalidArgException('realm', $realm);
@@ -536,7 +536,7 @@ function renderNewTripletForm ($realm1, $realm2)
 	printSelect ($realm1_data['list'], $realm1_data['options']);
 	echo '</td><td class=tdcenter valign=middle rowspan=2>';
 	if (count ($realm1_data['list']) && count ($realm2_data['list']))
-		printImageHREF ('ADD', 'Configure LB', TRUE, 120);
+		printImageHREF ('ADD', 'Configure LB', TRUE);
 	else
 	{
 		$names = array();

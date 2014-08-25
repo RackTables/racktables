@@ -419,13 +419,13 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 	return $ret;
 }
 
-function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
+function printImageHREF ($tag, $title = '', $do_input = FALSE)
 {
-	echo getImageHREF ($tag, $title, $do_input, $tabindex);
+	echo getImageHREF ($tag, $title, $do_input);
 }
 
 // this would be better called mkIMG(), make "IMG" HTML element
-function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
+function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
 	if (!isset ($image[$tag]))
@@ -437,7 +437,6 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"<input type=image name=submit class=icon " .
 			"src='${img['path']}' " .
 			"border=0 " .
-			($tabindex ? "tabindex=${tabindex}" : '') .
 			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
@@ -723,6 +722,8 @@ function printPageHeaders ()
 	ksort ($pageheaders);
 	foreach ($pageheaders as $s)
 		echo $s . "\n";
+	// add tabindex to all input forms
+	addJS ('js/tabindex_auto.js', FALSE);
 
 	// add CSS styles
 	foreach (addCSS (NULL) as $item)
@@ -909,7 +910,10 @@ function renderEntitySummary ($cell, $title, $values = array())
 function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = '')
 {
 	if (isset ($params))
+	{
 		$ret = '<a href="' . makeHrefProcess ($params) . '"';
+		$class .= ' input';
+	}
 	else
 	{
 		$ret = '<a href="#" onclick="return false;"';
