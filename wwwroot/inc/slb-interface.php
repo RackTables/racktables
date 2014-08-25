@@ -10,14 +10,14 @@ function renderSLBDefConfig()
 {
 	$defaults = getSLBDefaults();
 	startPortlet ('SLB default configs');
-	echo '<table cellspacing=0 cellpadding=5 align=center>';
 	printOpFormIntro ('save');
-	echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=103 name=vsconfig rows=10 cols=80>' . htmlspecialchars($defaults['vsconfig']) . '</textarea></td>';
+	echo '<table cellspacing=0 cellpadding=5 align=center>';
+	echo '<tr><th class=tdright>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80>' . htmlspecialchars($defaults['vsconfig']) . '</textarea></td>';
 	echo '<td rowspan=2>';
-	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</td></tr>';
-	echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=104 name=rsconfig rows=10 cols=80>' . htmlspecialchars($defaults['rsconfig']) . '</textarea></td></tr>';
+	echo '<tr><th class=tdright>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80>' . htmlspecialchars($defaults['rsconfig']) . '</textarea></td></tr>';
 	echo '</form></table>';
+	printImageHREF ('SAVE', 'Save changes', TRUE);
 	finishPortlet();
 }
 
@@ -91,17 +91,17 @@ function renderNewSLBItemForm ($realm1, $realm2)
 			case 'object':
 				$name = 'Load balancer';
 				$list = getNarrowObjectList ('IPV4LB_LISTSRC');
-				$options = array ('name' => 'object_id', 'tabindex' => 100);
+				$options = array ('name' => 'object_id');
 				break;
 			case 'ipv4vs':
 				$name = 'Virtual service';
 				$list = formatEntityList (listCells ('ipv4vs'));
-				$options = array ('name' => 'vs_id', 'tabindex' => 101);
+				$options = array ('name' => 'vs_id');
 				break;
 			case 'ipv4rspool':
 				$name = 'RS pool';
 				$list = formatEntityList (listCells ('ipv4rspool'));
-				$options = array ('name' => 'pool_id', 'tabindex' => 102);
+				$options = array ('name' => 'pool_id');
 				break;
 			default:
 				throw new InvalidArgException('realm', $realm);
@@ -119,7 +119,7 @@ function renderNewSLBItemForm ($realm1, $realm2)
 	printSelect ($realm1_data['list'], $realm1_data['options']);
 	echo '</td><td class=tdcenter valign=middle rowspan=2>';
 	if (count ($realm1_data['list']) && count ($realm2_data['list']))
-		printImageHREF ('ADD', 'Configure LB', TRUE, 120);
+		printImageHREF ('ADD', 'Configure LB', TRUE);
 	else
 	{
 		$names = array();
@@ -134,9 +134,9 @@ function renderNewSLBItemForm ($realm1, $realm2)
 	echo "<tr valign=top><th class=tdright>{$realm2_data['name']}</th><td class=tdleft>";
 	printSelect ($realm2_data['list'], $realm2_data['options']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea tabindex=110 name=vsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea tabindex=111 name=rsconfig rows=10 cols=80></textarea></td></tr>";
-	echo "<tr><th class=tdright>Priority</th><td class=tdleft colspan=2><input tabindex=112 name=prio size=10></td></tr>";
+	echo "<tr><th class=tdright>VS config</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>RS config</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
+	echo "<tr><th class=tdright>Priority</th><td class=tdleft colspan=2><input name=prio size=10></td></tr>";
 	echo "</form></table>\n";
 	finishPortlet();
 }
@@ -488,14 +488,14 @@ function renderNewRSPoolForm ()
 	printOpFormIntro ('add');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th class=tdright>Name:</th>";
-	echo "<td class=tdleft><input type=text name=name tabindex=101></td><td>";
+	echo "<td class=tdleft><input type=text name=name></td><td>";
 	echo "</td></tr><th class=tdright>Tags:</th><td class='tdleft'>";
 	printTagsPicker ();
 	echo "</td></tr>";
-	echo "<tr><th class=tdright>VS config:</th><td colspan=2><textarea name=vsconfig rows=10 cols=80 tabindex=102></textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td colspan=2><textarea name=rsconfig rows=10 cols=80 tabindex=103></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td colspan=2><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td colspan=2><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>\n";
 	echo "<tr><td colspan=2>";
-	printImageHREF ('CREATE', 'create real server pool', TRUE, 104);
+	printImageHREF ('CREATE', 'create real server pool', TRUE);
 	echo "</td></tr>";
 	echo "</table></form>\n";
 	finishPortlet();
@@ -542,20 +542,20 @@ function renderNewVSForm ()
 	if ($default_port == 0)
 		$default_port = '';
 	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip tabindex=101></td>";
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip></td>";
 	echo "<tr><th class=tdright>Port:</th><td class=tdleft>";
-	echo "<input type=text name=vport size=5 value='${default_port}' tabindex=102></td></tr>";
+	echo "<input type=text name=vport size=5 value='${default_port}'></td></tr>";
 	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
 	printSelect ($vs_proto, array ('name' => 'proto'), array_shift (array_keys ($vs_proto)));
 	echo "</td></tr>";
-	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name tabindex=104></td><td>";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name></td><td>";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>";
 	echo "<tr><th class=tdrigh>VS configuration:</th><td class=tdleft><textarea name=vsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><th class=tdrigh>RS configuration:</th><td class=tdleft><textarea name=rsconfig rows=10 cols=80></textarea></td></tr>";
 	echo "<tr><td colspan=2>";
-	printImageHREF ('CREATE', 'create virtual service', TRUE, 105);
+	printImageHREF ('CREATE', 'create virtual service', TRUE);
 	echo "</td></tr>";
 	echo '</table></form>';
 	finishPortlet();
@@ -596,20 +596,20 @@ function renderEditVService ($vsid)
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input tabindex=1 type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Port:</th><td class=tdleft><input tabindex=2 type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Port:</th><td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
 	global $vs_proto;
 	printSelect ($vs_proto, array ('name' => 'proto'), $vsinfo['proto']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input tabindex=4 type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea tabindex=5 name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea tabindex=6 name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 7);
+	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
 	echo "</table></form>\n";
 
