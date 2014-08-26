@@ -125,9 +125,11 @@ function xos12ReadMacList ($input)
 	foreach (explode ("\n", $input) as $line)
 		if (preg_match('/((?:[\da-f]{2}:){5}[\da-f]{2})\s+\S+\((\d{4})\).*\s+(\d+)\s*$/', $line, $m))
 		{
+			$mac = str_replace (':', '', $m[1]);
+			$mac = implode ('.', str_split ($mac, 4));
 			$portname = shortenIfName ($m[3]);
 			$result[$portname][] = array(
-				'mac' => $m[1],
+				'mac' => $mac,
 				'vid' => intval ($m[2]),
 			);
 		}
