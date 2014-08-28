@@ -966,7 +966,7 @@ function vrp85Read8021QConfig ($input)
 		do switch ($state)
 		{
 			case 'vlans':
-				if (preg_match ('/^VLAN ID: (.*)/', $line, $m))
+				if (preg_match ('/^VLAN ID: (.*)/', $line, $m) && ! isset ($current['vlanlist']))
 				{
 					$current['vlanlist'] = ' ' . $m[1];
 					$state = 'vlans-nextline';

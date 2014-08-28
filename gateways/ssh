@@ -27,8 +27,8 @@ sub display_help {
 ssh batch client for RackTables.
 Takes commands list in standard input and gives the responses via standard output.
 Usage:
-$0 [--as-user=<username>] [ -- ] [ ssh params ]
- --as-user            sudo self as specified username
+$0 [--sudo-user=<username>] [ -- ] [ ssh params ]
+ --sudo-user            sudo self as specified username
 END
 }
 
