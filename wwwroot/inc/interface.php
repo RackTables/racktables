@@ -8828,16 +8828,10 @@ function switchportInfoJS($object_id)
 		)
 			$allowed_ops[] = $prefix;
 
-	// make JS array with allowed items
-	$list = '';
-	foreach ($allowed_ops as $item)
-		$list .= "'" . addslashes ($item) . "', ";
-	$list = trim ($list, ", ");
-
 	addJS ('js/jquery.thumbhover.js');
 	addCSS ('css/jquery.contextmenu.css');
 	addJS ('js/jquery.contextmenu.js');
-	addJS ("enabled_elements = [ $list ];", TRUE);
+	addJS ("enabled_elements = " . json_encode ($allowed_ops), TRUE);
 	addJS ('js/portinfo.js');
 }
 
