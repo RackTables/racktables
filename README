@@ -41,6 +41,17 @@ Below is a list of known-good distributions with respective setup notes.
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
   section of "/etc/mysql/my.cnf" file and restart mysqld.
 
+*** Ubuntu 14.04
+* MySQL: apt-get install mysql-server
+* Apache/PHP: apt-get install apache2-bin libapache2-mod-php5 php5-gd \
+              php5-mysql php5-snmp
+              # php5-curl php5-ldap
+* To enable Unicode:
+  printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf
+  service mysql restart
+* During install time: MySQL UNIX socket path is /var/run/mysqld/mysqld.sock
+  and Apache httpd runs as www-data:www-data.
+
 *** ALTLinux 4.0
 * MySQL: apt-get install MySQL-server
 * Apache/PHP: apt-get install apache2-httpd-prefork php5-gd2 \
