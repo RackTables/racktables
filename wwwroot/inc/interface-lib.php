@@ -949,7 +949,6 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 		$_REQUEST['theme'] = $theme;
 		$src = 'data:image/png;base64,' . chunk_split (base64_encode (getOutputOf ('renderProgressBarImage', $done)));
 		$_REQUEST = $bk_request;
-		header ('Content-type: text/html');
 	}
 	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
 	return $ret;
