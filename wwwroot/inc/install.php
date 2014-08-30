@@ -554,9 +554,9 @@ function get_pseudo_file ($name)
   `server_id` int(10) unsigned NOT NULL,
   `graph_id` int(10) unsigned NOT NULL,
   `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`server_id`,`graph_id`),
-  KEY `object_id` (`object_id`),
+  PRIMARY KEY (`object_id`,`server_id`,`graph_id`),
   KEY `graph_id` (`graph_id`),
+  KEY `server_id` (`server_id`),
   CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
   CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
