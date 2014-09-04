@@ -501,8 +501,8 @@ function listCells ($realm, $parent_id = 0)
 	// Add necessary finish to the list before returning it. Maintain caches.
 	if (!$parent_id)
 		unset ($entityCache['partial'][$realm]);
-	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
-		cacheAllObjectsAttributes();
+	if ($realm == 'object') // cache dict attributes of all objects to speed up autotags calculation
+		cacheDictAttrValues();
 	foreach ($ret as $entity_id => &$entity)
 	{
 		sortEntityTags ($entity); // changes ['etags'] and ['itags']
@@ -547,7 +547,7 @@ function listCells ($realm, $parent_id = 0)
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$entity = &$ret[$entity_id];
-		$entity['atags'] = generateEntityAutoTags ($entity);
+		$entity['atags'] = callHook ('generateEntityAutoTags', $entity);
 		if (!$parent_id)
 			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
@@ -4005,10 +4005,31 @@ function loadEntityTags ($entity_realm = '', $entity_id = 0)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
+function cacheDictAttrValues()
+{
+	global $dict_attr_cache;
+	$dict_attr_cache = array();
+	$result = usePreparedSelectBlade ("
+SELECT
+	AV.attr_id,
+	AV.uint_value,
+	AV.object_id
+FROM
+	AttributeValue as AV
+	JOIN  Attribute as A ON AV.attr_id = A.id
+WHERE
+	A.type = 'dict'
+	AND uint_value IS NOT NULL
+");
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$dict_attr_cache[$row['object_id']][$row['attr_id']] = $row['uint_value'];
+}
+
 # Universal autotags generator, a complementing function for loadEntityTags().
 # Bypass key isn't strictly typed, but interpreted depending on the realm.
 function generateEntityAutoTags ($cell)
 {
+	global $dict_attr_cache;
 	$ret = array();
 	if (! array_key_exists ('realm', $cell))
 		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
@@ -4049,10 +4070,9 @@ function generateEntityAutoTags ($cell)
 			}
 
 			# dictionary attribute autotags '$attr_X_Y'
-			$attrs = getAttrValues($cell['id']);
-			foreach ($attrs as $attr_id => $attr_record)
-				if (isset ($attr_record['key']))
-					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_record['key']}");
+			if (isset ($dict_attr_cache[$cell['id']]))
+				foreach ($dict_attr_cache[$cell['id']] as $attr_id => $attr_key)
+					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_key}");
 			break;
 		case 'ipv4net':
 			// v4-only rules
@@ -4119,7 +4139,7 @@ function generateEntityAutoTags ($cell)
 			throw new InvalidArgException ('cell', '(array)', 'this input does not belong here');
 			break;
 	}
-	# {$tagless} doesn't apply to users
+	# {$untagged} doesn't apply to users
 	switch ($cell['realm'])
 	{
 		case 'rack':

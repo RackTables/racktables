@@ -1,13 +1,14 @@
 0.20.9
 	bugfix: 802.1Q support of Huawei VRP 8.80 devices
+	bugfix: adding new Cacti graphs sometimes failed, now works
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
 		WS-C2960X-48LPS-L, HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183),
 		Huawei CE6850-48S4Q-EI
 	update: link status feature is available on Cisco IOS XR (ASR)
 	update: remember last successful LDAP server to minimize LDAP auth delay
 	update: link status, MAC list support for ExtremeXOS
+	update: speed-up enumerating/filtering of objects
 	update: new tabindex: search input, form inputs, other elements
-
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks

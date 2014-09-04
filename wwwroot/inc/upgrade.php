@@ -1811,6 +1811,10 @@ CREATE TABLE `PatchCableOIFCompat` (
 			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.9':
+			$query[] = "ALTER TABLE CactiGraph ADD KEY (server_id)";
+			$query[] = "ALTER TABLE CactiGraph DROP PRIMARY KEY";
+			$query[] = "ALTER TABLE CactiGraph ADD PRIMARY KEY (object_id, server_id, graph_id)";
+			$query[] = "ALTER TABLE CactiGraph DROP KEY `object_id`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
