@@ -4139,7 +4139,7 @@ function generateEntityAutoTags ($cell)
 			throw new InvalidArgException ('cell', '(array)', 'this input does not belong here');
 			break;
 	}
-	# {$tagless} doesn't apply to users
+	# {$untagged} doesn't apply to users
 	switch ($cell['realm'])
 	{
 		case 'rack':
