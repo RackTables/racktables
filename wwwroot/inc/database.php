@@ -547,7 +547,7 @@ function listCells ($realm, $parent_id = 0)
 	foreach (array_keys ($ret) as $entity_id)
 	{
 		$entity = &$ret[$entity_id];
-		$entity['atags'] = generateEntityAutoTags ($entity);
+		$entity['atags'] = callHook ('generateEntityAutoTags', $entity);
 		if (!$parent_id)
 			$entityCache['complete'][$realm][$entity_id] = $entity;
 		else
