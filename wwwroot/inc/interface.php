@@ -589,10 +589,10 @@ JSTXT;
 		printOpFormIntro ('addLocation');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Add new location', TRUE);
-		echo '</td><td><select name=parent_id tabindex=100>';
+		echo '</td><td><select name=parent_id>';
 		renderLocationSelectTree ();
-		echo '</td><td><input type=text size=48 name=name tabindex=101></td><td>';
-		printImageHREF ('create', 'Add new location', TRUE, 102);
+		echo '</td><td><input type=text size=48 name=name></td><td>';
+		printImageHREF ('create', 'Add new location', TRUE);
 		echo "</td></tr></form>\n";
 	}
 
@@ -618,10 +618,10 @@ function renderRackspaceRowEditor ()
 		printOpFormIntro ('addRow');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
-		echo '</td><td><select name=location_id tabindex=100>';
+		echo '</td><td><select name=location_id>';
 		renderLocationSelectTree ();
-		echo '</td><td><input type=text name=name tabindex=100></td><td>';
-		printImageHREF ('create', 'Add new row', TRUE, 102);
+		echo '</td><td><input type=text name=name></td><td>';
+		printImageHREF ('create', 'Add new row', TRUE);
 		echo '</td></tr></form>';
 	}
 	startPortlet ('Rows');
@@ -638,9 +638,9 @@ function renderRackspaceRowEditor ()
 			echo getOpLink (array('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row');
 		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
 		echo '</td><td>';
-		echo '<select name=location_id tabindex=100>';
+		echo '<select name=location_id>';
 		renderLocationSelectTree ($rowInfo['location_id']);
-		echo "</td><td><input type=text name=name value='${rowInfo['name']}' tabindex=100></td><td>";
+		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td></tr>\n";
 	}
@@ -1013,12 +1013,12 @@ function renderNewRackForm ($row_id)
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name tabindex=1></td>";
-	echo "<td rowspan=4>Tags:<br>";
+	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name></td>";
+	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 value='${default_height}'></td></tr>\n";
+	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no></td></tr>\n";
+	echo "<tr><th class=tdright>Tags:</td><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 tabindex=2 value='${default_height}'></td></tr>\n";
-	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no tabindex=4></td></tr>\n";
 	echo "<tr><td class=submit colspan=2>";
 	printImageHREF ('CREATE', 'Add', TRUE);
 	echo "</td></tr></table></form>";
@@ -1028,7 +1028,7 @@ function renderNewRackForm ($row_id)
 	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
-	echo "<td rowspan=3 valign=top>Assign tags:<br>";
+	echo "<tr><th class=tdright>Assign tags:</td><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	echo "<tr><th class=tdright>Rack names (required):</th><td class=tdleft><textarea name=names cols=40 rows=25></textarea></td></tr>\n";
@@ -1649,12 +1649,12 @@ function renderPortsForObject ($object_id)
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
-		echo "</td><td class='tdleft'><input type=text size=8 name=port_name tabindex=100></td>\n";
-		echo "<td><input type=text name=port_label tabindex=101></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 102), $prefs['selected']);
-		echo "<td><input type=text name=port_l2address tabindex=103 size=18 maxlength=24></td>\n";
+		echo "</td><td class='tdleft'><input type=text size=8 name=port_name></td>\n";
+		echo "<td><input type=text name=port_label></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		echo "<td><input type=text name=port_l2address size=18 maxlength=24></td>\n";
 		echo "<td colspan=4>&nbsp;</td><td>";
-		printImageHREF ('add', 'add a port', TRUE, 104);
+		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td></tr></form>";
 	}
 	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes' || getConfigVar('ENABLE_BULKPORT_FORM') == 'yes' )
@@ -1670,13 +1670,13 @@ function renderPortsForObject ($object_id)
 		printOpFormIntro ('addBulkPorts');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add ports', TRUE);
-		echo "</td><td><input type=text size=8 name=port_name tabindex=105></td>\n";
-		echo "<td><input type=text name=port_label tabindex=106></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 107), $prefs['selected']);
-		echo "<td><input type=text name=port_numbering_start tabindex=108 size=3 maxlength=3></td>\n";
-		echo "<td><input type=text name=port_numbering_count tabindex=109 size=3 maxlength=3></td>\n";
+		echo "</td><td><input type=text size=8 name=port_name></td>\n";
+		echo "<td><input type=text name=port_label></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		echo "<td><input type=text name=port_numbering_start size=3 maxlength=3></td>\n";
+		echo "<td><input type=text name=port_numbering_count size=3 maxlength=3></td>\n";
 		echo "<td>&nbsp;</td><td>";
-		printImageHREF ('add', 'add ports', TRUE, 110);
+		printImageHREF ('add', 'add ports', TRUE);
 		echo "</td></tr></form>";
 		echo "</table><br>\n";
 	}
@@ -1788,13 +1788,13 @@ function renderPortsForObject ($object_id)
 		printOpFormIntro ('addBulkPorts');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add ports', TRUE);
-		echo "</td><td><input type=text size=8 name=port_name tabindex=105></td>\n";
-		echo "<td><input type=text name=port_label tabindex=106></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id', 'tabindex' => 107), $prefs['selected']);
-		echo "<td><input type=text name=port_numbering_start tabindex=108 size=3 maxlength=3></td>\n";
-		echo "<td><input type=text name=port_numbering_count tabindex=109 size=3 maxlength=3></td>\n";
+		echo "</td><td><input type=text size=8 name=port_name></td>\n";
+		echo "<td><input type=text name=port_label></td><td>";
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		echo "<td><input type=text name=port_numbering_start size=3 maxlength=3></td>\n";
+		echo "<td><input type=text name=port_numbering_count size=3 maxlength=3></td>\n";
 		echo "<td>&nbsp;</td><td>";
-		printImageHREF ('add', 'add ports', TRUE, 110);
+		printImageHREF ('add', 'add ports', TRUE);
 		echo "</td></tr></form>";
 		echo "</table><br>\n";
 	}
@@ -1805,16 +1805,16 @@ function renderPortsForObject ($object_id)
 
 	startPortlet ('Add/update multiple ports');
 	printOpFormIntro ('addMultiPorts');
-	echo 'Format: <select name=format tabindex=201>';
+	echo 'Format: <select name=format>';
 	echo '<option value=c3600asy>Cisco 3600 async: sh line | inc TTY</option>';
 	echo '<option value=fiwg selected>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
 	echo '<option value=fisxii>Foundry FastIron SuperX/II4000: sh int br</option>';
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type', 'tabindex' => 202), $prefs['selected']);
-	echo "<input type=submit value='Parse output' tabindex=204><br>\n";
-	echo "<textarea name=input cols=100 rows=50 tabindex=203></textarea><br>\n";
+	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
+	echo "<input type=submit value='Parse output'><br>\n";
+	echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
 	echo '</form>';
 	finishPortlet();
 }
@@ -1828,14 +1828,14 @@ function renderIPForObject ($object_id)
 		echo "<tr><td>"; // left btn
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td>";
-		echo "<td class=tdleft><input type='text' size='10' name='bond_name' tabindex=100></td>\n"; // if-name
-		echo "<td class=tdleft><input type=text name='ip' tabindex=101></td>\n"; // IP
+		echo "<td class=tdleft><input type='text' size='10' name='bond_name'></td>\n"; // if-name
+		echo "<td class=tdleft><input type=text name='ip'></td>\n"; // IP
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			echo "<td colspan=2>&nbsp;</td>"; // network, routed by
 		echo '<td>';
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102), $default_type); // type
+		printSelect ($aat, array ('name' => 'bond_type'), $default_type); // type
 		echo "</td><td>&nbsp;</td><td>"; // misc
-		printImageHREF ('add', 'allocate', TRUE, 103); // right btn
+		printImageHREF ('add', 'allocate', TRUE); // right btn
 		echo "</td></tr></form>";
 	}
 	global $aat;
@@ -2683,16 +2683,16 @@ END
 
 	// inputs column
 	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-	echo "<th class=tdright>Prefix:</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' tabindex=1 value='${prefix_value}'></td>";
+	echo "<th class=tdright>Prefix:</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' value='${prefix_value}'></td>";
 	echo '<tr><th class=tdright>VLAN:</th><td class=tdleft>';
-	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical', 'tabindex' => 2)) . '</td></tr>';
-	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name='name' size='20' tabindex=3></td></tr>";
+	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical')) . '</td></tr>';
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name='name' size='20'></td></tr>";
 	echo '<tr><th class=tdright>Tags:</th><td class="tdleft">';
 	printTagsPicker ();
 	echo '</td></tr>';
-	echo '<tr><td class=tdright><input type=checkbox name="is_connected" tabindex=4></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected"></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
 	echo "<tr><td colspan=2>";
-	printImageHREF ('CREATE', 'Add a new network', TRUE, 5);
+	printImageHREF ('CREATE', 'Add a new network', TRUE);
 	echo '</td></tr>';
 	echo "</table></form><br><br>\n";
 	finishPortlet();
@@ -3269,11 +3269,11 @@ function renderIPAddressAllocations ($ip_bin)
 		echo "<tr><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
-		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id', 'tabindex' => 100));
-		echo "</td><td><input type=text tabindex=101 name=bond_name size=10></td><td>";
-		printSelect ($aat, array ('name' => 'bond_type', 'tabindex' => 102, 'regular'));
+		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id'));
+		echo "</td><td><input type=text name=bond_name size=10></td><td>";
+		printSelect ($aat, array ('name' => 'bond_type', 'regular'));
 		echo "</td><td>";
-		printImageHREF ('add', 'allocate', TRUE, 103);
+		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td></form></tr>";
 	}
 	global $aat;
@@ -3317,7 +3317,7 @@ function renderNATv4ForObject ($object_id)
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo '</td><td>';
 		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP', 'ALL' => 'ALL'), array ('name' => 'proto'));
-		echo "<select name='localip' tabindex=1>";
+		echo "<select name='localip'>";
 
 		foreach ($alloclist as $ip_bin => $alloc)
 		{
@@ -3327,15 +3327,15 @@ function renderNATv4ForObject ($object_id)
 			echo "<option value='${ip}'>${osif}${ip}${name}</option>";
 		}
 
-		echo "</select>:<input type='text' name='localport' size='4' tabindex=2></td>";
-		echo "<td><input type='text' name='remoteip' id='remoteip' size='10' tabindex=3>";
+		echo "</select>:<input type='text' name='localport' size='4'></td>";
+		echo "<td><input type='text' name='remoteip' id='remoteip' size='10'>";
 		echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
 		echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
 		printImageHREF ('find', 'Find object');
 		echo "</a>";
-		echo ":<input type='text' name='remoteport' size='4' tabindex=4></td><td></td>";
-		echo "<td colspan=1><input type='text' name='description' size='20' tabindex=5></td><td>";
-		printImageHREF ('add', 'Add new NAT rule', TRUE, 6);
+		echo ":<input type='text' name='remoteport' size='4'></td><td></td>";
+		echo "<td colspan=1><input type='text' name='description' size='20'></td><td>";
+		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo "</td></tr></form>";
 	}
 
@@ -3439,7 +3439,6 @@ function renderAddMultipleObjectsForm ()
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
-	$tabindex = 100;
 
 	// exclude location-related object types
 	global $location_obj_types;
@@ -3456,11 +3455,11 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
+		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id"), 0);
 		echo '</td>';
-		echo "<td><input type=text size=30 name=${i}_object_name tabindex=${tabindex}></td>";
-		echo "<td><input type=text size=30 name=${i}_object_label tabindex=${tabindex}></td>";
-		echo "<td><input type=text size=20 name=${i}_object_asset_no tabindex=${tabindex}></td>";
+		echo "<td><input type=text size=30 name=${i}_object_name></td>";
+		echo "<td><input type=text size=30 name=${i}_object_label></td>";
+		echo "<td><input type=text size=20 name=${i}_object_asset_no></td>";
 		if ($i == 0)
 		{
 			echo "<td valign=top rowspan=${max}>";
@@ -3468,7 +3467,6 @@ function renderAddMultipleObjectsForm ()
 			echo "</td>\n";
 		}
 		echo "</tr>\n";
-		$tabindex++;
 	}
 	echo "<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>\n";
 	echo "</form></table>\n";
@@ -3863,14 +3861,14 @@ function renderUserListEditor ()
 		printOpFormIntro ('createUser');
 		echo '<table cellspacing=0 cellpadding=5 align=center>';
 		echo '<tr><th>&nbsp;</th><th>&nbsp;</th><th>Tags</th></tr>';
-		echo '<tr><th class=tdright>Username</th><td class=tdleft><input type=text size=64 name=username tabindex=100></td>';
-		echo '<td rowspan=4>';
+		echo '<tr><th class=tdright>Username</th><td class=tdleft><input type=text size=64 name=username></td>';
+		echo '<tr><th class=tdright>Real name</th><td class=tdleft><input type=text size=64 name=realname></td></tr>';
+		echo '<tr><th class=tdright>Password</th><td class=tdleft><input type=password size=64 name=password></td></tr>';
+		echo '<tr><th class=tdright>Tags</th><td class=tdleft>';
 		printTagsPicker ();
 		echo '</td></tr>';
-		echo '<tr><th class=tdright>Real name</th><td class=tdleft><input type=text size=64 name=realname tabindex=101></td></tr>';
-		echo '<tr><th class=tdright>Password</th><td class=tdleft><input type=password size=64 name=password tabindex=102></td></tr>';
 		echo '<tr><td colspan=2>';
-		printImageHREF ('CREATE', 'Add new account', TRUE, 103);
+		printImageHREF ('CREATE', 'Add new account', TRUE);
 		echo '</td></tr>';
 		echo '</table></form>';
 		finishPortlet();
@@ -4265,8 +4263,8 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo '<tr><td>&nbsp;</td><td>&nbsp;</td><td>';
 		printImageHREF ('add', 'Add new', TRUE);
 		echo "</td>";
-		echo "<td class=tdleft><input type=text name=dict_value size=64 tabindex=100></td><td>";
-		printImageHREF ('add', 'Add new', TRUE, 101);
+		echo "<td class=tdleft><input type=text name=dict_value size=64></td><td>";
+		printImageHREF ('add', 'Add new', TRUE);
 		echo '</td></tr></form>';
 	}
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
@@ -4334,9 +4332,9 @@ function renderPortOIFEditor()
 		echo '<td>&nbsp;</td>';
 		echo '<td>&nbsp;</td>';
 		echo '<td>&nbsp;</td>';
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 110) . '</td>';
-		echo '<td class=tdleft><input type=text size=48 name=oif_name tabindex=100></td>';
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 110) . '</td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
+		echo '<td class=tdleft><input type=text size=48 name=oif_name></td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
@@ -4393,8 +4391,8 @@ function renderChaptersEditor ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Add new', TRUE);
-		echo "</td><td><input type=text name=chapter_name tabindex=100></td><td>&nbsp;</td><td>";
-		printImageHREF ('create', 'Add new', TRUE, 101);
+		echo "</td><td><input type=text name=chapter_name></td><td>&nbsp;</td><td>";
+		printImageHREF ('create', 'Add new', TRUE);
 		echo '</td></tr></form>';
 	}
 	$dict = getChapterList();
@@ -4473,11 +4471,11 @@ function renderEditAttributesForm ()
 		printOpFormIntro ('add');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Create attribute', TRUE);
-		echo "</td><td><input type=text tabindex=100 name=attr_name></td><td>";
+		echo "</td><td><input type=text name=attr_name></td><td>";
 		global $attrtypes;
-		printSelect ($attrtypes, array ('name' => 'attr_type', 'tabindex' => 101));
+		printSelect ($attrtypes, array ('name' => 'attr_type'));
 		echo '</td><td>';
-		printImageHREF ('create', 'Create attribute', TRUE, 102);
+		printImageHREF ('create', 'Create attribute', TRUE);
 		echo '</td></tr></form>';
 	}
 	startPortlet ('Optional attributes');
@@ -4513,7 +4511,7 @@ function renderEditAttrMapForm ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td colspan=2 class=tdleft>';
-		echo '<select name=attr_id tabindex=100>';
+		echo '<select name=attr_id>';
 		$shortType['uint'] = 'U';
 		$shortType['float'] = 'F';
 		$shortType['string'] = 'S';
@@ -4525,8 +4523,8 @@ function renderEditAttrMapForm ()
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
 		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
-		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id', 'tabindex' => 101));
-		echo ' <select name=chapter_no tabindex=102><option value=0>-- dictionary chapter for [D] attributes --</option>';
+		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id'));
+		echo ' <select name=chapter_no><option value=0>-- dictionary chapter for [D] attributes --</option>';
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
 				echo "<option value='${chapter['id']}'>${chapter['name']}</option>";
@@ -5058,7 +5056,7 @@ function renderLivePTR ($id)
 		{
 			echo '<td>';
 			if ($print_cbox)
-				echo "<input type=checkbox name=import_${idx} tabindex=${idx} id=atom_1_" . $box_counter++ . "_1>";
+				echo "<input type=checkbox name=import_${idx} id=atom_1_" . $box_counter++ . "_1>";
 			else
 				echo '&nbsp;';
 			echo '</td>';
@@ -5212,9 +5210,9 @@ END
 		printOpFormIntro ('createTag');
 		echo '<tr>';
 		echo '<td align=left style="padding-left: 16px;">' . getImageHREF ('create', 'Create tag', TRUE) . '</td>';
-		echo '<td><input type=text size=48 name=tag_name tabindex=100></td>';
-		echo '<td class=tdleft>' . getSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable', 'tabindex' => 105), 'yes') . '</td>';
-		echo '<td>' . getSelect ($options, array ('name' => 'parent_id', 'tabindex' => 110)) . '</td>';
+		echo '<td><input type=text size=48 name=tag_name></td>';
+		echo '<td class=tdleft>' . getSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable'), 'yes') . '</td>';
+		echo '<td>' . getSelect ($options, array ('name' => 'parent_id')) . '</td>';
 		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
 		echo '</tr></form>';
 	}
@@ -5656,10 +5654,10 @@ function renderMyPasswordEditor ()
 {
 	printOpFormIntro ('changeMyPassword');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword tabindex=1></td></tr>";
-	echo "<tr><th class=tdright>New password (*):</th><td><input type=password name=newpassword1 tabindex=2></td></tr>";
-	echo "<tr><th class=tdright>New password again (*):</th><td><input type=password name=newpassword2 tabindex=3></td></tr>";
-	echo "<tr><td colspan=2 align=center><input type=submit value='Change' tabindex=4></td></tr>";
+	echo "<tr><th class=tdright>Current password (*):</th><td><input type=password name=oldpassword></td></tr>";
+	echo "<tr><th class=tdright>New password (*):</th><td><input type=password name=newpassword1></td></tr>";
+	echo "<tr><th class=tdright>New password again (*):</th><td><input type=password name=newpassword2></td></tr>";
+	echo "<tr><td colspan=2 align=center><input type=submit value='Change'></td></tr>";
 	echo '</table></form>';
 }
 
@@ -5823,8 +5821,8 @@ function renderFileReuploader ()
 {
 	startPortlet ('Replace existing contents');
 	printOpFormIntro ('replaceFile', array (), TRUE);
-	echo "<input type=file size=10 name=file tabindex=100>&nbsp;\n";
-	printImageHREF ('save', 'Save changes', TRUE, 101);
+	echo "<input type=file size=10 name=file>&nbsp;\n";
+	printImageHREF ('save', 'Save changes', TRUE);
 	echo "</form>\n";
 	finishPortlet();
 }
@@ -5841,20 +5839,20 @@ function renderFileProperties ($file_id)
 	$file = spotEntity ('file', $file_id);
 	printOpFormIntro ('updateFile');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input tabindex=101 type=text name=file_type value='";
+	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input type=text name=file_type value='";
 	echo htmlspecialchars ($file['type']) . "'></td></tr>";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input tabindex=102 type=text name=file_name value='";
+	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input type=text name=file_name value='";
 	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
-	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=103 name=file_comment rows=10 cols=80>\n";
+	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea name=file_comment rows=10 cols=80>\n";
 	echo htmlspecialchars ($file['comment']) . "</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
 	echo getOpLink (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id'=>$file_id), '', 'destroy', 'Delete file', 'need-confirmation');
 	echo '</td></tr>';
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</th></tr></table></form>';
 }
 
@@ -5872,13 +5870,13 @@ function renderFileManager ()
 		startPortlet ('Upload new');
 		printOpFormIntro ('addFile', array (), TRUE);
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>";
-		echo '<tr><th class=tdright>Comment:</th><td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td></tr>';
+		echo '<tr><th class=tdright>Comment:</th><td class=tdleft><textarea name=comment rows=10 cols=80></textarea></td></tr>';
 		echo '<tr><th class=tdright>Tags:</td><td class=tdleft>';
 		printTagsPicker ();
 		echo '</td></tr>';
-		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file' tabindex=100></td></td>";
+		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file'></td></td>";
 		echo "<tr><td colspan=2>";
-		printImageHREF ('CREATE', 'Upload file', TRUE, 102);
+		printImageHREF ('CREATE', 'Upload file', TRUE);
 		echo '</td></tr>';
 		echo "</table></form><br>";
 		finishPortlet();
@@ -5952,9 +5950,9 @@ function renderFilesForEntity ($entity_id)
 	echo "<tr><th>File</th><th>Comment</th><th></th></tr>\n";
 	printOpFormIntro ('addFile', array (), TRUE);
 	echo "<tr>";
-	echo "<td class=tdleft><input type='file' size='10' name='file' tabindex=100></td>\n";
-	echo "<td class=tdleft><textarea tabindex=101 name=comment rows=10 cols=80></textarea></td><td>\n";
-	printImageHREF ('CREATE', 'Upload file', TRUE, 102);
+	echo "<td class=tdleft><input type='file' size='10' name='file'></td>\n";
+	echo "<td class=tdleft><textarea name=comment rows=10 cols=80></textarea></td><td>\n";
+	printImageHREF ('CREATE', 'Upload file', TRUE);
 	echo "</td></tr></form>";
 	echo "</table><br>\n";
 	finishPortlet();
@@ -6271,7 +6269,7 @@ function renderTextEditor ($file_id)
 		$syntax = "text";
 	echo '<table border=0 align=center>';
 	addJS ('js/codepress/codepress.js');
-	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text tabindex=101 class='codepress " . $syntax . "'>\n";
+	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text class='codepress " . $syntax . "'>\n";
 	echo htmlspecialchars ($fullInfo['contents']) . '</textarea></td></tr>';
 	echo "<tr><td class=submit><input type=submit value='Save' onclick='$(file_text).toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
@@ -6383,7 +6381,7 @@ function showPathAndSearch ($pageno, $tabno)
 	echo "<input type=hidden name=last_page value=$pageno>";
 	echo "<input type=hidden name=last_tab value=$tabno>";
 	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 tabindex=1000 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
+	echo "<label>Search:<input type=text name=q size=20 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
 
 	// Path (breadcrumbs)
 	echo implode(' : ', array_reverse ($items));
@@ -6715,11 +6713,11 @@ function renderTwoColumnCompatTableEditor ($compat, $left, $right)
 	{
 		printOpFormIntro ('add');
 		echo '<tr><th class=tdleft>';
-		printImageHREF ('add', 'add pair', TRUE, 200);
+		printImageHREF ('add', 'add pair', TRUE);
 		echo '</th><th class=tdleft>';
-		printSelect ($loptions, array ('name' => $lkey, 'tabindex' => 100));
+		printSelect ($loptions, array ('name' => $lkey));
 		echo '</th><th class=tdleft>';
-		printSelect ($roptions, array ('name' => $rkey, 'tabindex' => 110));
+		printSelect ($roptions, array ('name' => $rkey));
 		echo '</th></tr></form>';
 	}
 
@@ -6832,11 +6830,11 @@ function render8021QOrderForm ($some_id)
 					if ($decision)
 						$options[$object_id] = $object_dname;
 				}
-			printSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']);
+			printSelect ($options, array ('name' => 'object_id', 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']);
 			echo '</td>';
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']) . '</td>';
+			echo '<td>' . getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']) . '</td>';
 		if ($pageno != 'vst')
 		{
 			$options = array();
@@ -6849,9 +6847,9 @@ function render8021QOrderForm ($some_id)
 				if ($decision)
 					$options[$nominee['id']] = niftyString ($nominee['description'], 30, FALSE);
 			}
-			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
 		}
-		echo '<td>' . getImageHREF ('Attach', 'set', TRUE, 104) . '</td></tr></form>';
+		echo '<td>' . getImageHREF ('Attach', 'set', TRUE) . '</td></tr></form>';
 	}
 	global $pageno;
 	$minuslines = array(); // indexed by object_id, which is unique
@@ -7034,11 +7032,11 @@ function renderVLANDomainListEditor ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('create', 'create domain', TRUE, 104);
+		printImageHREF ('create', 'create domain', TRUE);
 		echo '</td><td>';
-		echo '<input type=text size=48 name=vdom_descr tabindex=102>';
+		echo '<input type=text size=48 name=vdom_descr>';
 		echo '</td><td>';
-		printImageHREF ('create', 'create domain', TRUE, 103);
+		printImageHREF ('create', 'create domain', TRUE);
 		echo '</td></tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -7134,15 +7132,15 @@ function renderVLANDomainVLANList ($vdom_id)
 		global $vtoptions;
 		printOpFormIntro ('add');
 		echo '<tr><td>';
-		printImageHREF ('create', 'add VLAN', TRUE, 110);
+		printImageHREF ('create', 'add VLAN', TRUE);
 		echo '</td><td>';
-		echo '<input type=text name=vlan_id size=4 tabindex=101>';
+		echo '<input type=text name=vlan_id size=4>';
 		echo '</td><td>';
-		printSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), 'ondemand');
+		printSelect ($vtoptions, array ('name' => 'vlan_type'), 'ondemand');
 		echo '</td><td>';
-		echo '<input type=text size=48 name=vlan_descr tabindex=103>';
+		echo '<input type=text size=48 name=vlan_descr>';
 		echo '</td><td>';
-		printImageHREF ('create', 'add VLAN', TRUE, 110);
+		printImageHREF ('create', 'add VLAN', TRUE);
 		echo '</td></tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -7306,7 +7304,7 @@ function renderObject8021QPorts ($object_id)
 	if ($req_port_name == '' and $nports)
 	{
 		echo "<input type=hidden name=nports value=${nports}>";
-		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE, 100) . '</li>';
+		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE) . '</li>';
 	}
 	echo '</form>';
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q'))))
@@ -7670,8 +7668,8 @@ function renderVLANIPLinks ($some_id)
 		if (!count ($options))
 			return;
 		printOpFormIntro ('bind', $extra);
-		echo '<tr><td>' . getOptionTree ($sname, $options, array ('tabindex' => 101));
-		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE, 102) . '</td></tr></form>';
+		echo '<tr><td>' . getOptionTree ($sname, $options);
+		echo '</td><td>' . getImageHREF ('ATTACH', 'bind', TRUE) . '</td></tr></form>';
 	}
 	global $pageno, $tabno;
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -7851,13 +7849,13 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 
 	echo '<tr><th class=tdright>run now:</th><td class=tdcenter>';
 	printOpFormIntro ('exec8021QPull');
-	echo getImageHREF ('prev', 'pull remote changes in', TRUE, 101) . '</form></td><td class=tdcenter>';
+	echo getImageHREF ('prev', 'pull remote changes in', TRUE) . '</form></td><td class=tdcenter>';
 	if ($maxdecisions)
 		echo getImageHREF ('COMMIT gray', 'cannot push due to version conflict(s)');
 	else
 	{
 		printOpFormIntro ('exec8021QPush');
-		echo getImageHREF ('COMMIT', 'push local changes out', TRUE, 102) . '</form>';
+		echo getImageHREF ('COMMIT', 'push local changes out', TRUE) . '</form>';
 	}
 	echo '</td></tr>';
 	echo '</table>';
@@ -8106,9 +8104,9 @@ function renderVSTListEditor()
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 104) . '</td>';
-		echo '<td><input type=text size=48 name=vst_descr tabindex=101></td>';
-		echo '<td>' . getImageHREF ('create', 'create template', TRUE, 103) . '</td>';
+		echo '<td>' . getImageHREF ('create', 'create template', TRUE) . '</td>';
+		echo '<td><input type=text size=48 name=vst_descr></td>';
+		echo '<td>' . getImageHREF ('create', 'create template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -8624,9 +8622,9 @@ function renderObjectLogEditor ()
 	echo "<center><h2>Log records for this object (<a href=?page=objectlog>complete list</a>)</h2></center>";
 	printOpFormIntro ('add');
 	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
-	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>';
-	echo '<td><textarea name=logentry rows=10 cols=80 tabindex=100></textarea></td>';
-	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE, 101) . '</td>' ;
+	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>';
+	echo '<td><textarea name=logentry rows=10 cols=80></textarea></td>';
+	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>' ;
 	echo '</tr></form>';
 
 	$order = 'even';
@@ -8895,8 +8893,8 @@ function renderObjectCactiGraphs ($object_id)
 		echo "<tr><td>";
 		printImageHREF ('Attach', 'Link new graph', TRUE);
 		echo '</td><td>' . getSelect ($options, array ('name' => 'server_id'));
-		echo "</td><td><input type=text name=graph_id tabindex=100></td><td><input type=text name=caption tabindex=101></td><td>";
-		printImageHREF ('Attach', 'Link new graph', TRUE, 101);
+		echo "</td><td><input type=text name=graph_id></td><td><input type=text name=caption></td><td>";
+		printImageHREF ('Attach', 'Link new graph', TRUE);
 		echo "</td></tr></form>";
 		echo "</table>";
 		echo "<br/><br/>";
@@ -8940,8 +8938,8 @@ function renderObjectMuninGraphs ($object_id)
 		echo "<tr><td>";
 		printImageHREF ('Attach', 'Link new graph', TRUE);
 		echo '</td><td>' . getSelect ($options, array ('name' => 'server_id'));
-		echo "</td><td><input type=text name=graph tabindex=100></td><td><input type=text name=caption tabindex=101></td><td>";
-		printImageHREF ('Attach', 'Link new graph', TRUE, 101);
+		echo "</td><td><input type=text name=graph></td><td><input type=text name=caption></td><td>";
+		printImageHREF ('Attach', 'Link new graph', TRUE);
 		echo "</td></tr></form>";
 		echo "</table>";
 		echo "<br/><br/>";
@@ -8991,7 +8989,7 @@ function renderEditVlan ($vlan_ck)
 		"<input type=text size=40 name=vlan_descr value='${vlan['vlan_descr']}'>" .
 		'</td></tr>';
 	echo '<tr><th class=tdright>Type:</th><td class=tdleft>' .
-		getSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), $vlan['vlan_prop']) .
+		getSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan['vlan_prop']) .
 		'</td></tr>';
 	echo '</table>';
 	echo '<p>';
@@ -9138,12 +9136,12 @@ function renderCactiServersEditor()
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 112) . '</td>';
-		echo '<td><input type=text size=48 name=base_url tabindex=101></td>';
-		echo '<td><input type=text size=24 name=username tabindex=102></td>';
-		echo '<td><input type=password size=24 name=password tabindex=103></td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
+		echo '<td><input type=text size=48 name=base_url></td>';
+		echo '<td><input type=text size=24 name=username></td>';
+		echo '<td><input type=password size=24 name=password></td>';
 		echo '<td>&nbsp;</td>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 111) . '</td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -9192,10 +9190,10 @@ function renderMuninServersEditor()
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 112) . '</td>';
-		echo '<td><input type=text size=48 name=base_url tabindex=101></td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
+		echo '<td><input type=text size=48 name=base_url></td>';
 		echo '<td>&nbsp;</td>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE, 111) . '</td>';
+		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
@@ -9872,7 +9870,7 @@ function renderUserProperties ($user_id)
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
-	printImageHREF ('SAVE', 'Save changes', TRUE, 102);
+	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</th></tr></table></form>';
 }
 
@@ -9954,14 +9952,14 @@ function renderPatchCableHeapEditor()
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 200) . '</td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
 		echo "<td>&nbsp;</td>";
-		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end1_conn_id', 'tabindex' => 110)) . '</td>';
-		echo '<td>' . getSelect (getPatchCableTypeOptions(), array ('name' => 'pctype_id', 'tabindex' => 120)) . '</td>';
-		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end2_conn_id', 'tabindex' => 130)) . '</td>';
-		echo '<td><input type=text size=6 name=length value="1.00" tabindex=140></td>';
-		echo '<td><input type=text size=48 name=description tabindex=150></td>';
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 200) . '</td>';
+		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end1_conn_id')) . '</td>';
+		echo '<td>' . getSelect (getPatchCableTypeOptions(), array ('name' => 'pctype_id')) . '</td>';
+		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end2_conn_id')) . '</td>';
+		echo '<td><input type=text size=6 name=length value="1.00"></td>';
+		echo '<td><input type=text size=48 name=description></td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
@@ -10042,9 +10040,9 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 		printOpFormIntro ('add');
 		echo '<tr>';
 		echo '<td>&nbsp;</td>';
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 200) . '</td>';
-		echo "<td><input type=text size=${column['width']} name=${column['value']} tabindex=100></td>";
-		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE, 200) . '</td>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
+		echo "<td><input type=text size=${column['width']} name=${column['value']}></td>";
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
