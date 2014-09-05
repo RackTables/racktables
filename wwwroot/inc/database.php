@@ -4070,9 +4070,20 @@ function generateEntityAutoTags ($cell)
 			}
 
 			# dictionary attribute autotags '$attr_X_Y'
-			if (isset ($dict_attr_cache[$cell['id']]))
-				foreach ($dict_attr_cache[$cell['id']] as $attr_id => $attr_key)
-					$ret[] = array ('tag' => "\$attr_{$attr_id}_{$attr_key}");
+			$dict_arrrs = array();
+			if (is_array ($dict_attr_cache))
+			{
+				if (isset ($dict_attr_cache[$cell['id']]))
+					$dict_attrs = $dict_attr_cache[$cell['id']];
+			}
+			else
+			{
+				foreach (getAttrValues($cell['id']) as $attr_id => $attr_record)
+					if (isset ($attr_record['key']))
+						$dict_arrrs[$attr_id] = $attr_record['key'];
+			}
+			foreach ($dict_arrrs as $attr_id => $key)
+				$ret[] = array ('tag' => "\$attr_{$attr_id}_{$key}");
 			break;
 		case 'ipv4net':
 			// v4-only rules
