@@ -1017,6 +1017,12 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 
 function printTagsPicker ($preselect=NULL)
 {
+	global $taglist;
+	if (! count ($taglist))
+	{
+		printf ('(None exist yet, %s?)', mkA ('configure', 'tagtree', NULL, 'edit'));
+		return;
+	}
 	printTagsPickerInput ();
 	printTagsPickerUl ($preselect);
 	enableTagsPicker ();

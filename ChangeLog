@@ -9,6 +9,7 @@
 	update: link status, MAC list support for ExtremeXOS
 	update: speed-up enumerating/filtering of objects
 	update: new tabindex order: search input, form inputs, other elements
+	update: provide a hint to create tags before assigning
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks
