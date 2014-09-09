@@ -5736,4 +5736,10 @@ function addPatchCableHeapLogEntry ($heap_id, $message)
 	);
 }
 
+function selectRackOrder ($row_id)
+{
+	$result = usePreparedSelectBlade ("SELECT id FROM Rack WHERE row_id = ? ORDER BY sort_order, name", array($row_id));
+	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
+}
+
 ?>

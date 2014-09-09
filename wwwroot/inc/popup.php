@@ -12,22 +12,14 @@ function getProximateRacks ($rack_id, $proximity = 0)
 	if ($proximity > 0)
 	{
 		$rack = spotEntity ('rack', $rack_id);
-		$rackList = doubleLink (listCells ('rack', $rack['row_id']));
-		$todo = $proximity;
-		$cur_item = $rackList[$rack_id];
-		while ($todo and array_key_exists ('prev_key', $cur_item))
+		$rackList = selectRackOrder ($rack['row_id']);
+		$cur_item = array_search ($rack_id, $rackList);
+		if (FALSE !== $cur_item)
 		{
-			$cur_item = $rackList[$cur_item['prev_key']];
-			$ret[] = $cur_item['id'];
-			$todo--;
-		}
-		$todo = $proximity;
-		$cur_item = $rackList[$rack_id];
-		while ($todo and array_key_exists ('next_key', $cur_item))
-		{
-			$cur_item = $rackList[$cur_item['next_key']];
-			$ret[] = $cur_item['id'];
-			$todo--;
+			if ($todo = min ($cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item - $todo, $todo));
+			if ($todo = min (count ($rackList) - 1 - $cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item + 1, $todo));
 		}
 	}
 	return $ret;

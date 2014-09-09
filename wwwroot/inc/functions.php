@@ -917,36 +917,16 @@ function l2addressFromDatabase ($string)
 	}
 }
 
-// The following 2 functions return previous and next rack IDs for
-// a given rack ID. The order of racks is the same as in renderRackspace()
-// or renderRow().
-function getPrevIDforRack ($row_id, $rack_id)
+function getRackNeighbors ($row_id, $rack_id)
 {
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'prev_key', NULL);
-}
-
-function getNextIDforRack ($row_id, $rack_id)
-{
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'next_key', NULL);
-}
-
-// This function finds previous and next array keys for each array key and
-// modifies its argument accordingly.
-function doubleLink ($array)
-{
-	$prev_key = NULL;
-	foreach (array_keys ($array) as $key)
-	{
-		if ($prev_key)
-		{
-			$array[$key]['prev_key'] = $prev_key;
-			$array[$prev_key]['next_key'] = $key;
-		}
-		$prev_key = $key;
-	}
-	return $array;
+	$ret = array ('prev' => NULL, 'next' => NULL);
+	$ids = selectRackOrder ($row_id);
+	$index = array_search ($rack_id, $ids);
+	if ($index !== FALSE && $index > 0)
+		$ret['prev'] = $ids[$index - 1];
+	if ($index !== FALSE && $index + 1 < count ($ids))
+		$ret['next'] = $ids[$index + 1];
+	return $ret;
 }
 
 function sortTokenize ($a, $b)
