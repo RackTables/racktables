@@ -4031,7 +4031,7 @@ function generateEntityAutoTags ($cell)
 {
 	global $dict_attr_cache;
 	$ret = array();
-	if (! array_key_exists ('realm', $cell))
+	if (empty ($cell['realm']))
 		throw new InvalidArgException ('cell', '(array)', 'malformed structure');
 	switch ($cell['realm'])
 	{
