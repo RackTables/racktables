@@ -1836,7 +1836,7 @@ $iftable_processors['brocade-icx-64xx-1000SFP'] = array
 
 $iftable_processors['brocade-icx-64xx-10000SFP'] = array
 (
-	'pattern' => '@^GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
+	'pattern' => '@^10GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
 	'replacement' => '\\1\\2',
 	'dict_key' => '4-1077', // empty SFP-1000
 	'label' => '\\2',
