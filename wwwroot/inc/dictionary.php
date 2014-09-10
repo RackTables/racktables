@@ -2128,6 +2128,9 @@ $dictionary = array
 	2236 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9508 | http://www.cisco.com/c/en/us/products/switches/nexus-9508-switch/index.html]]'),
 	2237 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9516 | http://www.cisco.com/c/en/us/products/switches/nexus-9516-switch/index.html]]'),
 	2238 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1910-48G'),
+	2239 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6430-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
+	2240 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6450-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
+	2241 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8000 | http://www-03.ibm.com/systems/networking/switches/rack/g8000/]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
