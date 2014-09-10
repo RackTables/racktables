@@ -1825,6 +1825,35 @@ $iftable_processors['ibm-any-SFP+'] = array
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
 );
+$iftable_processors['brocade-icx-64xx-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '4-1077', // empty SFP-1000
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-icx-64xx-10000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '4-1077', // empty SFP-1000
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+
+$iftable_processors['brocade-icx-64xx-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/1/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+
 
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
@@ -3185,6 +3214,25 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'DCS-7124S: 24 SFP+/10000',
 		'processors' => array ('arista-any-SFP+', 'arista-management'),
 	),
+    '1991.1.3.57.2.1.1.1' => array
+	(
+		'dict_key' => 2226,
+		'text' => 'ICX6430-48: 48 1000T + 4 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+	),
+	'1991.1.3.48.4.1' => array
+	(
+		'dict_key' => 2226,
+		'text' => 'Stacked ICX6430-48: 48 1000T + 4 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+	),
+	'1991.1.3.48.5.1' => array
+	(
+		'dict_key' => 2226,
+		'text' => 'Stacked ICX6450-48: 48 1000T + 4 SFP+/10000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+	),
+
 );
 
 global $swtype_pcre;
