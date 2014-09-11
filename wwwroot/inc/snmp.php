@@ -3216,19 +3216,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
     '1991.1.3.57.2.1.1.1' => array
 	(
-		'dict_key' => 2226,
+		'dict_key' => 2227,
 		'text' => 'ICX6430-48: 48 1000T + 4 SFP+/1000',
 		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
 	),
 	'1991.1.3.48.4.1' => array
 	(
-		'dict_key' => 2226,
+		'dict_key' => 2227,
 		'text' => 'Stacked ICX6430-48: 48 1000T + 4 SFP+/1000',
 		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
 	),
 	'1991.1.3.48.5.1' => array
 	(
-		'dict_key' => 2226,
+		'dict_key' => 2228,
 		'text' => 'Stacked ICX6450-48: 48 1000T + 4 SFP+/10000',
 		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
 	),
