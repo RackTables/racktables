@@ -2118,6 +2118,7 @@ $dictionary = array
 	2226 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE7850-32Q-EI'),
 	2227 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6430-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
 	2228 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6450-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
+	2229 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8000 | http://www-03.ibm.com/systems/networking/switches/rack/g8000/]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
