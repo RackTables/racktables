@@ -2173,13 +2173,16 @@ function renderRackSpaceForObject ($object_id)
 		$object = spotEntity ('object', $object_id);
 		$matched_tags = array();
 		foreach ($allRacksData as $rack)
+		{
+			$tag_chain = array_replace ($rack['etags'], $rack['itags']);
 			foreach ($object['etags'] as $tag)
-				if (tagOnChain ($tag, $rack['etags']) or tagOnChain ($tag, $rack['itags']))
+				if (tagOnChain ($tag, $tag_chain))
 				{
 					$matching_racks[$rack['id']] = $rack;
 					$matched_tags[$tag['id']] = $tag;
 					break;
 				}
+		}
 		// add current object's racks even if they dont match filter
 		foreach ($workingRacksData as $rack_id => $rack)
 			if (! isset ($matching_racks[$rack_id]))
