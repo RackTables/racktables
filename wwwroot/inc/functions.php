@@ -917,6 +917,20 @@ function l2addressFromDatabase ($string)
 	}
 }
 
+// DEPRECATED, remove in 0.21.0
+function getPrevIDforRack ($row_id, $rack_id)
+{
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['prev'];
+}
+
+// DEPRECATED, remove in 0.21.0
+function getNextIDforRack ($row_id, $rack_id)
+{
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['next'];
+}
+
 function getRackNeighbors ($row_id, $rack_id)
 {
 	$ret = array ('prev' => NULL, 'next' => NULL);

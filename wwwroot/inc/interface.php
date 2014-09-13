@@ -904,8 +904,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
 	$neighbors = getRackNeighbors ($rackData['row_id'], $rack_id);
-	$prev_id = array_fetch ($neighbors, 'prev', NULL);
-	$next_id = array_fetch ($neighbors, 'next', NULL);
+	$prev_id = $neighbors['prev'];
+	$next_id = $neighbors['next'];
 	echo "<center><table border=0><tr valign=middle>";
 	echo '<td><h2>' . mkA ($rackData['row_name'], 'row', $rackData['row_id']) . ' :</h2></td>';
 	if ($prev_id != NULL)
