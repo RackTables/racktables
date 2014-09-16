@@ -2116,9 +2116,17 @@ $dictionary = array
 	2224 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B460 M4'),
 	2225 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B200 M4'),
 	2226 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE7850-32Q-EI'),
-	2227 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6430-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
-	2228 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6450-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
-	2229 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8000 | http://www-03.ibm.com/systems/networking/switches/rack/g8000/]]'),
+	2227 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6807-XL%L7,1H%'),
+	2228 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%VS-S2T-10G'),
+	2229 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%VS-S2T-10G-XL'),
+	2230 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6908-10G-2T'),
+	2231 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6908-10G-2TXL'),
+	2232 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2T'),
+	2233 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2TXL'),
+
+	2234 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6430-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
+	2235 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6450-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
+	2236 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8000 | http://www-03.ibm.com/systems/networking/switches/rack/g8000/]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with

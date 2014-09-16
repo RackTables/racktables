@@ -904,8 +904,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
 	$neighbors = getRackNeighbors ($rackData['row_id'], $rack_id);
-	$prev_id = array_fetch ($neighbors, 'prev', NULL);
-	$next_id = array_fetch ($neighbors, 'next', NULL);
+	$prev_id = $neighbors['prev'];
+	$next_id = $neighbors['next'];
 	echo "<center><table border=0><tr valign=middle>";
 	echo '<td><h2>' . mkA ($rackData['row_name'], 'row', $rackData['row_id']) . ' :</h2></td>';
 	if ($prev_id != NULL)
@@ -2173,13 +2173,16 @@ function renderRackSpaceForObject ($object_id)
 		$object = spotEntity ('object', $object_id);
 		$matched_tags = array();
 		foreach ($allRacksData as $rack)
+		{
+			$tag_chain = array_replace ($rack['etags'], $rack['itags']);
 			foreach ($object['etags'] as $tag)
-				if (tagOnChain ($tag, $rack['etags']) or tagOnChain ($tag, $rack['itags']))
+				if (tagOnChain ($tag, $tag_chain))
 				{
 					$matching_racks[$rack['id']] = $rack;
 					$matched_tags[$tag['id']] = $tag;
 					break;
 				}
+		}
 		// add current object's racks even if they dont match filter
 		foreach ($workingRacksData as $rack_id => $rack)
 			if (! isset ($matching_racks[$rack_id]))
