@@ -2104,6 +2104,7 @@ $dictionary = array
 	2211 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%CGS-2520-24TC'),
 	2212 => array ('chapter_id' => 12, 'dict_value' => 'Linksys%GPASS%SRW2024P'),
 	2213 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2920-48G J9728A'),
+	2214 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.3 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.3]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
