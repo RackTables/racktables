@@ -4171,37 +4171,28 @@ function generateEntityAutoTags ($cell)
 }
 
 // Return a tag chain with all DB tags on it.
-function getTagList ()
+function getTagList()
 {
 	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		"select id, parent_id, is_assignable, tag, entity_realm as realm, count(entity_id) as refcnt " .
-		"from TagTree left join TagStorage on id = tag_id " .
-		"group by id, entity_realm order by tag"
-	);
+	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['id']]))
-			$ret[$row['id']] = array
-			(
-				'id' => $row['id'],
-				'is_assignable' => $row['is_assignable'],
-				'tag' => $row['tag'],
-				'parent_id' => $row['parent_id'],
-				'refcnt' => array ('total' => 0)
-			);
-		if ($row['realm'])
-		{
-			$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
-			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
-			// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
-			if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
-				if (isset ($ret[$row['id']]['refcnt']['ipnet']))
-					$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
-				else
-					$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
-		}
+		$row['refcnt']['total'] = 0;
+		$ret[$row['id']] = $row;
+	}
+	unset ($result);
+
+	$result = usePreparedSelectBlade ("SELECT entity_realm AS realm, tag_id AS id, count(*) AS refcnt FROM TagStorage GROUP BY tag_id, entity_realm");
+	while ($row = $result->fetch(PDO::FETCH_ASSOC))
+	{
+		$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
+		$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
+		// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
+		if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
+			if (isset ($ret[$row['id']]['refcnt']['ipnet']))
+				$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
+			else
+				$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
 	}
 	return $ret;
 }
