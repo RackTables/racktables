@@ -4,27 +4,6 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-// Return a list of rack IDs that are P or less positions
-// far from the given rack in its row.
-function getProximateRacks ($rack_id, $proximity = 0)
-{
-	$ret = array ($rack_id);
-	if ($proximity > 0)
-	{
-		$rack = spotEntity ('rack', $rack_id);
-		$rackList = selectRackOrder ($rack['row_id']);
-		$cur_item = array_search ($rack_id, $rackList);
-		if (FALSE !== $cur_item)
-		{
-			if ($todo = min ($cur_item, $proximity))
-				$ret = array_merge ($ret, array_slice ($rackList, $cur_item - $todo, $todo));
-			if ($todo = min (count ($rackList) - 1 - $cur_item, $proximity))
-				$ret = array_merge ($ret, array_slice ($rackList, $cur_item + 1, $todo));
-		}
-	}
-	return $ret;
-}
-
 function findSparePorts ($port_info, $filter)
 {
 	$qparams = array ();
