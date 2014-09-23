@@ -1817,12 +1817,48 @@ $iftable_processors['ibm-49-to-52-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ibm-45-to-48-SFP'] = array
+(
+	'pattern' => '@^Ethernet(45|46|47|48)$@',
+	'replacement' => 'port \\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ibm-any-SFP+'] = array
 (
 	'pattern' => '@^Ethernet(\d+)$@',
 	'replacement' => 'port \\1',
 	'dict_key' => '9-1084',
 	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-icx-64xx-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '4-1077', // empty SFP-1000
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-icx-64xx-10000SFP'] = array
+(
+	'pattern' => '@^10GigabitEthernet([[:digit:]]+/2/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '9-1084', // empty SFP+
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-icx-64xx-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/1/)([[:digit:]]+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -3185,6 +3221,31 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'DCS-7124S: 24 SFP+/10000',
 		'processors' => array ('arista-any-SFP+', 'arista-management'),
 	),
+    '1991.1.3.57.2.1.1.1' => array
+	(
+		'dict_key' => 2235,
+		'text' => 'ICX6430-48: 48 1000T + 4 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+	),
+	'1991.1.3.48.4.1' => array
+	(
+		'dict_key' => 2235,
+		'text' => 'Stacked ICX6430-48: 48 1000T + 4 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+	),
+	'1991.1.3.48.5.1' => array
+	(
+		'dict_key' => 2236,
+		'text' => 'Stacked ICX6450-48: 48 1000T + 4 SFP+/10000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+	),
+	'26543.1.7.1' => array
+	(
+		'dict_key' => 2237,
+		'text' => 'IBM System Networking RackSwitch G8000',
+		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
+	),
+
 );
 
 global $swtype_pcre;
