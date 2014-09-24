@@ -2124,6 +2124,10 @@ $dictionary = array
 	2232 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2T'),
 	2233 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2TXL'),
 	2234 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.3 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.3]]'),
+	2235 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9504 | http://www.cisco.com/c/en/us/products/switches/nexus-9504-switch/index.html]]'),
+	2236 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9508 | http://www.cisco.com/c/en/us/products/switches/nexus-9508-switch/index.html]]'),
+	2237 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9516 | http://www.cisco.com/c/en/us/products/switches/nexus-9516-switch/index.html]]'),
+
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
