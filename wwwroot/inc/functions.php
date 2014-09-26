@@ -4808,10 +4808,7 @@ function searchEntitiesByText ($terms)
 				if (! isolatedPermission ($realm, 'default', spotEntity ($realm, $record['id'])))
 					unset ($summary[$realm][$key]);
 	// clear empty search result realms
-	foreach ($summary as $key => $data)
-		if (! count ($data))
-			unset ($summary[$key]);
-	return $summary;
+	return array_filter ($summary, 'count');
 }
 
 // returns URL to redirect to, or NULL if $result_type is unknown
