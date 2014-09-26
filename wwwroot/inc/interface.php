@@ -546,29 +546,33 @@ function renderLocationRowForEditor ($parentmod,$subtree, $level = 0)
 
 function renderLocationSelectTree ($selected_id = NULL, $parentmod = null, $placeholder = 'Options')
 {
-    if ($parentmod != null)
-    {
-        $tplm = TemplateManager::getInstance();
-        $locationlist = listCells ('location');
+    $tplm = TemplateManager::getInstance();
+    $locationlist = listCells ('location');
 
+    if($parentmod != null)
         $mod = $tplm->generateSubmodule($placeholder, "LocationChildren", $parentmod);
-        $mod->defNamespace();
-        $mod->addOutput('Content','-- None --');
-        $mod->setOutput('Id',0);
+    else
+        $mod = $tplm->generateModule("LocationChildren");
 
-        foreach (treeFromList ($locationlist) as $location)
-        {
-            $mod = $tplm->generateSubmodule("Options", "LocationChildrenBold", $parentmod);
-            $mod->setNamespace('',true);
-            $mod->setLock(true);
+    $mod->defNamespace();
+    $mod->addOutput('Content','-- None --');
+    $mod->setOutput('Id',0);
 
-            if ($location['id'] == $selected_id )
-                $mod->addOutput('Selected', 'selected');
-            $mod->addOutput('Content',$location['name']);
-            $mod->setOutput("Id", $location['id']) ;
-            printLocationChildrenSelectOptions ($location, 0, $selected_id, $mod);
-        }
+    foreach (treeFromList ($locationlist) as $location)
+    {
+        $smod = $tplm->generateSubmodule("Options", "LocationChildrenBold", $mod);
+        $smod->setNamespace('',true);
+        $smod->setLock(true);
+
+        if ($location['id'] == $selected_id )
+            $smod->addOutput('Selected', 'selected');
+        $smod->addOutput('Content',$location['name']);
+        $smod->setOutput("Id", $location['id']) ;
+        printLocationChildrenSelectOptions ($location, 0, $selected_id, $smod);
     }
+
+    if($parentmod == null)
+        return $mod->run();
 }
 
 function renderRackspaceLocationEditor ()
@@ -589,14 +593,6 @@ function renderRackspaceLocationEditor ()
 
 function renderRackspaceRowEditor ()
 {
-    function printNewItemTR ($plc,$parentmod)
-    {
-        $tplm = TemplateManager::getInstance();
-        $mod = $tplm->generateSubmodule($plc, "RackspaceRowEditorNew", $parentmod);
-        renderLocationSelectTree (null,$mod);
-
-    }
-
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule("Payload", "renderRackspaceRowEditor");
     $mod->setNamespace("rackspace",true);

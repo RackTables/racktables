@@ -9,7 +9,7 @@
 					<input class="icon" type="image" border="0" title="Add new row" src="?module=chrome&uri=pix/tango-document-new.png" name="submit"></input>
 				</td><td>
 					<select name=location_id tabindex=100>
-						<?php $this->Options; ?>
+						<?php $this->LocationNewOptions; ?>
 					</select>
 				</td>
 				<td>
@@ -48,7 +48,7 @@
 					<input class="icon" type="image" border="0" title="Add new row" src="?module=chrome&uri=pix/tango-document-new.png" name="submit"></input>
 				</td><td>
 					<select name=location_id tabindex=100>
-						<?php $this->Options; ?>
+						<?php $this->LocationNewOptions; ?>
 					</select>
 				</td>
 				<td>
