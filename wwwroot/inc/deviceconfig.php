@@ -2841,6 +2841,7 @@ function vrpReadInterfaceStatus ($text)
 				if ($field_list[0] == '')
 					array_shift ($field_list);
 				list ($portname, $status_raw) = $field_list;
+				$portname = preg_replace ('/([a-zA-Z0-9\/:]+).*/', '$1', $portname);
 				$portname = shortenIfName ($portname);
 
 				if ($status_raw == 'up' || $status_raw == 'down')
