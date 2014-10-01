@@ -917,36 +917,51 @@ function l2addressFromDatabase ($string)
 	}
 }
 
-// The following 2 functions return previous and next rack IDs for
-// a given rack ID. The order of racks is the same as in renderRackspace()
-// or renderRow().
+// DEPRECATED, remove in 0.21.0
 function getPrevIDforRack ($row_id, $rack_id)
 {
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'prev_key', NULL);
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['prev'];
 }
 
+// DEPRECATED, remove in 0.21.0
 function getNextIDforRack ($row_id, $rack_id)
 {
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'next_key', NULL);
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['next'];
 }
 
-// This function finds previous and next array keys for each array key and
-// modifies its argument accordingly.
-function doubleLink ($array)
+function getRackNeighbors ($row_id, $rack_id)
 {
-	$prev_key = NULL;
-	foreach (array_keys ($array) as $key)
+	$ret = array ('prev' => NULL, 'next' => NULL);
+	$ids = selectRackOrder ($row_id);
+	$index = array_search ($rack_id, $ids);
+	if ($index !== FALSE && $index > 0)
+		$ret['prev'] = $ids[$index - 1];
+	if ($index !== FALSE && $index + 1 < count ($ids))
+		$ret['next'] = $ids[$index + 1];
+	return $ret;
+}
+
+// Return a list of rack IDs that are P or less positions
+// far from the given rack in its row.
+function getProximateRacks ($rack_id, $proximity = 0)
+{
+	$ret = array ($rack_id);
+	if ($proximity > 0)
 	{
-		if ($prev_key)
+		$rack = spotEntity ('rack', $rack_id);
+		$rackList = selectRackOrder ($rack['row_id']);
+		$cur_item = array_search ($rack_id, $rackList);
+		if (FALSE !== $cur_item)
 		{
-			$array[$key]['prev_key'] = $prev_key;
-			$array[$prev_key]['next_key'] = $key;
+			if ($todo = min ($cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item - $todo, $todo));
+			if ($todo = min (count ($rackList) - 1 - $cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item + 1, $todo));
 		}
-		$prev_key = $key;
 	}
-	return $array;
+	return $ret;
 }
 
 function sortTokenize ($a, $b)
@@ -4793,10 +4808,7 @@ function searchEntitiesByText ($terms)
 				if (! isolatedPermission ($realm, 'default', spotEntity ($realm, $record['id'])))
 					unset ($summary[$realm][$key]);
 	// clear empty search result realms
-	foreach ($summary as $key => $data)
-		if (! count ($data))
-			unset ($summary[$key]);
-	return $summary;
+	return array_filter ($summary, 'count');
 }
 
 // returns URL to redirect to, or NULL if $result_type is unknown

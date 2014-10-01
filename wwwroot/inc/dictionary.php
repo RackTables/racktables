@@ -2115,6 +2115,19 @@ $dictionary = array
 	2223 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B260 M4'),
 	2224 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B460 M4'),
 	2225 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B200 M4'),
+	2226 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE7850-32Q-EI'),
+	2227 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6807-XL%L7,1H%'),
+	2228 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%VS-S2T-10G'),
+	2229 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%VS-S2T-10G-XL'),
+	2230 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6908-10G-2T'),
+	2231 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6908-10G-2TXL'),
+	2232 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2T'),
+	2233 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6904-40G-2TXL'),
+	2234 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.3 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.3]]'),
+	2235 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9504 | http://www.cisco.com/c/en/us/products/switches/nexus-9504-switch/index.html]]'),
+	2236 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9508 | http://www.cisco.com/c/en/us/products/switches/nexus-9508-switch/index.html]]'),
+	2237 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9516 | http://www.cisco.com/c/en/us/products/switches/nexus-9516-switch/index.html]]'),
+
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

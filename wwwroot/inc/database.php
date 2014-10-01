@@ -4070,8 +4070,8 @@ function generateEntityAutoTags ($cell)
 			}
 
 			# dictionary attribute autotags '$attr_X_Y'
-			$dict_arrrs = array();
-			if (is_array ($dict_attr_cache))
+			$dict_attrs = array();
+			if (isset ($dict_attr_cache))
 			{
 				if (isset ($dict_attr_cache[$cell['id']]))
 					$dict_attrs = $dict_attr_cache[$cell['id']];
@@ -4080,9 +4080,9 @@ function generateEntityAutoTags ($cell)
 			{
 				foreach (getAttrValues($cell['id']) as $attr_id => $attr_record)
 					if (isset ($attr_record['key']))
-						$dict_arrrs[$attr_id] = $attr_record['key'];
+						$dict_attrs[$attr_id] = $attr_record['key'];
 			}
-			foreach ($dict_arrrs as $attr_id => $key)
+			foreach ($dict_attrs as $attr_id => $key)
 				$ret[] = array ('tag' => "\$attr_{$attr_id}_{$key}");
 			break;
 		case 'ipv4net':
@@ -4171,37 +4171,28 @@ function generateEntityAutoTags ($cell)
 }
 
 // Return a tag chain with all DB tags on it.
-function getTagList ()
+function getTagList()
 {
 	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		"select id, parent_id, is_assignable, tag, entity_realm as realm, count(entity_id) as refcnt " .
-		"from TagTree left join TagStorage on id = tag_id " .
-		"group by id, entity_realm order by tag"
-	);
+	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (!isset ($ret[$row['id']]))
-			$ret[$row['id']] = array
-			(
-				'id' => $row['id'],
-				'is_assignable' => $row['is_assignable'],
-				'tag' => $row['tag'],
-				'parent_id' => $row['parent_id'],
-				'refcnt' => array ('total' => 0)
-			);
-		if ($row['realm'])
-		{
-			$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
-			$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
-			// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
-			if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
-				if (isset ($ret[$row['id']]['refcnt']['ipnet']))
-					$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
-				else
-					$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
-		}
+		$row['refcnt']['total'] = 0;
+		$ret[$row['id']] = $row;
+	}
+	unset ($result);
+
+	$result = usePreparedSelectBlade ("SELECT entity_realm AS realm, tag_id AS id, count(*) AS refcnt FROM TagStorage GROUP BY tag_id, entity_realm");
+	while ($row = $result->fetch(PDO::FETCH_ASSOC))
+	{
+		$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
+		$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
+		// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
+		if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
+			if (isset ($ret[$row['id']]['refcnt']['ipnet']))
+				$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
+			else
+				$ret[$row['id']]['refcnt']['ipnet'] = $row['refcnt'];
 	}
 	return $ret;
 }
@@ -4217,7 +4208,7 @@ function destroyTagsForEntity ($entity_realm, $entity_id)
 // but not now.
 function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 {
-	usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
+	return usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
 }
 
 function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
@@ -5590,14 +5581,19 @@ function isTransactionActive()
 	}
 }
 
+
+function getRowsCount ($table)
+{
+	$result = usePreparedSelectBlade ("SELECT COUNT(*) FROM `$table`");
+	return $result->fetch (PDO::FETCH_COLUMN, 0);
+}
+
 function getEntitiesCount ($realm)
 {
 	global $SQLSchema;
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
-	$table = $SQLSchema[$realm]['table'];
-	$result = usePreparedSelectBlade ("SELECT COUNT(*) FROM `$table`");
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return getRowsCount ($SQLSchema[$realm]['table']);
 }
 
 function getPatchCableConnectorList()
@@ -5729,6 +5725,12 @@ function addPatchCableHeapLogEntry ($heap_id, $message)
 		"INSERT INTO PatchCableHeapLog (heap_id, date, user, message) VALUES (?, NOW(), ?, ?)",
 		array ($heap_id, $remote_username, $message)
 	);
+}
+
+function selectRackOrder ($row_id)
+{
+	$result = usePreparedSelectBlade ("SELECT id FROM Rack WHERE row_id = ? ORDER BY sort_order, name", array($row_id));
+	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
 }
 
 ?>

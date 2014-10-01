@@ -411,7 +411,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 	if (! array_key_exists ($server_id, $servers))
 		throw new InvalidRequestArgException ('server_id', $server_id);
 	$cacti_url = $servers[$server_id]['base_url'];
-	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=1";
+	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
 	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
 	$postvars .= '&login_password=' . $servers[$server_id]['password'];
 
