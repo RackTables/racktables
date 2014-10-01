@@ -2127,6 +2127,7 @@ $dictionary = array
 	2235 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9504 | http://www.cisco.com/c/en/us/products/switches/nexus-9504-switch/index.html]]'),
 	2236 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9508 | http://www.cisco.com/c/en/us/products/switches/nexus-9508-switch/index.html]]'),
 	2237 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 9516 | http://www.cisco.com/c/en/us/products/switches/nexus-9516-switch/index.html]]'),
+	2238 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1910-48G'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
