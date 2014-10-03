@@ -2332,6 +2332,7 @@ function renderDepot ()
 	$cellfilter = getCellFilter();
 	$objects = array();
 	$objects_count = getEntitiesCount ('object');
+	$showobjecttype = (getConfigVar ('SHOW_OBJECTTYPE') == 'yes');
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
@@ -2347,7 +2348,10 @@ function renderDepot ()
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Type</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
+			echo '<tr><th>Common name</th>';
+			if ($showobjecttype)
+				echo '<th>Type</th>';
+			echo '<th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
 			$order = 'odd';
 			# gather IDs of all objects and fetch rackspace info in one pass
 			$idlist = array();
@@ -2355,13 +2359,17 @@ function renderDepot ()
 				$idlist[] = $obj['id'];
 			$mountinfo = getMountInfo ($idlist);
 			$containerinfo = getContainerInfo ($idlist);
+			if ($showobjecttype)
+				$objecttypes = readChapter (CHAP_OBJTYPE);
 			foreach ($objects as $obj)
 			{
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
 				echo "<tr class='row_${order} tdleft ${problem}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
-				echo "</td><td>${obj['objtype_name']}</td>";
+				echo '</td>';
+				if ($showobjecttype)
+					echo "<td>${objecttypes[$obj['objtype_id']]}</td>";
 				echo "<td>${obj['label']}</td>";
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
@@ -3538,12 +3546,14 @@ function renderSearchResults ($terms, $summary)
 		{
 			case 'object':
 				startPortlet ("<a href='index.php?page=depot'>Objects</a>");
+				$objecttypes = readChapter (CHAP_OBJTYPE);
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				echo '<tr><th>what</th><th>why</th></tr>';
 				foreach ($what as $obj)
 				{
 					echo "<tr class=row_${order} valign=top><td>";
 					$object = spotEntity ('object', $obj['id']);
+					$object['objtype_name'] = $objecttypes[$object['objtype_id']];
 					renderCell ($object);
 					echo "</td><td class=tdleft>";
 					if (isset ($obj['by_attr']))
@@ -6196,10 +6206,10 @@ function renderCell ($cell)
 		printImageHREF ('OBJECT');
 		echo '</td><td>';
 		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
-		echo '</td></tr><tr><td>';
-		echo "<small>${cell['objtype_name']}</small>";
-		echo "</td></tr><tr><td>";
-		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
+		echo '</td></tr>';
+		if (array_key_exists('objtype_name',$cell))
+			echo "<tr><td><small>${cell['objtype_name']}</small></td></tr>";
+		echo '<tr><td>', count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
 	default:
