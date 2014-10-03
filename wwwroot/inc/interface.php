@@ -1065,18 +1065,21 @@ function renderEditObjectForm()
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
-		$parents = getEntityRelatives ('parents', 'object', $object_id);
-		foreach ($parents as $link_id => $parent_details)
+		$parentsgroup = groupEntityRelativesByType(getEntityRelatives ('parents', 'object', $object_id));
+		foreach ($parentsgroup as $groupname => $parents)
 		{
-			if (!isset($label))
-				$label = count($parents) > 1 ? 'Containers:' : 'Container:';
-			echo "<tr><td>&nbsp;</td>";
-			echo "<th class=tdright>${label}</th><td class=tdleft>";
-			echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
-			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-			echo getOpLink (array('op'=>'unlinkObjects', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
-			echo "</td></tr>\n";
-			$label = '&nbsp;';
+				$label = $groupname . (count($parents) > 1 ? ' containers:' : ' container:');
+			foreach ($parents as $link_id => $parent_details)
+			{
+
+				echo "<tr><td>&nbsp;</td>";
+				echo "<th class=tdright>${label}</th><td class=tdleft>";
+				echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+				echo getOpLink (array('op'=>'unlinkObjects', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
+				echo "</td></tr>\n";
+				$label = '&nbsp;';
+			}
 		}
 		echo "<tr><td>&nbsp;</td>";
 		echo "<th class=tdright>Select container:</th><td class=tdleft>";
@@ -1403,21 +1406,27 @@ function renderObject ($object_id)
 		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
-	$parents = getEntityRelatives ('parents', 'object', $object_id);
-	if (count ($parents))
+	$parentgroups = groupEntityRelativesByType(getEntityRelatives ('parents', 'object', $object_id));
+	if (count ($parentgroups))
 	{
-		$fmt_parents = array();
-		foreach ($parents as $parent)
-			$fmt_parents[] =  "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
-		$summary[count($parents) > 1 ? 'Containers' : 'Container'] = implode ('<br>', $fmt_parents);
+		foreach ($parentgroups as $groupname => $parents)
+		{
+			$fmt_parents = array();
+			foreach ($parents as $parent)
+				$fmt_parents[] = "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
+			$summary[count($parents) > 1 ? "$groupname containers" : "$groupname container"] = implode ('<br>', $fmt_parents);
+		}
 	}
-	$children = getEntityRelatives ('children', 'object', $object_id);
-	if (count ($children))
+	$childrengroups = groupEntityRelativesByType(getEntityRelatives ('children', 'object', $object_id));
+	if (count ($childrengroups))
 	{
-		$fmt_children = array();
-		foreach ($children as $child)
-			$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
-		$summary['Contains'] = implode ('<br>', $fmt_children);
+		foreach ($childrengroups as $groupname => $children)
+		{
+			$fmt_children = array();
+			foreach ($children as $child)
+				$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
+			$summary["Contains " . strtolower($groupname)] = implode ('<br>', $fmt_children);
+		}
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
@@ -2338,7 +2347,7 @@ function renderDepot ()
 		{
 			startPortlet ('Objects (' . count ($objects) . ')');
 			echo '<br><br><table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo '<tr><th>Common name</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
+			echo '<tr><th>Common name</th><th>Type</th><th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
 			$order = 'odd';
 			# gather IDs of all objects and fetch rackspace info in one pass
 			$idlist = array();
@@ -2352,7 +2361,8 @@ function renderDepot ()
 				echo "<tr class='row_${order} tdleft ${problem}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
-				echo "</td><td>${obj['label']}</td>";
+				echo "</td><td>${obj['objtype_name']}</td>";
+				echo "<td>${obj['label']}</td>";
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
 				if (array_key_exists ($obj['id'], $containerinfo))
@@ -6187,6 +6197,8 @@ function renderCell ($cell)
 		echo '</td><td>';
 		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
 		echo '</td></tr><tr><td>';
+		echo "<small>${cell['objtype_name']}</small>";
+		echo "</td></tr><tr><td>";
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;

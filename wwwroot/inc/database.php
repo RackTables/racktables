@@ -493,6 +493,7 @@ function listCells ($realm, $parent_id = 0)
 		unset ($entityCache['partial'][$realm]);
 	if ($realm == 'object') // cache dict attributes of all objects to speed up autotags calculation
 		cacheDictAttrValues();
+	$objecttypes = readChapter (CHAP_OBJTYPE);
 	foreach ($ret as $entity_id => &$entity)
 	{
 		sortEntityTags ($entity); // changes ['etags'] and ['itags']
@@ -500,6 +501,7 @@ function listCells ($realm, $parent_id = 0)
 		{
 		case 'object':
 			setDisplayedName ($entity); // set $entity['dname']
+			$entity['objtype_name'] = $objecttypes[$entity['objtype_id']];
 			break;
 		case 'ipv4net':
 			$entity = array_merge ($entity, constructIPRange (ip4_int2bin ($entity['ip_bin']), $entity['mask']));
@@ -619,6 +621,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	{
 	case 'object':
 		setDisplayedName ($ret); // set $ret['dname']
+		$objecttypes = readChapter (CHAP_OBJTYPE);
+		$ret['objtype_name'] = $objecttypes[$ret['objtype_id']];
 		break;
 	case 'ipv4net':
 		processIPNetVlans ($ret);
@@ -1007,6 +1011,18 @@ function compare_name ($a, $b)
 	return strnatcmp($a['name'], $b['name']);
 }
 
+function groupEntityRelativesByType($relatives)
+{
+	$groups = array();
+	foreach ($relatives as $relative)
+	{
+		if (!array_key_exists($relative['type'],$groups))
+			$groups[$relative['type']] = array();
+		$groups[$relative['type']][] = $relative;
+	}
+	return $groups;
+}
+
 // find either parents or children of a record
 function getEntityRelatives ($type, $entity_type, $entity_id)
 {
@@ -1025,6 +1041,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
 	}
 	$result = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
+	$objecttypes = readChapter (CHAP_OBJTYPE);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
@@ -1035,21 +1052,25 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 		{
 			case 'object':
 				$page = 'object';
+				$type = $objecttypes[$relative['objtype_id']];
 				$id_name = 'object_id';
 				$name = $relative['dname'];
 				break;
 			case 'rack':
 				$page = 'rack';
+				$type = ucwords($page);
 				$id_name = 'rack_id';
 				$name = $relative['name'];
 				break;
 			case 'row':
 				$page = 'row';
+				$type = ucwords($page);
 				$id_name = 'row_id';
 				$name = $relative['name'];
 				break;
 			case 'location':
 				$page = 'location';
+				$type = ucwords($page);
 				$id_name = 'location_id';
 				$name = $relative['name'];
 				break;
@@ -1061,6 +1082,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 
 		$ret[$row['id']] = array(
 				'page' => $page,
+				'type' => $type,
 				'id_name' => $id_name,
 				'entity_type' => $row['entity_type'],
 				'entity_id' => $row['entity_id'],
