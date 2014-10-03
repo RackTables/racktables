@@ -503,7 +503,6 @@ function listCells ($realm, $parent_id = 0)
 		unset ($entityCache['partial'][$realm]);
 	if ($realm == 'object') // cache all attributes of all objects to speed up autotags calculation
 		cacheAllObjectsAttributes();
-	$objecttypes = readChapter (CHAP_OBJTYPE);
 	foreach ($ret as $entity_id => &$entity)
 	{
 		sortEntityTags ($entity); // changes ['etags'] and ['itags']
@@ -511,7 +510,6 @@ function listCells ($realm, $parent_id = 0)
 		{
 		case 'object':
 			setDisplayedName ($entity); // set $entity['dname']
-			$entity['objtype_name'] = $objecttypes[$entity['objtype_id']];
 			break;
 		case 'ipv4net':
 			$entity = array_merge ($entity, constructIPRange (ip4_int2bin ($entity['ip_bin']), $entity['mask']));
@@ -631,8 +629,6 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	{
 	case 'object':
 		setDisplayedName ($ret); // set $ret['dname']
-		$objecttypes = readChapter (CHAP_OBJTYPE);
-		$ret['objtype_name'] = $objecttypes[$ret['objtype_id']];
 		break;
 	case 'ipv4net':
 		processIPNetVlans ($ret);
