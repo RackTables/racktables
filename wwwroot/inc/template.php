@@ -869,7 +869,12 @@ class TemplateModule
 		
 		ob_start();	
 		include dirname(__FILE__) . '/../tpl/' . $this->tpl . '/' . $this->module . '.tpl.php';
-		return str_replace(array("\r\n", "\r", "\n\t", "\t", '  ', '    ', '    '), '', ob_get_clean());
+
+		// Remove comments from js code
+		$output_cont = preg_replace("(.*//.*\n)",'', ob_get_clean());
+		// Replace whitespace in the output 
+		$output_cont = str_replace(array("\t\t", '    ', '  ', '   '), array("\t", ' ', ' ', ' '),$output_cont);
+		return str_replace(array("\r\n", "\r", "\n\t", "\n\t\t\t", "\n\t\t"), '', $output_cont);
 	}
 	
 	/**
