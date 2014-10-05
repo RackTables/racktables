@@ -3543,7 +3543,8 @@ function readChapter ($chapter_id = 0, $style = '')
 		$chapter[$row['dict_key']] = ($style == 'a' ? $row['a_value'] : $row['o_value']);
 	}
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
-	asort ($chapter);
+	// Try to sort after the parsing in the same way as ORDER BY would do.
+	asort ($chapter, SORT_STRING | SORT_FLAG_CASE);
 	return $chapter;
 }
 
