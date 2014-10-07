@@ -953,11 +953,11 @@ function vrp85Read8021QConfig ($input)
 {
 	$ret = array
 	(
-		'vlanlist' => array(),
+		'vlanlist' => array (1), // VRP 8+ hides VLAN1 from config text
 		'portdata' => array(),
 		'portconfig' => array(),
 	);
-	$state = 'vlans';
+	$state = 'skip';
 	$current = array();
 
 	foreach (explode ("\n", $input) as $line)
@@ -965,31 +965,9 @@ function vrp85Read8021QConfig ($input)
 		$line = rtrim ($line);
 		do switch ($state)
 		{
-			case 'vlans':
-				if (preg_match ('/^VLAN ID: (.*)/', $line, $m) && ! isset ($current['vlanlist']))
-				{
-					$current['vlanlist'] = ' ' . $m[1];
-					$state = 'vlans-nextline';
-				}
-				elseif (preg_match('/^-+$/', $line))
-				{
-					// commit $current into vlanlist
-					$range = preg_replace ('/\s+to\s+/', '-', $current['vlanlist']);
-					$range = trim (preg_replace('/\s+/', ',', $range), ',-');
-					$ret['vlanlist'] = $range == '' ? array() : iosParseVLANString ($range);
-					$current = array();
-
+			case 'skip':
+				if (preg_match('/^Port\s+.*PVID/i', $line))
 					$state = 'ports';
-				}
-				break;
-			case 'vlans-nextline':
-				if (preg_match('/^\s+(\d.*)/', $line, $m))
-					$current['vlanlist'] .= ' ' . $m[1];
-				else
-				{
-					$state = 'vlans';
-					continue 2;
-				}
 				break;
 			case 'ports':
 				if (isset ($current['name']))
@@ -1044,6 +1022,9 @@ function vrp85Read8021QConfig ($input)
 					$current['lines'] = array (array ('type' => 'line-header', 'line' => $line));
 					$state = 'iface';
 				}
+				elseif (preg_match ('@vlan batch (.+)@', $line, $matches))
+					foreach (vrp53ParseVLANString ($matches[1]) as $vlan_id)
+						$ret['vlanlist'][] = $vlan_id;
 				break;
 			case 'iface':
 				$line_class = ($line == '#') ? 'line-header' : 'line-other';
@@ -1624,7 +1605,6 @@ function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			break;
 		// query list
 		case 'get8021q':
-			$ret .= "display vlan summary\n";
 			$ret .= "display port vlan\n";
 			$ret .= "display current-configuration\n";
 			break;

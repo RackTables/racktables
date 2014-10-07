@@ -3280,7 +3280,7 @@ function iosParseVLANString ($string)
 		$matches = array();
 		$item = trim ($item, ' ');
 		if (preg_match ('/^([[:digit:]]+)$/', $item, $matches))
-			$ret[] = $matches[1];
+			$ret[] = intval ($matches[1]);
 		elseif (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $item, $matches))
 			$ret = array_merge ($ret, range ($matches[1], $matches[2]));
 		else
