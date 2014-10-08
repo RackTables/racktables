@@ -1017,6 +1017,18 @@ function compare_name ($a, $b)
 	return strnatcmp($a['name'], $b['name']);
 }
 
+function groupEntityRelativesByType($relatives)
+{
+	$groups = array();
+	foreach ($relatives as $relative)
+	{
+		if (!array_key_exists($relative['type'],$groups))
+			$groups[$relative['type']] = array();
+		$groups[$relative['type']][] = $relative;
+	}
+	return $groups;
+}
+
 // find either parents or children of a record
 function getEntityRelatives ($type, $entity_type, $entity_id)
 {
@@ -1035,6 +1047,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
 	}
 	$result = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
+	$objecttypes = readChapter (CHAP_OBJTYPE);
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	$ret = array();
 	foreach ($rows as $row)
@@ -1045,21 +1058,25 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 		{
 			case 'object':
 				$page = 'object';
+				$type = $objecttypes[$relative['objtype_id']];
 				$id_name = 'object_id';
 				$name = $relative['dname'];
 				break;
 			case 'rack':
 				$page = 'rack';
+				$type = ucwords($page);
 				$id_name = 'rack_id';
 				$name = $relative['name'];
 				break;
 			case 'row':
 				$page = 'row';
+				$type = ucwords($page);
 				$id_name = 'row_id';
 				$name = $relative['name'];
 				break;
 			case 'location':
 				$page = 'location';
+				$type = ucwords($page);
 				$id_name = 'location_id';
 				$name = $relative['name'];
 				break;
@@ -1071,6 +1088,7 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 
 		$ret[$row['id']] = array(
 				'page' => $page,
+				'type' => $type,
 				'id_name' => $id_name,
 				'entity_type' => $row['entity_type'],
 				'entity_id' => $row['entity_id'],

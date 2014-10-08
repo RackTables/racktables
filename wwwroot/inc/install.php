@@ -2240,6 +2240,7 @@ WHERE O.objtype_id = 1562";
 ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
 ('REVERSED_RACKS_LISTSRC', 'false', 'string', 'yes', 'no', 'no', 'List of racks with reversed (top to bottom) units order'),
 ('NEAREST_RACKS_CHECKBOX', 'yes', 'string', 'yes', 'no', 'yes', 'Enable nearest racks in port list filter by default'),
+('SHOW_OBJECTTYPE', 'yes', 'string', 'no', 'no', 'yes', 'Show object type column on depot page'),
 ('DB_VERSION','${db_version}','string','no','yes','no','Database version.')";
 
 		$query[] = "INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}')";
