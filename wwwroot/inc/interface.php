@@ -3546,14 +3546,12 @@ function renderSearchResults ($terms, $summary)
 		{
 			case 'object':
 				startPortlet ("<a href='index.php?page=depot'>Objects</a>");
-				$objecttypes = readChapter (CHAP_OBJTYPE);
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				echo '<tr><th>what</th><th>why</th></tr>';
 				foreach ($what as $obj)
 				{
 					echo "<tr class=row_${order} valign=top><td>";
 					$object = spotEntity ('object', $obj['id']);
-					$object['objtype_name'] = $objecttypes[$object['objtype_id']];
 					renderCell ($object);
 					echo "</td><td class=tdleft>";
 					if (isset ($obj['by_attr']))
@@ -6202,13 +6200,14 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'object':
+		static $objecttypes = NULL;
+		if (!$objecttypes)
+			$objecttypes = readChapter (CHAP_OBJTYPE);
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td><td>';
 		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
-		echo '</td></tr>';
-		if (array_key_exists('objtype_name',$cell))
-			echo "<tr><td><small>${cell['objtype_name']}</small></td></tr>";
+		echo "<br /><small>${objecttypes[$cell['objtype_id']]}</small></td></tr>";
 		echo '<tr><td>', count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
