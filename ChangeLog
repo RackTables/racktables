@@ -1,6 +1,7 @@
 0.20.9
 	bugfix: 802.1Q support of Huawei VRP 8.80 devices
 	bugfix: adding new Cacti graphs sometimes failed, now works
+	bugfix: do not allow to turn an object into a location (#1339)
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
 		WS-C2960X-48LPS-L, HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183),
 		Huawei CE6850-48S4Q-EI

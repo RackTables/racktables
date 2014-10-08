@@ -3439,16 +3439,10 @@ function renderNATv4ForObject ($object_id)
 
 function renderAddMultipleObjectsForm ()
 {
-	$typelist = readChapter (CHAP_OBJTYPE, 'o');
+	$typelist = withoutLocationTypes (readChapter (CHAP_OBJTYPE, 'o'));
 	$typelist[0] = 'select type...';
 	$typelist = cookOptgroups ($typelist);
 	$max = getConfigVar ('MASSCOUNT');
-
-	// exclude location-related object types
-	global $location_obj_types;
-	foreach ($typelist['other'] as $key => $value)
-		if ($key > 0 && in_array($key, $location_obj_types))
-			unset($typelist['other'][$key]);
 
 	startPortlet ('Distinct types, same tags');
 	printOpFormIntro ('addObjects');

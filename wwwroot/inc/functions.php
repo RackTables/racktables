@@ -5233,6 +5233,17 @@ function getPortinfoByName (&$object, $portname)
 	return NULL;
 }
 
+// exclude location-related object types
+function withoutLocationTypes ($objtypes)
+{
+	global $location_obj_types;
+	$ret = array();
+	foreach ($objtypes as $k => $v)
+		if (! in_array ($k, $location_obj_types))
+			$ret[$k] = $v;
+	return $ret;
+}
+
 # For the given object ID return a getSelect-suitable list of object types
 # compatible with the object's attributes that have an assigned value in
 # AttributeValue (no assigned values mean full compatibility). Being compatible
@@ -5252,7 +5263,7 @@ function getObjectTypeChangeOptions ($object_id)
 		if ($attr['value'] != '')
 			$used[] = $attr;
 	}
-	foreach (readChapter (CHAP_OBJTYPE, 'o') as $test_id => $text)
+	foreach (withoutLocationTypes (readChapter (CHAP_OBJTYPE, 'o')) as $test_id => $text)
 	{
 		foreach ($used as $attr)
 		{
