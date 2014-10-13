@@ -483,7 +483,7 @@ function transformRequestData()
 function addJS ($data, $inline = FALSE, $group = 'default')
 {
 	static $javascript = array();
-	static $seen_filenames = array();
+	static $seen_data = array();
 
 	if (! isset ($data))
 	{
@@ -506,23 +506,17 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		foreach ($javascript as $group_name => $group_array)
 			foreach ($group_array as $item)
 				if ($item['type'] == 'file')
-					$seen_filenames[$item['script']] = 1;
+					$seen_data[$item['script']] = 1;
 	}
 
-	if ($inline)
-		$javascript[$group][] = array
-		(
-			'type' => 'inline',
-			'script' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
+	if (! isset ($seen_data[$data]))
 	{
 		$javascript[$group][] = array
 		(
-			'type' => 'file',
+			'type' => $inline ? 'inline' : 'file',
 			'script' => $data,
 		);
-		$seen_filenames[$data] = 1;
+		$seen_data[$data] = 1;
 	}
 }
 
@@ -533,24 +527,18 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 function addCSS ($data, $inline = FALSE)
 {
 	static $styles = array();
-	static $seen_filenames = array();
+	static $seen_data = array();
 
 	if (! isset ($data))
 		return $styles;
-	if ($inline)
-		$styles[] = array
-		(
-			'type' => 'inline',
-			'style' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
+	if (! isset ($seen_data[$data]))
 	{
 		$styles[] = array
 		(
-			'type' => 'file',
+			'type' => $inline ? 'inline' : 'file',
 			'style' => $data,
 		);
-		$seen_filenames[$data] = 1;
+		$seen_data[$data] = 1;
 	}
 }
 
