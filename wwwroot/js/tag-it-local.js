@@ -112,11 +112,18 @@ function suggest_search (term) {
 		results.sort();
 	}
 	else {
+		var wildcard = false;
+		if (/\*$/.test(term))
+		{
+			wildcard = true;
+			term = term.substring(0, term.length - 1);
+		}
 		results = finder(this.options.available_tags, term);
 		if (results.length == 0) {
 			results = finder(this.options.all_tags, term);
 		}
-		results = results.slice(0, suggest_size); // cutting
+		if (! wildcard)
+			results = results.slice(0, suggest_size); // cutting
 		results.sort();
 	}
 	
