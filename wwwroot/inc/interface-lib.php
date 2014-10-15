@@ -1238,7 +1238,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
     $tplm = TemplateManager::getInstance();
     //$tplm->setTemplate("vanilla");
 
-    $mod = $tplm->generateModule("PrintOpFormIntro",  false, array("opname" => $opname, "pageno" => $pageno, "tabno" => $tabno));
+    $mod = $tplm->generateModule("PrintOpFormIntro", false, array("opname" => $opname, "pageno" => $pageno, "tabno" => $tabno));
 
     if ($upload)
         $mod->setOutput("isUpload", true);
@@ -1246,7 +1246,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
     fillBypassValues ($pageno, $extra);
     $loopArray = array();
     foreach ($extra as $inputname => $inputvalue)
-    $loopArray[] = array("name" => htmlspecialchars ($inputname, ENT_QUOTES), "val" => htmlspecialchars ($inputvalue, ENT_QUOTES));
+        $loopArray[] = array("name" => htmlspecialchars ($inputname, ENT_QUOTES), "val" => htmlspecialchars ($inputvalue, ENT_QUOTES));
 
     $mod->setOutput("loopArray", $loopArray);
     return $mod->run();

@@ -3378,15 +3378,15 @@ function renderAddMultipleObjectsForm ()
         if ($key > 0 && in_array($key, $location_obj_types))
             unset($typelist['other'][$key]);
 
-    $mod->setOutput("formIntro", printOpFormIntro ('addObjects'));
+    $mod->setOutput("FormIntro", printOpFormIntro ('addObjects'));
     $objectListOutput = array();
     for ($i = 0; $i < $max; $i++)
     {
         $singleEntry = array();
         // Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-        $singleEntry['niftySelect'] = printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
+        $singleEntry['NiftySelect'] = printNiftySelect ($typelist, array ('name' => "${i}_object_type_id", 'tabindex' => $tabindex), 0);
         $singleEntry['i'] = $i;
-        $singleEntry['tabindex'] = $tabindex;
+        $singleEntry['Tabindex'] = $tabindex;
 
         if ($i == 0)
         {
@@ -3399,8 +3399,8 @@ function renderAddMultipleObjectsForm ()
         $tabindex++;
         $objectListOutput[] = $singleEntry;
     }
-    $mod->setOutput("objectListData", $objectListOutput);
-    $mod->setOutput("formIntroLotOfObjects", printOpFormIntro ('addLotOfObjects'));
+    $mod->setOutput("ObjectListData", $objectListOutput);
+    $mod->setOutput("FormIntroLotOfObjects", printOpFormIntro ('addLotOfObjects'));
 
     printNiftySelect ($typelist, array ('name' => 'global_type_id'), getConfigVar ('DEFAULT_OBJECT_TYPE'), false, $mod, "sameTypeSameTagSelect");
     printTagsPicker (null, $mod, 'tagsPicker');

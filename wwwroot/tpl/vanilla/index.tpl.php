@@ -14,8 +14,11 @@
 <body>
 	<div class="maintable">
  		<div class="mainheader">
-  			<div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php $this->RemoteDisplayname; ?></a> [ <a href='?logout'>logout</a> ]</div>
- 			<?php $this->Enterprise; //echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a>
+  			<div style="float: right" class='greeting'>
+  				<a href='index.php?page=myaccount&tab=default'><?php $this->RemoteDisplayname; ?></a> [ <a href='?logout'>logout</a> ]
+  			</div>
+ 			<?php $this->Enterprise; //echo getConfigVar ('enterprise') ?> RackTables 
+ 			<a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a>
  			<?php $this->Quicklinks_Table; ?>  
  		</div>
  	<div class="menubar">
