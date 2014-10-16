@@ -315,6 +315,18 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			$params_from_settings['connect-timeout'] = 'connect_timeout';
 			$params_from_settings['timeout'] = 'timeout';
 			$params_from_settings['prompt-delay'] = 'prompt_delay';
+			if (isset ($settings['proto']))
+				switch ($settings['proto'])
+				{
+					case 4:
+						$params_from_settings[] = '-4';
+						break;
+					case 6:
+						$params_from_settings[] = '-6';
+						break;
+					default:
+						throw new RTGatewayError ("Proto '${settings['proto']}' is invalid. Valid protocols are: '4', '6'");
+				}
 			$params_from_settings[] = $settings['hostname'];
 			break;
 		case 'netcat':

@@ -15,6 +15,8 @@ my $op_connect_timeout = 2;
 my $op_timeout = 10;
 my $op_prompt;
 my $op_delay = 0;
+my $op_ipv4;
+my $op_ipv6;
 GetOptions (
 	'h' => \$op_help,
 	'port:i' => \$op_port,
@@ -22,6 +24,8 @@ GetOptions (
 	'timeout:i' => \$op_timeout,
 	'prompt-delay:f' => \$op_delay,
 	'prompt:s' => \$op_prompt,
+	'4' => \$op_ipv4,
+	'6' => \$op_ipv6,
 );
 if ($op_help) {
 	&display_help;
@@ -44,15 +48,27 @@ port: TCP port number to connect to
 connect-timeout: timeout for giving up connecting process, seconds
 prompt: command prompt regexp for interactive telnet (auth prompts too)
 timeout: wait time for activity of remote telnet peer in seconds
+4: force telnet to use IPv4 addresses only
+6: force telnet to use IPv6 addresses only
 
 END
 }
 
 my $port = $op_port || 23;
+my $family;
+if (defined $op_ipv4) {
+	$family = "IPv4";
+}
+elsif (defined $op_ipv6) {
+	$family = "IPv6";
+} else {
+	$family = "any";
+}
 
 my $session = Net::Telnet->new (
 	Host => $op_host,
 	Port => $port,
+	Family => $family,
 	Timeout => $op_connect_timeout,
 );
 
