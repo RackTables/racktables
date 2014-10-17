@@ -8342,7 +8342,7 @@ function renderVSTRulesEditor ($vst_id)
 
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule('Payload', 'VstRulesEditor');
-    $mod->setNamespace('vst',true);
+    $mod->setNamespace('vst');
     $mod->setLock();
     $mod->addOutput('Nifty', niftyString ($vst['description']));
 
