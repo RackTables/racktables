@@ -871,7 +871,7 @@ class TemplateModule
 		include dirname(__FILE__) . '/../tpl/' . $this->tpl . '/' . $this->module . '.tpl.php';
 
 		// Remove comments from js code
-		$output_cont = preg_replace("/^(.*)\/\/(.*\n)/","$1\n", ob_get_clean());
+		$output_cont = preg_replace("/(.*)\/\/(.*\n)/","$0\n", ob_get_clean());
 		// Replace whitespace in the output 
 		$output_cont = str_replace(array("\t\t", '    ', '  ', '   '), array("\t", ' ', ' ', ' '),$output_cont);
 		return str_replace(array("\r\n", "\r", "\n\t", "\n\t\t\t", "\n\t\t"), '', $output_cont);
