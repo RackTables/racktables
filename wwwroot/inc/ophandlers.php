@@ -1208,15 +1208,22 @@ function updateObjectAllocation ()
 			amplifyCell ($rackData);
 			$workingRacksData[$cand_id] = $rackData;
 		}
+		else
+			$rackData = $workingRacksData[$cand_id];
+		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
 		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
 		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
 		{
+			if ($is_ro)
+				continue;
 			$changecnt++;
 			commitLinkEntities ('rack', $cand_id, 'object', $object_id);
 		}
 		// It's not zero-U mounted to this rack on the form, but it is in the DB.  Unmount it.
 		if (!isset($_REQUEST["zerou_${cand_id}"]) && in_array($cand_id, $parentRacks))
 		{
+			if ($is_ro)
+				continue;
 			$changecnt++;
 			commitUnlinkEntities ('rack', $cand_id, 'object', $object_id);
 		}
@@ -1228,7 +1235,8 @@ function updateObjectAllocation ()
 	$oldMolecule = getMoleculeForObject ($object_id);
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
-		if (! processGridForm ($rackData, 'F', 'T', $object_id))
+		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		if ($is_ro || !processGridForm ($rackData, 'F', 'T', $object_id))
 			continue;
 		$changecnt++;
 		// Reload our working copy after form processing.

@@ -1322,9 +1322,12 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	echo "<td class=pcright>";
 
 	// Grid form.
+	$is_ro = !rackModificationPermitted ($rackData, 'updateRack');
 	startPortlet ($header);
 	addJS ('js/racktables.js');
 	echo "<center>\n";
+	$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
+	echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th>";
 	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
@@ -1332,7 +1335,7 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
 	printOpFormIntro ('updateRack');
 	markupAtomGrid ($rackData, $state2);
-	renderAtomGrid ($rackData);
+	renderAtomGrid ($rackData, $is_ro);
 	echo "</table></center>\n";
 	echo "<br><input type=submit name=do_update value='${submit}'></form><br><br>\n";
 	finishPortlet();
@@ -2237,21 +2240,24 @@ function renderRackSpaceForObject ($object_id)
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
+		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation');
 		// Order is important here: only original allocation is highlighted.
 		highlightObject ($rackData, $object_id);
 		markupAtomGrid ($rackData, 'T');
 		// If we have a form processed, discard user input and show new database
 		// contents.
-		if (isset ($_REQUEST['rackmulti'][0])) // is an update
+		if (!$is_ro && isset ($_REQUEST['rackmulti'][0])) // is an update
 			mergeGridFormToRack ($rackData);
 		echo "<td valign=top>";
-		echo "<center>\n<h2>${rackData['name']}</h2>\n";
+		echo "<center>\n<h2 style='margin:0px'>${rackData['name']}</h2>\n";
+		$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
+		echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
 		echo "<table class=rack id=selectableRack border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th width='10%'>&nbsp;</th>";
 		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
 		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
-		renderAtomGrid ($rackData);
+		renderAtomGrid ($rackData, $is_ro);
 		echo "<tr><th width='10%'>&nbsp;</th>";
 		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
@@ -2259,11 +2265,12 @@ function renderRackSpaceForObject ($object_id)
 		echo "</table>\n<br>\n";
 		// Determine zero-u checkbox status.
 		// If form has been submitted, use form data, otherwise use DB data.
-		if (isset($_REQUEST['op']))
+		if (!$is_ro && isset($_REQUEST['op']))
 			$checked = isset($_REQUEST['zerou_'.$rack_id]) ? 'checked' : '';
 		else
 			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
-		echo "<label for=zerou_${rack_id}>Zero-U:</label> <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}>\n<br><br>\n";
+		$disabled_text = $is_ro ? ' disabled' : '';
+		echo "<label for=zerou_${rack_id}>Zero-U:</label> <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}${disabled_text}>\n<br><br>\n";
 		echo "<input type='button' onclick='uncheckAll();' value='Uncheck all'>\n";
 		echo '</center></td>';
 	}
@@ -3784,15 +3791,10 @@ function renderSearchResults ($terms, $summary)
 
 // This function prints a table of checkboxes to aid the user in toggling mount atoms
 // from one state to another. The first argument is rack data as
-// produced by amplifyCell(), the second is the value used for the 'unckecked' state
-// and the third is the value used for 'checked' state.
-// Usage contexts:
-// for mounting an object:             printAtomGrid ($data, 'F', 'T')
-// for changing rack design:           printAtomGrid ($data, 'A', 'F')
-// for adding rack problem:            printAtomGrid ($data, 'F', 'U')
-// for adding object problem:          printAtomGrid ($data, 'T', 'W')
+// produced by amplifyCell(), the second is the R/O flag. When this flag is true all checkboxes
+// are become disabled
 
-function renderAtomGrid ($data)
+function renderAtomGrid ($data, $is_ro=FALSE)
 {
 	$rack_id = $data['id'];
 	addJS ('js/racktables.js');
@@ -3807,10 +3809,11 @@ function renderAtomGrid ($data)
 			if (isset ($data[$unit_no][$locidx]['hl']))
 				echo $data[$unit_no][$locidx]['hl'];
 			echo "'>";
+			$disabled_text = $is_ro ? ' disabled' : '';
 			if (!($data[$unit_no][$locidx]['enabled'] === TRUE))
 				echo "<input type=checkbox id=${name} disabled>";
 			else
-				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=${name} id=${name}>";
+				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=${name} id=${name}${disabled_text}>";
 			echo '</td>';
 		}
 		echo "</tr>\n";

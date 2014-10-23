@@ -586,6 +586,15 @@ function applyObjectMountMask (&$rackData, $object_id)
 			}
 }
 
+// check permissions for rack modification
+function rackModificationPermitted ($rackData, $op, $with_context=TRUE)
+{
+	$op_annex = array (array ('tag' => '$op_'.$op), array ('tag' => '$any_op'));
+	$rack_op_annex = array_merge ($rackData['etags'], $rackData['itags'], $rackData['atags'], $op_annex);
+	$context = !$with_context || permitted (NULL, NULL, NULL, $op_annex);
+	return $context && permitted (NULL, NULL, NULL, $rack_op_annex);
+}
+
 // Design change means transition between 'F' and 'A' and back.
 function applyRackDesignMask (&$rackData)
 {
