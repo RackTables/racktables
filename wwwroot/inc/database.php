@@ -1534,6 +1534,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 			)
 			{
 				showError ("${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, 'atom ${atom}', cannot change state from '${state}' to '${newstate}'");
+				$dbxlink->rollBack();
 				return FALSE;
 			}
 			// Here we avoid using ON DUPLICATE KEY UPDATE by first performing DELETE
