@@ -171,6 +171,7 @@ $SQLSchema = array
 			'name' => 'name',
 			'location_id' => 'location_id',
 			'location_name' => 'location_name',
+			'rackc' => '(select count(Rack.id) from Rack where row_id = Row.id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('location_name', 'name'),
@@ -277,21 +278,10 @@ function getRowInfo ($row_id)
 	throw new EntityNotFoundException ('rackrow', $row_id);
 }
 
+// TODO: deprecated function. delete it
 function getAllRows ()
 {
-	$result = usePreparedSelectBlade ('
-SELECT
-	Row.id,
-	Row.name,
-	Row.location_id,
-	Row.location_name,
-	COUNT(Rack.id) AS rackc
-FROM Row
-LEFT JOIN Rack ON Rack.row_id = Row.id
-GROUP BY Row.id
-ORDER BY location_name, name
-');
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+	return listCells ('row');
 }
 
 // Return list of rows directly under a specified location

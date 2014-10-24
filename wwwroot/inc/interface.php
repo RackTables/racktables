@@ -430,7 +430,7 @@ function renderRackspace ()
 	{
 		$rows = array();
 		$rackCount = 0;
-		foreach (getAllRows() as $row_id => $rowInfo)
+		foreach (listCells ('row') as $row_id => $rowInfo)
 		{
 			$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
 			$found_racks = array_merge ($found_racks, $rackList);
@@ -626,10 +626,10 @@ function renderRackspaceRowEditor ()
 	}
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th><th>Row link</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ();
-	foreach (getAllRows() as $row_id => $rowInfo)
+	foreach (listCells ('row') as $row_id => $rowInfo)
 	{
 		echo '<tr><td>';
 		if ($rc = $rowInfo['rackc'])
@@ -642,7 +642,9 @@ function renderRackspaceRowEditor ()
 		renderLocationSelectTree ($rowInfo['location_id']);
 		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
-		echo "</form></td></tr>\n";
+		echo "</form></td>";
+		echo "<td>" . mkCellA ($rowInfo) . "</td>";
+		echo "</tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ();
@@ -1166,7 +1168,7 @@ function renderEditRackForm ($rack_id)
 	printOpFormIntro ('updateRack');
 	echo '<table border=0 align=center>';
 	echo "<tr><td>&nbsp;</td><th class=tdright>Rack row:</th><td class=tdleft>";
-	foreach (getAllRows () as $row_id => $rowInfo)
+	foreach (listCells ('row') as $row_id => $rowInfo)
 	{
 		$trail = getLocationTrail ($rowInfo['location_id'], FALSE);
 		$rows[$row_id] = empty ($trail) ? $rowInfo['name'] : $rowInfo['name'] . ' [' . $trail . ']';
