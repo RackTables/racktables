@@ -1195,14 +1195,10 @@ function updateObjectAllocation ()
 		return buildRedirectURL (NULL, NULL, $_REQUEST);
 	}
 	$object_id = getBypassValue();
+	$object = spotEntity ('object', $object_id);
 	$changecnt = 0;
-	// Get a list of all of this object's parents,
-	// then trim the list to only include parents that are racks
-	$objectParents = getEntityRelatives('parents', 'object', $object_id);
-	$parentRacks = array();
-	foreach ($objectParents as $parentData)
-		if ($parentData['entity_type'] == 'rack')
-			$parentRacks[] = $parentData['entity_id'];
+	// Get a list of rack ids which are parents of the object
+	$parentRacks = reduceSubarraysToColumn (getParents ($object, 'rack'), 'id');
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
 	{

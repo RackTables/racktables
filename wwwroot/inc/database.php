@@ -745,9 +745,8 @@ function amplifyCell (&$record, $dummy = NULL)
 		global $loclist;
 		$mounted_objects = array();
 		// fetch Zero-U mounted objects
-		foreach (getEntityRelatives ('children', 'rack', $record['id']) as $child_row)
-			if ($child_row['entity_type'] == 'object')
-				$mounted_objects[$child_row['entity_id']] = TRUE;
+		foreach (getChildren ($record, 'object') as $child)
+			$mounted_objects[$child['id']] = TRUE;
 
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 		unset ($result);
@@ -1001,7 +1000,6 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 	recordObjectHistory ($object_id);
 }
 
-// used by getEntityRelatives for sorting
 function compare_name ($a, $b)
 {
 	return strnatcmp($a['name'], $b['name']);
@@ -1022,6 +1020,8 @@ function groupEntityRelativesByType($relatives)
 // find either parents or children of a record
 function getEntityRelatives ($type, $entity_type, $entity_id)
 {
+	$ret = array();
+
 	if ($type == 'parents')
 	{
 		// searching for parents
@@ -1036,57 +1036,33 @@ function getEntityRelatives ($type, $entity_type, $entity_id)
 			'SELECT id, child_entity_type AS entity_type, child_entity_id AS entity_id FROM EntityLink ' .
 			'WHERE parent_entity_type = ? AND parent_entity_id = ?';
 	}
+
 	$result = usePreparedSelectBlade ($sql, array ($entity_type, $entity_id));
-	$objecttypes = readChapter (CHAP_OBJTYPE);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
-	$ret = array();
-	foreach ($rows as $row)
-	{
-		// get info of the relative
-		$relative = spotEntity ($row['entity_type'], $row['entity_id']);
-		switch ($row['entity_type'])
-		{
-			case 'object':
-				$page = 'object';
-				$type = $objecttypes[$relative['objtype_id']];
-				$id_name = 'object_id';
-				$name = $relative['dname'];
-				break;
-			case 'rack':
-				$page = 'rack';
-				$type = ucwords($page);
-				$id_name = 'rack_id';
-				$name = $relative['name'];
-				break;
-			case 'row':
-				$page = 'row';
-				$type = ucwords($page);
-				$id_name = 'row_id';
-				$name = $relative['name'];
-				break;
-			case 'location':
-				$page = 'location';
-				$type = ucwords($page);
-				$id_name = 'location_id';
-				$name = $relative['name'];
-				break;
-		}
-
-		// name needs to have some value for hrefs to work
-		if (!strlen ($name))
-			$name = sprintf("[Unnamed %s]", formatRealmName ($row['entity_type']));
-
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['id']] = array(
-				'page' => $page,
-				'type' => $type,
-				'id_name' => $id_name,
-				'entity_type' => $row['entity_type'],
-				'entity_id' => $row['entity_id'],
-				'name' => $name
+			'entity_type' => $row['entity_type'],
+			'entity_id' => $row['entity_id'],
 		);
-	}
-	// sort by name
-	uasort($ret, 'compare_name');
+
+	return $ret;
+}
+
+function getParents ($entity, $result_realm = NULL)
+{
+	return getRelatives ($entity, 'parents', $result_realm);
+}
+
+function getChildren ($entity, $result_realm = NULL)
+{
+	return getRelatives ($entity, 'children', $result_realm);
+}
+
+function getRelatives ($entity, $type, $result_realm = NULL)
+{
+	$ret = array();
+	foreach (getEntityRelatives ($type, $entity['realm'], $entity['id']) as $link_id => $struct)
+		if (! isset ($result_realm) || $result_realm == $struct['entity_type'])
+			$ret[$link_id] = spotEntity ($struct['entity_type'], $struct['entity_id']);
 	return $ret;
 }
 

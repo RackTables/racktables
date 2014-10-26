@@ -622,19 +622,20 @@ function applyRackProblemMask (&$rackData)
 function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
-	$parents = getEntityRelatives ('parents', 'object', $object_id);
-	$parent_ids = array();
-	foreach ($parents as $parent)
-		$parent_ids[] = $parent['entity_id'];
+	$object = spotEntity ('object', $object_id);
+	$parents = reindexByID (getParents ($object, 'object'));
 
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
+		{
+			$atom = &$rackData[$unit_no][$locidx];
 			if
 			(
-				$rackData[$unit_no][$locidx]['state'] == 'T' and
-				($rackData[$unit_no][$locidx]['object_id'] == $object_id or	in_array($rackData[$unit_no][$locidx]['object_id'], $parent_ids))
+				$atom['state'] == 'T' and
+				($atom['object_id'] == $object_id or isset ($parents[$atom['object_id']]))
 			)
-				$rackData[$unit_no][$locidx]['hl'] = 'h';
+				$atom['hl'] = 'h';
+		}
 }
 
 // This function marks atoms to selected or not depending on their current state.

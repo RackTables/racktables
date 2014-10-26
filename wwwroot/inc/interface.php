@@ -792,15 +792,14 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 	if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
-	$objectChildren = getEntityRelatives ('children', 'object', $objectData['id']);
+	$objectChildren = getChildren ($objectData, 'object');
 	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
 	if (count($objectChildren) > 0)
 	{
-		foreach ($objectChildren as $child)
+		foreach ($objectChildren as $childData)
 		{
-			$childNames[] = $child['name'];
-			$childData = spotEntity ('object', $child['entity_id']);
-			$attrData = getAttrValues ($child['entity_id']);
+			$childNames[] = $childData['name'];
+			$attrData = getAttrValues ($childData['id']);
 			$numRows = $numCols = 1;
 			if (isset ($attrData[2])) // HW type
 			{
@@ -818,19 +817,19 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 					$slot = $matches[0];
 				$slotRows[$slot] = $numRows;
 				$slotCols[$slot] = $numCols;
-				$slotInfo[$slot] = $child['name'];
-				$slotData[$slot] = $child['entity_id'];
+				$slotInfo[$slot] = $childData['dname'];
+				$slotData[$slot] = $childData['id'];
 				if (strlen ($childData['asset_no']))
 					$slotTitle[$slot] = "<div title='${childData['asset_no']}";
 				else
 					$slotTitle[$slot] = "<div title='no asset tag";
-				if (strlen ($childData['label']) and $childData['label'] != $child['name'])
+				if (strlen ($childData['label']) and $childData['label'] != $childData['dname'])
 					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
 				$slotClass[$slot] = 'state_T';
 				if ($childData['has_problems'] == 'yes')
 					$slotClass[$slot] = 'state_Tw';
-				if ($child['entity_id'] == $hl_obj_id)
+				if ($childData['id'] == $hl_obj_id)
 					$slotClass[$slot] = 'state_Th';
 			}
 		}
@@ -960,16 +959,17 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	}
 	echo "</table>\n";
 	// Get a list of all of objects Zero-U mounted to this rack
-	$zeroUObjects = getEntityRelatives('children', 'rack', $rack_id);
+	$zeroUObjects = getChildren ($rackData, 'object');
+	uasort ($zeroUObjects, 'compare_name');
 	if (count ($zeroUObjects) > 0)
 	{
 		echo "<br><table width='75%' class=rack border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th>Zero-U:</th></tr>\n";
 		foreach ($zeroUObjects as $zeroUObject)
 		{
-			$state = ($zeroUObject['entity_id'] == $hl_obj_id) ? 'Th' : 'T';
+			$state = ($zeroUObject['id'] == $hl_obj_id) ? 'Th' : 'T';
 			echo "<tr><td class='atom state_${state}'>";
-			printObjectDetailsForRenderRack($zeroUObject['entity_id']);
+			printObjectDetailsForRenderRack($zeroUObject['id']);
 			echo "</td></tr>\n";
 		}
 		echo "</table>\n";
@@ -2161,13 +2161,9 @@ function renderRackSpaceForObject ($object_id)
 				$workingRacksData[$cand_id] = $rackData;
 			}
 
-	// Get a list of all of this object's parents,
-	// then trim the list to only include parents that are racks
-	$objectParents = getEntityRelatives('parents', 'object', $object_id);
-	$parentRacks = array();
-	foreach ($objectParents as $parentData)
-		if ($parentData['entity_type'] == 'rack')
-			$parentRacks[] = $parentData['entity_id'];
+	// Get a list of rack ids that are parents of this object.
+	$object = spotEntity ('object', $object_id);
+	$parentRacks = reduceSubarraysToColumn (getParents ($object, 'rack'), 'id');
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
