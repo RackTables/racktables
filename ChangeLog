@@ -18,7 +18,9 @@
 	update: display object types of containers/nested objects, as well as
 		the type column in the Objects table (by Mark Jazmik).
 		This feature is disabled by default (the SHOW_OBJECTTYPE config var = 'no')
-	update: check permissions for changing rack mount table
+	update: check permissions when mounting an object to a rack against both the
+		object's and the rack's tags. Thus, it is possible to allow modifying object
+		but restrict mounting it to a particular rack.
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks
