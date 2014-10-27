@@ -445,7 +445,7 @@ function fillBypassValues ($pageno, &$args)
 // decision about displayed name is made.
 function formatObjectDisplayedName ($name, $objtype_id)
 {
-	return ($name != '') ? $name : sprintf ('[%s]', decodeObjectType ($objtype_id, 'o'));
+	return ($name != '') ? $name : sprintf ('[%s]', decodeObjectType ($objtype_id));
 }
 
 // Set the dname attribute within a cell
@@ -3083,17 +3083,13 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 	return $ret;
 }
 
-function decodeObjectType ($objtype_id, $style = 'r')
+// $style is deprecated and unused
+function decodeObjectType ($objtype_id, $style = '')
 {
-	static $types = array();
-	if (!count ($types))
-		$types = array
-		(
-			'r' => readChapter (CHAP_OBJTYPE),
-			'a' => readChapter (CHAP_OBJTYPE, 'a'),
-			'o' => readChapter (CHAP_OBJTYPE, 'o')
-		);
-	return $types[$style][$objtype_id];
+	static $types;
+	if (! isset ($types))
+		$types = readChapter (CHAP_OBJTYPE, 'a');
+	return $types[$objtype_id];
 }
 
 function isolatedPermission ($p, $t, $cell)

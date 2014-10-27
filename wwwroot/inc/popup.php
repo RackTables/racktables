@@ -178,7 +178,7 @@ function findObjectParentCandidates ($object_id)
 	$result = usePreparedSelectBlade ($query, $args);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = empty ($row['name']) ? sprintf("[%s] - object %d", decodeObjectType ($row['objtype_id'], 'o'), $row['id']) : $row['name'];
+		$ret[$row['id']] = empty ($row['name']) ? sprintf("[%s] - object %d", decodeObjectType ($row['objtype_id']), $row['id']) : $row['name'];
 	return $ret;
 }
 

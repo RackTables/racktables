@@ -1399,7 +1399,7 @@ function renderObject ($object_id)
 		'page' => 'depot',
 		'tab' => 'default',
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
-	)) . '">' .  decodeObjectType ($info['objtype_id'], 'o') . '</a>';
+	)) . '">' .  decodeObjectType ($info['objtype_id']) . '</a>';
 	if (strlen ($info['label']))
 		$summary['Visible label'] = $info['label'];
 	if (strlen ($info['asset_no']))
@@ -4468,9 +4468,9 @@ function renderAttributes ()
 		else
 			foreach ($attr['application'] as $app)
 				if ($attr['type'] == 'dict')
-					echo decodeObjectType ($app['objtype_id'], 'a') . " (values from '${app['chapter_name']}')<br>";
+					echo decodeObjectType ($app['objtype_id']) . " (values from '${app['chapter_name']}')<br>";
 				else
-					echo decodeObjectType ($app['objtype_id'], 'a') . '<br>';
+					echo decodeObjectType ($app['objtype_id']) . '<br>';
 		echo '</td></tr>';
 		$order = $nextorder[$order];
 	}
@@ -4568,9 +4568,9 @@ function renderEditAttrMapForm ()
 				echo getOpLink (array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']), '', 'delete', 'Remove mapping');
 			echo ' ';
 			if ($attr['type'] == 'dict')
-				echo decodeObjectType ($app['objtype_id'], 'o') . " (values from '${app['chapter_name']}')<br>";
+				echo decodeObjectType ($app['objtype_id']) . " (values from '${app['chapter_name']}')<br>";
 			else
-				echo decodeObjectType ($app['objtype_id'], 'o') . '<br>';
+				echo decodeObjectType ($app['objtype_id']) . '<br>';
 		}
 		echo "</td></tr>";
 		$order = $nextorder[$order];
