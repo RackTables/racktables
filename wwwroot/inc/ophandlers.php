@@ -1613,6 +1613,8 @@ function resetUIConfig()
 	setConfigVar ('8021Q_MULTILINK_LISTSRC', 'false');
 	setConfigVar ('REVERSED_RACKS_LISTSRC', 'false');
 	setConfigVar ('NEAREST_RACKS_CHECKBOX', 'yes');
+	setConfigVar ('SHOW_OBJECTTYPE', 'yes');
+
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 

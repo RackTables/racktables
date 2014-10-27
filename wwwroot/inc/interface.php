@@ -1065,16 +1065,16 @@ function renderEditObjectForm()
 	// parent selection
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
-		$parentsgroup = groupEntityRelativesByType(getEntityRelatives ('parents', 'object', $object_id));
-		foreach ($parentsgroup as $groupname => $parents)
+		$parents = getParents ($object, 'object');
+		foreach (groupBy ($parents, 'objtype_id') as $objtype_id => $parents_group)
 		{
-				$label = $groupname . (count($parents) > 1 ? ' containers:' : ' container:');
-			foreach ($parents as $link_id => $parent_details)
+			uasort ($parents_group, 'compare_name');
+			$label = decodeObjectType ($objtype_id) . (count($parents_group) > 1 ? ' containers:' : ' container:');
+			foreach ($parents_group as $link_id => $parent_cell)
 			{
-
 				echo "<tr><td>&nbsp;</td>";
 				echo "<th class=tdright>${label}</th><td class=tdleft>";
-				echo mkA ($parent_details['name'], 'object', $parent_details['entity_id']);
+				echo mkCellA ($parent_cell);
 				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 				echo getOpLink (array('op'=>'unlinkObjects', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
 				echo "</td></tr>\n";
@@ -1406,27 +1406,23 @@ function renderObject ($object_id)
 		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
-	$parentgroups = groupEntityRelativesByType(getEntityRelatives ('parents', 'object', $object_id));
-	if (count ($parentgroups))
+	$parents = getParents ($info, 'object');
+	foreach (groupBy ($parents, 'objtype_id') as $objtype_id => $parents_group)
 	{
-		foreach ($parentgroups as $groupname => $parents)
-		{
-			$fmt_parents = array();
-			foreach ($parents as $parent)
-				$fmt_parents[] = "<a href='".makeHref(array('page'=>$parent['page'], $parent['id_name'] => $parent['entity_id']))."'>${parent['name']}</a>";
-			$summary[count($parents) > 1 ? "$groupname containers" : "$groupname container"] = implode ('<br>', $fmt_parents);
-		}
+		uasort ($parents_group, 'compare_name');
+		$fmt_parents = array();
+		foreach ($parents_group as $parent)
+			$fmt_parents[] = mkCellA ($parent);
+		$summary[decodeObjectType ($objtype_id) . " containers"] = implode ('<br>', $fmt_parents);
 	}
-	$childrengroups = groupEntityRelativesByType(getEntityRelatives ('children', 'object', $object_id));
-	if (count ($childrengroups))
+	$children = getChildren ($info, 'object');
+	foreach (groupBy ($children, 'objtype_id') as $objtype_id => $children_group)
 	{
-		foreach ($childrengroups as $groupname => $children)
-		{
-			$fmt_children = array();
-			foreach ($children as $child)
-				$fmt_children[] = "<a href='".makeHref(array('page'=>$child['page'], $child['id_name']=>$child['entity_id']))."'>${child['name']}</a>";
-			$summary["Contains " . strtolower($groupname)] = implode ('<br>', $fmt_children);
-		}
+		uasort ($children_group, 'compare_name');
+		$fmt_children = array();
+		foreach ($children_group as $child)
+			$fmt_children[] = mkCellA ($child);
+		$summary["Contains " . strtolower(decodeObjectType ($objtype_id))] = implode ('<br>', $fmt_children);
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
@@ -2355,8 +2351,6 @@ function renderDepot ()
 				$idlist[] = $obj['id'];
 			$mountinfo = getMountInfo ($idlist);
 			$containerinfo = getContainerInfo ($idlist);
-			if ($showobjecttype)
-				$objecttypes = readChapter (CHAP_OBJTYPE);
 			foreach ($objects as $obj)
 			{
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
@@ -2365,7 +2359,7 @@ function renderDepot ()
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo '</td>';
 				if ($showobjecttype)
-					echo "<td>${objecttypes[$obj['objtype_id']]}</td>";
+					echo "<td>" . decodeObjectType ($obj['objtype_id']) . "</td>";
 				echo "<td>${obj['label']}</td>";
 				echo "<td>${obj['asset_no']}</td>";
 				$places = array();
@@ -6196,14 +6190,11 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'object':
-		static $objecttypes = NULL;
-		if (!$objecttypes)
-			$objecttypes = readChapter (CHAP_OBJTYPE);
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td><td>';
 		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
-		echo "<br /><small>${objecttypes[$cell['objtype_id']]}</small></td></tr>";
+		echo "<br /><small>" . decodeObjectType ($cell['objtype_id']) . "</small></td></tr>";
 		echo '<tr><td>', count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;

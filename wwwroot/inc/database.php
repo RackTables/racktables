@@ -1005,18 +1005,6 @@ function compare_name ($a, $b)
 	return strnatcmp($a['name'], $b['name']);
 }
 
-function groupEntityRelativesByType($relatives)
-{
-	$groups = array();
-	foreach ($relatives as $relative)
-	{
-		if (!array_key_exists($relative['type'],$groups))
-			$groups[$relative['type']] = array();
-		$groups[$relative['type']][] = $relative;
-	}
-	return $groups;
-}
-
 // find either parents or children of a record
 function getEntityRelatives ($type, $entity_type, $entity_id)
 {

@@ -6213,4 +6213,20 @@ function formatPatchCableHeapAsPlainText ($heap)
 	return niftyString ($text, 512);
 }
 
+// takes a list of structures and the field name in those structures.
+// returns a two-dimentional list indexed by the value of the given field
+// the subsequent index value is taken from the index of the original $list.
+function groupBy ($list, $group_field)
+{
+	$ret = array();
+	foreach ($list as $index => $item)
+	{
+		$key = '';
+		if (isset ($item[$group_field]))
+			$key = (string) $item[$group_field];
+		$ret[$key][$index] = $item;
+	}
+	return $ret;
+}
+
 ?>
