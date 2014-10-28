@@ -1988,6 +1988,20 @@ function markupIPAddrList (&$addrlist)
 	}
 }
 
+function findNetRouters ($net)
+{
+	if (isset ($net['own_addrlist']))
+		$own_addrlist = $net['own_addrlist'];
+	else
+	{
+		// do not call loadIPAddrList, it is expensive.
+		// instead, do our own DB scan only for router allocations
+		$rtrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), IPSCAN_DO_ALLOCS | IPSCAN_RTR_ONLY);
+		$own_addrlist = filterOwnAddrList ($net, $rtrlist);
+	}
+	return findRouters ($own_addrlist);
+}
+
 // Scan the given address list (returned by scanIPv4Space/scanIPv6Space) and return a list of all routers found.
 function findRouters ($addrlist)
 {
@@ -2540,6 +2554,25 @@ function nodeIsCollapsed ($node)
 	return $node['symbol'] == 'node-collapsed';
 }
 
+// returns those addresses from $addrlist that do not belong to $net's subsequent networks
+function filterOwnAddrList ($net, $addrlist)
+{
+	if ($net['kidc'] == 0)
+		return $addrlist;
+
+	// net has children
+	$ret = array();
+	foreach ($net['spare_ranges'] as $mask => $spare_list)
+		foreach ($spare_list as $spare_ip)
+		{
+			$spare_mask = ip_mask ($mask, strlen ($net['ip_bin']) == 16);
+			foreach ($addrlist as $bin_ip => $addr)
+				if (($bin_ip & $spare_mask) == $spare_ip)
+					$ret[$bin_ip] = $addr;
+		}
+	return $ret;
+}
+
 // sets 'addrlist', 'own_addrlist', 'addrc', 'own_addrc' keys of $node
 // 'addrc' and 'own_addrc' are sizes of 'addrlist' and 'own_addrlist', respectively
 function loadIPAddrList (&$node)
@@ -2549,24 +2582,8 @@ function loadIPAddrList (&$node)
 	if (! isset ($node['id']))
 		$node['own_addrlist'] = $node['addrlist'];
 	else
-	{
-		if ($node['kidc'] == 0)
-			$node['own_addrlist'] = $node['addrlist'];
-			//$node['own_addrlist'] = array();
-		else
-		{
-			$node['own_addrlist'] = array();
-			// node has childs
-			foreach ($node['spare_ranges'] as $mask => $spare_list)
-				foreach ($spare_list as $spare_ip)
-				{
-					$spare_range = constructIPRange ($spare_ip, $mask);
-					foreach ($node['addrlist'] as $bin_ip => $addr)
-						if (($bin_ip & $spare_range['mask_bin']) == $spare_range['ip_bin'])
-							$node['own_addrlist'][$bin_ip] = $addr;
-				}
-		}
-	}
+		$node['own_addrlist'] = filterOwnAddrList ($node, $node['addrlist']);
+
 	$node['addrc'] = count ($node['addrlist']);
 	$node['own_addrc'] = count ($node['own_addrlist']);
 }

@@ -248,6 +248,18 @@ $port_role_options = array
 	'downlink' => 'system: downlink trunk',
 );
 
+//  flags to pass to scanIPSpace, scanIPv4Space, scanIPv6Space
+define ('IPSCAN_DO_ADDR', 1 << 0);
+define ('IPSCAN_DO_ALLOCS', 1 << 1);
+define ('IPSCAN_DO_VS', 1 << 2);
+define ('IPSCAN_DO_RS', 1 << 3);
+define ('IPSCAN_DO_NAT', 1 << 4);
+define ('IPSCAN_DO_LOG', 1 << 5);
+define ('IPSCAN_RTR_ONLY', 1 << 6);
+
+define ('IPSCAN_ANY', -1 ^ IPSCAN_RTR_ONLY);
+define ('IPSCAN_DO_SLB', IPSCAN_DO_VS | IPSCAN_DO_RS);
+
 $object_attribute_cache = array();
 
 // Return list of locations directly under a specified location
@@ -2057,7 +2069,7 @@ function amplifyAllocationList ($alloc_list)
 	return $ret;
 }
 
-function scanIPSpace ($pairlist)
+function scanIPSpace ($pairlist, $filter_flags = IPSCAN_ANY)
 {
 	$v4_pairs = array();
 	$v6_pairs = array();
@@ -2069,8 +2081,8 @@ function scanIPSpace ($pairlist)
 			$v6_pairs[] = $pair;
 	}
 	return
-		scanIPv4Space ($v4_pairs) +
-		scanIPv6Space ($v6_pairs);
+		scanIPv4Space ($v4_pairs, $filter_flags) +
+		scanIPv6Space ($v6_pairs, $filter_flags);
 }
 
 // Check the range requested for meaningful IPv4 records, build them
@@ -2078,7 +2090,7 @@ function scanIPSpace ($pairlist)
 // Both arguments are expected in 4-byte binary string form. The resulting list
 // is keyed by 4-byte binary IPs, items aren't sorted.
 // LATER: accept a list of pairs and build WHERE sub-expression accordingly
-function scanIPv4Space ($pairlist)
+function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 {
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
@@ -2121,6 +2133,8 @@ function scanIPv4Space ($pairlist)
 	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
+	if ($filter_flags & IPSCAN_DO_ADDR)
+	{
 	$query = "select ip, name, comment, reserved from IPv4Address ".
 		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2134,8 +2148,13 @@ function scanIPv4Space ($pairlist)
 		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
 	unset ($result);
+	}
 
 	// 2. check for allocations
+	if ($filter_flags & IPSCAN_DO_ALLOCS)
+	{
+	if ($filter_flags & IPSCAN_RTR_ONLY)
+		$whereexpr2 .= " AND ia.type = 'router'";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
 		"from IPv4Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
@@ -2154,8 +2173,11 @@ function scanIPv4Space ($pairlist)
 		);
 	}
 	unset ($result);
+	}
 
 	// 3a. look for virtual services
+	if ($filter_flags & IPSCAN_DO_VS)
+	{
 	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -2180,8 +2202,11 @@ function scanIPv4Space ($pairlist)
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['vsglist'][] = $row['vs_id'];
 	}
+	}
 
 	// 4. don't forget about real servers along with pools
+	if ($filter_flags & IPSCAN_DO_RS)
+	{
 	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2192,8 +2217,11 @@ function scanIPv4Space ($pairlist)
 		$ret[$ip_bin]['rsplist'][] = $row['rspool_id'];
 	}
 	unset ($result);
+	}
 
 	// 5. add NAT rules, remote ip
+	if ($filter_flags & IPSCAN_DO_NAT)
+	{
 	$query =
 		"select " .
 		"proto, " .
@@ -2245,7 +2273,11 @@ function scanIPv4Space ($pairlist)
 		$ret[$ip_bin_local]['outpf'][] = $row;
 	}
 	unset ($result);
+	}
+
 	// 6. collect last log message
+	if ($filter_flags & IPSCAN_DO_LOG)
+	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv4Log l INNER JOIN " .
 		" (SELECT MAX(id) as id FROM IPv4Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2260,6 +2292,7 @@ function scanIPv4Space ($pairlist)
 			);
 	}
 	unset ($result);
+	}
 
 	return $ret;
 }
@@ -2268,7 +2301,7 @@ function scanIPv4Space ($pairlist)
 // into a list and return. Return an empty list if nothing matched.
 // Both arguments are expected as 16-byte binary IPs. The resulting list
 // is keyed by 16-byte bynary IPs, items aren't sorted.
-function scanIPv6Space ($pairlist)
+function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 {
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
@@ -2302,6 +2335,8 @@ function scanIPv6Space ($pairlist)
 	$whereexpr6 .= ')';
 
 	// 1. collect labels and reservations
+	if ($filter_flags & IPSCAN_DO_ADDR)
+	{
 	$query = "select ip, name, comment, reserved from IPv6Address ".
 		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2315,8 +2350,13 @@ function scanIPv6Space ($pairlist)
 		$ret[$ip_bin]['reserved'] = $row['reserved'];
 	}
 	unset ($result);
+	}
 
 	// 2. check for allocations
+	if ($filter_flags & IPSCAN_DO_ALLOCS)
+	{
+	if ($filter_flags & IPSCAN_RTR_ONLY)
+		$whereexpr2 .= " AND ia.type = 'router'";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
 		"from IPv6Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
@@ -2335,8 +2375,11 @@ function scanIPv6Space ($pairlist)
 		);
 	}
 	unset ($result);
+	}
 
 	// 3a. look for virtual services
+	if ($filter_flags & IPSCAN_DO_VS)
+	{
 	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -2361,8 +2404,11 @@ function scanIPv6Space ($pairlist)
 			$ret[$ip_bin] = constructIPAddress ($ip_bin);
 		$ret[$ip_bin]['vsglist'][] = $row['vs_id'];
 	}
+	}
 
 	// 4. don't forget about real servers along with pools
+	if ($filter_flags & IPSCAN_DO_RS)
+	{
 	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2373,8 +2419,11 @@ function scanIPv6Space ($pairlist)
 		$ret[$ip_bin]['rsplist'][] = $row['rspool_id'];
 	}
 	unset ($result);
+	}
 
 	// 6. collect last log message
+	if ($filter_flags & IPSCAN_DO_LOG)
+	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv6Log l INNER JOIN " .
 		" (SELECT MAX(id) as id FROM IPv6Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2389,6 +2438,8 @@ function scanIPv6Space ($pairlist)
 			);
 	}
 	unset ($result);
+	}
+
 	return $ret;
 }
 
