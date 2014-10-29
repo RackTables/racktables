@@ -252,9 +252,8 @@ function getRenderedAlloc ($object_id, $alloc)
 			$ret['td_routed_by'] = '<td>&nbsp;</td>';
 		else
 		{
-			loadIPAddrList ($netinfo);
 			$other_routers = array();
-			foreach (findRouters ($netinfo['own_addrlist']) as $router)
+			foreach (findNetRouters ($netinfo) as $router)
 				if ($router['id'] != $object_id)
 					$other_routers[] = $router;
 			if (count ($other_routers))
@@ -282,9 +281,8 @@ function getRenderedAlloc ($object_id, $alloc)
 		elseif ($allocpeer['type'] == 'point2point' && isset ($netinfo))
 		{
 			// show PtP peers in the IP network
-			if (! isset ($netinfo['own_addrlist']))
-				loadIPAddrList ($netinfo);
-			foreach (getPtPNeighbors ($ip_bin, $netinfo['own_addrlist']) as $p_ip_bin => $p_alloc_list)
+			$addrlist = isset ($netinfo['own_addrlist']) ? $netinfo['own_addrlist'] : getIPAddrList ($netinfo, IPSCAN_DO_ALLOCS);
+			foreach (getPtPNeighbors ($ip_bin, $addrlist) as $p_ip_bin => $p_alloc_list)
 				foreach ($p_alloc_list as $p_alloc)
 				{
 					$ret['td_peers'] .= $prefix . '&harr;&nbsp;' . makeIPAllocLink ($p_ip_bin, $p_alloc);
@@ -2520,8 +2518,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 
 	foreach ($tree as $item)
 	{
-		if ($display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none'))
-			loadIPAddrList ($item); // necessary to compute router list and address counter
+		$display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none');
 
 		if (isset ($item['id']))
 		{
@@ -2545,7 +2542,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			echo "</td>";
 
 			if ($display_routers)
-				printRoutersTD (findRouters ($item['own_addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
+				printRoutersTD (findNetRouters ($item), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
 				$self ($item['kids'], $baseurl, $target, $level + 1);
@@ -2785,7 +2782,7 @@ function renderIPNetwork ($id)
 		$domainclass[$domain_id] = $vlan_count == 1 ? '' : ($reuse_domain ? '{trwarning}' : '{trerror}');
 	foreach ($range['8021q'] as $item)
 		$summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id'])));
-	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findRouters ($range['addrlist'])))
+	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findNetRouters ($range)))
 	{
 		$summary['Routed by'] = '';
 		foreach ($routers as $rtr)
