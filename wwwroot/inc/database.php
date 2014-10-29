@@ -2294,6 +2294,10 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	unset ($result);
 	}
 
+	$override = callHook ('scanIPSpace_hook', $ret, $pairlist, $filter_flags);
+	if (isset ($override))
+		$ret = $override;
+
 	return $ret;
 }
 
@@ -2439,6 +2443,10 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	}
 	unset ($result);
 	}
+
+	$override = callHook ('scanIPSpace_hook', $ret, $pairlist, $filter_flags);
+	if (isset ($override))
+		$ret = $override;
 
 	return $ret;
 }
