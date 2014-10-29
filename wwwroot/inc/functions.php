@@ -2599,7 +2599,7 @@ function getIPAddress ($ip_bin)
 {
 	$scanres = scanIPSpace (array (array ('first' => $ip_bin, 'last' => $ip_bin)));
 	if (empty ($scanres))
-		return constructIPAddress ($ip_bin);
+		$scanres[$ip_bin] = constructIPAddress ($ip_bin);
 	markupIPAddrList ($scanres);
 	return $scanres[$ip_bin];
 }
