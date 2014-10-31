@@ -966,6 +966,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 		foreach ($zeroUObjects as $zeroUObject)
 		{
 			$state = ($zeroUObject['id'] == $hl_obj_id) ? 'Th' : 'T';
+			if ($zeroUObject['has_problems'] == 'yes')
+				$state .= 'w';
 			echo "<tr><td class='atom state_${state}'>";
 			printObjectDetailsForRenderRack($zeroUObject['id']);
 			echo "</td></tr>\n";
