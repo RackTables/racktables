@@ -2144,6 +2144,21 @@ $dictionary = array
 	2252 => array ('chapter_id' => 17, 'dict_value' => '[[Juniper%GPASS%MX104 | http://www.juniper.net/products-services/routing/mx-series/mx104]]'),
 	2253 => array ('chapter_id' => 17, 'dict_value' => '[[Juniper%GPASS%MX2010 | http://www.juniper.net/products-services/routing/mx-series/mx2010]]'),
 	2254 => array ('chapter_id' => 17, 'dict_value' => '[[Juniper%GPASS%MX2020 | http://www.juniper.net/products-services/routing/mx-series/mx2020]]'),
+	2255 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SE-64'),
+	2256 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SE-68'),
+	2257 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SE-72'),
+	2258 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-64'),
+	2259 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-72'),
+	2260 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-96'),
+	2261 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-48'),
+	2262 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-64'),
+	2263 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-72'),
+	2264 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-96'),
+	2265 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-128'),
+	2266 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050QX-32S'),
+	2267 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7010T-48'),
+	2268 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 20'),
+	2269 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE 13.x'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
