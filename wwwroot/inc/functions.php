@@ -2576,7 +2576,7 @@ function filterOwnAddrList ($net, $addrlist)
 function getIPAddrList ($net, $flags = IPSCAN_ANY)
 {
 	$addrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), $flags);
-	return filterOwnAddrList ($addrlist, $net);
+	return filterOwnAddrList ($net, $addrlist);
 }
 
 // sets 'addrlist', 'own_addrlist', 'addrc', 'own_addrc' keys of $node
