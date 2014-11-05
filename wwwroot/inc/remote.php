@@ -431,7 +431,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'netcat'; // default is netcat mode
 			if ($breed == 'air12')
 				$protocol = 'telnet'; # Aironet IOS is broken
-			$prompt = '^(Login|[Uu]sername|Password): $|^\S+[>#]$|\[[^][]*\]\? $'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|[Uu]sername|Password): $|^\S+[>#]$|\[[^][]*\]\? $|\?\s+\[[^][]*\]\s*$'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'fdry5':
