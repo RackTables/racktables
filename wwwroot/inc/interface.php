@@ -2513,14 +2513,13 @@ function renderIPSpaceEditor()
         $mod->addOutput("hasAddrspaceList", true);
 
         $allNetinfoOut = array();
+        $mod->setOutput('CountNetInfo', count ($netinfo['addrlist']));
         foreach ($addrspaceList as $netinfo)
         {
             $singleNetinfo = array( 'mkAIpmask' => mkA ("${netinfo['ip']}/${netinfo['mask']}", $net_page, $netinfo['id']),
                                     'name' => niftyString ($netinfo['name']));
-            if (! isIPNetworkEmpty ($netinfo))
-                $singleNetinfo['destroyItem'] = printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
-            else
-                $singleNetinfo['destroyItem'] = getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
+            $singleNetinfo['IsDestroyable'] = (! isIPNetworkEmpty ($netinfo));
+            $singleNetinfo['NetInfo_Id'] = $netinfo['id'];
             if (count ($netinfo['etags']))
             {
                 $etagsMod = $tplm->generateModule('ETagsLine', true, array('cont' => serializeTags ($netinfo['etags'])));
