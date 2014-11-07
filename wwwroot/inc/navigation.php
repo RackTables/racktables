@@ -543,8 +543,8 @@ $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Edit';
 $tabhandler['portmap']['default'] = 'renderOIFCompatViewer';
 $tabhandler['portmap']['edit'] = 'renderOIFCompatEditor';
-$ophandler['portmap']['edit']['add'] = 'tableHandler';
-$ophandler['portmap']['edit']['del'] = 'tableHandler';
+$ophandler['portmap']['edit']['add'] = 'addOIFCompat';
+$ophandler['portmap']['edit']['del'] = 'delOIFCompat';
 $ophandler['portmap']['edit']['addPack'] = 'addOIFCompatPack';
 $ophandler['portmap']['edit']['delPack'] = 'delOIFCompatPack';
 

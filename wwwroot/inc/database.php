@@ -3386,6 +3386,16 @@ function getPortOIFCompat ($ignore_cache = FALSE)
 	return $cache;
 }
 
+function addPortOIFCompat ($type1, $type2)
+{
+	return usePreparedExecuteBlade ("INSERT IGNORE INTO PortCompat (type1, type2) VALUES (?, ?),(?, ?)", array ($type1, $type2, $type2, $type1));
+}
+
+function deletePortOIFCompat ($type1, $type2)
+{
+	return usePreparedExecuteBlade ("DELETE FROM PortCompat WHERE (type1 = ? AND type2 = ?) OR (type1 = ? AND type2 = ?)", array ($type1, $type2, $type2, $type1));
+}
+
 // Returns an array of all object type pairs from the ObjectParentCompat table.
 function getObjectParentCompat ()
 {

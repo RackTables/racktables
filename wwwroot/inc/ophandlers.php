@@ -232,26 +232,6 @@ $opspec_list['parentmap-edit-del'] = array
 		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['portmap-edit-add'] = array
-(
-	'table' => 'PortCompat',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'type1', 'assertion' => 'uint'),
-		array ('url_argname' => 'type2', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['portmap-edit-del'] = array
-(
-	'table' => 'PortCompat',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'type1', 'assertion' => 'uint'),
-		array ('url_argname' => 'type2', 'assertion' => 'uint'),
-	),
-);
 $opspec_list['portifcompat-edit-add'] = array
 (
 	'table' => 'PortInterfaceCompat',
@@ -2750,6 +2730,22 @@ function addIIFOIFCompatPack ()
 		$ngood++;
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
+}
+
+function addOIFCompat ()
+{
+	$type1 = assertUIntArg ('type1');
+	$type2 = assertUIntArg ('type2');
+	$n_changed = addPortOIFCompat ($type1, $type2);
+	showSuccess ("$n_changed row(s) added");
+}
+
+function delOIFCompat ()
+{
+	$type1 = assertUIntArg ('type1');
+	$type2 = assertUIntArg ('type2');
+	$n_changed = deletePortOIFCompat ($type1, $type2);
+	showSuccess ("$n_changed row(s) deleted");
 }
 
 $msgcode['delIIFOIFCompatPack']['OK'] = 38;

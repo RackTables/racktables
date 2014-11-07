@@ -1819,6 +1819,10 @@ CREATE TABLE `PatchCableOIFCompat` (
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_RRA_ID','1','uint','no','no','yes','RRA ID for Cacti graphs displayed in RackTables')";
 			$query[] = "INSERT INTO `Config` (`varname`,`varvalue`,`vartype`,`emptyok`,`is_hidden`,`is_userdefined`,`description`)
 VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object type column on depot page.')";
+
+			// make PortCompat symmetric (insert missing reversed-order pairs)
+			$query[] = "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

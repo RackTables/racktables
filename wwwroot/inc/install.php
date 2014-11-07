@@ -1956,15 +1956,11 @@ WHERE O.objtype_id = 1562";
 (19,19),
 (24,24),
 (18,19),
-(19,18),
 (18,24),
-(24,18),
 (19,24),
-(24,19),
 (29,29),
 (30,30),
 (16,1322),
-(1322,16),
 (29,681),
 (29,682),
 (32,32),
@@ -1979,12 +1975,8 @@ WHERE O.objtype_id = 1562";
 (41,41),
 (42,42),
 (439,439),
-(446,33),
-(681,29),
 (681,681),
 (681,682),
-(682,29),
-(682,681),
 (682,682),
 (1077,1077),
 (1084,1084),
@@ -1993,7 +1985,6 @@ WHERE O.objtype_id = 1562";
 (1196,1196),
 (1197,1197),
 (1198,1199),
-(1199,1198),
 (1200,1200),
 (1201,1201),
 (1202,1202),
@@ -2001,7 +1992,6 @@ WHERE O.objtype_id = 1562";
 (1204,1204),
 (1205,1205),
 (1206,1207),
-(1207,1206),
 (1209,1209),
 (1210,1210),
 (1211,1211),
@@ -2156,6 +2146,9 @@ WHERE O.objtype_id = 1562";
 (1674,1674),
 (1642,1642),
 (1999,1999)";
+
+		// make PortCompat symmetric (insert missing reversed-order pairs)
+		$query[] = "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
 
 		$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
