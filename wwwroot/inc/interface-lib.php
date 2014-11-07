@@ -966,7 +966,8 @@ function serializeTags ($chain, $baseurl = '', $parent = null, $placeholder = "S
             $mod->addOutput('Class', getTagClassName($taginfo['id']));
         
         $mod->addOutput('Tag', $taginfo['tag']);
-        $modCont .= $mod->run();
+        if($parent == null)
+            $modCont .= $mod->run();
     }
 
 
