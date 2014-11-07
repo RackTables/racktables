@@ -2033,6 +2033,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
+	'9.1.578' => array
+	(
+		'dict_key' => 282,
+		'text' => 'Cisco 2851 ISR: 2 RJ-45/10-100TX + NM and HWIC Slots',
+		'processors' => array ('catalyst-chassis-uplinks-1000T'),
+	),
 	'9.1.614' => array
 	(
 		'dict_key' => 175,
