@@ -1048,7 +1048,7 @@ function renderEntitySummary ($cell, $title, $values = array(), $parent = null, 
 
     foreach ($values as $name => $value)
     {
-        $loopMod = $tplm->generateSubmodule("LoopMod", "RenderEntitySummary_LoopCont" , $mod);
+        $loopMod = $tplm->generatePseudoSubmodule("LoopMod", $mod);
         $loopMod->defNamespace();
 
         if (is_array ($value) and count ($value) == 1)
