@@ -1820,8 +1820,13 @@ CREATE TABLE `PatchCableOIFCompat` (
 			$query[] = "INSERT INTO `Config` (`varname`,`varvalue`,`vartype`,`emptyok`,`is_hidden`,`is_userdefined`,`description`)
 VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object type column on depot page.')";
 
-			// make PortCompat symmetric (insert missing reversed-order pairs)
-			$query[] = "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
+			$query[] = "INSERT INTO PortInnerInterface (id, iif_name) VALUES (12, 'CFP2'),(13,'CPAK')";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1589, 'empty CFP2'),(1590,'empty CPAK')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+				(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),
+				(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1588,1589),(1588,1590),(1589,1589),(1589,1590),(1590,1590)";
+			$query[] = extendPortCompatQuery();
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
 			break;
@@ -2044,6 +2049,12 @@ else
 }
 echo '</table>';
 echo '</body></html>';
+}
+
+// returns SQL query to make PortCompat symmetric (insert missing reversed-order pairs)
+function extendPortCompatQuery()
+{
+	return "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
 }
 
 function convertSLBTablesToBinIPs()
