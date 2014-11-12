@@ -1826,6 +1826,7 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 				(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),
 				(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674)";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1588,1589),(1588,1590),(1589,1589),(1589,1590),(1590,1590)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 12=1589; 13=1590') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 			$query[] = extendPortCompatQuery();
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
