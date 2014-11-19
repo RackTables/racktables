@@ -3397,11 +3397,11 @@ function renderAddMultipleObjectsForm ()
 
         if ($i == 0)
         {
-            $singleEntry['max'] = $max;
-            $singleEntry['tagsPicker'] = printTagsPicker ();
+            $singleEntry['Max'] = $max;
+            $singleEntry['TagsPicker'] = printTagsPicker ();
         }
         else
-            $singleEntry['tagsPicker'] = "";
+            $singleEntry['TagsPicker'] = "";
 
         $tabindex++;
         $objectListOutput[] = $singleEntry;
