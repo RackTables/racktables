@@ -1021,7 +1021,15 @@ function addIPv4Prefix ()
 	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
+	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_cell = spotEntity ('ipv4net', $net_id);
+	if (isset ($vlan_ck))
+	{
+		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+			commitSupplementVLANIPv4 ($vlan_ck, $net_id);
+		else
+			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
+	}
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv4net', $net_id) . ' has been created');
 }
 
@@ -1032,7 +1040,15 @@ function addIPv6Prefix ()
 	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
+	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_cell = spotEntity ('ipv6net', $net_id);
+	if (isset ($vlan_ck))
+	{
+		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+			commitSupplementVLANIPv6 ($vlan_ck, $net_id);
+		else
+			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
+	}
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
 }
 

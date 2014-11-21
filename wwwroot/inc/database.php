@@ -4375,13 +4375,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	}
 	produceTagsForNewRecord ('ipv4net', $taglist, $network_id);
 	if ($vlan_ck != NULL)
-	{
-		$ctx = getContext();
-		fixContext (spotEntity ('ipv4net', $network_id));
-		if (permitted ('ipv4net', '8021q', 'bind'))
-			commitSupplementVLANIPv4 ($vlan_ck, $network_id);
-		restoreContext ($ctx);
-	}
+		commitSupplementVLANIPv4 ($vlan_ck, $network_id);
 	return $network_id;
 }
 
@@ -4413,13 +4407,7 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 		updateV6Address ($net['ip_bin'], 'Subnet-Router anycast', 'yes');
 	produceTagsForNewRecord ('ipv6net', $taglist, $network_id);
 	if ($vlan_ck != NULL)
-	{
-		$ctx = getContext();
-		fixContext (spotEntity ('ipv6net', $network_id));
-		if (permitted ('ipv6net', '8021q', 'bind'))
-			commitSupplementVLANIPv6 ($vlan_ck, $network_id);
-		restoreContext ($ctx);
-	}
+		commitSupplementVLANIPv6 ($vlan_ck, $network_id);
 	return $network_id;
 }
 
