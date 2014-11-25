@@ -1565,10 +1565,11 @@ function renderObject ($object_id)
 			{
 				$class = 'trerror';
 				$osif = '';
-				if (array_key_exists (inet_pton ($pf['localip']), $info['ipv4']))
+				$localip_bin = ip_parse ($pf['localip']);
+				if (array_key_exists ($localip_bin, $info['ipv4']))
 				{
-					$class = $info['ipv4'][inet_pton ($pf['localip'])]['addrinfo']['class'];
-					$osif = $info['ipv4'][inet_pton ($pf['localip'])]['osif'] . ': ';
+					$class = $info['ipv4'][$localip_bin]['addrinfo']['class'];
+					$osif = $info['ipv4'][$localip_bin]['osif'] . ': ';
 				}
 				echo "<tr class='$class'>";
 				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
