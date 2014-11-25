@@ -2216,14 +2216,14 @@ $dictionary = array
 	2324 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X460-G2-48p-GE4'),
 	2325 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X670-G2-48x-4q'),
 	2326 => array ('chapter_id' => 12, 'dict_value' => 'Extreme Networks%GPASS%Summit X670-G2-72x'),
-	2327 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3548 | http://www.cisco.com/c/en/us/products/switches/nexus-3548-switch/index.html'),
-	2328 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3524 | http://www.cisco.com/c/en/us/products/switches/nexus-3524-switch/index.html'),
-	2329 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3172 | http://www.cisco.com/c/en/us/products/switches/nexus-3172-switch/index.html'),
-	2330 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3164Q | http://www.cisco.com/c/en/us/products/switches/nexus-3164q-switch/index.html'),
-	2331 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3132Q | http://www.cisco.com/c/en/us/products/switches/nexus-3132q-switch/index.html'),
-	2332 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3064 | http://www.cisco.com/c/en/us/products/switches/nexus-3064-switch/index.html'),
-	2333 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3048 | http://www.cisco.com/c/en/us/products/switches/nexus-3048-switch/index.html'),
-	2334 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3016 | http://www.cisco.com/c/en/us/products/switches/nexus-3016-switch/index.html'),
+	2327 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3548 | http://www.cisco.com/c/en/us/products/switches/nexus-3548-switch/index.html]]'),
+	2328 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3524 | http://www.cisco.com/c/en/us/products/switches/nexus-3524-switch/index.html]]'),
+	2329 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3172 | http://www.cisco.com/c/en/us/products/switches/nexus-3172-switch/index.html]]'),
+	2330 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3164Q | http://www.cisco.com/c/en/us/products/switches/nexus-3164q-switch/index.html]]'),
+	2331 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3132Q | http://www.cisco.com/c/en/us/products/switches/nexus-3132q-switch/index.html]]'),
+	2332 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3064 | http://www.cisco.com/c/en/us/products/switches/nexus-3064-switch/index.html]]'),
+	2333 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3048 | http://www.cisco.com/c/en/us/products/switches/nexus-3048-switch/index.html]]'),
+	2334 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3016 | http://www.cisco.com/c/en/us/products/switches/nexus-3016-switch/index.html]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
