@@ -5858,16 +5858,6 @@ function renderFileBrowser ()
 // Like renderFileBrowser(), but with the option to delete files
 function renderFileManager ()
 {
-    // Used for uploading a parentless file
-    function printNewItemTR ($parent, $placeholder)
-    {
-        $tplm = TemplateManager::getInstance();
-        $mod = $tplm->generateSubmodule($placeholder, 'FileManagerNew', $parent);
-        $mod->setNamespace('files');
-
-        printTagsPicker (null, $mod, 'TagsPicker');
-    }
-
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule('Payload', 'RenderFileManager');
     $mod->setNamespace('files');
