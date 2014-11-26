@@ -12,8 +12,8 @@
 		<td><input type=text size=30 name=<?php $this->i ?>_object_name tabindex=<?php $this->Tabindex ?> ></td>
 		<td><input type=text size=30 name=<?php $this->i ?>_object_label tabindex=<?php $this->Tabindex ?> ></td>
 		<td><input type=text size=20 name=<?php $this->i ?>_object_asset_no tabindex=<?php $this->Tabindex ?> ></td>
-		<td valign=top rowspan=<?php $this->max ?> >
-		<?php $this->tagsPicker ?> 
+		<td valign=top rowspan=<?php $this->Max ?> >
+		<?php $this->TagsPicker ?> 
 		</td>
 	<?php $this->endLoop(); ?> 
 	<tr><td class=submit colspan=5><input type=submit name=got_fast_data value='Go!'></td></tr>
@@ -31,13 +31,12 @@
 	</td></tr>
 	<tr><th>Tags</th></tr>
 	<tr><td valign=top>
-		<?php $this->tagsPicker ?> 
+		<?php $this->TagsPicker ?> 
 	</td></tr>
 	<tr><td colspan=2><input type=submit name=got_very_fast_data value='Go!'></td></tr></table>
 	</form>
 	</div>	
 </div>
-
 <?php } else { ?>
 Don't use this page directly, it's supposed <br />
 to get loaded within the main page. <br />

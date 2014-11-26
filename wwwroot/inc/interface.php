@@ -2513,14 +2513,13 @@ function renderIPSpaceEditor()
         $mod->addOutput("hasAddrspaceList", true);
 
         $allNetinfoOut = array();
+        $mod->setOutput('CountNetInfo', count ($netinfo['addrlist']));
         foreach ($addrspaceList as $netinfo)
         {
             $singleNetinfo = array( 'mkAIpmask' => mkA ("${netinfo['ip']}/${netinfo['mask']}", $net_page, $netinfo['id']),
                                     'name' => niftyString ($netinfo['name']));
-            if (! isIPNetworkEmpty ($netinfo))
-                $singleNetinfo['destroyItem'] = printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
-            else
-                $singleNetinfo['destroyItem'] = getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
+            $singleNetinfo['IsDestroyable'] = (! isIPNetworkEmpty ($netinfo));
+            $singleNetinfo['NetInfo_Id'] = $netinfo['id'];
             if (count ($netinfo['etags']))
             {
                 $etagsMod = $tplm->generateModule('ETagsLine', true, array('cont' => serializeTags ($netinfo['etags'])));
@@ -2741,39 +2740,46 @@ function renderIPv4NetworkAddresses ($range, $parent, $placeholder)
     $address_count = $endip - $startip + 1;
     $page = 0;
     $rendered_pager = '';
+    $numpages = 0;
     if ($address_count > $maxperpage && $maxperpage > 0)
     {
         $page = isset ($_REQUEST['pg']) ? $_REQUEST['pg'] : (isset ($hl_ip) ? intval (($hl_ip - $startip) / $maxperpage) : 0);
-        if ($numpages = ceil ($address_count / $maxperpage))
+        $numpages = ceil ($address_count / $maxperpage);
+        if ($numpages)
         {
             $mod->addOutput('HasPagination', true);
             $mod->addOutput('StartIP', ip4_format (ip4_int2bin ($startip)));
             $mod->addOutput('EndIP', ip4_format (ip4_int2bin ($endip)));
             $pagesarray = array();
-            $smod = $tplm->generateSubmodule('Pager', 'IPNetworkAddressesPager', $mod);
+            //$smod = $tplm->generateSubmodule('Pager', 'IPNetworkAddressesPager', $mod);
             for ($i = 0; $i < $numpages; $i++)
+            {
                 if ($i == $page)
                 {
                     $pagesarray[] = array(
                                         'B' => '<b>',
                                         'BEnd' => '</b>',
-                                        'i' => $i,
-                                        'Link' => makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $netinfo['id'], 'pg' => $i))
+                                        'i' => $i
+                                        //,
+                                        //'Link' => makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $netinfo['id'], 'pg' => $i))
                                     );
                 }
                 else
                 {
                     $pagesarray[] = array(
-                                        'i' => $i,
-                                        'Link' => makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $netinfo['id'], 'pg' => $i))
+                                        'i' => $i
+                                        //,
+                                      //  'Link' => makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $netinfo['id'], 'pg' => $i))
                                     );
                 }
-            $smod->addOutput('Pages', $pagesarray);
+            }
+                /*
+            $smod->addOutput('Pages', $pagesarray);  */
         }
         $startip = $startip + $page * $maxperpage;
         $endip = min ($startip + $maxperpage - 1, $endip);
     }
-
+    /*
     markupIPAddrList ($range['addrlist']);
     for ($ip = $startip; $ip <= $endip; $ip++)
     {
@@ -2877,6 +2883,7 @@ function renderIPv4NetworkAddresses ($range, $parent, $placeholder)
     // end of iteration
     if (permitted (NULL, NULL, 'set_reserve_comment'))
         $mod->addOutput('UserHasEditPerm', true);
+        */
 }
 
 function renderIPv6NetworkAddresses ($netinfo, $parent, $placeholder)
@@ -3390,11 +3397,11 @@ function renderAddMultipleObjectsForm ()
 
         if ($i == 0)
         {
-            $singleEntry['max'] = $max;
-            $singleEntry['tagsPicker'] = printTagsPicker ();
+            $singleEntry['Max'] = $max;
+            $singleEntry['TagsPicker'] = printTagsPicker ();
         }
         else
-            $singleEntry['tagsPicker'] = "";
+            $singleEntry['TagsPicker'] = "";
 
         $tabindex++;
         $objectListOutput[] = $singleEntry;
