@@ -11,7 +11,12 @@
 	 	<th>template</th>
 	<?php } ?>
 	<th>&nbsp;</th></tr>  
-	<?php $this->AddNewTop ?>
+	<?php if ($this->is('AddNewTop',true)) { ?>
+		<tr>
+	 		<td><?php $this->NewSelect ?></td>
+			<td><?php $this->getH("PrintImageHref", array('Attach', 'set', TRUE, 104)); ?></td>
+		</tr></form>
+	<?php } ?>
 	<?php while ($this->loop('AllMinusLines')) : ?>
 		<tr>
 		<?php if ($this->is("isNoObject",true)) { ?>
@@ -25,8 +30,14 @@
 		<?php } ?> 
 		<td><?php $this->cutblock ?></td></tr>
 	<?php endwhile ?>
-	<?php $this->AddNewBottom ?>
+	<?php if ($this->is('AddNewTop',false)) { ?>
+		<tr>
+	 		<td><?php $this->NewSelect ?></td>
+			<td><?php $this->getH("PrintImageHref", array('Attach', 'set', TRUE, 104)); ?></td>
+		</tr></form>
+	<?php } ?>
 	</table>
+	
 <?php } else { ?>
 Don't use this page directly, it's supposed <br />
 to get loaded within the main page. <br />

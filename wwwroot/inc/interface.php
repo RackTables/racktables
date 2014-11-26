@@ -3856,13 +3856,6 @@ function renderUserList ()
 
 function renderUserListEditor ()
 {
-    function printNewItemTR ($parent,$placeholder)
-    {
-        $tplm = TemplateManager::getInstance();
-        $smod2 = $tplm->generateSubmodule($placeholder, "UserListEditorNew", $parent);
-        $smod2->setNamespace('userlist');
-        printTagsPicker (null, $smod2, 'TagsPicker');
-    }
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule("Payload", "renderUserListEditor");
     $mod->setNamespace("userlist");
@@ -6886,74 +6879,66 @@ function renderIIFOIFCompatEditor()
 
 function render8021QOrderForm ($some_id)
 {
-    function printNewItemTR ()
-    {
-        $all_vswitches = getVLANSwitches();
-        global $pageno;
-        $hintcodes = array ('prev_vdid' => 'DEFAULT_VDOM_ID', 'prev_vstid' => 'DEFAULT_VST_ID', 'prev_objid' => NULL);
-        $focus = array();
-        foreach ($hintcodes as $hint_code => $option_name)
-            if (array_key_exists ($hint_code, $_REQUEST))
-            {
-                assertUIntArg ($hint_code);
-                $focus[$hint_code] = $_REQUEST[$hint_code];
-            }
-            elseif ($option_name != NULL)
-                $focus[$hint_code] = getConfigVar ($option_name);
-            else
-                $focus[$hint_code] = NULL;
-
-        $tplm = TemplateManager::getInstance();
-        $mod = $tplm->generateModule("Render8021QOrderForm_PrintNew");
-        $mod->setNamespace("vlandomain");
-
-        if ($pageno != 'object')
-        {
-            $mod->setOutput("isNoObject", true);
-            // hide any object that is already in the table
-            $options = array();
-            foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
-                if (!in_array ($object_id, $all_vswitches))
-                {
-                    $ctx = getContext();
-                    spreadContext (spotEntity ('object', $object_id));
-                    $decision = permitted (NULL, NULL, 'del');
-                    restoreContext ($ctx);
-                    if ($decision)
-                        $options[$object_id] = $object_dname;
-                }
-            $mod->addOutput("selected", getSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']));
-        }
-        if ($pageno != 'vlandomain')
-        {
-            $mod->setOutput("isNoVLANDomain", true);
-            $mod->addOutput("getVLDSelect", getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']));
-        }
-        if ($pageno != 'vst')
-        {
-            $mod->setOutput("isNoVST", true);
-
-            $options = array();
-            foreach (listCells ('vst') as $nominee)
-            {
-                $ctx = getContext();
-                spreadContext ($nominee);
-                $decision = permitted (NULL, NULL, 'add');
-                restoreContext ($ctx);
-                if ($decision)
-                    $options[$nominee['id']] = niftyString ($nominee['description'], 30, FALSE);
-            }
-            $mod->addOutput("getVSTSelect", getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']));
-        }
-        return $mod->run();
-    }
-
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule("Payload","Render8021QOrderForm");
     $mod->setNamespace("vlandomain");
-
+	
     global $pageno;
     $minuslines = array(); // indexed by object_id, which is unique
+    
+    $all_vswitches = getVLANSwitches();
+    
+    //Generate NEW
+    $hintcodes = array ('prev_vdid' => 'DEFAULT_VDOM_ID', 'prev_vstid' => 'DEFAULT_VST_ID', 'prev_objid' => NULL);
+    $focus = array();
+    foreach ($hintcodes as $hint_code => $option_name)
+    if (array_key_exists ($hint_code, $_REQUEST))
+    {
+    	assertUIntArg ($hint_code);
+    	$focus[$hint_code] = $_REQUEST[$hint_code];
+    }
+    elseif ($option_name != NULL)
+    $focus[$hint_code] = getConfigVar ($option_name);
+    else
+    	$focus[$hint_code] = NULL;
+        
+    if ($pageno != 'object')
+    {
+    	// hide any object that is already in the table
+    	$options = array();
+    	foreach (getNarrowObjectList ('VLANSWITCH_LISTSRC') as $object_id => $object_dname)
+    	if (!in_array ($object_id, $all_vswitches))
+    	{
+    		$ctx = getContext();
+    		spreadContext (spotEntity ('object', $object_id));
+    		$decision = permitted (NULL, NULL, 'del');
+    		restoreContext ($ctx);
+    		if ($decision)
+    			$options[$object_id] = $object_dname;
+    	}
+    	$mod->addOutput("NewSelect", getSelect ($options, array ('name' => 'object_id', 'tabindex' => 101, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_objid']));
+    }
+    if ($pageno != 'vlandomain')
+    {
+    	$mod->addOutput("NewSelect", getSelect (getVLANDomainOptions(), array ('name' => 'vdom_id', 'tabindex' => 102, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vdid']));
+    }
+    if ($pageno != 'vst')
+    {
+    
+    	$options = array();
+    	foreach (listCells ('vst') as $nominee)
+    	{
+    		$ctx = getContext();
+    		spreadContext ($nominee);
+    		$decision = permitted (NULL, NULL, 'add');
+    		restoreContext ($ctx);
+    		if ($decision)
+    			$options[$nominee['id']] = niftyString ($nominee['description'], 30, FALSE);
+    	}
+    	$mod->addOutput("NewSelect", getSelect ($options, array ('name' => 'vst_id', 'tabindex' => 103, 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']));
+    }
+    //Generate NEW END
+    
     switch ($pageno)
     {
     case 'object':
@@ -7006,7 +6991,7 @@ function render8021QOrderForm ($some_id)
         getConfigVar ('ADDNEW_AT_TOP') == 'yes' and
         ($pageno != 'object' or !count ($minuslines))
     )
-        $mod->addOutput("AddNewTop", printNewItemTR());
+        $mod->addOutput("AddNewTop", true);
 
     $vdomlist = getVLANDomainOptions();
     $vstlist = getVSTOptions();
@@ -7063,7 +7048,7 @@ function render8021QOrderForm ($some_id)
         getConfigVar ('ADDNEW_AT_TOP') != 'yes' and
         ($pageno != 'object' or !count ($minuslines))
     )
-        $mod->addOutput("AddNewBottom", printNewItemTR());
+        $mod->addOutput("AddNewTop", false);
 }
 
 function render8021QStatus ()
@@ -7233,7 +7218,7 @@ function renderVLANDomain ($vdom_id)
 
 function renderVLANDomainVLANList ($vdom_id)
 {
-    function printNewItemTR ($parent, $placeholder)
+    /* function printNewItemTR ($parent, $placeholder)
     {
         global $vtoptions;
 
@@ -7241,14 +7226,14 @@ function renderVLANDomainVLANList ($vdom_id)
         $mod = $tplm->generateSubmodule($placeholder, "RenderVLANDomainVLANList_printNew", $parent, false, array('Vtoptions' => $vtoptions,
                                         "PrintSel" => printSelect ($vtoptions, array ('name' => 'vlan_type', 'tabindex' => 102), 'ondemand')));
         $mod->setNamespace("vlandomain");
-    }
+    } */
 
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule("Payload","RenderVLANDomainVLANList");
     $mod->setNamespace("vlandomain");
 
     if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-        printNewItemTR($mod, "AddNewTop");
+       $mod->addOutput('NewTop', true);
 
     global $vtoptions;
     $allDomainVLANsOut = array();
@@ -7267,9 +7252,7 @@ function renderVLANDomainVLANList ($vdom_id)
         $allDomainVLANsOut[] = $singleDomainVLAN;
     }
     $mod->addOutput("allDomainVLANs", $allDomainVLANsOut);
-
-    if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-        printNewItemTR($mod, "AddNewBottom");
+    $mod->addOutput('VTOptions', $vtoptions);
 }
 
 function get8021QPortTrClass ($port, $domain_vlans, $desired_mode = NULL)
