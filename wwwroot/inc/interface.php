@@ -6171,8 +6171,9 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		$thumbwidth = getRackImageWidth();
 		$thumbheight = getRackImageHeight ($cell['height']);
-		echo "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' ";
-		echo "src='?module=image&img=minirack&rack_id=${cell['id']}'>";
+		$img = "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' " .
+			"src='?module=image&img=minirack&rack_id=${cell['id']}'>";
+		echo mkA ($img, 'rack', $cell['id']);
 		echo "</td><td>";
 		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'rack', $cell['id']);
 		echo "</td></tr><tr><td>";
