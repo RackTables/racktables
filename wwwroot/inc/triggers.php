@@ -134,8 +134,8 @@ function trigger_tags ()
 
 function trigger_passwdchange ()
 {
-	global $user_auth_src;
-	return $user_auth_src == 'database' ? 'std' : '';
+	global $user_auth_src, $remote_username;
+	return ($user_auth_src == 'database' || 1 === getUserIDByUsername ($remote_username)) ? 'std' : '';
 }
 
 function trigger_localreports ()
