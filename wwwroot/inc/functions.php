@@ -1717,13 +1717,17 @@ function shrinkSubtree ($tree, $used_tags, $preselect, $realm)
 }
 
 // Get taginfo record by tag name, return NULL, if record doesn't exist.
-function getTagByName ($target_name)
+function getTagByName ($tag_name)
 {
 	global $taglist;
-	foreach ($taglist as $taginfo)
-		if ($taginfo['tag'] == $target_name)
-			return $taginfo;
-	return NULL;
+	static $cache = NULL;
+	if (! isset ($cache))
+	{
+		$cache = array();
+		foreach ($taglist as $key => $taginfo)
+			$cache[$taginfo['tag']] = $taginfo;
+	}
+	return array_fetch($cache, $tag_name, NULL);
 }
 
 // Merge two chains, filtering dupes out. Return the resulting superset.
