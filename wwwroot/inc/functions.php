@@ -6265,4 +6265,20 @@ function groupBy ($list, $group_field)
 	return $ret;
 }
 
+// returns the associative $array sorted by its keys
+// sort order is taken from the $order array:
+// $array[i] is arranged with $array[j] conforming to
+// numeric comparison of $order[i] and $order[j].
+function customKsort ($array, $order)
+{
+	$ret = array();
+	foreach ($array as $key => $value)
+		$ret[$key] = isset ($order[$key]) ? $order[$key] : array_last ($order) + 1;
+
+	asort ($ret, SORT_NUMERIC);
+	foreach (array_keys ($ret) as $key)
+		$ret[$key] = $array[$key];
+	return $ret;
+}
+
 ?>

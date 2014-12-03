@@ -4,6 +4,8 @@
 	bugfix: do not allow to turn an object into a location (#1339)
 	bugfix: handle glob() result carefully (#1273, reported by Georg Hoellrigl)
 	bugfix: fix color for zero-U objects with problems (#1189)
+	bugfix: fix syntax error crash with PHP version < 5.3 (unexpected T_FUNCTION).
+		This bug appeared in 0.20.8 and reported by Frank Altpeter.
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
 		WS-C2960X-48LPS-L, HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183),
 		Huawei CE6850-48S4Q-EI, CE7850-32Q-EI

@@ -3799,17 +3799,7 @@ function getAttrValuesSorted ($object_id)
 			$attr_order[$attr_id] = $i++;
 		unset ($result);
 	}
-
-	$ret = getAttrValues ($object_id);
-	uksort ($ret,
-		function ($a, $b) use ($attr_order) {
-			return numCompare (
-				array_fetch ($attr_order, $a, 0),
-				array_fetch ($attr_order, $b, 0)
-			);
-		}
-	);
-	return $ret;
+	return customKsort (getAttrValues ($object_id), $attr_order);
 }
 
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
