@@ -876,6 +876,7 @@ function findAutoTagWarnings ($expr)
 			{
 				case preg_match ('/^\$(.*)?id_(\d+)$/', $expr['load'], $m) && isset ($entityIDs[$m[1]]):
 					list ($realm, $description) = $entityIDs[$m[1]];
+					$recid = $m[2];
 					try
 					{
 						spotEntity ($realm, $m[2]);
