@@ -2368,6 +2368,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2960S-F48LPS-L: 48 RJ-45/10-100TX + 4 SFP/1000',
 		'processors' => array ('catalyst-stack-1-to-4-SFP', 'catalyst-chassis-mgmt', 'catalyst-stack-any-100TX'),
 	),
+	'9.1.1165' => array
+	(
+		'dict_key' => 2335,
+		'text' => 'Cisco ASR 1001',
+		'processors' => array ('catalyst-stack-any-1000T', 'catalyst-any-1000T'),
+	),
 	'9.1.1693' => array
 	(
 		'dict_key' => 2112,
