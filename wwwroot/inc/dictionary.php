@@ -782,9 +782,9 @@ $dictionary = array
 	714 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%BlackDiamond 12802R | http://www.extremenetworks.com/products/blackdiamond-12800r.aspx]]'),
 	715 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%BlackDiamond 12804R | http://www.extremenetworks.com/products/blackdiamond-12800r.aspx]]'),
 	716 => array ('chapter_id' => 12, 'dict_value' => '[[Extreme Networks%GPASS%BlackDiamond 12804C | http://www.extremenetworks.com/products/blackdiamond-12804c.aspx]]'),
-	717 => array ('chapter_id' => 24, 'dict_value' => '[[Cisco%GPASS%ASR 1002 | http://cisco.com/en/US/products/ps9436/index.html]]'),
-	718 => array ('chapter_id' => 24, 'dict_value' => '[[Cisco%GPASS%ASR 1004 | http://cisco.com/en/US/products/ps9437/index.html]]'),
-	719 => array ('chapter_id' => 24, 'dict_value' => '[[Cisco%GPASS%ASR 1006 | http://cisco.com/en/US/products/ps9438/index.html]]'),
+	717 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 1002 | http://cisco.com/en/US/products/ps9436/index.html]]'),
+	718 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 1004 | http://cisco.com/en/US/products/ps9437/index.html]]'),
+	719 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 1006 | http://cisco.com/en/US/products/ps9438/index.html]]'),
 	720 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 3.3 | http://www.openbsd.org/33.html]]'),
 	721 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 3.4 | http://www.openbsd.org/34.html]]'),
 	722 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 3.5 | http://www.openbsd.org/35.html]]'),
@@ -2224,6 +2224,7 @@ $dictionary = array
 	2332 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3064 | http://www.cisco.com/c/en/us/products/switches/nexus-3064-switch/index.html]]'),
 	2333 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3048 | http://www.cisco.com/c/en/us/products/switches/nexus-3048-switch/index.html]]'),
 	2334 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3016 | http://www.cisco.com/c/en/us/products/switches/nexus-3016-switch/index.html]]'),
+	2335 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 1001 | http://www.cisco.com/c/en/us/products/routers/asr-1001-router/index.html]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
