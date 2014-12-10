@@ -7138,18 +7138,18 @@ function renderVLANDomainListEditor ()
     $allDomainStatsOut = array();
     foreach (getVLANDomainStats() as $vdom_id => $dominfo)
     {
-        $singleDomainStat = array('formIntro' => printOpFormIntro ('upd', array ('vdom_id' => $vdom_id)));
+        $singleDomainStat = array('FormIntro' => printOpFormIntro ('upd', array ('vdom_id' => $vdom_id)));
         if ($dominfo['switchc'] or $dominfo['vlanc'] > 1)
         {
-            $singleDomainStat['imageNoDestroy'] = printImageHREF ('nodestroy', 'domain used elsewhere');
+            $singleDomainStat['ImageNoDestroy'] = printImageHREF ('nodestroy', 'domain used elsewhere');
         }
         else
         {
-            $singleDomainStat['linkDestroy'] = getOpLink (array ('op' => 'del', 'vdom_id' => $vdom_id), '', 'destroy', 'delete domain');
+            $singleDomainStat['LinkDestroy'] = getOpLink (array ('op' => 'del', 'vdom_id' => $vdom_id), '', 'destroy', 'delete domain');
         }
-
-        $singleDomainStat['niftyStr'] = niftyString ($dominfo['description'], 0);
-        $singleDomainStat['imageUpdate'] = printImageHREF ('save', 'update description', TRUE);
+        $singleDomainStat['Id'] = $vdom_id;
+        $singleDomainStat['NiftyStr'] = niftyString ($dominfo['description'], 0);
+        $singleDomainStat['ImageUpdate'] = printImageHREF ('save', 'update description', TRUE);
         $allDomainStatsOut[] = $singleDomainStat;
     }
 
@@ -7276,7 +7276,6 @@ function renderObject8021QPorts ($object_id)
 
     $tplm = TemplateManager::getInstance();
     $mod = $tplm->generateSubmodule('Payload', 'RenderObject8021QPorts');
-
     $mod->setNamespace('object');
 
     // port list

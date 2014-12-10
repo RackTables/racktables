@@ -17,13 +17,13 @@
 	</form> 
 	<?php endif ?>
 	<?php while($this->loop("allDomainStats")): ?>	
-		<?php $this->formIntro ?> 
+		<?php $this->FormIntro ?> 
 		<tr><td>
-		<?php $this->imageNoDestroy ?> 	
-		<?php $this->linkDestroy ?> 
-		</td><td><input name=vdom_descr type=text size=48 value=<?php $this->niftyStr ?>> 
+		<?php $this->ImageNoDestroy ?> 	
+		<?php $this->LinkDestroy ?> 
+		</td><td><input name=vdom_descr type=text size=48 value=<?php $this->NiftyStr ?>> 
 		</td><td>
-		<?php $this->imageUpdate ?> 
+		<?php $this->ImageUpdate ?> 
 		</td></tr></form>
 	<?php endwhile ?> 
 	<?php if ($this->is("isAddNew", false)) : ?>
