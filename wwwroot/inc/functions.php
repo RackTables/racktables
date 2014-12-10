@@ -4363,15 +4363,18 @@ function recalc8021QPorts ($switch_id)
 
 	$object = spotEntity ('object', $switch_id);
 	amplifyCell ($object);
-	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
-	$vswitch = getVLANSwitchInfo ($switch_id);
+	$dbxlink->beginTransaction();
+	$vswitch = getVLANSwitchInfo ($switch_id, 'FOR UPDATE');
 	if (! $vswitch)
+	{
+		$dbxlink->rollBack();
 		return $ret;
+	}
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
+	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
 	$order = apply8021QOrder ($vswitch, $vlan_config);
 	$before = $order;
 
-	$dbxlink->beginTransaction();
 	// calculate remote uplinks and copy them to local downlinks
 	foreach ($order as $pn => &$local_port_order)
 	{
