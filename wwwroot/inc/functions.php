@@ -4360,9 +4360,8 @@ function recalc8021QPorts ($switch_id)
 		'ports' => 0,
 	);
 	global $dbxlink;
+	$ports = getObjectPortsAndLinks ($switch_id);
 
-	$object = spotEntity ('object', $switch_id);
-	amplifyCell ($object);
 	$dbxlink->beginTransaction();
 	$vswitch = getVLANSwitchInfo ($switch_id, 'FOR UPDATE');
 	if (! $vswitch)
@@ -4382,7 +4381,7 @@ function recalc8021QPorts ($switch_id)
 			continue;
 
 		// if there is a link with remote side type 'uplink', use its vlan mask
-		if ($portinfo = findConnectedPort ($object['ports'], $pn))
+		if ($portinfo = findConnectedPort ($ports, $pn))
 		{
 			$remote_pn = $portinfo['remote_name'];
 			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
@@ -4428,7 +4427,7 @@ function recalc8021QPorts ($switch_id)
 			continue;
 
 		// if there is a link with remote side type 'downlink', replace its vlan mask
-		if ($portinfo = findConnectedPort ($object['ports'], $pn))
+		if ($portinfo = findConnectedPort ($ports, $pn))
 		{
 			$remote_pn = $portinfo['remote_name'];
 			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
