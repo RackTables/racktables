@@ -3364,7 +3364,7 @@ function renderNATv4ForObject ($object_id)
         $allNatv4FocusOut[] = $singleFocus;
     }
 
-    $mod->addOutput("allNatv4Focus", $allNatv4FocusOut);
+    $mod->addOutput("AllNatv4Focus", $allNatv4FocusOut);
 }
 
 function renderAddMultipleObjectsForm ()
@@ -4351,8 +4351,7 @@ function renderPortOIFEditor()
             {
                 $singleOption['DestroyLink'] = getOpLink (array ('op' => 'del', 'id' => $oif_id), '', 'destroy', 'remove');
             }
-            $singleOption['
-                          SaveImg'] = getImageHREF ('save', 'Save changes', TRUE);
+            $singleOption['SaveImg'] = getImageHREF ('save', 'Save changes', TRUE);
         }
         $allOptionsOut[] = $singleOption;
     }
@@ -6770,19 +6769,12 @@ function renderIIFOIFCompat()
 function renderTwoColumnCompatTableEditor ($compat, $left, $right, $parent = null, $placeholder = 'TwoColumnCompatTableEditor')
 {
     function printNewitemTR ($lkey, $loptions, $rkey, $roptions, $parent = null, $placeholder = 'NewitemTR')
-    {
+    {   
         $tplm = TemplateManager::getInstance();
-        if($parent == null)
-            $mod = $tplm->generateModule("TwoColumnCompatTableEditor_PrintNew");
-        else
-            $mod = $tplm->generateSubmodule($placeholder,"TwoColumnCompatTableEditor_PrintNew", $parent);
-        $mod->setNamespace("portifcompat");
+        $mod = $tplm->generatePseudoSubmodule($placeholder, $parent);
 
         printSelect ($loptions, array ('name' => $lkey, 'tabindex' => 100), NULL, $mod, "lOptions");
         printSelect ($roptions, array ('name' => $rkey, 'tabindex' => 110), NULL, $mod, "rOptions");
-        
-        if($parent == null)
-            return $mod->run();
     }
 
     global $nextorder;
@@ -6811,6 +6803,10 @@ function renderTwoColumnCompatTableEditor ($compat, $left, $right, $parent = nul
             $last_lkey = $item[$left['key']];
         }
         $singleCompat = array('Order' => $order,
+                              'Left_Key' => $left['key'],
+                              'Right_Key' => $right['key'],
+                              'ItemLeft_Key' => $item[$left['key']],
+                              'ItemRight_Key' => $item[$right['key']],
                               'OpLink' => getOpLink (array ('op' => 'del', $left['key'] => $item[$left['key']], $right['key'] => $item[$right['key']]), '', 'delete', 'remove pair'),
                               'LeftValue' => niftyString ($item[$left['value']], $left['width']),
                               'RightValue' => niftyString ($item[$right['value']], $right['width']));

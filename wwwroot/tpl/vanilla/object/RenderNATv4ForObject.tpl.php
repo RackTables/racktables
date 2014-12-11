@@ -31,7 +31,7 @@
 		<center><h2>arriving NAT connections</h2></center>
 		<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>
 		<tr><th></th><th>Source</th><th>Source objects</th><th>Target</th><th>Description</th></tr>
-		<?php $this->startLoop("allNatv4Focus"); ?>	
+		<?php $this->startLoop("AllNatv4Focus"); ?>	
 			<tr><td><?php $this->opLink ?></td>
 			<td><?php $this->proto ?>/<?php $this->focus_portpair_local_mod ?></td>
 			<td class="description"><?php $this->mkA ?></td>
