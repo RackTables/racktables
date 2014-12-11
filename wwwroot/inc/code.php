@@ -876,6 +876,7 @@ function findAutoTagWarnings ($expr)
 			{
 				case preg_match ('/^\$(.*)?id_(\d+)$/', $expr['load'], $m) && isset ($entityIDs[$m[1]]):
 					list ($realm, $description) = $entityIDs[$m[1]];
+					$recid = $m[2];
 					try
 					{
 						spotEntity ($realm, $m[2]);
@@ -926,6 +927,7 @@ function findAutoTagWarnings ($expr)
 				case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $expr['load'])):
 				case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $expr['load'])):
 				case (preg_match ('/^\$type_(tcp|udp|mark)$/', $expr['load'])):
+				case (preg_match ('/^\$client_([0-9a-fA-F.:]+)$/', $expr['load'])):
 					return array();
 				default:
 					foreach ($user_defined_atags as $regexp)
