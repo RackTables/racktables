@@ -2224,6 +2224,10 @@ $dictionary = array
 	2332 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3064 | http://www.cisco.com/c/en/us/products/switches/nexus-3064-switch/index.html]]'),
 	2333 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3048 | http://www.cisco.com/c/en/us/products/switches/nexus-3048-switch/index.html]]'),
 	2334 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3016 | http://www.cisco.com/c/en/us/products/switches/nexus-3016-switch/index.html]]'),
+	2335 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.2'),
+	2336 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS XE 15.4'),
+	2337 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%ASR 1001 | http://www.cisco.com/c/en/us/products/routers/asr-1001-router/index.html]]'),
+	2338 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%7201 | http://www.cisco.com/c/en/us/products/routers/7201-router/index.html]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with

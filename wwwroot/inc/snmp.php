@@ -2285,6 +2285,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C3560V2-48PS: 48 RJ-45/10-100TX + 4 SFP/1000',
 		'processors' => array ('catalyst-chassis-any-1000SFP', 'catalyst-chassis-any-100TX'),
 	),
+	'9.1.1045' => array
+	(
+		'dict_key' => 1328,
+		'text' => 'Cisco 2911 ISR',
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-stack-any-100TX'),
+	),
 	'9.1.1104' => array
 	(
 		'dict_key' => 1348,
@@ -2306,11 +2312,14 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'9.1.1208' => array
 	(
 		'dict_key' => 1394,
+#		'dict_key' => 1393,
 		'text' => 'WS-C2960S-24PS-L: 24 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
+#		'text' => 'WS-C2960S-48LPS-L: 48 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
 		'processors' => array
 		(
 			'catalyst-chassis-mgmt',
 			'catalyst-stack-25-to-28-SFP',
+#			'catalyst-stack-49-to-52-SFP',
 			'catalyst-stack-any-1000T',
 		),
 	),
@@ -3405,6 +3414,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.2' => 252,
 			'15.0' => 1901,
 			'15.1' => 2082,
+			'15.2' => 2335,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))

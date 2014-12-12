@@ -132,6 +132,8 @@ $breed_by_swcode = array
 	1963 => 'ios12', // IOS 15.1 (router OS)
 	2082 => 'ios12', // IOS 15.1
 	2142 => 'ios12', // IOS 15.2
+	2335 => 'ios12', // IOS 15.2 (router OS)
+	2336 => 'ios12', // IOS XE 15.4 (router OS)
 	963  => 'nxos4', // NX-OS 4.0
 	964  => 'nxos4', // NX-OS 4.1
 	1365 => 'nxos4', // NX-OS 4.2
@@ -629,7 +631,6 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 					$errors .= $str;
 			}
 		}
-
 		$write_fd = $write_left;
 		$read_fd = $read_left;
 
