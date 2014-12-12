@@ -36,11 +36,11 @@ $svghandler = array();
 $ajaxhandler = array();
 
 $indexlayout = array
-(
-	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
-	array ('files', 'reports', 'ipv4slb', '8021q'),
-	array ('config', 'objectlog', 'virtual', 'cables'),
-);
+               (
+                   array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
+                   array ('files', 'reports', 'ipv4slb', '8021q'),
+                   array ('config', 'objectlog', 'virtual', 'cables'),
+               );
 
 $page['index']['title'] = 'Main page';
 $page['index']['handler'] = 'renderIndex';
@@ -639,6 +639,7 @@ $tabhandler['myaccount']['qlinks'] = 'renderMyQuickLinks';
 $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';
+$ophandler['myaccount']['interface']['settemplate'] = 'updateCurrentTemplate';
 $ophandler['myaccount']['qlinks']['save'] = 'saveQuickLinks';
 
 $page['cacti']['title'] = 'Cacti';

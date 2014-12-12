@@ -389,6 +389,7 @@ function proxyStaticURI ($URI)
 		or ! array_key_exists (strtolower ($matches[2]), $content_type)
 	)
 		printStatic404();
+	TemplateManager::changeStaticDir();
 	global $local_staticdir, $racktables_staticdir;
 	if (isset ($local_staticdir))
 		$fh = @fopen ("${local_staticdir}/${URI}", 'r');
