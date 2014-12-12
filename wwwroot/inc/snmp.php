@@ -2186,6 +2186,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2960G-8TC-L: 7 RJ-45/10-100-1000T(X) + 1 combo-gig',
 		'processors' => array ('catalyst-chassis-8-combo-1000SFP', 'catalyst-chassis-any-1000T'),
 	),
+	'9.1.821' => array
+	(
+		'dict_key' => 2338,
+		'text' => 'Cisco 7201',
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
 	'9.1.920' => array
 	(
 		'dict_key' => 795,
