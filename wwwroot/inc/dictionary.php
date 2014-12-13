@@ -2224,6 +2224,7 @@ $dictionary = array
 	2332 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3064 | http://www.cisco.com/c/en/us/products/switches/nexus-3064-switch/index.html]]'),
 	2333 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3048 | http://www.cisco.com/c/en/us/products/switches/nexus-3048-switch/index.html]]'),
 	2334 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3016 | http://www.cisco.com/c/en/us/products/switches/nexus-3016-switch/index.html]]'),
+	2335 => array ('chapter_id' => 13, 'dict_value' => 'SUSE Enterprise%GSKIP%SLES12'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
