@@ -2269,6 +2269,7 @@ $dictionary = array
 	2377 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SG300-28MP'),
 	2378 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SG300-52P'),
 	2379 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%SG300-52MP'),
+	2380 => array ('chapter_id' => 13, 'dict_value' => 'SUSE Enterprise%GSKIP%SLES12'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
