@@ -6983,14 +6983,14 @@ function render8021QStatus ()
 				$stats[$cname] += $dominfo[$cname];
 			echo '<tr align=left><td>' . mkA (niftyString ($dominfo['description']), 'vlandomain', $vdom_id) . '</td>';
 			foreach ($columns as $cname)
-				echo '<td>' . $dominfo[$cname] . '</td>';
+				echo '<td class=tdright>' . $dominfo[$cname] . '</td>';
 			echo '</tr>';
 		}
 		if (count ($vdlist) > 1)
 		{
 			echo '<tr align=left><td>total:</td>';
 			foreach ($columns as $cname)
-				echo '<td>' . $stats[$cname] . '</td>';
+				echo '<td class=tdright>' . $stats[$cname] . '</td>';
 			echo '</tr>';
 		}
 		echo '</table>';
@@ -7013,7 +7013,7 @@ function render8021QStatus ()
 			if (count ($vst_info['etags']))
 				echo '<br><small>' . serializeTags ($vst_info['etags']) . '</small>';
 			echo '</td>';
-			echo "<td>${vst_info['rulec']}</td><td>${vst_info['switchc']}</td></tr>";
+			echo "<td class=tdright>${vst_info['rulec']}</td><td class=tdright>${vst_info['switchc']}</td></tr>";
 		}
 		echo '</table>';
 	}
