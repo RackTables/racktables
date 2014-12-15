@@ -2188,7 +2188,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.821' => array
 	(
-		'dict_key' => 2338,
+		'dict_key' => 50036,
 		'text' => 'Cisco 7201',
 		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
@@ -3420,7 +3420,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.2' => 252,
 			'15.0' => 1901,
 			'15.1' => 2082,
-			'15.2' => 2335,
+			'15.2' => 50034,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
