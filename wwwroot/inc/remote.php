@@ -134,6 +134,7 @@ $breed_by_swcode = array
 	2142 => 'ios12', // IOS 15.2
 	50034 => 'ios12', // IOS 15.2 (router OS)
 	50035 => 'ios12', // IOS XE 15.4 (router OS)
+	50039 => 'ios12', // IOS 15.3
 	963  => 'nxos4', // NX-OS 4.0
 	964  => 'nxos4', // NX-OS 4.1
 	1365 => 'nxos4', // NX-OS 4.2
