@@ -1885,7 +1885,7 @@ function addPortToVS()
 	$row = array ('vs_id' => $vsinfo['id'], 'proto' => $proto, 'vport' => $vport, 'vsconfig' => NULL, 'rsconfig' => NULL);
 	if ($port = isPortEnabled ($row, $vsinfo['ports']))
 	{
-		showError ("Service already contains port " . formatVSPort ($port));
+		showError ("Service already contains port $port");
 		return;
 	}
 	usePreparedInsertBlade ('VSPorts', $row);
