@@ -90,7 +90,7 @@ define
 // "softer" way (see below).
 class RackTablesError extends Exception
 {
-	const INTERNAL = 2;
+	const INTERNAL = 0; // the default code
 	const DB_WRITE_FAILED = 3;
 	const NOT_AUTHENTICATED = 4;
 	const MISCONFIGURED = 6;
