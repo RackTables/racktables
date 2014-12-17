@@ -5690,7 +5690,7 @@ function registerOpHandler ($page, $tab, $opname, $callback, $method = 'before')
 	elseif ($method == 'after')
 		array_push ($ophandlers_stack[$page][$tab][$opname], $callback);
 	else
-		throw new RacktablesError ("unknown ophandler injection method '$method'");
+		throw new RacktablesError ("unknown ophandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // call this from custom ophandler registered by registerOpHandler
@@ -5744,7 +5744,7 @@ function registerTabHandler ($page, $tab, $callback, $method = 'after')
 	elseif ($method == 'replace')
 		array_push ($tabhandlers_stack[$page][$tab], '!' . $callback);
 	else
-		throw new RacktablesError ("unknown tabhandler injection method '$method'");
+		throw new RacktablesError ("unknown tabhandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // Returns  tab content already rendered by previous tabhandlers in the chain registered by registerTabHandler.
