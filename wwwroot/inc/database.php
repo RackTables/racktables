@@ -3130,7 +3130,7 @@ function getObjectAttrsSearchResults ($what)
 // multiple matching stickers. Search is only performed on "string" or "dict" attributes.
 function getStickerSearchResults ($tablename, $what)
 {
-	$map = getAttrMap ();
+	$attr_types = array();
 	$result = usePreparedSelectBlade
 	(
 		'SELECT AV.object_id, AV.attr_id FROM AttributeValue AV ' .
@@ -3145,7 +3145,9 @@ function getStickerSearchResults ($tablename, $what)
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		if (in_array ($map[$row['attr_id']]['type'], array ('string', 'dict')))
+		if (! array_key_exists ($row['attr_id'], $attr_types))
+			$attr_types[$row['attr_id']] = getAttrType ($row['attr_id']);
+		if (in_array ($attr_types[$row['attr_id']], array ('string', 'dict')))
 		{
 			$ret[$row['object_id']]['id'] = $row['object_id'];
 			$ret[$row['object_id']]['by_sticker'][] = $row['attr_id'];
@@ -3302,12 +3304,12 @@ function searchByMgmtHostname ($string)
 // returns an array of object ids
 function searchByAttrValue ($attr_id, $value)
 {
-	$map = getAttrMap();
-	if (! isset ($map[$attr_id]))
+	$type = getAttrType ($attr_id);
+	if (! isset ($type))
 		throw new InvalidArgException ('attr_id', $attr_id, "No such attribute");
 
 	$field = NULL;
-	switch ($map[$attr_id]['type'])
+	switch ($type)
 	{
 		case 'string':
 			$field = 'string_value';
@@ -3321,7 +3323,7 @@ function searchByAttrValue ($attr_id, $value)
 			$field = 'uint_value';
 			break;
 		default:
-			throw new InvalidArgException ('type', $map[$attr_id]['type']);
+			throw new InvalidArgException ('type', $type);
 	}
 
 	$result = usePreparedSelectBlade ("
@@ -3637,8 +3639,22 @@ function getPortOIFRefc()
 	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'refcnt');
 }
 
+function getAttrType ($attr_id)
+{
+	$result = usePreparedSelectBlade ('SELECT type FROM Attribute WHERE id = ?' , array ($attr_id));
+	return $result->fetch (PDO::FETCH_COLUMN, 0);
+}
+
+function getObjTypeAttrMap ($objtype_id)
+{
+	$result = usePreparedSelectBlade ('SELECT id, type, name, chapter_id, sticky FROM Attribute INNER JOIN AttributeMap ON id = attr_id WHERE objtype_id = ?' , array ($objtype_id));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+}
+
 // Return a list of all stickers with sticker map applied. Each sticker records will
 // list all its ways on the map with refcnt set.
+// The function is pretty heavy, uses temporary tables and scans many rows,
+// so try to not use it unless it is really necessary
 function getAttrMap ()
 {
 	static $cached_result = NULL;
@@ -5551,8 +5567,7 @@ function touchVLANSwitch ($switch_id)
 # attribute belonging to the given range (relative to today's date).
 function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 {
-	$attrmap = getAttrMap();
-	if ($attrmap[$attr_id]['type'] != 'date')
+	if (getAttrType ($attr_id) != 'date')
 		throw new InvalidArgException ('attr_id', $attr_id, 'attribute cannot store dates');
 	$result = usePreparedSelectBlade
 	(
