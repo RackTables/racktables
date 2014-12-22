@@ -902,6 +902,30 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 	return $ret;
 }
 
+function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $title = '', $comment = '', $class = '')
+{
+	$ret = '';
+	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+	$ret .= '<a href="#"';
+	$class = trim ($class);
+	if (! empty ($class))
+		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
+	if (! empty ($comment))
+		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
+	$href = makeHrefForHelper ($helper, $params);
+	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
+
+	if (! empty ($img_name))
+	{
+		$ret .= getImageHREF ($img_name, $comment);
+		if (! empty ($title))
+			$ret .= ' ';
+	}
+	$ret .= $title;
+	$ret .= '</a>';
+	return $ret;
+}
+
 function renderProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 {
 	echo getProgressBar ($percentage, $theme, $inline);
