@@ -912,7 +912,7 @@ function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $tit
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
 	if (! empty ($comment))
 		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
-	$href = makeHrefForHelper ($helper, $params);
+	$href = makeHref (array ('module' => 'popup', 'helper' => $helper) + makePageParams ($params));
 	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
 
 	if (! empty ($img_name))

@@ -2825,11 +2825,6 @@ function makeHrefProcess ($params = array())
 	return makeHref (array ('module' => 'redirect') + makePageParams ($params));
 }
 
-function makeHrefForHelper ($helper_name, $params = array())
-{
-	return makeHref (array ('module' => 'popup', 'helper' => $helper_name) + $params);
-}
-
 // Process the given list of records to build data suitable for printNiftySelect()
 // (like it was formerly executed by printSelect()). Screen out vendors according
 // to VENDOR_SIEVE, if object type ID is provided. However, the OPTGROUP with already

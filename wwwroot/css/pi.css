@@ -911,3 +911,12 @@ a.noclick {
 	font-size: 12px;
 	line-height: 1.5em;
 }
+
+div.popupbar {
+	background-color: #f0f0f0;
+	border: 1px solid #3c78b5;
+	padding: 10px;
+	height: 100%;
+	text-align: center;
+	margin: 5px;
+}

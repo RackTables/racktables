@@ -1083,7 +1083,7 @@ function renderEditObjectForm()
 		}
 		echo "<tr><td>&nbsp;</td>";
 		echo "<th class=tdright>Select container:</th><td class=tdleft>";
-		echo getPopupLink ('objlist', array ('object_id' => $object_id), 'findlink', 'attach', 'Select a container');
+		echo getPopupLink ('objlist', array(), 'findlink', 'attach', 'Select a container');
 		echo "</td></tr>\n";
 	}
 	// optional attributes

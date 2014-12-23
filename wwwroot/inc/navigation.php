@@ -862,4 +862,8 @@ $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 $ajaxhandler['get-slb-form'] = 'renderSLBFormAJAX';
 $ajaxhandler['triplet-preview'] = 'getTripletConfigAJAX';
 
+$popuphandler['objlist'] = 'renderPopupObjectSelector';
+$popuphandler['portlist'] = 'renderPopupPortSelector';
+$popuphandler['inet4list'] = 'renderPopupIPv4Selector';
+
 ?>
