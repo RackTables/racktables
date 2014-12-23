@@ -1889,22 +1889,14 @@ function getCellFilter ()
 
 function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
-	global $page, $pageno, $tabno;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	$url = "index.php?page=${nextpage}&tab=${nexttab}";
-
-	if ($nextpage === $pageno)
-		fillBypassValues ($nextpage, $moreArgs);
-	foreach ($moreArgs as $arg => $value)
-		if (is_array ($value))
-			foreach ($value as $v)
-				$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
-		elseif ($arg != 'module')
-			$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
-	return $url;
+	$params = array();
+	if ($nextpage !== NULL)
+		$params['page'] = $nextpage;
+	if ($nexttab !== NULL)
+		$params['tab'] = $nexttab;
+	$params = makePageParams ($params + $moreArgs);
+	unset ($params['module']); // 'interface' module is the default
+	return makeHref ($params);
 }
 
 // store the accumulated message list into he $SESSION array to display them later
@@ -2815,27 +2807,27 @@ function makeHref ($params = array())
 	return 'index.php?' . implode ('&', $tmp);
 }
 
+function makePageParams ($params = array())
+{
+	global $pageno, $tabno;
+	$ret = array();
+	// assure that page and tab keys go first
+	$ret['page'] = isset ($params['page']) ? $params['page'] : $pageno;
+	$ret['tab'] = isset ($params['tab']) ? $params['tab'] : $tabno;
+	$ret += $params;
+	if ($ret['page'] === $pageno)
+		fillBypassValues ($pageno, $ret);
+	return $ret;
+}
+
 function makeHrefProcess ($params = array())
 {
-	global $pageno, $tabno, $page;
-	$tmp = array();
-	if (! array_key_exists ('page', $params))
-		$params['page'] = $pageno;
-	if (! array_key_exists ('tab', $params))
-		$params['tab'] = $tabno;
-	if ($params['page'] === $pageno)
-		fillBypassValues ($pageno, $params);
-	foreach ($params as $key => $value)
-		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
-	return '?module=redirect&' . implode ('&', $tmp);
+	return makeHref (array ('module' => 'redirect') + makePageParams ($params));
 }
 
 function makeHrefForHelper ($helper_name, $params = array())
 {
-	$ret = '?module=popup&helper=' . $helper_name;
-	foreach($params as $key=>$value)
-		$ret .= '&'.urlencode($key).'='.urlencode($value);
-	return $ret;
+	return makeHref (array ('module' => 'popup', 'helper' => $helper_name) + $params);
 }
 
 // Process the given list of records to build data suitable for printNiftySelect()

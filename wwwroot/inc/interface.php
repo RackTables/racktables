@@ -6402,12 +6402,7 @@ function showTabs ($pageno, $tabno)
 		if ($tabidx == $tabno)
 			$tabclass = 'current'; // override any class for an active selection
 		echo "<li><a class=${tabclass}";
-		echo " href='index.php?page=${pageno}&tab=${tabidx}";
-		$args = array();
-		fillBypassValues ($pageno, $args);
-		foreach ($args as $param_name => $param_value)
-			echo "&" . urlencode ($param_name) . '=' . urlencode ($param_value);
-
+		echo " href='" . makeHref (makePageParams (array ('tab' => $tabidx)));
 		echo "'>${tabtitle}</a></li>\n";
 	}
 	echo "</ul></div>";
