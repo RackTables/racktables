@@ -3917,23 +3917,36 @@ function usePreparedInsertBlade ($tablename, $columns)
 	}
 }
 
+function makeWhereSQL ($where_columns, $conjunction, &$params = array())
+{
+	$query = '';
+	$params = array();
+	$conj = '';
+	foreach ($where_columns as $colname => $colvalue)
+	{
+		if ($colvalue === NULL)
+			$query .= " ${conj} ${colname} IS NULL";
+		else
+		{
+			$query .= " ${conj} ${colname}=?";
+			$params[] = $colvalue;
+		}
+		$conj = $conjunction;
+	}
+	return $query;
+}
+
 // This swiss-knife blade deletes any number of records from the specified table
 // using the specified key names and values.
 // returns integer - affected rows count. Throws exception on error
 function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
-	$conj = '';
-	$query = "DELETE FROM ${tablename} WHERE ";
-	foreach ($columns as $colname => $colvalue)
-	{
-		$query .= " ${conj} ${colname}=?";
-		$conj = $conjunction;
-	}
+	$query = "DELETE FROM ${tablename} WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		$prepared->execute (array_values ($columns));
+		$prepared->execute ($where_values);
 		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
@@ -3968,17 +3981,11 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 		$query .= "${conj}${colname}=?";
 		$conj = ', ';
 	}
-	$conj = '';
-	$query .= ' WHERE ';
-	foreach (array_keys ($where_columns) as $colname)
-	{
-		$query .= " ${conj} ${colname}=?";
-		$conj = $conjunction;
-	}
+	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
-		$prepared->execute (array_merge (array_values ($set_columns), array_values ($where_columns)));
+		$prepared->execute (array_merge (array_values ($set_columns), $where_values));
 		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
