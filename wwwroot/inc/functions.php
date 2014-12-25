@@ -5245,14 +5245,28 @@ function getConfigVar ($varname = '')
 }
 
 // return portinfo array if object has a port with such name, or NULL
-function getPortinfoByName (&$object, $portname)
+// in strict mode the resulting port name is always equal to the $portname.
+// in non-strict mode names are compared using shortenIfName()
+function getPortinfoByName (&$object, $portname, $strict_mode = TRUE)
 {
 	if (! isset ($object['ports']))
-		amplifyCell ($object);
+		$object['ports'] = getObjectPortsAndLinks ($object['id']);
+	if (! $strict_mode)
+	{
+		$breed = detectDeviceBreed ($object['id']);
+		$portname = shortenIfName ($portname, $breed);
+	}
+	$ret = NULL;
 	foreach ($object['ports'] as $portinfo)
-		if ($portinfo['name'] == $portname)
-			return $portinfo;
-	return NULL;
+		if ($portname == ($strict_mode ? $portinfo['name'] : shortenIfName ($portinfo['name'], $breed)))
+		{
+			$ret = $portinfo;
+			if ($ret['linked'])
+				break;
+		}
+		elseif (isset ($ret))
+			break;
+	return $ret;
 }
 
 // exclude location-related object types
