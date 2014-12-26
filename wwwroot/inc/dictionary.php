@@ -217,8 +217,8 @@ $dictionary = array
 	142 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst Express 500-24LC'),
 	143 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750-24TS'),
 	144 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750-E'),
-	145 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4503'),
-	146 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 6513'),
+	145 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 4503'),
+	146 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6513'),
 	147 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst 4948 | http://www.cisco.com/en/US/products/ps6026/index.html]]'),
 	148 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6509-E%L9,1H%'),
 	149 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6509-NEB-A%L9,1H%'),
@@ -442,10 +442,10 @@ $dictionary = array
 	369 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 6509%L9,1H%'),
 	370 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 6524GS-8S'),
 	371 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 6524GT-8S'),
-	372 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4503-E'),
-	373 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4506-E'),
-	374 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4507R-E'),
-	375 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4510R-E'),
+	372 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 4503-E'),
+	373 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 4506-E'),
+	374 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 4507R-E'),
+	375 => array ('chapter_id' => 30, 'dict_value' => 'Cisco%GPASS%Catalyst 4510R-E'),
 	376 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3750-24TE-M'),
 	377 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Catalyst 4948-10GE | http://www.cisco.com/en/US/products/ps6230/index.html]]'),
 	378 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 4924-10GE'),
@@ -2104,6 +2104,14 @@ $dictionary = array
 	2211 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%CGS-2520-24TC'),
 	2212 => array ('chapter_id' => 12, 'dict_value' => 'Linksys%GPASS%SRW2024P'),
 	2213 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%2920-48G J9728A'),
+
+	// merged from modular branch
+	2500 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6K-SUP1-2GE'),
+	2501 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6K-SUP1A-2GE'),
+	2502 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6K-SUP2-2GE'),
+	2503 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X4515'),
+	2504 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X4548-GB-RJ45'),
+	2505 => array ('chapter_id' => 17, 'dict_value' => 'Cisco (blade)%GPASS%NPE-G2'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT

@@ -255,7 +255,7 @@ $iftable_processors['catalyst-chassis-25-to-26-1000SFP'] = array
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(25|26)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => '4-1077',
-	'label' => '\\2X',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -264,7 +264,7 @@ $iftable_processors['catalyst-chassis-any-100TX'] = array
 	'pattern' => '@^FastEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'fa\\1\\2',
 	'dict_key' => 19,
-	'label' => '\\2X',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -282,7 +282,7 @@ $iftable_processors['catalyst-chassis-any-1000T'] = array
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => 24,
-	'label' => '\\2X',
+	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -344,6 +344,15 @@ $iftable_processors['catalyst-chassis-1-to-2-combo-1000T'] = array (
 	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2)$@',
 	'replacement' => 'gi\\1\\2',
 	'dict_key' => 24,
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['catalyst-chassis-1-to-3-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?(1|2|3)$@',
+	'replacement' => 'gi\\1\\2',
+	'dict_key' => '4-1077',
 	'label' => '\\2',
 	'try_next_proc' => TRUE,
 );
@@ -552,6 +561,24 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'replacement' => 'e\\1',
 	'dict_key' => '9-1084',
 	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-router-chassis-any-100TX'] = array
+(
+	'pattern' => '@^FastEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'fe\\1\\2',
+	'dict_key' => 19,
+	'label' => 'FE \\1\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-router-chassis-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)?([[:digit:]]+)$@',
+	'replacement' => 'ge\\1\\2',
+	'dict_key' => 24,
+	'label' => 'GE \\1\\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -1817,8 +1844,143 @@ $iftable_processors['ibm-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
-global $known_switches;
-$known_switches = array // key is system OID w/o "enterprises" prefix
+$iftable_processors['catalyst-module-any-1000T'] = array
+(
+	'pattern' => '@^Gi(\d+)/(\d+)$@',
+	'replacement' => 'gi\\1/\\2',
+	'dict_key' => 24,
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-any-1000SFP'] = array
+(
+	'pattern' => '@^Gi(\d+)/(\d+)$@',
+	'replacement' => 'gi\\1/\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-any-1000GBIC'] = array
+(
+	'pattern' => '@^Gi(\d+)/(\d+)$@',
+	'replacement' => 'gi\\1/\\2',
+	'dict_key' => '3-1078',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-any-10000X2'] = array
+(
+	'pattern' => '@^TenGigabitEthernet(\d+)/(\d+)$@',
+	'replacement' => 'te\\1/\\2',
+	'dict_key' => '6-1080',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-any-10000XENPAK'] = array
+(
+	'pattern' => '@^TenGigabitEthernet(\d+)/(\d+)$@',
+	'replacement' => 'te\\1/\\2',
+	'dict_key' => '5-1079',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-sup-g1-1000SFP'] = array
+(
+	'pattern' => '@^Gi(\d+)/1$@',
+	'replacement' => 'gi\\1/1',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-module-sup-g2-1000SFP'] = array
+(
+	'pattern' => '@^Gi(\d+)/2$@',
+	'replacement' => 'gi\\1/2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['catalyst-module-sup-g2-1000T'] = array
+(
+	'pattern' => '@^Gi(\d+)/2 10/100/1000BaseT$@',
+	'replacement' => 'gi\\1/2',
+	'dict_key' => '1-24',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-100TX'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => 19,
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-1000T'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => 24,
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-CX4'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '1-40',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-X2'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '6-1080',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-1000SFP'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-10000SFP+'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(\d+)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-module-21-to-24-1000SFP'] = array
+(
+	'pattern' => '@^Port ([A-Z])?(21|22|23|24)$@',
+	'replacement' => '\\1\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+global $known_devices;
+$known_devices = array // key is system OID w/o "enterprises" prefix
 (
 	'9.1.217' => array
 	(
@@ -1831,6 +1993,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1719,
 		'text' => 'WS-C2924M-XL: 24 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.222' => array
+	(
+		'dict_key' => 269,
+		'text' => '7206VXR: 6 module bays',
+		'modular' => TRUE,
 	),
 	'9.1.246' => array
 	(
@@ -1855,6 +2023,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 154,
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'9.1.283' => array
+	(
+		'dict_key' => 148,
+		'text' => 'WS-C6509-E: 9 module bays',
+		'modular' => TRUE,
 	),
 	'9.1.323' => array
 	(
@@ -1934,6 +2108,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950SX-24 24 RJ-45/10-100TX + 2 1000Base-SX',
 		'processors' => array ('catalyst-chassis-uplinks-1000SX','catalyst-chassis-any-100TX'),
 	),
+	'9.1.503' => array
+	(
+		'dict_key' => 145,
+		'text' => 'WS-C4503: 3 module bays',
+		'modular' => TRUE,
+	),
 	'9.1.527' => array
 	(
 		'dict_key' => 210,
@@ -1982,6 +2162,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
 	),
+	'9.1.577' => array
+	(
+		'dict_key' => 281,
+		'text' => 'Cisco 2821 ISR: 2 RJ-45/10-100-1000T(X) + 6 module bays',
+		'modular' => TRUE,
+	),
 	'9.1.614' => array
 	(
 		'dict_key' => 175,
@@ -2005,6 +2191,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 174,
 		'text' => 'WS-C3560G-48TS: 48 RJ-45/10-100-1000T(X) + 4 SFP/1000',
 		'processors' => array ('catalyst-chassis-49-to-52-1000SFP', 'catalyst-chassis-any-1000T'),
+	),
+	'9.1.619' => array
+	(
+		'dict_key' => 279,
+		'text' => 'Cisco 2801 ISR: 2 RJ-45/10-100TX + 4 module bays',
+		'modular' => TRUE,
 	),
 	'9.1.626' => array
 	(
@@ -2514,6 +2706,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 864,
 		'text' => 'J4900B: 24 RJ-45/10-100TX + 2 combo-gig',
 		'processors' => array ('procurve-25-to-26-combo-1000SFP', 'procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.51' => array
+	(
+		'dict_key' => 890,
+		'text' => 'J8698A: 12 module bays',
+		'modular' => TRUE,
 	),
 	'11.2.3.7.11.53' => array
 	(
@@ -3165,6 +3363,246 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 );
 
+global $known_modules;
+$known_modules = array
+(
+	'2801_ISR_motherboard' => array
+	(
+		'pattern' => '@^C2801 Motherboard@',
+		'processors' => array ('cisco-router-chassis-any-100TX'),
+		'assign_to_origin' => TRUE,
+	),
+	'2821_ISR_motherboard' => array
+	(
+		'pattern' => '@^c2821 Motherboard@',
+		'processors' => array ('cisco-router-chassis-any-1000T'),
+		'assign_to_origin' => TRUE,
+	),
+	'J8702A' => array
+	(
+		'pattern' => '@^ProCurve J8702A .+ Module$@',
+		'dict_key' => 1628,
+		'text' => 'J8702A: 24 RJ-45/10-100-1000T(X) PoE',
+		'processors' => array ('procurve-module-1000T'),
+	),
+	'J8705A' => array
+	(
+		'pattern' => '@^ProCurve J8705A .+ Module$@',
+		'dict_key' => 1629,
+		'text' => 'J8705A: 20 RJ-45/10-100-1000T(X) PoE + 4 SFP',
+		'processors' => array ('procurve-module-21-to-24-1000SFP', 'procurve-module-1000T'),
+	),
+	'J8706A' => array
+	(
+		'pattern' => '@^ProCurve J8706A .+ Module$@',
+		'dict_key' => 1630,
+		'text' => 'J8706A: 24 SFP',
+		'processors' => array ('procurve-module-1000SFP'),
+	),
+	'J8707A' => array
+	(
+		'pattern' => '@^ProCurve J8707A .+ Module$@',
+		'dict_key' => 1631,
+		'text' => 'J8707A: 4 X2/10000',
+		'processors' => array ('procurve-module-CX4'),
+	),
+	'J8708A' => array
+	(
+		'pattern' => '@^ProCurve J8708A .+ Module$@',
+		'dict_key' => 1632,
+		'text' => 'J8708A: 4 CX4/10000',
+		'processors' => array ('procurve-module-X2'),
+	),
+	'J8726A' => array
+	(
+		'pattern' => '@^ProCurve J8726A Management Module 5400zl$@',
+		'dict_key' => 1627,
+		'text' => 'J8726A: 1 console',
+	),
+	'J9307A' => array
+	(
+		'pattern' => '@^ProCurve J9307A .+ Module$@',
+		'dict_key' => 1633,
+		'text' => 'J9307A: 24 RJ-45/10-100-1000T(X) PoE+',
+		'processors' => array ('procurve-module-1000T'),
+	),
+	'J9308A' => array
+	(
+		'pattern' => '@^ProCurve J9308A .+ Module$@',
+		'dict_key' => 1634,
+		'text' => 'J9308A: 20 RJ-45/10-100-1000T(X) PoE+ + 4 SFP',
+		'processors' => array ('procurve-module-21-to-24-1000SFP', 'procurve-module-1000T'),
+	),
+	'J8709A' => array
+	(
+		'pattern' => '@^ProCurve J8709A .+ Module$@',
+		'dict_key' => 1635,
+		'text' => 'J8709A: 4 SFP+',
+		'processors' => array ('procurve-module-10000SFP+'),
+	),
+	'J9478A' => array
+	(
+		'pattern' => '@^ProCurve J9478A .+ Module$@',
+		'dict_key' => 1636,
+		'text' => 'J9478A: 24 RJ-45/10-100 PoE+',
+		'processors' => array ('procurve-module-100TX'),
+	),
+	'NPE-G2' => array
+	(
+		'pattern' => '@^NPE-G2@',
+		'dict_key' => 2505,
+		'text' => 'NPE-G2: processing engine',
+		'processors' => array ('catalyst-chassis-1-to-3-combo-1000SFP', 'catalyst-chassis-any-1000T'),
+	),
+	'WS-X4515' => array
+	(
+		'pattern' => '@^WS-X4515@',
+		'dict_key' => 2503,
+		'text' => 'WS-X4515: supervisor module',
+		'processors' => array ('catalyst-chassis-any-1000GBIC'),
+	),
+	'WS-X6K-SUP2-2GE' => array
+	(
+		'pattern' => '@^WS-X6K-S(2|2U)-(P|MS)FC2@',
+		'dict_key' => 2502,
+		'text' => 'WS-X6K-SUP2-2GE: supervisor module',
+		'processors' => array ('catalyst-module-sup-g1-1000SFP', 'catalyst-module-sup-g2-1000SFP'),
+	),
+	'WS-SUP720-3B' => array
+	(
+		'pattern' => '@^WS-SUP720-3B@',
+		'dict_key' => 1552,
+		'text' => 'WS-SUP720-3B: supervisor module',
+		'processors' => array ('catalyst-module-sup-g1-1000SFP', 'catalyst-module-sup-g2-1000SFP', 'catalyst-module-sup-g2-1000T'),
+	),
+	'WS-XSUP720-3BXL' => array
+	(
+		'pattern' => '@^WS-XSUP720-3BXL@',
+		'dict_key' => 1553,
+		'text' => 'WS-XSUP720-3BXL: supervisor module',
+		'processors' => array ('catalyst-module-sup-g1-1000SFP', 'catalyst-module-sup-g2-1000SFP', 'catalyst-module-sup-g2-1000T'),
+	),
+	'WS-X4548-GB-RJ45' => array
+	(
+		'pattern' => '@^WS-X4548-GB-RJ45@',
+		'dict_key' => 2504,
+		'text' => 'WS-X4548-GB-RJ45: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'WS-X6148-GE-TX' => array
+	(
+		'pattern' => '@^WS-X6148-GE-TX@',
+		'dict_key' => 1536,
+		'text' => 'WS-X6148-GE-TX: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+	'WS-X6148-GE-45AF' => array
+	(
+		'pattern' => '@^WS-X6148-GE-45AF@',
+		'dict_key' => 1537,
+		'text' => 'WS-X6148-GE-45AF: 48 RJ-45/10-100-1000T(X) PoE',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+	'WS-X6148A-GE-TX' => array
+	(
+		'pattern' => '@^WS-X6148A-GE-TX@',
+		'dict_key' => 1538,
+		'text' => 'WS-X6148A-GE-TX: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+	'WS-X6408A-GBIC' => array
+	(
+		'pattern' => '@^WS-X6408A-GBIC@',
+		'dict_key' => 1539,
+		'text' => 'WS-X6408A-GBIC: 8 GBIC/1000',
+		'processors' => array ('catalyst-module-any-1000GBIC'),
+	),
+	'WS-X6416-GBIC' => array
+	(
+		'pattern' => '@^WS-X6416-GBIC@',
+		'dict_key' => 1540,
+		'text' => 'WS-X6416-GBIC: 16 GBIC/1000',
+		'processors' => array ('catalyst-module-any-1000GBIC'),
+	),
+	'WS-X6516A-GBIC' => array
+	(
+		'pattern' => '@^WS-X6516A-GBIC@',
+		'dict_key' => 1541,
+		'text' => 'WS-X6516A-GBIC: 16 GBIC/1000',
+		'processors' => array ('catalyst-module-any-1000GBIC'),
+	),
+	'WS-X6548-GE-TX' => array
+	(
+		'pattern' => '@^WS-X6548-GE-TX@',
+		'dict_key' => 1542,
+		'text' => 'WS-X6548-GE-TX: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+	'WS-X6548-GE-45AF' => array
+	(
+		'pattern' => '@^WS-X6548-GE-45AF@',
+		'dict_key' => 1543,
+		'text' => 'WS-X6548-GE-45AF: 48 RJ-45/10-100-1000T(X) PoE',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+	'WS-X6704-10GE' => array
+	(
+		'pattern' => '@^WS-X6704-10GE@',
+		'dict_key' => 1544,
+		'text' => 'WS-X6704-10GE: 4 XENPAK',
+		'processors' => array ('catalyst-module-any-10000XENPAK'),
+	),
+	'WS-X6708-10G-3C' => array
+	(
+		'pattern' => '@^WS-X6708-10G-3C@',
+		'dict_key' => 1545,
+		'text' => 'WS-X6708-10G-3C: 8 X2',
+		'processors' => array ('catalyst-module-any-10000X2'),
+	),
+	'WS-X6708-10G-3CXL' => array
+	(
+		'pattern' => '@^WS-X6708-10G-3CXL@',
+		'dict_key' => 1546,
+		'text' => 'WS-X6708-10G-3CXL: 8 X2',
+		'processors' => array ('catalyst-module-any-10000X2'),
+	),
+	'WS-X6716-10GT-3C' => array
+	(
+		'pattern' => '@^WS-X6716-10GT-3C@',
+		'dict_key' => 1547,
+		'text' => 'WS-X6716-10GT-3C: 16 X2',
+		'processors' => array ('catalyst-module-any-10000X2'),
+	),
+	'WS-X6716-10GT-3CXL' => array
+	(
+		'pattern' => '@^WS-X6716-10GT-3CXL@',
+		'dict_key' => 1548,
+		'text' => 'WS-X6716-10GT-3CXL: 16 X2',
+		'processors' => array ('catalyst-module-any-10000X2'),
+	),
+	'WS-X6724-SFP' => array
+	(
+		'pattern' => '@^WS-X6724-SFP@',
+		'dict_key' => 1549,
+		'text' => 'WS-X6724-SFP: 24 SFP/1000',
+		'processors' => array ('catalyst-module-any-1000SFP'),
+	),
+	'WS-X6748-SFP' => array
+	(
+		'pattern' => '@^WS-X6748-SFP@',
+		'dict_key' => 1551,
+		'text' => 'WS-X6748-SFP: 48 SFP/1000',
+		'processors' => array ('catalyst-module-any-1000SFP'),
+	),
+	'WS-X6748-GE-TX' => array
+	(
+		'pattern' => '@^WS-X6748-GE-TX@',
+		'dict_key' => 1550,
+		'text' => 'WS-X6748-GE-TX: 48 RJ-45/10-100-1000T(X)',
+		'processors' => array ('catalyst-module-any-1000T'),
+	),
+);
+
 global $swtype_pcre;
 $swtype_pcre = array
 (
@@ -3180,6 +3618,21 @@ $swtype_pcre = array
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
 	'/^Arista Networks EOS version 4\./' => 1675,
 	'/^Dell Force10 OS\b.*\bApplication Software Version: 8(\.\d+){3}/' => 1594,
+);
+
+global $chapter_to_objtype_map;
+$chapter_to_objtype_map = array
+(
+	11 => 4,
+	12 => 8,
+	17 => 7,
+	18 => 5,
+	24 => 798,
+	25 => 965,
+	26 => 1055,
+	27 => 2,
+	30 => 1503,
+	38 => 1787,
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
@@ -3226,10 +3679,132 @@ function checkPIC ($port_type_id)
 	}
 }
 
+// Recursive function handles sub-modules
+function addModules ($parent_id, $object_id, $module_key = NULL)
+{
+	$self = __FUNCTION__;
+	global $chapter_to_objtype_map, $known_modules, $iftable_processors, $snmp_data, $objectInfo;
+	$count = count ($snmp_data['entPhysicalContainedIn']);
+	$children = array_keys ($snmp_data['entPhysicalContainedIn'], $parent_id);
+	foreach ($children as $id)
+	{
+		// it should be added as a port
+		if (array_key_exists ($id, $snmp_data['entToIfMapping']))
+			addModulePort ($id, $object_id, $module_key);
+
+		// it should be added as an object
+		foreach ($known_modules as $key => $attr)
+			// the model string may be stored in entPhysicalDescr or entPhysicalModelName
+			if (preg_match ($attr['pattern'], $snmp_data['entPhysicalDescr'][$id]) or preg_match ($attr['pattern'], $snmp_data['entPhysicalModelName'][$id]))
+			{
+				$module_key = $key;
+
+				// sometimes ports are registered to a child object such as a motherboard
+				// in such cases, we want them assigned to the origin object itself (example: Cisco 2801 ISR)
+				if (isset ($known_modules[$module_key]['assign_to_origin']))
+				{
+					addModulePort ($id, $object_id, $module_key);
+					break;
+				}
+				showSuccess ($known_modules[$module_key]['text']);
+
+				// entPhysicalName contains the name of the slot in most cases.
+				// But sometimes it contains a non-unique string, such as 'Linecard'.
+				// If that is true, use the id instead, which can be assumed to be unique.
+				$module_name_known = TRUE;
+				$module_name = $snmp_data['entPhysicalName'][$id];
+				if (strlen ($snmp_data['entPhysicalName'][$id]) > 3)
+				{
+					$module_name_known = FALSE;
+					$module_name = $id;
+				}
+
+				// determine object type
+				$dict_entry = getDictionaryEntry ($attr['dict_key']);
+				if (! array_key_exists ($dict_entry['chapter_id'], $chapter_to_objtype_map))
+				{
+					showError ('No dictionary entry, terminating');
+					break 2;
+				}
+
+				$objtype_id = $chapter_to_objtype_map[$dict_entry['chapter_id']];
+				$child_object_id = commitAddObject ("${objectInfo['name']} - module ${module_name}", NULL, $objtype_id, NULL);
+				$child_objectInfo = spotEntity ('object', $child_object_id);
+				$child_objectInfo['attrs'] = getAttrValues ($child_object_id);
+				updateStickerForCell ($child_objectInfo, 1, $snmp_data['entPhysicalSerialNum'][$id]); // OEM S/N 1
+				updateStickerForCell ($child_objectInfo, 2, $attr['dict_key']); // HW type
+				updateStickerForCell ($child_objectInfo, 5, $snmp_data['entPhysicalFirmwareRev'][$id]); // SW version
+				if ($module_name_known)
+					updateStickerForCell ($child_objectInfo, 28, $module_name); // Slot number
+				commitLinkEntities ('object', $object_id, 'object', $child_object_id);
+
+				// add model-specific module details
+				switch ($module_key)
+				{
+				case 'J8726A':
+					checkPIC ('1-681');
+					commitAddPort ($child_object_id, 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
+					break;
+				case 'NPE-G2':
+					checkPIC ('1-29');
+					commitAddPort ($child_object_id, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+					commitAddPort ($child_object_id, 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
+					checkPIC ('1-19');
+					commitAddPort ($child_object_id, 'mgmt', '1-19', '', ''); // 100Mb OOB mgmt
+					break;
+				case 'WS-SUP720-3B':
+				case 'WS-X6K-SUP2-2GE':
+				case 'WS-XSUP720-3BXL':
+					checkPIC ('1-29');
+					commitAddPort ($child_object_id, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+					break;
+				case 'WS-X4515':
+					checkPIC ('1-29');
+					commitAddPort ($child_object_id, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+					checkPIC ('1-19');
+					commitAddPort ($child_object_id, 'eobc', '1-19', 'mgmt', ''); // 100Mb OOB mgmt
+					break;
+				}
+				break;
+			}
+
+		// if a new child object was just created, find children of that; otherwise, find children of the object passed as an argument
+		$search_object_id = isset ($child_object_id) ? $child_object_id : $object_id;
+		$self ($id, $search_object_id, $module_key);
+	}
+}
+
+function addModulePort ($ent_id, $object_id, $module_key)
+{
+	global $known_modules, $iftable_processors, $snmp_data;
+	$ifId = $snmp_data['entToIfMapping'][$ent_id];
+	foreach ($known_modules[$module_key]['processors'] as $processor_name)
+	{
+		$pattern = $iftable_processors[$processor_name]['pattern'];
+		$replacement = $iftable_processors[$processor_name]['replacement'];
+		$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $snmp_data['entPhysicalName'][$ent_id], 1, $count);
+		if ($newname === NULL)
+		{
+			showError ('PCRE pattern error, terminating');
+			break;
+		}
+		if (!$count)
+			continue; // try next processor on current port
+		$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $snmp_data['entPhysicalName'][$ent_id], 1, $count);
+		checkPIC ($iftable_processors[$processor_name]['dict_key']);
+		// By default, the 'skip_macs' key of the known_switch_modules array doesn't exist.  If it does exist, it can be assumed that it's true.
+		$mac = (isset ($known_modules[$module_key]['skip_macs'])) ? NULL : $snmp_data['ifPhysAddress'][$ifId];
+		commitAddPort ($object_id, $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $mac);
+		if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
+			break;
+	}
+}
+
 $msgcode['doSNMPmining']['ERR1'] = 161;
 $msgcode['doSNMPmining']['ERR2'] = 162;
 function doSNMPmining ($object_id, $snmpsetup)
 {
+	global $objectInfo;
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -3246,22 +3821,23 @@ function doSNMPmining ($object_id, $snmpsetup)
 
 	switch ($objectInfo['objtype_id'])
 	{
-	case 7:   // Router
-	case 8:   // Network switch
-	case 965: // Wireless
+	case 7:    // Router
+	case 8:    // Network switch
+	case 965:  // Wireless
+	case 1503: // Network chassis
 		$device = new RTSNMPDevice ($endpoints[0], $snmpsetup);
-		return doSwitchSNMPmining ($objectInfo, $device);
+		return doGenericSNMPmining ($device);
 	case 2:
 		$device = new APCPowerSwitch ($endpoints[0], $snmpsetup);
-		return doPDUSNMPmining ($objectInfo, $device);
+		return doPDUSNMPmining ($device);
 	}
 }
 
-$msgcode['doSwitchSNMPmining']['ERR3'] = 188;
-$msgcode['doSwitchSNMPmining']['ERR4'] = 189;
-function doSwitchSNMPmining ($objectInfo, $device)
+$msgcode['doGenericSNMPmining']['ERR3'] = 188;
+$msgcode['doGenericSNMPmining']['ERR4'] = 189;
+function doGenericSNMPmining ($device)
 {
-	global $known_switches, $iftable_processors;
+	global $objectInfo, $known_devices, $iftable_processors;
 
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 	{
@@ -3269,7 +3845,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		return;
 	}
 	$sysObjectID = preg_replace ('/^.*(enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
-	if (!isset ($known_switches[$sysObjectID]))
+	if (!isset ($known_devices[$sysObjectID]))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
 		return;
@@ -3277,15 +3853,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
-	$ifDescr_tablename = array_fetch ($known_switches[$sysObjectID], 'ifDescrOID', 'ifDescr');
-	showSuccess ($known_switches[$sysObjectID]['text']);
-	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)
-		if (!array_key_exists ($known_switches[$sysObjectID]['processors'][$pkey], $iftable_processors))
-		{
-			showWarning ('processor "' . $known_switches[$sysObjectID]['processors'][$pkey] . '" not found');
-			unset ($known_switches[$sysObjectID]['processors'][$pkey]);
-		}
-	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
+	showSuccess ($known_devices[$sysObjectID]['text']);
+	updateStickerForCell ($objectInfo, 2, $known_devices[$sysObjectID]['dict_key']); // HW type
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	detectSoftwareType ($objectInfo, $sysDescr);
 	switch (1)
@@ -3308,11 +3877,25 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$sysChassi = $device->snmpget ('1.3.6.1.4.1.9.3.6.3.0');
 		if ($sysChassi !== FALSE or $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
-		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		// some models have the console port located on a module instead of the chassis
+		$no_console = array
+		(
+			'9.1.283',
+			'9.1.503'
+		);
+		if (! in_array ($sysObjectID, $no_console))
+		{
+			checkPIC ('1-29');
+			commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		}
 		if (preg_match ('/Cisco IOS Software, C2600/', $sysDescr))
 			commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
-		if ($sysObjectID == '9.1.956')
+		$dual_ac = array
+		(
+			'9.1.283',
+			'9.1.956'
+		);
+		if (in_array ($sysObjectID, $dual_ac))
 		{
 			// models with two AC inputs
 			checkPIC ('1-16');
@@ -3595,61 +4178,169 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	default: // Nortel...
 		break;
 	}
-	$ifInfo = array();
-	foreach ($device->snmpwalkoid ($ifDescr_tablename) as $oid => $value)
+	if (isset ($known_devices[$sysObjectID]['modular']))
 	{
-		$randomindex = preg_replace ("/^.*${ifDescr_tablename}\.(.+)\$/", '\\1', $oid);
-		$value = trim (preg_replace ('/^[^:]+: (.+)$/', '\\1', $value), '"');
-		$ifInfo[$randomindex]['ifDescr'] = $value;
-	}
-	foreach ($device->snmpwalkoid ('ifPhysAddress') as $oid => $value)
-	{
-		$randomindex = preg_replace ("/^.*ifPhysAddress\.(.+)\$/", '\\1', $oid);
-		$value = trim ($value);
-		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
-		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
-		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
-		if (preg_match ('/^string: [0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}/i', $value)) // STRING: x:yy:z:xx:y:zz
+		// this is a modular device
+		// TODO: put the entire mining operation inside a single transaction (not possible now because commitAddPort() LOCKs/UNLOCKs the Port table which auto-commits any open transactions)
+		global $snmp_data;
+		$snmp_data = array ();
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.4') as $raw_key => $raw_value)
 		{
-			list ($dummy, $value) = explode (' ', $value);
-			$addrbytes = explode (':', $value);
-			foreach ($addrbytes as $bidx => $bytestr)
-				if (strlen ($bytestr) == 1)
-					$addrbytes[$bidx] = '0' . $bytestr;
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.4.'));
+			$value = substr ($raw_value, strlen ('INTEGER: '));
+			$snmp_data['entPhysicalContainedIn'][$key] = $value;
 		}
-		elseif (preg_match ('/^hex-string:( [0-9a-f]{2}){6}/i', $value)) // Hex-STRING: xx yy zz xx yy zz
-			$addrbytes = explode (' ', substr ($value, -17));
-		elseif (preg_match ('/22[0-9a-f]{12}22$/', bin2hex ($value))) // STRING: "??????"
-			$addrbytes = array (substr (bin2hex ($value), -14, 12));
-		else
-			continue; // martian format
-		$ifInfo[$randomindex]['ifPhysAddress'] = implode ('', $addrbytes);
-	}
-	// process each interface only once regardless of how many processors we have to run
-	foreach ($ifInfo as $iface)
-		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.2') as $raw_key => $raw_value)
 		{
-			$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
-			if ($newname === NULL)
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.2.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			$snmp_data['entPhysicalDescr'][$key] = $value;
+		}
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.7') as $raw_key => $raw_value)
+		{
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.7.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			$snmp_data['entPhysicalName'][$key] = $value;
+		}
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.13') as $raw_key => $raw_value)
+		{
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.13.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			$snmp_data['entPhysicalModelName'][$key] = $value;
+		}
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.11') as $raw_key => $raw_value)
+		{
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.11.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			$snmp_data['entPhysicalSerialNum'][$key] = $value;
+		}
+		updateStickerForCell ($objectInfo, 1, $snmp_data['entPhysicalSerialNum'][1]); // OEM S/N 1, safe to assume that the chassis is the first array element
+		foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.9') as $raw_key => $raw_value)
+		{
+			$key = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.9.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			$snmp_data['entPhysicalFirmwareRev'][$key] = $value;
+		}
+		foreach ($device->snmpwalkoid ('ifPhysAddress') as $raw_key => $raw_value)
+		{
+			$key = substr ($raw_key, strlen ('IF-MIB::ifPhysAddress.'));
+			$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+			if (preg_match ('/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}/i', $value)) // x:yy:z:xx:y:zz
 			{
-				showError ('PCRE pattern error, terminating');
-				break 2;
+				$addrbytes = explode (':', $value);
+				foreach ($addrbytes as $bidx => $bytestr)
+					if (strlen ($bytestr) == 1)
+						$addrbytes[$bidx] = '0' . $bytestr;
 			}
-			if (!$count)
-				continue; // try next processor on current port
-			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
-			checkPIC ($iftable_processors[$processor_name]['dict_key']);
-			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
-			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
-				continue 2;
+			elseif (preg_match ('/^[0-9a-f]{1,2}( [0-9a-f]{1,2}){5}/i', $value)) // xx yy zz xx yy zz
+				$addrbytes = explode (' ', substr ($value, -17));
+			elseif (preg_match ('/22[0-9a-f]{12}22$/', bin2hex ($value))) // "??????"
+				$addrbytes = array (substr (bin2hex ($value), -14, 12));
+			else
+				break; // martian format
+			// if this port's MAC is already assigned to another port, mark it as an empty string instead of causing a conflict
+			$mac = implode ('', $addrbytes);
+			$snmp_data['ifPhysAddress'][$key] = (array_key_exists ('ifPhysAddress', $snmp_data) and in_array ($mac, $snmp_data['ifPhysAddress'])) ? '' : $mac;
 		}
+		// map entPhysicalIndex to ifIndex for MAC addresses association
+		// first try to use entAliasMappingIdentifier (some devices don't support it)
+		if ($entToIfMapping_raw = @$device->snmpwalkoid ('mib-2.47.1.3.2.1.2'))
+			foreach ($entToIfMapping_raw as $key => $value)
+			{
+				// find the entID and map it to the ifID
+				$e_array = explode ('.', $key);
+				$e_index = count ($e_array) - 2;
+				$eid = $e_array[$e_index];
+				$iid = substr ($value, strrpos ($value, '.') + 1);
+				$snmp_data['entToIfMapping'][$eid] = $iid; 
+			}
+		else
+		{
+			// entAliasMappingIdentifier isn't available, use entPhysicalName
+			$ifName = array ();
+			foreach ($device->snmpwalkoid ('ifName') as $raw_key => $raw_value)
+			{
+				$key = substr ($raw_key, strlen ('IF-MIB::ifName.'));
+				$value = str_ireplace (array ('STRING: ', '"'), '', $raw_value);
+				$ifName[$key] = $value;
+			}
+			// query entPhysicalClass and note which entries which are ports
+			foreach ($device->snmpwalkoid ('mib-2.47.1.1.1.1.5') as $raw_key => $raw_value)
+				if (substr ($raw_value, strlen ('INTEGER: ')) == 10)
+					$snmp_data['entPhysicalPorts'][] = substr ($raw_key, strlen ('SNMPv2-SMI::mib-2.47.1.1.1.1.5.'));
+			// do the mapping, but only for ports
+			foreach ($snmp_data['entPhysicalName'] as $key => $value)
+				if (in_array ($key, $snmp_data['entPhysicalPorts']))
+					$snmp_data['entToIfMapping'][$key] = array_search ($value, $ifName);
+		}
+		addModules (1, $objectInfo['id']);
+	}
+	else
+	{
+		// this is not a modular device
+		$ifDescr_tablename = (isset ($known_devices[$sysObjectID]['ifDescrOID'])) ? $known_devices[$sysObjectID]['ifDescrOID'] : 'ifDescr';
+		foreach (array_keys ($known_devices[$sysObjectID]['processors']) as $pkey)
+			if (!array_key_exists ($known_devices[$sysObjectID]['processors'][$pkey], $iftable_processors))
+			{
+				showWarning ('processor "' . $known_devices[$sysObjectID]['processors'][$pkey] . '" not found');
+				unset ($known_devices[$sysObjectID]['processors'][$pkey]);
+			}
+		$ifInfo = array ();
+		foreach ($device->snmpwalkoid ($ifDescr_tablename) as $oid => $value)
+		{
+			$randomindex = preg_replace ("/^.*${ifDescr_tablename}\.(.+)\$/", '\\1', $oid);
+			$value = trim (preg_replace ('/^[^:]+: (.+)$/', '\\1', $value), '"');
+			$ifInfo[$randomindex]['ifDescr'] = $value;
+		}
+		foreach ($device->snmpwalkoid ('ifPhysAddress') as $oid => $value)
+		{
+			$randomindex = preg_replace ("/^.*ifPhysAddress\.(.+)\$/", '\\1', $oid);
+			$value = trim ($value);
+			// NET-SNMP may return MAC addresses in one of two (?) formats depending on
+			// DISPLAY-HINT internal database. The best we can do about it is to accept both.
+			// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
+			if (preg_match ('/^string: [0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}/i', $value)) // STRING: x:yy:z:xx:y:zz
+			{
+				list ($dummy, $value) = explode (' ', $value);
+				$addrbytes = explode (':', $value);
+				foreach ($addrbytes as $bidx => $bytestr)
+					if (strlen ($bytestr) == 1)
+						$addrbytes[$bidx] = '0' . $bytestr;
+			}
+			elseif (preg_match ('/^hex-string:( [0-9a-f]{2}){6}/i', $value)) // Hex-STRING: xx yy zz xx yy zz
+				$addrbytes = explode (' ', substr ($value, -17));
+			elseif (preg_match ('/22[0-9a-f]{12}22$/', bin2hex ($value))) // STRING: "??????"
+				$addrbytes = array (substr (bin2hex ($value), -14, 12));
+			else
+				continue; // martian format
+			$ifInfo[$randomindex]['ifPhysAddress'] = implode ('', $addrbytes);
+		}
+		// process each interface only once regardless of how many processors we have to run
+		foreach ($ifInfo as $iface)
+			foreach ($known_devices[$sysObjectID]['processors'] as $processor_name)
+			{
+				$newname = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['replacement'], $iface['ifDescr'], 1, $count);
+				if ($newname === NULL)
+				{
+					showError ('PCRE pattern error, terminating');
+					break 2;
+				}
+				if (!$count)
+					continue; // try next processor on current port
+				$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
+				checkPIC ($iftable_processors[$processor_name]['dict_key']);
+				commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+				if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
+					continue 2;
+			}
+	}
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
 
-function doPDUSNMPmining ($objectInfo, $switch)
+function doPDUSNMPmining ($switch)
 {
-	global $known_APC_SKUs;
+	global $objectInfo, $known_APC_SKUs;
 	if (FALSE !== ($dict_key = array_search ($switch->getHWModel(), $known_APC_SKUs)))
 		updateStickerForCell ($objectInfo, 2, $dict_key);
 	updateStickerForCell ($objectInfo, 1, $switch->getHWSerial());
@@ -3856,109 +4547,6 @@ class APCPowerSwitch extends RTSNMPDevice
 	function getHWModel()
 	{
 		return preg_replace ('/^STRING: "(.*)"$/', '\\1', $this->snmpget ("{$this->snmpMib}.1.1.12.1.5.0"));
-	}
-}
-
-// Take address in the form XX:XX:XX:XX:XX:XX and return the next
-// address in the same form.
-function nextMACAddress ($addr)
-{
-	if ($addr == '')
-		return '';
-	$bytes = array();
-	foreach (explode (':', $addr) as $hex)
-		$bytes[] = hexdec ($hex);
-	for ($i = 5; $i >= 0; $i--)
-	{
-		$bytes[$i] += 1;
-		if ($bytes[$i] <= 255) // FF
-			break; // no roll over
-		$bytes[$i] = 0;
-	}
-	foreach (array_keys ($bytes) as $key)
-		$bytes[$key] = sprintf ('%02X', $bytes[$key]);
-	return implode (':', $bytes);
-}
-
-function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $mac_address = '')
-{
-	global $dbxlink;
-	$mac_address = l2addressFromDatabase (l2addressForDatabase ($mac_address));
-	switch ($mtype)
-	{
-	case 'WS-X6748-GE-TX':
-		$dbxlink->beginTransaction();
-		for ($i = 1; $i <= 48; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		$dbxlink->commit();
-		break;
-	case 'WS-X6708-10GE':
-		for ($i = 1; $i <= 8; $i++)
-		{
-			commitAddPort ($object_id, "te${slotno}/${i}", '6-1080', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case 'WS-X6704-10GE':
-		for ($i = 1; $i <= 4; $i++)
-		{
-			commitAddPort ($object_id, "te${slotno}/${i}", '5-1079', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case 'VS-S720-10G':
-		commitAddPort ($object_id, "gi${slotno}/1", '4-1077', "slot ${slotno} port 1", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "gi${slotno}/2", '4-1077', "slot ${slotno} port 2", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "gi${slotno}/3", '1-24',   "slot ${slotno} port 3", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "te${slotno}/4", '6-1080', "slot ${slotno} port 4", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "te${slotno}/5", '6-1080', "slot ${slotno} port 5", $mac_address);
-		break;
-	case '3750G-24TS':
-		// MAC address of 1st port is the next one after switch's address
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 24; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		for ($i = 25; $i <= 28; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '4-1077', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case '3750G-24T':
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 24; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case '3750G-16TD':
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 16; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		commitAddPort ($object_id, "te${slotno}/0/1", '5-1079', "unit ${slotno} port ${i}", $mac_address);
-		break;
-	case 'LE02G48TA':
-		for ($i = 0; $i <= 47; $i++)
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
-		break;
-	case 'LE02X12SA':
-		for ($i = 0; $i <= 11; $i++)
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '9-1084', "slot ${slotno} port ${i}", $mac_address);
-		break;
 	}
 }
 

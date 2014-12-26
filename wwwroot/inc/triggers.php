@@ -78,9 +78,10 @@ function trigger_snmpportfinder ()
 	$object = spotEntity ('object', getBypassValue());
 	switch ($object['objtype_id'])
 	{
-	case 7:   // any router
-	case 8:   // or switch
-	case 965: // or wireless device would suffice
+	case 7:    // any router
+	case 8:    // or switch
+	case 965:  // or wireless device
+	case 1503: // or network chassis would suffice
 		return $object['nports'] ? '' : 'attn';
 	case 2: // but only selected PDUs
 		if ($object['nports'])
@@ -113,7 +114,7 @@ function trigger_ip ()
 
 function trigger_natv4 ()
 {
-	if (!count (getObjectIPv4AllocationList (getBypassValue())))
+	if (!count (getObjectIPvNAllocationList (getBypassValue(), 4)))
 		return '';
 	return considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'IPV4NAT_LISTSRC') ? 'std' : '';
 }

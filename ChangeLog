@@ -1,5 +1,8 @@
 0.21.0
 	update: explicitly require PHP version 5.3.0 or newer
+	update: SNMP support for Cisco 2801 (#779), 2821 (#775), 7206VXR (#483),
+		WS-C6509-E (#338), WS-C4503 (#528), HP J8698A (#351) by Aaron Dummer
+	update: display ports & IPs of contained objects (#797)
 0.20.9
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
 		HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183)

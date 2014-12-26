@@ -726,11 +726,12 @@ function amplifyCell (&$record, $dummy = NULL)
 	switch ($record['realm'])
 	{
 	case 'object':
-		$record['ports'] = getObjectPortsAndLinks ($record['id']);
-		$record['ipv4'] = getObjectIPv4Allocations ($record['id']);
-		$record['ipv6'] = getObjectIPv6Allocations ($record['id']);
+		$record['ports'] = getObjectPortsAndLinks ($record['id'], TRUE);
+		$record['ipv4'] = getObjectIPv4Allocations ($record['id'], TRUE);
+		$record['ipv6'] = getObjectIPv6Allocations ($record['id'], TRUE);
 		$record['nat4'] = getNATv4ForObject ($record['id']);
 		$record['files'] = getFilesOfEntity ($record['realm'], $record['id']);
+		$record['children'] = getObjectContentsList ($record['id']);
 		break;
 	case 'file':
 		$record['links'] = getFileLinks ($record['id']);
@@ -892,10 +893,36 @@ END;
 	return $ret;
 }
 
-function getObjectPortsAndLinks ($object_id)
+function getObjectPortsAndLinks ($object_id, $include_children = FALSE)
 {
-	$ret = fetchPortList ("Port.object_id = ?", array ($object_id));
-	return sortPortList ($ret, TRUE);
+	$ret = sortPortList (fetchPortList ('Port.object_id = ?', array ($object_id)), TRUE);
+	if ($include_children)
+	{
+		// sort children by object name
+		$objects = array ();
+		if (count ($ret))
+		{
+			$i = key ($ret);
+			$objects[$ret[$i]['object_name']] = $ret;
+		}
+		foreach (getObjectContentsList ($object_id) as $child_id)
+		{
+			$child_ports = fetchPortList ('Port.object_id = ?', array ($child_id));
+			if (count ($child_ports))
+			{
+				$i = key ($child_ports);
+				$objects[$child_ports[$i]['object_name']] = sortPortList ($child_ports, TRUE);
+			}
+		}
+		ksort ($objects, SORT_NATURAL);
+
+		// flatten the sorted array
+		$ret = array ();
+		foreach ($objects as $object_name => $ports)
+			foreach ($ports as $port)
+				$ret[$port['id']] = $port;
+	}
+	return $ret;
 }
 
 // Fetch the object type via SQL.
@@ -1014,7 +1041,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 // used by getEntityRelatives for sorting
 function compare_name ($a, $b)
 {
-	return strnatcmp($a['name'], $b['name']);
+	return strnatcmp ($a['name'], $b['name']);
 }
 
 // find either parents or children of a record
@@ -1743,7 +1770,7 @@ function getPortReservationComment ($port_id)
 // The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
 // string value. In case it is omitted, we just assign it its current value.
 // It would be nice to simplify this semantics later.
-function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
+function commitUpdatePort ($port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
@@ -1752,7 +1779,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
-		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
+		if ($do_locks && alreadyUsedL2Address ($db_l2address, $portinfo['object_id']))
 		{
 			// FIXME: it is more correct to throw InvalidArgException here
 			// and convert it to InvalidRequestArgException at upper level,
@@ -1772,11 +1799,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 				'reservation_comment' => $reservation_comment,
 				'l2address' => nullEmptyStr ($db_l2address),
 			),
-			array
-			(
-				'id' => $port_id,
-				'object_id' => $object_id
-			)
+			array ('id' => $port_id)
 		);
 		if ($do_locks)
 			$dbxlink->exec ('UNLOCK TABLES');
@@ -2013,74 +2036,119 @@ function fetchIPv6LogEntry ($ip_bin)
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-// wrapper around getObjectIPv4AllocationList and getObjectIPv6AllocationList
-function getObjectIPAllocationList ($object_id)
+function getObjectIPAllocationList ($object_id, $include_children = FALSE)
 {
 	return
-		getObjectIPv4AllocationList ($object_id) +
-		getObjectIPv6AllocationList ($object_id);
+		getObjectIPvNAllocationList ($object_id, 4, $include_children) +
+		getObjectIPvNAllocationList ($object_id, 6, $include_children);
 }
 
-// Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
-// Used instead of getObjectIPv4Allocations if you need perfomance but 'addrinfo' value
+function fetchObjectIPvNAllocationList ($object_id, $version)
+{
+	$ret = array ();
+	$result = usePreparedSelectBlade
+	(
+		'SELECT A.name AS osif, A.type, A.ip, A.object_id, O.name AS object_name ' . 
+		"FROM IPv{$version}Allocation A LEFT JOIN Object O ON A.object_id = O.id " .
+		'WHERE A.object_id = ?',
+		array ($object_id)
+	);
+	while ($row = $result->fetch (PDO::FETCH_ASSOC))
+		$ret[] = array
+			(
+				'object_id' => $row['object_id'],
+				'object_name' => $row['object_name'],
+				'osif' => $row['osif'],
+				'type' => $row['type'],
+				'ip' => ($version == 4) ? ip4_int2bin ($row['ip']) : $row['ip']
+			);
+	return $ret;
+}
+
+// Returns all IPvN addresses allocated to object, but does not attach detailed info about address
+// Used instead of getObjectIPAllocations if you need perfomance but 'addrinfo' value
+function getObjectIPvNAllocationList ($object_id, $version, $include_children = FALSE)
+{
+	$allocs = fetchObjectIPvNAllocationList ($object_id, $version);
+	// sort ports by name
+	$unsorted = $sorted = array ();
+	foreach ($allocs as $alloc)
+		$unsorted[$alloc['osif']][] = $alloc;
+	foreach (sortPortList ($unsorted) as $osif => $subarray)
+		foreach ($subarray as $alloc)
+			$sorted[] = $alloc;
+	$ret = $sorted;
+	if ($include_children)
+	{
+		// sort children by object name and port name
+		$objects = array ();
+		if (count ($ret))
+		{
+			$i = key ($ret);
+			$objects[$ret[$i]['object_name']] = $ret;
+		}
+		foreach (getObjectContentsList ($object_id) as $child_id)
+		{
+			$child_allocs = fetchObjectIPvNAllocationList ($child_id, $version);
+			if (count ($child_allocs))
+			{
+				$i = key ($child_allocs);
+				$unsorted = $sorted = array ();
+				foreach ($child_allocs as $alloc)
+					$unsorted[$alloc['osif']][] = $alloc;
+				foreach (sortPortList ($unsorted) as $osif => $subarray)
+					foreach ($subarray as $alloc)
+						$sorted[] = $alloc;
+				$objects[$child_allocs[$i]['object_name']] = $sorted;
+			}
+		}
+		ksort ($objects, SORT_NATURAL);
+
+		// sorting is done, flatten the array
+		$ret = array ();
+		foreach ($objects as $object_name => $allocs)
+			foreach ($allocs as $alloc)
+				$ret[] = $alloc;
+	}
+	return $ret;
+}
+
+// FIXME: deprecated, left here only for compatibility with home-made scripts
 function getObjectIPv4AllocationList ($object_id)
 {
-	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		'SELECT name AS osif, type, ip FROM IPv4Allocation ' .
-		'WHERE object_id = ?',
-		array ($object_id)
-	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[ip4_int2bin ($row['ip'])] = array ('osif' => $row['osif'], 'type' => $row['type']);
-	return $ret;
+	return getObjectIPvNAllocationList ($object_id, 4);
 }
 
-// Returns all IPv6 addresses allocated to object, but does not attach detailed info about address
-// Used instead of getObjectIPv6Allocations if you need perfomance but 'addrinfo' value
+// FIXME: deprecated, left here only for compatibility with home-made scripts
 function getObjectIPv6AllocationList ($object_id)
 {
-	$ret = array();
-	$result = usePreparedSelectBlade
-	(
-		'SELECT name AS osif, type, ip AS ip FROM IPv6Allocation ' .
-		'WHERE object_id = ?',
-		array ($object_id)
-	);
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['ip']] = array ('osif' => $row['osif'], 'type' => $row['type']);
-	return $ret;
+	return getObjectIPvNAllocationList ($object_id, 6);
 }
 
 // Return all IP addresses allocated to the object sorted by allocation name.
 // Attach detailed info about address to each alocation records.
 // Index result by binary ip
-function getObjectIPAllocations ($object_id)
+function getObjectIPAllocations ($object_id, $include_children = FALSE)
 {
-	return amplifyAllocationList (getObjectIPAllocationList ($object_id));
+	return amplifyAllocationList (getObjectIPAllocationList ($object_id, $include_children));
 }
-function getObjectIPv4Allocations ($object_id)
+function getObjectIPv4Allocations ($object_id, $include_children = FALSE)
 {
-	return amplifyAllocationList (getObjectIPv4AllocationList ($object_id));
+	return amplifyAllocationList (getObjectIPvNAllocationList ($object_id, 4, $include_children));
 }
-function getObjectIPv6Allocations ($object_id)
+function getObjectIPv6Allocations ($object_id, $include_children = FALSE)
 {
-	return amplifyAllocationList (getObjectIPv6AllocationList ($object_id));
+	return amplifyAllocationList (getObjectIPvNAllocationList ($object_id, 6, $include_children));
 }
 
 function amplifyAllocationList ($alloc_list)
 {
-	$ret = array();
-	$sorted = array();
-	foreach ($alloc_list as $ip_bin => $alloc)
-		$sorted[$alloc['osif']][$ip_bin] = $alloc;
-	foreach (sortPortList ($sorted) as $osif => $subarray)
-		foreach ($subarray as $ip_bin => $alloc)
-		{
-			$alloc['addrinfo'] = getIPAddress ($ip_bin);
-			$ret[$ip_bin] = $alloc;
-		}
+	$ret = array ();
+	foreach ($alloc_list as $alloc)
+	{
+		$alloc['addrinfo'] = getIPAddress ($alloc['ip']);
+		$ret[] = $alloc;
+	}
 	return $ret;
 }
 
@@ -3524,6 +3592,16 @@ mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id i
 function commitDeleteChapter ($chapter_no = 0)
 {
 	usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
+}
+
+function getDictionaryEntry ($dict_key)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT * FROM Dictionary WHERE dict_key = ?',
+		array ($dict_key)
+	);
+	return $result->fetch (PDO::FETCH_ASSOC);
 }
 
 // This is a dictionary accessor. We perform link rendering, so the user sees
