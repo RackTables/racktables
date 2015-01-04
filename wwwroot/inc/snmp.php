@@ -1556,15 +1556,6 @@ $iftable_processors['dell-any-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['3com-25-to-26-1000T'] = array
-(
-	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(25|26)$@',
-	'replacement' => '\\1/\\2/\\3',
-	'dict_key' => '1-24',
-	'label' => '\\3',
-	'try_next_proc' => FALSE,
-);
-
 $iftable_processors['3com-27-to-28-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(27|28)$@',
@@ -2534,12 +2525,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J4904A: 48 RJ-45/10-100-1000T(X)',
 		'processors' => array ('procurve-chassis-1000T'),
 	),
-	'25506.11.1.82' => array
-	(
-		'dict_key' => 2382,
-		'text' => 'JE006A: 24 RJ-45/10-100-1000T(X)',
-		'processors' => array ('3com-25-to-26-1000SFP', '3com-27-to-28-1000SFP', '3com-any-1000T'),
-	),
 	'11.2.3.7.11.33.4.1.1' => array
 	(
 		'dict_key' => 1605,
@@ -3268,6 +3253,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2240,
 		'text' => 'Stacked ICX6450-48: 48 1000T + 4 SFP+/10000',
 		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+	),
+	'25506.11.1.82' => array
+	(
+		'dict_key' => 2382,
+		'text' => 'JE006A: 24 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports',
+		'processors' => array ('3com-25-to-26-1000SFP', '3com-27-to-28-1000SFP', '3com-any-1000T'),
 	),
 	'26543.1.7.1' => array
 	(
