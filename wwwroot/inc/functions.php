@@ -1032,6 +1032,22 @@ function findAllEndpoints ($object_id, $fallback = '')
 	return $regular;
 }
 
+// Split object's FQDN (or the common name if FQDN is not set) into the
+// hostname and domain name in Munin convention (using the first period as the
+// separator), and return the pair. Throw an exception on error.
+function getMuninNameAndDomain ($object_id)
+{
+	$o = spotEntity ('object', $object_id);
+	$hd = $o['name'];
+	// FQDN overrides the common name for Munin purposes.
+	$attrs = getAttrValues ($object_id);
+	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
+		$hd = $attrs[3]['value'];
+	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
+		throw new InvalidArgException ('$object_id', $object_id, 'the name is not in the host.do.ma.in format');
+	return $ret;
+}
+
 // Some records in the dictionary may be written as plain text or as Wiki
 // link in the following syntax:
 // 1. word

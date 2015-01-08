@@ -8927,7 +8927,19 @@ function renderObjectMuninGraphs ($object_id)
 		echo "<br/><br/>";
 	}
 	if (!extension_loaded ('curl'))
-		throw new RackTablesError ("The PHP cURL extension is not loaded.", RackTablesError::MISCONFIGURED);
+	{
+		showError ('The PHP cURL extension is not loaded.');
+		return;
+	}
+	try
+	{
+		list ($host, $domain) = getMuninNameAndDomain ($object_id);
+	}
+	catch (InvalidArgException $e)
+	{
+		showError ('This object does not have the FQDN or the common name in the host.do.ma.in format.');
+		return;
+	}
 
 	$servers = getMuninServers();
 	$options = array();
@@ -8938,15 +8950,12 @@ function renderObjectMuninGraphs ($object_id)
 		printNewItem ($options);
 	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">";
 
-	$object = spotEntity ('object', $object_id);
-	list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
-
 	foreach (getMuninGraphsForObject ($object_id) as $graph_name => $graph)
 	{
 		$munin_url = $servers[$graph['server_id']]['base_url'];
 		$text = "(graph ${graph_name} on server ${graph['server_id']})";
 		echo "<tr><td>";
-		echo "<a href='${munin_url}/${domain}/${object['dname']}/${graph_name}.html' target='_blank'>";
+		echo "<a href='${munin_url}/${domain}/${host}.${domain}/${graph_name}.html' target='_blank'>";
 		echo "<img src='index.php?module=image&img=muningraph&object_id=${object_id}&server_id=${graph['server_id']}&graph=${graph_name}' alt='${text}' title='${text}'></a></td>";
 		echo "<td>";
 		echo getOpLink (array ('op' => 'del', 'server_id' => $graph['server_id'], 'graph' => $graph_name), '', 'Cut', 'Unlink graph', 'need-confirmation');
