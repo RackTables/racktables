@@ -1501,7 +1501,7 @@ function redirectIfNecessary ()
 		$trigger,
 		$pageno,
 		$tabno;
-	@session_start();
+	startSession();
 	if
 	(
 		! isset ($_REQUEST['tab']) and
@@ -1783,7 +1783,7 @@ function getCellFilter ()
 	global $sic;
 	global $pageno;
 	$andor_used = FALSE;
-	@session_start();
+	startSession();
 	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if (isset($_REQUEST['andor']))
 		$andor_used = TRUE;
@@ -1921,8 +1921,9 @@ function backupLogMessages()
 	global $log_messages;
 	if (! empty ($log_messages))
 	{
-		@session_start();
+		startSession();
 		$_SESSION['log'] = $log_messages;
+		session_commit();
 	}
 }
 
@@ -6298,6 +6299,32 @@ function customKsort ($array, $order)
 	foreach (array_keys ($ret) as $key)
 		$ret[$key] = $array[$key];
 	return $ret;
+}
+
+// RT uses PHP sessions on demand and tries to minimize session lifetime
+// to allow concurrent operations for a single user.
+// You should call session_commit after each call of this function.
+function startSession()
+{
+	if (is_callable ('session_status'))
+	{
+		if (session_status() != PHP_SESSION_ACTIVE)
+			session_start();
+	}
+	else
+	{
+		// compatibility mode for PHP prior to 5.4.0
+		$old_errorlevel = error_reporting (E_ALL & ~E_NOTICE);
+		session_start();
+		error_reporting ($old_errorlevel);
+	}
+}
+
+// loads session data. Use if you need to only read from _SESSION.
+function startROSession()
+{
+	startSession();
+	session_commit();
 }
 
 ?>

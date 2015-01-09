@@ -3182,8 +3182,9 @@ function updVSTRule()
 		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 		{
-			@session_start();
+			startSession();
 			$_SESSION['vst_edited'] = $data;
+			session_commit();
 		}
 		throw $e;
 	}

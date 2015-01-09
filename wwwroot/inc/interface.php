@@ -413,7 +413,7 @@ END;
 function renderRackspace ()
 {
 	// Handle the location filter
-	@session_start();
+	startSession();
 	if (isset ($_REQUEST['changeLocationFilter']))
 		unset ($_SESSION['locationFilter']);
 	if (isset ($_REQUEST['location_id']))
@@ -1892,7 +1892,7 @@ function showMessageOrError ()
 {
 	global $log_messages;
 
-	@session_start();
+	startSession();
 	if (isset ($_SESSION['log']))
 	{
 		$log_messages = array_merge ($_SESSION['log'], $log_messages);
@@ -8215,7 +8215,7 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td><input type=text name=description value="%s"></td>';
 	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
 	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
-	@session_start();
+	startSession();
 	foreach (isset ($_SESSION['vst_edited']) ? $_SESSION['vst_edited'] : $vst['rules'] as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';
