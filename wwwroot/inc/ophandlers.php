@@ -1435,7 +1435,7 @@ function addLotOfObjects()
 				amplifyCell ($info);
 				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
 			}
-			catch (RTDatabaseError $e)
+			catch (RackTablesError $e)
 			{
 				showError ("Error creating object '$name': " . $e->getMessage());
 				continue;
