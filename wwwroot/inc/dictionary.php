@@ -114,6 +114,7 @@ $dictionary = array
 	13 => array ('chapter_id' => 1, 'dict_value' => 'Modem'),
 	14 => array ('chapter_id' => 1, 'dict_value' => 'MediaConverter'),
 	15 => array ('chapter_id' => 1, 'dict_value' => 'console'),
+	16 => array ('chapter_id' => 1, 'dict_value' => 'Network module'),
 	42 => array ('chapter_id' => 11, 'dict_value' => 'noname/unknown'),
 	43 => array ('chapter_id' => 11, 'dict_value' => 'IBM xSeries%GPASS%305'),
 	44 => array ('chapter_id' => 11, 'dict_value' => 'IBM xSeries%GPASS%306'),
@@ -2111,7 +2112,11 @@ $dictionary = array
 	2502 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X6K-SUP2-2GE'),
 	2503 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X4515'),
 	2504 => array ('chapter_id' => 12, 'dict_value' => 'Cisco (blade)%GPASS%WS-X4548-GB-RJ45'),
-	2505 => array ('chapter_id' => 17, 'dict_value' => 'Cisco (blade)%GPASS%NPE-G2'),
+	2505 => array ('chapter_id' => 39, 'dict_value' => 'Cisco (blade)%GPASS%NPE-G2'),
+	2506 => array ('chapter_id' => 39, 'dict_value' => 'Cisco (blade)%GPASS%NPE-G1'),
+	2507 => array ('chapter_id' => 39, 'dict_value' => 'Cisco (blade)%GPASS%PA-MC-4T1'),
+	2508 => array ('chapter_id' => 39, 'dict_value' => 'Cisco (blade)%GPASS%PA-MC-8TE1'),
+	2509 => array ('chapter_id' => 39, 'dict_value' => 'Cisco (blade)%GPASS%PA-T3'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
