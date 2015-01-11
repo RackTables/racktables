@@ -1973,8 +1973,10 @@ function getRackImageHeight ($units)
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
+// Returns number of marked up (busy) addresses
 function markupIPAddrList (&$addrlist)
 {
+	$used = 0;
 	foreach (array_keys ($addrlist) as $ip_bin)
 	{
 		$refc = array
@@ -1993,12 +1995,19 @@ function markupIPAddrList (&$addrlist)
 		}
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
 		if ($nallocs > 1 && $nallocs != $refc['shared'] || $nallocs && $nreserved)
+		{
 			$addrlist[$ip_bin]['class'] = 'trerror';
+			++$used;
+		}
 		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'inpf', 'outpf'))) // these fields don't trigger the 'busy' status
+		{
 			$addrlist[$ip_bin]['class'] = 'trbusy';
+			++$used;
+		}
 		else
 			$addrlist[$ip_bin]['class'] = '';
 	}
+	return $used;
 }
 
 function findNetRouters ($net)

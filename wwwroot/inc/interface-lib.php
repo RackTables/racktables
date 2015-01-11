@@ -531,7 +531,7 @@ function getRenderedIPNetCapacity ($range)
 function getRenderedIPv4NetCapacity ($range)
 {
 	$class = 'net-usage';
-	if (isset ($range['addrc']))
+	if (isset ($range['own_addrlist']))
 	{
 		// full mode
 		// $a is "aquamarine zone", $b is "gray zone"
@@ -546,9 +546,9 @@ function getRenderedIPv4NetCapacity ($range)
 			foreach ($range['spare_ranges'] as $mask => $spare_list)
 				$a_total = bcadd ($a_total, bcmul (count ($spare_list), ip4_mask_size ($mask)), 0);
 		}
-		$a_used = $range['own_addrc'];
+		$a_used = markupIPAddrList ($range['own_addrlist']);
 		$b_total = bcsub ($total, $a_total, 0);
-		$b_used = $range['addrc'] - $a_used;
+		$b_used = markupIPAddrList ($range['addrlist']) - $a_used;
 
 		// generate link to progress bar image
 		$width = 100;
@@ -610,8 +610,8 @@ function getRenderedIPv6NetCapacity ($range)
 {
 	$div_id = $range['ip'] . '/' . $range['mask'];
 	$class = 'net-usage';
-	if (isset ($range['addrc']))
-		$used = $range['addrc'];
+	if (isset ($range['addrlist']))
+		$used = markupIPAddrList ($range['addrlist']);
 	else
 	{
 		$used = NULL;
