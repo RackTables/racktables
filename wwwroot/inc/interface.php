@@ -2596,6 +2596,10 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 
 			if ($display_routers)
 				printRoutersTD (findRouters ($item['own_addrlist']), getConfigVar ('IPV4_TREE_RTR_AS_CELL'));
+
+			// comment
+			echo "<td class=\"tdleft\">" . niftyString ($item['comment'], 0) . "</td>";
+
 			echo "</tr>";
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
 				$self ($item['kids'], $baseurl, $target, $level + 1);
@@ -2612,6 +2616,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			echo "</td>";
 			if ($display_routers)
 				echo "<td></td>";
+			echo "<td class=\"tdleft\">" . niftyString ($item['comment'], 0) . "</td>";
 			echo "</tr>";
 		}
 	}
@@ -2679,6 +2684,7 @@ function renderIPSpace()
 			echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
 			if (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none')
 				echo "<th>routed by</th>";
+			echo "<th>comment</th>";
 			echo "</tr>\n";
 			$baseurl = makeHref(array('page'=>$pageno, 'tab'=>$tabno)) . $cellfilter['urlextra'];
 			renderIPSpaceRecords ($tree, $baseurl, $eid);
