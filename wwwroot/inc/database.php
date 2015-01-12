@@ -4931,9 +4931,8 @@ function getPortInterfaceCompat()
 // Return a set of options for a plain SELECT. These options include the current
 // OIF of the given port and all OIFs of its permanent IIF.
 // If given port is already linked, returns only types compatible with the remote port's type
-function getExistingPortTypeOptions ($port_id)
+function getExistingPortTypeOptions ($portinfo)
 {
-	$portinfo = getPortInfo ($port_id);
 	$remote_type = NULL;
 	if ($portinfo['linked'])
 	{

@@ -1728,7 +1728,7 @@ function renderPortsForObject ($object_id)
 		echo '<td>';
 		if ($port['iif_id'] != 1)
 			echo '<label>' . $port['iif_name'] . ' ';
-		printSelect (getExistingPortTypeOptions ($port['id']), array ('name' => 'port_type_id'), $port['oif_id']);
+		printSelect (getExistingPortTypeOptions ($port), array ('name' => 'port_type_id'), $port['oif_id']);
 		if ($port['iif_id'] != 1)
 			echo '</label>';
 		echo '</td>';
@@ -8396,7 +8396,7 @@ function renderDiscoveredNeighbors ($object_id)
 					{
 						$tmp_types = ($portinfo['iif_id'] == 1) ?
 							array ($portinfo['oif_id'] => $portinfo['oif_name']) :
-							getExistingPortTypeOptions ($portinfo['id']);
+							getExistingPortTypeOptions ($portinfo);
 						foreach ($tmp_types as $oif_id => $oif_name)
 							$port_types[$side][$oif_id][] = array ('id' => $oif_id, 'name' => $oif_name, 'portinfo' => $portinfo);
 					}
