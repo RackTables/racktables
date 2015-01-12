@@ -1728,7 +1728,13 @@ function renderPortsForObject ($object_id)
 		echo '<td>';
 		if ($port['iif_id'] != 1)
 			echo '<label>' . $port['iif_name'] . ' ';
-		printSelect (getExistingPortTypeOptions ($port), array ('name' => 'port_type_id'), $port['oif_id']);
+		$port_type_opts = array();
+		if ($port['linked'])
+			foreach (getExistingPortTypeOptions ($port) as $oif_id => $opt_str)
+				$port_type_opts[$port['iif_name']][$port['iif_id'] . '-' . $oif_id] = $opt_str;
+		else
+			$port_type_opts = getNewPortTypeOptions();
+		printNiftySelect ($port_type_opts, array ('name' => 'port_type_id'), $port['iif_id'] . '-' . $port['oif_id']);
 		if ($port['iif_id'] != 1)
 			echo '</label>';
 		echo '</td>';

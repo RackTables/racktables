@@ -829,7 +829,7 @@ function editPortForObject ()
 {
 	global $sic;
 	assertUIntArg ('port_id');
-	assertUIntArg ('port_type_id');
+	assertStringArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
 	genericAssertion ('l2address', 'l2address0');
 	genericAssertion ('name', 'string');

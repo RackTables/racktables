@@ -1746,13 +1746,27 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		}
 		$prev_comment = getPortReservationComment ($port_id);
 		$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
+		switch (1)
+		{
+		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = $matches[1];
+			$oif_id = $matches[2];
+			break;
+		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = $portinfo['iif_id'];
+			$oif_id = $matches[1];
+			break;
+		default:
+			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+		}
 		usePreparedUpdateBlade
 		(
 			'Port',
 			array
 			(
 				'name' => $port_name,
-				'type' => $port_type_id,
+				'iif_id' => $iif_id,
+				'type' => $oif_id,
 				'label' => $port_label,
 				'reservation_comment' => $reservation_comment,
 				'l2address' => nullEmptyStr ($db_l2address),

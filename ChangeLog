@@ -32,6 +32,7 @@
 	update: new Juniper MX, Cisco Nexus 3000, Cisco Small Business series
 		models added into dictionary
 	update: increase port table column width (#1387)
+	update: ability to change an unlinked inner port type (e.g. hardwired -> SFP)
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks
