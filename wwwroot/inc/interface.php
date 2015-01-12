@@ -3620,7 +3620,7 @@ function renderSearchResults ($terms, $summary)
 					startPortlet ('IPv6 addresses');
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				// FIXME: address, parent network, routers (if extended view is enabled)
-				echo '<tr><th>Address</th><th>Description</th></tr>';
+				echo '<tr><th>Address</th><th>Description</th><th>Comment</th></tr>';
 				foreach ($what as $addr)
 				{
 					echo "<tr class=row_${order}><td class=tdleft>";
@@ -3635,7 +3635,7 @@ function renderSearchResults ($terms, $summary)
 							)) . "'>${fmt}</a></td>";
 					else
 						echo "<a href='index.php?page=ipaddress&tab=default&ip=${fmt}'>${fmt}</a></td>";
-					echo "<td class=tdleft>${addr['name']}</td></tr>";
+					echo "<td class=tdleft>${addr['name']}</td><td>${addr['comment']}</td></tr>";
 					$order = $nextorder[$order];
 				}
 				echo '</table>';

@@ -28,6 +28,7 @@
 		object's and the rack's tags. Thus, it is possible to allow modifying object
 		but restrict mounting it to a particular rack.
 	update: consider object's FQDN to retrieve its Munin graphs (#1279)
+	update: searching by IP address comment field (by Niilo Kajander, #1359)
 	new Juniper MX, Cisco Nexus 3000, Cisco Small Business series
 		models added into dictionary
 0.20.8 2014-06-07

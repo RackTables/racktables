@@ -2789,13 +2789,14 @@ function getIPv6PrefixSearchResult ($terms)
 
 function getIPv4AddressSearchResult ($terms)
 {
-	$query = "select ip, name from IPv4Address where ";
+	$query = "select ip, name, comment from IPv4Address where ";
 	$or = '';
 	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $or . "name like ?";
+		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
+		$qparams[] = "%${term}%";
 		$qparams[] = "%${term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2811,13 +2812,14 @@ function getIPv4AddressSearchResult ($terms)
 
 function getIPv6AddressSearchResult ($terms)
 {
-	$query = "select ip, name from IPv6Address where ";
+	$query = "select ip, name, comment from IPv6Address where ";
 	$or = '';
 	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $or . "name like ?";
+		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
+		$qparams[] = "%${term}%";
 		$qparams[] = "%${term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
