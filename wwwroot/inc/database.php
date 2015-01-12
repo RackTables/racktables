@@ -3633,7 +3633,6 @@ function getPortOIFRefc()
 	(
 		'SELECT POI.id, (' .
 		'(SELECT COUNT(*) FROM PortCompat WHERE type1 = id) + ' .
-		'(SELECT COUNT(*) FROM PortCompat WHERE type2 = id) + ' .
 		'(SELECT COUNT(*) FROM Port WHERE type = POI.id) + ' .
 		'(SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = POI.id)' .
 		') AS refcnt FROM PortOuterInterface AS POI'
@@ -4940,24 +4939,24 @@ function getExistingPortTypeOptions ($port_id)
 	{
 		$remote_portinfo = getPortInfo ($portinfo['remote_id']);
 		$result = usePreparedSelectBlade ("
-SELECT DISTINCT oif_id, oif_name
-FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
-LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ?
-LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ?
-WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
-AND (pc1.type1 IS NOT NULL OR pc2.type2 IS NOT NULL)
+SELECT oif_id, oif_name
+FROM PortInterfaceCompat
+INNER JOIN PortOuterInterface ON oif_id = id
+INNER JOIN PortCompat pc ON pc.type1 = oif_id AND pc.type2 = ?
+WHERE iif_id = ?
 ORDER BY oif_name
-", array ($remote_portinfo['oif_id'], $remote_portinfo['oif_id'], $port_id)
+", array ($remote_portinfo['oif_id'], $portinfo['iif_id'])
 		);
 	}
 	else
 	{
 		$result = usePreparedSelectBlade ("
 SELECT oif_id, oif_name
-FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
-WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
+FROM PortInterfaceCompat
+INNER JOIN PortOuterInterface ON oif_id = id
+WHERE iif_id = ?
 ORDER BY oif_name
-", array ($port_id)
+", array ($portinfo['iif_id'])
 		);
 	}
 
