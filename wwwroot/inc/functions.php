@@ -3195,10 +3195,6 @@ function getPortListPrefs()
 // This SELECT will be used for the "add new port" form.
 function getNewPortTypeOptions()
 {
-	static $ret = NULL;
-	if (isset ($ret))
-		return $ret;
-
 	$ret = array();
 	$prefs = getPortListPrefs();
 	foreach (getPortInterfaceCompat() as $row)

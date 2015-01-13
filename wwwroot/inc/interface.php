@@ -1650,14 +1650,17 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 function renderPortsForObject ($object_id)
 {
 	$prefs = getPortListPrefs();
+	global $new_port_type_opts;
+	$new_port_type_opts = getNewPortTypeOptions();
 	function printNewItemTR ($prefs)
 	{
+		global $new_port_type_opts;
 		printOpFormIntro ('addPort');
 		echo "<tr><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td><td class='tdleft'><input type=text size=16 name=port_name></td>\n";
 		echo "<td><input type=text name=port_label></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		printNiftySelect ($new_port_type_opts, array ('name' => 'port_type_id'), $prefs['selected']);
 		echo "<td><input type=text name=port_l2address size=18 maxlength=24></td>\n";
 		echo "<td colspan=4>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE);
@@ -1678,7 +1681,7 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add ports', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name></td>\n";
 		echo "<td><input type=text name=port_label></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		printNiftySelect ($new_port_type_opts, array ('name' => 'port_type_id'), $prefs['selected']);
 		echo "<td><input type=text name=port_numbering_start size=3 maxlength=3></td>\n";
 		echo "<td><input type=text name=port_numbering_count size=3 maxlength=3></td>\n";
 		echo "<td>&nbsp;</td><td>";
@@ -1729,11 +1732,11 @@ function renderPortsForObject ($object_id)
 		if ($port['iif_id'] != 1)
 			echo '<label>' . $port['iif_name'] . ' ';
 		$port_type_opts = array();
-		if ($port['linked'])
+		if (! $port['linked'])
+			$port_type_opts = $new_port_type_opts;
+		else
 			foreach (getExistingPortTypeOptions ($port) as $oif_id => $opt_str)
 				$port_type_opts[$port['iif_name']][$port['iif_id'] . '-' . $oif_id] = $opt_str;
-		else
-			$port_type_opts = getNewPortTypeOptions();
 		printNiftySelect ($port_type_opts, array ('name' => 'port_type_id'), $port['iif_id'] . '-' . $port['oif_id']);
 		if ($port['iif_id'] != 1)
 			echo '</label>';
@@ -1786,7 +1789,7 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add ports', TRUE);
 		echo "</td><td><input type=text size=8 name=port_name></td>\n";
 		echo "<td><input type=text name=port_label></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
+		printNiftySelect ($new_port_type_opts, array ('name' => 'port_type_id'), $prefs['selected']);
 		echo "<td><input type=text name=port_numbering_start size=3 maxlength=3></td>\n";
 		echo "<td><input type=text name=port_numbering_count size=3 maxlength=3></td>\n";
 		echo "<td>&nbsp;</td><td>";
@@ -1808,7 +1811,7 @@ function renderPortsForObject ($object_id)
 	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
 	echo "</select>";
 	echo 'Default port type: ';
-	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
+	printNiftySelect ($new_port_type_opts, array ('name' => 'port_type'), $prefs['selected']);
 	echo "<input type=submit value='Parse output'><br>\n";
 	echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
 	echo '</form>';
