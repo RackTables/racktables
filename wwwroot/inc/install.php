@@ -304,6 +304,18 @@ ENDOFTEXT
 	return TRUE;
 }
 
+function get_process_owner()
+{
+	// this function requires the posix extention and returns the fallback value otherwise
+	if (is_callable('posix_getpwuid') and is_callable('posix_geteuid'))
+	{
+		$user = posix_getpwuid(posix_geteuid());
+		if (isset ($user['name']))
+			return $user['name'];
+	}
+	return 'nobody';
+}
+
 function check_config_access()
 {
 	global $path_to_secret_php;
@@ -312,6 +324,7 @@ function check_config_access()
 		echo 'The configuration file ownership/permissions seem to be OK.<br>';
 		return TRUE;
 	}
+	$uname = get_process_owner();
 	echo 'Please set ownership (<tt>chown</tt>) and/or permissions (<tt>chmod</tt>) ';
 	echo "of <tt>${path_to_secret_php}</tt> on the server filesystem as follows:";
 	echo '<div align=left><ul>';
@@ -320,10 +333,10 @@ function check_config_access()
 	echo '<li>The file should not be readable by anyone except the httpd process.</li>';
 	echo '<li>The file should not be writable by anyone.</li>';
 	echo '</ul></div>';
-	echo 'For example, if httpd runs as user "nobody" and group "nogroup", commands ';
+	echo 'For example, if httpd runs as user "' . $uname . '" and group "nogroup", commands ';
 	echo 'similar to the following may work (though not guaranteed to, please consider ';
 	echo 'only as an example):';
-	echo '<pre>chown nobody:nogroup secret.php; chmod 400 secret.php</pre>';
+	echo "<pre>chown $uname:nogroup secret.php; chmod 400 secret.php</pre>";
 	return FALSE;
 }
 
