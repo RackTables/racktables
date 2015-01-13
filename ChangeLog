@@ -1,4 +1,4 @@
-0.20.9
+0.20.9 2015-01-13
 	bugfix: 802.1Q support of Huawei VRP 8.80 devices
 	bugfix: adding new Cacti graphs sometimes failed, now works
 	bugfix: do not allow to turn an object into a location (#1339)
