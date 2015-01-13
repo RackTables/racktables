@@ -464,7 +464,7 @@ function renderPopupHTML ($contents)
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
 <head>
 <title>RackTables pop-up</title>
-<? printPageHeaders(); ?>
+<?php printPageHeaders(); ?>
 </head>
 <body style="height: 100%;">
 <div class="popupbar"><?php echo $contents; ?></div>
