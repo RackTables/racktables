@@ -3256,7 +3256,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'25506.11.1.82' => array
 	(
-		'dict_key' => 2382,
+		'dict_key' => 2176,
 		'text' => 'JE006A: 24 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports',
 		'processors' => array ('3com-25-to-26-1000SFP', '3com-27-to-28-1000SFP', '3com-any-1000T'),
 	),
