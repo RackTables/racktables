@@ -3188,18 +3188,35 @@ function getPortListPrefs()
 	return $ret;
 }
 
-// Return data for printNiftySelect() with port type options. All OIF options
-// for the default IIF will be shown, but only the default OIFs will be present
-// for each other IIFs. IIFs for that there is no default OIF will not
-// be listed.
-// This SELECT will be used for the "add new port" form.
 function getNewPortTypeOptions()
 {
-	$ret = array();
-	$prefs = getPortListPrefs();
-	foreach (getPortInterfaceCompat() as $row)
+	return getUnlinkedPortTypeOptions (NULL);
+}
+
+// Return data for printNiftySelect() with port type options. All OIF options
+// for the default or current (passed) IIFs will be shown, but only the default
+// OIFs will be present for each other IIFs. IIFs for that there is no default
+// OIF will not be listed.
+// This SELECT will be used in "manage object ports" form.
+function getUnlinkedPortTypeOptions ($port_iif_id)
+{
+	static $cache;
+	static $prefs;
+	static $compat;
+	if (! isset ($cache))
 	{
-		if ($row['iif_id'] == $prefs['iif_pick'])
+		$cache = array();
+		$prefs = getPortListPrefs();
+		$compat = getPortInterfaceCompat();
+	}
+
+	if (isset ($cache[$port_iif_id]))
+		return $cache[$port_iif_id];
+
+	$ret = array();
+	foreach ($compat as $row)
+	{
+		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
 			$optgroup = $row['iif_name'];
 		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
 			$optgroup = 'other';
@@ -3209,6 +3226,8 @@ function getNewPortTypeOptions()
 			$ret[$optgroup] = array();
 		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
 	}
+
+	$cache[$port_iif_id] = $ret;
 	return $ret;
 }
 
