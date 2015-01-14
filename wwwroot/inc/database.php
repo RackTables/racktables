@@ -1627,6 +1627,16 @@ function getRackspaceHistory ()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
+function getRackSpaceHistoryForObject ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		"SELECT id as mo_id, object_id as ro_id, ctime, comment, user_name FROM " .
+		"MountOperation where object_id = ? ORDER BY ctime DESC", array ($object_id)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
 // This function is used in renderRackspaceHistory()
 function getOperationMolecules ($op_id = 0)
 {
