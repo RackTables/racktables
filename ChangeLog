@@ -1,5 +1,7 @@
 0.20.10
-	bugfix: port type is not changed for an unlinked modular port (#1393)
+	bugfix: port type could not be changed for an unlinked modular port (#1393)
+	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)
+	bugfix: error displaying a pop-up window when short_open_tag=0 in php.ini
 0.20.9 2015-01-13
 	bugfix: 802.1Q support of Huawei VRP 8.80 devices
 	bugfix: adding new Cacti graphs sometimes failed, now works
