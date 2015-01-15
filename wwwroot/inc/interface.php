@@ -2165,7 +2165,7 @@ function renderRackSpaceForObject ($object_id)
 		$matched_tags = array();
 		foreach ($allRacksData as $rack)
 		{
-			$tag_chain = array_replace ($rack['etags'], $rack['itags']);
+			$tag_chain = array_merge ($rack['etags'], $rack['itags']);
 			foreach ($object['etags'] as $tag)
 				if (tagOnChain ($tag, $tag_chain))
 				{
