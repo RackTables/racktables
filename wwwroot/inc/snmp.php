@@ -2500,7 +2500,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1873' => array
 	(
-		'dict_key' => 2383,  // Should be created in dictionary
+		'dict_key' => 2383,
 		'text' => 'Cisco AIR-3702E',
 		'processors' => array ('catalyst-any-1000T'),
 	),
@@ -3936,8 +3936,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.2' => 252,
 			'15.0' => 1901,
 			'15.1' => 2082,
-			'15.2' => 2384,  // Should be created in dictionary
-			'15.3' => 2385,  // Should be created in dictionary
+			'15.2' => 2384,
+			'15.3' => 2385,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
