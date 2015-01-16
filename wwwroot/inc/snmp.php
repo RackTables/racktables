@@ -654,6 +654,24 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['nexus-any-combo-1000SFP'] = array
+ (
+ 	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
+ 	'replacement' => 'e\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['nexus-any-combo-10000SFP+'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '9-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ftos-any-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet 0/(\d+)$@',
@@ -3022,9 +3040,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.12.3.1.3.1084' => array
 	(
-		'dict_key' => 1412,
-		'text' => 'N5K-C5548P: 32 SFP+/10000',
-		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
+		'dict_key' => 2386,
+		'text' => 'N5K-C5548UP: 32 combo SFP/SFP+ + 16 combo SFP/SFP+',
+		'processors' => array ('nexus-any-combo-1000SFP', 'nexus-any-combo-10000SFP+', 'nexus-mgmt'),
 	),
 	'11.2.3.7.11.9' => array
 	(
