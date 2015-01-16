@@ -2452,12 +2452,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C4948E: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 + 1 RJ-45/100TX (OOB mgmt)',
 		'processors' => array ('catalyst-chassis-uplinks-10000SFP+', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
 	),
-    '9.1.1643' => array
-    (
-        'dict_key' => 2190,
-        'text' => 'WS-C3850-48T: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 or 4 SFP/1000',
-        'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
-    ),
+	'9.1.1643' => array
+	(
+		'dict_key' => 2190,
+		'text' => 'WS-C3850-48T: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 or 4 SFP/1000',
+		'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+	),
 	'9.1.1650' => array
 	(
 		'dict_key' => 1903,
