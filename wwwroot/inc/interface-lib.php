@@ -354,46 +354,22 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 
 function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 {
-	function serializeJSArray ($options)
-	{
-		$tmp = array();
-		foreach ($options as $key => $value)
-			$tmp[] = "'${key}': \"${value}\"";
-		return '{' . implode (', ', $tmp) . "}\n";
-	}
-	function serializeJSTree ($tree_options)
-	{
-		$self = __FUNCTION__;
-		$tmp = array();
-		# Leaves on the PHP tree are stored "value => label" way,
-		# non-leaves are stored "label => array" way, and the JS
-		# tree is always built "label => value" or "label => array"
-		# way, hence a structure transform is required.
-		foreach ($tree_options as $key => $value)
-			$tmp[] = is_array ($value) ?
-				'"' . str_replace ('"', '\"', $key) . '": ' . $self ($value) :
-				'"' . str_replace ('"', '\"', $value) . '": "' . str_replace ('"', '\"', $key) . '"';
-		return '{' . implode (', ', $tmp) . "}\n";
-	}
-
 	$default_config = array
 	(
 		'choose' => 'select...',
 		'empty_value' => '',
+		'indexed' => true,
 	);
-	foreach ($tree_config as $cfgoption_name => $cfgoption_value)
-		$default_config[$cfgoption_name] = $cfgoption_value;
-	# it is safe to call many times for the same file
 	addJS ('js/jquery.optionTree.js');
-	$ret  = "<input type=hidden name=${tree_name}>\n";
-	$ret .= "<script type='text/javascript'>\n";
-	$ret .= "\$(function() {\n";
-	$ret .= "    var option_tree = " . serializeJSTree ($tree_options) . ";\n";
-	$ret .= "    var options = " . serializeJSArray ($default_config) . ";\n";
-	$ret .= "    \$('input[name=${tree_name}]').optionTree(option_tree, options);\n";
-	$ret .= "});\n";
-	$ret .= "</script>\n";
-	return $ret;
+	addJS ("
+$(function() {
+	var option_tree = " . json_encode ($tree_options) . ";
+	var options = " . json_encode ($tree_config + $default_config) . ";
+	$('input[name=${tree_name}]').optionTree(option_tree, options);
+});
+", TRUE);
+
+	return "<input type=hidden name=${tree_name}>";
 }
 
 function printImageHREF ($tag, $title = '', $do_input = FALSE)
@@ -899,6 +875,30 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 	if (FALSE !== strpos ($class, 'need-confirmation'))
 		addJS ('js/racktables.js');
 	$ret .= $title . '</a>';
+	return $ret;
+}
+
+function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $title = '', $comment = '', $class = '')
+{
+	$ret = '';
+	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+	$ret .= '<a href="#"';
+	$class = trim ($class);
+	if (! empty ($class))
+		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
+	if (! empty ($comment))
+		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
+	$href = makeHref (array ('module' => 'popup', 'helper' => $helper) + makePageParams ($params));
+	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
+
+	if (! empty ($img_name))
+	{
+		$ret .= getImageHREF ($img_name, $comment);
+		if (! empty ($title))
+			$ret .= ' ';
+	}
+	$ret .= $title;
+	$ret .= '</a>';
 	return $ret;
 }
 

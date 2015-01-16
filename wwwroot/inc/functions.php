@@ -1889,22 +1889,14 @@ function getCellFilter ()
 
 function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
-	global $page, $pageno, $tabno;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	$url = "index.php?page=${nextpage}&tab=${nexttab}";
-
-	if ($nextpage === $pageno)
-		fillBypassValues ($nextpage, $moreArgs);
-	foreach ($moreArgs as $arg => $value)
-		if (is_array ($value))
-			foreach ($value as $v)
-				$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
-		elseif ($arg != 'module')
-			$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
-	return $url;
+	$params = array();
+	if ($nextpage !== NULL)
+		$params['page'] = $nextpage;
+	if ($nexttab !== NULL)
+		$params['tab'] = $nexttab;
+	$params = makePageParams ($params + $moreArgs);
+	unset ($params['module']); // 'interface' module is the default
+	return makeHref ($params);
 }
 
 // store the accumulated message list into he $SESSION array to display them later
@@ -2815,27 +2807,22 @@ function makeHref ($params = array())
 	return 'index.php?' . implode ('&', $tmp);
 }
 
-function makeHrefProcess ($params = array())
+function makePageParams ($params = array())
 {
-	global $pageno, $tabno, $page;
-	$tmp = array();
-	if (! array_key_exists ('page', $params))
-		$params['page'] = $pageno;
-	if (! array_key_exists ('tab', $params))
-		$params['tab'] = $tabno;
-	if ($params['page'] === $pageno)
-		fillBypassValues ($pageno, $params);
-	foreach ($params as $key => $value)
-		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
-	return '?module=redirect&' . implode ('&', $tmp);
+	global $pageno, $tabno;
+	$ret = array();
+	// assure that page and tab keys go first
+	$ret['page'] = isset ($params['page']) ? $params['page'] : $pageno;
+	$ret['tab'] = isset ($params['tab']) ? $params['tab'] : $tabno;
+	$ret += $params;
+	if ($ret['page'] === $pageno)
+		fillBypassValues ($pageno, $ret);
+	return $ret;
 }
 
-function makeHrefForHelper ($helper_name, $params = array())
+function makeHrefProcess ($params = array())
 {
-	$ret = '?module=popup&helper=' . $helper_name;
-	foreach($params as $key=>$value)
-		$ret .= '&'.urlencode($key).'='.urlencode($value);
-	return $ret;
+	return makeHref (array ('module' => 'redirect') + makePageParams ($params));
 }
 
 // Process the given list of records to build data suitable for printNiftySelect()
@@ -5258,14 +5245,28 @@ function getConfigVar ($varname = '')
 }
 
 // return portinfo array if object has a port with such name, or NULL
-function getPortinfoByName (&$object, $portname)
+// in strict mode the resulting port name is always equal to the $portname.
+// in non-strict mode names are compared using shortenIfName()
+function getPortinfoByName (&$object, $portname, $strict_mode = TRUE)
 {
 	if (! isset ($object['ports']))
-		amplifyCell ($object);
+		$object['ports'] = getObjectPortsAndLinks ($object['id']);
+	if (! $strict_mode)
+	{
+		$breed = detectDeviceBreed ($object['id']);
+		$portname = shortenIfName ($portname, $breed);
+	}
+	$ret = NULL;
 	foreach ($object['ports'] as $portinfo)
-		if ($portinfo['name'] == $portname)
-			return $portinfo;
-	return NULL;
+		if ($portname == ($strict_mode ? $portinfo['name'] : shortenIfName ($portinfo['name'], $breed)))
+		{
+			$ret = $portinfo;
+			if ($ret['linked'])
+				break;
+		}
+		elseif (isset ($ret))
+			break;
+	return $ret;
 }
 
 // exclude location-related object types
@@ -5690,7 +5691,7 @@ function registerOpHandler ($page, $tab, $opname, $callback, $method = 'before')
 	elseif ($method == 'after')
 		array_push ($ophandlers_stack[$page][$tab][$opname], $callback);
 	else
-		throw new RacktablesError ("unknown ophandler injection method '$method'");
+		throw new RacktablesError ("unknown ophandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // call this from custom ophandler registered by registerOpHandler
@@ -5744,7 +5745,7 @@ function registerTabHandler ($page, $tab, $callback, $method = 'after')
 	elseif ($method == 'replace')
 		array_push ($tabhandlers_stack[$page][$tab], '!' . $callback);
 	else
-		throw new RacktablesError ("unknown tabhandler injection method '$method'");
+		throw new RacktablesError ("unknown tabhandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // Returns  tab content already rendered by previous tabhandlers in the chain registered by registerTabHandler.

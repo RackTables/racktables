@@ -1140,10 +1140,9 @@ $msgcode['supplementAttrMap']['OK'] = 48;
 $msgcode['supplementAttrMap']['ERR1'] = 154;
 function supplementAttrMap ()
 {
-	assertUIntArg ('attr_id');
+	$attr_id = assertUIntArg ('attr_id');
 	assertUIntArg ('objtype_id');
-	$attrMap = getAttrMap();
-	if ($attrMap[$_REQUEST['attr_id']]['type'] != 'dict')
+	if (getAttrType ($attr_id) != 'dict')
 		$chapter_id = NULL;
 	else
 	{
@@ -1158,7 +1157,7 @@ function supplementAttrMap ()
 		}
 		$chapter_id = $_REQUEST['chapter_no'];
 	}
-	commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id);
+	commitSupplementAttrMap ($attr_id, $_REQUEST['objtype_id'], $chapter_id);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1885,7 +1884,7 @@ function addPortToVS()
 	$row = array ('vs_id' => $vsinfo['id'], 'proto' => $proto, 'vport' => $vport, 'vsconfig' => NULL, 'rsconfig' => NULL);
 	if ($port = isPortEnabled ($row, $vsinfo['ports']))
 	{
-		showError ("Service already contains port " . formatVSPort ($port));
+		showError ("Service already contains port " . $port['proto'] . ' ' . $port['vport']);
 		return;
 	}
 	usePreparedInsertBlade ('VSPorts', $row);

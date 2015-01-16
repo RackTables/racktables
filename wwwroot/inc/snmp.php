@@ -573,6 +573,15 @@ $iftable_processors['nexus-any-1000SFP/10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['airnet-dot11-any'] = array
+(
+	'pattern' => '@^Dot11Radio([[:digit:]]$@',
+	'replacement' => '\\1',
+	'dict_key' => '14-1084',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ftos-any-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet 0/(\d+)$@',
@@ -2063,6 +2072,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Cisco 2811 ISR',
 		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-stack-any-100TX'),
 	),
+	'9.1.577' => array
+	(
+		'dict_key' => 281,
+		'text' => 'Cisco 2821 ISR',
+		'processors' => array ('catalyst-chassis-any-100TX', 'catalyst-stack-any-100TX', 'catalyst-stack-any-1000T', 'catalyst-chassis-any-1000T'),
+	),
 	'9.1.614' => array
 	(
 		'dict_key' => 175,
@@ -2338,15 +2353,15 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.1.1208' => array
 	(
-		'dict_key' => 1394,
-#		'dict_key' => 1393,
-		'text' => 'WS-C2960S-24PS-L: 24 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
-#		'text' => 'WS-C2960S-48LPS-L: 48 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
+#		'dict_key' => 1394,
+		'dict_key' => 1393,
+#		'text' => 'WS-C2960S-24PS-L: 24 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
+		'text' => 'WS-C2960S-48LPS-L: 48 RJ-45/10-100-1000T(X) PoE+ + 4 SFP/1000',
 		'processors' => array
 		(
 			'catalyst-chassis-mgmt',
-			'catalyst-stack-25-to-28-SFP',
-#			'catalyst-stack-49-to-52-SFP',
+#			'catalyst-stack-25-to-28-SFP',
+			'catalyst-stack-49-to-52-SFP',
 			'catalyst-stack-any-1000T',
 		),
 	),
@@ -2404,6 +2419,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C4948E: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 + 1 RJ-45/100TX (OOB mgmt)',
 		'processors' => array ('catalyst-chassis-uplinks-10000SFP+', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
 	),
+        '9.1.1643' => array
+        (
+                'dict_key' => 2190,
+                'text' => 'WS-C3850-48T: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 or 4 SFP/1000',
+                'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+        ),
 	'9.1.1650' => array
 	(
 		'dict_key' => 1903,
@@ -2443,6 +2464,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 50038,
 		'text' => 'WS-C3850-48P: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000',
 		'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+	),
+	'9.1.1873' => array
+	(
+		'dict_key' => 50051,
+		'text' => 'Cisco AIR-3702E',
+		'processors' => array ('catalyst-any-1000T'),
 	),
 	'9.5.18' => array
 	(

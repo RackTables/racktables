@@ -34,7 +34,6 @@ $0 <hostname> [-b </path/to/netcat/binary>] [-p <port>] [--connect-timeout=<seco
  -p, --port             TCP port number to connect to (defaults to 23)
  -b, --ncbin            Full path to netcat binary (defaults to $op_ncbin)
  -w, --connect-timeout  netcat timeout (defaults to $op_timeout)
-
 END
 }
 

@@ -1083,14 +1083,8 @@ function renderEditObjectForm()
 		}
 		echo "<tr><td>&nbsp;</td>";
 		echo "<th class=tdright>Select container:</th><td class=tdleft>";
-		echo "<span";
-		$helper_args = array ('object_id' => $object_id);
-		$popup_args = 'height=700, width=400, location=no, menubar=no, '.
-			'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
-		echo " onclick='window.open(\"" . makeHrefForHelper ('objlist', $helper_args);
-		echo "\",\"findlink\",\"${popup_args}\");'>";
-		printImageHREF ('attach', 'Select a container');
-		echo "</span></td></tr>\n";
+		echo getPopupLink ('objlist', array(), 'findlink', 'attach', 'Select a container');
+		echo "</td></tr>\n";
 	}
 	// optional attributes
 	$i = 0;
@@ -1766,24 +1760,8 @@ function renderPortsForObject ($object_id)
 		else
 		{
 			$in_rack = getConfigVar ('NEAREST_RACKS_CHECKBOX');
-			echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter><span";
-			$helper_args = array
-			(
-				'port' => $port['id'],
-				'in_rack' => ($in_rack == "yes" ? "on" : "")
-			);
-			$popup_args = 'height=700, width=400, location=no, menubar=no, '.
-				'resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
-			echo " ondblclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
-			echo "\",\"findlink\",\"${popup_args}\");'";
-			// end of onclick=
-			echo " onclick='window.open(\"" . makeHrefForHelper ('portlist', $helper_args);
-			echo "\",\"findlink\",\"${popup_args}\");'";
-			// end of onclick=
-			echo '>';
-			// end of <a>
-			printImageHREF ('plug', 'Link this port');
-			echo "</span>";
+			echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class=tdcenter>";
+			echo getPopupLink ('portlist', array ('port' => $port['id'], 'in_rack' => ($in_rack == "yes" ? "on" : "")), 'findlink', 'plug', '', 'Link this port');
 			echo " <input type=text name=reservation_comment></td>\n";
 		}
 		echo "<td>";
@@ -3350,10 +3328,7 @@ function renderNATv4ForObject ($object_id)
 
 		echo "</select>:<input type='text' name='localport' size='4'></td>";
 		echo "<td><input type='text' name='remoteip' id='remoteip' size='10'>";
-		echo "<a href='javascript:;' onclick='window.open(\"" . makeHrefForHelper ('inet4list');
-		echo "\", \"findobjectip\", \"height=700, width=400, location=no, menubar=no, resizable=yes, scrollbars=no, status=no, titlebar=no, toolbar=no\");'>";
-		printImageHREF ('find', 'Find object');
-		echo "</a>";
+		echo getPopupLink ('inet4list', array(), 'findobjectip', 'find', 'Find object');
 		echo ":<input type='text' name='remoteport' size='4'></td><td></td>";
 		echo "<td colspan=1><input type='text' name='description' size='20'></td><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
@@ -6427,12 +6402,7 @@ function showTabs ($pageno, $tabno)
 		if ($tabidx == $tabno)
 			$tabclass = 'current'; // override any class for an active selection
 		echo "<li><a class=${tabclass}";
-		echo " href='index.php?page=${pageno}&tab=${tabidx}";
-		$args = array();
-		fillBypassValues ($pageno, $args);
-		foreach ($args as $param_name => $param_value)
-			echo "&" . urlencode ($param_name) . '=' . urlencode ($param_value);
-
+		echo " href='" . makeHref (makePageParams (array ('tab' => $tabidx)));
 		echo "'>${tabtitle}</a></li>\n";
 	}
 	echo "</ul></div>";
