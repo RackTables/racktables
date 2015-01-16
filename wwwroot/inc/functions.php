@@ -2791,7 +2791,7 @@ function convertToBytes ($value)
 }
 
 // make "A" HTML element
-function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
+function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL, $attrs = array())
 {
 	global $page, $tab;
 	if ($text == '')
@@ -2811,7 +2811,11 @@ function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 			throw new InvalidArgException ('bypass', '(NULL)');
 		$args[$page[$nextpage]['bypass']] = $bypass;
 	}
-	return '<a href="' . makeHref ($args) . '">' . $text . '</a>';
+	$attrs['href'] = makeHref ($args);
+	$ret = '<a';
+	foreach ($attrs as $attr_name => $attr_value)
+		$ret .= " $attr_name=" . '"' . htmlspecialchars ($attr_value, ENT_QUOTES) . '"';
+	return $ret . '>' . $text . '</a>';
 }
 
 // make "HREF" HTML attribute
@@ -3324,6 +3328,15 @@ function formatVLANAsPlainText ($vlaninfo)
 function formatVLANAsHyperlink ($vlaninfo)
 {
 	return mkA (formatVLANAsRichText ($vlaninfo), 'vlan', $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id']);
+}
+
+function formatVLANAsShortLink ($vlaninfo)
+{
+	$title = sprintf ('VLAN %d @ %s', $vlaninfo['vlan_id'], $vlaninfo['domain_descr']);
+	if ($vlaninfo['vlan_descr'] != '')
+		$title .= ' (' . $vlaninfo['vlan_descr'] . ')';
+	$attrs = array ('title' => $title);
+	return mkA ($vlaninfo['vlan_id'], 'vlan', $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id'], NULL, $attrs);
 }
 
 function formatVLANAsRichText ($vlaninfo)

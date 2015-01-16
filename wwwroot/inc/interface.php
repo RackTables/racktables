@@ -2768,7 +2768,7 @@ function renderIPNetwork ($id)
 	foreach (array_count_values (reduceSubarraysToColumn ($range['8021q'], 'domain_id')) as $domain_id => $vlan_count)
 		$domainclass[$domain_id] = $vlan_count == 1 ? '' : ($reuse_domain ? '{trwarning}' : '{trerror}');
 	foreach ($range['8021q'] as $item)
-		$summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id'])));
+		$summary[] = array ($domainclass[$item['domain_id']] . 'VLAN:', formatVLANAsHyperlink (getVlanRow ($item['domain_id'] . '-' . $item['vlan_id'])));
 	if (getConfigVar ('EXT_IPV4_VIEW') == 'yes' and count ($routers = findNetRouters ($range)))
 	{
 		$summary['Routed by'] = '';
@@ -3757,7 +3757,7 @@ function renderSearchResults ($terms, $summary)
 				foreach ($what as $vlan)
 				{
 					echo "<tr class=row_${order}><td class=tdleft>";
-					echo formatVLANAsHyperlink (getVLANInfo ($vlan['id'])) . "</td></tr>";
+					echo formatVLANAsHyperlink (getVlanRow ($vlan['id'])) . "</td></tr>";
 					$order = $nextorder[$order];
 				}
 				echo '</table>';
@@ -6613,7 +6613,7 @@ function dynamic_title_decoder ($path_position)
 	case 'vlan':
 		return array
 		(
-			'name' => formatVLANAsPlainText (getVLANInfo ($sic['vlan_ck'])),
+			'name' => formatVLANAsPlainText (getVlanRow ($sic['vlan_ck'])),
 			'params' => array ('vlan_ck' => $sic['vlan_ck'])
 		);
 	case 'vst':
@@ -7550,7 +7550,7 @@ function renderVLANInfo ($vlan_ck)
 	foreach ($others as $other)
 		if ($other['domain_id'] != $vlan['domain_id'])
 			echo '<tr><th class=tdright>Counterpart:</th><td class=tdleft>' .
-				formatVLANAsHyperlink (getVLANInfo ("${other['domain_id']}-${vlan['vlan_id']}")) .
+				formatVLANAsHyperlink (getVlanRow ("${other['domain_id']}-${vlan['vlan_id']}")) .
 				'</td></tr>';
 	echo '</table>';
 	finishPortlet();
@@ -7738,7 +7738,7 @@ function renderVLANIPLinks ($some_id)
 			break;
 		case 'ipv4net':
 		case 'ipv6net':
-			$vlaninfo = getVLANInfo ($item['domain_id'] . '-' . $item['vlan_id']);
+			$vlaninfo = getVlanRow ($item['domain_id'] . '-' . $item['vlan_id']);
 			echo formatVLANAsRichText ($vlaninfo);
 			break;
 		}

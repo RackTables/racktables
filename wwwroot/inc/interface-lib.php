@@ -929,7 +929,10 @@ function renderNetVLAN ($cell)
 		return;
 	$links = array();
 	foreach ($cell['8021q'] as $vi)
-		$links[] = mkA ($vi['vlan_id'], 'vlan', "${vi['domain_id']}-${vi['vlan_id']}");
+	{
+		$vlan_info = getVlanRow ("${vi['domain_id']}-${vi['vlan_id']}");
+		$links[] = formatVLANAsShortLink ($vlan_info);
+	}
 	$noun = count ($cell['8021q']) > 1 ? 'VLANs' : 'VLAN';
 	echo "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
 }

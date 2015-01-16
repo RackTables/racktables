@@ -5174,7 +5174,7 @@ function getStored8021QConfig ($object_id, $instance = 'desired')
 	return $ret;
 }
 
-function getVLANInfo ($vlan_ck)
+function getVlanRow ($vlan_ck)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
 	$query = 'SELECT domain_id, vlan_id, vlan_type AS vlan_prop, vlan_descr, ' .
@@ -5184,7 +5184,14 @@ function getVLANInfo ($vlan_ck)
 	if (NULL == ($ret = $result->fetch (PDO::FETCH_ASSOC)))
 		throw new EntityNotFoundException ('VLAN', $vlan_ck);
 	$ret['vlan_ck'] = $vlan_ck;
-	unset ($result);
+	return $ret;
+}
+
+function getVLANInfo ($vlan_ck)
+{
+	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
+	$ret = getVlanRow ($vlan_ck);
+
 	$result = usePreparedSelectBlade
 	(
 	 	'SELECT ipv4net_id FROM VLANIPv4 WHERE domain_id = ? AND vlan_id = ? ORDER BY ipv4net_id',
