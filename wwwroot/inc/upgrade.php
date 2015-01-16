@@ -2052,7 +2052,8 @@ echo '</table>';
 echo '</body></html>';
 }
 
-// returns SQL query to make PortCompat symmetric (insert missing reversed-order pairs)
+// returns SQL query to make PortCompat symmetric (insert missing reversed-order pairs).
+// It should be called each time after the PortCompat table pairs being added during upgrade.
 function extendPortCompatQuery()
 {
 	return "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";

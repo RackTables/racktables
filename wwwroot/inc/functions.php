@@ -1032,6 +1032,22 @@ function findAllEndpoints ($object_id, $fallback = '')
 	return $regular;
 }
 
+// Split object's FQDN (or the common name if FQDN is not set) into the
+// hostname and domain name in Munin convention (using the first period as the
+// separator), and return the pair. Throw an exception on error.
+function getMuninNameAndDomain ($object_id)
+{
+	$o = spotEntity ('object', $object_id);
+	$hd = $o['name'];
+	// FQDN overrides the common name for Munin purposes.
+	$attrs = getAttrValues ($object_id);
+	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
+		$hd = $attrs[3]['value'];
+	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
+		throw new InvalidArgException ('$object_id', $object_id, 'the name is not in the host.do.ma.in format');
+	return $ret;
+}
+
 // Some records in the dictionary may be written as plain text or as Wiki
 // link in the following syntax:
 // 1. word
@@ -1485,7 +1501,7 @@ function redirectIfNecessary ()
 		$trigger,
 		$pageno,
 		$tabno;
-	@session_start();
+	startSession();
 	if
 	(
 		! isset ($_REQUEST['tab']) and
@@ -1767,7 +1783,7 @@ function getCellFilter ()
 	global $sic;
 	global $pageno;
 	$andor_used = FALSE;
-	@session_start();
+	startSession();
 	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if (isset($_REQUEST['andor']))
 		$andor_used = TRUE;
@@ -1905,8 +1921,9 @@ function backupLogMessages()
 	global $log_messages;
 	if (! empty ($log_messages))
 	{
-		@session_start();
+		startSession();
 		$_SESSION['log'] = $log_messages;
+		session_commit();
 	}
 }
 
@@ -1956,8 +1973,10 @@ function getRackImageHeight ($units)
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
+// Returns number of marked up (busy) addresses
 function markupIPAddrList (&$addrlist)
 {
+	$used = 0;
 	foreach (array_keys ($addrlist) as $ip_bin)
 	{
 		$refc = array
@@ -1976,12 +1995,19 @@ function markupIPAddrList (&$addrlist)
 		}
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
 		if ($nallocs > 1 && $nallocs != $refc['shared'] || $nallocs && $nreserved)
+		{
 			$addrlist[$ip_bin]['class'] = 'trerror';
+			++$used;
+		}
 		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'inpf', 'outpf'))) // these fields don't trigger the 'busy' status
+		{
 			$addrlist[$ip_bin]['class'] = 'trbusy';
+			++$used;
+		}
 		else
 			$addrlist[$ip_bin]['class'] = '';
 	}
+	return $used;
 }
 
 function findNetRouters ($net)
@@ -3162,18 +3188,35 @@ function getPortListPrefs()
 	return $ret;
 }
 
-// Return data for printNiftySelect() with port type options. All OIF options
-// for the default IIF will be shown, but only the default OIFs will be present
-// for each other IIFs. IIFs for that there is no default OIF will not
-// be listed.
-// This SELECT will be used for the "add new port" form.
 function getNewPortTypeOptions()
 {
-	$ret = array();
-	$prefs = getPortListPrefs();
-	foreach (getPortInterfaceCompat() as $row)
+	return getUnlinkedPortTypeOptions (NULL);
+}
+
+// Return data for printNiftySelect() with port type options. All OIF options
+// for the default or current (passed) IIFs will be shown, but only the default
+// OIFs will be present for each other IIFs. IIFs for that there is no default
+// OIF will not be listed.
+// This SELECT will be used in "manage object ports" form.
+function getUnlinkedPortTypeOptions ($port_iif_id)
+{
+	static $cache;
+	static $prefs;
+	static $compat;
+	if (! isset ($cache))
 	{
-		if ($row['iif_id'] == $prefs['iif_pick'])
+		$cache = array();
+		$prefs = getPortListPrefs();
+		$compat = getPortInterfaceCompat();
+	}
+
+	if (isset ($cache[$port_iif_id]))
+		return $cache[$port_iif_id];
+
+	$ret = array();
+	foreach ($compat as $row)
+	{
+		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
 			$optgroup = $row['iif_name'];
 		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
 			$optgroup = 'other';
@@ -3183,6 +3226,8 @@ function getNewPortTypeOptions()
 			$ret[$optgroup] = array();
 		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
 	}
+
+	$cache[$port_iif_id] = $ret;
 	return $ret;
 }
 
@@ -6282,6 +6327,32 @@ function customKsort ($array, $order)
 	foreach (array_keys ($ret) as $key)
 		$ret[$key] = $array[$key];
 	return $ret;
+}
+
+// RT uses PHP sessions on demand and tries to minimize session lifetime
+// to allow concurrent operations for a single user.
+// You should call session_commit after each call of this function.
+function startSession()
+{
+	if (is_callable ('session_status'))
+	{
+		if (session_status() != PHP_SESSION_ACTIVE)
+			session_start();
+	}
+	else
+	{
+		// compatibility mode for PHP prior to 5.4.0
+		$old_errorlevel = error_reporting (E_ALL & ~E_NOTICE);
+		session_start();
+		error_reporting ($old_errorlevel);
+	}
+}
+
+// loads session data. Use if you need to only read from _SESSION.
+function startROSession()
+{
+	startSession();
+	session_commit();
 }
 
 ?>

@@ -1746,13 +1746,27 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		}
 		$prev_comment = getPortReservationComment ($port_id);
 		$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
+		switch (1)
+		{
+		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = $matches[1];
+			$oif_id = $matches[2];
+			break;
+		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+			$iif_id = $portinfo['iif_id'];
+			$oif_id = $matches[1];
+			break;
+		default:
+			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+		}
 		usePreparedUpdateBlade
 		(
 			'Port',
 			array
 			(
 				'name' => $port_name,
-				'type' => $port_type_id,
+				'iif_id' => $iif_id,
+				'type' => $oif_id,
 				'label' => $port_label,
 				'reservation_comment' => $reservation_comment,
 				'l2address' => nullEmptyStr ($db_l2address),
@@ -2789,13 +2803,14 @@ function getIPv6PrefixSearchResult ($terms)
 
 function getIPv4AddressSearchResult ($terms)
 {
-	$query = "select ip, name from IPv4Address where ";
+	$query = "select ip, name, comment from IPv4Address where ";
 	$or = '';
 	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $or . "name like ?";
+		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
+		$qparams[] = "%${term}%";
 		$qparams[] = "%${term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -2811,13 +2826,14 @@ function getIPv4AddressSearchResult ($terms)
 
 function getIPv6AddressSearchResult ($terms)
 {
-	$query = "select ip, name from IPv6Address where ";
+	$query = "select ip, name, comment from IPv6Address where ";
 	$or = '';
 	$qparams = array();
 	foreach (explode (' ', $terms) as $term)
 	{
-		$query .= $or . "name like ?";
+		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
+		$qparams[] = "%${term}%";
 		$qparams[] = "%${term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -3631,7 +3647,6 @@ function getPortOIFRefc()
 	(
 		'SELECT POI.id, (' .
 		'(SELECT COUNT(*) FROM PortCompat WHERE type1 = id) + ' .
-		'(SELECT COUNT(*) FROM PortCompat WHERE type2 = id) + ' .
 		'(SELECT COUNT(*) FROM Port WHERE type = POI.id) + ' .
 		'(SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = POI.id)' .
 		') AS refcnt FROM PortOuterInterface AS POI'
@@ -4930,32 +4945,31 @@ function getPortInterfaceCompat()
 // Return a set of options for a plain SELECT. These options include the current
 // OIF of the given port and all OIFs of its permanent IIF.
 // If given port is already linked, returns only types compatible with the remote port's type
-function getExistingPortTypeOptions ($port_id)
+function getExistingPortTypeOptions ($portinfo)
 {
-	$portinfo = getPortInfo ($port_id);
 	$remote_type = NULL;
 	if ($portinfo['linked'])
 	{
 		$remote_portinfo = getPortInfo ($portinfo['remote_id']);
 		$result = usePreparedSelectBlade ("
-SELECT DISTINCT oif_id, oif_name
-FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
-LEFT JOIN PortCompat pc1 ON oif_id = pc1.type1 AND pc1.type2 = ?
-LEFT JOIN PortCompat pc2 ON oif_id = pc1.type2 AND pc2.type1 = ?
-WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
-AND (pc1.type1 IS NOT NULL OR pc2.type2 IS NOT NULL)
+SELECT oif_id, oif_name
+FROM PortInterfaceCompat
+INNER JOIN PortOuterInterface ON oif_id = id
+INNER JOIN PortCompat pc ON pc.type1 = oif_id AND pc.type2 = ?
+WHERE iif_id = ?
 ORDER BY oif_name
-", array ($remote_portinfo['oif_id'], $remote_portinfo['oif_id'], $port_id)
+", array ($remote_portinfo['oif_id'], $portinfo['iif_id'])
 		);
 	}
 	else
 	{
 		$result = usePreparedSelectBlade ("
 SELECT oif_id, oif_name
-FROM PortInterfaceCompat INNER JOIN PortOuterInterface ON oif_id = id
-WHERE iif_id = (SELECT iif_id FROM Port WHERE id = ?)
+FROM PortInterfaceCompat
+INNER JOIN PortOuterInterface ON oif_id = id
+WHERE iif_id = ?
 ORDER BY oif_name
-", array ($port_id)
+", array ($portinfo['iif_id'])
 		);
 	}
 

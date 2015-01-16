@@ -829,7 +829,7 @@ function editPortForObject ()
 {
 	global $sic;
 	assertUIntArg ('port_id');
-	assertUIntArg ('port_type_id');
+	assertStringArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
 	genericAssertion ('l2address', 'l2address0');
 	genericAssertion ('name', 'string');
@@ -1435,7 +1435,7 @@ function addLotOfObjects()
 				amplifyCell ($info);
 				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
 			}
-			catch (RTDatabaseError $e)
+			catch (RackTablesError $e)
 			{
 				showError ("Error creating object '$name': " . $e->getMessage());
 				continue;
@@ -3182,8 +3182,9 @@ function updVSTRule()
 		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 		{
-			@session_start();
+			startSession();
 			$_SESSION['vst_edited'] = $data;
+			session_commit();
 		}
 		throw $e;
 	}

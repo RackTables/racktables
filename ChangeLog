@@ -1,4 +1,9 @@
-0.20.9
+0.20.10
+	bugfix: port type could not be changed for an unlinked modular port (#1393)
+	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)
+	bugfix: error displaying a pop-up window when short_open_tag=0 in php.ini
+	update: SNMP support for Cisco SMB switches: all 200, 220 and 300 series models
+0.20.9 2015-01-13
 	bugfix: 802.1Q support of Huawei VRP 8.80 devices
 	bugfix: adding new Cacti graphs sometimes failed, now works
 	bugfix: do not allow to turn an object into a location (#1339)
@@ -6,6 +11,8 @@
 	bugfix: fix color for zero-U objects with problems (#1189)
 	bugfix: fix syntax error crash with PHP version < 5.3 (unexpected T_FUNCTION).
 		This bug appeared in 0.20.8 and reported by Frank Altpeter.
+	bugfix: When adding large amounts of objects at once, one typo halts progress (#1369)
+	bugfix: commented, but not reserved/allocated IPs were counted as busy in net usage bar (#1217)
 	update: SNMP support for Cisco CGS-2520-24TC (#1259), WS-C2960X-24TS-LL (#1205),
 		WS-C2960X-48LPS-L, HP J8693A (#1251), HP J9728A (#1255), Linksys SRW2024P (#1183),
 		Huawei CE6850-48S4Q-EI, CE7850-32Q-EI
@@ -25,7 +32,12 @@
 	update: check permissions when mounting an object to a rack against both the
 		object's and the rack's tags. Thus, it is possible to allow modifying object
 		but restrict mounting it to a particular rack.
-	new Juniper MX, Cisco Nexus 3000 models added into dictionary
+	update: consider object's FQDN to retrieve its Munin graphs (#1279)
+	update: searching by IP address comment field (by Niilo Kajander, #1359)
+	update: new Juniper MX, Cisco Nexus 3000, Cisco Small Business series
+		models added into dictionary
+	update: increase port table column width (#1387)
+	update: ability to change an unlinked inner port type (e.g. hardwired -> SFP)
 0.20.8 2014-06-07
 	bugfix: syntax error in functions.php when using PHP prior to 5.3.0 (#1195)
 	bugfix: properly format comment text for locations and racks

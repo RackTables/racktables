@@ -472,15 +472,21 @@ function proxyCactiRequest ($server_id, $graph_id)
 
 function proxyMuninRequest ($server_id, $graph)
 {
-	$object = spotEntity ('object', getBypassValue());
-	list ($host, $domain) = preg_split ("/\./", $object['dname'], 2);
+	try
+	{
+		list ($host, $domain) = getMuninNameAndDomain (getBypassValue());
+	}
+	catch (InvalidArgException $e)
+	{
+		throw new RTImageError ('munin_graph');
+	}
 
 	$ret = array();
 	$servers = getMuninServers();
 	if (! array_key_exists ($server_id, $servers))
 		throw new InvalidRequestArgException ('server_id', $server_id);
 	$munin_url = $servers[$server_id]['base_url'];
-	$url = "${munin_url}/${domain}/${object['dname']}/${graph}-day.png";
+	$url = "${munin_url}/${domain}/${host}.${domain}/${graph}-day.png";
 
 	$session = curl_init();
 
