@@ -2452,6 +2452,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C4948E: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 + 1 RJ-45/100TX (OOB mgmt)',
 		'processors' => array ('catalyst-chassis-uplinks-10000SFP+', 'catalyst-chassis-uplinks-1000T', 'catalyst-chassis-mgmt'),
 	),
+    '9.1.1643' => array
+    (
+        'dict_key' => 2190,
+        'text' => 'WS-C3850-48T: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000 or 4 SFP/1000',
+        'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+    ),
 	'9.1.1650' => array
 	(
 		'dict_key' => 1903,
@@ -2485,6 +2491,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2960X-24TS-LL: 24 RJ-45/10-100-1000T(X) + 2 SFP/1000',
 		'processors' => array ('catalyst-chassis-25-to-26-1000SFP', 'catalyst-chassis-mgmt', 'catalyst-chassis-any-1000T'),
 
+	),
+	'9.1.1745' => array
+	(
+		'dict_key' => 50038,  // Should be created in dictionary
+		'text' => 'WS-C3850-48P: 48 RJ-45/10-100-1000T(X) + 4 SFP+/10000',
+		'processors' => array ('catalyst-stack-uplinks-10000SFP+', 'catalyst-chassis-mgmt', 'catalyst-stack-any-1000T'),
+	),
+	'9.1.1873' => array
+	(
+		'dict_key' => 50051,  // Should be created in dictionary
+		'text' => 'Cisco AIR-3702E',
+		'processors' => array ('catalyst-any-1000T'),
 	),
 	'9.5.18' => array
 	(
@@ -3918,6 +3936,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.2' => 252,
 			'15.0' => 1901,
 			'15.1' => 2082,
+			'15.2' => 50034,  // Should be created in dictionary
+			'15.3' => 50039,  // Should be created in dictionary
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
@@ -3958,6 +3978,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		(
 			'4.0' => 963,
 			'4.1' => 964,
+			'5.2' => 1809,
 		);
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
