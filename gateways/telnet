@@ -43,22 +43,24 @@ Takes commands list in standard input and gives the responses via standard outpu
 Login credentials are not specially handled and should be placed as first lines of input
 Usage:
 $0 {hostname} [--port={port}] [--connect-timeout={seconds}] --prompt={regexp} [--timeout={seconds}]
+
 port: TCP port number to connect to
 connect-timeout: timeout for giving up connecting process, seconds
 prompt: command prompt regexp for interactive telnet (auth prompts too)
 timeout: wait time for activity of remote telnet peer in seconds
 4: force telnet to use IPv4 addresses only
 6: force telnet to use IPv6 addresses only
+
 END
 }
 
 my $port = $op_port || 23;
 my $family;
 if (defined $op_ipv4) {
-	$family = "ipv4";
+	$family = "IPv4";
 }
 elsif (defined $op_ipv6) {
-	$family = "ipv6";
+	$family = "IPv6";
 } else {
 	$family = "any";
 }
@@ -66,7 +68,7 @@ elsif (defined $op_ipv6) {
 my $session = Net::Telnet->new (
 	Host => $op_host,
 	Port => $port,
-#	Family => $family,
+	Family => $family,
 	Timeout => $op_connect_timeout,
 );
 
