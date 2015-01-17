@@ -270,7 +270,7 @@ function getLocations ($location_id)
 		'SELECT id, name FROM Location WHERE parent_id = ? ORDER BY name',
 		array ($location_id)
 	);
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 // Return detailed information about one rack row.
@@ -310,7 +310,7 @@ function getRows ($location_id)
 		'ORDER BY R.name',
 		array ($location_id)
 	);
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 function getRacks ($row_id)
@@ -3651,7 +3651,7 @@ function getPortOIFRefc()
 		'(SELECT COUNT(*) FROM PortInterfaceCompat WHERE oif_id = POI.id)' .
 		') AS refcnt FROM PortOuterInterface AS POI'
 	);
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'refcnt');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'refcnt');
 }
 
 function getAttrType ($attr_id)
@@ -4624,7 +4624,7 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 		'ORDER BY name, id',
 		array ($entity_type, $entity_id)
 	);
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
 // FIXME: return a standard cell list, so upper layer can iterate over
@@ -4703,7 +4703,7 @@ function getFileLinks ($file_id)
 		'WHERE file_id = ? ORDER BY entity_type, entity_id',
 		array ($file_id)
 	);
-	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getFileStats ()
@@ -4973,7 +4973,7 @@ ORDER BY oif_name
 		);
 	}
 
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'oif_id'), 'oif_name');
 }
 
 function getPortTypeUsageStatistics()
@@ -4992,13 +4992,13 @@ function getPortTypeUsageStatistics()
 function getPortIIFOptions()
 {
 	$result = usePreparedSelectBlade ('SELECT id, iif_name FROM PortInnerInterface ORDER BY iif_name');
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'iif_name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'iif_name');
 }
 
 function getPortOIFOptions()
 {
 	$result = usePreparedSelectBlade ('SELECT id, oif_name FROM PortOuterInterface ORDER BY oif_name');
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'oif_name');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'oif_name');
 }
 
 function commitSupplementPIC ($iif_id, $oif_id)
@@ -5047,7 +5047,7 @@ function getVLANDomainStats ()
 function getVLANDomainOptions()
 {
 	$result = usePreparedSelectBlade ('SELECT id, description FROM VLANDomain ORDER BY description');
-	return reduceSubarraysToColumn (reindexByID ($result->fetchAll (PDO::FETCH_ASSOC)), 'description');
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'description');
 }
 
 function getVLANDomain ($vdid)
@@ -5093,7 +5093,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id)
 	);
-	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 // faster than getDomainVLANs, but w/o statistics
@@ -5112,7 +5112,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id)
 	);
-	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 function getVLANSwitches()
@@ -5702,7 +5702,7 @@ function getPatchCableHeapSummary()
 		'GROUP BY PCH.id ' .
 		'ORDER BY pctype, end1_connector, end2_connector, description, id '
 	);
-	return reindexByID ($result->fetchAll (PDO::FETCH_ASSOC));
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getPatchCableHeapOptionsForOIF ($oif_id)

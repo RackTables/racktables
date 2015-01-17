@@ -632,7 +632,7 @@ function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
 	$object = spotEntity ('object', $object_id);
-	$parents = reindexByID (getParents ($object, 'object'));
+	$parents = reindexById (getParents ($object, 'object'));
 
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
