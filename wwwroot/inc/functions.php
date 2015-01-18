@@ -3931,7 +3931,7 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 				$seen_nets[$net_id] = 1;
 				$net = spotEntity ("${family}net", $net_id);
 				foreach ($net['8021q'] as $vlan)
-					if (! isset ($employed[$vlan['vlan_id']]))
+					if (isset ($domain_vlanlist[$vlan['vlan_id']]) and ! isset ($employed[$vlan['vlan_id']]))
 						$employed[$vlan['vlan_id']] = 1;
 			}
 	}
