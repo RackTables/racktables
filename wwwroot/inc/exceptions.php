@@ -114,6 +114,12 @@ class RackTablesError extends Exception
 			echo '<hr>' . $helpdesk_banner;
 		echo '</body></html>';
 	}
+	protected static function formatString ($string)
+	{
+		if (isCLIMode())
+			return $string;
+		return niftyString ($string);
+	}
 	public function dispatch()
 	{
 		$msgheader = array
@@ -188,9 +194,9 @@ class InvalidArgException extends RackTablesError
 	}
 	function __construct ($name, $value, $reason=NULL)
 	{
-		$message = 'Argument \'' . niftyString ($name) . '\'' .
-			' of value ' . niftyString (var_export ($value, TRUE), 200) .
-			' is invalid' . (is_null ($reason) ? '' : ' (' . niftyString ($reason, 100) . ')') .
+		$message = 'Argument \'' . self::formatString ($name) . '\'' .
+			' of value ' . self::formatString (var_export ($value, TRUE), 200) .
+			' is invalid' . (is_null ($reason) ? '' : ' (' . self::formatString ($reason, 100) . ')') .
 			'.';
 		parent::__construct ($message, parent::INTERNAL);
 		$this->name = $name;

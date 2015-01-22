@@ -2,6 +2,7 @@
 	bugfix: port type could not be changed for an unlinked modular port (#1393)
 	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)
 	bugfix: error displaying a pop-up window when short_open_tag=0 in php.ini
+	bugfix: exception messages in CLI mode were html-escaped
 	update: SNMP support for Cisco SMB switches: all 200, 220 and 300 series models
 	update: show VLAN domain of an IP network on mouse hover
 0.20.9 2015-01-13
