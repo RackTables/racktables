@@ -22,7 +22,7 @@ $(document).ready(function() {
 
 function getTagChild(tag, tags_trace, tags_name_to_id) {
 	var result = [];
-	if (tags_trace.length > 0) {
+	if (Object.keys(tags_trace).length > 0) {
 		if (typeof tag == "undefined" || tag.length == 0) { // empty tag
 			for(var k in tags_trace) {
 				if (tags_trace[k].length == 0)
@@ -58,7 +58,7 @@ function finder (source, req_term) {
 function suggest_search (term) {
 	var results = [];
 	if (term == "*") {
-		if (typeof(this.options.tags_trace) != 'undefined' && this.options.tags_trace.length > 0) {
+		if (typeof(this.options.tags_trace) != 'undefined' &&  Object.keys(this.options.tags_trace).length > 0) {
 			if (typeof(this.tagInput) != 'undefined')
 				this.tagInput.autocomplete('widget').addClass('indented');
 			var roots = [];
@@ -137,7 +137,7 @@ function suggest (request, response) {
 
 function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, expand_all_btn, pass_value) {
 	var tags_name_to_id = [];
-	var tags_trace = [];
+	var tags_trace = {};
 	var tags_to_name = [];
 	var all_tags = [];
 	var available_tags = [];
