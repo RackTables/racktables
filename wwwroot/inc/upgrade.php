@@ -265,6 +265,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.7',
 		'0.20.8',
 		'0.20.9',
+		'0.20.10',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1830,6 +1831,9 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			$query[] = extendPortCompatQuery();
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.10':
+			$query[] = "UPDATE Config SET varvalue = '0.20.10' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
