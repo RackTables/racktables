@@ -5070,7 +5070,7 @@ function getVLANDomain ($vdid)
 	return $ret;
 }
 
-// TODO: this function is very inefficient. Consider use of getDomainVLANList instead
+// This function is pretty heavy. Consider use of getDomainVLANList instead
 function getDomainVLANs ($vdom_id)
 {
 	$result = usePreparedSelectBlade
@@ -5081,19 +5081,27 @@ SELECT
 	vlan_descr,
 	(SELECT COUNT(ipv4net_id) FROM VLANIPv4 AS VI WHERE VI.domain_id = VD.domain_id and VI.vlan_id = VD.vlan_id) +
 	(SELECT COUNT(ipv6net_id) FROM VLANIPv6 AS VI WHERE VI.domain_id = VD.domain_id and VI.vlan_id = VD.vlan_id) AS netc,
-	(
-		SELECT COUNT(port_name)
-		FROM VLANSwitch AS VS INNER JOIN PortAllowedVLAN AS PAV ON VS.object_id = PAV.object_id
-		WHERE VS.domain_id = VD.domain_id and PAV.vlan_id = VD.vlan_id
-	) AS portc
+	s2.portc
 FROM
-	VLANDescription AS VD
+	VLANDescription VD LEFT JOIN
+	(
+		SELECT
+			PAV.vlan_id as vid,
+			COUNT(PAV.port_name) as portc
+		FROM
+			VLANSwitch VS
+			INNER JOIN VLANDescription USING (domain_id)
+			INNER JOIN PortAllowedVLAN PAV ON PAV.object_id = VS.object_id AND VLANDescription.vlan_id = PAV.vlan_id
+		WHERE VS.domain_id = ?
+		GROUP BY PAV.vlan_id
+	) AS s2 ON vlan_id = s2.vid
 WHERE domain_id = ?
-ORDER BY vlan_id
+
 END
-		, array ($vdom_id)
+		, array ($vdom_id, $vdom_id)
 	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
+	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
+	return $ret;
 }
 
 // faster than getDomainVLANs, but w/o statistics
