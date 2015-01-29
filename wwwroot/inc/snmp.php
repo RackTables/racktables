@@ -2739,7 +2739,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array
 		(
 			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-combo-1000T',
+			'generic-gi-1-to-2-1000T',
 			'generic-fa-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
@@ -2751,7 +2751,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array
 		(
 			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-combo-1000T',
+			'generic-gi-1-to-2-1000T',
 			'generic-fa-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
@@ -2763,7 +2763,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array
 		(
 			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-combo-1000T',
+			'generic-gi-1-to-2-1000T',
 			'generic-fa-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
@@ -2775,7 +2775,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array
 		(
 			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-combo-1000T',
+			'generic-gi-1-to-2-1000T',
 			'generic-fa-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
