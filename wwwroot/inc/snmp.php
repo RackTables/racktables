@@ -277,6 +277,78 @@ $iftable_processors['generic-21-to-24-combo-1000SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['cisco-smb-any-100TX'] = array
+(
+	'pattern' => '@^FastEthernet(\d+)$@',
+	'replacement' => 'fa\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-smb-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-smb-1-to-2-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(1|2)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['cisco-smb-1-to-2-combo-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(1|2)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => 'G\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-smb-25-to-26-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(25|26)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['cisco-smb-25-to-26-combo-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(25|26)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => 'G\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['cisco-smb-49-to-50-combo-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(49|50)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['cisco-smb-49-to-50-combo-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(49|50)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => 24,
+	'label' => 'G\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-any-10TX'] = array
 (
 	'pattern' => '@^([[:digit:]]+)$@',
@@ -2738,9 +2810,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SF 220-24: 24 RJ-45/10/100TX + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-1000T',
-			'generic-fa-any-100TX',
+			'cisco-smb-1-to-2-combo-1000SFP',
+			'cisco-smb-1-to-2-combo-1000T',
+			'cisco-smb-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2750,9 +2822,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SF 220-24P: 24 RJ-45/10/100TX + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-1000T',
-			'generic-fa-any-100TX',
+			'cisco-smb-1-to-2-combo-1000SFP',
+			'cisco-smb-1-to-2-combo-1000T',
+			'cisco-smb-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2762,9 +2834,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SF 220-48: 48 RJ-45/10/100TX + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-1000T',
-			'generic-fa-any-100TX',
+			'cisco-smb-1-to-2-combo-1000SFP',
+			'cisco-smb-1-to-2-combo-1000T',
+			'cisco-smb-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2774,9 +2846,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SF 220-48P: 48 RJ-45/10/100TX + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-1-to-2-combo-1000SFP',
-			'generic-gi-1-to-2-1000T',
-			'generic-fa-any-100TX',
+			'cisco-smb-1-to-2-combo-1000SFP',
+			'cisco-smb-1-to-2-combo-1000T',
+			'cisco-smb-any-100TX',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2786,9 +2858,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SG 220-26: 24 RJ-45/10/100TX/1000T(X) + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-25-to-26-combo-1000SFP',
-			'generic-gi-25-to-26-combo-1000T',
-			'generic-gi-any-1000T',
+			'cisco-smb-25-to-26-combo-1000SFP',
+			'cisco-smb-25-to-26-combo-1000T',
+			'cisco-smb-any-1000T',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2798,9 +2870,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SG 220-26P: 24 RJ-45/10/100TX/1000T(X) + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-25-to-26-combo-1000SFP',
-			'generic-gi-25-to-26-combo-1000T',
-			'generic-gi-any-1000T',
+			'cisco-smb-25-to-26-combo-1000SFP',
+			'cisco-smb-25-to-26-combo-1000T',
+			'cisco-smb-any-1000T',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2810,9 +2882,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SG 220-50: 48 RJ-45/10/100TX/1000T(X) + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-49-to-50-combo-1000SFP',
-			'generic-gi-49-to-50-combo-1000T',
-			'generic-gi-any-1000T',
+			'cisco-smb-49-to-50-combo-1000SFP',
+			'cisco-smb-49-to-50-combo-1000T',
+			'cisco-smb-any-1000T',
 		),
 		'ifDescrOID' => 'ifName',
 	),
@@ -2822,9 +2894,9 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'SG 220-50P: 48 RJ-45/10/100TX/1000T(X) + 2 combo-gig',
 		'processors' => array
 		(
-			'generic-gi-49-to-50-combo-1000SFP',
-			'generic-gi-49-to-50-combo-1000T',
-			'generic-gi-any-1000T',
+			'cisco-smb-49-to-50-combo-1000SFP',
+			'cisco-smb-49-to-50-combo-1000T',
+			'cisco-smb-any-1000T',
 		),
 		'ifDescrOID' => 'ifName',
 	),
