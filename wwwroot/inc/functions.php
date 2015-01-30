@@ -3935,7 +3935,11 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 						$employed[$vlan['vlan_id']] = 1;
 			}
 	}
-	return array_keys ($employed);
+	$ret = array_keys ($employed);
+	$override = callHook ('getEmployedVlans_hook', $ret, $object_id, $domain_vlanlist);
+	if (isset ($override))
+		$ret = $override;
+	return $ret;
 }
 
 // take port list with order applied and return uplink ports in the same format
