@@ -434,19 +434,6 @@ $opspec_list['8021q-vdlist-del'] = array
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['8021q-vdlist-upd'] = array
-(
-	'table' => 'VLANDomain',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'vdom_descr', 'table_colname' => 'description', 'assertion' => 'string'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-	),
-);
 $opspec_list['vlandomain-vlanlist-add'] = array
 (
 	'table' => 'VLANDescription',
@@ -3766,6 +3753,28 @@ function setPatchCableAmount()
 {
 	commitSetPatchCableAmount (genericAssertion ('id', 'uint'), genericAssertion ('amount', 'uint0'));
 	showFuncMessage (__FUNCTION__, 'OK');
+}
+
+function updateVLANDomain()
+{
+	$domain_id = assertUIntArg ('vdom_id');
+	$group_id = assertUIntArg ('group_id', TRUE);
+	$description = assertStringArg ('vdom_descr');
+
+	if (! $group_id)
+		$group_id = NULL;
+	else
+	{
+		$dominfo = getVLANDomain ($domain_id);
+		$parent_dominfo = getVLANDomain ($group_id);
+		if ($group_id == $domain_id)
+			throw new InvalidRequestArgException ('group_id', $group_id, "domains should not be the same");
+		if ($parent_dominfo['group_id'] || $dominfo['subdomc'])
+			throw new InvalidRequestArgException ('group_id', $group_id, "Multi-level domain groups are not allowed");
+	}
+
+	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
+	showSuccess ("VLAN domain updated successfully");
 }
 
 ?>

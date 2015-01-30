@@ -1125,9 +1125,11 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
+  `group_id` int(10) unsigned default NULL,
   `description` char(255) default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `description` (`description`)
+  UNIQUE KEY `description` (`description`),
+  CONSTRAINT `VLANDomain-FK-group_id` FOREIGN KEY (`group_id`) REFERENCES `VLANDomain` (`id`) ON DELETE SET NULL,
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `VLANIPv4` (

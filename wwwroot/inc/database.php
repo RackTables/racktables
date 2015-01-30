@@ -5034,14 +5034,23 @@ function getVLANDomainStats ()
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, description, ' .
+		'SELECT id, group_id, description, ' .
+		'(SELECT COUNT(vd.id) FROM VLANDomain vd WHERE vd.group_id = VLANDomain.id) as subdomc, ' .
 		'(SELECT COUNT(vlan_id) FROM VLANDescription WHERE domain_id = id) AS vlanc, ' .
 		'(SELECT COUNT(ipv4net_id) FROM VLANIPv4 WHERE domain_id = id) AS ipv4netc, ' .
 		'(SELECT COUNT(object_id) FROM VLANSwitch WHERE domain_id = id) AS switchc, ' .
 		'(SELECT COUNT(port_name) FROM VLANSwitch AS VS INNER JOIN PortVLANMode AS PVM ON VS.object_id = PVM.object_id WHERE domain_id = id) AS portc ' .
 		'FROM VLANDomain ORDER BY description'
 	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+	foreach ($ret as $vdom_id => $domain)
+		if ($domain['group_id'])
+		{
+			// sum only vlans/nets because subdomains have switches/ports of their own
+			$ret[$domain['group_id']]['vlanc'] += $domain['vlanc'];
+			$ret[$domain['group_id']]['ipv4netc'] += $domain['ipv4netc'];
+		}
+	return $ret;
 }
 
 function getVLANDomainOptions()
@@ -5052,7 +5061,13 @@ function getVLANDomainOptions()
 
 function getVLANDomain ($vdid)
 {
-	$result = usePreparedSelectBlade ('SELECT id, description FROM VLANDomain WHERE id = ?', array ($vdid));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, group_id, description, ' .
+		'(SELECT COUNT(vd.id) FROM VLANDomain vd WHERE vd.group_id = VLANDomain.id) as subdomc ' .
+		'FROM VLANDomain WHERE id = ?',
+		array ($vdid)
+	);
 	if (!$ret = $result->fetch (PDO::FETCH_ASSOC))
 		throw new EntityNotFoundException ('VLAN domain', $vdid);
 	unset ($result);
@@ -5070,9 +5085,34 @@ function getVLANDomain ($vdid)
 	return $ret;
 }
 
-// This function is pretty heavy. Consider use of getDomainVLANList instead
-function getDomainVLANs ($vdom_id)
+function getDomainGroupMembers ($vdom_group_id)
 {
+	$result = usePreparedSelectBlade ("SELECT id FROM VLANDomain WHERE group_id = ?", array ($vdom_group_id));
+	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
+}
+
+// This function is pretty heavy. Consider use of getDomainVLANList instead
+// If $strict is false, returns VLANs belonging to the domain or group.
+// Otherwise the vlans of group subdomains are not returned.
+function getDomainVLANs ($vdom_id, $strict = FALSE)
+{
+	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	{
+		$self = __FUNCTION__;
+		$ret = $self ($vdom_id, TRUE);
+		foreach ($members as $member_vdom_id)
+			foreach ($self ($member_vdom_id, TRUE) as $vid => $vlan_info)
+				if (! isset ($ret[$vid]))
+					$ret[$vid] = $vlan_info;
+				else
+				{
+					$ret[$vid]['netc'] += $vlan_info['netc'];
+					$ret[$vid]['portc'] += $vlan_info['portc'];
+				}
+		ksort ($ret, SORT_NUMERIC);
+		return $ret;
+	}
+
 	$result = usePreparedSelectBlade
 	(<<<END
 SELECT
@@ -5096,6 +5136,7 @@ FROM
 		GROUP BY PAV.vlan_id
 	) AS s2 ON vlan_id = s2.vid
 WHERE domain_id = ?
+ORDER BY vlan_id
 
 END
 		, array ($vdom_id, $vdom_id)
@@ -5104,9 +5145,20 @@ END
 	return $ret;
 }
 
-// faster than getDomainVLANs, but w/o statistics
-function getDomainVLANList ($vdom_id)
+// faster than getDomainVLANs, but w/o statistics.
+// If $strict is false, returns VLANs belonging to the domain or group.
+// Otherwise the vlans of group subdomains are not returned.
+function getDomainVLANList ($vdom_id, $strict = FALSE)
 {
+	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	{
+		$self = __FUNCTION__;
+		$ret = $self ($vdom_id, TRUE);
+		foreach ($members as $member_vdom_id)
+			$ret += $self ($member_vdom_id, TRUE);
+		return $ret;
+	}
+
 	$result = usePreparedSelectBlade
 	(<<<END
 SELECT
@@ -5186,7 +5238,8 @@ function getVlanRow ($vlan_ck)
 {
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($vlan_ck);
 	$query = 'SELECT domain_id, vlan_id, vlan_type AS vlan_prop, vlan_descr, ' .
-		'(SELECT description FROM VLANDomain WHERE id = domain_id) AS domain_descr ' .
+		'(SELECT description FROM VLANDomain WHERE id = domain_id) AS domain_descr, ' .
+		'(SELECT group_id FROM VLANDomain WHERE id = domain_id) AS domain_group_id ' .
 		'FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?';
 	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
 	if (NULL == ($ret = $result->fetch (PDO::FETCH_ASSOC)))

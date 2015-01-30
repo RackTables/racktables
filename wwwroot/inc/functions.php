@@ -6051,6 +6051,20 @@ function isCLIMode ()
 	return !isset ($_SERVER['REQUEST_METHOD']);
 }
 
+// returns true either if given domains are the same
+// or if one is a group and other is its member
+function sameDomains ($domain_id_1, $domain_id_2)
+{
+	if ($domain_id_1 == $domain_id_2)
+		return TRUE;
+	static $cache = array();
+	if (! isset ($cache[$domain_id_1]))
+		$cache[$domain_id_1] = getDomainGroupMembers ($domain_id_1);
+	if (! isset ($cache[$domain_id_2]))
+		$cache[$domain_id_2] = getDomainGroupMembers ($domain_id_2);
+	return in_array ($domain_id_1, $cache[$domain_id_2]) || in_array ($domain_id_2, $cache[$domain_id_1]);
+}
+
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
 // Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
 function checkPortRole ($vswitch, $port_name, $port_order)
@@ -6086,7 +6100,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 
 			if (! $remote_auto && ! $local_auto)
 				return TRUE;
-			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && $vswitch['domain_id'] == $remote_vswitch['domain_id'])
+			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
 				return TRUE; // auto-calc link ends must belong to the same domain
 			else
 				return FALSE;

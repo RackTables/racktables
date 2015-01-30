@@ -7023,15 +7023,26 @@ function renderVLANDomainListEditor ()
 		printImageHREF ('create', 'create domain', TRUE);
 		echo '</td><td>';
 		echo '<input type=text size=48 name=vdom_descr>';
+		echo '</td>&nbsp;<td>';
 		echo '</td><td>';
 		printImageHREF ('create', 'create domain', TRUE);
 		echo '</td></tr></form>';
 	}
+	$domain_list = getVLANDomainStats();
+	$group_opts = array('existing groups' => array (0 => '-- no group --'));
+	foreach ($domain_list as $vdom_id => $dominfo)
+	{
+		if ($dominfo['group_id'])
+			continue;
+		$key = $dominfo['subdomc'] ? 'existing groups' : 'create group';
+		$group_opts[$key][$vdom_id] = $dominfo['description'];
+	}
+
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>description</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>description</th><th>group</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
-	foreach (getVLANDomainStats() as $vdom_id => $dominfo)
+	foreach ($domain_list as $vdom_id => $dominfo)
 	{
 		printOpFormIntro ('upd', array ('vdom_id' => $vdom_id));
 		echo '<tr><td>';
@@ -7041,6 +7052,11 @@ function renderVLANDomainListEditor ()
 			echo getOpLink (array ('op' => 'del', 'vdom_id' => $vdom_id), '', 'destroy', 'delete domain');
 		echo '</td><td><input name=vdom_descr type=text size=48 value="';
 		echo niftyString ($dominfo['description'], 0) . '">';
+		echo '</td><td>';
+		if ($dominfo['subdomc'])
+			printSelect (array (0 => 'a domain group'), array ('name' => 'group_id'));
+		else
+			printNiftySelect ($group_opts, array ('name' => 'group_id'), intval($dominfo['group_id']));
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
@@ -7086,7 +7102,18 @@ function renderVLANDomain ($vdom_id)
 
 	echo '</td><td class=pcright>';
 
-	if (!count ($myvlans = getDomainVLANs ($vdom_id)))
+	$domain_options = getVLANDomainOptions();
+	$myvlans = array();
+	foreach (array_merge(array ($vdom_id), getDomainGroupMembers ($vdom_id)) as $domain_id)
+		foreach (getDomainVLANs ($domain_id, TRUE) as $vlan_id => $vlan_info)
+		{
+			$vlan_info['domain_id'] = $domain_id;
+			$vlan_info['domain_descr'] = $domain_options[$domain_id];
+			$myvlans[$vlan_id][$domain_id] = $vlan_info;
+		}
+	ksort ($myvlans, SORT_NUMERIC);
+
+	if (!count ($myvlans))
 		startPortlet ('no VLANs');
 	else
 	{
@@ -7094,17 +7121,21 @@ function renderVLANDomain ($vdom_id)
 		$order = 'odd';
 		global $vtdecoder;
 		echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-		echo '<tr><th>VLAN ID</th><th>propagation</th><th>';
+		echo '<tr><th>VLAN ID</th><th><span title="propagation flag">P</span></th><th>';
 		printImageHREF ('net', 'IPv4 networks linked');
 		echo '</th><th>ports</th><th>description</th></tr>';
-		foreach ($myvlans as $vlan_id => $vlan_info)
+		foreach ($myvlans as $vlan_id => $vlan_list)
 		{
-			echo "<tr class=row_${order}>";
-			echo '<td class=tdright>' . mkA ($vlan_id, 'vlan', "${vdom_id}-${vlan_id}") . '</td>';
-			echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
-			echo '<td class=tdright>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
-			echo '<td class=tdright>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
-			echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
+			foreach ($vlan_list as $domain_id => $vlan_info)
+			{
+				echo "<tr class=row_${order}>";
+				echo '<td class=tdright>' . (count ($vlan_list) > 1 ? $domain_options[$domain_id] . ' ' : '') .
+					formatVLANAsShortLink ($vlan_info) . '</td>';
+				echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
+				echo '<td class=tdright>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
+				echo '<td class=tdright>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
+				echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
+			}
 			$order = $nextorder[$order];
 		}
 		echo '</table>';
@@ -7136,7 +7167,7 @@ function renderVLANDomainVLANList ($vdom_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	global $vtoptions;
-	foreach (getDomainVLANs ($vdom_id) as $vlan_id => $vlan_info)
+	foreach (getDomainVLANs ($vdom_id, TRUE) as $vlan_id => $vlan_info)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td>';
