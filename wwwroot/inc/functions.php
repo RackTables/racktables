@@ -6372,4 +6372,44 @@ function startROSession()
 	session_commit();
 }
 
+// removes a VLAN from ports that contain it, but keep a VLAN amongst others in a range
+function pinpointDeleteVlan ($domain_id, $vlan_id)
+{
+	$ret = 0;
+	$vlan_ck = $domain_id . '-' . $vlan_id;
+	$domain_vlanlist = getDomainVLANList ($domain_id);
+	$used_ports = getVLANConfiguredPorts ($vlan_ck);
+	foreach ($used_ports as $object_id => $port_list)
+	{
+		$vswitch = getVLANSwitchInfo ($object_id); // get mutex rev
+		$D = getStored8021QConfig ($object_id);
+		$changes = array();
+		foreach ($port_list as $pn)
+		{
+			if (! isset ($D[$pn]))
+				continue;
+			// remove vlan from a port only if its range does not contain foreign vlans
+			foreach (listToRanges ($D[$pn]['allowed']) as $range)
+				if (matchVLANFilter ($vlan_id, array ($range)))
+				{
+					for ($i = $range['from']; $i <= $range['to']; ++$i)
+						if (! isset ($domain_vlanlist[$i]))
+							continue 3; // keep vlan, skip to next port
+				}
+			// remove vlan from port
+			$conf = $D[$pn];
+			$conf['allowed'] = array_diff ($conf['allowed'], array ($vlan_id));
+			if ($conf['mode'] == 'access')
+				$conf['mode'] = 'trunk';
+			if ($conf['native'] == $vlan_id)
+				$conf['native'] = 0;
+			$changes[$pn] = $conf;
+		}
+		if ($changes)
+			$ret += apply8021qChangeRequest ($object_id, $changes, FALSE, $vswitch['mutex_rev']);
+	}
+
+	return $ret;
+}
+
 ?>

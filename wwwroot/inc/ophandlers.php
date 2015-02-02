@@ -3444,23 +3444,7 @@ function clearVlan()
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 
-	$n_cleared = 0;
-	foreach (getVLANConfiguredPorts ($_REQUEST['vlan_ck']) as $object_id => $portnames)
-	{
-		$D = getStored8021QConfig ($object_id);
-		$changes = array();
-		foreach ($portnames as $pn)
-		{
-			$conf = $D[$pn];
-			$conf['allowed'] = array_diff ($conf['allowed'], array ($vlan_id));
-			if ($conf['mode'] == 'access')
-				$conf['mode'] = 'trunk';
-			if ($conf['native'] == $vlan_id)
-				$conf['native'] = 0;
-			$changes[$pn] = $conf;
-		}
-		$n_cleared += apply8021qChangeRequest ($object_id, $changes, FALSE);
-	}
+	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
 		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
 }
@@ -3468,10 +3452,9 @@ function clearVlan()
 function deleteVlan()
 {
 	genericAssertion ('vlan_ck', 'uint-vlan');
-	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
-	if (! empty ($confports))
-		throw new RackTablesError ("You can not delete VLAN that has assosiated ports");
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	pinpointDeleteVlan ($vdom_id, $vlan_id);
+	// since there is no strict foreign keys refering VLANDescription, we can delete a row
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
 	return buildRedirectURL ('vlandomain', 'default', array ('vdom_id' => $vdom_id));

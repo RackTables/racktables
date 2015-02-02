@@ -9011,13 +9011,12 @@ function renderEditVlan ($vlan_ck)
 	$reason = '';
 	if ($vlan['vlan_id'] == VLAN_DFL_ID)
 		$reason = "You can not delete default VLAN";
-	elseif ($portc)
-		$reason = "Can not delete: $portc ports configured";
 	if (! empty ($reason))
 		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', $reason);
 	else
-		echo getOpLink (array ('op' => 'del', 'vlan_ck' => $vlan_ck), 'delete VLAN', 'destroy');
+		echo getOpLink (array ('op' => 'del', 'vlan_ck' => $vlan_ck), 'delete VLAN', 'destroy', '', 'need-confirmation');
 	echo $clear_line;
+
 	finishPortlet();
 }
 
