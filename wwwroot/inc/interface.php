@@ -7557,18 +7557,25 @@ function renderVLANInfo ($vlan_ck)
 {
 	global $vtoptions, $nextorder;
 	$vlan = getVLANInfo ($vlan_ck);
+	$group_members = getDomainGroupMembers ($vlan['domain_id']);
+
+	// list of VLANs to display linked nets and ports from.
+	// If domain is a group master, this list contains all
+	// the counterpart vlans from domain group members.
+	// If domain is a group member, the list contains one
+	// counterpart vlan from the domain master.
+	$group_ck_list = array();
+
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td colspan=2 align=center><h1>' . formatVLANAsRichText ($vlan) . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
-	startPortlet ('summary');
-	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>";
-	echo "<tr><th width='50%' class=tdright>Domain:</th><td class=tdleft>";
-	echo niftyString ($vlan['domain_descr'], 0) . '</td></tr>';
-	echo "<tr><th width='50%' class=tdright>VLAN ID:</th><td class=tdleft>${vlan['vlan_id']}</td></tr>";
+	$summary = array();
+	$summary['Domain'] = niftyString ($vlan['domain_descr'], 0);
+	$summary['VLAN ID'] = $vlan['vlan_id'];
 	if (strlen ($vlan['vlan_descr']))
-		echo "<tr><th width='50%' class=tdright>Description:</th><td class=tdleft>" .
-			niftyString ($vlan['vlan_descr'], 0) . "</td></tr>";
-	echo "<tr><th width='50%' class=tdright>Propagation:</th><td class=tdleft>" . $vtoptions[$vlan['vlan_prop']] . "</td></tr>";
+		$summary['Description'] = niftyString ($vlan['vlan_descr'], 0);
+	$summary['Propagation'] = $vtoptions[$vlan['vlan_prop']];
+
 	$others = getSearchResultByField
 	(
 		'VLANDescription',
@@ -7578,18 +7585,57 @@ function renderVLANInfo ($vlan_ck)
 		'domain_id',
 		1
 	);
+	$counterparts = array();
+	$group_counterparts = array();
+	$domain_list = getVLANDomainOptions();
 	foreach ($others as $other)
 		if ($other['domain_id'] != $vlan['domain_id'])
-			echo '<tr><th class=tdright>Counterpart:</th><td class=tdleft>' .
-				formatVLANAsHyperlink (getVlanRow ("${other['domain_id']}-${vlan['vlan_id']}")) .
-				'</td></tr>';
-	echo '</table>';
-	finishPortlet();
-	if (0 == count ($vlan['ipv4nets']) + count ($vlan['ipv6nets']))
+		{
+			$counterpart_ck = "${other['domain_id']}-${vlan['vlan_id']}";
+			$counterpart_vlan = getVlanRow ($counterpart_ck);
+			$counterpart_link = mkA
+			(
+				$domain_list[$counterpart_vlan['domain_id']] . ': ' . $counterpart_vlan['vlan_descr'],
+				'vlan',
+				$counterpart_ck
+			);
+			if
+			(
+				$counterpart_vlan['domain_id'] == $vlan['domain_group_id'] or
+				in_array($counterpart_vlan['domain_id'], $group_members)
+			)
+			{
+				$group_ck_list[$counterpart_ck] = $counterpart_vlan;
+				$group_counterparts[] = $counterpart_link;
+			}
+			elseif ($vlan['domain_group_id'] and $counterpart_vlan['domain_group_id'] == $vlan['domain_group_id'])
+				$group_counterparts[] = $counterpart_link;
+			else
+				$counterparts[] = $counterpart_link;
+		}
+	if ($group_counterparts)
+	{
+		$group_id = $vlan['domain_group_id'] ? $vlan['domain_group_id'] : $vlan['domain_id'];
+		$summary[$domain_list[$group_id] . ' counterparts'] = implode ('<br>', $group_counterparts);
+	}
+	if ($counterparts)
+		$summary['Counterparts'] = implode ('<br>', $counterparts);
+	renderEntitySummary ($vlan, 'summary', $summary);
+
+	$networks = array();
+	$net_vlan_list = array ($vlan);
+	foreach (array_keys ($group_ck_list) as $grouped_ck)
+		$net_vlan_list[] = getVLANInfo ($grouped_ck);
+	foreach ($net_vlan_list as $net_vlan)
+		foreach (array ('ipv4net' => 'ipv4nets', 'ipv6net' => 'ipv6nets') as $realm => $key)
+			foreach ($net_vlan[$key] as $net_id)
+				$networks["$realm-$net_id"] = spotEntity ($realm, $net_id);
+
+	if (0 == count ($networks))
 		startPortlet ('no networks');
 	else
 	{
-		startPortlet ('networks (' . (count ($vlan['ipv4nets']) + count ($vlan['ipv6nets'])) . ')');
+		startPortlet ('networks (' . count ($networks) . ')');
 		$order = 'odd';
 		echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 		echo '<tr><th>';
@@ -7597,10 +7643,8 @@ function renderVLANInfo ($vlan_ck)
 		echo '</th><th>';
 		printImageHREF ('text');
 		echo '</th></tr>';
-		foreach (array ('ipv4net', 'ipv6net') as $nettype)
-		foreach ($vlan[$nettype . 's'] as $netid)
+		foreach ($networks as $net)
 		{
-			$net = spotEntity ($nettype, $netid);
 			#echo "<tr class=row_${order}><td>";
 			echo '<tr><td>';
 			renderCell ($net);
@@ -7613,6 +7657,16 @@ function renderVLANInfo ($vlan_ck)
 	finishPortlet();
 
 	$confports = getVLANConfiguredPorts ($vlan_ck);
+	foreach (array_keys ($group_ck_list) as $grouped_ck)
+		$confports += getVLANConfiguredPorts ($grouped_ck);
+	if ($vlan['domain_group_id'])
+	{
+		// we should find configured port on master's members
+		// even if master domain itself does not have such VLAN
+		$master_ck = $vlan['domain_group_id'] . '-' . $vlan['vlan_id'];
+		if (! isset ($group_ck_list[$master_ck]))
+			$confports += getVLANConfiguredPorts ($master_ck);
+	}
 
 	// get non-switch device list
 	$foreign_devices = array();
@@ -7666,7 +7720,11 @@ function renderVLANInfo ($vlan_ck)
 			{
 				echo '<li>';
 				if ($portinfo = getPortinfoByName ($object, $port_name))
+				{
 					echo formatPortLink ($object['id'], NULL, $portinfo['id'], $portinfo['name']);
+					if ($portinfo['linked'])
+						echo ' &mdash; ' . formatPortLink ($portinfo['remote_object_id'], $portinfo['remote_object_name'], $portinfo['remote_id'], NULL);
+				}
 				else
 					echo $port_name;
 				echo '</li>';
