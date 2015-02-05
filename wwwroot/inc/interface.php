@@ -10155,7 +10155,12 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 		{
 			printOpFormIntro ('upd', array ($column['key'] => $row[$column['key']]));
 			echo '<td>' . getImageHREF ('favorite', 'custom') . '</td>';
-			echo '<td>' . getOpLink (array ('op' => 'del', $column['key'] => $row[$column['key']]), '', 'destroy', 'remove') . '</td>';
+			echo '<td>';
+			if (array_key_exists ('refc', $row) && $row['refc'] > 0)
+				echo getImageHREF ('nodestroy', "referenced ${row['refc']} times");
+			else
+				echo getOpLink (array ('op' => 'del', $column['key'] => $row[$column['key']]), '', 'destroy', 'remove');
+			echo '</td>';
 			echo "<td><input type=text size=${column['width']} name=${column['value']} value='" . niftyString ($row[$column['value']], $column['width']) . "'></td>";
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</form>';

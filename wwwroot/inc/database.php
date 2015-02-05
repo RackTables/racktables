@@ -5723,7 +5723,12 @@ function getEntitiesCount ($realm)
 
 function getPatchCableConnectorList()
 {
-	$result = usePreparedSelectBlade ('SELECT id, origin, connector FROM PatchCableConnector ORDER BY connector');
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, origin, connector, ' .
+		'(SELECT COUNT(*) FROM PatchCableConnectorCompat WHERE connector_id = id) AS refc ' .
+		'FROM PatchCableConnector ORDER BY connector'
+	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
@@ -5737,7 +5742,13 @@ function getPatchCableConnectorOptions()
 
 function getPatchCableTypeList()
 {
-	$result = usePreparedSelectBlade ('SELECT id, origin, pctype FROM PatchCableType ORDER BY pctype');
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, origin, pctype, ' .
+		'(SELECT COUNT(*) FROM PatchCableConnectorCompat WHERE pctype_id = PatchCableType.id) + ' .
+		'(SELECT COUNT(*) FROM PatchCableOIFCompat WHERE pctype_id = PatchCableType.id) AS refc ' .
+		'FROM PatchCableType ORDER BY pctype'
+	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
