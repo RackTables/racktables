@@ -3085,7 +3085,7 @@ function getAllVLANOptions ($except = array())
 	foreach (getVLANDomainOptions() as $domain_id => $domain_descr)
 	{
 		$domain_list = array();
-		foreach (getDomainVLANList ($domain_id) as $vlan)
+		foreach (getDomainVLANList ($domain_id, TRUE) as $vlan)
 			$domain_list["${domain_id}-${vlan['vlan_id']}"] = "${vlan['vlan_id']} ${vlan['vlan_descr']}";
 		if (isset ($except[$domain_id]))
 		{
