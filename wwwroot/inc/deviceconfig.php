@@ -104,14 +104,14 @@ function xos12ReadInterfaceStatus ($input)
 {
 	$ret = array();
 	foreach (explode ("\n", $input) as $line)
-		if (preg_match('/^(\d+)\s+([ED])[a-zA-Z-]+\s+(active|ready)\s+/', $line, $m))
+		if (preg_match('/^(\d+|\d:\d+)\s+.*\s+([ED])\s+([AR])\s+/', $line, $m))
 		{
-			$portname = shortenIfName ($m[1]);
-			if ($m[3] == 'active')
+			$portname = $m[1];
+                        if ($m[2] == 'E' and $m[3] == 'A')
 				$status = 'up';
-			elseif ($m[2] == 'E')
+			elseif ($m[2] == 'E' and $m[3] == 'R' )
 				$status = 'down';
-			else
+			elseif ($m[2] == 'D')
 				$status = 'disabled';
 			$ret[$portname]['status'] = $status;
 		}
@@ -1695,7 +1695,7 @@ function xos12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "show configuration\n";
 			break;
 		case 'getportstatus':
-			$ret .= "show ports information\n";
+			$ret .= "show ports no-refresh\n";
 			break;
 		case 'getmaclist':
 			$ret .= "show fdb\n";
