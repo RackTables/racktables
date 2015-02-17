@@ -114,6 +114,7 @@ function xos12ReadInterfaceStatus ($input)
 			elseif ($m[2] == 'D')
 				$status = 'disabled';
 			$ret[$portname]['status'] = $status;
+			unset ($status);
 		}
 	return $ret;
 }
