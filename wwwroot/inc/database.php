@@ -5645,10 +5645,37 @@ function getMuninGraphsForObject ($object_id)
 
 function touchVLANSwitch ($switch_id)
 {
-	usePreparedExecuteBlade
+	return usePreparedExecuteBlade
 	(
 		'UPDATE VLANSwitch SET mutex_rev=mutex_rev+1, last_change=NOW(), out_of_sync="yes" WHERE object_id=?',
 		array ($switch_id)
+	);
+}
+
+function detouchVLANSwitch ($switch_id, $mutex_rev)
+{
+	return usePreparedExecuteBlade
+	(
+		'UPDATE VLANSwitch SET last_change=NOW(), out_of_sync="no" WHERE object_id=? AND mutex_rev = ?',
+		array ($switch_id, $mutex_rev)
+	);
+}
+
+function setVLANSwitchError ($object_id, $errno)
+{
+	return usePreparedExecuteBlade
+	(
+		'UPDATE VLANSwitch SET last_errno=?, last_error_ts=NOW() WHERE object_id=?',
+		array ($errno, $object_id)
+	);
+}
+
+function setVLANSwitchTimestamp ($object_id, $field_name)
+{
+	return usePreparedExecuteBlade
+	(
+		"UPDATE VLANSwitch SET `$field_name`=NOW() WHERE object_id=?",
+		array ($object_id)
 	);
 }
 
