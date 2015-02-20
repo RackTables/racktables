@@ -1,7 +1,9 @@
 @media print {
 	body table.maintable { font-size: 80%; }
 	.mainheader { display: none; }
-	.menubar { display: none; }
+	.searchbox { display: none; }
+	div.menubar { color: #000000; font-weight: bold; }
+	div.menubar a { color: #000000; font-weight: bold; }
 	.tabbar { display: none; }
 	div.greynavbar { border-top-width: 0px; }
 	.greynavbar * a[class=std] { display: none; }
