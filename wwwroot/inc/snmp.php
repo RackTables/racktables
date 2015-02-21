@@ -3915,10 +3915,9 @@ function checkPIC ($port_type_id)
 	}
 }
 
-$msgcode['doSNMPmining']['ERR1'] = 161;
-$msgcode['doSNMPmining']['ERR2'] = 162;
 function doSNMPmining ($object_id, $snmpsetup)
 {
+	setFuncMessages (__FUNCTION__, array ('ERR1' => 161, 'ERR2' => 162));
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
@@ -3946,10 +3945,9 @@ function doSNMPmining ($object_id, $snmpsetup)
 	}
 }
 
-$msgcode['doSwitchSNMPmining']['ERR3'] = 188;
-$msgcode['doSwitchSNMPmining']['ERR4'] = 189;
 function doSwitchSNMPmining ($objectInfo, $device)
 {
+	setFuncMessages (__FUNCTION__, array ('ERR3' => 188, 'ERR4' => 189));
 	global $known_switches, $iftable_processors;
 
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))

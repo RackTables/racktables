@@ -711,9 +711,16 @@ $opspec_list['cableconf-oifcompat-del'] = array
 	),
 );
 
-$msgcode['addPortForwarding']['OK'] = 48;
+function setFuncMessages ($funcname, $messages)
+{
+	global $msgcode;
+	foreach ($messages as $symbol => $code)
+		$msgcode[$funcname][$symbol] = $code;
+}
+
 function addPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -742,9 +749,9 @@ function addPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['delPortForwarding']['OK'] = 49;
 function delPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -767,9 +774,9 @@ function delPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updPortForwarding']['OK'] = 51;
 function updPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -794,9 +801,9 @@ function updPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addPortForObject']['OK'] = 48;
 function addPortForObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertStringArg ('port_name', TRUE);
 	genericAssertion ('port_l2address', 'l2address0');
 	genericAssertion ('port_name', 'string');
@@ -811,9 +818,9 @@ function addPortForObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
-$msgcode['editPortForObject']['OK'] = 6;
 function editPortForObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
 	assertUIntArg ('port_id');
 	assertStringArg ('port_type_id');
@@ -826,9 +833,9 @@ function editPortForObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['addMultiPorts']['OK'] = 10;
 function addMultiPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 10));
 	assertStringArg ('format');
 	assertStringArg ('input');
 	assertStringArg ('port_type');
@@ -931,9 +938,9 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
 }
 
-$msgcode['addBulkPorts']['OK'] = 82;
 function addBulkPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 82));
 	assertStringArg ('port_type_id');
 	assertStringArg ('port_name', TRUE);
 	assertStringArg ('port_label', TRUE);
@@ -958,9 +965,9 @@ function addBulkPorts ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }
 
-$msgcode['updIPAllocation']['OK'] = 51;
 function updIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
@@ -970,9 +977,9 @@ function updIPAllocation ()
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
 }
 
-$msgcode['delIPAllocation']['OK'] = 49;
 function delIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 
@@ -980,10 +987,9 @@ function delIPAllocation ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPAllocation']['OK'] = 48;
-$msgcode['addIPAllocation']['ERR1'] = 170;
 function addIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
@@ -1039,9 +1045,9 @@ function addIPv6Prefix ()
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
 }
 
-$msgcode['delIPv4Prefix']['OK'] = 49;
 function delIPv4Prefix ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
 	loadIPAddrList ($netinfo);
@@ -1062,9 +1068,9 @@ function delIPv4Prefix ()
 		return buildRedirectURL ('index', 'default');
 }
 
-$msgcode['delIPv6Prefix']['OK'] = 49;
 function delIPv6Prefix ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
 	loadIPAddrList ($netinfo);
@@ -1082,9 +1088,9 @@ function delIPv6Prefix ()
 		return buildRedirectURL ('index', 'default');
 }
 
-$msgcode['editAddress']['OK'] = 51;
 function editAddress ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertStringArg ('name', TRUE);
 	assertStringArg ('comment', TRUE);
 	$ip_bin = assertIPArg ('ip');
@@ -1092,9 +1098,9 @@ function editAddress ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['createUser']['OK'] = 5;
 function createUser ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	assertStringArg ('password');
@@ -1106,9 +1112,9 @@ function createUser ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['updateUser']['OK'] = 6;
 function updateUser ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	genericAssertion ('user_id', 'uint');
 	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
@@ -1123,10 +1129,9 @@ function updateUser ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['supplementAttrMap']['OK'] = 48;
-$msgcode['supplementAttrMap']['ERR1'] = 154;
 function supplementAttrMap ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 154));
 	$attr_id = assertUIntArg ('attr_id');
 	assertUIntArg ('objtype_id');
 	if (getAttrType ($attr_id) != 'dict')
@@ -1148,9 +1153,9 @@ function supplementAttrMap ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['clearSticker']['OK'] = 49;
 function clearSticker ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	global $sic;
 	assertUIntArg ('attr_id');
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $sic['attr_id']))))
@@ -1162,9 +1167,9 @@ function clearSticker ()
 	}
 }
 
-$msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63));
 	global $remote_username, $sic;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
@@ -1247,9 +1252,9 @@ function updateObjectAllocation ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($changecnt));
 }
 
-$msgcode['updateObject']['OK'] = 51;
 function updateObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$taglist = genericAssertion ('taglist', 'array0');
 	genericAssertion ('num_attrs', 'uint0');
 	genericAssertion ('object_name', 'string0');
@@ -1447,9 +1452,9 @@ function linkObjects ()
 	showSuccess ('Container set successfully');
 }
 
-$msgcode['deleteObject']['OK'] = 7;
 function deleteObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7));
 	assertUIntArg ('object_id');
 	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
 
@@ -1460,9 +1465,9 @@ function deleteObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
-$msgcode['resetObject']['OK'] = 57;
 function resetObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 57));
 	$racklist = getResidentRacksData (getBypassValue(), FALSE);
 	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
@@ -1470,9 +1475,9 @@ function resetObject ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateUI']['OK'] = 51;
 function updateUI ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('num_vars');
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
@@ -1491,9 +1496,9 @@ function updateUI ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['saveMyPreferences']['OK'] = 51;
 function saveMyPreferences ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('num_vars');
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
@@ -1511,17 +1516,17 @@ function saveMyPreferences ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['resetMyPreference']['OK'] = 51;
 function resetMyPreference ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertStringArg ("varname");
 	resetUserConfigVar ($_REQUEST["varname"]);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 57));
 	setConfigVar ('MASSCOUNT','8');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('ROW_SCALE','2');
@@ -1608,10 +1613,10 @@ function resetUIConfig()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRealServer']['OK'] = 48;
 // Add single record.
 function addRealServer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	global $sic;
 	$rsip_bin = assertIPArg ('rsip');
 	assertStringArg ('rsport', TRUE);
@@ -1629,11 +1634,10 @@ function addRealServer ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRealServers']['OK'] = 37;
-$msgcode['addRealServers']['ERR1'] = 131;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 37, 'ERR1' => 131));
 	global $sic;
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
@@ -1725,9 +1729,9 @@ function addVSG ()
 	showSuccess (mkCellA ($vsinfo) . ' created successfully');
 }
 
-$msgcode['deleteVService']['OK'] = 49;
 function deleteVService ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('vs_id');
 	$vsinfo = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
 	if ($vsinfo['refcnt'] != 0)
@@ -1753,9 +1757,9 @@ function deleteVS()
 	return buildRedirectURL ('ipv4slb', 'vs');
 }
 
-$msgcode['updateSLBDefConfig']['OK'] = 43;
 function updateSLBDefConfig ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	global $sic;
 	commitUpdateSLBDefConf
 	(
@@ -1768,9 +1772,9 @@ function updateSLBDefConfig ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateRealServer']['OK'] = 51;
 function updateRealServer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	global $sic;
 	assertUIntArg ('rs_id');
 	$rsip_bin = assertIPArg ('rsip');
@@ -1788,9 +1792,9 @@ function updateRealServer ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateVService']['OK'] = 51;
 function updateVService ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	global $sic;
 	assertUIntArg ('vs_id');
 	$taglist = genericAssertion ('taglist', 'array0');
@@ -2081,9 +2085,9 @@ function createTriplet()
 	showSuccess ("SLB triplet created");
 }
 
-$msgcode['addLoadBalancer']['OK'] = 48;
 function addLoadBalancer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	global $sic;
 	assertUIntArg ('pool_id');
 	assertUIntArg ('object_id');
@@ -2119,9 +2123,9 @@ function addRSPool ()
 	showSuccess ('RS pool ' . mkA ($_REQUEST['name'], 'ipv4rspool', $pool_id) . ' created successfully');
 }
 
-$msgcode['deleteRSPool']['OK'] = 49;
 function deleteRSPool ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('pool_id');
 	$poolinfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 	if ($poolinfo['refcnt'] != 0)
@@ -2134,10 +2138,9 @@ function deleteRSPool ()
 	return buildRedirectURL ('ipv4slb', 'rspools');
 }
 
-$msgcode['importPTRData']['OK'] = 26;
-$msgcode['importPTRData']['ERR'] = 141;
 function importPTRData ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 26, 'ERR' => 141));
 	$net = spotEntity ('ipv4net', getBypassValue());
 	assertUIntArg ('addrcount');
 	$nbad = $ngood = 0;
@@ -2171,9 +2174,9 @@ function importPTRData ()
 		showFuncMessage (__FUNCTION__, 'ERR', array ($nbad, $ngood));
 }
 
-$msgcode['generateAutoPorts']['OK'] = 21;
 function generateAutoPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	$object = spotEntity ('object', getBypassValue());
 	executeAutoPorts ($object['id'], $object['objtype_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2190,9 +2193,9 @@ function updateTag ()
 	showSuccess ('Tag updated successfully');
 }
 
-$msgcode['saveEntityTags']['OK'] = 43;
 function saveEntityTags ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	global $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
@@ -2203,10 +2206,9 @@ function saveEntityTags ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['rollTags']['OK'] = 67;
-$msgcode['rollTags']['ERR'] = 149;
 function rollTags ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 67, 'ERR' => 149));
 	assertStringArg ('sum', TRUE);
 	assertUIntArg ('realsum');
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
@@ -2234,12 +2236,9 @@ function rollTags ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($n_ok));
 }
 
-$msgcode['changeMyPassword']['OK'] = 51;
-$msgcode['changeMyPassword']['ERR1'] = 150;
-$msgcode['changeMyPassword']['ERR2'] = 151;
-$msgcode['changeMyPassword']['ERR3'] = 152;
 function changeMyPassword ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51, 'ERR1' => 150, 'ERR2' => 151, 'ERR3' => 152));
 	global $remote_username, $user_auth_src;
 	if ($user_auth_src != 'database')
 	{
@@ -2265,10 +2264,9 @@ function changeMyPassword ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['saveRackCode']['OK'] = 43;
-$msgcode['saveRackCode']['ERR1'] = 154;
 function saveRackCode ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43, 'ERR1' => 154));
 	assertStringArg ('rackcode');
 	// For the test to succeed, unescape LFs, strip CRs.
 	$newcode = dos2unix ($_REQUEST['rackcode']);
@@ -2288,9 +2286,9 @@ function submitSLBConfig ()
 	showNotice ("You should redefine submitSLBConfig ophandler in your local extension to install SLB config");
 }
 
-$msgcode['addLocation']['OK'] = 5;
 function addLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
 
@@ -2300,12 +2298,12 @@ function addLocation ()
 	showSuccess ('added location ' . mkA ($_REQUEST['name'], 'location', $location_id));
 }
 
-$msgcode['updateLocation']['OK'] = 6;
 // This function is used by two forms:
 //  - renderEditLocationForm - all attributes may be modified
 //  - renderRackspaceLocationEditor - only the name and parent may be modified
 function updateLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $pageno;
 	assertUIntArg ('location_id');
 	assertUIntArg ('parent_id', TRUE);
@@ -2344,10 +2342,9 @@ function updateLocation ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteLocation']['OK'] = 7;
-$msgcode['deleteLocation']['ERR1'] = 206;
 function deleteLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
 	assertUIntArg ('location_id');
 	$locationData = spotEntity ('location', $_REQUEST['location_id']);
 	amplifyCell ($locationData);
@@ -2363,9 +2360,9 @@ function deleteLocation ()
 	return buildRedirectURL ('rackspace', 'editlocations');
 }
 
-$msgcode['addRow']['OK'] = 5;
 function addRow ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertUIntArg ('location_id', TRUE);
 	assertStringArg ('name');
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
@@ -2374,12 +2371,12 @@ function addRow ()
 	showSuccess ('added row ' . mkA ($_REQUEST['name'], 'row', $row_id));
 }
 
-$msgcode['updateRow']['OK'] = 6;
 // This function is used by two forms:
 //  - renderEditRowForm - all attributes may be modified
 //  - renderRackspaceRowEditor - only the name and location may be modified
 function updateRow ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	assertUIntArg ('row_id');
 	assertUIntArg ('location_id', TRUE);
 	assertStringArg ('name');
@@ -2411,10 +2408,9 @@ function updateRow ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteRow']['OK'] = 7;
-$msgcode['deleteRow']['ERR1'] = 206;
 function deleteRow ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
 	assertUIntArg ('row_id');
 	$rowData = spotEntity ('row', $_REQUEST['row_id']);
 	amplifyCell ($rowData);
@@ -2428,9 +2424,9 @@ function deleteRow ()
 	return buildRedirectURL ('rackspace', 'editrows');
 }
 
-$msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('ERR2' => 172));
 	$taglist = genericAssertion ('taglist', 'array0');
 
 	// The new rack(s) should be placed on the bottom of the list, sort-wise
@@ -2486,9 +2482,9 @@ function addRack ()
 		showFuncMessage (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['updateRack']['OK'] = 6;
 function updateRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	assertUIntArg ('row_id');
 	assertStringArg ('name');
 	assertUIntArg ('height');
@@ -2512,10 +2508,9 @@ function updateRack ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteRack']['OK'] = 7;
-$msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
 	assertUIntArg ('rack_id');
 	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
@@ -2588,10 +2583,10 @@ function querySNMPData ()
 	doSNMPmining (getBypassValue(), $snmpsetup); // shows message by itself
 }
 
-$msgcode['addFileWithoutLink']['OK'] = 5;
 // File-related functions
 function addFileWithoutLink ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
@@ -2606,10 +2601,9 @@ function addFileWithoutLink ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
-$msgcode['addFileToEntity']['OK'] = 5;
-$msgcode['addFileToEntity']['ERR1'] = 207;
 function addFileToEntity ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5, 'ERR1' => 207));
 	global $pageno, $etype_by_pageno;
 	if (!isset ($etype_by_pageno[$pageno]))
 		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
@@ -2643,9 +2637,9 @@ function addFileToEntity ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
-$msgcode['linkFileToEntity']['OK'] = 71;
 function linkFileToEntity ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 71));
 	assertUIntArg ('file_id');
 	global $pageno, $etype_by_pageno, $sic;
 	if (!isset ($etype_by_pageno[$pageno]))
@@ -2665,10 +2659,9 @@ function linkFileToEntity ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
-$msgcode['replaceFile']['OK'] = 7;
-$msgcode['replaceFile']['ERR2'] = 201;
 function replaceFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR2' => 201));
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
@@ -2684,28 +2677,26 @@ function replaceFile ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['unlinkFile']['OK'] = 72;
 function unlinkFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 72));
 	assertUIntArg ('link_id');
 	commitUnlinkFile ($_REQUEST['link_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['deleteFile']['OK'] = 7;
 function deleteFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7));
 	assertUIntArg ('file_id');
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	commitDeleteFile ($_REQUEST['file_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['updateFileText']['OK'] = 6;
-$msgcode['updateFileText']['ERR1'] = 179;
-$msgcode['updateFileText']['ERR2'] = 155;
 function updateFileText ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6, 'ERR1' => 179, 'ERR2' => 155));
 	assertStringArg ('mtime_copy');
 	assertStringArg ('file_text', TRUE); // it's Ok to save empty
 	$shortInfo = spotEntity ('file', getBypassValue());
@@ -2719,9 +2710,9 @@ function updateFileText ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['addIIFOIFCompatPack']['OK'] = 37;
 function addIIFOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 37));
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
@@ -2750,9 +2741,9 @@ function delOIFCompat ()
 	showSuccess ("$n_changed row(s) deleted");
 }
 
-$msgcode['delIIFOIFCompatPack']['OK'] = 38;
 function delIIFOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 38));
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
@@ -2765,9 +2756,9 @@ function delIIFOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 }
 
-$msgcode['addOIFCompatPack']['OK'] = 21;
 function addOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
 	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
@@ -2787,9 +2778,9 @@ function addOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['delOIFCompatPack']['OK'] = 21;
 function delOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
 	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
@@ -2800,9 +2791,9 @@ function delOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['add8021QOrder']['OK'] = 48;
 function add8021QOrder ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vst_id');
@@ -2822,9 +2813,9 @@ function add8021QOrder ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['del8021QOrder']['OK'] = 49;
 function del8021QOrder ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('object_id');
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('vst_id');
@@ -2846,9 +2837,9 @@ function del8021QOrder ()
 	return buildRedirectURL (NULL, NULL, $focus_hints);
 }
 
-$msgcode['createVLANDomain']['OK'] = 48;
 function createVLANDomain ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertStringArg ('vdom_descr');
 	global $sic;
 	usePreparedInsertBlade
@@ -2877,6 +2868,7 @@ function createVLANDomain ()
 
 function save8021QPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	global $sic;
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertStringArg ('form_mode');
@@ -2942,9 +2934,9 @@ function save8021QPorts ()
 	return buildRedirectURL (NULL, NULL, $extra);
 }
 
-$msgcode['bindVLANtoIPv4']['OK'] = 48;
 function bindVLANtoIPv4 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2952,9 +2944,9 @@ function bindVLANtoIPv4 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['bindVLANtoIPv6']['OK'] = 48;
 function bindVLANtoIPv6 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2962,9 +2954,9 @@ function bindVLANtoIPv6 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['unbindVLANfromIPv4']['OK'] = 49;
 function unbindVLANfromIPv4 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2972,9 +2964,9 @@ function unbindVLANfromIPv4 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['unbindVLANfromIPv6']['OK'] = 49;
 function unbindVLANfromIPv6 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2982,10 +2974,9 @@ function unbindVLANfromIPv6 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['process8021QSyncRequest']['OK'] = 63;
-$msgcode['process8021QSyncRequest']['ERR'] = 191;
 function process8021QSyncRequest ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR' => 191));
 	// behave depending on current operation: exec8021QPull or exec8021QPush
 	global $sic, $op;
 	if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
@@ -2994,9 +2985,9 @@ function process8021QSyncRequest ()
 		showFuncMessage (__FUNCTION__, 'OK', array ($done));
 }
 
-$msgcode['process8021QRecalcRequest']['CHANGED'] = 87;
 function process8021QRecalcRequest ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 87));
 	assertPermission (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q')));
 	$counters = recalc8021QPorts (getBypassValue());
 	if ($counters['ports'])
@@ -3005,11 +2996,9 @@ function process8021QRecalcRequest ()
 		showNotice ('No changes were made');
 }
 
-$msgcode['resolve8021QConflicts']['OK'] = 63;
-$msgcode['resolve8021QConflicts']['ERR1'] = 179;
-$msgcode['resolve8021QConflicts']['ERR2'] = 109;
 function resolve8021QConflicts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR1' => 179, 'ERR2' => 109));
 	global $sic, $dbxlink;
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertUIntArg ('nrows');
@@ -3118,9 +3107,9 @@ function update8021QPortList()
 		showSuccess ("disabled 802.1Q for ${disabled} port(s)");
 }
 
-$msgcode['cloneVST']['OK'] = 48;
 function cloneVST()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('mutex_rev', TRUE);
 	assertUIntArg ('from_id');
 	$src_vst = spotEntity ('vst', $_REQUEST['from_id']);
@@ -3129,9 +3118,9 @@ function cloneVST()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updVSTRule']['OK'] = 43;
 function updVSTRule()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	// this is used for making throwing an invalid argument exception easier.
 	function updVSTRule_get_named_param ($name, $haystack, &$last_used_name)
 	{
@@ -3179,9 +3168,9 @@ function updVSTRule()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['importDPData']['OK'] = 44;
 function importDPData()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 44));
 	global $sic, $dbxlink;
 	assertUIntArg ('nports');
 	$nignored = $ndone = 0;
@@ -3630,9 +3619,10 @@ function tableHandler()
 	}
 	showOneLiner ($retcode);
 }
-$msgcode['updateFile']['OK'] = 6;
+
 function updateFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$file_id = getBypassValue();
 	$file_name = genericAssertion ('file_name', 'string');
 	$file_type = genericAssertion ('file_type', 'string');
@@ -3648,9 +3638,9 @@ function updateFile ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($file_name));
 }
 
-$msgcode['editIPv4Net']['OK'] = 6;
 function editIPv4Net ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$net_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$comment = genericAssertion ('comment', 'string0');
@@ -3666,9 +3656,9 @@ function editIPv4Net ()
 	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
 }
 
-$msgcode['editIPv6Net']['OK'] = 6;
 function editIPv6Net ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$net_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$comment = genericAssertion ('comment', 'string0');
@@ -3684,9 +3674,9 @@ function editIPv6Net ()
 	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
 }
 
-$msgcode['updIPv4RSP']['OK'] = 6;
 function updIPv4RSP ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$rspool_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$vsconfig = genericAssertion ('vsconfig', 'string0');
@@ -3702,9 +3692,9 @@ function updIPv4RSP ()
 	showFuncMessage (__FUNCTION__, 'OK', array($_REQUEST['name']));
 }
 
-$msgcode['editUserProperties']['OK'] = 6;
 function editUserProperties ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$taglist = genericAssertion ('taglist', 'array0');
 	$user_id = getBypassValue();
 	rebuildTagChainForEntity ('user', $user_id, buildTagChainFromIds ($taglist), TRUE);
@@ -3748,9 +3738,9 @@ function replenishPatchCable()
 		showError ('could not replenish');
 }
 
-$msgcode['setPatchCableAmount']['OK'] = 51;
 function setPatchCableAmount()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	commitSetPatchCableAmount (genericAssertion ('id', 'uint'), genericAssertion ('amount', 'uint0'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
