@@ -5297,7 +5297,7 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 		foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
 		{
 			$tag_class = isset ($taginfo['id']) && isset ($taginfo['refcnt']) ? getTagClassName ($row['input_value']) : '';
-			echo "<tr class='${row['tr_class']}'><td colspan=2 class='${row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
+			echo "<tr class='${row['tr_class']}'><td class='${row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
 			echo "<label><input type=checkbox class='${row['input_class']}' name='${row['input_name']}[]' value='${row['input_value']}'";
 			if (array_key_exists ('input_extraattrs', $row))
 				echo ' ' . $row['input_extraattrs'];
@@ -6607,7 +6607,7 @@ function dynamic_title_decoder ($path_position)
 			throw new EntityNotFoundException ('VLAN domain', $vdom_id);
 		return array
 		(
-			'name' => niftyString ("domain '" . $vdlist[$vdom_id] . "'", 20, FALSE),
+			'name' => "domain '" . niftyString ($vdlist[$vdom_id], 40, FALSE) . "'",
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
@@ -6620,7 +6620,7 @@ function dynamic_title_decoder ($path_position)
 		$vst = spotEntity ('vst', $sic['vst_id']);
 		return array
 		(
-			'name' => niftyString ("template '" . $vst['description'] . "'", 50, FALSE),
+			'name' => "template '" . niftyString ($vst['description'], 40, FALSE) . "'",
 			'params' => array ('vst_id' => $sic['vst_id'])
 		);
 	case 'dqueue':
