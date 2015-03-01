@@ -124,14 +124,21 @@ foreach ($switch_list as $object_id)
 {
 	$cell = spotEntity ('object', $object_id);
 	$new_disabled = ! considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC');
-	$queue = detectVLANSwitchQueue (getVLANSwitchInfo ($object_id));
-	if ($queue == 'disabled' xor $new_disabled)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
-			array ($new_disabled ? E_8021Q_SYNC_DISABLED : E_8021Q_NOERROR, $object_id)
-		);
-	elseif (in_array ($queue, $todo[$options['mode']]))
+	$vswitch = getVLANSwitchInfo ($object_id);
+	$queue = detectVLANSwitchQueue ($vswitch);
+	if ($queue != 'disabled' && $new_disabled)
+	{
+		setVLANSwitchError ($object_id, E_8021Q_SYNC_DISABLED);
+		continue;
+	}
+	elseif ($queue == 'disabled' && ! $new_disabled)
+	{
+		$vswitch['last_errno'] = E_8021Q_NOERROR;
+		setVLANSwitchError ($object_id, $vswitch['last_errno']);
+		$queue = detectVLANSwitchQueue ($vswitch);
+	}
+
+	if (in_array ($queue, $todo[$options['mode']]))
 		$switch_queue[] = $cell;
 }
 
