@@ -4389,98 +4389,45 @@ function recalc8021QPorts ($switch_id)
 		'switches' => 0,
 		'ports' => 0,
 	);
-	global $dbxlink;
-	$ports = getObjectPortsAndLinks ($switch_id);
-
-	$dbxlink->beginTransaction();
-	$vswitch = getVLANSwitchInfo ($switch_id, 'FOR UPDATE');
+	$vswitch = getVLANSwitchInfo ($switch_id);
 	if (! $vswitch)
-	{
-		$dbxlink->rollBack();
 		return $ret;
-	}
-	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
-	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
-	$order = apply8021QOrder ($vswitch, $vlan_config);
-	$before = $order;
+	$ports = getObjectPortsAndLinks ($switch_id);
+	$order = apply8021QOrder ($vswitch, getStored8021QConfig ($switch_id, 'desired'));
+
+	$self_processed = FALSE;
 
 	// calculate remote uplinks and copy them to local downlinks
-	foreach ($order as $pn => &$local_port_order)
-	{
-		if ($local_port_order['vst_role'] != 'downlink')
-			continue;
-
-		// if there is a link with remote side type 'uplink', use its vlan mask
-		if ($portinfo = findConnectedPort ($ports, $pn))
+	foreach ($ports as $portinfo)
+		if
+		(
+			$portinfo['linked'] and
+			isset ($order[$portinfo['name']]) and
+			$order[$portinfo['name']]['vst_role'] == 'downlink'
+		)
 		{
+			// if there is a link with remote side type 'uplink', use its vlan mask
 			$remote_pn = $portinfo['remote_name'];
-			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
 			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
 			if (! $remote_vswitch)
 				continue;
-			$remote_domain_vlanlist = getDomainVLANList ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
-			$remote_before = $remote_order;
-			if ($remote_order[$remote_pn]['vst_role'] == 'uplink')
-			{
-				$remote_uplinks = filter8021QChangeRequests ($remote_domain_vlanlist, $remote_before, produceUplinkPorts ($remote_domain_vlanlist, $remote_order, $remote_vswitch['object_id']));
-				$remote_port_order = $remote_uplinks[$remote_pn];
-				$new_order = produceDownlinkPort ($domain_vlanlist, $pn, array ($pn => $local_port_order), $remote_port_order);
-				$local_port_order = $new_order[$pn]; // this updates $order
-
-				// queue changes in D-config of remote switch
-				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, array ($remote_pn => $remote_port_order)))
-				{
-					touchVLANSwitch ($portinfo['remote_object_id']);
-					$ret['switches'] ++;
-					$ret['ports'] += $changed;
-				}
-			}
+			$n = apply8021qChangeRequest ($remote_vswitch['object_id'], array(), FALSE, NULL, array($portinfo['remote_name'] => ''));
+			$ret['switches'] += $n ? 1 : 0;
+			$ret['ports'] += $n;
+			if ($n > 1)
+				$self_processed = TRUE;
 		}
-	}
 
-	// calculate local uplinks, store changes in $order
-	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order, $vswitch['object_id'])) as $pn => $portorder)
-		$order[$pn] = $portorder;
-	// queue changes in D-config of local switch
-	if ($changed = replace8021QPorts ('desired', $switch_id, $before, $order))
+	// if no connected downlinks found, re-calculate local uplinks
+	// (otherwise the remote switch has already called apply8021qChangeRequest for us)
+	if ($self_processed)
+		$ret['switches'] += 1;
+	elseif ($ret['ports'] == 0)
 	{
-		touchVLANSwitch ($switch_id);
-		$ret['switches'] ++;
-		$ret['ports'] += $changed;
+		$n = apply8021qChangeRequest ($switch_id, array(), FALSE, NULL, array());
+		$ret['switches'] += $n ? 1 : 0;
+		$ret['ports'] += $n;
 	}
-
-	// calculate the remote side of local uplinks
-	foreach ($order as $pn => &$local_port_order)
-	{
-		if ($local_port_order['vst_role'] != 'uplink')
-			continue;
-
-		// if there is a link with remote side type 'downlink', replace its vlan mask
-		if ($portinfo = findConnectedPort ($ports, $pn))
-		{
-			$remote_pn = $portinfo['remote_name'];
-			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
-			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
-			if (! $remote_vswitch)
-				continue;
-			$remote_domain_vlanlist = getDomainVLANList ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
-			$remote_before = $remote_order;
-			if ($remote_order[$remote_pn]['vst_role'] == 'downlink')
-			{
-				$new_order = produceDownlinkPort ($remote_domain_vlanlist, $remote_pn, $remote_order, $local_port_order);
-				// queue changes in D-config of remote switch
-				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, $new_order))
-				{
-					touchVLANSwitch ($portinfo['remote_object_id']);
-					$ret['switches'] ++;
-					$ret['ports'] += $changed;
-				}
-			}
-		}
-	}
-	$dbxlink->commit();
 	return $ret;
 }
 
@@ -5469,9 +5416,10 @@ function explodeTableLine ($line, $table_schema)
 // returns number of changed ports (both local and remote)
 // shows error messages unconditionally, and success messages respecting  to $verbose setting
 // if $mutex_rev is set, checks if it is outdated
+// if $uplinks_filter is not empty, changes only those uplink ports that are keys of this array
 // NOTE: this function is calling itself through initiateUplinksReverb. It is important that
 // the call to initiateUplinksReverb is outside of DB transaction scope.
-function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL)
+function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL, $uplinks_filter = array())
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
@@ -5496,6 +5444,8 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
 		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after, $vswitch['object_id']));
+		if ($uplinks_filter)
+			$new_uplinks = array_intersect_key ($new_uplinks, $uplinks_filter);
 		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
 		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
 		if ($npulled + $nsaved_uplinks)
