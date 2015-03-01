@@ -4188,6 +4188,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	$dbxlink->beginTransaction();
 	$vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE');
 	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$Dnew = $D;
 	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 	$conflict = FALSE;
 	$ok_to_push = array();
@@ -4202,9 +4203,11 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		case 'ok_to_delete':
 			$nsaved += del8021QPort ($vswitch['object_id'], $pn);
+			unset ($Dnew[$pn]);
 			break;
 		case 'ok_to_add':
 			$nsaved += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+			$Dnew[$pn] = $port['right'];
 			break;
 		case 'delete_conflict':
 		case 'merge_conflict':
@@ -4216,6 +4219,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			// FIXME: this can be logged
 			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $port['right']);
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
+			$Dnew[$pn] = $port['right'];
 			break;
 		case 'ok_to_push_with_merge':
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
@@ -4227,7 +4231,7 @@ function exec8021QDeploy ($object_id, $do_push)
 	}
 	// redo uplinks unconditionally
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
-	$Dnew = apply8021QOrder ($vswitch, getStored8021QConfig ($vswitch['object_id'], 'desired'));
+	$Dnew = apply8021QOrder ($vswitch, $Dnew);
 	// Take new "desired" configuration and derive uplink port configuration
 	// from it. Then cancel changes to immune VLANs and save resulting
 	// changes (if any left).
