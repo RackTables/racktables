@@ -5869,4 +5869,39 @@ function selectRackOrder ($row_id)
 	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
 }
 
+// Sets exclusive server-global named lock.
+// Returns bool - whether the lock was set or not (wait timeout)
+// A lock is implicitly released on any subsequent call to setDBMutex in the same connection
+function setDBMutex ($name, $timeout = 5)
+{
+	$result = usePreparedSelectBlade ('SELECT GET_LOCK(?, ?)', array (getDBName() . '.' . $name, $timeout));
+	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	if ($row === NULL)
+		throw new RTDatabaseError ("error occured when executing GET_LOCK");
+	if ($row !== '1')
+		throw new RTDatabaseError ('lock wait timeout');
+}
+
+function tryDBMutex ($name, $timeout = 0)
+{
+	try
+	{
+		setDBMutex ($name, $timeout);
+		return TRUE;
+	}
+	catch (RTDatabaseError $e)
+	{
+		return FALSE;
+	}
+}
+
+function releaseDBMutex ($name)
+{
+	$result = usePreparedSelectBlade ('SELECT RELEASE_LOCK(?)', array (getDBName() . '.' . $name));
+	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	if ($row === NULL)
+		throw new RTDatabaseError ("error occured when executing RELEASE_LOCK");
+	return $row === '1';
+}
+
 ?>
