@@ -3825,20 +3825,18 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 function exportSwitch8021QConfig
 (
 	$vswitch,
-	$device_vlanlist,
-	$before,
-	$changes,
-	$vlan_names
+	$running_config,
+	$changes
 )
 {
-	$crq = generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes);
+	$crq = generate8021QDeployOps ($vswitch, $running_config['vlanlist'], $running_config['portdata'], $changes);
 	if (count ($crq))
 	{
 		array_unshift ($crq, array ('opcode' => 'begin configuration'));
 		$crq[] = array ('opcode' => 'end configuration');
 		if (considerConfiguredConstraint (spotEntity ('object', $vswitch['object_id']), '8021Q_WRI_AFTER_CONFT_LISTSRC'))
 			$crq[] = array ('opcode' => 'save configuration');
-		setDevice8021QConfig ($vswitch['object_id'], $crq, $vlan_names);
+		setDevice8021QConfig ($vswitch['object_id'], $crq, $running_config['vlannames']);
 	}
 	return count ($crq);
 }
@@ -4271,10 +4269,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			);
 			try
 			{
-				$vlan_names = array();
-				foreach ($R['vlanlist'] as $vid)
-					$vlan_names[$vid] = @$R['vlannames']['vid'];
-				$npushed += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push, $vlan_names);
+				$npushed += exportSwitch8021QConfig ($vswitch, $R, $ok_to_push);
 				// update cache for ports deployed
 				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
 				usePreparedExecuteBlade

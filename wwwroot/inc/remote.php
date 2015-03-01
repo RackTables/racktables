@@ -647,6 +647,18 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	return proc_close ($child);
 }
 
+// returns the empty structure to be returned from getRunning8021QConfig
+function constructRunning8021QConfig()
+{
+	return array
+	(
+		'vlanlist' => array(),   // unindexed list of integer VIDs
+		'portdata' => array(),   // portconf structures indexed by portname
+		'portconfig' => array(), // config text lines indexed by portname.
+		'vlannames' => array(),  // vlan names indexed by VID
+	);
+}
+
 function getRunning8021QConfig ($object_id)
 {
 	$ret = queryDevice ($object_id, 'get8021q');

@@ -325,12 +325,8 @@ function ros11ReadLLDPStatus ($input)
 
 function ios12ReadVLANConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array(),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+
 	$schema = $ret;
 	if (preg_match ('/\nUnable to get configuration. Try again later/s', $input))
 		throw new ERetryNeeded ("device is busy. 'show run' did not work");
@@ -504,12 +500,8 @@ function ios12PickVLANCommand (&$work, $line)
 // Another finite automata to read a dialect of Foundry configuration.
 function fdry5ReadVLANConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array(),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+
 	global $breedfunc;
 	$nextfunc = 'fdry5-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
@@ -707,12 +699,8 @@ function ros11ParsePortString ($string)
 // an implementation for Huawei syntax
 function vrp53ReadVLANConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array(),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+
 	global $breedfunc;
 	$nextfunc = 'vrp53-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
@@ -833,12 +821,9 @@ function vrp53PickInterfaceSubcommand (&$work, $line)
 
 function vrp55Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (1), // VRP 5.50 hides VLAN1 from config text
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID; // VRP 5.50 hides VLAN1 from config text
+
 	foreach (explode ("\n", $input) as $line)
 	{
 		$matches = array();
@@ -952,12 +937,9 @@ function vrp55Read8021QConfig ($input)
 
 function vrp85Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (1), // VRP 8+ hides VLAN1 from config text
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID; // VRP 8+ hides VLAN1 from config text
+
 	$state = 'skip';
 	$current = array();
 
@@ -1064,11 +1046,8 @@ Forbidden Ports        :
 */
 function dlinkReadVLANConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array(),
-		'portdata' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+
 	global $breedfunc;
 	$nextfunc = 'dlink-get8021q-top';
 	foreach (explode ("\n", $input) as $line)
@@ -1141,11 +1120,9 @@ function dlinkStorePortInfo (&$work, $port_name, $new_mode, $overwrite_mode = ''
 
 function linuxReadVLANConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (VLAN_DFL_ID),
-		'portdata' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID;
+
 	foreach (explode ("\n", $input) as $line)
 	{
 		// 13: vlan11@eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP \    link/ether 00:1e:34:ae:75:21 brd ff:ff:ff:ff:ff:ff
@@ -2156,12 +2133,9 @@ function linuxTranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 
 function xos12Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (1),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID;
+
 	foreach (explode ("\n", $input) as $line)
 	{
 		$matches = array();
@@ -2207,13 +2181,9 @@ function xos12Read8021QConfig ($input)
 
 function jun10Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (1),
-		'vlannames' => array (1 => 'default'),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlannames'][VLAN_DFL_ID] = 'default';
+
 	$lines = explode ("\n", $input);
 
 	// get vlan list
@@ -2352,13 +2322,8 @@ function jun10Read8021QConfig ($input)
 
 function ftos8Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (),
-		'vlannames' => array (),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+
 	$iface = NULL;
 	foreach (explode ("\n", $input) as $line)
 	{
@@ -2476,13 +2441,9 @@ function eos4BuildSwitchport ($mined)
 
 function eos4Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (VLAN_DFL_ID),
-		'vlannames' => array (),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID;
+
 	foreach (explode ("\n", $input) as $line)
 	{
 		$matches = array();
@@ -2588,12 +2549,9 @@ function eos4Read8021QConfig ($input)
 # configuration is not supported.
 function ros11Read8021QConfig ($input)
 {
-	$ret = array
-	(
-		'vlanlist' => array (VLAN_DFL_ID),
-		'portdata' => array(),
-		'portconfig' => array(),
-	);
+	$ret = constructRunning8021QConfig();
+	$ret['vlanlist'][] = VLAN_DFL_ID;
+
 	$nextfunc = 'ros11-get8021q-scantop';
 	global $breedfunc;
 	foreach (explode ("\n", $input) as $line)
