@@ -4345,17 +4345,14 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 // the current configuration of given uplink ports.
 function initiateUplinksReverb ($object_id, $uplink_ports)
 {
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
 	// Filter and regroup all requests (regardless of how many will succeed)
 	// to end up with no more, than one execution per remote object.
 	$upstream_config = array();
-	foreach ($object['ports'] as $portinfo)
+	foreach (getObjectPortsAndLinks ($object_id) as $portinfo)
 		if
 		(
-			array_key_exists ($portinfo['name'], $uplink_ports) and
-			$portinfo['remote_object_id'] != '' and
-			$portinfo['remote_name'] != ''
+			$portinfo['linked'] and
+			array_key_exists ($portinfo['name'], $uplink_ports)
 		)
 			$upstream_config[$portinfo['remote_object_id']][$portinfo['remote_name']] = $uplink_ports[$portinfo['name']];
 	// Note that when current object has several Port records inder same name
