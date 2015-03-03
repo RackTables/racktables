@@ -2558,6 +2558,60 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('catalyst-chassis-25-to-26-1000SFP', 'catalyst-chassis-mgmt', 'catalyst-chassis-any-1000T'),
 
 	),
+	'9.1.1750' => array
+	(
+		'dict_key' => 2135,
+		'text' => 'WS-C2960+24LC-L: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1755' => array
+	(
+		'dict_key' => 2140,
+		'text' => 'WS-C2960+24LC-S: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1749' => array
+	(
+		'dict_key' => 2134,
+		'text' => 'WS-C2960+24PC-L: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1754' => array
+	(
+		'dict_key' => 2139,
+		'text' => 'WS-C2960+24PC-S: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1752' => array
+	(
+		'dict_key' => 2137,
+		'text' => 'WS-C2960+24TC-L: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1757' => array
+	(
+		'dict_key' => 2141,
+		'text' => 'WS-C2960+24TC-S: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1748' => array
+	(
+		'dict_key' => 2132,
+		'text' => 'WS-C2960+48PST-L: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1753' => array
+	(
+		'dict_key' => 2138,
+		'text' => 'WS-C2960+48PST-S: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
+	'9.1.1756' => array
+	(
+		'dict_key' => 2219,
+		'text' => 'WS-C2960+48TC-S: 24/48 RJ-45/10-100TX + 2 combo-gig',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000SFP', 'catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
+	),
 	'9.5.18' => array
 	(
 		'dict_key' => 2094,
