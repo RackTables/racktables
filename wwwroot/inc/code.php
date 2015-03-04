@@ -864,6 +864,34 @@ function findAutoTagWarnings ($expr)
 		'vst' => array ('vst', '802.1Q template'),
 		'user' => array ('user', 'User'),
 	);
+	// autotags that don't require a regexp to match
+	$simple_autotags = array
+	(
+		'$aggregate',
+		'$any_file',
+		'$any_ip4net',
+		'$any_ip6net',
+		'$any_ipv4rsp',
+		'$any_ipv4vs',
+		'$any_location',
+		'$any_net',
+		'$any_object',
+		'$any_op',
+		'$any_rack',
+		'$any_row',
+		'$any_rsp',
+		'$any_vs',
+		'$nameless',
+		'$no_asset_tag',
+		'$portless',
+		'$runs_8021Q',
+		'$type_mark',
+		'$type_tcp',
+		'$type_udp',
+		'$unmounted',
+		'$untagged',
+		'$unused',
+	);
 	switch ($expr['type'])
 	{
 		case 'LEX_TRUE':
@@ -874,6 +902,8 @@ function findAutoTagWarnings ($expr)
 		case 'LEX_AUTOTAG':
 			switch (1)
 			{
+				case (in_array ($expr['load'], $simple_autotags)):
+					return array();
 				case preg_match ('/^\$(.*)?id_(\d+)$/', $expr['load'], $m) && isset ($entityIDs[$m[1]]):
 					list ($realm, $description) = $entityIDs[$m[1]];
 					$recid = $m[2];
@@ -916,17 +946,14 @@ function findAutoTagWarnings ($expr)
 						'text' => "Page number '${recid}' does not exist."
 					));
 				case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $expr['load'])):
-				case (preg_match ('/^\$any_(op|rack|object|ip4net|ip6net|net|ipv4vs|vs|ipv4rsp|rsp|file|location|row)$/', $expr['load'])):
 				case (preg_match ('/^\$typeid_\d+$/', $expr['load'])): // FIXME: check value validity
 				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
 				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
 				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_\d+$/', $expr['load'])):
-				case (preg_match ('/^\$(aggregate|unused|nameless|portless|unmounted|untagged|no_asset_tag|runs_8021Q)$/', $expr['load'])):
 				case (preg_match ('/^\$(masklen_eq|spare)_\d{1,3}$/', $expr['load'])):
 				case (preg_match ('/^\$attr_\d+(_\d+)?$/', $expr['load'])):
 				case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $expr['load'])):
 				case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $expr['load'])):
-				case (preg_match ('/^\$type_(tcp|udp|mark)$/', $expr['load'])):
 				case (preg_match ('/^\$client_([0-9a-fA-F.:]+)$/', $expr['load'])):
 					return array();
 				default:
