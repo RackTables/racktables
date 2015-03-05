@@ -5458,9 +5458,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 		showError (sprintf ("Failed to update switchports: %s", $e->getMessage()));
 		return 0;
 	}
-	$nsaved_downlinks = 0;
-	if ($nsaved_uplinks)
-		$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
+	$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
 	// instant deploy to that switch if configured
 	$done = 0;
 	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')

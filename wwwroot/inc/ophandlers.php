@@ -2991,7 +2991,7 @@ function process8021QRecalcRequest ()
 	assertPermission (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q')));
 	$counters = recalc8021QPorts (getBypassValue());
 	if ($counters['ports'])
-		showFuncMessage (__FUNCTION__, 'CHANGED', array ($counters['ports'], $counters['switches']));
+		showFuncMessage (__FUNCTION__, 'OK', array ($counters['ports'], $counters['switches']));
 	else
 		showNotice ('No changes were made');
 }
