@@ -5896,6 +5896,13 @@ function selectRackOrder ($row_id)
 	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
 }
 
+function getDBName()
+{
+	global $pdo_dsn;
+	if (preg_match ('/\bdbname=(.+?)(;|$)/', $pdo_dsn, $m))
+		return $m[1];
+}
+
 // Sets exclusive server-global named lock.
 // Returns bool - whether the lock was set or not (wait timeout)
 // A lock is implicitly released on any subsequent call to setDBMutex in the same connection
