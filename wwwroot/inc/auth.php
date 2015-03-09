@@ -35,6 +35,9 @@ function authenticate ()
 	if (isset ($_SESSION['logout']))
 	{
 		unset($_SESSION['logout']);
+		unset($_SERVER['PHP_AUTH_USER']);
+		unset($_SERVER['PHP_AUTH_PW']);
+
 		if (isset ($user_auth_src) and 'saml' == $user_auth_src)
 			saml_logout ();
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
