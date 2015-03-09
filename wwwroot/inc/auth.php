@@ -29,25 +29,12 @@ function authenticate ()
 	// Phase 1. Assert basic pre-requisites, short-circuit the logout request.
 	if (!isset ($user_auth_src) or !isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
-
-	/* workaround &logout urls */
-	session_start();
-	if (isset ($_SESSION['logout']))
+	if (isset ($_REQUEST['logout']))
 	{
-		unset($_SESSION['logout']);
 		if (isset ($user_auth_src) and 'saml' == $user_auth_src)
 			saml_logout ();
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
-
 	}
-	if(isset($_REQUEST['logout']))
-	{
-		$_SESSION['logout'] = 1;
-		header('location: index.php');
-		exit;
-	}
-	session_write_close();
-
 	// Phase 2. Do some method-specific processing, initialize $remote_username on success.
 	switch (TRUE)
 	{
