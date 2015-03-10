@@ -135,9 +135,7 @@ class RackTablesError extends Exception
 		switch ($this->code)
 		{
 		case self::NOT_AUTHENTICATED:
-			header ('WWW-Authenticate: Basic realm="' . getConfigVar ('enterprise') . ' RackTables access"');
-			header ('HTTP/1.1 401 Unauthorized');
-			$this->genHTMLPage ('Not authenticated', '<h2>This system requires authentication. You should use a username and a password.</h2>');
+			header('location: ?login');
 			break;
 		case self::MISCONFIGURED:
 		case self::INTERNAL:

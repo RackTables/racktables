@@ -121,6 +121,17 @@ if (! isset ($script_mode) || $script_mode !== TRUE)
 	// A successful call to authenticate() always generates autotags and somethimes
 	// even given/implicit tags. It also sets remote_username and remote_displayname.
 	authenticate();
+
+	if(isset($_SESSION['url']))
+	{
+		startsession();
+		$url = $_SESSION['url'];
+		unset($_SESSION['url']);
+		session_write_close();
+		header("location: $url");
+		exit;
+	}
+
 	// Authentication passed.
 	// Note that we don't perform autorization here, so each 1st level page
 	// has to do it in its way, e.g. by calling authorize() after fixContext().

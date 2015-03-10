@@ -41,12 +41,144 @@ function authenticate ()
 	// Phase 1. Assert basic pre-requisites, short-circuit the logout request.
 	if (! isset ($user_auth_src) || ! isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
+
+	startsession();
+
 	if (isset ($_REQUEST['logout']))
 	{
 		if (isset ($user_auth_src) && 'saml' == $user_auth_src)
 			saml_logout ();
-		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
+
+		if(isset($_SESSION['loggedin']) && ($_SESSION['loggedin'] == 1))
+		{
+			unset($_SESSION['loggedin']);
+			unset($_SESSION['username']);
+			unset($_SESSION['userinfo']);
+			unset($_SESSION['auto_tags']);
+			unset($_SESSION['user_given_tags']);
+			unset($_SESSION['sessiontimeout']);
+
+			echo <<<ENDLOGOUTPAGE
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>RT logout</title>
+</head>
+<body>
+<div style="width:300px;height:150px;margin: auto;position: absolute;top: 0;left: 0;bottom: 0;right: 0;">
+You have successfully logged out.
+<p><a href=?login>Return to RackTables Login Page</a></p>
+<div>
+</body></html>
+ENDLOGOUTPAGE;
+exit;
+		}
+		else
+		{
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+		}
 	}
+
+	if (isset($_REQUEST['login']))
+	{
+
+			unset($_SESSION['loggedin']);
+			unset($_SESSION['username']);
+			unset($_SESSION['userinfo']);
+			unset($_SESSION['auto_tags']);
+			unset($_SESSION['user_given_tags']);
+			unset($_SESSION['sessiontimeout']);
+
+			if(isset($_SESSION['msg']))
+				$msg = $_SESSION['msg'];
+			else
+				$msg = "";
+
+			header ('Content-Type: text/html; charset=UTF-8');
+
+			echo <<<ENDLOGINFORM
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>RT login</title>
+</head>
+<body>
+<div style="width:250px;height:200px;margin: auto;position: absolute;top: 0;left: 0;bottom: 0;right: 0;">
+<form action="${_SERVER['SCRIPT_NAME']}" method="POST">
+$msg
+<table>
+<tr><td colspan=2 style="background-color: #000;color: #FFF;">RackTables Login</td></tr>
+<tr><td>Username: </td><td><input type="text" name="username" autofocus="autofocus"></td></tr>
+<tr><td>Password: </td><td><input type="password" name="password"></td></tr>
+</table>
+<p><input type="submit" value="Login"></p>
+</div>
+</body></html>
+ENDLOGINFORM;
+
+			if(isset($_SESSION['msg']))
+				unset($_SESSION['msg']);
+exit;
+	}
+
+	// not logged in
+	if (!isset($_SESSION['loggedin']) or $_SESSION['loggedin'] != 1 )
+	{
+
+		if(!empty($_GET))
+			$_SESSION['url'] = $_SERVER['REQUEST_URI'];
+
+		// new login
+		if(
+			isset($_POST['username']) &&
+			!empty($_POST['username']) &&
+			isset($_POST['password']) &&
+			!empty($_POST['password'])
+		)
+		{
+			$_SESSION['username'] = $_POST['username'];
+			$remote_username = $_SESSION['username'];
+		}
+		else
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+	}
+	else
+	{
+		// already logged in
+		if(!isset($_SESSION['sessiontimeout']) || (time() - $_SESSION['sessiontimeout'] > 60*60)) // 1 Hour
+		{
+			if(!empty($_GET))
+				$_SESSION['url'] = $_SERVER['REQUEST_URI'];
+
+			$_SESSION['msg'] = "Session timed out!";
+			unset($_SESSION['loggedin']);
+			unset($_SESSION['username']);
+			unset($_SESSION['userinfo']);
+			unset($_SESSION['auto_tags']);
+			unset($_SESSION['user_given_tags']);
+			unset($_SESSION['sessiontimeout']);
+
+			// force login
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+		}
+
+		$remote_username = $_SESSION['username'];
+
+		$userinfo = $_SESSION['userinfo'];
+
+		$user_given_tags = $_SESSION['user_given_tags'];
+		$auto_tags = $_SESSION['auto_tags'];
+
+		$remote_displayname = $_SESSION['displayname'];
+
+		$_SESSION['sessiontimeout'] = time();
+
+		session_write_close();
+		return; // success
+	}
+
+	$_SESSION['sessiontimeout'] = time();
+
 	// Phase 2. Do some method-specific processing, initialize $remote_username on success.
 	switch (TRUE)
 	{
@@ -58,7 +190,7 @@ function authenticate ()
 			break;
 		case 'ldap' == $user_auth_src:
 			assertHTTPCredentialsReceived();
-			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			$remote_username = $_SESSION['username'];
 			constructLDAPOptions();
 			break;
 		case 'httpd' == $user_auth_src:
@@ -90,12 +222,19 @@ function authenticate ()
 	switch (TRUE)
 	{
 		case isset ($script_mode) && $script_mode:
+			$_SESSION['loggedin'] = 1;
 			return; // success
 		// Just trust the server, because the password isn't known.
 		case 'httpd' == $user_auth_src:
 			$remote_displayname = $userinfo['user_realname'] != '' ?
 				$userinfo['user_realname'] :
 				$remote_username;
+			$_SESSION['userinfo'] = $userinfo;
+			$_SESSION['auto_tags'] = $auto_tags;
+			$_SESSION['user_given_tags'] = $user_given_tags;
+			$_SESSION['displayname'] = $remote_displayname;
+			$_SESSION['loggedin'] = 1;
+			session_write_close();
 			return; // success
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case array_key_exists ('user_id', $userinfo) && $userinfo['user_id'] == 1:
@@ -103,19 +242,44 @@ function authenticate ()
 			$remote_displayname = $userinfo['user_realname'] != '' ?
 				$userinfo['user_realname'] :
 				$remote_username;
-			if (authenticated_via_database ($userinfo, $_SERVER['PHP_AUTH_PW']))
+			if (authenticated_via_database ($userinfo, $_POST['password']))
+			{
+				$_SESSION['userinfo'] = $userinfo;
+				$_SESSION['auto_tags'] = $auto_tags;
+				$_SESSION['user_given_tags'] = $user_given_tags;
+				$_SESSION['displayname'] = $remote_displayname;
+				$_SESSION['loggedin'] = 1;
+				session_write_close();
 				return; // success
+			}
+			$_SESSION['msg'] = "Wrong Username or Password!";
 			break; // failure
 		case 'ldap' == $user_auth_src:
 			$ldap_dispname = '';
-			if (! authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW'], $ldap_dispname))
+			if (! authenticated_via_ldap ($remote_username, $_POST['password'], $ldap_dispname))
+			{
+				$_SESSION['msg'] = "Wrong Username or Password!";
 				break; // failure
+			}
 			$remote_displayname = $userinfo['user_realname'] != '' ? // local value is most preferred
 				$userinfo['user_realname'] :
 				($ldap_dispname != '' ? $ldap_dispname : $remote_username); // then one from LDAP
+
+			$_SESSION['userinfo'] = $userinfo;
+			$_SESSION['auto_tags'] = $auto_tags;
+			$_SESSION['user_given_tags'] = $user_given_tags;
+			$_SESSION['displayname'] = $remote_displayname;
+			$_SESSION['loggedin'] = 1;
+			session_write_close();
 			return; // success
 		case 'saml' == $user_auth_src:
 			$remote_displayname = $saml_dispname != '' ? $saml_dispname : $saml_username;
+			$_SESSION['userinfo'] = $userinfo;
+			$_SESSION['auto_tags'] = $auto_tags;
+			$_SESSION['user_given_tags'] = $user_given_tags;
+			$_SESSION['displayname'] = $remote_displayname;
+			$_SESSION['loggedin'] = 1;
+			session_write_close();
 			return; // success
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
