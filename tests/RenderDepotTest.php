@@ -8,6 +8,7 @@ class RenderDepotTest extends PHPUnit_Framework_TestCase
 
 	public function setUp ()
 	{
+		@session_start();
 		// create a nameless shelf which contains a modem (re: ticket #1115)
 		$this->shelf_id = commitAddObject (NULL, NULL, 3, NULL);
 		$this->modem_id = commitAddObject ('unit test modem', NULL, 13, NULL);
