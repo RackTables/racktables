@@ -9350,9 +9350,17 @@ function renderDataIntegrityReport ()
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['parent_entity_type']);
-			$parent = spotEntity ($orphan['parent_entity_type'], $orphan['parent_entity_id']);
+			try
+			{
+				$parent = spotEntity ($orphan['parent_entity_type'], $orphan['parent_entity_id']);
+				$parent_name = $parent['name'];
+			}
+			catch (EntityNotFoundException $e)
+			{
+				$parent_name = 'missing from DB';
+			}
 			echo "<tr class=row_${order}>";
-			echo "<td>${realm_name}: ${parent['name']}</td>";
+			echo "<td>${realm_name}: ${parent_name}</td>";
 			echo "<td>${orphan['child_entity_type']}</td>";
 			echo "<td>${orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
@@ -9387,9 +9395,17 @@ function renderDataIntegrityReport ()
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['child_entity_type']);
-			$child = spotEntity ($orphan['child_entity_type'], $orphan['child_entity_id']);
+			try
+			{
+				$child = spotEntity ($orphan['child_entity_type'], $orphan['child_entity_id']);
+				$child_name = $child['name'];
+			}
+			catch (EntityNotFoundException $e)
+			{
+				$child_name = 'missing from DB';
+			}
 			echo "<tr class=row_${order}>";
-			echo "<td>${realm_name}: ${child['name']}</td>";
+			echo "<td>${realm_name}: ${child_name}</td>";
 			echo "<td>${orphan['parent_entity_type']}</td>";
 			echo "<td>${orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
