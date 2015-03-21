@@ -5714,12 +5714,21 @@ function renderMyQuickLinks ()
 	printOpFormIntro ('save');
 	echo '<ul class="qlinks-form">';
 	$active_items = explode (',', getConfigVar ('QUICK_LINK_PAGES'));
+	$items = array();
 	foreach ($indexlayout as $row)
 		foreach ($row as $ypageno)
 		{
-			$checked_state = in_array ($ypageno, $active_items) ? 'checked' : '';
-			echo "<li><label><input type='checkbox' name='page_list[]' value='$ypageno' $checked_state>" . getPageName ($ypageno) . "</label></li>\n";
+			$items[$ypageno] = getPageName ($ypageno);
+			if ($ypageno == 'config') // expand
+				foreach ($page as $subpageno => $subpage)
+					if (array_fetch ($subpage, 'parent', NULL) == $ypageno)
+						$items[$subpageno] = $items[$ypageno] . ': ' . getPageName ($subpageno);
 		}
+	foreach ($items as $ypageno => $pagename)
+	{
+		$checked_state = in_array ($ypageno, $active_items) ? 'checked' : '';
+		echo "<li><label><input type='checkbox' name='page_list[]' value='$ypageno' $checked_state>" . $pagename . "</label></li>\n";
+	}
 	echo '</ul>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form></div>';
