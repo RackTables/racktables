@@ -5332,12 +5332,12 @@ function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 
 function renderEntityTags ($entity_id)
 {
-	global $tagtree, $taglist, $target_given_tags, $pageno, $etype_by_pageno;
+	global $tagtree, $taglist, $target_given_tags;
 	echo '<table border=0 width="100%"><tr>';
 
 	if (count ($taglist) > getConfigVar ('TAGS_QUICKLIST_THRESHOLD'))
 	{
-		$minilist = getTagChart (getConfigVar ('TAGS_QUICKLIST_SIZE'), $etype_by_pageno[$pageno], $target_given_tags);
+		$minilist = getTagChart (getConfigVar ('TAGS_QUICKLIST_SIZE'), etypeByPageno(), $target_given_tags);
 		// It could happen, that none of existing tags have been used in the current realm.
 		if (count ($minilist))
 		{
@@ -5358,7 +5358,7 @@ function renderEntityTags ($entity_id)
 
 	// do not do anything about empty tree, trigger function ought to work this out
 	echo '<td class=pcright>';
-	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, $etype_by_pageno[$pageno]);
+	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, etypeByPageno());
 	echo '</td>';
 
 	echo '</tr></table>';
@@ -5933,9 +5933,7 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 
 function renderFilesForEntity ($entity_id)
 {
-	global $pageno, $etype_by_pageno;
-	// Now derive entity_type from pageno.
-	$entity_type = $etype_by_pageno[$pageno];
+	$entity_type = etypeByPageno();
 
 	startPortlet ('Upload and link new');
 	echo "<table border=0 cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";

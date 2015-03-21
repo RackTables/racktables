@@ -70,9 +70,7 @@ function renderVS ($vsid)
 
 function renderTripletForm ($bypass_id)
 {
-	global $pageno, $etype_by_pageno;
-	$cell = spotEntity ($etype_by_pageno[$pageno], $bypass_id);
-	renderSLBTriplets2 ($cell, TRUE);
+	renderSLBTriplets2 (spotEntity (etypeByPageno(), $bypass_id), TRUE);
 }
 
 // either $port of $vip argument should be NULL

@@ -2196,10 +2196,7 @@ function updateTag ()
 function saveEntityTags ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 43));
-	global $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
-	$realm = $etype_by_pageno[$pageno];
+	$realm = etypeByPageno();
 	$entity_id = getBypassValue();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	rebuildTagChainForEntity ($realm, $entity_id, buildTagChainFromIds ($taglist), TRUE);
@@ -2604,10 +2601,7 @@ function addFileWithoutLink ()
 function addFileToEntity ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 5, 'ERR1' => 207));
-	global $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
-	$realm = $etype_by_pageno[$pageno];
+	$realm = etypeByPageno();
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
@@ -2641,9 +2635,7 @@ function linkFileToEntity ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 71));
 	assertUIntArg ('file_id');
-	global $pageno, $etype_by_pageno, $sic;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
+	global $sic;
 
 	usePreparedInsertBlade
 	(
@@ -2651,7 +2643,7 @@ function linkFileToEntity ()
 		array
 		(
 			'file_id' => $sic['file_id'],
-			'entity_type' => $etype_by_pageno[$pageno],
+			'entity_type' => etypeByPageno(),
 			'entity_id' => getBypassValue(),
 		)
 	);

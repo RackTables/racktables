@@ -6355,4 +6355,14 @@ function pinpointDeleteVlan ($domain_id, $vlan_id)
 	return $ret;
 }
 
+function etypeByPageno ($pg = NULL)
+{
+	global $etype_by_pageno, $pageno;
+	if ($pg === NULL)
+		$pg = $pageno;
+	if (! array_key_exists ($pg, $etype_by_pageno))
+		throw new RackTablesError ('key not found', RackTablesError::INTERNAL);
+	return $etype_by_pageno[$pg];
+}
+
 ?>
