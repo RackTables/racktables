@@ -7,6 +7,6 @@ require_once '../wwwroot/inc/init.php';
 require_once '../wwwroot/inc/interface.php';
 require_once './TestHelper.php';
 
-# Sanity check of connection.
-TestHelper::ensureUsingUnitTestDatabase();
+// Sanity check DB connection
+TestHelper::ensureUsingUnitTestDatabase ();
 ?>

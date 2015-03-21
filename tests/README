@@ -33,27 +33,22 @@ Creating and configuring a Unit Testing Database
 Assuming you have installed your development Racktables using the web
 interface, you will already have a working database.  You can clone
 that database to a new dedicated unit testing database (where the
-database name contains the string "_unittest") from the command line
-as follows:
+database name contains the string "_unittest") from the command line.
+Note that you should use the $db_username contained in wwwroot/inc/secret.php
+instead of racktables_user.
 
-  mysql -uroot -p
-  create database racktables_unittest;   # db dedicated to testing
-  grant all on racktables_unittest.* to root;
-  grant all on racktables_unittest.* to root@localhost;
-
-  # Note for the below, you should use the $db_username
-  # contained in wwwroot/inc/secret.php instead of <rackuser>.
-  grant all on racktables_unittest.* to <rackuser>;
-  grant all on racktables_unittest.* to <rackuser>@localhost;
+  mysql -u root -p
+  CREATE DATABASE racktables_unittest CHARACTER SET utf8 COLLATE utf8_general_ci;
+  GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';
   exit
 
 Then duplicate the existing database to your new unit testing database:
 
-  mysqldump -h localhost -u <rackuser> -p<rackpw> <original_db_name> |
-  mysql -h localhost -u <rackuser> -p<rackpw> racktables_unittest
+  mysqldump -u racktables_user -p MY_SECRET_PASSWORD racktables_db | \ 
+      mysql -u racktables_user -p MY_SECRET_PASSWORD racktables_unittest
 
 
-Edit the secret file and change the dbname in $pdo_dsn to the new
+Edit the secret.php file and change the dbname in $pdo_dsn to the new
 "_unittest" database, eg:
 
   $pdo_dsn = 'mysql:host=127.0.01;dbname=racktables_unittest';
