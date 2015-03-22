@@ -8742,17 +8742,25 @@ function allObjectLogs ()
 		$order = 'odd';
 		foreach ($logs as $row)
 		{
-			// Link to a different page if the object is a Rack
-			if ($row['objtype_id'] == 1560)
+			switch ($row['objtype_id'])
 			{
-				$text = $row['name'];
-				$entity = 'rack';
-			}
-			else
-			{
-				$object = spotEntity ('object', $row['object_id']);
-				$text = $object['dname'];
-				$entity = 'object';
+				case 1560:
+					$text = $row['name'];
+					$entity = 'rack';
+					break;
+				case 1561:
+					$text = $row['name'];
+					$entity = 'row';
+					break;
+				case 1562:
+					$text = $row['name'];
+					$entity = 'location';
+					break;
+				default:
+					$object = spotEntity ('object', $row['object_id']);
+					$text = $object['dname'];
+					$entity = 'object';
+					break;
 			}
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . mkA ($text, $entity, $row['object_id'], 'log') . '</td>';

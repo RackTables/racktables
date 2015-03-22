@@ -125,6 +125,16 @@ $opspec_list['rack-log-del'] = array
 		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['row-log-del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'row_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['ipv4vs-editlblist-delLB'] =
 $opspec_list['ipv4rspool-editlblist-delLB'] =
 $opspec_list['object-editrspvs-delLB'] = array
@@ -3236,12 +3246,15 @@ function addObjectlog ()
 {
 	assertStringArg ('logentry');
 	global $remote_username, $sic;
-	if (isset ($sic['object_id']))
-		$object_id = $sic['object_id'];
+	if (isset ($sic['rack_id']))
+		$object_id = $sic['rack_id'];
+	elseif (isset ($sic['row_id']))
+		$object_id = $sic['row_id'];
 	elseif (isset ($sic['location_id']))
 		$object_id = $sic['location_id'];
 	else
-		$object_id = $sic['rack_id'];
+		$object_id = $sic['object_id'];
+
 	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
 	showSuccess ('Log entry added');
 }

@@ -91,6 +91,7 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 			'DELETE FROM TagTree WHERE id BETWEEN ? AND ?',
 			array (self::$first_tag_id, self::$last_tag_id)
 		);
+		usePreparedExecuteBlade ('SET foreign_key_checks=1');
 	}
 
 	public function testGetLocationChildrenList ()
