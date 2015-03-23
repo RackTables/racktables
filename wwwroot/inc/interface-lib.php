@@ -990,6 +990,8 @@ function serializeFileLinks ($links, $scissors = FALSE)
 	return $ret;
 }
 
+// XXX: in new code please use one of the stringFor... functions below
+//
 // This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings that are too long: append "cut here" indicator and provide a mouse hint.
@@ -1007,6 +1009,41 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 		str_replace (' ', '&nbsp;', htmlspecialchars (mb_substr ($string, 0, $maxlen - 1), ENT_QUOTES, 'UTF-8')) .
 		$cutind .
 		($usetags ? '</span>' : '');
+}
+
+// "Some text, %s, some more text."
+function stringForLabel ($string, $maxlen = 30)
+{
+	// A tab counts for a space.
+	$string = preg_replace ("/\t/", ' ', $string);
+	$full = htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	if ($maxlen == 0 || mb_strlen ($string) <= $maxlen)
+		return $full;
+	$trimmed = mb_substr ($string, 0, $maxlen - 1);
+	$trimmed = htmlspecialchars ($trimmed, ENT_QUOTES, 'UTF-8');
+	$trimmed = str_replace (' ', '&nbsp;', $trimmed) . '&hellip;';
+	return "<span title='${full}'>${trimmed}</span>";
+}
+
+// "<TD>%s</TD>"
+function stringForTD ($string, $maxlen = 30)
+{
+	// The non-breaking space helps the TD to render properly.
+	return $string == '' ? '&nbsp;' : stringForLabel ($string, $maxlen);
+}
+
+// "<INPUT type=text value='%s'>"
+function stringForTextInputValue ($string, $maxlen = 30)
+{
+	if ($maxlen != 0)
+		$string = mb_substr ($string, 0, $maxlen);
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+}
+
+// "<TEXTAREA>%s</TEXTAREA>"
+function stringForTextarea ($string)
+{
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 }
 
 function printTagsPicker ($preselect=NULL)
