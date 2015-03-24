@@ -3145,31 +3145,17 @@ function decodeObjectType ($objtype_id, $style = '')
 	return $types[$objtype_id];
 }
 
+// This wrapper makes it possible to call permitted() with the security context
+// containing the given object of temporary interest without the [previously loaded]
+// main subject.
 function isolatedPermission ($p, $t, $cell)
 {
-	// This function is called from both "file" page and a number of other pages,
-	// which have already fixed security context and authorized the user for it.
-	// OTOH, it is necessary here to authorize against the current file, which
-	// means saving the current context and building a new one.
-	global
-		$expl_tags,
-		$impl_tags,
-		$target_given_tags,
-		$auto_tags;
-	// push current context
-	$orig_expl_tags = $expl_tags;
-	$orig_impl_tags = $impl_tags;
-	$orig_target_given_tags = $target_given_tags;
-	$orig_auto_tags = $auto_tags;
+	$saved = getContext();
 	// retarget
 	fixContext ($cell);
 	// remember decision
 	$ret = permitted ($p, $t);
-	// pop context
-	$expl_tags = $orig_expl_tags;
-	$impl_tags = $orig_impl_tags;
-	$target_given_tags = $orig_target_given_tags;
-	$auto_tags = $orig_auto_tags;
+	restoreContext ($saved);
 	return $ret;
 }
 
