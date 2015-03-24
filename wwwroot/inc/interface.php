@@ -4363,7 +4363,7 @@ function renderPortOIFEditor()
 				echo getOpLink (array ('op' => 'del', 'id' => $oif_id), '', 'destroy', 'remove');
 				echo '</td>';
 			}
-			echo '<td class=tdleft><input type=text size=48 name=oif_name value="' . niftyString ($oif_name, 48) . '"></td>';
+			echo '<td class=tdleft><input type=text size=48 name=oif_name value="' . stringForTextInputValue ($oif_name, 48) . '"></td>';
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</form>';
 		}
@@ -7058,7 +7058,7 @@ function renderVLANDomainListEditor ()
 		else
 			echo getOpLink (array ('op' => 'del', 'vdom_id' => $vdom_id), '', 'destroy', 'delete domain');
 		echo '</td><td><input name=vdom_descr type=text size=48 value="';
-		echo niftyString ($dominfo['description'], 0) . '">';
+		echo stringForTextInputValue ($dominfo['description'], 255) . '">';
 		echo '</td><td>';
 		if ($dominfo['subdomc'])
 			printSelect (array (0 => 'a domain group'), array ('name' => 'group_id'));
@@ -8206,7 +8206,7 @@ function renderVSTListEditor()
 		else
 			echo getOpLink (array ('op' => 'del', 'vst_id' => $vst_id), '', 'destroy', 'delete template');
 		echo '</td>';
-		echo '<td><input name=vst_descr type=text size=48 value="' . niftyString ($vst_info['description'], 0) . '"></td>';
+		echo '<td><input name=vst_descr type=text size=48 value="' . stringForTextInputValue ($vst_info['description'], 255) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'update template', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
@@ -10099,7 +10099,7 @@ function renderPatchCableHeapEditor()
 		echo '<td>' . getSelect (getPatchCableTypeOptions(), array ('name' => 'pctype_id'), $heap['pctype_id']) . '</td>';
 		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end2_conn_id'), $heap['end2_conn_id']) . '</td>';
 		echo "<td><input type=text size=6 name=length value='${heap['length']}'></td>";
-		echo '<td><input type=text size=48 name=description value="' . niftyString ($heap['description'], 255) . '"></td>';
+		echo '<td><input type=text size=48 name=description value="' . stringForTextInputValue ($heap['description'], 255) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 		echo '</tr>';
 		echo '</form>';
@@ -10192,7 +10192,7 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 			else
 				echo getOpLink (array ('op' => 'del', $column['key'] => $row[$column['key']]), '', 'destroy', 'remove');
 			echo '</td>';
-			echo "<td><input type=text size=${column['width']} name=${column['value']} value='" . niftyString ($row[$column['value']], $column['width']) . "'></td>";
+			echo "<td><input type=text size=${column['width']} name=${column['value']} value='" . stringForTextInputValue ($row[$column['value']], $column['width']) . "'></td>";
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</form>';
 		}
