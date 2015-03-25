@@ -8246,7 +8246,7 @@ function renderVST ($vst_id)
 	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($vst['description'], 0) . '</h1><h2>';
+	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($vst['description'], 0) . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 
 	renderEntitySummary ($vst, 'summary', array ('tags' => ''));
