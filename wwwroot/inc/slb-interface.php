@@ -358,10 +358,10 @@ function prepareRealServersTable ($rs_list)
 		if ($key != 'rsip')
 			unset ($columns[$key]);
 	return array
-		(
-			'columns' => $columns,
-			'rows' => $rs_list,
-		);
+	(
+		'columns' => $columns,
+		'rows' => $rs_list,
+	);
 }
 
 function renderEditRSList ($rs_list)
