@@ -7652,7 +7652,6 @@ function renderVLANInfo ($vlan_ck)
 		echo '</th></tr>';
 		foreach ($networks as $net)
 		{
-			#echo "<tr class=row_${order}><td>";
 			echo '<tr><td>';
 			renderCell ($net);
 			echo '</td><td>' . (mb_strlen ($net['comment']) ? niftyString ($net['comment']) : '&nbsp;');
