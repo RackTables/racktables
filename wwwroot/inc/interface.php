@@ -3109,7 +3109,7 @@ function renderIPNetworkProperties ($id)
 	echo "</td></tr>\n";
 	echo '<tr><th class=tdright><label for=commentinput>Comment:</label></th>';
 	echo "<td class=tdleft><textarea name=comment id=commentinput cols=80 rows=25>\n";
-	echo htmlspecialchars ($netdata['comment'], ENT_QUOTES, 'UTF-8') . "</textarea></tr>";
+	echo stringForTextarea ($netdata['comment']) . "</textarea></tr>";
 	echo "<tr><td colspan=2 class=tdcenter>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr></table></form>\n";
@@ -5848,7 +5848,7 @@ function renderFileProperties ($file_id)
 	echo "<tr><th class=tdright>Filename:</th><td class=tdleft><input type=text name=file_name value='";
 	echo htmlspecialchars ($file['name']) . "'></td></tr>\n";
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea name=file_comment rows=10 cols=80>\n";
-	echo htmlspecialchars ($file['comment']) . "</textarea></td></tr>\n";
+	echo stringForTextarea ($file['comment']) . "</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
 	echo getOpLink (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id'=>$file_id), '', 'destroy', 'Delete file', 'need-confirmation');
 	echo '</td></tr>';
@@ -6247,7 +6247,7 @@ function getFilePreviewCode ($file)
 				$file = getFile ($file['id']);
 				$ret .= '<textarea readonly rows=' . getConfigVar ('PREVIEW_TEXT_ROWS');
 				$ret .= ' cols=' . getConfigVar ('PREVIEW_TEXT_COLS') . '>';
-				$ret .= htmlspecialchars ($file['contents']);
+				$ret .= stringForTextarea ($file['contents']);
 				$ret .= '</textarea>';
 			}
 			break;
@@ -6270,7 +6270,7 @@ function renderTextEditor ($file_id)
 	echo '<table border=0 align=center>';
 	addJS ('js/codepress/codepress.js');
 	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text class='codepress " . $syntax . "'>\n";
-	echo htmlspecialchars ($fullInfo['contents']) . '</textarea></td></tr>';
+	echo stringForTextarea ($fullInfo['contents']) . '</textarea></td></tr>';
 	echo "<tr><td class=submit><input type=submit value='Save' onclick='$(file_text).toggleEditor();'>";
 	echo "</td></tr>\n</table></form>\n";
 }
