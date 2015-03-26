@@ -3604,7 +3604,8 @@ function readChapter ($chapter_id = 0, $style = '')
 	}
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
 	// Try to sort after the parsing in the same way as ORDER BY would do.
-	asort ($chapter, SORT_STRING | SORT_FLAG_CASE);
+	// (SORT_FLAG_CASE is only available in PHP 5.4.0 and later.)
+	asort ($chapter, defined ('SORT_FLAG_CASE') ? (SORT_STRING | SORT_FLAG_CASE) : SORT_STRING);
 	return $chapter;
 }
 

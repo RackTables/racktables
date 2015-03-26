@@ -3,6 +3,7 @@
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)
 	bugfix: catch EntityNotFound exceptions in data integrity report (#1439)
 	bugfix: location log entries broke the object log report (#1443) 
+	bugfix: fix a PHP warning on older PHP versions (reported by Bruno Santoni)
 	update: SNMP support for Cisco C2960-Plus series
 	update: ability to delete a VLAN keeping it in the VLAN ranges on 802.1Q ports
 	new feature: VLAN domain groups.
