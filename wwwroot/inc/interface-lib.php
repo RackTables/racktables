@@ -295,6 +295,9 @@ function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	echo getSelect ($optionList, $select_attrs, $selected_id);
 }
 
+// $selected_id can be an array if you want to use multiselect
+// in order to use multiselect $select_attrs should contain smth like this:
+// 		[ 'name' => 'some_name[]', 'multiple' => 'multiple', 'size' => 5 ]
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
 function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $treat_single_special = TRUE)
 {
@@ -317,7 +320,13 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 		$ret .= " ${attr_name}=${attr_value}";
 	$ret .= '>';
 	foreach ($optionList as $dict_key => $dict_value)
-		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+	{
+		if (is_array ($selected_id))
+			$is_selected = in_array ($dict_key, $selected_id);
+		else
+			$is_selected = $dict_key == $selected_id;
+		$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>";
+	}
 	$ret .= '</select>';
 	return $ret;
 }
@@ -348,7 +357,13 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 	{
 		$ret .= "<optgroup label='${groupname}'>\n";
 		foreach ($groupdata as $dict_key => $dict_value)
-			$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>\n";
+		{
+			if (is_array ($selected_id))
+				$is_selected = in_array ($dict_key, $selected_id);
+			else
+				$is_selected = $dict_key == $selected_id;
+			$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>\n";
+		}
 		$ret .= "</optgroup>\n";
 	}
 	$ret .= "</select>\n";
