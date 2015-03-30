@@ -6085,9 +6085,9 @@ function renderCell ($cell)
 	case 'user':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
-		echo '</td><td>' . mkA ($cell['user_name'], 'user', $cell['user_id']) . '</td></tr>';
+		echo '</td><td>' . mkA (stringForTD ($cell['user_name']), 'user', $cell['user_id']) . '</td></tr>';
 		if (strlen ($cell['user_realname']))
-			echo "<tr><td><strong>" . niftyString ($cell['user_realname']) . "</strong></td></tr>";
+			echo "<tr><td><strong>" . stringForTD ($cell['user_realname']) . "</strong></td></tr>";
 		else
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
 		echo '<td>';
@@ -6113,7 +6113,7 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
-		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'file', $cell['id']);
+		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'file', $cell['id']);
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) and count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
@@ -6145,7 +6145,7 @@ function renderCell ($cell)
 
 		echo "<tr><td>";
 		if (strlen ($cell['name']))
-			echo "<strong>" . niftyString ($cell['name']) . "</strong>";
+			echo "<strong>" . stringForTD ($cell['name']) . "</strong>";
 		else
 			echo "<span class=sparenetwork>no name</span>";
 		// render VLAN
@@ -6163,9 +6163,9 @@ function renderCell ($cell)
 			"src='?module=image&img=minirack&rack_id=${cell['id']}'>";
 		echo mkA ($img, 'rack', $cell['id']);
 		echo "</td><td>";
-		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'rack', $cell['id']);
+		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'rack', $cell['id']);
 		echo "</td></tr><tr><td>";
-		echo niftyString ($cell['comment']);
+		echo stringForTD ($cell['comment']);
 		echo "</td></tr><tr><td>";
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
@@ -6174,9 +6174,9 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('LOCATION');
 		echo "</td><td>";
-		echo mkA ('<strong>' . niftyString ($cell['name']) . '</strong>', 'location', $cell['id']);
+		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'location', $cell['id']);
 		echo "</td></tr><tr><td>";
-		echo niftyString ($cell['comment']);
+		echo stringForTD ($cell['comment']);
 		echo "</td></tr><tr><td>";
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
@@ -6185,8 +6185,8 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td><td>';
-		echo mkA ('<strong>' . niftyString ($cell['dname']) . '</strong>', 'object', $cell['id']);
-		echo "<br /><small>" . decodeObjectType ($cell['objtype_id']) . "</small></td></tr>";
+		echo mkA ('<strong>' . stringForLabel ($cell['dname']) . '</strong>', 'object', $cell['id']);
+		echo "<br /><small>" . stringForLabel (decodeObjectType ($cell['objtype_id'])) . "</small></td></tr>";
 		echo '<tr><td>', count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo "</td></tr></table>";
 		break;
