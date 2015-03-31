@@ -726,6 +726,15 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['nexus-any-QSFP+'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '10-1588',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ftos-any-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet 0/(\d+)$@',
@@ -3134,6 +3143,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5548P: 32 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'9.12.3.1.3.1417' => array
+	(
+		'dict_key' => 2383,
+		'text' => 'Nexus 3132Q: 32 QSFP+',
+		'processors' => array ('nexus-any-QSFP+', 'nexus-mgmt'),
+	),
 	'11.2.3.7.11.9' => array
 	(
 		'dict_key' => 1086,
@@ -3923,6 +3938,14 @@ $swtype_pcre = array
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
 	'/^Arista Networks EOS version 4\./' => 1675,
 	'/^Dell Force10 OS\b.*\bApplication Software Version: 8(\.\d+){3}/' => 1594,
+	'/^Cisco NX-OS\b.*Version 4\.0\b.*/' => 963,
+	'/^Cisco NX-OS\b.*Version 4\.1\b.*/' => 964,
+	'/^Cisco NX-OS\b.*Version 4\.2\b.*/' => 1365,
+	'/^Cisco NX-OS\b.*Version 5\.0\b.*/' => 1410,
+	'/^Cisco NX-OS\b.*Version 5\.1\b.*/' => 1411,
+	'/^Cisco NX-OS\b.*Version 5\.2\b.*/' => 1809,
+	'/^Cisco NX-OS\b.*Version 6\.1\b.*/' => 2028,
+	'/^Cisco NX-OS\b.*Version .*/' => 1643, // default 6.0
 );
 
 function updateStickerForCell ($cell, $attr_id, $new_value)
