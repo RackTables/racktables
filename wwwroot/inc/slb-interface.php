@@ -53,7 +53,7 @@ function renderSLBEntityCell ($cell, $highlighted = FALSE)
 	case 'ipv4rspool':
 		echo "<tr><td>";
 		echo "<a class='$a_class' href='index.php?page=ipv4rspool&pool_id=${cell['id']}'>";
-		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : niftyString ($cell['name']);
+		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : stringForTD ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
 		if ($cell['rscount'])

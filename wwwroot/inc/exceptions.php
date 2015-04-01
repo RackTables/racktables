@@ -118,7 +118,7 @@ class RackTablesError extends Exception
 	{
 		if (isCLIMode())
 			return $string;
-		return niftyString ($string);
+		return stringForLabel ($string);
 	}
 	public function dispatch()
 	{
@@ -318,7 +318,7 @@ function dumpArray($arr)
 {
 	echo '<table class="exceptionParametersDump">';
 	foreach($arr as $key=>$value)
-		echo '<tr><th>' . niftyString ($key) . '</th><td>' . niftyString ($value, 100) . '</td></tr>';
+		echo '<tr><th>' . stringForTD ($key) . '</th><td>' . stringForTD ($value, 100) . '</td></tr>';
 	echo '</table>';
 }
 

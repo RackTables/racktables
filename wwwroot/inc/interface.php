@@ -232,7 +232,7 @@ function getRenderedAlloc ($object_id, $alloc)
 		$ret['td_ip'] .= "<span class='$ip_class' $ip_title>$dottedquad</span>";
 	$ret['td_ip'] .= $aac_right[$alloc['type']];
 	if (strlen ($alloc['addrinfo']['name']))
-		$ret['td_ip'] .= ' (' . niftyString ($alloc['addrinfo']['name']) . ')';
+		$ret['td_ip'] .= ' (' . stringForLabel ($alloc['addrinfo']['name']) . ')';
 	$ret['td_ip'] .= '</td>';
 
 	// render network and routed_by tds
@@ -2485,7 +2485,7 @@ function renderRackspaceHistory ()
 		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>${row['ctime']}</a></td>";
 		echo "<td>${row['user_name']}</td><td>";
 		renderCell (spotEntity ('object', $row['ro_id']));
-		echo '</td><td>' . niftyString ($row['comment'], 0) . '</td></tr>';
+		echo '</td><td>' . stringForTD ($row['comment'], 0) . '</td></tr>';
 		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
@@ -2645,7 +2645,7 @@ function renderIPSpaceEditor()
 			else
 				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
 			echo '</td><td class=tdleft>' . mkA ("${netinfo['ip']}/${netinfo['mask']}", $net_page, $netinfo['id']) . '</td>';
-			echo '<td class=tdleft>' . niftyString ($netinfo['name']);
+			echo '<td class=tdleft>' . stringForTD ($netinfo['name']);
 			if (count ($netinfo['etags']))
 				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
 			echo '</td><td>';
@@ -3327,7 +3327,7 @@ function renderNATv4ForObject ($object_id)
 		foreach ($alloclist as $ip_bin => $alloc)
 		{
 			$ip = $alloc['addrinfo']['ip'];
-			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . niftyString ($alloc['addrinfo']['name']) . ')');
+			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . stringForLabel ($alloc['addrinfo']['name']) . ')');
 			$osif = (!isset ($alloc['osif']) or !strlen ($alloc['osif'])) ? '' : ($alloc['osif'] . ': ');
 			echo "<option value='${ip}'>${osif}${ip}${name}</option>";
 		}
@@ -4308,7 +4308,7 @@ function renderPortOIFViewer()
 		echo '<td class=tdleft>' . getImageHREF ($oif_id < 2000 ? 'computer' : 'favorite') . '</td>';
 		echo "<td class=tdright>${oif_id}</td>";
 		echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
-		echo '<td class=tdleft>' . niftyString ($oif_name, 48) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
 		echo '</tr>';
 		$order = $nextorder[$order];
 	}
@@ -4343,7 +4343,7 @@ function renderPortOIFEditor()
 			echo "<td class=tdleft>${oif_id}</td>";
 			echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
 			echo '<td>&nbsp;</td>';
-			echo '<td class=tdleft>' . niftyString ($oif_name, 48) . '</td>';
+			echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
 			echo '<td>&nbsp;</td>';
 		}
 		else
@@ -5738,7 +5738,7 @@ function renderMyQuickLinks ()
 function renderFileSummary ($file)
 {
 	$summary = array();
-	$summary['Type'] = niftyString ($file['type']);
+	$summary['Type'] = stringForTD ($file['type']);
 	$summary['Size'] =
 	(
 		isolatedPermission ('file', 'download', $file) ?
@@ -6071,7 +6071,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	}
 	else
 	{
-		echo niftyString ($netinfo['name']);
+		echo stringForTD ($netinfo['name']);
 		if (count ($netinfo['etags']))
 			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv${ip_ver}space&tab=default&") . '</small>';
 	}
@@ -6670,9 +6670,9 @@ function renderTwoColumnCompatTableViewer ($compat, $left, $right)
 		}
 		echo "<tr class=row_${order}>";
 		echo "<td class=tdright>${item[$left['key']]}</td>";
-		echo '<td class=tdleft>' . niftyString ($item[$left['value']], $left['width']) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($item[$left['value']], $left['width']) . '</td>';
 		echo "<td class=tdright>${item[$right['key']]}</td>";
-		echo '<td class=tdleft>' . niftyString ($item[$right['value']], $right['width']) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($item[$right['value']], $right['width']) . '</td>';
 		echo '</tr>';
 	}
 	echo '</table>';
@@ -6734,8 +6734,8 @@ function renderTwoColumnCompatTableEditor ($compat, $left, $right)
 		echo '<td>';
 		echo getOpLink (array ('op' => 'del', $left['key'] => $item[$left['key']], $right['key'] => $item[$right['key']]), '', 'delete', 'remove pair');
 		echo '</td>';
-		echo '<td class=tdleft>' . niftyString ($item[$left['value']], $left['width']) . '</td>';
-		echo '<td class=tdleft>' . niftyString ($item[$right['value']], $right['width']) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($item[$left['value']], $left['width']) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($item[$right['value']], $right['width']) . '</td>';
 		echo '</tr>';
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
@@ -6964,7 +6964,7 @@ function render8021QStatus ()
 		{
 			foreach ($columns as $cname)
 				$stats[$cname] += $dominfo[$cname];
-			echo '<tr align=left><td>' . mkA (niftyString ($dominfo['description']), 'vlandomain', $vdom_id) . '</td>';
+			echo '<tr align=left><td>' . mkA (stringForTD ($dominfo['description']), 'vlandomain', $vdom_id) . '</td>';
 			foreach ($columns as $cname)
 				echo '<td class=tdright>' . $dominfo[$cname] . '</td>';
 			echo '</tr>';
@@ -6992,7 +6992,7 @@ function render8021QStatus ()
 		foreach ($vstlist as $vst_id => $vst_info)
 		{
 			echo '<tr align=left valign=top><td>';
-			echo mkA (niftyString ($vst_info['description']), 'vst', $vst_id);
+			echo mkA (stringForTD ($vst_info['description']), 'vst', $vst_id);
 			if (count ($vst_info['etags']))
 				echo '<br><small>' . serializeTags ($vst_info['etags']) . '</small>';
 			echo '</td>';
@@ -7078,7 +7078,7 @@ function renderVLANDomain ($vdom_id)
 	global $nextorder;
 	$mydomain = getVLANDomain ($vdom_id);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($mydomain['description']);
+	echo '<tr><td colspan=2 align=center><h1>' . stringForTD ($mydomain['description']);
 	echo '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 	if (!count ($mydomain['switchlist']))
@@ -7577,10 +7577,10 @@ function renderVLANInfo ($vlan_ck)
 	echo '<tr><td colspan=2 align=center><h1>' . formatVLANAsRichText ($vlan) . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 	$summary = array();
-	$summary['Domain'] = niftyString ($vlan['domain_descr'], 0);
+	$summary['Domain'] = stringForTD ($vlan['domain_descr'], 0);
 	$summary['VLAN ID'] = $vlan['vlan_id'];
 	if (strlen ($vlan['vlan_descr']))
-		$summary['Description'] = niftyString ($vlan['vlan_descr'], 0);
+		$summary['Description'] = stringForTD ($vlan['vlan_descr'], 0);
 	$summary['Propagation'] = $vtoptions[$vlan['vlan_prop']];
 
 	$others = getSearchResultByField
@@ -7654,7 +7654,7 @@ function renderVLANInfo ($vlan_ck)
 		{
 			echo '<tr><td>';
 			renderCell ($net);
-			echo '</td><td>' . (mb_strlen ($net['comment']) ? niftyString ($net['comment']) : '&nbsp;');
+			echo '</td><td>' . stringForTD ($net['comment']);
 			echo '</td></tr>';
 			$order = $nextorder[$order];
 		}
@@ -8246,7 +8246,7 @@ function renderVST ($vst_id)
 	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	echo '<tr><td colspan=2 align=center><h1>' . niftyString ($vst['description'], 0) . '</h1></td></tr>';
+	echo '<tr><td colspan=2 align=center><h1>' . stringForTD ($vst['description'], 0) . '</h1></td></tr>';
 	echo "<tr><td class=pcleft width='50%'>";
 
 	renderEntitySummary ($vst, 'summary', array ('tags' => ''));
@@ -8285,10 +8285,10 @@ function renderVSTRulesEditor ($vst_id)
 		$source_options = array();
 		foreach (listCells ('vst') as $vst_id => $vst_info)
 			if ($vst_info['rulec'])
-				$source_options[$vst_id] = niftyString ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
+				$source_options[$vst_id] = stringForLabel ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
 	}
 	addJS ('js/vst_editor.js');
-	echo '<center><h1>' . niftyString ($vst['description']) . '</h1></center>';
+	echo '<center><h1>' . stringForLabel ($vst['description']) . '</h1></center>';
 	if (count ($source_options))
 	{
 		startPortlet ('clone another template');
@@ -9222,7 +9222,7 @@ function renderCactiConfig()
 	echo '<tr><th>base URL</th><th>username</th><th>graph(s)</th></tr>';
 	foreach ($servers as $server)
 	{
-		echo '<tr align=left valign=top><td>' . niftyString ($server['base_url']) . '</td>';
+		echo '<tr align=left valign=top><td>' . stringForTD ($server['base_url']) . '</td>';
 		echo "<td>${server['username']}</td><td class=tdright>${server['num_graphs']}</td></tr>";
 	}
 	echo '</table>';
@@ -9276,7 +9276,7 @@ function renderMuninConfig()
 	echo '<tr><th>base URL</th><th>graph(s)</th></tr>';
 	foreach ($servers as $server)
 	{
-		echo '<tr align=left valign=top><td>' . niftyString ($server['base_url']) . '</td>';
+		echo '<tr align=left valign=top><td>' . stringForTD ($server['base_url']) . '</td>';
 		echo "<td class=tdright>${server['num_graphs']}</td></tr>";
 	}
 	echo '</table>';
@@ -10059,8 +10059,8 @@ function renderPatchCableHeapSummary()
 	{
 		echo "<tr class=row_${order}>";
 		echo "<td class=tdleft>${event['date']}</td>";
-		echo '<td class=tdleft>' . niftyString ($event['user'], 255) . '</td>';
-		echo '<td class=tdleft>' . niftyString ($event['message'], 255) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($event['user'], 255) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($event['message'], 255) . '</td>';
 		echo '</tr>';
 		$order = $nextorder[$order];
 	}
@@ -10124,11 +10124,11 @@ function renderPatchCableHeapAmount()
 		echo '</td>';
 		echo "<td><input type=text size=7 name=amount value='${heap['amount']}'></td>";
 		echo '<td>' . getOpLink (array ('op' => 'inc', 'id' => $heap['id']), '', 'add', 'replenish') . '</td>';
-		echo '<td>' . niftyString ($heap['end1_connector'], 32) . '</td>';
-		echo '<td>' . niftyString ($heap['pctype'], 255) . '</td>';
-		echo '<td>' . niftyString ($heap['end2_connector'], 32) . '</td>';
+		echo '<td>' . stringForTD ($heap['end1_connector'], 32) . '</td>';
+		echo '<td>' . stringForTD ($heap['pctype'], 255) . '</td>';
+		echo '<td>' . stringForTD ($heap['end2_connector'], 32) . '</td>';
 		echo "<td class=tdright>${heap['length']}</td>";
-		echo '<td>' . niftyString ($heap['description'], 255) . '</td>';
+		echo '<td>' . stringForTD ($heap['description'], 255) . '</td>';
 		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
@@ -10149,7 +10149,7 @@ function renderSimpleTableWithOriginViewer ($rows, $column)
 			echo getImageHREF ('favorite', 'custom');
 		echo '</td>';
 		echo "<td class=tdright>${row[$column['key']]}</td>";
-		echo '<td class=tdleft>' . niftyString ($row[$column['value']], $column['width']) . '</td>';
+		echo '<td class=tdleft>' . stringForTD ($row[$column['value']], $column['width']) . '</td>';
 		echo '</tr>';
 	}
 	echo '</table>';
@@ -10178,7 +10178,7 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 		{
 			echo '<td>' . getImageHREF ('computer', 'default') . '</td>';
 			echo '<td>&nbsp;</td>';
-			echo '<td>' . niftyString ($row[$column['value']], $column['width']) . '</td>';
+			echo '<td>' . stringForTD ($row[$column['value']], $column['width']) . '</td>';
 			echo '<td>&nbsp;</td>';
 		}
 		else
