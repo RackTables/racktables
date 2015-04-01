@@ -6929,7 +6929,7 @@ function render8021QOrderForm ($some_id)
 			echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . mkA ($vdomlist[$item['vdom_id']], 'vlandomain', $item['vdom_id']) . '</td>';
+			echo '<td>' . mkA (stringForTD ($vdomlist[$item['vdom_id']]), 'vlandomain', $item['vdom_id']) . '</td>';
 		if ($pageno != 'vst')
 			echo '<td>' . mkA ($vstlist[$item['vst_id']], 'vst', $item['vst_id']) . '</td>';
 		echo "<td>${cutblock}</td></tr>";
@@ -7136,12 +7136,12 @@ function renderVLANDomain ($vdom_id)
 			foreach ($vlan_list as $domain_id => $vlan_info)
 			{
 				echo "<tr class=row_${order}>";
-				echo '<td class=tdright>' . (count ($vlan_list) > 1 ? $domain_options[$domain_id] . ' ' : '') .
+				echo '<td class=tdright>' . (count ($vlan_list) > 1 ? stringForLabel ($domain_options[$domain_id]) . ' ' : '') .
 					formatVLANAsShortLink ($vlan_info) . '</td>';
 				echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
 				echo '<td class=tdright>' . ($vlan_info['netc'] ? $vlan_info['netc'] : '&nbsp;') . '</td>';
 				echo '<td class=tdright>' . ($vlan_info['portc'] ? $vlan_info['portc'] : '&nbsp;') . '</td>';
-				echo "<td class=tdleft>${vlan_info['vlan_descr']}</td></tr>";
+				echo '<td class=tdleft>' . stringForLabel ($vlan_info['vlan_descr']) . '</td></tr>';
 			}
 			$order = $nextorder[$order];
 		}
@@ -7185,7 +7185,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
 		printSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan_info['vlan_type']);
 		echo '</td><td>';
-		echo '<input name=vlan_descr type=text size=48 value="' . htmlspecialchars ($vlan_info['vlan_descr']) . '">';
+		echo '<input name=vlan_descr type=text size=48 value="' . stringForTextInputValue ($vlan_info['vlan_descr'], 255) . '">';
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
@@ -9086,15 +9086,15 @@ function renderEditVlan ($vlan_ck)
 	// static attributes
 	echo '<table border=0 cellspacing=0 cellpadding=2 align=center>';
 	echo '<tr><th class=tdright>Name:</th><td class=tdleft>' .
-		"<input type=text size=40 name=vlan_descr value='${vlan['vlan_descr']}'>" .
+		"<input type=text size=40 name=vlan_descr value='" . stringForTextInputValue ($vlan['vlan_descr'], 255) . "'>" .
 		'</td></tr>';
 	echo '<tr><th class=tdright>Type:</th><td class=tdleft>' .
 		getSelect ($vtoptions, array ('name' => 'vlan_type'), $vlan['vlan_prop']) .
 		'</td></tr>';
 	echo '</table>';
 	echo '<p>';
-	echo '<input type="hidden" name="vdom_id" value="' . htmlspecialchars ($vlan['domain_id'], ENT_QUOTES) . '">';
-	echo '<input type="hidden" name="vlan_id" value="' . htmlspecialchars ($vlan['vlan_id'], ENT_QUOTES) . '">';
+	echo '<input type="hidden" name="vdom_id" value="' . $vlan['domain_id'] . '">';
+	echo '<input type="hidden" name="vlan_id" value="' . $vlan['vlan_id'] . '">';
 	printImageHREF ('SAVE', 'Update VLAN', TRUE);
 	echo '</form><p>';
 	// get configured ports count
