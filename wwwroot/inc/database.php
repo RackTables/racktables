@@ -5184,18 +5184,24 @@ function getVLANSwitches()
 
 function getVLANSwitchInfo ($object_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade
-	(
+	return array_first (getVLANSwitchInfoRows (array ('object_id' => $object_id), $extrasql));
+}
+
+function getVLANSwitchInfoRows ($filter = array(), $extrasql = '')
+{
+	$query =
 		'SELECT object_id, domain_id, template_id, mutex_rev, out_of_sync, last_errno, ' .
 		'UNIX_TIMESTAMP(last_change) as last_change, ' .
 		'UNIX_TIMESTAMP(last_push_started) as last_push_started, ' .
 		'UNIX_TIMESTAMP(last_push_finished) as last_push_finished, ' .
 		'UNIX_TIMESTAMP(last_error_ts) as last_error_ts ' .
-		'FROM VLANSwitch WHERE object_id = ? ' . $extrasql,
-		array ($object_id)
-	);
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row === FALSE ? NULL : $row;
+		'FROM VLANSwitch';
+	$params = array();
+	if ($filter)
+		$query .= ' WHERE ' . makeWhereSQL ($filter, 'AND', $params);
+	$query .= ' ' . $extrasql;
+	$result = usePreparedSelectBlade ($query, $params);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 function getStored8021QConfig ($object_id, $instance = 'desired')
