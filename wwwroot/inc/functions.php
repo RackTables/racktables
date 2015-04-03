@@ -5892,12 +5892,11 @@ function mkCellA ($cell)
 	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
 }
 
-// Return a simple object list w/o related information, so that the returned value
-// can be directly used by printSelect(). An optional argument is the name of config
-// option with constraint in RackCode.
-function getNarrowObjectList ($varname = '')
+// Returns a list of entities of a given realm, like listCells.
+// An optional $varname is the name of config option with constraint in RackCode.
+function listConstraint ($realm, $varname = '')
 {
-	$wideList = listCells ('object');
+	$wideList = listCells ($realm);
 	if (strlen ($varname) and strlen ($filter = getConfigVar ($varname)))
 	{
 		$expr = compileExpression ($filter);
@@ -5905,7 +5904,15 @@ function getNarrowObjectList ($varname = '')
 			return array();
 		$wideList = filterCellList ($wideList, $expr);
 	}
-	return formatEntityList ($wideList);
+	return $wideList;
+}
+
+// Return a simple object list w/o related information, so that the returned value
+// can be directly used by printSelect(). An optional argument is the name of config
+// option with constraint in RackCode.
+function getNarrowObjectList ($varname = '')
+{
+	return formatEntityList (listConstraint ('object', $varname));
 }
 
 // takes an array of cells,
