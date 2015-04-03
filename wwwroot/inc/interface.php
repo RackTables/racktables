@@ -6929,7 +6929,7 @@ function render8021QOrderForm ($some_id)
 			echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
 		}
 		if ($pageno != 'vlandomain')
-			echo '<td>' . mkA (stringForTD ($vdomlist[$item['vdom_id']]), 'vlandomain', $item['vdom_id']) . '</td>';
+			echo '<td>' . mkA (stringForTD ($vdomlist[$item['vdom_id']], 64), 'vlandomain', $item['vdom_id']) . '</td>';
 		if ($pageno != 'vst')
 			echo '<td>' . mkA ($vstlist[$item['vst_id']], 'vst', $item['vst_id']) . '</td>';
 		echo "<td>${cutblock}</td></tr>";
