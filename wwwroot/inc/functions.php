@@ -3072,7 +3072,7 @@ function getVSTOptions()
 {
 	$ret = array();
 	foreach (listCells ('vst') as $vst)
-		$ret[$vst['id']] = niftyString ($vst['description'], 30, FALSE);
+		$ret[$vst['id']] = stringForOption ($vst['description']);
 	return $ret;
 }
 

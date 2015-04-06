@@ -1061,6 +1061,16 @@ function stringForTextarea ($string)
 	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 }
 
+// <OPTION>%s</OPTION>
+function stringForOption ($string, $maxlen = 30)
+{
+	$string = preg_replace ("/\t/", ' ', $string);
+	if ($maxlen == 0 || mb_strlen ($string) <= $maxlen)
+		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	$string = mb_substr ($string, 0, $maxlen - 1);
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . '&hellip;';
+}
+
 function printTagsPicker ($preselect=NULL)
 {
 	global $taglist;
