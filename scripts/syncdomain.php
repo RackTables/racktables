@@ -57,23 +57,6 @@ default:
 $max = array_fetch ($options, 'max', 0);
 $nolock = array_key_exists ('nolock', $options);
 
-$switch_list = array();
-if (! isset ($options['vdid']))
-	$switch_list = getVLANSwitches();
-else
-	try
-	{
-		$mydomain = getVLANDomain ($options['vdid']);
-		foreach ($mydomain['switchlist'] as $switch)
-			$switch_list[] = $switch['object_id'];
-	}
-	catch (RackTablesError $e)
-	{
-		print_message_line ("Cannot load domain data with ID ${options['vdid']}");
-		print_message_line ($e->getMessage());
-		exit (1);
-	}
-
 $todo = array
 (
 	'pull' => array ('sync_ready', 'resync_ready'),
@@ -119,12 +102,17 @@ if (! $nolock)
 }
 
 // fetch all the needed data from DB (preparing for DB connection loss)
+$vswitch_filter = array();
+if (isset ($options['vdid']))
+	$vswitch_filter['domain_id'] = $options['vdid'];
+$switch_list = getVLANSwitchInfoRows ($vswitch_filter);
+$enabled_switches = listConstraint ('object', 'SYNC_802Q_LISTSRC');
+
 $switch_queue = array();
-foreach ($switch_list as $object_id)
+foreach ($switch_list as $vswitch)
 {
-	$cell = spotEntity ('object', $object_id);
-	$new_disabled = ! considerConfiguredConstraint ($cell, 'SYNC_802Q_LISTSRC');
-	$vswitch = getVLANSwitchInfo ($object_id);
+	$object_id = $vswitch['object_id'];
+	$new_disabled = ! isset ($enabled_switches[$object_id]);
 	$queue = detectVLANSwitchQueue ($vswitch);
 	if ($queue != 'disabled' && $new_disabled)
 	{
@@ -139,7 +127,7 @@ foreach ($switch_list as $object_id)
 	}
 
 	if (in_array ($queue, $todo[$options['mode']]))
-		$switch_queue[] = $cell;
+		$switch_queue[] = spotEntity ('object', $object_id);
 }
 
 // YOU SHOULD NOT USE DB FUNCTIONS BELOW IN THE PARENT PROCESS
