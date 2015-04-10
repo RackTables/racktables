@@ -2274,6 +2274,9 @@ $dictionary = array
 	2382 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5850-48T4S2Q-HI'),
 	2383 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 3132Q | http://www.cisco.com/c/en/us/products/switches/nexus-3132q-switch/index.html]]'),
         2384 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 8 (jessie) | http://debian.org/releases/jessie/]]'),
+        2385 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R420'),
+        2386 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R630'),
+        2387 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R630'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
