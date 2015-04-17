@@ -4433,7 +4433,7 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 
 function detectVLANSwitchQueue ($vswitch)
 {
-	if ($vswitch['out_of_sync'] == 'no')
+	if ($vswitch['out_of_sync'] == 'no' && $vswitch['last_errno'] != E_8021Q_SYNC_DISABLED)
 		return 'done';
 	switch ($vswitch['last_errno'])
 	{
