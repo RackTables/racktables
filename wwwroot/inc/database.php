@@ -1719,9 +1719,9 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 	return lastInsertID();
 }
 
-function getPortReservationComment ($port_id)
+function getPortReservationComment ($port_id, $extrasql = '')
 {
-	$result = usePreparedSelectBlade ('SELECT reservation_comment FROM Port WHERE id = ?', array ($port_id));
+	$result = usePreparedSelectBlade ("SELECT reservation_comment FROM Port WHERE id = ? $extrasql", array ($port_id));
 	return $result->fetchColumn();
 }
 
@@ -1793,8 +1793,8 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
 {
 	global $dbxlink;
-	$dbxlink->exec ('LOCK TABLES Port WRITE');
-	$prev_comment = getPortReservationComment ($port_id);
+	$dbxlink->beginTransaction();
+	$prev_comment = getPortReservationComment ($port_id, 'FOR UPDATE');
 	$reservation_comment = mb_strlen ($port_reservation_comment) ? $port_reservation_comment : NULL;
 	usePreparedUpdateBlade
 	(
@@ -1808,9 +1808,9 @@ function commitUpdatePortComment ($port_id, $port_reservation_comment)
 			'id' => $port_id,
 		)
 	);
-	$dbxlink->exec ('UNLOCK TABLES');
 	if ($prev_comment !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
+	$dbxlink->commit();
 }
 
 function commitUpdatePortOIF ($port_id, $port_type_id)
