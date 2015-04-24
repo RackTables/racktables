@@ -1842,26 +1842,16 @@ function linkPorts ($porta, $portb, $cable = NULL)
 	if ($porta == $portb)
 		throw new InvalidArgException ('porta/portb', $porta, "Ports can't be the same");
 
-	global $dbxlink;
-	$dbxlink->exec ('LOCK TABLES Link WRITE');
 	$result = usePreparedSelectBlade
 	(
 		'SELECT COUNT(*) FROM Link WHERE porta IN (?,?) OR portb IN (?,?)',
 		array ($porta, $portb, $porta, $portb)
 	);
 	if ($result->fetchColumn () != 0)
-	{
-		$dbxlink->exec ('UNLOCK TABLES');
-		return "Port ${porta} or ${portb} is already linked";
-	}
+		throw new RTDatabaseError ("Port ${porta} or ${portb} is already linked");
 	unset ($result);
-	if ($porta > $portb)
-	{
-		$tmp = $porta;
-		$porta = $portb;
-		$portb = $tmp;
-	}
-	usePreparedInsertBlade
+
+	$ret = usePreparedInsertBlade
 	(
 		'Link',
 		array
@@ -1871,7 +1861,6 @@ function linkPorts ($porta, $portb, $cable = NULL)
 			'cable' => mb_strlen ($cable) ? $cable : NULL
 		)
 	);
-	$dbxlink->exec ('UNLOCK TABLES');
 	usePreparedExecuteBlade
 	(
 		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
@@ -1892,6 +1881,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		$pair_id = ($row['id'] == $porta ? $portb : $porta);
 		addPortLogEntry ($pair_id, sprintf ("linked to %s %s", $row['obj_name'], $row['port_name']));
 	}
+	return $ret;
 }
 
 function commitUpdatePortLink ($port_id, $cable = NULL)
