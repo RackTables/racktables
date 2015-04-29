@@ -3368,7 +3368,7 @@ function fdry5SpotConfigText ($input)
 
 function vrpSpotConfigText ($input)
 {
-	return preg_replace ('/.*?^!Software Version V\N*\n(.*)^return$.*/sm', '$1', $input, 1);
+	return preg_replace ('/.*?(?:^!(?:Software Version V|Last configuration was)\N*\n)+(.*)^return$.*/sm', '$1', $input, 1);
 }
 
 function xos12SpotConfigText ($input)
