@@ -401,6 +401,9 @@ $opspec_list['8021q-vstlist-add'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'vst_descr', 'table_colname' => 'description', 'assertion' => 'string'),
+		// workaround SQL_STRICT
+		array ('fix_argname' => 'mutex_rev', 'fix_argvalue' => 0),
+		array ('fix_argname' => 'saved_by', 'fix_argvalue' => ""),
 	),
 );
 $opspec_list['8021q-vstlist-del'] = array
