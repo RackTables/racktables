@@ -2384,7 +2384,7 @@ function updateRow ()
 	assertUIntArg ('location_id', TRUE);
 	assertStringArg ('name');
 
-	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, NULL, NULL, NULL);
+	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, 'no', NULL, NULL);
 
 	global $pageno;
 	if ($pageno == 'row')
