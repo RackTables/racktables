@@ -2111,7 +2111,7 @@ function linuxTranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'getportstatus':
-			$ret .= "cd /sys/class/net && for d in eth*; do sudo /sbin/ethtool \$d; done\n";
+			$ret .= "cd /sys/class/net && for d in $(ls -1d eth* em* p* 2>/dev/null); do sudo /sbin/ethtool \$d; done\n";
 			break;
 		case 'getmaclist':
 			$ret .= "sudo /usr/sbin/arp -an\n";
