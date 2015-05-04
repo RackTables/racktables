@@ -995,6 +995,17 @@ function addIPAllocation ()
 	assertStringArg ('bond_name', TRUE);
 	genericAssertion ('bond_type', 'enum/alloc_type');
 
+	if($_REQUEST['bond_type'] != 'shared')
+	{
+		// check if address is alread allocated
+		$address = getIPAddress($ip_bin);
+
+		if(!empty($address['allocs'])) {
+			showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
+			return;
+		}
+	}
+
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
