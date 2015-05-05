@@ -1009,6 +1009,12 @@ function addIPAllocation ()
 		return;
 	}
 
+	if($address['reserved'])
+	{
+		showWarning("IP ".ip_format($ip_bin)." is reserved \"".$address['name']."\"");
+		//TODO ask to take reserved IP or not !
+	}
+
 	bindIPToObject ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
 
 	showFuncMessage (__FUNCTION__, 'OK');
