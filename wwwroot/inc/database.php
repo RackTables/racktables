@@ -994,7 +994,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		(
 			'name' => !mb_strlen ($new_name) ? NULL : $new_name,
 			'label' => !mb_strlen ($new_label) ? NULL : $new_label,
-			'has_problems' => $new_has_problems,
+			'has_problems' => !mb_strlen ($new_has_problems) ? 'no' : $new_has_problems,
 			'asset_no' => !mb_strlen ($new_asset_no) ? NULL : $new_asset_no,
 			'comment' => $new_comment == '' ? NULL : $new_comment,
 		),
