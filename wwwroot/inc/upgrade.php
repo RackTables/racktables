@@ -1979,6 +1979,10 @@ ENDOFTRIGGER;
 				(11,1090), (12,1090), (11,1091), (12,1091)";
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
+
+			$query[] = "ALTER TABLE `IPv4Address` MODIFY `comment` TEXT COLLATE utf8_unicode_ci";
+			$query[] = "ALTER TABLE `IPv6Address` MODIFY `comment` TEXT COLLATE utf8_unicode_ci";
+
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

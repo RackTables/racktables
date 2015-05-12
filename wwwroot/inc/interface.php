@@ -3339,7 +3339,7 @@ function renderIPAddressProperties ($ip_bin)
 	echo '<tr><td class=tdright><label for=id_name>Name:</label></td>';
 	echo "<td class=tdleft><input type=text name=name id=id_name size=20 value='${address['name']}'></tr>";
 	echo '<tr><td class=tdright><label for=id_comment>Comment:</label></td>';
-	echo "<td class=tdleft><input type=text name=comment id=id_comment size=20 value='${address['comment']}'></tr>";
+	echo "<td class=tdleft><textarea rows=5 cols=80 name=comment id=id_comment>${address['comment']}</textarea></tr>";
 	echo '<td class=tdright><label for=id_reserved>Reserved:</label></td>';
 	echo "<td class=tdleft><input type=checkbox name=reserved id=id_reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
