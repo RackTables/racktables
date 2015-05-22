@@ -3145,7 +3145,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'9.12.3.1.3.1417' => array
 	(
-		'dict_key' => 2383,
+		'dict_key' => 2331,
 		'text' => 'Nexus 3132Q: 32 QSFP+',
 		'processors' => array ('nexus-any-QSFP+', 'nexus-mgmt'),
 	),
