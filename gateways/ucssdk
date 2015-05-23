@@ -22,13 +22,24 @@
 import sys
 try:
 	from UcsSdk import *
+	from UcsSdk.MoMeta.NetworkElement import NetworkElement
+        from UcsSdk.MoMeta.EquipmentChassis import EquipmentChassis
+        from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
 	handle = UcsHandle()
 except Exception, err:
 	sys.stderr.write('UCS Python SDK is missing\n')
 	sys.exit(2)
 
 loggedin = 0
-for line in sys.stdin:
+while 1:
+	try:
+		line = sys.stdin.readline()
+	except KeyboardInterrupt:
+		break
+
+	if not line:
+		break
+
 	words = line.split()
 	if len(words) == 0:
 		continue
