@@ -53,7 +53,7 @@ if (! isset ($local_staticdir)) // the directory where RT will search static fil
 // (re)connects to DB, stores PDO object in $dbxlink global var
 function connectDB()
 {
-	global $dbxlink, $pdo_dsn, $db_username, $db_password, $pdo_bufsize;
+	global $dbxlink, $pdo_dsn, $db_username, $db_password, $pdo_bufsize, $pdo_ssl_key, $pdo_ssl_cert, $pdo_ssl_ca;
 	$dbxlink = NULL;
 	$drvoptions = array
 	(
@@ -62,6 +62,12 @@ function connectDB()
 	);
 	if (isset ($pdo_bufsize))
 		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
+	if (isset ($pdo_ssl_key))
+		$drvoptions[PDO::MYSQL_ATTR_SSL_KEY] = $pdo_ssl_key;
+	if (isset ($pdo_ssl_cert))
+		$drvoptions[PDO::MYSQL_ATTR_SSL_CERT] = $pdo_ssl_cert;
+	if (isset ($pdo_ssl_ca))
+		$drvoptions[PDO::MYSQL_ATTR_SSL_CA] = $pdo_ssl_ca;
 	try
 	{
 		$dbxlink = new PDO ($pdo_dsn, $db_username, $db_password, $drvoptions);
