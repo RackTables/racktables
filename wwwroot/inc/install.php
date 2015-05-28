@@ -250,10 +250,15 @@ function init_config ()
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
-	fwrite ($conf, "# Setting MySQL client buffer size may be required to make downloading work for\n");
-	fwrite ($conf, "# larger files, but it does not work with mysqlnd.\n");
-	fwrite ($conf, "# \$pdo_bufsize = 50 * 1024 * 1024;\n\n");
 	fwrite ($conf, <<<ENDOFTEXT
+# Setting MySQL client buffer size may be required to make downloading work for
+# larger files, but it does not work with mysqlnd.
+# \$pdo_bufsize = 50 * 1024 * 1024;
+# Setting PDO SSL key, cert, and CA will allow a SSL/TLS connection to the MySQL
+# DB. Make sure the files are readable by the web server
+# \$pdo_ssl_key = '\\path\\to\\ssl\\key'
+# \$pdo_ssl_cert = '\\path\\to\\ssl\\cert'
+# \$pdo_ssl_ca = '\\path\\to\\ssl\\ca'
 
 \$user_auth_src = 'database';
 \$require_local_account = TRUE;
