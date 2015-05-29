@@ -85,12 +85,8 @@ function showLogoutURL ()
 {
 	$https = (isset ($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') ? 's' : '';
 	$port = (! in_array ($_SERVER['SERVER_PORT'], array (80, 443))) ? ':' . $_SERVER['SERVER_PORT'] : '';
-	$pathinfo = pathinfo ($_SERVER['REQUEST_URI']);
-	$dirname = $pathinfo['dirname'];
-	// add a trailing slash if the installation resides in a subdirectory
-	if ($dirname != '/')
-		$dirname .= '/';
-	printf ('http%s://%s%s?logout', $https, $_SERVER['SERVER_NAME'], $dirname);
+	$uri = explode('?',$_SERVER['REQUEST_URI']);
+	printf ('http%s://%s%s?logout', $https, $_SERVER['SERVER_NAME'], $uri[0]);
 }
 
 $quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
