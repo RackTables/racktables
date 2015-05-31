@@ -1455,6 +1455,72 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 	commitUpdateObject ($rack_id, $new_name, NULL, $new_has_problems, $new_asset_no, $new_comment);
 }
 
+// Unmount all objects from the rack
+function commitCleanRack ($rack_id)
+{
+	$rack = spotEntity ('rack', $rack_id);
+	foreach (getChildren ($rack, 'object') as $child)
+		commitUnlinkEntities ('rack', $rack_id, 'object', $child['id']);
+	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
+	usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
+}
+
+// Drop the rack
+function commitDeleteRack ($rack_id)
+{
+	$rack = spotEntity ('rack', $rack_id);
+	releaseFiles ('rack', $rack_id);
+	destroyTagsForEntity ('rack', $rack_id);
+	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
+	commitDeleteObject ($rack_id);
+	foreach (getParents ($rack, 'row') as $row)
+		resetRackSortOrder ($row['id']);
+}
+
+// Drop the row with all racks inside
+function commitDeleteRow ($row_id)
+{
+	$racks = getRacks ($row_id);
+	foreach ($racks as $rack)
+		commitDeleteRack ($rack['id']);
+	commitDeleteObject ($row_id);
+}
+
+// Returns mounted devices count in all racks inside the specified row
+function getRowMountsCount ($row_id)
+{
+	$query =<<<END
+SELECT COUNT(*) FROM (
+	SELECT object_id FROM RackSpace rs LEFT JOIN EntityLink el ON (rs.rack_id = el.child_entity_id)
+	WHERE
+		rs.object_id IS NOT NULL AND
+		el.parent_entity_id = ? AND el.parent_entity_type = "row" AND el.child_entity_type = "rack"
+	UNION
+	SELECT el1.child_entity_id object_id FROM EntityLink el1 LEFT JOIN EntityLink el2 ON (el1.parent_entity_id = el2.child_entity_id)
+	WHERE
+		el1.parent_entity_type = "rack" AND el1.child_entity_type = "object" AND
+		el2.parent_entity_id = ? AND el2.parent_entity_type = "row" AND el2.child_entity_type = "rack"
+) x
+END;
+	$result = usePreparedSelectBlade ($query, array ($row_id, $row_id));
+	return $result->fetch (PDO::FETCH_COLUMN, 0);
+}
+
+// Returns mounted devices count in specified rack
+function getRackMountsCount ($rack_id)
+{
+	$query =<<<END
+SELECT COUNT(*) FROM (
+	SELECT object_id FROM RackSpace WHERE object_id IS NOT NULL AND rack_id = ?
+	UNION
+	SELECT child_entity_id object_id FROM EntityLink WHERE
+		parent_entity_id = ? AND parent_entity_type = "rack" AND child_entity_type = "object"
+) x
+END;
+	$result = usePreparedSelectBlade ($query, array ($rack_id, $rack_id));
+	return $result->fetch (PDO::FETCH_COLUMN, 0);
+}
+
 // Used when sort order is manually changed, and when a rack is moved or deleted
 // Input is expected to be a pre-sorted array of rack IDs
 function updateRackSortOrder ($racks)

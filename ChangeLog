@@ -9,6 +9,8 @@
 	new feature: VLAN domain groups.
 		A group is a domain that has all the VLANs of its members
 	update: SNMP support for Cisco Nexus 3132Q
+	update: ability to clean rack mounts or drop entire row (even if it contains racks inside)
+		from user interface
 0.20.10 2015-01-26
 	bugfix: port type could not be changed for an unlinked modular port (#1393)
 	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)

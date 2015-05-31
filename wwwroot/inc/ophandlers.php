@@ -2420,16 +2420,13 @@ function updateRow ()
 
 function deleteRow ()
 {
-	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
-	assertUIntArg ('row_id');
-	$rowData = spotEntity ('row', $_REQUEST['row_id']);
-	amplifyCell ($rowData);
-	if (count ($rowData['racks']))
-	{
-		showFuncMessage (__FUNCTION__, 'ERR1', array ($rowData['name']));
-		return;
-	}
-	commitDeleteObject ($_REQUEST['row_id']);
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'UMOUNT' => 58));
+	$row_id = assertUIntArg ('row_id');
+	$rowData = spotEntity ('row', $row_id);
+	$unmounted = getRowMountsCount ($row_id);
+	commitDeleteRow ($row_id);
+	if ($unmounted)
+		showFuncMessage (__FUNCTION__, 'UMOUNT', array ($unmounted));
 	showFuncMessage (__FUNCTION__, 'OK', array ($rowData['name']));
 	return buildRedirectURL ('rackspace', 'editrows');
 }
@@ -2524,18 +2521,23 @@ function deleteRack ()
 	assertUIntArg ('rack_id');
 	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
-	if (count ($rackData['mountedObjects']))
+	if (!$rackData['isDeletable'])
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1');
 		return;
 	}
-	releaseFiles ('rack', $_REQUEST['rack_id']);
-	destroyTagsForEntity ('rack', $_REQUEST['rack_id']);
-	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $_REQUEST['rack_id']));
-	commitDeleteObject ($_REQUEST['rack_id']);
-	resetRackSortOrder ($rackData['row_id']);
+	commitDeleteRack ($_REQUEST['rack_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
 	return buildRedirectURL ('rackspace', 'default');
+}
+
+function cleanRack ()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 58));
+	$rack_id = assertUIntArg ('rack_id');
+	$unmounted = getRackMountsCount ($rack_id);
+	commitCleanRack ($rack_id);
+	showFuncMessage (__FUNCTION__, 'OK', array ($unmounted));
 }
 
 function updateRackDesign ()

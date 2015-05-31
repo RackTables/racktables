@@ -616,6 +616,8 @@ function renderRackspaceRowEditor ()
 		printOpFormIntro ('addRow');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
+		echo '</td><td>&nbsp;';
+		echo '</td><td>&nbsp;';
 		echo '</td><td><select name=location_id>';
 		renderLocationSelectTree ();
 		echo '</td><td><input type=text name=name></td><td>';
@@ -624,17 +626,20 @@ function renderRackspaceRowEditor ()
 	}
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th>Location</th><th>Name</th><th>&nbsp;</th><th>Row link</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th># Racks</th><th># Devices</th><th>Location</th><th>Name</th><th>&nbsp;</th><th>Row link</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ();
 	foreach (listCells ('row') as $row_id => $rowInfo)
 	{
 		echo '<tr><td>';
-		if ($rc = $rowInfo['rackc'])
-			printImageHREF ('nodestroy', "${rc} rack(s) here");
-		else
-			echo getOpLink (array('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row');
+		$rc = $rowInfo['rackc'];
+		$delete_racks_str = $rc ? " and $rc rack(s)" : '';
+		echo getOpLink (array ('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row'.$delete_racks_str, 'need-confirmation');
 		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
+		echo '</td><td>';
+		echo $rc;
+		echo '</td><td>';
+		echo getRowMountsCount ($row_id);
 		echo '</td><td>';
 		echo '<select name=location_id>';
 		renderLocationSelectTree ($rowInfo['location_id']);
@@ -1220,12 +1225,18 @@ function renderEditRackForm ($rack_id)
 	if ($rack['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
 	if ($rack['isDeletable'])
 	{
-		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
 		echo getOpLink (array ('op'=>'deleteRack'), '', 'destroy', 'Delete rack', 'need-confirmation');
-		echo "&nbsp;</td></tr>\n";
+		echo "&nbsp;";
 	}
+	else
+	{
+		echo getOpLink (array ('op'=>'cleanRack'), '' ,'clear', 'Reset (cleanup) rack mounts', 'need-confirmation');
+		echo "&nbsp;";
+	}
+	echo "</td></tr>\n";
 	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>${rack['comment']}</textarea></td></tr>";
 	echo "<tr><td class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -1927,6 +1938,7 @@ function showMessageOrError ()
 		49 => array ('code' => 'success', 'format' => 'deleted a record successfully'),
 		51 => array ('code' => 'success', 'format' => 'updated a record successfully'),
 		57 => array ('code' => 'success', 'format' => 'Reset complete'),
+		58 => array ('code' => 'success', 'format' => '%u device(s) unmounted successfully'),
 		63 => array ('code' => 'success', 'format' => '%u change request(s) have been processed'),
 		67 => array ('code' => 'success', 'format' => "Tag rolling done, %u objects involved"),
 		71 => array ('code' => 'success', 'format' => 'File "%s" was linked successfully'),
