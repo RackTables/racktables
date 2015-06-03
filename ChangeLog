@@ -2,7 +2,7 @@
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)
 	bugfix: catch EntityNotFound exceptions in data integrity report (#1439)
-	bugfix: location log entries broke the object log report (#1443) 
+	bugfix: location log entries broke the object log report (#1443)
 	bugfix: fix a PHP warning on older PHP versions (reported by Bruno Santoni)
 	update: SNMP support for Cisco C2960-Plus series
 	update: ability to delete a VLAN keeping it in the VLAN ranges on 802.1Q ports
@@ -11,6 +11,7 @@
 	update: SNMP support for Cisco Nexus 3132Q
 	update: ability to clean rack mounts or drop entire row (even if it contains racks inside)
 		from user interface
+	update: warn when already used or reserved IP is assigned to object
 0.20.10 2015-01-26
 	bugfix: port type could not be changed for an unlinked modular port (#1393)
 	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)
