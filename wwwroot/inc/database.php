@@ -5072,8 +5072,10 @@ function getPortIIFStats ($iif_id)
 	(
 		'SELECT oif_name AS title, COUNT(Port.id) AS max, ' .
 		'COUNT(reservation_comment) + ' .
-		'SUM((SELECT COUNT(*) FROM Link WHERE Port.id IN (porta, portb))) AS current ' .
+		'COUNT(la.porta) + COUNT(lb.portb) AS current ' .
 		'FROM Port INNER JOIN PortOuterInterface AS POI ON type = POI.id ' .
+		'LEFT JOIN Link AS la ON la.porta = Port.id ' .
+		'LEFT JOIN Link AS lb ON lb.portb = Port.id ' .
 		'WHERE iif_id = ? GROUP BY type',
 		array ($iif_id)
 	);
