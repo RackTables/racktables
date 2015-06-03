@@ -1000,7 +1000,6 @@ function addIPAllocation ()
 
 	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($_REQUEST['bond_type'] != 'shared') ) ) {
 		showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
-		return;
 	}
 
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
