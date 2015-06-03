@@ -1473,8 +1473,7 @@ function commitDeleteRack ($rack_id)
 	destroyTagsForEntity ('rack', $rack_id);
 	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id));
 	commitDeleteObject ($rack_id);
-	foreach (getParents ($rack, 'row') as $row)
-		resetRackSortOrder ($row['id']);
+	resetRackSortOrder ($rack['row_id']);
 }
 
 // Drop the row with all racks inside
