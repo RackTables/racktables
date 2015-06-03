@@ -147,6 +147,7 @@ $ophandler['rack']['problems']['updateRack'] = 'updateRackProblems';
 $ophandler['rack']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['rack']['edit']['updateRack'] = 'updateRack';
 $ophandler['rack']['edit']['deleteRack'] = 'deleteRack';
+$ophandler['rack']['edit']['cleanRack'] = 'cleanRack';
 $ophandler['rack']['log']['add'] = 'addObjectlog';
 $ophandler['rack']['log']['del'] = 'tableHandler';
 $ophandler['rack']['tags']['saveTags'] = 'saveEntityTags';
