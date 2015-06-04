@@ -683,7 +683,9 @@ function addSLBPortLink ($link_row)
 	{
 		$result = usePreparedSelectBlade
 		(
-			"SELECT vip FROM VSEnabledPorts vep INNER JOIN VSEnabledIPs vei USING (vs_id, object_id, rspool_id) WHERE vep.object_id = ? AND proto = ? AND vport = ? HAVING COUNT(distinct vip) != COUNT(vip)",
+			"SELECT vip FROM VSEnabledPorts vep INNER JOIN VSEnabledIPs vei USING (vs_id, object_id, rspool_id)
+			WHERE vep.object_id = ? AND proto = ? AND vport = ?
+			GROUP BY vip HAVING COUNT(distinct vip) != COUNT(vip)",
 			array ($link_row['object_id'], $link_row['proto'], $link_row['vport'])
 		);
 		if ($row = $result->fetch (PDO::FETCH_ASSOC, 0))

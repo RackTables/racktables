@@ -39,7 +39,7 @@ $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
 	array ('files', 'reports', 'ipv4slb', '8021q'),
-	array ('config', 'objectlog', 'virtual'),
+	array ('config', 'objectlog', 'virtual', 'cables'),
 );
 
 $page['index']['title'] = 'Main page';
@@ -103,18 +103,22 @@ $tab['row']['default'] = 'View';
 $tab['row']['edit'] = 'Properties';
 $tab['row']['editracks'] = 'Manage racks';
 $tab['row']['newrack'] = 'Add new rack';
+$tab['row']['log'] = 'Log';
 $tab['row']['tagroller'] = 'Tag roller';
 $tab['row']['files'] = 'Files';
 $tabhandler['row']['default'] = 'renderRow';
 $tabhandler['row']['edit'] = 'renderEditRowForm';
 $tabhandler['row']['editracks'] = 'renderRackSortForm';
 $tabhandler['row']['newrack'] = 'renderNewRackForm';
+$tabhandler['row']['log'] = 'renderObjectLogEditor';
 $tabhandler['row']['tagroller'] = 'renderTagRollerForRow';
 $tabhandler['row']['files'] = 'renderFilesForEntity';
 $ophandler['row']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['row']['edit']['deleteRow'] = 'deleteRow';
 $ophandler['row']['edit']['updateRow'] = 'updateRow';
 $ophandler['row']['newrack']['addRack'] = 'addRack';
+$ophandler['row']['log']['add'] = 'addObjectlog';
+$ophandler['row']['log']['del'] = 'tableHandler';
 $ophandler['row']['tagroller']['rollTags'] = 'rollTags';
 $ophandler['row']['files']['addFile'] = 'addFileToEntity';
 $ophandler['row']['files']['linkFile'] = 'linkFileToEntity';
@@ -143,6 +147,7 @@ $ophandler['rack']['problems']['updateRack'] = 'updateRackProblems';
 $ophandler['rack']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['rack']['edit']['updateRack'] = 'updateRack';
 $ophandler['rack']['edit']['deleteRack'] = 'deleteRack';
+$ophandler['rack']['edit']['cleanRack'] = 'cleanRack';
 $ophandler['rack']['log']['add'] = 'addObjectlog';
 $ophandler['rack']['log']['del'] = 'tableHandler';
 $ophandler['rack']['tags']['saveTags'] = 'saveEntityTags';
@@ -543,8 +548,8 @@ $tab['portmap']['default'] = 'View';
 $tab['portmap']['edit'] = 'Edit';
 $tabhandler['portmap']['default'] = 'renderOIFCompatViewer';
 $tabhandler['portmap']['edit'] = 'renderOIFCompatEditor';
-$ophandler['portmap']['edit']['add'] = 'tableHandler';
-$ophandler['portmap']['edit']['del'] = 'tableHandler';
+$ophandler['portmap']['edit']['add'] = 'addOIFCompat';
+$ophandler['portmap']['edit']['del'] = 'delOIFCompat';
 $ophandler['portmap']['edit']['addPack'] = 'addOIFCompatPack';
 $ophandler['portmap']['edit']['delPack'] = 'delOIFCompatPack';
 
@@ -554,10 +559,20 @@ $tab['portifcompat']['default'] = 'View';
 $tab['portifcompat']['edit'] = 'Edit';
 $tabhandler['portifcompat']['default'] = 'renderIIFOIFCompat';
 $tabhandler['portifcompat']['edit'] = 'renderIIFOIFCompatEditor';
-$ophandler['portifcompat']['edit']['add'] = 'addIIFOIFCompat';
+$ophandler['portifcompat']['edit']['add'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['del'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['addPack'] = 'addIIFOIFCompatPack';
 $ophandler['portifcompat']['edit']['delPack'] = 'delIIFOIFCompatPack';
+
+$page['portoifs']['title'] = 'Port outer interfaces';
+$page['portoifs']['parent'] = 'config';
+$tab['portoifs']['default'] = 'View';
+$tab['portoifs']['edit'] = 'Edit';
+$tabhandler['portoifs']['default'] = 'renderPortOIFViewer';
+$tabhandler['portoifs']['edit'] = 'renderPortOIFEditor';
+$ophandler['portoifs']['edit']['add'] = 'tableHandler';
+$ophandler['portoifs']['edit']['del'] = 'tableHandler';
+$ophandler['portoifs']['edit']['upd'] = 'tableHandler';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
@@ -651,6 +666,29 @@ $ophandler['munin']['servers']['add'] = 'tableHandler';
 $ophandler['munin']['servers']['del'] = 'tableHandler';
 $ophandler['munin']['servers']['upd'] = 'tableHandler';
 
+$page['cableconf']['title'] = 'Patch cables';
+$page['cableconf']['parent'] = 'config';
+$tab['cableconf']['default'] = 'View';
+$tab['cableconf']['connectors'] = 'Edit connectors';
+$tab['cableconf']['cabletypes'] = 'Edit cable types';
+$tab['cableconf']['conncompat'] = 'Connector compatibility';
+$tab['cableconf']['oifcompat'] = 'Outer interface compatibility';
+$tabhandler['cableconf']['default'] = 'renderPatchCableConfiguration';
+$tabhandler['cableconf']['connectors'] = 'renderPatchCableConnectorEditor';
+$tabhandler['cableconf']['cabletypes'] = 'renderPatchCableTypeEditor';
+$tabhandler['cableconf']['conncompat'] = 'renderPatchCableConnectorCompatEditor';
+$tabhandler['cableconf']['oifcompat'] = 'renderPatchCableOIFCompatEditor';
+$ophandler['cableconf']['connectors']['add'] = 'tableHandler';
+$ophandler['cableconf']['connectors']['del'] = 'tableHandler';
+$ophandler['cableconf']['connectors']['upd'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['add'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['del'] = 'tableHandler';
+$ophandler['cableconf']['cabletypes']['upd'] = 'tableHandler';
+$ophandler['cableconf']['conncompat']['add'] = 'tableHandler';
+$ophandler['cableconf']['conncompat']['del'] = 'tableHandler';
+$ophandler['cableconf']['oifcompat']['add'] = 'tableHandler';
+$ophandler['cableconf']['oifcompat']['del'] = 'tableHandler';
+
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
 $tab['reports']['default'] = 'System';
@@ -715,7 +753,7 @@ $tabhandler['8021q']['vdlist'] = 'renderVLANDomainListEditor';
 $tabhandler['8021q']['vstlist'] = 'renderVSTListEditor';
 $ophandler['8021q']['vdlist']['add'] = 'createVLANDomain';
 $ophandler['8021q']['vdlist']['del'] = 'tableHandler';
-$ophandler['8021q']['vdlist']['upd'] = 'tableHandler';
+$ophandler['8021q']['vdlist']['upd'] = 'updateVLANDomain';
 $ophandler['8021q']['vstlist']['add'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['del'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['upd'] = 'tableHandler';
@@ -797,11 +835,28 @@ $page['virtual']['parent'] = 'index';
 $tab['virtual']['default'] = 'Summary';
 $tabhandler['virtual']['default'] = 'renderVirtualResourcesSummary';
 
+$page['cables']['title'] = 'Patch cables';
+$page['cables']['parent'] = 'index';
+$tab['cables']['default'] = 'View';
+$tab['cables']['amount'] = 'Consume/replenish';
+$tab['cables']['heaps'] = 'Configure heaps';
+$trigger['cables']['amount'] = 'triggerPatchCableHeapsConfigured';
+$tabhandler['cables']['default'] = 'renderPatchCableHeapSummary';
+$tabhandler['cables']['amount'] = 'renderPatchCableHeapAmount';
+$tabhandler['cables']['heaps'] = 'renderPatchCableHeapEditor';
+$ophandler['cables']['heaps']['add'] = 'tableHandler';
+$ophandler['cables']['heaps']['del'] = 'tableHandler';
+$ophandler['cables']['heaps']['upd'] = 'tableHandler';
+$ophandler['cables']['amount']['dec'] = 'consumePatchCable';
+$ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
+$ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
+
 $ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
 $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
 $ajaxhandler['get-port-link'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-mac'] = 'getPortInfoAJAX';
+$ajaxhandler['get-port-portmac'] = 'getPortInfoAJAX';
 $ajaxhandler['get-port-conf'] = 'getPortInfoAJAX';
 $ajaxhandler['upd-ip-name'] = 'updateIPNameAJAX';
 $ajaxhandler['upd-ip-comment'] = 'updateIPCommentAJAX';
@@ -811,5 +866,9 @@ $ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 $ajaxhandler['get-slb-form'] = 'renderSLBFormAJAX';
 $ajaxhandler['triplet-preview'] = 'getTripletConfigAJAX';
+
+$popuphandler['objlist'] = 'renderPopupObjectSelector';
+$popuphandler['portlist'] = 'renderPopupPortSelector';
+$popuphandler['inet4list'] = 'renderPopupIPv4Selector';
 
 ?>

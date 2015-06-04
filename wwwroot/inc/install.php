@@ -304,6 +304,18 @@ ENDOFTEXT
 	return TRUE;
 }
 
+function get_process_owner()
+{
+	// this function requires the posix extention and returns the fallback value otherwise
+	if (is_callable('posix_getpwuid') and is_callable('posix_geteuid'))
+	{
+		$user = posix_getpwuid(posix_geteuid());
+		if (isset ($user['name']))
+			return $user['name'];
+	}
+	return 'nobody';
+}
+
 function check_config_access()
 {
 	global $path_to_secret_php;
@@ -312,6 +324,7 @@ function check_config_access()
 		echo 'The configuration file ownership/permissions seem to be OK.<br>';
 		return TRUE;
 	}
+	$uname = get_process_owner();
 	echo 'Please set ownership (<tt>chown</tt>) and/or permissions (<tt>chmod</tt>) ';
 	echo "of <tt>${path_to_secret_php}</tt> on the server filesystem as follows:";
 	echo '<div align=left><ul>';
@@ -320,10 +333,10 @@ function check_config_access()
 	echo '<li>The file should not be readable by anyone except the httpd process.</li>';
 	echo '<li>The file should not be writable by anyone.</li>';
 	echo '</ul></div>';
-	echo 'For example, if httpd runs as user "nobody" and group "nogroup", commands ';
+	echo 'For example, if httpd runs as user "' . $uname . '" and group "nogroup", commands ';
 	echo 'similar to the following may work (though not guaranteed to, please consider ';
 	echo 'only as an example):';
-	echo '<pre>chown nobody:nogroup secret.php; chmod 400 secret.php</pre>';
+	echo "<pre>chown $uname:nogroup secret.php; chmod 400 secret.php</pre>";
 	return FALSE;
 }
 
@@ -554,9 +567,9 @@ function get_pseudo_file ($name)
   `server_id` int(10) unsigned NOT NULL,
   `graph_id` int(10) unsigned NOT NULL,
   `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`server_id`,`graph_id`),
-  KEY `object_id` (`object_id`),
+  PRIMARY KEY (`object_id`,`server_id`,`graph_id`),
   KEY `graph_id` (`graph_id`),
+  KEY `server_id` (`server_id`),
   CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
   CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
@@ -854,6 +867,66 @@ function get_pseudo_file ($name)
   UNIQUE KEY `parent_child` (`parent_objtype_id`,`child_objtype_id`)
 ) ENGINE=InnoDB";
 
+		$query[] = "CREATE TABLE `PatchCableConnector` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `connector` char(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `connector_per_origin` (`connector`,`origin`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PatchCableConnectorCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `connector_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`connector_id`),
+  KEY `connector_id` (`connector_id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-connector_id` FOREIGN KEY (`connector_id`) REFERENCES `PatchCableConnector` (`id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PatchCableHeap` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pctype_id` int(10) unsigned NOT NULL,
+  `end1_conn_id` int(10) unsigned NOT NULL,
+  `end2_conn_id` int(10) unsigned NOT NULL,
+  `amount` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `length` decimal(5,2) unsigned NOT NULL DEFAULT '1.00',
+  `description` char(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compat1` (`pctype_id`,`end1_conn_id`),
+  KEY `compat2` (`pctype_id`,`end2_conn_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat1` FOREIGN KEY (`pctype_id`, `end1_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat2` FOREIGN KEY (`pctype_id`, `end2_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PatchCableHeapLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `heap_id` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` char(64) NOT NULL,
+  `message` char(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `heap_id-date` (`heap_id`,`date`),
+  CONSTRAINT `PatchCableHeapLog-FK-heap_id` FOREIGN KEY (`heap_id`) REFERENCES `PatchCableHeap` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PatchCableOIFCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `oif_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`oif_id`),
+  KEY `oif_id` (`oif_id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-oif_id` FOREIGN KEY (`oif_id`) REFERENCES `PortOuterInterface` (`id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PatchCableType` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `pctype` char(64) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB";
+
 		$query[] = "CREATE TABLE `Port` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `object_id` int(10) unsigned NOT NULL default '0',
@@ -887,7 +960,9 @@ function get_pseudo_file ($name)
   `type1` int(10) unsigned NOT NULL default '0',
   `type2` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `type1_2` (`type1`,`type2`),
-  KEY `type2` (`type2`)
+  KEY `type2` (`type2`),
+  CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (`type1`) REFERENCES `PortOuterInterface` (`id`),
+  CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (`type2`) REFERENCES `PortOuterInterface` (`id`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `PortInnerInterface` (
@@ -901,7 +976,8 @@ function get_pseudo_file ($name)
   `iif_id` int(10) unsigned NOT NULL,
   `oif_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `pair` (`iif_id`,`oif_id`),
-  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`)
+  CONSTRAINT `PortInterfaceCompat-FK-iif_id` FOREIGN KEY (`iif_id`) REFERENCES `PortInnerInterface` (`id`),
+  CONSTRAINT `PortInterfaceCompat-FK-oif_id` FOREIGN KEY (`oif_id`) REFERENCES `PortOuterInterface` (`id`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `PortLog` (
@@ -922,6 +998,13 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`object_id`,`port_name`,`vlan_id`),
   UNIQUE KEY `port_id` (`object_id`,`port_name`),
   CONSTRAINT `PortNativeVLAN-FK-compound` FOREIGN KEY (`object_id`, `port_name`, `vlan_id`) REFERENCES `PortAllowedVLAN` (`object_id`, `port_name`, `vlan_id`) ON DELETE CASCADE
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `PortOuterInterface` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `oif_name` char(48) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oif_name` (`oif_name`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `PortVLANMode` (
@@ -1042,9 +1125,11 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `VLANDomain` (
   `id` int(10) unsigned NOT NULL auto_increment,
+  `group_id` int(10) unsigned default NULL,
   `description` char(255) default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `description` (`description`)
+  UNIQUE KEY `description` (`description`),
+  CONSTRAINT `VLANDomain-FK-group_id` FOREIGN KEY (`group_id`) REFERENCES `VLANDomain` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `VLANIPv4` (
@@ -1072,7 +1157,7 @@ function get_pseudo_file ($name)
   `rule_no` int(10) unsigned NOT NULL,
   `port_pcre` char(255) NOT NULL,
   `port_role` enum('access','trunk','anymode','uplink','downlink','none') NOT NULL default 'none',
-  `wrt_vlans` char(255) default NULL,
+  `wrt_vlans` text,
   `description` char(255) default NULL,
   UNIQUE KEY `vst-rule` (`vst_id`,`rule_no`),
   CONSTRAINT `VLANSTRule-FK-vst_id` FOREIGN KEY (`vst_id`) REFERENCES `VLANSwitchTemplate` (`id`) ON DELETE CASCADE
@@ -1361,7 +1446,6 @@ WHERE O.objtype_id = 1562";
 
 		$query[] = "INSERT INTO `Chapter` (`id`, `sticky`, `name`) VALUES
 (1,'yes','ObjectType'),
-(2,'yes','PortOuterInterface'),
 (11,'no','server models'),
 (12,'no','network switch models'),
 (13,'no','server OS type'),
@@ -1537,6 +1621,66 @@ WHERE O.objtype_id = 1562";
 (1787,14,NULL,'no'),
 (1787,30,38,'yes')";
 
+		$query[] = "INSERT INTO PatchCableConnector (id, origin, connector) VALUES
+(1,'default','FC/PC'),(2,'default','FC/APC'),
+(3,'default','LC/PC'),(4,'default','LC/APC'),
+(5,'default','MPO-12/PC'),(6,'default','MPO-12/APC'),
+(7,'default','MPO-24/PC'),(8,'default','MPO-24/APC'),
+(9,'default','SC/PC'),(10,'default','SC/APC'),
+(11,'default','ST/PC'),(12,'default','ST/APC'),
+(13,'default','T568/8P8C/RJ45'),
+(14,'default','SFP-1000'),
+(15,'default','SFP+'),
+(999,'default','CX4/SFF-8470')";
+
+		$query[] = "INSERT INTO PatchCableType (id, origin, pctype) VALUES
+(1,'default','duplex OM1'),
+(2,'default','duplex OM2'),
+(3,'default','duplex OM3'),
+(4,'default','duplex OM4'),
+(5,'default','duplex OS1'),
+(6,'default','duplex OS2'),
+(7,'default','simplex OM1'),
+(8,'default','simplex OM2'),
+(9,'default','simplex OM3'),
+(10,'default','simplex OM4'),
+(11,'default','simplex OS1'),
+(12,'default','simplex OS2'),
+(13,'default','Cat.5 TP'),
+(14,'default','Cat.6 TP'),
+(15,'default','Cat.6a TP'),
+(16,'default','Cat.7 TP'),
+(17,'default','Cat.7a TP'),
+(18,'default','12-fiber OM3'),
+(19,'default','12-fiber OM4'),
+(20,'default','10Gb/s CX4 coax'),
+(21,'default','24-fiber OM3'),
+(22,'default','24-fiber OM4'),
+(23,'default','1Gb/s 50cm shielded'),
+(24,'default','10Gb/s 24AWG twinax'),
+(25,'default','10Gb/s 26AWG twinax'),
+(26,'default','10Gb/s 28AWG twinax'),
+(27,'default','10Gb/s 30AWG twinax'),
+(999,'default','Cat.3 TP')";
+
+		$query[] = "INSERT INTO PatchCableConnectorCompat (pctype_id, connector_id) VALUES
+(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1), -- FC/PC
+(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2),(12,2), -- FC/APC
+(1,3),(2,3),(3,3),(4,3),(5,3),(6,3),(7,3),(8,3),(9,3),(10,3),(11,3),(12,3), -- LC/PC
+(1,4),(2,4),(3,4),(4,4),(5,4),(6,4),(7,4),(8,4),(9,4),(10,4),(11,4),(12,4), -- LC/APC
+(1,9),(2,9),(3,9),(4,9),(5,9),(6,9),(7,9),(8,9),(9,9),(10,9),(11,9),(12,9), -- SC/PC
+(1,10),(2,10),(3,10),(4,10),(5,10),(6,10),(7,10),(8,10),(9,10),(10,10),(11,10),(12,10), -- SC/APC
+(1,11),(2,11),(3,11),(4,11),(5,11),(6,11),(7,11),(8,11),(9,11),(10,11),(11,11),(12,11), -- ST/PC
+(1,12),(2,12),(3,12),(4,12),(5,12),(6,12),(7,12),(8,12),(9,12),(10,12),(11,12),(12,12), -- ST/APC
+(13,13),(14,13),(15,13),(16,13),(17,13),(999,13), -- T568
+(18,5),(19,5), -- MPO-12/PC
+(18,6),(19,6), -- MPO-12/APC
+(20,999), -- CX4
+(21,7),(22,7), -- MPO-24/PC
+(21,8),(22,8), -- MPO-24/APC
+(23,14), -- SFP-1000
+(24,15),(25,15),(26,15),(27,15) -- SFP+";
+
 		$query[] = "INSERT INTO `PortInnerInterface` VALUES
 (1,'hardwired'),
 (2,'SFP-100'),
@@ -1548,7 +1692,253 @@ WHERE O.objtype_id = 1562";
 (8,'XFP'),
 (9,'SFP+'),
 (10,'QSFP+'),
-(11,'CFP')";
+(11,'CFP'),
+(12,'CFP2'),
+(13,'CPAK')";
+
+		$query[] = "INSERT INTO `PortOuterInterface` VALUES
+(16,'AC-in'),
+(17,'10Base2'),
+(18,'10Base-T'),
+(19,'100Base-TX'),
+(24,'1000Base-T'),
+(29,'RS-232 (RJ-45)'),
+(30,'10GBase-SR'),
+(31,'virtual bridge'),
+(32,'sync serial'),
+(33,'KVM (host)'),
+(34,'1000Base-ZX'),
+(35,'10GBase-ER'),
+(36,'10GBase-LR'),
+(37,'10GBase-LRM'),
+(38,'10GBase-ZR'),
+(39,'10GBase-LX4'),
+(40,'10GBase-CX4'),
+(41,'10GBase-KX4'),
+(42, '1000Base-EX'),
+(439,'dry contact'),
+(440,'unknown'),
+(446,'KVM (console)'),
+(681,'RS-232 (DB-9)'),
+(682,'RS-232 (DB-25)'),
+(1077,'empty SFP-1000'),
+(1078,'empty GBIC'),
+(1079,'empty XENPAK'),
+(1080,'empty X2'),
+(1081,'empty XPAK'),
+(1082,'empty XFP'),
+(1084,'empty SFP+'),
+(1087,'1000Base-T (Dell 1855)'),
+(1195,'100Base-FX'),
+(1196,'100Base-SX'),
+(1197,'100Base-LX10'),
+(1198,'100Base-BX10-D'),
+(1199,'100Base-BX10-U'),
+(1200,'100Base-EX'),
+(1201,'100Base-ZX'),
+(1202,'1000Base-SX'),
+(1203,'1000Base-SX+'),
+(1204,'1000Base-LX'),
+(1205,'1000Base-LX10'),
+(1206,'1000Base-BX10-D'),
+(1207,'1000Base-BX10-U'),
+(1208,'empty SFP-100'),
+(1209,'1000Base-CWDM80-1470 (gray)'),
+(1210,'1000Base-CWDM80-1490 (violet)'),
+(1211,'1000Base-CWDM80-1510 (blue)'),
+(1212,'1000Base-CWDM80-1530 (green)'),
+(1213,'1000Base-CWDM80-1550 (yellow)'),
+(1214,'1000Base-CWDM80-1570 (orange)'),
+(1215,'1000Base-CWDM80-1590 (red)'),
+(1216,'1000Base-CWDM80-1610 (brown)'),
+(1217,'1000Base-DWDM80-61.42 (ITU 20)'),
+(1218,'1000Base-DWDM80-60.61 (ITU 21)'),
+(1219,'1000Base-DWDM80-59.79 (ITU 22)'),
+(1220,'1000Base-DWDM80-58.98 (ITU 23)'),
+(1221,'1000Base-DWDM80-58.17 (ITU 24)'),
+(1222,'1000Base-DWDM80-57.36 (ITU 25)'),
+(1223,'1000Base-DWDM80-56.55 (ITU 26)'),
+(1224,'1000Base-DWDM80-55.75 (ITU 27)'),
+(1225,'1000Base-DWDM80-54.94 (ITU 28)'),
+(1226,'1000Base-DWDM80-54.13 (ITU 29)'),
+(1227,'1000Base-DWDM80-53.33 (ITU 30)'),
+(1228,'1000Base-DWDM80-52.52 (ITU 31)'),
+(1229,'1000Base-DWDM80-51.72 (ITU 32)'),
+(1230,'1000Base-DWDM80-50.92 (ITU 33)'),
+(1231,'1000Base-DWDM80-50.12 (ITU 34)'),
+(1232,'1000Base-DWDM80-49.32 (ITU 35)'),
+(1233,'1000Base-DWDM80-48.51 (ITU 36)'),
+(1234,'1000Base-DWDM80-47.72 (ITU 37)'),
+(1235,'1000Base-DWDM80-46.92 (ITU 38)'),
+(1236,'1000Base-DWDM80-46.12 (ITU 39)'),
+(1237,'1000Base-DWDM80-45.32 (ITU 40)'),
+(1238,'1000Base-DWDM80-44.53 (ITU 41)'),
+(1239,'1000Base-DWDM80-43.73 (ITU 42)'),
+(1240,'1000Base-DWDM80-42.94 (ITU 43)'),
+(1241,'1000Base-DWDM80-42.14 (ITU 44)'),
+(1242,'1000Base-DWDM80-41.35 (ITU 45)'),
+(1243,'1000Base-DWDM80-40.56 (ITU 46)'),
+(1244,'1000Base-DWDM80-39.77 (ITU 47)'),
+(1245,'1000Base-DWDM80-38.98 (ITU 48)'),
+(1246,'1000Base-DWDM80-38.19 (ITU 49)'),
+(1247,'1000Base-DWDM80-37.40 (ITU 50)'),
+(1248,'1000Base-DWDM80-36.61 (ITU 51)'),
+(1249,'1000Base-DWDM80-35.82 (ITU 52)'),
+(1250,'1000Base-DWDM80-35.04 (ITU 53)'),
+(1251,'1000Base-DWDM80-34.25 (ITU 54)'),
+(1252,'1000Base-DWDM80-33.47 (ITU 55)'),
+(1253,'1000Base-DWDM80-32.68 (ITU 56)'),
+(1254,'1000Base-DWDM80-31.90 (ITU 57)'),
+(1255,'1000Base-DWDM80-31.12 (ITU 58)'),
+(1256,'1000Base-DWDM80-30.33 (ITU 59)'),
+(1257,'1000Base-DWDM80-29.55 (ITU 60)'),
+(1258,'1000Base-DWDM80-28.77 (ITU 61)'),
+(1259,'10GBase-ZR-DWDM80-61.42 (ITU 20)'),
+(1260,'10GBase-ZR-DWDM80-60.61 (ITU 21)'),
+(1261,'10GBase-ZR-DWDM80-59.79 (ITU 22)'),
+(1262,'10GBase-ZR-DWDM80-58.98 (ITU 23)'),
+(1263,'10GBase-ZR-DWDM80-58.17 (ITU 24)'),
+(1264,'10GBase-ZR-DWDM80-57.36 (ITU 25)'),
+(1265,'10GBase-ZR-DWDM80-56.55 (ITU 26)'),
+(1266,'10GBase-ZR-DWDM80-55.75 (ITU 27)'),
+(1267,'10GBase-ZR-DWDM80-54.94 (ITU 28)'),
+(1268,'10GBase-ZR-DWDM80-54.13 (ITU 29)'),
+(1269,'10GBase-ZR-DWDM80-53.33 (ITU 30)'),
+(1270,'10GBase-ZR-DWDM80-52.52 (ITU 31)'),
+(1271,'10GBase-ZR-DWDM80-51.72 (ITU 32)'),
+(1272,'10GBase-ZR-DWDM80-50.92 (ITU 33)'),
+(1273,'10GBase-ZR-DWDM80-50.12 (ITU 34)'),
+(1274,'10GBase-ZR-DWDM80-49.32 (ITU 35)'),
+(1275,'10GBase-ZR-DWDM80-48.51 (ITU 36)'),
+(1276,'10GBase-ZR-DWDM80-47.72 (ITU 37)'),
+(1277,'10GBase-ZR-DWDM80-46.92 (ITU 38)'),
+(1278,'10GBase-ZR-DWDM80-46.12 (ITU 39)'),
+(1279,'10GBase-ZR-DWDM80-45.32 (ITU 40)'),
+(1280,'10GBase-ZR-DWDM80-44.53 (ITU 41)'),
+(1281,'10GBase-ZR-DWDM80-43.73 (ITU 42)'),
+(1282,'10GBase-ZR-DWDM80-42.94 (ITU 43)'),
+(1283,'10GBase-ZR-DWDM80-42.14 (ITU 44)'),
+(1284,'10GBase-ZR-DWDM80-41.35 (ITU 45)'),
+(1285,'10GBase-ZR-DWDM80-40.56 (ITU 46)'),
+(1286,'10GBase-ZR-DWDM80-39.77 (ITU 47)'),
+(1287,'10GBase-ZR-DWDM80-38.98 (ITU 48)'),
+(1288,'10GBase-ZR-DWDM80-38.19 (ITU 49)'),
+(1289,'10GBase-ZR-DWDM80-37.40 (ITU 50)'),
+(1290,'10GBase-ZR-DWDM80-36.61 (ITU 51)'),
+(1291,'10GBase-ZR-DWDM80-35.82 (ITU 52)'),
+(1292,'10GBase-ZR-DWDM80-35.04 (ITU 53)'),
+(1293,'10GBase-ZR-DWDM80-34.25 (ITU 54)'),
+(1294,'10GBase-ZR-DWDM80-33.47 (ITU 55)'),
+(1295,'10GBase-ZR-DWDM80-32.68 (ITU 56)'),
+(1296,'10GBase-ZR-DWDM80-31.90 (ITU 57)'),
+(1297,'10GBase-ZR-DWDM80-31.12 (ITU 58)'),
+(1298,'10GBase-ZR-DWDM80-30.33 (ITU 59)'),
+(1299,'10GBase-ZR-DWDM80-29.55 (ITU 60)'),
+(1300,'10GBase-ZR-DWDM80-28.77 (ITU 61)'),
+(1316,'1000Base-T (Dell M1000e)'),
+(1322,'AC-out'),
+(1399,'DC'),
+(1424,'1000Base-CX'),
+(1425,'10GBase-ER-DWDM40-61.42 (ITU 20)'),
+(1426,'10GBase-ER-DWDM40-60.61 (ITU 21)'),
+(1427,'10GBase-ER-DWDM40-59.79 (ITU 22)'),
+(1428,'10GBase-ER-DWDM40-58.98 (ITU 23)'),
+(1429,'10GBase-ER-DWDM40-58.17 (ITU 24)'),
+(1430,'10GBase-ER-DWDM40-57.36 (ITU 25)'),
+(1431,'10GBase-ER-DWDM40-56.55 (ITU 26)'),
+(1432,'10GBase-ER-DWDM40-55.75 (ITU 27)'),
+(1433,'10GBase-ER-DWDM40-54.94 (ITU 28)'),
+(1434,'10GBase-ER-DWDM40-54.13 (ITU 29)'),
+(1435,'10GBase-ER-DWDM40-53.33 (ITU 30)'),
+(1436,'10GBase-ER-DWDM40-52.52 (ITU 31)'),
+(1437,'10GBase-ER-DWDM40-51.72 (ITU 32)'),
+(1438,'10GBase-ER-DWDM40-50.92 (ITU 33)'),
+(1439,'10GBase-ER-DWDM40-50.12 (ITU 34)'),
+(1440,'10GBase-ER-DWDM40-49.32 (ITU 35)'),
+(1441,'10GBase-ER-DWDM40-48.51 (ITU 36)'),
+(1442,'10GBase-ER-DWDM40-47.72 (ITU 37)'),
+(1443,'10GBase-ER-DWDM40-46.92 (ITU 38)'),
+(1444,'10GBase-ER-DWDM40-46.12 (ITU 39)'),
+(1445,'10GBase-ER-DWDM40-45.32 (ITU 40)'),
+(1446,'10GBase-ER-DWDM40-44.53 (ITU 41)'),
+(1447,'10GBase-ER-DWDM40-43.73 (ITU 42)'),
+(1448,'10GBase-ER-DWDM40-42.94 (ITU 43)'),
+(1449,'10GBase-ER-DWDM40-42.14 (ITU 44)'),
+(1450,'10GBase-ER-DWDM40-41.35 (ITU 45)'),
+(1451,'10GBase-ER-DWDM40-40.56 (ITU 46)'),
+(1452,'10GBase-ER-DWDM40-39.77 (ITU 47)'),
+(1453,'10GBase-ER-DWDM40-38.98 (ITU 48)'),
+(1454,'10GBase-ER-DWDM40-38.19 (ITU 49)'),
+(1455,'10GBase-ER-DWDM40-37.40 (ITU 50)'),
+(1456,'10GBase-ER-DWDM40-36.61 (ITU 51)'),
+(1457,'10GBase-ER-DWDM40-35.82 (ITU 52)'),
+(1458,'10GBase-ER-DWDM40-35.04 (ITU 53)'),
+(1459,'10GBase-ER-DWDM40-34.25 (ITU 54)'),
+(1460,'10GBase-ER-DWDM40-33.47 (ITU 55)'),
+(1461,'10GBase-ER-DWDM40-32.68 (ITU 56)'),
+(1462,'10GBase-ER-DWDM40-31.90 (ITU 57)'),
+(1463,'10GBase-ER-DWDM40-31.12 (ITU 58)'),
+(1464,'10GBase-ER-DWDM40-30.33 (ITU 59)'),
+(1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
+(1466,'10GBase-ER-DWDM40-28.77 (ITU 61)'),
+(1469,'virtual port'),
+(1588,'empty QSFP+'),
+(1589,'empty CFP2'),
+(1590,'empty CPAK'),
+(1603,'1000Base-T (HP c-Class)'),
+(1604,'100Base-TX (HP c-Class)'),
+(1642,'10GBase-T'),
+(1660,'40GBase-FR'),
+(1661,'40GBase-KR4'),
+(1662,'40GBase-ER4'),
+(1663,'40GBase-SR4'),
+(1664,'40GBase-LR4'),
+(1668,'empty CFP'),
+(1669,'100GBase-SR10'),
+(1670,'100GBase-LR4'),
+(1671,'100GBase-ER4'),
+(1672,'100GBase-SR4'),
+(1673,'100GBase-KR4'),
+(1674,'100GBase-KP4'),
+(1999,'10GBase-KR')
+";
+// Add new outer interface types with id < 2000. Values 2000 and up are for
+// users' local types.
+
+		$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
+(13,18),(14,18),(15,18),(16,18),(17,18),(999,18), -- 10Base-T: Cat.3+ TP
+(11,1198),(12,1198),(11,1199),(12,1199),          -- 100Base-BX10: 1xSMF
+(5,1197),(6,1197),                                -- 100Base-LX10: 2xSMF
+(5,1200),(6,1200),                                -- 100Base-EX: 2xSMF
+(5,1201),(6,1201),                                -- 100Base-ZX: 2xSMF
+(1,1195),(2,1195),(3,1195),(4,1195),              -- 100Base-FX: 2xMMF
+(1,1196),(2,1196),(3,1196),(4,1196),              -- 100Base-SX: 2xMMF
+(13,19),(14,19),(15,19),(16,19),(17,19),          -- 100Base-TX: Cat.5+ TP
+(11,1206),(12,1206),(11,1207),(12,1207),          -- 1000Base-BX10: 1xSMF
+(5,1204),(6,1204),                                -- 1000Base-LX: 2xSMF
+(5,1205),(6,1205),                                -- 1000Base-LX10: 2xSMF
+(1,1202),(2,1202),(3,1202),(4,1202),              -- 1000Base-SX: 2xMMF
+(1,1203),(2,1203),(3,1203),(4,1203),              -- 1000Base-SX+: 2xMMF
+(13,24),(14,24),(15,24),(16,24),(17,24),          -- 1000Base-T: Cat.5+ TP
+(5,34),(6,34),                                    -- 1000Base-ZX: 2xSMF
+(23,1077),                                        -- 1000Base direct attach: shielded
+(1,30),(2,30),(3,30),(4,30),                      -- 10GBase-SR: 2xMMF
+(5,36),(6,36),                                    -- 10GBase-LR: 2xSMF
+(5,35),(6,35),                                    -- 10GBase-ER: 2xSMF
+(5,38),(6,38),                                    -- 10GBase-ZR: 2xSMF
+(1,39),(2,39),(3,39),(4,39),(5,39),(6,39),        -- 10GBase-LX4: 2xMMF/2xSMF
+(1,37),(2,37),(3,37),(4,37),                      -- 10GBase-LRM: 2xMMF
+(14,1642),(15,1642),(16,1642),(17,1642),          -- 10GBase-T: Cat.6+ TP
+(20,40),                                          -- 10GBase-CX4: coax
+(24,1084),(25,1084),(26,1084),(27,1084),          -- 10GBase direct attach: twinax
+(18,1663),(19,1663),                              -- 40GBase-SR4: 8xMMF
+(5,1664),(6,1664),                                -- 40GBase-LR4: 2xSMF
+(5,1662),(6,1662),                                -- 40GBase-ER4: 2xSMF
+(5,1660),(6,1660),                                -- 40GBase-FR: 2xSMF
+(21,1669),(22,1669),                              -- 100GBase-SR10: 20xMMF
+(18,1672),(19,1672),                              -- 100GBase-SR4: 8xMMF
+(5,1670),(6,1670),                                -- 100GBase-LR4: 2xSMF
+(5,1671),(6,1671)                                 -- 100GBase-ER4: 2xSMF";
 
 		$query[] = "INSERT INTO `ObjectParentCompat` VALUES
 (3,13),
@@ -1562,19 +1952,23 @@ WHERE O.objtype_id = 1562";
 (1505,1506),
 (1505,1507),
 (1506,4),
-(1506,1504)";
+(1506,1504),
+(1787,8),
+(1787,1502)";
 
 		$query[] = "INSERT INTO `PortInterfaceCompat` VALUES
 (2,1208),(2,1195),(2,1196),(2,1197),(2,1198),(2,1199),(2,1200),(2,1201),
-(3,1078),(3,24),(3,34),(3,1202),(3,1203),(3,1204),(3,1205),(3,1206),(3,1207),
-(4,1077),(4,24),(4,34),(4,1202),(4,1203),(4,1204),(4,1205),(4,1206),(4,1207),
+(3,1078),(3,24),(3,34),(3,42),(3,1202),(3,1203),(3,1204),(3,1205),(3,1206),(3,1207),
+(4,1077),(4,24),(4,34),(4,42),(4,1202),(4,1203),(4,1204),(4,1205),(4,1206),(4,1207),
 (5,1079),(5,30),(5,35),(5,36),(5,37),(5,38),(5,39),(5,40),
 (6,1080),(6,30),(6,35),(6,36),(6,37),(6,38),(6,39),(6,40),
 (7,1081),(7,30),(7,35),(7,36),(7,37),(7,38),(7,39),(7,40),
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
-(10,1588),(10,1663),(10,1664),
-(11,1668),(11,1669),(11,1670),(11,1671),
+(10,1588),(10,1660),(10,1662),(10,1663),(10,1664),
+(11,1668),(11,1669),(11,1670),(11,1671),(11,1672),(11,1673),(11,1674),
+(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),
+(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674),
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
 		$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
@@ -1583,15 +1977,11 @@ WHERE O.objtype_id = 1562";
 (19,19),
 (24,24),
 (18,19),
-(19,18),
 (18,24),
-(24,18),
 (19,24),
-(24,19),
 (29,29),
 (30,30),
 (16,1322),
-(1322,16),
 (29,681),
 (29,682),
 (32,32),
@@ -1604,13 +1994,10 @@ WHERE O.objtype_id = 1562";
 (39,39),
 (40,40),
 (41,41),
+(42,42),
 (439,439),
-(446,33),
-(681,29),
 (681,681),
 (681,682),
-(682,29),
-(682,681),
 (682,682),
 (1077,1077),
 (1084,1084),
@@ -1619,7 +2006,6 @@ WHERE O.objtype_id = 1562";
 (1196,1196),
 (1197,1197),
 (1198,1199),
-(1199,1198),
 (1200,1200),
 (1201,1201),
 (1202,1202),
@@ -1627,7 +2013,6 @@ WHERE O.objtype_id = 1562";
 (1204,1204),
 (1205,1205),
 (1206,1207),
-(1207,1206),
 (1209,1209),
 (1210,1210),
 (1211,1211),
@@ -1767,15 +2152,29 @@ WHERE O.objtype_id = 1562";
 (1469,1469),
 (1399,1399),
 (1588,1588),
+(1588,1589),
+(1588,1590),
+(1589,1589),
+(1589,1590),
+(1590,1590),
 (1603,1603),
+(1660,1660),
 (1661,1661),
+(1662,1662),
 (1663,1663),
 (1664,1664),
 (1668,1668),
 (1669,1669),
 (1670,1670),
 (1671,1671),
-(1642,1642)";
+(1672,1672),
+(1673,1673),
+(1674,1674),
+(1642,1642),
+(1999,1999)";
+
+		// make PortCompat symmetric (insert missing reversed-order pairs)
+		$query[] = "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
 
 		$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
@@ -1849,8 +2248,9 @@ WHERE O.objtype_id = 1562";
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
 ('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices'),
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
-('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to dislay in quick links'),
+('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to display in quick links'),
 ('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
+('CACTI_RRA_ID','1','uint','no','no','yes','RRA ID for Cacti graphs displayed in RackTables'),
 ('MUNIN_LISTSRC','false','string','yes','no','no','List of object with Munin graphs'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
@@ -1860,6 +2260,7 @@ WHERE O.objtype_id = 1562";
 ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
 ('REVERSED_RACKS_LISTSRC', 'false', 'string', 'yes', 'no', 'no', 'List of racks with reversed (top to bottom) units order'),
 ('NEAREST_RACKS_CHECKBOX', 'yes', 'string', 'yes', 'no', 'yes', 'Enable nearest racks in port list filter by default'),
+('SHOW_OBJECTTYPE', 'yes', 'string', 'no', 'no', 'yes', 'Show object type column on depot page'),
 ('DB_VERSION','${db_version}','string','no','yes','no','Database version.')";
 
 		$query[] = "INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}')";

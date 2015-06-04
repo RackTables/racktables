@@ -15,17 +15,21 @@ my $op_connect_timeout = 2;
 my $op_timeout = 10;
 my $op_prompt;
 my $op_delay = 0;
+my $op_ipv4;
+my $op_ipv6;
 GetOptions (
-    'h' => \$op_help,
-    'port:i' => \$op_port,
-    'connect-timeout:i' => \$op_connect_timeout,
-    'timeout:i' => \$op_timeout,
-    'prompt-delay:f' => \$op_delay,
-    'prompt:s' => \$op_prompt,
+	'h' => \$op_help,
+	'port:i' => \$op_port,
+	'connect-timeout:i' => \$op_connect_timeout,
+	'timeout:i' => \$op_timeout,
+	'prompt-delay:f' => \$op_delay,
+	'prompt:s' => \$op_prompt,
+	'4' => \$op_ipv4,
+	'6' => \$op_ipv6,
 );
 if ($op_help) {
-    &display_help;
-    exit;
+	&display_help;
+	exit;
 }
 my $op_host = $ARGV[0];
 defined $op_host or die "ERROR: please specify remote host (-h for help)";
@@ -33,7 +37,7 @@ defined $op_prompt or die "ERROR: please specify prompt regexp (-h for help)";
 my $prompt_re = qr/$op_prompt/;
 
 sub display_help {
-    print <<END;
+	print <<END;
 telnet batch client for RackTables.
 Takes commands list in standard input and gives the responses via standard output.
 Login credentials are not specially handled and should be placed as first lines of input
@@ -44,27 +48,42 @@ port: TCP port number to connect to
 connect-timeout: timeout for giving up connecting process, seconds
 prompt: command prompt regexp for interactive telnet (auth prompts too)
 timeout: wait time for activity of remote telnet peer in seconds
+4: force telnet to use IPv4 addresses only
+6: force telnet to use IPv6 addresses only
 
 END
 }
 
 my $port = $op_port || 23;
+my $family;
+if (defined $op_ipv4) {
+	$family = "IPv4";
+}
+elsif (defined $op_ipv6) {
+	$family = "IPv6";
+} else {
+	$family = "any";
+}
 
 my $session = Net::Telnet->new (
-    Host => $op_host,
-    Port => $port,
-    Timeout => $op_connect_timeout,
+	Host => $op_host,
+	Port => $port,
+	Family => $family,
+	Timeout => $op_connect_timeout,
 );
 
 use IO::Select;
 my $sel = new IO::Select($session);
 
+$|=1;
 my $buff = '';
 my $nohang_read;
 until ($session->eof) {
 	# read output from the device
-    eval {
-		$buff .= $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+	eval {
+		my $chunk = $session->get (Timeout => $nohang_read ? 0 : $op_timeout, Errmode => $nohang_read ? 'return' : 'die');
+		$buff .= $chunk;
+		print $chunk;
 	};
 	if ($@) {
 		# check if there is something else in <STDIN>
@@ -75,24 +94,23 @@ until ($session->eof) {
 			last; # no more input, seems like session was closed remotely by our last command
 		}
 	}
-    $nohang_read = 0;
-	print $1 if ($buff =~ s/(.*\n)//s);
+	$nohang_read = 0;
+	$buff =~ s/(.*\n)//s;
 
-    next unless ($buff =~ $prompt_re);
-    # send pending commands to the device
-    if ($op_delay and IO::Select->select ($sel, undef, undef, $op_delay)) {
-        # something is received, no prompt detection at this time
-        # set NOHANG options for next reading, cause it can be telnet control sequence
-        $nohang_read = 1;
-    }
-    elsif (defined ($_ = <STDIN>)) {
-        # replace all CR and LF symbols with single trailing LF
-        s/[\015\012]//g;
-        $session->put($_ . "\012");
-    }
-    else {
-        # no more commands in input
-        last;
-    }
+	next unless ($buff =~ $prompt_re);
+	# send pending commands to the device
+	if ($op_delay and IO::Select->select ($sel, undef, undef, $op_delay)) {
+		# something is received, no prompt detection at this time
+		# set NOHANG options for next reading, cause it can be telnet control sequence
+		$nohang_read = 1;
+	}
+	elsif (defined ($_ = <STDIN>)) {
+		# replace all CR and LF symbols with single trailing LF
+		s/[\015\012]//g;
+		$session->put($_ . "\012");
+	}
+	else {
+		# no more commands in input
+		last;
+	}
 }
-print $buff;

@@ -4,35 +4,6 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-// Return a list of rack IDs that are P or less positions
-// far from the given rack in its row.
-function getProximateRacks ($rack_id, $proximity = 0)
-{
-	$ret = array ($rack_id);
-	if ($proximity > 0)
-	{
-		$rack = spotEntity ('rack', $rack_id);
-		$rackList = doubleLink (listCells ('rack', $rack['row_id']));
-		$todo = $proximity;
-		$cur_item = $rackList[$rack_id];
-		while ($todo and array_key_exists ('prev_key', $cur_item))
-		{
-			$cur_item = $rackList[$cur_item['prev_key']];
-			$ret[] = $cur_item['id'];
-			$todo--;
-		}
-		$todo = $proximity;
-		$cur_item = $rackList[$rack_id];
-		while ($todo and array_key_exists ('next_key', $cur_item))
-		{
-			$cur_item = $rackList[$cur_item['next_key']];
-			$ret[] = $cur_item['id'];
-			$todo--;
-		}
-	}
-	return $ret;
-}
-
 function findSparePorts ($port_info, $filter)
 {
 	$qparams = array ();
@@ -44,13 +15,13 @@ SELECT
 	p.iif_id,
 	p.type as oif_id,
 	pii.iif_name,
-	d.dict_value as oif_name,
+	poi.oif_name,
 	p.object_id,
 	o.name as object_name
 FROM Port p
 INNER JOIN Object o ON o.id = p.object_id
 INNER JOIN PortInnerInterface pii ON p.iif_id = pii.id
-INNER JOIN Dictionary d ON d.dict_key = p.type
+INNER JOIN PortOuterInterface poi ON poi.id = p.type
 ";
 	// porttype filter (non-strict match)
 	$query .= "
@@ -207,7 +178,7 @@ function findObjectParentCandidates ($object_id)
 	$result = usePreparedSelectBlade ($query, $args);
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['id']] = empty ($row['name']) ? sprintf("[%s] - object %d", decodeObjectType ($row['objtype_id'], 'o'), $row['id']) : $row['name'];
+		$ret[$row['id']] = empty ($row['name']) ? sprintf("[%s] - object %d", decodeObjectType ($row['objtype_id']), $row['id']) : $row['name'];
 	return $ret;
 }
 
@@ -228,8 +199,8 @@ function sortObjectAddressesAndNames ($a, $b)
 
 function renderPopupObjectSelector()
 {
+	assertPermission('object', 'default');
 	$object_id = getBypassValue();
-	echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
 	echo '<h2>Choose a container:</h2>';
 	echo '<form action="javascript:;">';
 	$parents = findObjectParentCandidates($object_id);
@@ -239,11 +210,12 @@ function renderPopupObjectSelector()
 		"if (getElementById(\"parents\").value != \"\") {".
 		"	opener.location=\"?module=redirect&page=object&tab=edit&op=linkObjects&object_id=${object_id}&child_entity_type=object&child_entity_id=${object_id}&parent_entity_type=object&parent_entity_id=\"+getElementById(\"parents\").value; ".
 		"	window.close();}'>";
-	echo '</form></div>';
+	echo '</form>';
 }
 
 function handlePopupPortLink()
 {
+	assertPermission('depot', 'default');
 	assertUIntArg ('port');
 	assertUIntArg ('remote_port');
 	assertStringArg ('cable', TRUE);
@@ -278,6 +250,19 @@ function handlePopupPortLink()
 		if ($remote_port_info['oif_id'] != $type_remote)
 			commitUpdatePortOIF ($remote_port_info['id'], $type_remote);
 		linkPorts ($port_info['id'], $remote_port_info['id'], $_REQUEST['cable']);
+		// patch cable?
+		if (array_key_exists ('heap_id', $_REQUEST))
+		{
+			// Leave the compatibility constraints check up to the foreign keys.
+			if (0 != $heap_id = genericAssertion ('heap_id', 'uint0'))
+			{
+				$heaps = getPatchCableHeapSummary();
+				if (commitModifyPatchCableAmount ($heap_id, -1))
+					showSuccess ('consumed a patch cable from ' . formatPatchCableHeapAsPlainText ($heaps[$heap_id]));
+				else
+					showError ('failed to consume a patch cable');
+			}
+		}
 		showOneLiner 
 		(
 			8, 
@@ -350,7 +335,7 @@ END
 		else
 		{
 			echo '<label>' . $port_info['iif_name'] . ' ';
-			printSelect (getExistingPortTypeOptions ($port_info['id']), array ('class' => 'porttype', 'name' => 'port_type'), $type_local);
+			printSelect (getExistingPortTypeOptions ($port_info), array ('class' => 'porttype', 'name' => 'port_type'), $type_local);
 			echo '</label>';
 		}
 		echo ' &mdash; ';
@@ -362,7 +347,7 @@ END
 		else
 		{
 			echo '<label>' . $remote_port_info['iif_name'] . ' ';
-			printSelect (getExistingPortTypeOptions ($remote_port_info['id']), array ('class' => 'porttype', 'name' => 'remote_port_type'), $type_remote);
+			printSelect (getExistingPortTypeOptions ($remote_port_info), array ('class' => 'porttype', 'name' => 'remote_port_type'), $type_remote);
 			echo '</label>';
 		}
 		echo ' ' . formatPort ($remote_port_info);
@@ -374,6 +359,9 @@ END
 
 function renderPopupPortSelector()
 {
+	if (isset ($_REQUEST['do_link']))
+		return handlePopupPortLink();
+	assertPermission('depot', 'default');
 	assertUIntArg ('port');
 	$port_id = $_REQUEST['port'];
 	$port_info = getPortInfo ($port_id);
@@ -439,6 +427,11 @@ function renderPopupPortSelector()
 	{
 		echo getSelect ($spare_ports, array ('name' => 'remote_port', 'size' => getConfigVar ('MAXSELSIZE')), NULL, FALSE);
 		echo "<p>Cable ID: <input type=text id=cable name=cable>";
+		// suggest patch cables where it makes sense
+		$heaps = getPatchCableHeapOptionsForOIF ($port_info['oif_id']);
+		if (count ($heaps))
+			// Use + instead of array_merge() to avoid renumbering the keys.
+			echo '<p>Patch cable: ' . getSelect (array (0 => 'none') + $heaps, array ('name' => 'heap_id'));
 		echo "<p><input type='submit' value='Link' name='do_link'>";
 	}
 	finishPortlet();
@@ -447,7 +440,7 @@ function renderPopupPortSelector()
 
 function renderPopupIPv4Selector()
 {
-	echo '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
+	assertPermission('ipv4space', 'default');
 	echo '<h2>Choose a port:</h2><br><br>';
 	echo '<form action="javascript:;">';
 	echo '<input type=hidden id=ip>';
@@ -462,54 +455,20 @@ function renderPopupIPv4Selector()
 		"if (getElementById(\"ip\")!=\"\") {".
 		" opener.document.getElementById(\"remoteip\").value=getElementById(\"ip\").value;".
 		" window.close();}'>";
-	echo '</form></div>';
+	echo '</form>';
 }
 
-function renderPopupHTML()
+function renderPopupHTML ($contents)
 {
-	global $pageno, $tabno;
-header ('Content-Type: text/html; charset=UTF-8');
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
-<?php
-	assertStringArg ('helper');
-	$text = '';
-	switch ($_REQUEST['helper'])
-	{
-		case 'objlist':
-			$pageno = 'object';
-			$tabno = 'default';
-			fixContext();
-			assertPermission();
-			$text .= getOutputOf ('renderPopupObjectSelector');
-			break;
-		case 'portlist':
-			$pageno = 'depot';
-			$tabno = 'default';
-			fixContext();
-			assertPermission();
-			$text .= '<div style="background-color: #f0f0f0; border: 1px solid #3c78b5; padding: 10px; height: 100%; text-align: center; margin: 5px;">';
-			if (isset ($_REQUEST['do_link']))
-				$text .= getOutputOf ('callHook', 'handlePopupPortLink');
-			else
-				$text .= getOutputOf ('callHook' , 'renderPopupPortSelector');
-			$text .= '</div>';
-			break;
-		case 'inet4list':
-			$pageno = 'ipv4space';
-			$tabno = 'default';
-			fixContext();
-			assertPermission();
-			$text .= getOutputOf ('renderPopupIPv4Selector');
-			break;
-		default:
-			throw new InvalidRequestArgException ('helper', $_REQUEST['helper']);
-	}
-	echo '<head><title>RackTables pop-up</title>';
-	printPageHeaders();
-	echo '</head>';
-	echo '<body style="height: 100%;">' . $text . '</body>';
-?>
+<head>
+<title>RackTables pop-up</title>
+<?php printPageHeaders(); ?>
+</head>
+<body style="height: 100%;">
+<div class="popupbar"><?php echo $contents; ?></div>
+</body>
 </html>
 <?php
 }

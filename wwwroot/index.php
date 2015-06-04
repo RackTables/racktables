@@ -82,15 +82,10 @@ try {
 		{
 			dispatchImageRequest();
 		}
-		catch (RTPermissionDenied $e)
-		{
-			ob_clean();
-			renderAccessDeniedImage();
-		}
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderErrorImage();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError;
 		}
 		break;
 
@@ -152,7 +147,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 
@@ -168,7 +163,7 @@ try {
 		catch (Exception $e)
 		{
 			ob_clean();
-			renderProgressBarError();
+			throw ($e instanceof RTImageError) ? $e : new RTImageError ('pbar_error');
 		}
 		break;
 
@@ -258,7 +253,20 @@ try {
 	case 'popup':
 		require_once 'inc/popup.php';
 		require_once 'inc/init.php';
-		renderPopupHTML();
+		prepareNavigation();
+		fixContext();
+		assertPermission();
+		$helper = assertStringArg ('helper');
+
+		header ('Content-Type: text/html; charset=UTF-8');
+		// call the main handler - page or tab handler.
+		if (isset ($popuphandler[$helper]) and is_callable ($popuphandler[$helper]))
+			call_user_func ($popuphandler[$helper], $helper);
+		else
+			throw new RackTablesError ("Missing handler function for node '${handler}'", RackTablesError::INTERNAL);
+		$contents = ob_get_contents();
+		ob_clean();
+		renderPopupHTML ($contents);
 		break;
 
 	case 'upgrade':

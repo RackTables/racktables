@@ -20,53 +20,64 @@ Below is a list of known-good distributions with respective setup notes.
 * Apache/PHP: yum install httpd php php-mysql php-pdo php-gd php-snmp \
               php-mbstring php-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
-section of "/etc/my.cnf" file and restart mysqld.
+  section of "/etc/my.cnf" file and restart mysqld.
 
 *** Debian 6
 * MySQL: aptitude install mysql-server-5.1
 * Apache/PHP: aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
-section of "/etc/mysql/my.cnf" file and restart mysqld.
+  section of "/etc/mysql/my.cnf" file and restart mysqld.
 
 *** Debian 7 with nginx
 * MySQL: aptitude install mysql-server-5.1
 * nginx: aptitude install nginx php5-fpm
-* Remember to adjust server_name in server {} section, otherwise your logout link
-* will point to localhost (and thus fail).
-* Notice, that fpm.sock is advised, keep the rest on default configuration, or
-* tweak to your needs. You may need to set fastcgi_read_timeout 600; if you use
-* some external addons like fping, which may take some time in certain situations.
-* Please note that setting aggresive caching for php scripts may result in stale
-* content - so maximum of 60 seconds is advised, but by default it is not enabled.
+  Remember to adjust server_name in server {} section, otherwise your logout link
+  will point to localhost (and thus fail).
+  Notice, that fpm.sock is advised, keep the rest on default configuration, or
+  tweak to your needs. You may need to set fastcgi_read_timeout 600; if you use
+  some external addons like fping, which may take some time in certain situations.
+  Please note that setting aggresive caching for php scripts may result in stale
+  content - so maximum of 60 seconds is advised, but by default it is not enabled.
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
-section of "/etc/mysql/my.cnf" file and restart mysqld.
+  section of "/etc/mysql/my.cnf" file and restart mysqld.
+
+*** Ubuntu 14.04
+* MySQL: apt-get install mysql-server
+* Apache/PHP: apt-get install apache2-bin libapache2-mod-php5 php5-gd \
+              php5-mysql php5-snmp
+              # php5-curl php5-ldap
+* To enable Unicode:
+  printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf
+  service mysql restart
+* During install time: MySQL UNIX socket path is /var/run/mysqld/mysqld.sock
+  and Apache httpd runs as www-data:www-data.
 
 *** ALTLinux 4.0
 * MySQL: apt-get install MySQL-server
 * Apache/PHP: apt-get install apache2-httpd-prefork php5-gd2 \
-php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
+  php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring
 * To enable Unicode, add "CHSET=utf8" line to "/etc/sysconfig/mysqld" file
-and restart mysqld.
+  and restart mysqld.
 
 *** openSUSE 11.0
 * MySQL: YaST -> Software -> software management -> Web and LAMP server -> mysql
 * Apache/PHP: use YaST to install apache2-mod_php5, php5-gd, php5-mbstring,
-php5-mysql, php5-bcmath, php5-snmp and php5-ldap
+  php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 * To enable Unicode, add "default-character-set=utf8" line to "[mysql]"
-section of "/etc/my.cnf" file and restart mysqld.
+  section of "/etc/my.cnf" file and restart mysqld.
 
 *** Scientific Linux 6
 * MySQL: yum install mysql-server mysql
 * Apache/PHP: httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
-section of "/etc/my.cnf" file and restart mysqld.
+  section of "/etc/my.cnf" file and restart mysqld.
 
 *** CentOS 5
 * MySQL: yum install mysql-server mysql
 * Apache/PHP: httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring \
               php53-bcmath
 * To enable Unicode, add "character-set-server=utf8" line to "[mysqld]"
-section of "/etc/my.cnf" file and restart mysqld.
+  section of "/etc/my.cnf" file and restart mysqld.
 
 *** FreeBSD 8
 * Apache/PHP:

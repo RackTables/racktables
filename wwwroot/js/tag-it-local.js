@@ -22,7 +22,7 @@ $(document).ready(function() {
 
 function getTagChild(tag, tags_trace, tags_name_to_id) {
 	var result = [];
-	if (tags_trace.length > 0) {
+	if (Object.keys(tags_trace).length > 0) {
 		if (typeof tag == "undefined" || tag.length == 0) { // empty tag
 			for(var k in tags_trace) {
 				if (tags_trace[k].length == 0)
@@ -58,7 +58,7 @@ function finder (source, req_term) {
 function suggest_search (term) {
 	var results = [];
 	if (term == "*") {
-		if (typeof(this.options.tags_trace) != 'undefined' && this.options.tags_trace.length > 0) {
+		if (typeof(this.options.tags_trace) != 'undefined' &&  Object.keys(this.options.tags_trace).length > 0) {
 			if (typeof(this.tagInput) != 'undefined')
 				this.tagInput.autocomplete('widget').addClass('indented');
 			var roots = [];
@@ -112,11 +112,18 @@ function suggest_search (term) {
 		results.sort();
 	}
 	else {
+		var wildcard = false;
+		if (/\*$/.test(term))
+		{
+			wildcard = true;
+			term = term.substring(0, term.length - 1);
+		}
 		results = finder(this.options.available_tags, term);
 		if (results.length == 0) {
 			results = finder(this.options.all_tags, term);
 		}
-		results = results.slice(0, suggest_size); // cutting
+		if (! wildcard)
+			results = results.slice(0, suggest_size); // cutting
 		results.sort();
 	}
 	
@@ -130,7 +137,7 @@ function suggest (request, response) {
 
 function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, expand_all_btn, pass_value) {
 	var tags_name_to_id = [];
-	var tags_trace = [];
+	var tags_trace = {};
 	var tags_to_name = [];
 	var all_tags = [];
 	var available_tags = [];
@@ -217,9 +224,13 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 	var oldresizeMenu = $.ui.autocomplete.prototype._resizeMenu;
 	$.ui.autocomplete.prototype._resizeMenu = function() {
 		//oldresizeMenu.call(this);
-		var ul = this.menu.element;
-		ul.children("li:(.ui-menu-item)").addClass("tagit-menu-item");
-		ul.removeClass("ui-widget-content");
+		// do not interfere with other user-defined autocomplete inputs
+		if ($(this.element).filter('input[data-tagit=yes]').length)
+		{
+			var ul = this.menu.element;
+			ul.children("li:(.ui-menu-item)").addClass("tagit-menu-item");
+			ul.removeClass("ui-widget-content");
+		}
 	};
 
 	function renderItem (ul, item) {

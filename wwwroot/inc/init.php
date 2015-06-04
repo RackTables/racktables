@@ -94,6 +94,9 @@ $taglist = getTagList();
 $tagtree = treeFromList ($taglist);
 
 $auto_tags = array();
+if (! isCLIMode() && isset ($_SERVER['REMOTE_ADDR']))
+	$auto_tags[] = array ('tag' => '$client_' . $_SERVER['REMOTE_ADDR']);
+
 // Initial chain for the current user.
 $user_given_tags = array();
 
@@ -138,8 +141,9 @@ $op = '';
 
 // load additional plugins
 ob_start();
-foreach (glob("$racktables_plugins_dir/*.php") as $filename)
-	require_once $filename;
+if (FALSE !== $plugin_files = glob ("${racktables_plugins_dir}/*.php"))
+	foreach ($plugin_files as $plugin_file)
+		 require_once $plugin_file;
 // display plugins output if it contains something but newlines
 $tmp = ob_get_clean();
 if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))

@@ -42,6 +42,9 @@ $image['objectlog']['height'] = 200;
 $image['virtual']['path'] = 'pix/virtualresources.png';
 $image['virtual']['width'] = 218;
 $image['virtual']['height'] = 200;
+$image['cables']['path'] = 'pix/patch_cables.png';
+$image['cables']['width'] = 218;
+$image['cables']['height'] = 200;
 $image['download']['path'] = 'pix/download.png';
 $image['download']['width'] = 16;
 $image['download']['height'] = 16;
@@ -63,6 +66,9 @@ $image['Cut gray']['height'] = 22;
 $image['CUT']['path'] = 'pix/tango-edit-cut-32x32.png';
 $image['CUT']['width'] = 32;
 $image['CUT']['height'] = 32;
+$image['CUT gray']['path'] = 'pix/tango-edit-cut-32x32-gray.png';
+$image['CUT gray']['width'] = 32;
+$image['CUT gray']['height'] = 32;
 $image['add']['path'] = 'pix/tango-list-add.png';
 $image['add']['width'] = 16;
 $image['add']['height'] = 16;
@@ -289,6 +295,9 @@ function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 	echo getSelect ($optionList, $select_attrs, $selected_id);
 }
 
+// $selected_id can be an array if you want to use multiselect
+// in order to use multiselect $select_attrs should contain smth like this:
+// 		[ 'name' => 'some_name[]', 'multiple' => 'multiple', 'size' => 5 ]
 // Input array keys are OPTION VALUEs and input array values are OPTION text.
 function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $treat_single_special = TRUE)
 {
@@ -311,7 +320,13 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 		$ret .= " ${attr_name}=${attr_value}";
 	$ret .= '>';
 	foreach ($optionList as $dict_key => $dict_value)
-		$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>";
+	{
+		if (is_array ($selected_id))
+			$is_selected = in_array ($dict_key, $selected_id);
+		else
+			$is_selected = $dict_key == $selected_id;
+		$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>";
+	}
 	$ret .= '</select>';
 	return $ret;
 }
@@ -324,7 +339,7 @@ function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = N
 // Input is a cooked list of OPTGROUPs, each with own sub-list of OPTIONs in the same
 // format as printSelect() expects.
 // If tree is true, hierarchical drop-boxes are used, otherwise optgroups are used.
-function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree = false)
+function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 {
 	// special treatment for ungrouped data
 	if (count ($groupList) == 1 and isset ($groupList['other']))
@@ -333,96 +348,55 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL, $tree =
 		return '';
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
-	if ($tree)
+
+	$ret = '<select';
+	foreach ($select_attrs as $attr_name => $attr_value)
+		$ret .= " ${attr_name}=${attr_value}";
+	$ret .= ">\n";
+	foreach ($groupList as $groupname => $groupdata)
 	{
-		# it is safe to call many times for the same file
-		addJS ('js/jquery.optionTree.js');
-		$ret  = "<input type=hidden name=${select_attrs['name']}>\n";
-		$ret .= "<script type='text/javascript'>\n";
-		$ret .= "\$(function() {\n";
-		$ret .= "    var option_tree = {\n";
-		foreach ($groupList as $groupname => $groupdata)
+		$ret .= "<optgroup label='${groupname}'>\n";
+		foreach ($groupdata as $dict_key => $dict_value)
 		{
-			$ret .= "        '${groupname}': {";
-			foreach ($groupdata as $dict_key => $dict_value)
-				$ret .= "\"${dict_value}\":'${dict_key}', ";
-			$ret .= "},\n";
+			if (is_array ($selected_id))
+				$is_selected = in_array ($dict_key, $selected_id);
+			else
+				$is_selected = $dict_key == $selected_id;
+			$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>\n";
 		}
-		$ret .= "    };\n";
-		$ret .= "    var options = {empty_value: '', choose: 'select...'};\n";
-		$ret .= "    \$('input[name=${select_attrs['name']}]').optionTree(option_tree, options);\n";
-		$ret .= "});\n";
-		$ret .= "</script>\n";
+		$ret .= "</optgroup>\n";
 	}
-	else
-	{
-		$ret = '<select';
-		foreach ($select_attrs as $attr_name => $attr_value)
-			$ret .= " ${attr_name}=${attr_value}";
-		$ret .= ">\n";
-		foreach ($groupList as $groupname => $groupdata)
-		{
-			$ret .= "<optgroup label='${groupname}'>\n";
-			foreach ($groupdata as $dict_key => $dict_value)
-				$ret .= "<option value='${dict_key}'" . ($dict_key == $selected_id ? ' selected' : '') . ">${dict_value}</option>\n";
-			$ret .= "</optgroup>\n";
-		}
-		$ret .= "</select>\n";
-	}
+	$ret .= "</select>\n";
 	return $ret;
 }
 
 function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 {
-	function serializeJSArray ($options)
-	{
-		$tmp = array();
-		foreach ($options as $key => $value)
-			$tmp[] = "'${key}': \"${value}\"";
-		return '{' . implode (', ', $tmp) . "}\n";
-	}
-	function serializeJSTree ($tree_options)
-	{
-		$self = __FUNCTION__;
-		$tmp = array();
-		# Leaves on the PHP tree are stored "value => label" way,
-		# non-leaves are stored "label => array" way, and the JS
-		# tree is always built "label => value" or "label => array"
-		# way, hence a structure transform is required.
-		foreach ($tree_options as $key => $value)
-			$tmp[] = is_array ($value) ?
-				'"' . str_replace ('"', '\"', $key) . '": ' . $self ($value) :
-				'"' . str_replace ('"', '\"', $value) . '": "' . str_replace ('"', '\"', $key) . '"';
-		return '{' . implode (', ', $tmp) . "}\n";
-	}
-
 	$default_config = array
 	(
 		'choose' => 'select...',
 		'empty_value' => '',
+		'indexed' => true,
 	);
-	foreach ($tree_config as $cfgoption_name => $cfgoption_value)
-		$default_config[$cfgoption_name] = $cfgoption_value;
-	# it is safe to call many times for the same file
 	addJS ('js/jquery.optionTree.js');
-	$ret  = "<input type=hidden name=${tree_name}>\n";
-	$ret .= "<script type='text/javascript'>\n";
-	$ret .= "\$(function() {\n";
-	$ret .= "    var option_tree = " . serializeJSTree ($tree_options) . ";\n";
-	$ret .= "    var options = " . serializeJSArray ($default_config) . ";\n";
-	$ret .= "    \$('input[name=${tree_name}]').optionTree(option_tree, options);\n";
-	$ret .= "});\n";
-	$ret .= "</script>\n";
-	return $ret;
+	addJS ("
+$(function() {
+	var option_tree = " . json_encode ($tree_options) . ";
+	var options = " . json_encode ($tree_config + $default_config) . ";
+	$('input[name=${tree_name}]').optionTree(option_tree, options);
+});
+", TRUE);
+
+	return "<input type=hidden name=${tree_name}>";
 }
 
-function printImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
+function printImageHREF ($tag, $title = '', $do_input = FALSE)
 {
-	echo getImageHREF ($tag, $title, $do_input, $tabindex);
+	echo getImageHREF ($tag, $title, $do_input);
 }
 
 // this would be better called mkIMG(), make "IMG" HTML element
-function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
+function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
 	if (!isset ($image[$tag]))
@@ -434,7 +408,6 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE, $tabindex = 0)
 			"<input type=image name=submit class=icon " .
 			"src='${img['path']}' " .
 			"border=0 " .
-			($tabindex ? "tabindex=${tabindex}" : '') .
 			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
@@ -504,7 +477,7 @@ function transformRequestData()
 function addJS ($data, $inline = FALSE, $group = 'default')
 {
 	static $javascript = array();
-	static $seen_filenames = array();
+	static $seen_data = array();
 
 	if (! isset ($data))
 	{
@@ -527,23 +500,17 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		foreach ($javascript as $group_name => $group_array)
 			foreach ($group_array as $item)
 				if ($item['type'] == 'file')
-					$seen_filenames[$item['script']] = 1;
+					$seen_data[$item['script']] = 1;
 	}
 
-	if ($inline)
-		$javascript[$group][] = array
-		(
-			'type' => 'inline',
-			'script' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
+	if (! isset ($seen_data[$data]))
 	{
 		$javascript[$group][] = array
 		(
-			'type' => 'file',
+			'type' => $inline ? 'inline' : 'file',
 			'script' => $data,
 		);
-		$seen_filenames[$data] = 1;
+		$seen_data[$data] = 1;
 	}
 }
 
@@ -554,24 +521,18 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 function addCSS ($data, $inline = FALSE)
 {
 	static $styles = array();
-	static $seen_filenames = array();
+	static $seen_data = array();
 
 	if (! isset ($data))
 		return $styles;
-	if ($inline)
-		$styles[] = array
-		(
-			'type' => 'inline',
-			'style' => $data,
-		);
-	elseif (! isset ($seen_filenames[$data]))
+	if (! isset ($seen_data[$data]))
 	{
 		$styles[] = array
 		(
-			'type' => 'file',
+			'type' => $inline ? 'inline' : 'file',
 			'style' => $data,
 		);
-		$seen_filenames[$data] = 1;
+		$seen_data[$data] = 1;
 	}
 }
 
@@ -588,7 +549,7 @@ function getRenderedIPNetCapacity ($range)
 function getRenderedIPv4NetCapacity ($range)
 {
 	$class = 'net-usage';
-	if (isset ($range['addrc']))
+	if (isset ($range['own_addrlist']))
 	{
 		// full mode
 		// $a is "aquamarine zone", $b is "gray zone"
@@ -603,9 +564,9 @@ function getRenderedIPv4NetCapacity ($range)
 			foreach ($range['spare_ranges'] as $mask => $spare_list)
 				$a_total = bcadd ($a_total, bcmul (count ($spare_list), ip4_mask_size ($mask)), 0);
 		}
-		$a_used = $range['own_addrc'];
+		$a_used = markupIPAddrList ($range['own_addrlist']);
 		$b_total = bcsub ($total, $a_total, 0);
-		$b_used = $range['addrc'] - $a_used;
+		$b_used = markupIPAddrList ($range['addrlist']) - $a_used;
 
 		// generate link to progress bar image
 		$width = 100;
@@ -667,8 +628,8 @@ function getRenderedIPv6NetCapacity ($range)
 {
 	$div_id = $range['ip'] . '/' . $range['mask'];
 	$class = 'net-usage';
-	if (isset ($range['addrc']))
-		$used = $range['addrc'];
+	if (isset ($range['addrlist']))
+		$used = markupIPAddrList ($range['addrlist']);
 	else
 	{
 		$used = NULL;
@@ -720,6 +681,8 @@ function printPageHeaders ()
 	ksort ($pageheaders);
 	foreach ($pageheaders as $s)
 		echo $s . "\n";
+	// add tabindex to all input forms
+	addJS ('js/tabindex_auto.js', FALSE);
 
 	// add CSS styles
 	foreach (addCSS (NULL) as $item)
@@ -787,7 +750,7 @@ function serializeTags ($chain, $baseurl = '')
 			$parent_info[] = $taginfo['tag'];
 			if (strlen ($title))
 				$title .= "\n";
-			$title .= implode (" \xE2\x86\x92  ", $parent_info); # right arrow
+			$title .= implode (" &rarr;  ", $parent_info);
 		}
 		if (strlen ($title))
 			$title = "title='$title'";
@@ -906,7 +869,10 @@ function renderEntitySummary ($cell, $title, $values = array())
 function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = '')
 {
 	if (isset ($params))
+	{
 		$ret = '<a href="' . makeHrefProcess ($params) . '"';
+		$class .= ' input';
+	}
 	else
 	{
 		$ret = '<a href="#" onclick="return false;"';
@@ -930,6 +896,30 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 	return $ret;
 }
 
+function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $title = '', $comment = '', $class = '')
+{
+	$ret = '';
+	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
+	$ret .= '<a href="#"';
+	$class = trim ($class);
+	if (! empty ($class))
+		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
+	if (! empty ($comment))
+		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
+	$href = makeHref (array ('module' => 'popup', 'helper' => $helper) + makePageParams ($params));
+	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
+
+	if (! empty ($img_name))
+	{
+		$ret .= getImageHREF ($img_name, $comment);
+		if (! empty ($title))
+			$ret .= ' ';
+	}
+	$ret .= $title;
+	$ret .= '</a>';
+	return $ret;
+}
+
 function renderProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 {
 	echo getProgressBar ($percentage, $theme, $inline);
@@ -946,7 +936,6 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 		$_REQUEST['theme'] = $theme;
 		$src = 'data:image/png;base64,' . chunk_split (base64_encode (getOutputOf ('renderProgressBarImage', $done)));
 		$_REQUEST = $bk_request;
-		header ('Content-type: text/html');
 	}
 	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
 	return $ret;
@@ -958,7 +947,10 @@ function renderNetVLAN ($cell)
 		return;
 	$links = array();
 	foreach ($cell['8021q'] as $vi)
-		$links[] = mkA ($vi['vlan_id'], 'vlan', "${vi['domain_id']}-${vi['vlan_id']}");
+	{
+		$vlan_info = getVlanRow ("${vi['domain_id']}-${vi['vlan_id']}");
+		$links[] = formatVLANAsShortLink ($vlan_info);
+	}
 	$noun = count ($cell['8021q']) > 1 ? 'VLANs' : 'VLAN';
 	echo "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
 }
@@ -1013,6 +1005,8 @@ function serializeFileLinks ($links, $scissors = FALSE)
 	return $ret;
 }
 
+// XXX: in new code please use one of the stringFor... functions below
+//
 // This is a dual-purpose formating function:
 // 1. Replace empty strings with nbsp.
 // 2. Cut strings that are too long: append "cut here" indicator and provide a mouse hint.
@@ -1032,8 +1026,59 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 		($usetags ? '</span>' : '');
 }
 
+// "Some text, %s, some more text."
+function stringForLabel ($string, $maxlen = 30)
+{
+	// A tab counts for a space.
+	$string = preg_replace ("/\t/", ' ', $string);
+	$full = htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	if ($maxlen == 0 || mb_strlen ($string) <= $maxlen)
+		return $full;
+	$trimmed = mb_substr ($string, 0, $maxlen - 1);
+	$trimmed = htmlspecialchars ($trimmed, ENT_QUOTES, 'UTF-8');
+	$trimmed = str_replace (' ', '&nbsp;', $trimmed) . '&hellip;';
+	return "<span title='${full}'>${trimmed}</span>";
+}
+
+// "<TD>%s</TD>"
+function stringForTD ($string, $maxlen = 30)
+{
+	// The non-breaking space helps the TD to render properly.
+	return $string == '' ? '&nbsp;' : stringForLabel ($string, $maxlen);
+}
+
+// "<INPUT type=text value='%s'>"
+function stringForTextInputValue ($string, $maxlen = 30)
+{
+	if ($maxlen != 0)
+		$string = mb_substr ($string, 0, $maxlen);
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+}
+
+// "<TEXTAREA>%s</TEXTAREA>"
+function stringForTextarea ($string)
+{
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+}
+
+// <OPTION>%s</OPTION>
+function stringForOption ($string, $maxlen = 30)
+{
+	$string = preg_replace ("/\t/", ' ', $string);
+	if ($maxlen == 0 || mb_strlen ($string) <= $maxlen)
+		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	$string = mb_substr ($string, 0, $maxlen - 1);
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . '&hellip;';
+}
+
 function printTagsPicker ($preselect=NULL)
 {
+	global $taglist;
+	if (! count ($taglist))
+	{
+		printf ('(None exist yet, %s?)', mkA ('configure', 'tagtree', NULL, 'edit'));
+		return;
+	}
 	printTagsPickerInput ();
 	printTagsPickerUl ($preselect);
 	enableTagsPicker ();

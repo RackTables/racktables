@@ -53,7 +53,7 @@ function uncheckAll () {
 }
 
 // used by 802.1Q sync form
-function checkColumnOfRadios (prefix, numRows, suffix)
+function checkColumnOfRadios8021Q (prefix, numRows, suffix)
 {
 	var elemId;
 	for (var i=0; i < numRows; i++)

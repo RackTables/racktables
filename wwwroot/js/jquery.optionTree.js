@@ -171,7 +171,7 @@ $.fn.optionTree = function(tree, options) {
             var foundPreselect = false;
             $.each(tree, function(k, v) {
                 var label, value;
-                if (options.indexed) {
+                if (options.indexed && typeof v !== 'object') {
                     label = v;
                     value = k;
                 } else {

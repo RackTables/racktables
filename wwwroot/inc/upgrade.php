@@ -263,6 +263,10 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.5',
 		'0.20.6',
 		'0.20.7',
+		'0.20.8',
+		'0.20.9',
+		'0.20.10',
+		'0.20.11',
 	);
 	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
 		return NULL;
@@ -1605,6 +1609,239 @@ ENDOFTRIGGER;
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.7' WHERE varname = 'DB_VERSION'";
 			break;
+		case '0.20.8':
+			$query[] = "ALTER TABLE `VLANSTRule` CHANGE COLUMN `wrt_vlans` `wrt_vlans` text";
+
+			$query[] = "
+CREATE TABLE `PortOuterInterface` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `oif_name` char(48) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `oif_name` (`oif_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+";
+			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
+			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
+			// and 10GBase-KR. Make respective changes and make primary key auto
+			// increment start at 2000.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '10GBase-KX4' WHERE id = 41";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1999, '10GBase-KR')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1999, 1999)";
+			$query[] = "DELETE FROM Dictionary WHERE chapter_id = 2";
+			$query[] = "DELETE FROM Chapter WHERE id = 2";
+			$query[] = "ALTER TABLE PortInterfaceCompat ADD CONSTRAINT `PortInterfaceCompat-FK-oif_id` FOREIGN KEY (oif_id) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (type1) REFERENCES PortOuterInterface (id)";
+			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (type2) REFERENCES PortOuterInterface (id)";
+			// Add more 40G and 100G standards.
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
+(1660,'40GBase-FR'),
+(1662,'40GBase-ER4'),
+(1672,'100GBase-SR4'),
+(1673,'100GBase-KR4'),
+(1674,'100GBase-KP4')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+(10,1660),
+(10,1662),
+(11,1672),
+(11,1673),
+(11,1674)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES
+(1660,1660),
+(1662,1662),
+(1672,1672),
+(1673,1673),
+(1674,1674)";
+			// Refine 1G OIF list: fix spelling and add a new standard.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '1000Base-LX10' WHERE id = 1205";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (42, '1000Base-EX')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (42, 42)";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (3, 42), (4,42)";
+			// patch cables
+		$query[] = "
+CREATE TABLE `PatchCableConnector` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `connector` char(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `connector_per_origin` (`connector`,`origin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableType` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `origin` enum('default','custom') NOT NULL DEFAULT 'custom',
+  `pctype` char(64) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableConnectorCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `connector_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`connector_id`),
+  KEY `connector_id` (`connector_id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-connector_id` FOREIGN KEY (`connector_id`) REFERENCES `PatchCableConnector` (`id`),
+  CONSTRAINT `PatchCableConnectorCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableHeap` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pctype_id` int(10) unsigned NOT NULL,
+  `end1_conn_id` int(10) unsigned NOT NULL,
+  `end2_conn_id` int(10) unsigned NOT NULL,
+  `amount` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `length` decimal(5,2) unsigned NOT NULL DEFAULT '1.00',
+  `description` char(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compat1` (`pctype_id`,`end1_conn_id`),
+  KEY `compat2` (`pctype_id`,`end2_conn_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat1` FOREIGN KEY (`pctype_id`, `end1_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`),
+  CONSTRAINT `PatchCableHeap-FK-compat2` FOREIGN KEY (`pctype_id`, `end2_conn_id`) REFERENCES `PatchCableConnectorCompat` (`pctype_id`, `connector_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableHeapLog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `heap_id` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  `user` char(64) NOT NULL,
+  `message` char(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `heap_id-date` (`heap_id`,`date`),
+  CONSTRAINT `PatchCableHeapLog-FK-heap_id` FOREIGN KEY (`heap_id`) REFERENCES `PatchCableHeap` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "
+CREATE TABLE `PatchCableOIFCompat` (
+  `pctype_id` int(10) unsigned NOT NULL,
+  `oif_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`pctype_id`,`oif_id`),
+  KEY `oif_id` (`oif_id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-oif_id` FOREIGN KEY (`oif_id`) REFERENCES `PortOuterInterface` (`id`),
+  CONSTRAINT `PatchCableOIFCompat-FK-pctype_id` FOREIGN KEY (`pctype_id`) REFERENCES `PatchCableType` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+		$query[] = "INSERT INTO PatchCableConnector (id, origin, connector) VALUES
+(1,'default','FC/PC'),(2,'default','FC/APC'),
+(3,'default','LC/PC'),(4,'default','LC/APC'),
+(5,'default','MPO-12/PC'),(6,'default','MPO-12/APC'),
+(7,'default','MPO-24/PC'),(8,'default','MPO-24/APC'),
+(9,'default','SC/PC'),(10,'default','SC/APC'),
+(11,'default','ST/PC'),(12,'default','ST/APC'),
+(13,'default','T568/8P8C/RJ45'),
+(14,'default','SFP-1000'),
+(15,'default','SFP+'),
+(999,'default','CX4/SFF-8470')";
+		$query[] = "INSERT INTO PatchCableType (id, origin, pctype) VALUES
+(1,'default','duplex OM1'),
+(2,'default','duplex OM2'),
+(3,'default','duplex OM3'),
+(4,'default','duplex OM4'),
+(5,'default','duplex OS1'),
+(6,'default','duplex OS2'),
+(7,'default','simplex OM1'),
+(8,'default','simplex OM2'),
+(9,'default','simplex OM3'),
+(10,'default','simplex OM4'),
+(11,'default','simplex OS1'),
+(12,'default','simplex OS2'),
+(13,'default','Cat.5 TP'),
+(14,'default','Cat.6 TP'),
+(15,'default','Cat.6a TP'),
+(16,'default','Cat.7 TP'),
+(17,'default','Cat.7a TP'),
+(18,'default','12-fiber OM3'),
+(19,'default','12-fiber OM4'),
+(20,'default','10Gb/s CX4 coax'),
+(21,'default','24-fiber OM3'),
+(22,'default','24-fiber OM4'),
+(23,'default','1Gb/s 50cm shielded'),
+(24,'default','10Gb/s 24AWG twinax'),
+(25,'default','10Gb/s 26AWG twinax'),
+(26,'default','10Gb/s 28AWG twinax'),
+(27,'default','10Gb/s 30AWG twinax'),
+(999,'default','Cat.3 TP')";
+		$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
+(13,18),(14,18),(15,18),(16,18),(17,18),(999,18), -- 10Base-T: Cat.3+ TP
+(11,1198),(12,1198),(11,1199),(12,1199),          -- 100Base-BX10: 1xSMF
+(5,1197),(6,1197),                                -- 100Base-LX10: 2xSMF
+(5,1200),(6,1200),                                -- 100Base-EX: 2xSMF
+(5,1201),(6,1201),                                -- 100Base-ZX: 2xSMF
+(1,1195),(2,1195),(3,1195),(4,1195),              -- 100Base-FX: 2xMMF
+(1,1196),(2,1196),(3,1196),(4,1196),              -- 100Base-SX: 2xMMF
+(13,19),(14,19),(15,19),(16,19),(17,19),          -- 100Base-TX: Cat.5+ TP
+(11,1206),(12,1206),(11,1207),(12,1207),          -- 1000Base-BX10: 1xSMF
+(5,1204),(6,1204),                                -- 1000Base-LX: 2xSMF
+(5,1205),(6,1205),                                -- 1000Base-LX10: 2xSMF
+(1,1202),(2,1202),(3,1202),(4,1202),              -- 1000Base-SX: 2xMMF
+(1,1203),(2,1203),(3,1203),(4,1203),              -- 1000Base-SX+: 2xMMF
+(13,24),(14,24),(15,24),(16,24),(17,24),          -- 1000Base-T: Cat.5+ TP
+(5,34),(6,34),                                    -- 1000Base-ZX: 2xSMF
+(23,1077),                                        -- 1000Base direct attach: shielded
+(1,30),(2,30),(3,30),(4,30),                      -- 10GBase-SR: 2xMMF
+(5,36),(6,36),                                    -- 10GBase-LR: 2xSMF
+(5,35),(6,35),                                    -- 10GBase-ER: 2xSMF
+(5,38),(6,38),                                    -- 10GBase-ZR: 2xSMF
+(1,39),(2,39),(3,39),(4,39),(5,39),(6,39),        -- 10GBase-LX4: 2xMMF/2xSMF
+(1,37),(2,37),(3,37),(4,37),                      -- 10GBase-LRM: 2xMMF
+(14,1642),(15,1642),(16,1642),(17,1642),          -- 10GBase-T: Cat.6+ TP
+(20,40),                                          -- 10GBase-CX4: coax
+(24,1084),(25,1084),(26,1084),(27,1084),          -- 10GBase direct attach: twinax
+(18,1663),(19,1663),                              -- 40GBase-SR4: 8xMMF
+(5,1664),(6,1664),                                -- 40GBase-LR4: 2xSMF
+(5,1662),(6,1662),                                -- 40GBase-ER4: 2xSMF
+(5,1660),(6,1660),                                -- 40GBase-FR: 2xSMF
+(21,1669),(22,1669),                              -- 100GBase-SR10: 20xMMF
+(18,1672),(19,1672),                              -- 100GBase-SR4: 8xMMF
+(5,1670),(6,1670),                                -- 100GBase-LR4: 2xSMF
+(5,1671),(6,1671)                                 -- 100GBase-ER4: 2xSMF";
+		$query[] = "INSERT INTO PatchCableConnectorCompat (pctype_id, connector_id) VALUES
+(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1), -- FC/PC
+(1,2),(2,2),(3,2),(4,2),(5,2),(6,2),(7,2),(8,2),(9,2),(10,2),(11,2),(12,2), -- FC/APC
+(1,3),(2,3),(3,3),(4,3),(5,3),(6,3),(7,3),(8,3),(9,3),(10,3),(11,3),(12,3), -- LC/PC
+(1,4),(2,4),(3,4),(4,4),(5,4),(6,4),(7,4),(8,4),(9,4),(10,4),(11,4),(12,4), -- LC/APC
+(1,9),(2,9),(3,9),(4,9),(5,9),(6,9),(7,9),(8,9),(9,9),(10,9),(11,9),(12,9), -- SC/PC
+(1,10),(2,10),(3,10),(4,10),(5,10),(6,10),(7,10),(8,10),(9,10),(10,10),(11,10),(12,10), -- SC/APC
+(1,11),(2,11),(3,11),(4,11),(5,11),(6,11),(7,11),(8,11),(9,11),(10,11),(11,11),(12,11), -- ST/PC
+(1,12),(2,12),(3,12),(4,12),(5,12),(6,12),(7,12),(8,12),(9,12),(10,12),(11,12),(12,12), -- ST/APC
+(13,13),(14,13),(15,13),(16,13),(17,13),(999,13), -- T568
+(18,5),(19,5), -- MPO-12/PC
+(18,6),(19,6), -- MPO-12/APC
+(20,999), -- CX4
+(21,7),(22,7), -- MPO-24/PC
+(21,8),(22,8), -- MPO-24/APC
+(23,14), -- SFP-1000
+(24,15),(25,15),(26,15),(27,15) -- SFP+";
+			// add rules for Cisco UCS objects
+			$query[] = "INSERT INTO `ObjectParentCompat` (`parent_objtype_id`, `child_objtype_id`) VALUES (1787,8),(1787,1502)";
+			$query[] = "UPDATE Config SET varvalue = '0.20.8' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.9':
+			$query[] = "ALTER TABLE CactiGraph ADD KEY (server_id)";
+			$query[] = "ALTER TABLE CactiGraph DROP PRIMARY KEY";
+			$query[] = "ALTER TABLE CactiGraph ADD PRIMARY KEY (object_id, server_id, graph_id)";
+			$query[] = "ALTER TABLE CactiGraph DROP KEY `object_id`";
+			$query[] = "UPDATE Config SET description = 'List of pages to display in quick links' WHERE varname = 'QUICK_LINK_PAGES'";
+			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('CACTI_RRA_ID','1','uint','no','no','yes','RRA ID for Cacti graphs displayed in RackTables')";
+			$query[] = "INSERT INTO `Config` (`varname`,`varvalue`,`vartype`,`emptyok`,`is_hidden`,`is_userdefined`,`description`)
+VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object type column on depot page.')";
+
+			$query[] = "INSERT INTO PortInnerInterface (id, iif_name) VALUES (12, 'CFP2'),(13,'CPAK')";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1589, 'empty CFP2'),(1590,'empty CPAK')";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+				(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),
+				(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674)";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1588,1589),(1588,1590),(1589,1589),(1589,1590),(1590,1590)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 12=1589; 13=1590') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
+			$query[] = extendPortCompatQuery();
+
+			$query[] = "UPDATE Config SET varvalue = '0.20.9' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.10':
+			$query[] = "UPDATE Config SET varvalue = '0.20.10' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.11':
+			$query[] = "ALTER TABLE VLANDomain ADD COLUMN `group_id` int(10) UNSIGNED DEFAULT NULL AFTER `id`, " .
+				"ADD CONSTRAINT `VLANDomain-FK-group_id` FOREIGN KEY (`group_id`) REFERENCES `VLANDomain` (`id`) ON DELETE SET NULL";
+
+			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
+			break;
 		case 'dictionary':
 			$query = reloadDictionary();
 			break;
@@ -1824,6 +2061,13 @@ else
 }
 echo '</table>';
 echo '</body></html>';
+}
+
+// returns SQL query to make PortCompat symmetric (insert missing reversed-order pairs).
+// It should be called each time after the PortCompat table pairs being added during upgrade.
+function extendPortCompatQuery()
+{
+	return "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
 }
 
 function convertSLBTablesToBinIPs()

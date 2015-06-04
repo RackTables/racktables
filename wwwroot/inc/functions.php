@@ -10,10 +10,8 @@
 *
 */
 
-// PHP messages in the following defines are suppressed because of the possibility
-// that they are already defined by user in secret.php file
-@define ('TAGNAME_REGEXP', '/^[\p{L}0-9-]( ?([._~+%-] ?)?[\p{L}0-9:])*(%|\+)?$/u');
-@define ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9-]( ?([._~+%-] ?)?[\p{L}0-9:])*(%|\+)?$/u');
+defineIfNotDefined ('TAGNAME_REGEXP', '/^[\p{L}0-9-]( ?([._~+%-] ?)?[\p{L}0-9:])*(%|\+)?$/u');
+defineIfNotDefined ('AUTOTAGNAME_REGEXP', '/^\$[\p{L}0-9-]( ?([._~+%-] ?)?[\p{L}0-9:])*(%|\+)?$/u');
 
 $loclist[0] = 'front';
 $loclist[1] = 'interior';
@@ -35,7 +33,6 @@ $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
 define ('CHAP_OBJTYPE', 1);
-define ('CHAP_PORTTYPE', 2);
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
 define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
@@ -151,6 +148,12 @@ $wdm_packs = array
 );
 
 $log_messages = array(); // messages waiting for displaying
+
+function defineIfNotDefined ($constant, $value, $case_insensitive = FALSE)
+{
+	if (defined ($constant) === FALSE)
+		define ($constant, $value, $case_insensitive);
+}
 
 // This function assures that specified argument was passed
 // and is a number greater than zero.
@@ -278,6 +281,10 @@ function genericAssertion ($argname, $argtype)
 		return assertUIntArg ($argname);
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
+	case 'decimal':
+		if (! preg_match ('/^\d+(\.\d+)?$/', assertStringArg ($argname)))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
+		return $sic[$argname];
 	case 'inet':
 		return assertIPArg ($argname);
 	case 'inet4':
@@ -438,7 +445,7 @@ function fillBypassValues ($pageno, &$args)
 // decision about displayed name is made.
 function formatObjectDisplayedName ($name, $objtype_id)
 {
-	return ($name != '') ? $name : sprintf ('[%s]', decodeObjectType ($objtype_id, 'o'));
+	return ($name != '') ? $name : sprintf ('[%s]', decodeObjectType ($objtype_id));
 }
 
 // Set the dname attribute within a cell
@@ -579,6 +586,15 @@ function applyObjectMountMask (&$rackData, $object_id)
 			}
 }
 
+// check permissions for rack modification
+function rackModificationPermitted ($rackData, $op, $with_context=TRUE)
+{
+	$op_annex = array (array ('tag' => '$op_'.$op), array ('tag' => '$any_op'));
+	$rack_op_annex = array_merge ($rackData['etags'], $rackData['itags'], $rackData['atags'], $op_annex);
+	$context = !$with_context || permitted (NULL, NULL, NULL, $op_annex);
+	return $context && permitted (NULL, NULL, NULL, $rack_op_annex);
+}
+
 // Design change means transition between 'F' and 'A' and back.
 function applyRackDesignMask (&$rackData)
 {
@@ -615,19 +631,20 @@ function applyRackProblemMask (&$rackData)
 function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
-	$parents = getEntityRelatives ('parents', 'object', $object_id);
-	$parent_ids = array();
-	foreach ($parents as $parent)
-		$parent_ids[] = $parent['entity_id'];
+	$object = spotEntity ('object', $object_id);
+	$parents = reindexById (getParents ($object, 'object'));
 
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
+		{
+			$atom = &$rackData[$unit_no][$locidx];
 			if
 			(
-				$rackData[$unit_no][$locidx]['state'] == 'T' and
-				($rackData[$unit_no][$locidx]['object_id'] == $object_id or	in_array($rackData[$unit_no][$locidx]['object_id'], $parent_ids))
+				$atom['state'] == 'T' and
+				($atom['object_id'] == $object_id or isset ($parents[$atom['object_id']]))
 			)
-				$rackData[$unit_no][$locidx]['hl'] = 'h';
+				$atom['hl'] = 'h';
+		}
 }
 
 // This function marks atoms to selected or not depending on their current state.
@@ -866,7 +883,7 @@ function ip6_mask ($prefix_len)
 // in the provided string, an empty string for an empty string or raise an exception.
 function l2addressForDatabase ($string)
 {
-	$string = strtoupper ($string);
+	$string = strtoupper (trim ($string));
 	$ret = '';
 	switch (TRUE)
 	{
@@ -910,36 +927,51 @@ function l2addressFromDatabase ($string)
 	}
 }
 
-// The following 2 functions return previous and next rack IDs for
-// a given rack ID. The order of racks is the same as in renderRackspace()
-// or renderRow().
+// DEPRECATED, remove in 0.21.0
 function getPrevIDforRack ($row_id, $rack_id)
 {
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'prev_key', NULL);
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['prev'];
 }
 
+// DEPRECATED, remove in 0.21.0
 function getNextIDforRack ($row_id, $rack_id)
 {
-	$rackList = doubleLink (listCells ('rack', $row_id));
-	return array_fetch ($rackList[$rack_id], 'next_key', NULL);
+	$n = getRackNeighbors ($row_id, $rack_id);
+	return $n['next'];
 }
 
-// This function finds previous and next array keys for each array key and
-// modifies its argument accordingly.
-function doubleLink ($array)
+function getRackNeighbors ($row_id, $rack_id)
 {
-	$prev_key = NULL;
-	foreach (array_keys ($array) as $key)
+	$ret = array ('prev' => NULL, 'next' => NULL);
+	$ids = selectRackOrder ($row_id);
+	$index = array_search ($rack_id, $ids);
+	if ($index !== FALSE && $index > 0)
+		$ret['prev'] = $ids[$index - 1];
+	if ($index !== FALSE && $index + 1 < count ($ids))
+		$ret['next'] = $ids[$index + 1];
+	return $ret;
+}
+
+// Return a list of rack IDs that are P or less positions
+// far from the given rack in its row.
+function getProximateRacks ($rack_id, $proximity = 0)
+{
+	$ret = array ($rack_id);
+	if ($proximity > 0)
 	{
-		if ($prev_key)
+		$rack = spotEntity ('rack', $rack_id);
+		$rackList = selectRackOrder ($rack['row_id']);
+		$cur_item = array_search ($rack_id, $rackList);
+		if (FALSE !== $cur_item)
 		{
-			$array[$key]['prev_key'] = $prev_key;
-			$array[$prev_key]['next_key'] = $key;
+			if ($todo = min ($cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item - $todo, $todo));
+			if ($todo = min (count ($rackList) - 1 - $cur_item, $proximity))
+				$ret = array_merge ($ret, array_slice ($rackList, $cur_item + 1, $todo));
 		}
-		$prev_key = $key;
 	}
-	return $array;
+	return $ret;
 }
 
 function sortTokenize ($a, $b)
@@ -998,6 +1030,22 @@ function findAllEndpoints ($object_id, $fallback = '')
 	if (!count ($regular) && strlen ($fallback))
 		return array ($fallback);
 	return $regular;
+}
+
+// Split object's FQDN (or the common name if FQDN is not set) into the
+// hostname and domain name in Munin convention (using the first period as the
+// separator), and return the pair. Throw an exception on error.
+function getMuninNameAndDomain ($object_id)
+{
+	$o = spotEntity ('object', $object_id);
+	$hd = $o['name'];
+	// FQDN overrides the common name for Munin purposes.
+	$attrs = getAttrValues ($object_id);
+	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
+		$hd = $attrs[3]['value'];
+	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
+		throw new InvalidArgException ('$object_id', $object_id, 'the name is not in the host.do.ma.in format');
+	return $ret;
 }
 
 // Some records in the dictionary may be written as plain text or as Wiki
@@ -1453,7 +1501,7 @@ function redirectIfNecessary ()
 		$trigger,
 		$pageno,
 		$tabno;
-	@session_start();
+	startSession();
 	if
 	(
 		! isset ($_REQUEST['tab']) and
@@ -1685,13 +1733,17 @@ function shrinkSubtree ($tree, $used_tags, $preselect, $realm)
 }
 
 // Get taginfo record by tag name, return NULL, if record doesn't exist.
-function getTagByName ($target_name)
+function getTagByName ($tag_name)
 {
 	global $taglist;
-	foreach ($taglist as $taginfo)
-		if ($taginfo['tag'] == $target_name)
-			return $taginfo;
-	return NULL;
+	static $cache = NULL;
+	if (! isset ($cache))
+	{
+		$cache = array();
+		foreach ($taglist as $key => $taginfo)
+			$cache[$taginfo['tag']] = $taginfo;
+	}
+	return array_fetch($cache, $tag_name, NULL);
 }
 
 // Merge two chains, filtering dupes out. Return the resulting superset.
@@ -1731,7 +1783,7 @@ function getCellFilter ()
 	global $sic;
 	global $pageno;
 	$andor_used = FALSE;
-	@session_start();
+	startSession();
 	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
 	if (isset($_REQUEST['andor']))
 		$andor_used = TRUE;
@@ -1853,22 +1905,14 @@ function getCellFilter ()
 
 function buildRedirectURL ($nextpage = NULL, $nexttab = NULL, $moreArgs = array())
 {
-	global $page, $pageno, $tabno;
-	if ($nextpage === NULL)
-		$nextpage = $pageno;
-	if ($nexttab === NULL)
-		$nexttab = $tabno;
-	$url = "index.php?page=${nextpage}&tab=${nexttab}";
-
-	if ($nextpage === $pageno)
-		fillBypassValues ($nextpage, $moreArgs);
-	foreach ($moreArgs as $arg => $value)
-		if (is_array ($value))
-			foreach ($value as $v)
-				$url .= '&' . urlencode ($arg . '[]') . '=' . urlencode ($v);
-		elseif ($arg != 'module')
-			$url .= '&' . urlencode ($arg) . '=' . urlencode ($value);
-	return $url;
+	$params = array();
+	if ($nextpage !== NULL)
+		$params['page'] = $nextpage;
+	if ($nexttab !== NULL)
+		$params['tab'] = $nexttab;
+	$params = makePageParams ($params + $moreArgs);
+	unset ($params['module']); // 'interface' module is the default
+	return makeHref ($params);
 }
 
 // store the accumulated message list into he $SESSION array to display them later
@@ -1877,8 +1921,9 @@ function backupLogMessages()
 	global $log_messages;
 	if (! empty ($log_messages))
 	{
-		@session_start();
+		startSession();
 		$_SESSION['log'] = $log_messages;
+		session_commit();
 	}
 }
 
@@ -1928,8 +1973,10 @@ function getRackImageHeight ($units)
 }
 
 // Indicate occupation state of each IP address: none, ordinary or problematic.
+// Returns number of marked up (busy) addresses
 function markupIPAddrList (&$addrlist)
 {
+	$used = 0;
 	foreach (array_keys ($addrlist) as $ip_bin)
 	{
 		$refc = array
@@ -1948,12 +1995,33 @@ function markupIPAddrList (&$addrlist)
 		}
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
 		if ($nallocs > 1 && $nallocs != $refc['shared'] || $nallocs && $nreserved)
+		{
 			$addrlist[$ip_bin]['class'] = 'trerror';
+			++$used;
+		}
 		elseif (! isIPAddressEmpty ($addrlist[$ip_bin], array ('name', 'comment', 'inpf', 'outpf'))) // these fields don't trigger the 'busy' status
+		{
 			$addrlist[$ip_bin]['class'] = 'trbusy';
+			++$used;
+		}
 		else
 			$addrlist[$ip_bin]['class'] = '';
 	}
+	return $used;
+}
+
+function findNetRouters ($net)
+{
+	if (isset ($net['own_addrlist']))
+		$own_addrlist = $net['own_addrlist'];
+	else
+	{
+		// do not call loadIPAddrList, it is expensive.
+		// instead, do our own DB scan only for router allocations
+		$rtrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), IPSCAN_DO_ALLOCS | IPSCAN_RTR_ONLY);
+		$own_addrlist = filterOwnAddrList ($net, $rtrlist);
+	}
+	return findRouters ($own_addrlist);
 }
 
 // Scan the given address list (returned by scanIPv4Space/scanIPv6Space) and return a list of all routers found.
@@ -2508,6 +2576,31 @@ function nodeIsCollapsed ($node)
 	return $node['symbol'] == 'node-collapsed';
 }
 
+// returns those addresses from $addrlist that do not belong to $net's subsequent networks
+function filterOwnAddrList ($net, $addrlist)
+{
+	if ($net['kidc'] == 0)
+		return $addrlist;
+
+	// net has children
+	$ret = array();
+	foreach ($net['spare_ranges'] as $mask => $spare_list)
+		foreach ($spare_list as $spare_ip)
+		{
+			$spare_mask = ip_mask ($mask, strlen ($net['ip_bin']) == 16);
+			foreach ($addrlist as $bin_ip => $addr)
+				if (($bin_ip & $spare_mask) == $spare_ip)
+					$ret[$bin_ip] = $addr;
+		}
+	return $ret;
+}
+
+function getIPAddrList ($net, $flags = IPSCAN_ANY)
+{
+	$addrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), $flags);
+	return filterOwnAddrList ($net, $addrlist);
+}
+
 // sets 'addrlist', 'own_addrlist', 'addrc', 'own_addrc' keys of $node
 // 'addrc' and 'own_addrc' are sizes of 'addrlist' and 'own_addrlist', respectively
 function loadIPAddrList (&$node)
@@ -2517,24 +2610,8 @@ function loadIPAddrList (&$node)
 	if (! isset ($node['id']))
 		$node['own_addrlist'] = $node['addrlist'];
 	else
-	{
-		if ($node['kidc'] == 0)
-			$node['own_addrlist'] = $node['addrlist'];
-			//$node['own_addrlist'] = array();
-		else
-		{
-			$node['own_addrlist'] = array();
-			// node has childs
-			foreach ($node['spare_ranges'] as $mask => $spare_list)
-				foreach ($spare_list as $spare_ip)
-				{
-					$spare_range = constructIPRange ($spare_ip, $mask);
-					foreach ($node['addrlist'] as $bin_ip => $addr)
-						if (($bin_ip & $spare_range['mask_bin']) == $spare_range['ip_bin'])
-							$node['own_addrlist'][$bin_ip] = $addr;
-				}
-		}
-	}
+		$node['own_addrlist'] = filterOwnAddrList ($node, $node['addrlist']);
+
 	$node['addrc'] = count ($node['addrlist']);
 	$node['own_addrc'] = count ($node['own_addrlist']);
 }
@@ -2567,7 +2644,7 @@ function getIPAddress ($ip_bin)
 {
 	$scanres = scanIPSpace (array (array ('first' => $ip_bin, 'last' => $ip_bin)));
 	if (empty ($scanres))
-		return constructIPAddress ($ip_bin);
+		$scanres[$ip_bin] = constructIPAddress ($ip_bin);
 	markupIPAddrList ($scanres);
 	return $scanres[$ip_bin];
 }
@@ -2714,7 +2791,7 @@ function convertToBytes ($value)
 }
 
 // make "A" HTML element
-function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
+function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL, $attrs = array())
 {
 	global $page, $tab;
 	if ($text == '')
@@ -2734,7 +2811,11 @@ function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL)
 			throw new InvalidArgException ('bypass', '(NULL)');
 		$args[$page[$nextpage]['bypass']] = $bypass;
 	}
-	return '<a href="' . makeHref ($args) . '">' . $text . '</a>';
+	$attrs['href'] = makeHref ($args);
+	$ret = '<a';
+	foreach ($attrs as $attr_name => $attr_value)
+		$ret .= " $attr_name=" . '"' . htmlspecialchars ($attr_value, ENT_QUOTES) . '"';
+	return $ret . '>' . $text . '</a>';
 }
 
 // make "HREF" HTML attribute
@@ -2756,27 +2837,22 @@ function makeHref ($params = array())
 	return 'index.php?' . implode ('&', $tmp);
 }
 
-function makeHrefProcess ($params = array())
+function makePageParams ($params = array())
 {
-	global $pageno, $tabno, $page;
-	$tmp = array();
-	if (! array_key_exists ('page', $params))
-		$params['page'] = $pageno;
-	if (! array_key_exists ('tab', $params))
-		$params['tab'] = $tabno;
-	if ($params['page'] === $pageno)
-		fillBypassValues ($pageno, $params);
-	foreach ($params as $key => $value)
-		$tmp[] = urlencode ($key) . '=' . urlencode ($value);
-	return '?module=redirect&' . implode ('&', $tmp);
+	global $pageno, $tabno;
+	$ret = array();
+	// assure that page and tab keys go first
+	$ret['page'] = isset ($params['page']) ? $params['page'] : $pageno;
+	$ret['tab'] = isset ($params['tab']) ? $params['tab'] : $tabno;
+	$ret += $params;
+	if ($ret['page'] === $pageno)
+		fillBypassValues ($pageno, $ret);
+	return $ret;
 }
 
-function makeHrefForHelper ($helper_name, $params = array())
+function makeHrefProcess ($params = array())
 {
-	$ret = '?module=popup&helper=' . $helper_name;
-	foreach($params as $key=>$value)
-		$ret .= '&'.urlencode($key).'='.urlencode($value);
-	return $ret;
+	return makeHref (array ('module' => 'redirect') + makePageParams ($params));
 }
 
 // Process the given list of records to build data suitable for printNiftySelect()
@@ -2996,7 +3072,7 @@ function getVSTOptions()
 {
 	$ret = array();
 	foreach (listCells ('vst') as $vst)
-		$ret[$vst['id']] = niftyString ($vst['description'], 30, FALSE);
+		$ret[$vst['id']] = stringForOption ($vst['description']);
 	return $ret;
 }
 
@@ -3009,15 +3085,12 @@ function getAllVLANOptions ($except = array())
 	foreach (getVLANDomainOptions() as $domain_id => $domain_descr)
 	{
 		$domain_list = array();
-		foreach (getDomainVLANList ($domain_id) as $vlan)
+		foreach (getDomainVLANList ($domain_id, TRUE) as $vlan)
 			$domain_list["${domain_id}-${vlan['vlan_id']}"] = "${vlan['vlan_id']} ${vlan['vlan_descr']}";
 		if (isset ($except[$domain_id]))
-		{
-			$vlans_except = array();
 			foreach ($except[$domain_id] as $vid)
 				if (isset ($domain_list["${domain_id}-${vid}"]))
 					unset ($domain_list["${domain_id}-${vid}"]);
-		}
 		$ret[$domain_descr] = $domain_list;
 	}
 	return $ret;
@@ -3060,44 +3133,26 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 	return $ret;
 }
 
-function decodeObjectType ($objtype_id, $style = 'r')
+// $style is deprecated and unused
+function decodeObjectType ($objtype_id, $style = '')
 {
-	static $types = array();
-	if (!count ($types))
-		$types = array
-		(
-			'r' => readChapter (CHAP_OBJTYPE),
-			'a' => readChapter (CHAP_OBJTYPE, 'a'),
-			'o' => readChapter (CHAP_OBJTYPE, 'o')
-		);
-	return $types[$style][$objtype_id];
+	static $types;
+	if (! isset ($types))
+		$types = readChapter (CHAP_OBJTYPE, 'a');
+	return $types[$objtype_id];
 }
 
+// This wrapper makes it possible to call permitted() with the security context
+// containing the given object of temporary interest without the [previously loaded]
+// main subject.
 function isolatedPermission ($p, $t, $cell)
 {
-	// This function is called from both "file" page and a number of other pages,
-	// which have already fixed security context and authorized the user for it.
-	// OTOH, it is necessary here to authorize against the current file, which
-	// means saving the current context and building a new one.
-	global
-		$expl_tags,
-		$impl_tags,
-		$target_given_tags,
-		$auto_tags;
-	// push current context
-	$orig_expl_tags = $expl_tags;
-	$orig_impl_tags = $impl_tags;
-	$orig_target_given_tags = $target_given_tags;
-	$orig_auto_tags = $auto_tags;
+	$saved = getContext();
 	// retarget
 	fixContext ($cell);
 	// remember decision
 	$ret = permitted ($p, $t);
-	// pop context
-	$expl_tags = $orig_expl_tags;
-	$impl_tags = $orig_impl_tags;
-	$target_given_tags = $orig_target_given_tags;
-	$auto_tags = $orig_auto_tags;
+	restoreContext ($saved);
 	return $ret;
 }
 
@@ -3120,18 +3175,35 @@ function getPortListPrefs()
 	return $ret;
 }
 
-// Return data for printNiftySelect() with port type options. All OIF options
-// for the default IIF will be shown, but only the default OIFs will be present
-// for each other IIFs. IIFs for that there is no default OIF will not
-// be listed.
-// This SELECT will be used for the "add new port" form.
 function getNewPortTypeOptions()
 {
-	$ret = array();
-	$prefs = getPortListPrefs();
-	foreach (getPortInterfaceCompat() as $row)
+	return getUnlinkedPortTypeOptions (NULL);
+}
+
+// Return data for printNiftySelect() with port type options. All OIF options
+// for the default or current (passed) IIFs will be shown, but only the default
+// OIFs will be present for each other IIFs. IIFs for that there is no default
+// OIF will not be listed.
+// This SELECT will be used in "manage object ports" form.
+function getUnlinkedPortTypeOptions ($port_iif_id)
+{
+	static $cache;
+	static $prefs;
+	static $compat;
+	if (! isset ($cache))
 	{
-		if ($row['iif_id'] == $prefs['iif_pick'])
+		$cache = array();
+		$prefs = getPortListPrefs();
+		$compat = getPortInterfaceCompat();
+	}
+
+	if (isset ($cache[$port_iif_id]))
+		return $cache[$port_iif_id];
+
+	$ret = array();
+	foreach ($compat as $row)
+	{
+		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
 			$optgroup = $row['iif_name'];
 		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
 			$optgroup = 'other';
@@ -3141,6 +3213,8 @@ function getNewPortTypeOptions()
 			$ret[$optgroup] = array();
 		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
 	}
+
+	$cache[$port_iif_id] = $ret;
 	return $ret;
 }
 
@@ -3239,6 +3313,15 @@ function formatVLANAsHyperlink ($vlaninfo)
 	return mkA (formatVLANAsRichText ($vlaninfo), 'vlan', $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id']);
 }
 
+function formatVLANAsShortLink ($vlaninfo)
+{
+	$title = sprintf ('VLAN %d @ %s', $vlaninfo['vlan_id'], $vlaninfo['domain_descr']);
+	if ($vlaninfo['vlan_descr'] != '')
+		$title .= ' (' . $vlaninfo['vlan_descr'] . ')';
+	$attrs = array ('title' => $title);
+	return mkA ($vlaninfo['vlan_id'], 'vlan', $vlaninfo['domain_id'] . '-' . $vlaninfo['vlan_id'], NULL, $attrs);
+}
+
 function formatVLANAsRichText ($vlaninfo)
 {
 	$ret = 'VLAN' . $vlaninfo['vlan_id'];
@@ -3258,7 +3341,7 @@ function iosParseVLANString ($string)
 		$matches = array();
 		$item = trim ($item, ' ');
 		if (preg_match ('/^([[:digit:]]+)$/', $item, $matches))
-			$ret[] = $matches[1];
+			$ret[] = intval ($matches[1]);
 		elseif (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $item, $matches))
 			$ret = array_merge ($ret, range ($matches[1], $matches[2]));
 		else
@@ -3725,20 +3808,20 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 function exportSwitch8021QConfig
 (
 	$vswitch,
-	$device_vlanlist,
-	$before,
-	$changes,
-	$vlan_names
+	$running_config,
+	$changes
 )
 {
-	$crq = generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes);
+	$crq = generate8021QDeployOps ($vswitch, $running_config['vlanlist'], $running_config['portdata'], $changes);
 	if (count ($crq))
 	{
 		array_unshift ($crq, array ('opcode' => 'begin configuration'));
 		$crq[] = array ('opcode' => 'end configuration');
 		if (considerConfiguredConstraint (spotEntity ('object', $vswitch['object_id']), '8021Q_WRI_AFTER_CONFT_LISTSRC'))
 			$crq[] = array ('opcode' => 'save configuration');
-		setDevice8021QConfig ($vswitch['object_id'], $crq, $vlan_names);
+		setVLANSwitchTimestamp ($vswitch['object_id'], 'last_push_started');
+		setDevice8021QConfig ($vswitch['object_id'], $crq, $running_config['vlannames']);
+		setVLANSwitchTimestamp ($vswitch['object_id'], 'last_push_finished');
 	}
 	return count ($crq);
 }
@@ -3831,11 +3914,15 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 				$seen_nets[$net_id] = 1;
 				$net = spotEntity ("${family}net", $net_id);
 				foreach ($net['8021q'] as $vlan)
-					if (! isset ($employed[$vlan['vlan_id']]))
+					if (isset ($domain_vlanlist[$vlan['vlan_id']]) and ! isset ($employed[$vlan['vlan_id']]))
 						$employed[$vlan['vlan_id']] = 1;
 			}
 	}
-	return array_keys ($employed);
+	$ret = array_keys ($employed);
+	$override = callHook ('getEmployedVlans_hook', $ret, $object_id, $domain_vlanlist);
+	if (isset ($override))
+		$ret = $override;
+	return $ret;
 }
 
 // take port list with order applied and return uplink ports in the same format
@@ -4064,27 +4151,28 @@ function get8021QSyncOptions
 // return number of records updated successfully of FALSE, if a conflict was in the way
 function exec8021QDeploy ($object_id, $do_push)
 {
-	global $dbxlink;
 	$nsaved = $npushed = $nsaved_uplinks = 0;
-	$dbxlink->beginTransaction();
-	if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
+	if (NULL === $vswitch = getVLANSwitchInfo ($object_id))
 		throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
-	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
-	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
+	if (! tryDBMutex (__FUNCTION__ . "-$object_id", 10))
+		throw new RTGatewayError ("802.1Q sync is already active for object #$object_id");
+
 	try
 	{
 		$R = getRunning8021QConfig ($vswitch['object_id']);
 	}
 	catch (RTGatewayError $e)
 	{
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET last_errno=?, last_error_ts=NOW() WHERE object_id=?',
-			array (E_8021Q_PULL_REMOTE_ERROR, $vswitch['object_id'])
-		);
-		$dbxlink->commit();
+		setVLANSwitchError ($object_id, E_8021Q_PULL_REMOTE_ERROR);
 		throw $e;
 	}
+
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	$vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE');
+	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
+	$Dnew = $D;
+	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 	$conflict = FALSE;
 	$ok_to_push = array();
 	foreach (get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']) as $pn => $port)
@@ -4098,9 +4186,11 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		case 'ok_to_delete':
 			$nsaved += del8021QPort ($vswitch['object_id'], $pn);
+			unset ($Dnew[$pn]);
 			break;
 		case 'ok_to_add':
 			$nsaved += add8021QPort ($vswitch['object_id'], $pn, $port['right']);
+			$Dnew[$pn] = $port['right'];
 			break;
 		case 'delete_conflict':
 		case 'merge_conflict':
@@ -4112,6 +4202,7 @@ function exec8021QDeploy ($object_id, $do_push)
 			// FIXME: this can be logged
 			$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $port['right']);
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
+			$Dnew[$pn] = $port['right'];
 			break;
 		case 'ok_to_push_with_merge':
 			upd8021QPort ('cached', $vswitch['object_id'], $pn, $port['right']);
@@ -4123,74 +4214,54 @@ function exec8021QDeploy ($object_id, $do_push)
 	}
 	// redo uplinks unconditionally
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
-	$Dnew = apply8021QOrder ($vswitch, getStored8021QConfig ($vswitch['object_id'], 'desired'));
+	$Dnew = apply8021QOrder ($vswitch, $Dnew);
 	// Take new "desired" configuration and derive uplink port configuration
 	// from it. Then cancel changes to immune VLANs and save resulting
 	// changes (if any left).
 	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew, $vswitch['object_id']));
 	$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
-	if ($nsaved + $nsaved_uplinks)
-		// saved configuration has changed (either "user" ports have changed,
-		// or uplinks, or both), so bump revision number up)
-		touchVLANSwitch ($vswitch['object_id']);
+
+	$out_of_sync = FALSE;
+	$errno = E_8021Q_NOERROR;
+	if ($nsaved + $nsaved_uplinks or count ($ok_to_push))
+		$out_of_sync = TRUE;
 	if ($conflict)
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET out_of_sync="yes", last_errno=?, last_error_ts=NOW() WHERE object_id=?',
-			array (E_8021Q_VERSION_CONFLICT, $vswitch['object_id'])
-		);
-	else
 	{
-		usePreparedExecuteBlade
-		(
-			'UPDATE VLANSwitch SET last_errno=?, last_error_ts=NOW() WHERE object_id=?',
-			array (E_8021Q_NOERROR, $vswitch['object_id'])
-		);
-		// Modified uplinks are very likely to differ from those in R-copy,
-		// so don't mark device as clean, if this happened. This can cost
-		// us an additional, empty round of sync, but at least out_of_sync
-		// won't be mistakenly set to 'no'.
-		// FIXME: A cleaner way of coupling pull and push operations would
-		// be to split this function into two.
-		if (!count ($ok_to_push) and !$nsaved_uplinks)
-			usePreparedExecuteBlade
-			(
-				'UPDATE VLANSwitch SET out_of_sync="no" WHERE object_id=?',
-				array ($vswitch['object_id'])
-			);
-		elseif ($do_push)
-		{
-			usePreparedExecuteBlade
-			(
-				'UPDATE VLANSwitch SET last_push_started=NOW() WHERE object_id=?',
-				array ($vswitch['object_id'])
-			);
-			try
-			{
-				$vlan_names = array();
-				foreach ($R['vlanlist'] as $vid)
-					$vlan_names[$vid] = @$R['vlannames']['vid'];
-				$npushed += exportSwitch8021QConfig ($vswitch, $R['vlanlist'], $R['portdata'], $ok_to_push, $vlan_names);
-				// update cache for ports deployed
-				replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
-				usePreparedExecuteBlade
-				(
-					'UPDATE VLANSwitch SET last_push_finished=NOW(), out_of_sync="no", last_errno=? WHERE object_id=?',
-					array (E_8021Q_NOERROR, $vswitch['object_id'])
-				);
-			}
-			catch (RTGatewayError $r)
-			{
-				usePreparedExecuteBlade
-				(
-					'UPDATE VLANSwitch SET out_of_sync="yes", last_error_ts=NOW(), last_errno=? WHERE object_id=?',
-					array (E_8021Q_PUSH_REMOTE_ERROR, $vswitch['object_id'])
-				);
-				callHook ('pushErrorHandler', $object_id, $r);
-			}
-		}
+		$errno = E_8021Q_VERSION_CONFLICT;
+		$out_of_sync = TRUE;
+	}
+	setVLANSwitchError ($object_id, $errno);
+
+	$mutex_rev = $vswitch['mutex_rev'];
+	if ($vswitch['out_of_sync'] == "yes" && ! $out_of_sync)
+		detouchVLANSwitch ($object_id, $mutex_rev);
+	elseif ($vswitch['out_of_sync'] == "no" && $out_of_sync)
+	{
+		touchVLANSwitch ($object_id);
+		++$mutex_rev;
 	}
 	$dbxlink->commit();
+
+	if ($out_of_sync && $do_push)
+	{
+		try
+		{
+			$npushed += exportSwitch8021QConfig ($vswitch, $R, $ok_to_push);
+		}
+		catch (RTGatewayError $r)
+		{
+			setVLANSwitchError ($object_id, E_8021Q_PUSH_REMOTE_ERROR);
+			callHook ('pushErrorHandler', $object_id, $r);
+			throw $r;
+		}
+
+		// update cache for ports deployed
+		$dbxlink->beginTransaction();
+		replace8021QPorts ('cached', $vswitch['object_id'], $R['portdata'], $ok_to_push);
+		setVLANSwitchError ($object_id, E_8021Q_NOERROR);
+		detouchVLANSwitch ($object_id, $mutex_rev);
+		$dbxlink->commit();
+	}
 	// start downlink work only after unlocking current object to make deadlocks less likely to happen
 	// TODO: only process changed uplink ports
 	if ($nsaved_uplinks)
@@ -4257,17 +4328,14 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 // the current configuration of given uplink ports.
 function initiateUplinksReverb ($object_id, $uplink_ports)
 {
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
 	// Filter and regroup all requests (regardless of how many will succeed)
 	// to end up with no more, than one execution per remote object.
 	$upstream_config = array();
-	foreach ($object['ports'] as $portinfo)
+	foreach (getObjectPortsAndLinks ($object_id) as $portinfo)
 		if
 		(
-			array_key_exists ($portinfo['name'], $uplink_ports) and
-			$portinfo['remote_object_id'] != '' and
-			$portinfo['remote_name'] != ''
+			$portinfo['linked'] and
+			array_key_exists ($portinfo['name'], $uplink_ports)
 		)
 			$upstream_config[$portinfo['remote_object_id']][$portinfo['remote_name']] = $uplink_ports[$portinfo['name']];
 	// Note that when current object has several Port records inder same name
@@ -4304,96 +4372,45 @@ function recalc8021QPorts ($switch_id)
 		'switches' => 0,
 		'ports' => 0,
 	);
-	global $dbxlink;
-
-	$object = spotEntity ('object', $switch_id);
-	amplifyCell ($object);
-	$vlan_config = getStored8021QConfig ($switch_id, 'desired');
 	$vswitch = getVLANSwitchInfo ($switch_id);
 	if (! $vswitch)
 		return $ret;
-	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
-	$order = apply8021QOrder ($vswitch, $vlan_config);
-	$before = $order;
+	$ports = getObjectPortsAndLinks ($switch_id);
+	$order = apply8021QOrder ($vswitch, getStored8021QConfig ($switch_id, 'desired'));
 
-	$dbxlink->beginTransaction();
+	$self_processed = FALSE;
+
 	// calculate remote uplinks and copy them to local downlinks
-	foreach ($order as $pn => &$local_port_order)
-	{
-		if ($local_port_order['vst_role'] != 'downlink')
-			continue;
-
-		// if there is a link with remote side type 'uplink', use its vlan mask
-		if ($portinfo = findConnectedPort ($object['ports'], $pn))
+	foreach ($ports as $portinfo)
+		if
+		(
+			$portinfo['linked'] and
+			isset ($order[$portinfo['name']]) and
+			$order[$portinfo['name']]['vst_role'] == 'downlink'
+		)
 		{
+			// if there is a link with remote side type 'uplink', use its vlan mask
 			$remote_pn = $portinfo['remote_name'];
-			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
 			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
 			if (! $remote_vswitch)
 				continue;
-			$remote_domain_vlanlist = getDomainVLANList ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
-			$remote_before = $remote_order;
-			if ($remote_order[$remote_pn]['vst_role'] == 'uplink')
-			{
-				$remote_uplinks = filter8021QChangeRequests ($remote_domain_vlanlist, $remote_before, produceUplinkPorts ($remote_domain_vlanlist, $remote_order, $remote_vswitch['object_id']));
-				$remote_port_order = $remote_uplinks[$remote_pn];
-				$new_order = produceDownlinkPort ($domain_vlanlist, $pn, array ($pn => $local_port_order), $remote_port_order);
-				$local_port_order = $new_order[$pn]; // this updates $order
-
-				// queue changes in D-config of remote switch
-				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, array ($remote_pn => $remote_port_order)))
-				{
-					touchVLANSwitch ($portinfo['remote_object_id']);
-					$ret['switches'] ++;
-					$ret['ports'] += $changed;
-				}
-			}
+			$n = apply8021qChangeRequest ($remote_vswitch['object_id'], array(), FALSE, NULL, array($portinfo['remote_name'] => ''));
+			$ret['switches'] += $n ? 1 : 0;
+			$ret['ports'] += $n;
+			if ($n > 1)
+				$self_processed = TRUE;
 		}
-	}
 
-	// calculate local uplinks, store changes in $order
-	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, produceUplinkPorts ($domain_vlanlist, $order, $vswitch['object_id'])) as $pn => $portorder)
-		$order[$pn] = $portorder;
-	// queue changes in D-config of local switch
-	if ($changed = replace8021QPorts ('desired', $switch_id, $before, $order))
+	// if no connected downlinks found, re-calculate local uplinks
+	// (otherwise the remote switch has already called apply8021qChangeRequest for us)
+	if ($self_processed)
+		$ret['switches'] += 1;
+	elseif ($ret['ports'] == 0)
 	{
-		touchVLANSwitch ($switch_id);
-		$ret['switches'] ++;
-		$ret['ports'] += $changed;
+		$n = apply8021qChangeRequest ($switch_id, array(), FALSE, NULL, array());
+		$ret['switches'] += $n ? 1 : 0;
+		$ret['ports'] += $n;
 	}
-
-	// calculate the remote side of local uplinks
-	foreach ($order as $pn => &$local_port_order)
-	{
-		if ($local_port_order['vst_role'] != 'uplink')
-			continue;
-
-		// if there is a link with remote side type 'downlink', replace its vlan mask
-		if ($portinfo = findConnectedPort ($object['ports'], $pn))
-		{
-			$remote_pn = $portinfo['remote_name'];
-			$remote_vlan_config = getStored8021QConfig ($portinfo['remote_object_id'], 'desired');
-			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
-			if (! $remote_vswitch)
-				continue;
-			$remote_domain_vlanlist = getDomainVLANList ($remote_vswitch['domain_id']);
-			$remote_order = apply8021QOrder ($remote_vswitch, $remote_vlan_config);
-			$remote_before = $remote_order;
-			if ($remote_order[$remote_pn]['vst_role'] == 'downlink')
-			{
-				$new_order = produceDownlinkPort ($remote_domain_vlanlist, $remote_pn, $remote_order, $local_port_order);
-				// queue changes in D-config of remote switch
-				if ($changed = replace8021QPorts ('desired', $portinfo['remote_object_id'], $remote_before, $new_order))
-				{
-					touchVLANSwitch ($portinfo['remote_object_id']);
-					$ret['switches'] ++;
-					$ret['ports'] += $changed;
-				}
-			}
-		}
-	}
-	$dbxlink->commit();
 	return $ret;
 }
 
@@ -4416,7 +4433,7 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 
 function detectVLANSwitchQueue ($vswitch)
 {
-	if ($vswitch['out_of_sync'] == 'no')
+	if ($vswitch['out_of_sync'] == 'no' && $vswitch['last_errno'] != E_8021Q_SYNC_DISABLED)
 		return 'done';
 	switch ($vswitch['last_errno'])
 	{
@@ -4471,8 +4488,26 @@ function acceptable8021QConfig ($port)
 	}
 }
 
-function authorize8021QChangeRequests ($before, $changes)
+function nativeVlanChangePermitted ($pn, $from_vid, $to_vid, $op = NULL)
 {
+	$before = array ($pn => array (
+		'mode' => 'access',
+		'native' => $from_vid,
+		'allowed' => array ($from_vid),
+	));
+	$changes = array ($pn => array (
+		'mode' => 'access',
+		'native' => $to_vid,
+		'allowed' => array ($to_vid),
+	));
+
+	return count (authorize8021QChangeRequests ($before, $changes, $op)) != 0;
+}
+
+function authorize8021QChangeRequests ($before, $changes, $op = NULL)
+{
+	if (NULL !== $ret = callHook ('authorize8021QChangeRequests_hook', $before, $changes, $op))
+		return $ret;
 	global $script_mode;
 	if (isset ($script_mode) and $script_mode)
 		return $changes;
@@ -4480,10 +4515,10 @@ function authorize8021QChangeRequests ($before, $changes)
 	foreach ($changes as $pn => $change)
 	{
 		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
 				continue 2; // next port
 		foreach (array_diff ($change['allowed'], $before[$pn]['allowed']) as $added_id)
-			if (!permitted (NULL, NULL, NULL, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
 				continue 2; // next port
 		$ret[$pn] = $change;
 	}
@@ -4768,10 +4803,7 @@ function searchEntitiesByText ($terms)
 				if (! isolatedPermission ($realm, 'default', spotEntity ($realm, $record['id'])))
 					unset ($summary[$realm][$key]);
 	// clear empty search result realms
-	foreach ($summary as $key => $data)
-		if (! count ($data))
-			unset ($summary[$key]);
-	return $summary;
+	return array_filter ($summary, 'count');
 }
 
 // returns URL to redirect to, or NULL if $result_type is unknown
@@ -5186,14 +5218,39 @@ function getConfigVar ($varname = '')
 }
 
 // return portinfo array if object has a port with such name, or NULL
-function getPortinfoByName (&$object, $portname)
+// in strict mode the resulting port name is always equal to the $portname.
+// in non-strict mode names are compared using shortenIfName()
+function getPortinfoByName (&$object, $portname, $strict_mode = TRUE)
 {
 	if (! isset ($object['ports']))
-		amplifyCell ($object);
+		$object['ports'] = getObjectPortsAndLinks ($object['id']);
+	if (! $strict_mode)
+	{
+		$breed = detectDeviceBreed ($object['id']);
+		$portname = shortenIfName ($portname, $breed);
+	}
+	$ret = NULL;
 	foreach ($object['ports'] as $portinfo)
-		if ($portinfo['name'] == $portname)
-			return $portinfo;
-	return NULL;
+		if ($portname == ($strict_mode ? $portinfo['name'] : shortenIfName ($portinfo['name'], $breed)))
+		{
+			$ret = $portinfo;
+			if ($ret['linked'])
+				break;
+		}
+		elseif (isset ($ret))
+			break;
+	return $ret;
+}
+
+// exclude location-related object types
+function withoutLocationTypes ($objtypes)
+{
+	global $location_obj_types;
+	$ret = array();
+	foreach ($objtypes as $k => $v)
+		if (! in_array ($k, $location_obj_types))
+			$ret[$k] = $v;
+	return $ret;
 }
 
 # For the given object ID return a getSelect-suitable list of object types
@@ -5215,7 +5272,7 @@ function getObjectTypeChangeOptions ($object_id)
 		if ($attr['value'] != '')
 			$used[] = $attr;
 	}
-	foreach (readChapter (CHAP_OBJTYPE, 'o') as $test_id => $text)
+	foreach (withoutLocationTypes (readChapter (CHAP_OBJTYPE, 'o')) as $test_id => $text)
 	{
 		foreach ($used as $attr)
 		{
@@ -5342,9 +5399,10 @@ function explodeTableLine ($line, $table_schema)
 // returns number of changed ports (both local and remote)
 // shows error messages unconditionally, and success messages respecting  to $verbose setting
 // if $mutex_rev is set, checks if it is outdated
+// if $uplinks_filter is not empty, changes only those uplink ports that are keys of this array
 // NOTE: this function is calling itself through initiateUplinksReverb. It is important that
 // the call to initiateUplinksReverb is outside of DB transaction scope.
-function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL)
+function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_rev = NULL, $uplinks_filter = array())
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
@@ -5369,6 +5427,8 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 		foreach ($changes as $port_name => $port)
 			$after[$port_name] = $port;
 		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $after, produceUplinkPorts ($domain_vlanlist, $after, $vswitch['object_id']));
+		if ($uplinks_filter)
+			$new_uplinks = array_intersect_key ($new_uplinks, $uplinks_filter);
 		$npulled = replace8021QPorts ('desired', $vswitch['object_id'], $before, $changes);
 		$nsaved_uplinks = replace8021QPorts ('desired', $vswitch['object_id'], $before, $new_uplinks);
 		if ($npulled + $nsaved_uplinks)
@@ -5381,9 +5441,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 		showError (sprintf ("Failed to update switchports: %s", $e->getMessage()));
 		return 0;
 	}
-	$nsaved_downlinks = 0;
-	if ($nsaved_uplinks)
-		$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
+	$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
 	// instant deploy to that switch if configured
 	$done = 0;
 	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
@@ -5607,7 +5665,7 @@ function registerOpHandler ($page, $tab, $opname, $callback, $method = 'before')
 	elseif ($method == 'after')
 		array_push ($ophandlers_stack[$page][$tab][$opname], $callback);
 	else
-		throw new RacktablesError ("unknown ophandler injection method '$method'");
+		throw new RacktablesError ("unknown ophandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // call this from custom ophandler registered by registerOpHandler
@@ -5661,7 +5719,7 @@ function registerTabHandler ($page, $tab, $callback, $method = 'after')
 	elseif ($method == 'replace')
 		array_push ($tabhandlers_stack[$page][$tab], '!' . $callback);
 	else
-		throw new RacktablesError ("unknown tabhandler injection method '$method'");
+		throw new RacktablesError ("unknown tabhandler injection method '$method'", RackTablesError::INTERNAL);
 }
 
 // Returns  tab content already rendered by previous tabhandlers in the chain registered by registerTabHandler.
@@ -5831,12 +5889,11 @@ function mkCellA ($cell)
 	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
 }
 
-// Return a simple object list w/o related information, so that the returned value
-// can be directly used by printSelect(). An optional argument is the name of config
-// option with constraint in RackCode.
-function getNarrowObjectList ($varname = '')
+// Returns a list of entities of a given realm, like listCells.
+// An optional $varname is the name of config option with constraint in RackCode.
+function listConstraint ($realm, $varname = '')
 {
-	$wideList = listCells ('object');
+	$wideList = listCells ($realm);
 	if (strlen ($varname) and strlen ($filter = getConfigVar ($varname)))
 	{
 		$expr = compileExpression ($filter);
@@ -5844,7 +5901,15 @@ function getNarrowObjectList ($varname = '')
 			return array();
 		$wideList = filterCellList ($wideList, $expr);
 	}
-	return formatEntityList ($wideList);
+	return $wideList;
+}
+
+// Return a simple object list w/o related information, so that the returned value
+// can be directly used by printSelect(). An optional argument is the name of config
+// option with constraint in RackCode.
+function getNarrowObjectList ($varname = '')
+{
+	return formatEntityList (listConstraint ('object', $varname));
 }
 
 // takes an array of cells,
@@ -5905,6 +5970,20 @@ function isCLIMode ()
 	return !isset ($_SERVER['REQUEST_METHOD']);
 }
 
+// returns true either if given domains are the same
+// or if one is a group and other is its member
+function sameDomains ($domain_id_1, $domain_id_2)
+{
+	if ($domain_id_1 == $domain_id_2)
+		return TRUE;
+	static $cache = array();
+	if (! isset ($cache[$domain_id_1]))
+		$cache[$domain_id_1] = getDomainGroupMembers ($domain_id_1);
+	if (! isset ($cache[$domain_id_2]))
+		$cache[$domain_id_2] = getDomainGroupMembers ($domain_id_2);
+	return in_array ($domain_id_1, $cache[$domain_id_2]) || in_array ($domain_id_2, $cache[$domain_id_1]);
+}
+
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
 // Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
 function checkPortRole ($vswitch, $port_name, $port_order)
@@ -5940,7 +6019,7 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 
 			if (! $remote_auto && ! $local_auto)
 				return TRUE;
-			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && $vswitch['domain_id'] == $remote_vswitch['domain_id'])
+			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
 				return TRUE; // auto-calc link ends must belong to the same domain
 			else
 				return FALSE;
@@ -6138,6 +6217,142 @@ function splitNetworkByMask ($netinfo, $dst_mask)
         $self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
         $self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
     );
+}
+
+// this function is used both to remember and to retrieve the last created entity's ID
+// it stores given id in the static var, and returns the stored value is called without args
+// used in plugins to make additional work on created entity in the chained ophandler
+// returns an array of realm-ID pairs
+function lastCreated ($realm = NULL, $id = NULL)
+{
+	static $last_ids = array();
+	if (isset ($realm) && isset ($id))
+		$last_ids[] = array('realm' => $realm, 'id' => $id);
+	return $last_ids;
+}
+
+// returns last id of a given type from lastCreated() result array
+function getLastCreatedId ($realm)
+{
+	foreach (array_reverse (lastCreated()) as $item)
+		if ($item['realm'] == $realm)
+			return $item['id'];
+}
+
+function formatPatchCableHeapAsPlainText ($heap)
+{
+	$text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
+	if ($heap['description'] != '')
+		$text .=  " (${heap['description']})";
+	return niftyString ($text, 512);
+}
+
+// takes a list of structures and the field name in those structures.
+// returns a two-dimentional list indexed by the value of the given field
+// the subsequent index value is taken from the index of the original $list.
+function groupBy ($list, $group_field)
+{
+	$ret = array();
+	foreach ($list as $index => $item)
+	{
+		$key = '';
+		if (isset ($item[$group_field]))
+			$key = (string) $item[$group_field];
+		$ret[$key][$index] = $item;
+	}
+	return $ret;
+}
+
+// returns the associative $array sorted by its keys
+// sort order is taken from the $order array:
+// $array[i] is arranged with $array[j] conforming to
+// numeric comparison of $order[i] and $order[j].
+function customKsort ($array, $order)
+{
+	$ret = array();
+	foreach ($array as $key => $value)
+		$ret[$key] = isset ($order[$key]) ? $order[$key] : array_last ($order) + 1;
+
+	asort ($ret, SORT_NUMERIC);
+	foreach (array_keys ($ret) as $key)
+		$ret[$key] = $array[$key];
+	return $ret;
+}
+
+// RT uses PHP sessions on demand and tries to minimize session lifetime
+// to allow concurrent operations for a single user.
+// You should call session_commit after each call of this function.
+function startSession()
+{
+	if (is_callable ('session_status'))
+	{
+		if (session_status() != PHP_SESSION_ACTIVE)
+			session_start();
+	}
+	else
+	{
+		// compatibility mode for PHP prior to 5.4.0
+		$old_errorlevel = error_reporting (E_ALL & ~E_NOTICE);
+		session_start();
+		error_reporting ($old_errorlevel);
+	}
+}
+
+// loads session data. Use if you need to only read from _SESSION.
+function startROSession()
+{
+	startSession();
+	session_commit();
+}
+
+// removes a VLAN from ports that contain it, but keep a VLAN amongst others in a range
+function pinpointDeleteVlan ($domain_id, $vlan_id)
+{
+	$ret = 0;
+	$vlan_ck = $domain_id . '-' . $vlan_id;
+	$domain_vlanlist = getDomainVLANList ($domain_id);
+	$used_ports = getVLANConfiguredPorts ($vlan_ck);
+	foreach ($used_ports as $object_id => $port_list)
+	{
+		$vswitch = getVLANSwitchInfo ($object_id); // get mutex rev
+		$D = getStored8021QConfig ($object_id);
+		$changes = array();
+		foreach ($port_list as $pn)
+		{
+			if (! isset ($D[$pn]))
+				continue;
+			// remove vlan from a port only if its range does not contain foreign vlans
+			foreach (listToRanges ($D[$pn]['allowed']) as $range)
+				if (matchVLANFilter ($vlan_id, array ($range)))
+				{
+					for ($i = $range['from']; $i <= $range['to']; ++$i)
+						if (! isset ($domain_vlanlist[$i]))
+							continue 3; // keep vlan, skip to next port
+				}
+			// remove vlan from port
+			$conf = $D[$pn];
+			$conf['allowed'] = array_diff ($conf['allowed'], array ($vlan_id));
+			if ($conf['mode'] == 'access')
+				$conf['mode'] = 'trunk';
+			if ($conf['native'] == $vlan_id)
+				$conf['native'] = 0;
+			$changes[$pn] = $conf;
+		}
+		if ($changes)
+			$ret += apply8021qChangeRequest ($object_id, $changes, FALSE, $vswitch['mutex_rev']);
+	}
+
+	return $ret;
+}
+
+function etypeByPageno ($pg = NULL)
+{
+	global $etype_by_pageno, $pageno;
+	if ($pg === NULL)
+		$pg = $pageno;
+	if (! array_key_exists ($pg, $etype_by_pageno))
+		throw new RackTablesError ('key not found', RackTablesError::INTERNAL);
+	return $etype_by_pageno[$pg];
 }
 
 ?>

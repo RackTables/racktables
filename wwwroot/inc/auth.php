@@ -322,20 +322,29 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 		if (! array_key_exists ($option_name, $LDAP_options))
 			$LDAP_options[$option_name] = $option_value;
 
-	if
-	(
-		$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
-		$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
-	)
-		throw new RackTablesError ('LDAP misconfiguration: refresh/retry/expiry mismatch', RackTablesError::MISCONFIGURED);
-	if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
-		return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
-	// authenticated_via_ldap_cache()'s way of locking can sometimes result in
-	// a PDO error condition that convertPDOException() was not able to dispatch.
-	// To avoid reaching printPDOException() (which prints backtrace with password
-	// argument in cleartext), any remaining PDO condition is converted locally.
 	try
 	{
+		// Destroy the cache each time config changes.
+		if ($LDAP_options['cache_expiry'] != 0 &&
+			sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
+		{
+			discardLDAPCache();
+			saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
+			deleteScript ('LDAPLastSuccessfulServer');
+		}
+
+		if
+		(
+			$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
+			$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
+		)
+			throw new RackTablesError ('LDAP misconfiguration: refresh/retry/expiry mismatch', RackTablesError::MISCONFIGURED);
+		if ($LDAP_options['cache_expiry'] == 0) // immediate expiry set means disabled cache
+			return authenticated_via_ldap_nocache ($username, $password, $ldap_displayname);
+		// authenticated_via_ldap_cache()'s way of locking can sometimes result in
+		// a PDO error condition that convertPDOException() was not able to dispatch.
+		// To avoid reaching printPDOException() (which prints backtrace with password
+		// argument in cleartext), any remaining PDO condition is converted locally.
 		return authenticated_via_ldap_cache ($username, $password, $ldap_displayname);
 	}
 	catch (PDOException $e)
@@ -392,13 +401,6 @@ function isLDAPCacheValid ($cache_row, $password_hash, $check_for_refreshing = F
 function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 {
 	global $LDAP_options, $auto_tags;
-
-	// Destroy the cache each time config changes.
-	if (sha1 (serialize ($LDAP_options)) != loadScript ('LDAPConfigHash'))
-	{
-		discardLDAPCache();
-		saveScript ('LDAPConfigHash', sha1 (serialize ($LDAP_options)));
-	}
 
 	$user_data = array(); // fill auto_tags and ldap_displayname from this array
 	$password_hash = sha1 ($password);
@@ -470,16 +472,57 @@ function queryLDAPServer ($username, $password)
 	if(extension_loaded('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);
 
-	$connect = @ldap_connect ($LDAP_options['server'], array_fetch ($LDAP_options, 'port', 389));
-	if ($connect === FALSE)
-		return array ('result' => 'CAN');
+	$LDAP_CANT_CONNECT_CODES = array (
+		-1,			// Can't contact LDAP server error
+		-5,			// LDAP Timed out error
+		-11,		// LDAP connect error
+	);
 
-	if (isset ($LDAP_options['use_tls']) && $LDAP_options['use_tls'] >= 1)
+	$last_successful_server = loadScript ('LDAPLastSuccessfulServer');
+	$success_server = NULL;
+	$servers = preg_split ("/\s+/", $LDAP_options['server'], NULL, PREG_SPLIT_NO_EMPTY);
+	if (isset ($last_successful_server) && in_array ($last_successful_server, $servers))	// Cached server is still present in config ?
 	{
-		$tls = ldap_start_tls ($connect);
-		if ($LDAP_options['use_tls'] >= 2 && $tls == FALSE)
-			throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
+		// Use last successful server first
+		$servers = array_diff ($servers, array ($last_successful_server));
+		array_unshift ($servers, $last_successful_server);
 	}
+	// Try to connect to each server until first success
+	foreach ($servers as $server)
+	{
+		$connect = @ldap_connect ($server, array_fetch ($LDAP_options, 'port', 389));
+		if ($connect === FALSE)
+			continue;
+		ldap_set_option ($connect, LDAP_OPT_NETWORK_TIMEOUT, array_fetch ($LDAP_options, 'server_alive_timeout', 2));
+		// If use_tls configuration option is set, then try establish TLS session instead of ldap_bind
+		if (isset ($LDAP_options['use_tls']) && $LDAP_options['use_tls'] >= 1)
+		{
+			$tls = ldap_start_tls ($connect);
+			if ($LDAP_options['use_tls'] >= 2 && $tls == FALSE)
+			{
+				if (in_array (ldap_errno ($connect), $LDAP_CANT_CONNECT_CODES))
+					continue;
+				else
+					throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
+			}
+		}
+		else
+		{
+			if (@ldap_bind ($connect) || !in_array (ldap_errno ($connect), $LDAP_CANT_CONNECT_CODES))
+			{
+				$success_server = $server;
+				// Cleanup after check. This connection will be used below
+				@ldap_unbind ($connect);
+				$connect = ldap_connect ($server, array_fetch ($LDAP_options, 'port', 389));
+				break;
+			}
+		}
+	}
+	if (!isset ($success_server))
+		return array ('result' => 'CAN');
+	if ($LDAP_options['cache_expiry'] != 0 &&
+		$last_successful_server !== $success_server)
+		saveScript ('LDAPLastSuccessfulServer', $success_server);
 
 	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)

@@ -125,6 +125,16 @@ $opspec_list['rack-log-del'] = array
 		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['row-log-del'] = array
+(
+	'table' => 'ObjectLog',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'row_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
 $opspec_list['ipv4vs-editlblist-delLB'] =
 $opspec_list['ipv4rspool-editlblist-delLB'] =
 $opspec_list['object-editrspvs-delLB'] = array
@@ -232,24 +242,14 @@ $opspec_list['parentmap-edit-del'] = array
 		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['portmap-edit-add'] = array
+$opspec_list['portifcompat-edit-add'] = array
 (
-	'table' => 'PortCompat',
+	'table' => 'PortInterfaceCompat',
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'type1', 'assertion' => 'uint'),
-		array ('url_argname' => 'type2', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['portmap-edit-del'] = array
-(
-	'table' => 'PortCompat',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'type1', 'assertion' => 'uint'),
-		array ('url_argname' => 'type2', 'assertion' => 'uint'),
+		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['portifcompat-edit-del'] = array
@@ -260,6 +260,37 @@ $opspec_list['portifcompat-edit-del'] = array
 	(
 		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portoifs-edit-add'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'oif_name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['portoifs-edit-del'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['portoifs-edit-upd'] = array
+(
+	'table' => 'PortOuterInterface',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'oif_name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['attrs-editmap-del'] = array
@@ -380,6 +411,9 @@ $opspec_list['8021q-vstlist-add'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'vst_descr', 'table_colname' => 'description', 'assertion' => 'string'),
+		// workaround SQL_STRICT
+		array ('fix_argname' => 'mutex_rev', 'fix_argvalue' => 0),
+		array ('fix_argname' => 'saved_by', 'fix_argvalue' => ""),
 	),
 );
 $opspec_list['8021q-vstlist-del'] = array
@@ -409,19 +443,6 @@ $opspec_list['8021q-vdlist-del'] = array
 	'table' => 'VLANDomain',
 	'action' => 'DELETE',
 	'arglist' => array
-	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['8021q-vdlist-upd'] = array
-(
-	'table' => 'VLANDomain',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'vdom_descr', 'table_colname' => 'description', 'assertion' => 'string'),
-	),
-	'where_arglist' => array
 	(
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
 	),
@@ -554,10 +575,165 @@ $opspec_list['munin-servers-upd'] = array
 		array ('url_argname' => 'id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['cables-heaps-add'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'amount', 'fix_argvalue' => 0),
+		array ('url_argname' => 'length', 'assertion' => 'decimal'),
+		array ('url_argname' => 'description', 'assertion' => 'string0'),
+	),
+);
+$opspec_list['cables-heaps-del'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cables-heaps-upd'] = array
+(
+	'table' => 'PatchCableHeap',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'length', 'assertion' => 'decimal'),
+		array ('url_argname' => 'description', 'assertion' => 'string0'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-connectors-add'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'connector', 'assertion' => 'string'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-connectors-del'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-connectors-upd'] = array
+(
+	'table' => 'PatchCableConnector',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'connector', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-add'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype', 'assertion' => 'string'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-del'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-cabletypes-upd'] = array
+(
+	'table' => 'PatchCableType',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'pctype', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
+	),
+);
+$opspec_list['cableconf-conncompat-add'] = array
+(
+	'table' => 'PatchCableConnectorCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-conncompat-del'] = array
+(
+	'table' => 'PatchCableConnectorCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-oifcompat-add'] = array
+(
+	'table' => 'PatchCableOIFCompat',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['cableconf-oifcompat-del'] = array
+(
+	'table' => 'PatchCableOIFCompat',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+	),
+);
 
-$msgcode['addPortForwarding']['OK'] = 48;
+function setFuncMessages ($funcname, $messages)
+{
+	global $msgcode;
+	foreach ($messages as $symbol => $code)
+		$msgcode[$funcname][$symbol] = $code;
+}
+
 function addPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -586,9 +762,9 @@ function addPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['delPortForwarding']['OK'] = 49;
 function delPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -611,9 +787,9 @@ function delPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updPortForwarding']['OK'] = 51;
 function updPortForwarding ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
@@ -638,9 +814,9 @@ function updPortForwarding ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addPortForObject']['OK'] = 48;
 function addPortForObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertStringArg ('port_name', TRUE);
 	genericAssertion ('port_l2address', 'l2address0');
 	genericAssertion ('port_name', 'string');
@@ -655,12 +831,12 @@ function addPortForObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
-$msgcode['editPortForObject']['OK'] = 6;
 function editPortForObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
 	assertUIntArg ('port_id');
-	assertUIntArg ('port_type_id');
+	assertStringArg ('port_type_id');
 	assertStringArg ('reservation_comment', TRUE);
 	genericAssertion ('l2address', 'l2address0');
 	genericAssertion ('name', 'string');
@@ -670,9 +846,9 @@ function editPortForObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['addMultiPorts']['OK'] = 10;
 function addMultiPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 10));
 	assertStringArg ('format');
 	assertStringArg ('input');
 	assertStringArg ('port_type');
@@ -775,9 +951,9 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
 }
 
-$msgcode['addBulkPorts']['OK'] = 82;
 function addBulkPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 82));
 	assertStringArg ('port_type_id');
 	assertStringArg ('port_name', TRUE);
 	assertStringArg ('port_label', TRUE);
@@ -802,9 +978,9 @@ function addBulkPorts ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $error_count));
 }
 
-$msgcode['updIPAllocation']['OK'] = 51;
 function updIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
@@ -814,9 +990,9 @@ function updIPAllocation ()
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
 }
 
-$msgcode['delIPAllocation']['OK'] = 49;
 function delIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 
@@ -824,19 +1000,30 @@ function delIPAllocation ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addIPAllocation']['OK'] = 48;
-$msgcode['addIPAllocation']['ERR1'] = 170;
 function addIPAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
 	$ip_bin = assertIPArg ('ip');
 	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
 	genericAssertion ('bond_type', 'enum/alloc_type');
 
+	// check if address is alread allocated
+	$address = getIPAddress($ip_bin);
+
+	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($_REQUEST['bond_type'] != 'shared') ) )
+		showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
+
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
 		return;
+	}
+
+	if($address['reserved'] && strlen ($address['name']))
+	{
+		showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
+		//TODO ask to take reserved IP or not !
 	}
 
 	bindIPToObject ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
@@ -852,7 +1039,15 @@ function addIPv4Prefix ()
 	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
+	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_cell = spotEntity ('ipv4net', $net_id);
+	if (isset ($vlan_ck))
+	{
+		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+			commitSupplementVLANIPv4 ($vlan_ck, $net_id);
+		else
+			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
+	}
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv4net', $net_id) . ' has been created');
 }
 
@@ -863,13 +1058,21 @@ function addIPv6Prefix ()
 	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist, $vlan_ck);
+	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_cell = spotEntity ('ipv6net', $net_id);
+	if (isset ($vlan_ck))
+	{
+		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+			commitSupplementVLANIPv6 ($vlan_ck, $net_id);
+		else
+			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
+	}
 	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
 }
 
-$msgcode['delIPv4Prefix']['OK'] = 49;
 function delIPv4Prefix ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
 	loadIPAddrList ($netinfo);
@@ -890,9 +1093,9 @@ function delIPv4Prefix ()
 		return buildRedirectURL ('index', 'default');
 }
 
-$msgcode['delIPv6Prefix']['OK'] = 49;
 function delIPv6Prefix ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('id');
 	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
 	loadIPAddrList ($netinfo);
@@ -910,9 +1113,9 @@ function delIPv6Prefix ()
 		return buildRedirectURL ('index', 'default');
 }
 
-$msgcode['editAddress']['OK'] = 51;
 function editAddress ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertStringArg ('name', TRUE);
 	assertStringArg ('comment', TRUE);
 	$ip_bin = assertIPArg ('ip');
@@ -920,9 +1123,9 @@ function editAddress ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['createUser']['OK'] = 5;
 function createUser ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	assertStringArg ('password');
@@ -934,9 +1137,9 @@ function createUser ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['updateUser']['OK'] = 6;
 function updateUser ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	genericAssertion ('user_id', 'uint');
 	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
@@ -951,14 +1154,12 @@ function updateUser ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
-$msgcode['supplementAttrMap']['OK'] = 48;
-$msgcode['supplementAttrMap']['ERR1'] = 154;
 function supplementAttrMap ()
 {
-	assertUIntArg ('attr_id');
+	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 154));
+	$attr_id = assertUIntArg ('attr_id');
 	assertUIntArg ('objtype_id');
-	$attrMap = getAttrMap();
-	if ($attrMap[$_REQUEST['attr_id']]['type'] != 'dict')
+	if (getAttrType ($attr_id) != 'dict')
 		$chapter_id = NULL;
 	else
 	{
@@ -973,13 +1174,13 @@ function supplementAttrMap ()
 		}
 		$chapter_id = $_REQUEST['chapter_no'];
 	}
-	commitSupplementAttrMap ($_REQUEST['attr_id'], $_REQUEST['objtype_id'], $chapter_id);
+	commitSupplementAttrMap ($attr_id, $_REQUEST['objtype_id'], $chapter_id);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['clearSticker']['OK'] = 49;
 function clearSticker ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	global $sic;
 	assertUIntArg ('attr_id');
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $sic['attr_id']))))
@@ -991,9 +1192,9 @@ function clearSticker ()
 	}
 }
 
-$msgcode['updateObjectAllocation']['OK'] = 63;
 function updateObjectAllocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63));
 	global $remote_username, $sic;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
@@ -1006,14 +1207,10 @@ function updateObjectAllocation ()
 		return buildRedirectURL (NULL, NULL, $_REQUEST);
 	}
 	$object_id = getBypassValue();
+	$object = spotEntity ('object', $object_id);
 	$changecnt = 0;
-	// Get a list of all of this object's parents,
-	// then trim the list to only include parents that are racks
-	$objectParents = getEntityRelatives('parents', 'object', $object_id);
-	$parentRacks = array();
-	foreach ($objectParents as $parentData)
-		if ($parentData['entity_type'] == 'rack')
-			$parentRacks[] = $parentData['entity_id'];
+	// Get a list of rack ids which are parents of the object
+	$parentRacks = reduceSubarraysToColumn (getParents ($object, 'rack'), 'id');
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
 	{
@@ -1023,15 +1220,22 @@ function updateObjectAllocation ()
 			amplifyCell ($rackData);
 			$workingRacksData[$cand_id] = $rackData;
 		}
+		else
+			$rackData = $workingRacksData[$cand_id];
+		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
 		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
 		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
 		{
+			if ($is_ro)
+				continue;
 			$changecnt++;
 			commitLinkEntities ('rack', $cand_id, 'object', $object_id);
 		}
 		// It's not zero-U mounted to this rack on the form, but it is in the DB.  Unmount it.
 		if (!isset($_REQUEST["zerou_${cand_id}"]) && in_array($cand_id, $parentRacks))
 		{
+			if ($is_ro)
+				continue;
 			$changecnt++;
 			commitUnlinkEntities ('rack', $cand_id, 'object', $object_id);
 		}
@@ -1043,7 +1247,8 @@ function updateObjectAllocation ()
 	$oldMolecule = getMoleculeForObject ($object_id);
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
-		if (! processGridForm ($rackData, 'F', 'T', $object_id))
+		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		if ($is_ro || !processGridForm ($rackData, 'F', 'T', $object_id))
 			continue;
 		$changecnt++;
 		// Reload our working copy after form processing.
@@ -1072,9 +1277,9 @@ function updateObjectAllocation ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($changecnt));
 }
 
-$msgcode['updateObject']['OK'] = 51;
 function updateObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$taglist = genericAssertion ('taglist', 'array0');
 	genericAssertion ('num_attrs', 'uint0');
 	genericAssertion ('object_name', 'string0');
@@ -1247,7 +1452,7 @@ function addLotOfObjects()
 				amplifyCell ($info);
 				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
 			}
-			catch (RTDatabaseError $e)
+			catch (RackTablesError $e)
 			{
 				showError ("Error creating object '$name': " . $e->getMessage());
 				continue;
@@ -1272,9 +1477,9 @@ function linkObjects ()
 	showSuccess ('Container set successfully');
 }
 
-$msgcode['deleteObject']['OK'] = 7;
 function deleteObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7));
 	assertUIntArg ('object_id');
 	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
 
@@ -1285,9 +1490,9 @@ function deleteObject ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($oinfo['dname']));
 }
 
-$msgcode['resetObject']['OK'] = 57;
 function resetObject ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 57));
 	$racklist = getResidentRacksData (getBypassValue(), FALSE);
 	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
@@ -1295,9 +1500,9 @@ function resetObject ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateUI']['OK'] = 51;
 function updateUI ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('num_vars');
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
@@ -1316,9 +1521,9 @@ function updateUI ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['saveMyPreferences']['OK'] = 51;
 function saveMyPreferences ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertUIntArg ('num_vars');
 
 	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
@@ -1336,17 +1541,17 @@ function saveMyPreferences ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['resetMyPreference']['OK'] = 51;
 function resetMyPreference ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertStringArg ("varname");
 	resetUserConfigVar ($_REQUEST["varname"]);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['resetUIConfig']['OK'] = 57;
 function resetUIConfig()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 57));
 	setConfigVar ('MASSCOUNT','8');
 	setConfigVar ('MAXSELSIZE','30');
 	setConfigVar ('ROW_SCALE','2');
@@ -1418,6 +1623,7 @@ function resetUIConfig()
 	setConfigVar ('SYNC_802Q_LISTSRC', '');
 	setConfigVar ('QUICK_LINK_PAGES', 'depot,ipv4space,rackspace');
 	setConfigVar ('CACTI_LISTSRC', 'false');
+	setConfigVar ('CACTI_RRA_ID', '1');
 	setConfigVar ('MUNIN_LISTSRC', 'false');
 	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
 	setConfigVar ('DATETIME_ZONE', 'UTC');
@@ -1427,13 +1633,15 @@ function resetUIConfig()
 	setConfigVar ('8021Q_MULTILINK_LISTSRC', 'false');
 	setConfigVar ('REVERSED_RACKS_LISTSRC', 'false');
 	setConfigVar ('NEAREST_RACKS_CHECKBOX', 'yes');
+	setConfigVar ('SHOW_OBJECTTYPE', 'yes');
+
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRealServer']['OK'] = 48;
 // Add single record.
 function addRealServer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	global $sic;
 	$rsip_bin = assertIPArg ('rsip');
 	assertStringArg ('rsport', TRUE);
@@ -1451,11 +1659,10 @@ function addRealServer ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['addRealServers']['OK'] = 37;
-$msgcode['addRealServers']['ERR1'] = 131;
 // Parse textarea submitted and try adding a real server for each line.
 function addRealServers ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 37, 'ERR1' => 131));
 	global $sic;
 	assertStringArg ('format');
 	assertStringArg ('rawtext');
@@ -1528,6 +1735,7 @@ function addVService ()
 		)
 	);
 	$vs_id = lastInsertID();
+	lastCreated ('ipv4vs', $vs_id);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
@@ -1539,15 +1747,16 @@ function addVSG ()
 	$name = assertStringArg ('name');
 	usePreparedInsertBlade ('VS', array ('name' => $name));
 	$vs_id = lastInsertID();
+	lastCreated ('ipvs', $vs_id);
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('ipvs', $_REQUEST['taglist'], $vs_id);
 	$vsinfo = spotEntity ('ipvs', $vs_id);
 	showSuccess (mkCellA ($vsinfo) . ' created successfully');
 }
 
-$msgcode['deleteVService']['OK'] = 49;
 function deleteVService ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('vs_id');
 	$vsinfo = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
 	if ($vsinfo['refcnt'] != 0)
@@ -1573,9 +1782,9 @@ function deleteVS()
 	return buildRedirectURL ('ipv4slb', 'vs');
 }
 
-$msgcode['updateSLBDefConfig']['OK'] = 43;
 function updateSLBDefConfig ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	global $sic;
 	commitUpdateSLBDefConf
 	(
@@ -1588,9 +1797,9 @@ function updateSLBDefConfig ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateRealServer']['OK'] = 51;
 function updateRealServer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	global $sic;
 	assertUIntArg ('rs_id');
 	$rsip_bin = assertIPArg ('rsip');
@@ -1608,9 +1817,9 @@ function updateRealServer ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updateVService']['OK'] = 51;
 function updateVService ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	global $sic;
 	assertUIntArg ('vs_id');
 	$taglist = genericAssertion ('taglist', 'array0');
@@ -1691,7 +1900,7 @@ function addPortToVS()
 	$row = array ('vs_id' => $vsinfo['id'], 'proto' => $proto, 'vport' => $vport, 'vsconfig' => NULL, 'rsconfig' => NULL);
 	if ($port = isPortEnabled ($row, $vsinfo['ports']))
 	{
-		showError ("Service already contains port " . formatVSPort ($port));
+		showError ("Service already contains port " . $port['proto'] . ' ' . $port['vport']);
 		return;
 	}
 	usePreparedInsertBlade ('VSPorts', $row);
@@ -1901,9 +2110,9 @@ function createTriplet()
 	showSuccess ("SLB triplet created");
 }
 
-$msgcode['addLoadBalancer']['OK'] = 48;
 function addLoadBalancer ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	global $sic;
 	assertUIntArg ('pool_id');
 	assertUIntArg ('object_id');
@@ -1939,9 +2148,9 @@ function addRSPool ()
 	showSuccess ('RS pool ' . mkA ($_REQUEST['name'], 'ipv4rspool', $pool_id) . ' created successfully');
 }
 
-$msgcode['deleteRSPool']['OK'] = 49;
 function deleteRSPool ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('pool_id');
 	$poolinfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
 	if ($poolinfo['refcnt'] != 0)
@@ -1954,10 +2163,9 @@ function deleteRSPool ()
 	return buildRedirectURL ('ipv4slb', 'rspools');
 }
 
-$msgcode['importPTRData']['OK'] = 26;
-$msgcode['importPTRData']['ERR'] = 141;
 function importPTRData ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 26, 'ERR' => 141));
 	$net = spotEntity ('ipv4net', getBypassValue());
 	assertUIntArg ('addrcount');
 	$nbad = $ngood = 0;
@@ -1991,9 +2199,9 @@ function importPTRData ()
 		showFuncMessage (__FUNCTION__, 'ERR', array ($nbad, $ngood));
 }
 
-$msgcode['generateAutoPorts']['OK'] = 21;
 function generateAutoPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	$object = spotEntity ('object', getBypassValue());
 	executeAutoPorts ($object['id'], $object['objtype_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2010,23 +2218,19 @@ function updateTag ()
 	showSuccess ('Tag updated successfully');
 }
 
-$msgcode['saveEntityTags']['OK'] = 43;
 function saveEntityTags ()
 {
-	global $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
-	$realm = $etype_by_pageno[$pageno];
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
+	$realm = etypeByPageno();
 	$entity_id = getBypassValue();
 	$taglist = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	rebuildTagChainForEntity ($realm, $entity_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['rollTags']['OK'] = 67;
-$msgcode['rollTags']['ERR'] = 149;
 function rollTags ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 67, 'ERR' => 149));
 	assertStringArg ('sum', TRUE);
 	assertUIntArg ('realsum');
 	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
@@ -2054,12 +2258,9 @@ function rollTags ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($n_ok));
 }
 
-$msgcode['changeMyPassword']['OK'] = 51;
-$msgcode['changeMyPassword']['ERR1'] = 150;
-$msgcode['changeMyPassword']['ERR2'] = 151;
-$msgcode['changeMyPassword']['ERR3'] = 152;
 function changeMyPassword ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 51, 'ERR1' => 150, 'ERR2' => 151, 'ERR3' => 152));
 	global $remote_username, $user_auth_src;
 	if ($user_auth_src != 'database')
 	{
@@ -2085,10 +2286,9 @@ function changeMyPassword ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['saveRackCode']['OK'] = 43;
-$msgcode['saveRackCode']['ERR1'] = 154;
 function saveRackCode ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43, 'ERR1' => 154));
 	assertStringArg ('rackcode');
 	// For the test to succeed, unescape LFs, strip CRs.
 	$newcode = dos2unix ($_REQUEST['rackcode']);
@@ -2108,9 +2308,9 @@ function submitSLBConfig ()
 	showNotice ("You should redefine submitSLBConfig ophandler in your local extension to install SLB config");
 }
 
-$msgcode['addLocation']['OK'] = 5;
 function addLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
 
@@ -2120,12 +2320,12 @@ function addLocation ()
 	showSuccess ('added location ' . mkA ($_REQUEST['name'], 'location', $location_id));
 }
 
-$msgcode['updateLocation']['OK'] = 6;
 // This function is used by two forms:
 //  - renderEditLocationForm - all attributes may be modified
 //  - renderRackspaceLocationEditor - only the name and parent may be modified
 function updateLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $pageno;
 	assertUIntArg ('location_id');
 	assertUIntArg ('parent_id', TRUE);
@@ -2164,10 +2364,9 @@ function updateLocation ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteLocation']['OK'] = 7;
-$msgcode['deleteLocation']['ERR1'] = 206;
 function deleteLocation ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
 	assertUIntArg ('location_id');
 	$locationData = spotEntity ('location', $_REQUEST['location_id']);
 	amplifyCell ($locationData);
@@ -2183,9 +2382,9 @@ function deleteLocation ()
 	return buildRedirectURL ('rackspace', 'editlocations');
 }
 
-$msgcode['addRow']['OK'] = 5;
 function addRow ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertUIntArg ('location_id', TRUE);
 	assertStringArg ('name');
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
@@ -2194,17 +2393,17 @@ function addRow ()
 	showSuccess ('added row ' . mkA ($_REQUEST['name'], 'row', $row_id));
 }
 
-$msgcode['updateRow']['OK'] = 6;
 // This function is used by two forms:
 //  - renderEditRowForm - all attributes may be modified
 //  - renderRackspaceRowEditor - only the name and location may be modified
 function updateRow ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	assertUIntArg ('row_id');
 	assertUIntArg ('location_id', TRUE);
 	assertStringArg ('name');
 
-	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, NULL, NULL, NULL);
+	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, 'no', NULL, NULL);
 
 	global $pageno;
 	if ($pageno == 'row')
@@ -2231,26 +2430,22 @@ function updateRow ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteRow']['OK'] = 7;
-$msgcode['deleteRow']['ERR1'] = 206;
 function deleteRow ()
 {
-	assertUIntArg ('row_id');
-	$rowData = spotEntity ('row', $_REQUEST['row_id']);
-	amplifyCell ($rowData);
-	if (count ($rowData['racks']))
-	{
-		showFuncMessage (__FUNCTION__, 'ERR1', array ($rowData['name']));
-		return;
-	}
-	commitDeleteObject ($_REQUEST['row_id']);
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'UMOUNT' => 58));
+	$row_id = assertUIntArg ('row_id');
+	$rowData = spotEntity ('row', $row_id);
+	$unmounted = getRowMountsCount ($row_id);
+	commitDeleteRow ($row_id);
+	if ($unmounted)
+		showFuncMessage (__FUNCTION__, 'UMOUNT', array ($unmounted));
 	showFuncMessage (__FUNCTION__, 'OK', array ($rowData['name']));
 	return buildRedirectURL ('rackspace', 'editrows');
 }
 
-$msgcode['addRack']['ERR2'] = 172;
 function addRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('ERR2' => 172));
 	$taglist = genericAssertion ('taglist', 'array0');
 
 	// The new rack(s) should be placed on the bottom of the list, sort-wise
@@ -2263,7 +2458,6 @@ function addRack ()
 		assertUIntArg ('height1');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
-		produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 		// Set the height and sort order
 		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
@@ -2292,7 +2486,6 @@ function addRack ()
 		foreach ($names2 as $cname)
 		{
 			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
-			produceTagsForNewRecord ('rack', $taglist, $rack_id);
 
 			// Set the height and sort order
 			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
@@ -2308,9 +2501,9 @@ function addRack ()
 		showFuncMessage (__FUNCTION__, 'ERR2');
 }
 
-$msgcode['updateRack']['OK'] = 6;
 function updateRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	assertUIntArg ('row_id');
 	assertStringArg ('name');
 	assertUIntArg ('height');
@@ -2334,25 +2527,29 @@ function updateRack ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
-$msgcode['deleteRack']['OK'] = 7;
-$msgcode['deleteRack']['ERR1'] = 206;
 function deleteRack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
 	assertUIntArg ('rack_id');
 	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
 	amplifyCell ($rackData);
-	if (count ($rackData['mountedObjects']))
+	if (!$rackData['isDeletable'])
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1');
 		return;
 	}
-	releaseFiles ('rack', $_REQUEST['rack_id']);
-	destroyTagsForEntity ('rack', $_REQUEST['rack_id']);
-	usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $_REQUEST['rack_id']));
-	commitDeleteObject ($_REQUEST['rack_id']);
-	resetRackSortOrder ($rackData['row_id']);
+	commitDeleteRack ($_REQUEST['rack_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
 	return buildRedirectURL ('rackspace', 'default');
+}
+
+function cleanRack ()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 58));
+	$rack_id = assertUIntArg ('rack_id');
+	$unmounted = getRackMountsCount ($rack_id);
+	commitCleanRack ($rack_id);
+	showFuncMessage (__FUNCTION__, 'OK', array ($unmounted));
 }
 
 function updateRackDesign ()
@@ -2410,10 +2607,10 @@ function querySNMPData ()
 	doSNMPmining (getBypassValue(), $snmpsetup); // shows message by itself
 }
 
-$msgcode['addFileWithoutLink']['OK'] = 5;
 // File-related functions
 function addFileWithoutLink ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 5));
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
@@ -2428,14 +2625,10 @@ function addFileWithoutLink ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
-$msgcode['addFileToEntity']['OK'] = 5;
-$msgcode['addFileToEntity']['ERR1'] = 207;
 function addFileToEntity ()
 {
-	global $pageno, $etype_by_pageno;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
-	$realm = $etype_by_pageno[$pageno];
+	setFuncMessages (__FUNCTION__, array ('OK' => 5, 'ERR1' => 207));
+	$realm = etypeByPageno();
 	assertStringArg ('comment', TRUE);
 
 	// Make sure the file can be uploaded
@@ -2465,13 +2658,11 @@ function addFileToEntity ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
 }
 
-$msgcode['linkFileToEntity']['OK'] = 71;
 function linkFileToEntity ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 71));
 	assertUIntArg ('file_id');
-	global $pageno, $etype_by_pageno, $sic;
-	if (!isset ($etype_by_pageno[$pageno]))
-		throw new RackTablesError ('key not found in etype_by_pageno', RackTablesError::INTERNAL);
+	global $sic;
 
 	usePreparedInsertBlade
 	(
@@ -2479,7 +2670,7 @@ function linkFileToEntity ()
 		array
 		(
 			'file_id' => $sic['file_id'],
-			'entity_type' => $etype_by_pageno[$pageno],
+			'entity_type' => etypeByPageno(),
 			'entity_id' => getBypassValue(),
 		)
 	);
@@ -2487,10 +2678,9 @@ function linkFileToEntity ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
-$msgcode['replaceFile']['OK'] = 7;
-$msgcode['replaceFile']['ERR2'] = 201;
 function replaceFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR2' => 201));
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
@@ -2506,28 +2696,26 @@ function replaceFile ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['unlinkFile']['OK'] = 72;
 function unlinkFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 72));
 	assertUIntArg ('link_id');
 	commitUnlinkFile ($_REQUEST['link_id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['deleteFile']['OK'] = 7;
 function deleteFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 7));
 	assertUIntArg ('file_id');
 	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
 	commitDeleteFile ($_REQUEST['file_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['updateFileText']['OK'] = 6;
-$msgcode['updateFileText']['ERR1'] = 179;
-$msgcode['updateFileText']['ERR2'] = 155;
 function updateFileText ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6, 'ERR1' => 179, 'ERR2' => 155));
 	assertStringArg ('mtime_copy');
 	assertStringArg ('file_text', TRUE); // it's Ok to save empty
 	$shortInfo = spotEntity ('file', getBypassValue());
@@ -2541,18 +2729,9 @@ function updateFileText ()
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
-$msgcode['addIIFOIFCompat']['OK'] = 48;
-function addIIFOIFCompat ()
-{
-	assertUIntArg ('iif_id');
-	assertUIntArg ('oif_id');
-	commitSupplementPIC ($_REQUEST['iif_id'], $_REQUEST['oif_id']);
-	showFuncMessage (__FUNCTION__, 'OK');
-}
-
-$msgcode['addIIFOIFCompatPack']['OK'] = 37;
 function addIIFOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 37));
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
@@ -2565,9 +2744,25 @@ function addIIFOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 }
 
-$msgcode['delIIFOIFCompatPack']['OK'] = 38;
+function addOIFCompat ()
+{
+	$type1 = assertUIntArg ('type1');
+	$type2 = assertUIntArg ('type2');
+	$n_changed = addPortOIFCompat ($type1, $type2);
+	showSuccess ("$n_changed row(s) added");
+}
+
+function delOIFCompat ()
+{
+	$type1 = assertUIntArg ('type1');
+	$type2 = assertUIntArg ('type2');
+	$n_changed = deletePortOIFCompat ($type1, $type2);
+	showSuccess ("$n_changed row(s) deleted");
+}
+
 function delIIFOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 38));
 	genericAssertion ('standard', 'enum/wdmstd');
 	genericAssertion ('iif_id', 'iif');
 	global $wdm_packs, $sic;
@@ -2580,9 +2775,9 @@ function delIIFOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
 }
 
-$msgcode['addOIFCompatPack']['OK'] = 21;
 function addOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
 	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
@@ -2602,9 +2797,9 @@ function addOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['delOIFCompatPack']['OK'] = 21;
 function delOIFCompatPack ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
 	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
@@ -2615,9 +2810,9 @@ function delOIFCompatPack ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['add8021QOrder']['OK'] = 48;
 function add8021QOrder ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('object_id');
 	assertUIntArg ('vst_id');
@@ -2637,9 +2832,9 @@ function add8021QOrder ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['del8021QOrder']['OK'] = 49;
 function del8021QOrder ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	assertUIntArg ('object_id');
 	assertUIntArg ('vdom_id');
 	assertUIntArg ('vst_id');
@@ -2661,9 +2856,9 @@ function del8021QOrder ()
 	return buildRedirectURL (NULL, NULL, $focus_hints);
 }
 
-$msgcode['createVLANDomain']['OK'] = 48;
 function createVLANDomain ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertStringArg ('vdom_descr');
 	global $sic;
 	usePreparedInsertBlade
@@ -2674,12 +2869,14 @@ function createVLANDomain ()
 			'description' => $sic['vdom_descr'],
 		)
 	);
+	$domain_id = lastInsertID();
+	lastCreated ('vdom', $domain_id);
 	usePreparedInsertBlade
 	(
 		'VLANDescription',
 		array
 		(
-			'domain_id' => lastInsertID(),
+			'domain_id' => $domain_id,
 			'vlan_id' => VLAN_DFL_ID,
 			'vlan_type' => 'compulsory',
 			'vlan_descr' => 'default',
@@ -2690,6 +2887,7 @@ function createVLANDomain ()
 
 function save8021QPorts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	global $sic;
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertStringArg ('form_mode');
@@ -2755,9 +2953,9 @@ function save8021QPorts ()
 	return buildRedirectURL (NULL, NULL, $extra);
 }
 
-$msgcode['bindVLANtoIPv4']['OK'] = 48;
 function bindVLANtoIPv4 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2765,9 +2963,9 @@ function bindVLANtoIPv4 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['bindVLANtoIPv6']['OK'] = 48;
 function bindVLANtoIPv6 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2775,9 +2973,9 @@ function bindVLANtoIPv6 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['unbindVLANfromIPv4']['OK'] = 49;
 function unbindVLANfromIPv4 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2785,9 +2983,9 @@ function unbindVLANfromIPv4 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['unbindVLANfromIPv6']['OK'] = 49;
 function unbindVLANfromIPv6 ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 49));
 	genericAssertion ('id', 'uint');
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	global $sic;
@@ -2795,10 +2993,9 @@ function unbindVLANfromIPv6 ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['process8021QSyncRequest']['OK'] = 63;
-$msgcode['process8021QSyncRequest']['ERR'] = 191;
 function process8021QSyncRequest ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR' => 191));
 	// behave depending on current operation: exec8021QPull or exec8021QPush
 	global $sic, $op;
 	if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
@@ -2807,22 +3004,20 @@ function process8021QSyncRequest ()
 		showFuncMessage (__FUNCTION__, 'OK', array ($done));
 }
 
-$msgcode['process8021QRecalcRequest']['CHANGED'] = 87;
 function process8021QRecalcRequest ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 87));
 	assertPermission (NULL, NULL, NULL, array (array ('tag' => '$op_recalc8021Q')));
 	$counters = recalc8021QPorts (getBypassValue());
 	if ($counters['ports'])
-		showFuncMessage (__FUNCTION__, 'CHANGED', array ($counters['ports'], $counters['switches']));
+		showFuncMessage (__FUNCTION__, 'OK', array ($counters['ports'], $counters['switches']));
 	else
 		showNotice ('No changes were made');
 }
 
-$msgcode['resolve8021QConflicts']['OK'] = 63;
-$msgcode['resolve8021QConflicts']['ERR1'] = 179;
-$msgcode['resolve8021QConflicts']['ERR2'] = 109;
 function resolve8021QConflicts ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR1' => 179, 'ERR2' => 109));
 	global $sic, $dbxlink;
 	assertUIntArg ('mutex_rev', TRUE); // counts from 0
 	assertUIntArg ('nrows');
@@ -2931,9 +3126,9 @@ function update8021QPortList()
 		showSuccess ("disabled 802.1Q for ${disabled} port(s)");
 }
 
-$msgcode['cloneVST']['OK'] = 48;
 function cloneVST()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	assertUIntArg ('mutex_rev', TRUE);
 	assertUIntArg ('from_id');
 	$src_vst = spotEntity ('vst', $_REQUEST['from_id']);
@@ -2942,9 +3137,9 @@ function cloneVST()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['updVSTRule']['OK'] = 43;
 function updVSTRule()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	// this is used for making throwing an invalid argument exception easier.
 	function updVSTRule_get_named_param ($name, $haystack, &$last_used_name)
 	{
@@ -2982,8 +3177,9 @@ function updVSTRule()
 		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
 		{
-			@session_start();
+			startSession();
 			$_SESSION['vst_edited'] = $data;
+			session_commit();
 		}
 		throw $e;
 	}
@@ -2991,9 +3187,9 @@ function updVSTRule()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-$msgcode['importDPData']['OK'] = 44;
 function importDPData()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 44));
 	global $sic, $dbxlink;
 	assertUIntArg ('nports');
 	$nignored = $ndone = 0;
@@ -3067,12 +3263,15 @@ function addObjectlog ()
 {
 	assertStringArg ('logentry');
 	global $remote_username, $sic;
-	if (isset ($sic['object_id']))
-		$object_id = $sic['object_id'];
+	if (isset ($sic['rack_id']))
+		$object_id = $sic['rack_id'];
+	elseif (isset ($sic['row_id']))
+		$object_id = $sic['row_id'];
 	elseif (isset ($sic['location_id']))
 		$object_id = $sic['location_id'];
 	else
-		$object_id = $sic['rack_id'];
+		$object_id = $sic['object_id'];
+
 	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
 	showSuccess ('Log entry added');
 }
@@ -3101,6 +3300,14 @@ $ucsproductmap = array
 	'UCS-FI-6248UP' => 1757, # 6248 FI
 	'UCS-FI-6296UP' => 1758, # 6296 FI
 	'N20-C6508' => 1735, # 5108 chassis
+	'UCSB-5108-AC2' => 2220, # 5108-AC2 chassis
+	'UCSB-5108-DC2' => 2221, # 5108-DC2 chassis
+	'UCSB-5108-HVDC' => 2222, # 5108-HVDC chassis
+	'UCSB-B420-M3' => 1744,   # B420 M3
+	'UCSB-B22-M3'  => 1745,   # B22 M3
+	'UCSB-B260-M4' => 2223,   # B260 M4
+	'UCSB-B460-M4' => 2224,   # B460 M4
+	'UCSB-B200-M4' => 2225,   # B200 M4
 );
 
 function autoPopulateUCS()
@@ -3235,23 +3442,7 @@ function clearVlan()
 	genericAssertion ('vlan_ck', 'uint-vlan1');
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 
-	$n_cleared = 0;
-	foreach (getVLANConfiguredPorts ($_REQUEST['vlan_ck']) as $object_id => $portnames)
-	{
-		$D = getStored8021QConfig ($object_id);
-		$changes = array();
-		foreach ($portnames as $pn)
-		{
-			$conf = $D[$pn];
-			$conf['allowed'] = array_diff ($conf['allowed'], array ($vlan_id));
-			if ($conf['mode'] == 'access')
-				$conf['mode'] = 'trunk';
-			if ($conf['native'] == $vlan_id)
-				$conf['native'] = 0;
-			$changes[$pn] = $conf;
-		}
-		$n_cleared += apply8021qChangeRequest ($object_id, $changes, FALSE);
-	}
+	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
 		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
 }
@@ -3259,10 +3450,11 @@ function clearVlan()
 function deleteVlan()
 {
 	genericAssertion ('vlan_ck', 'uint-vlan');
-	$confports = getVLANConfiguredPorts ($_REQUEST['vlan_ck']);
-	if (! empty ($confports))
-		throw new RackTablesError ("You can not delete VLAN that has assosiated ports");
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
+	if ($n_cleared > 0)
+		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
+	// since there is no strict foreign keys refering VLANDescription, we can delete a row
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
 	return buildRedirectURL ('vlandomain', 'default', array ('vdom_id' => $vdom_id));
@@ -3401,7 +3593,30 @@ function tableHandler()
 	switch ($opspec['action'])
 	{
 	case 'INSERT':
+		switch ($opspec['table'])
+		{
+			case 'Attribute':
+				$realm = 'attr';
+				break;
+			case 'Chapter':
+				$realm = 'chapter';
+				break;
+			case 'Dictionary':
+				$realm = 'dict';
+				break;
+			case 'TagTree':
+				$realm = 'tag';
+				break;
+			case 'VLANSwitchTemplate':
+				$realm = 'vst';
+				break;
+			default:
+				$realm = NULL;
+		}
 		usePreparedInsertBlade ($opspec['table'], buildOpspecColumns ($opspec, 'arglist'));
+		if (isset ($realm))
+			lastCreated ($realm, lastInsertID());
+
 		$retcode = 48;
 		break;
 	case 'DELETE':
@@ -3428,9 +3643,10 @@ function tableHandler()
 	}
 	showOneLiner ($retcode);
 }
-$msgcode['updateFile']['OK'] = 6;
+
 function updateFile ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$file_id = getBypassValue();
 	$file_name = genericAssertion ('file_name', 'string');
 	$file_type = genericAssertion ('file_type', 'string');
@@ -3446,9 +3662,9 @@ function updateFile ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($file_name));
 }
 
-$msgcode['editIPv4Net']['OK'] = 6;
 function editIPv4Net ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$net_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$comment = genericAssertion ('comment', 'string0');
@@ -3464,9 +3680,9 @@ function editIPv4Net ()
 	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
 }
 
-$msgcode['editIPv6Net']['OK'] = 6;
 function editIPv6Net ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$net_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$comment = genericAssertion ('comment', 'string0');
@@ -3482,9 +3698,9 @@ function editIPv6Net ()
 	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
 }
 
-$msgcode['updIPv4RSP']['OK'] = 6;
 function updIPv4RSP ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$rspool_id = getBypassValue();
 	$name = genericAssertion ('name', 'string0');
 	$vsconfig = genericAssertion ('vsconfig', 'string0');
@@ -3500,9 +3716,9 @@ function updIPv4RSP ()
 	showFuncMessage (__FUNCTION__, 'OK', array($_REQUEST['name']));
 }
 
-$msgcode['editUserProperties']['OK'] = 6;
 function editUserProperties ()
 {
+	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$taglist = genericAssertion ('taglist', 'array0');
 	$user_id = getBypassValue();
 	rebuildTagChainForEntity ('user', $user_id, buildTagChainFromIds ($taglist), TRUE);
@@ -3528,6 +3744,51 @@ function renameObjectPorts()
 		showSuccess ("Renamed $n ports");
 	else
 		showNotice ("Nothing renamed");
+}
+
+function consumePatchCable()
+{
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), -1))
+		showSuccess ('consumed OK');
+	else
+		showError ('could not consume');
+}
+
+function replenishPatchCable()
+{
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), 1))
+		showSuccess ('replenished OK');
+	else
+		showError ('could not replenish');
+}
+
+function setPatchCableAmount()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 51));
+	commitSetPatchCableAmount (genericAssertion ('id', 'uint'), genericAssertion ('amount', 'uint0'));
+	showFuncMessage (__FUNCTION__, 'OK');
+}
+
+function updateVLANDomain()
+{
+	$domain_id = assertUIntArg ('vdom_id');
+	$group_id = assertUIntArg ('group_id', TRUE);
+	$description = assertStringArg ('vdom_descr');
+
+	if (! $group_id)
+		$group_id = NULL;
+	else
+	{
+		$dominfo = getVLANDomain ($domain_id);
+		$parent_dominfo = getVLANDomain ($group_id);
+		if ($group_id == $domain_id)
+			throw new InvalidRequestArgException ('group_id', $group_id, "domains should not be the same");
+		if ($parent_dominfo['group_id'] || $dominfo['subdomc'])
+			throw new InvalidRequestArgException ('group_id', $group_id, "Multi-level domain groups are not allowed");
+	}
+
+	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
+	showSuccess ("VLAN domain updated successfully");
 }
 
 ?>

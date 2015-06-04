@@ -70,9 +70,7 @@ function renderVS ($vsid)
 
 function renderTripletForm ($bypass_id)
 {
-	global $pageno, $etype_by_pageno;
-	$cell = spotEntity ($etype_by_pageno[$pageno], $bypass_id);
-	renderSLBTriplets2 ($cell, TRUE);
+	renderSLBTriplets2 (spotEntity (etypeByPageno(), $bypass_id), TRUE);
 }
 
 // either $port of $vip argument should be NULL
@@ -94,9 +92,9 @@ function renderPopupTripletForm ($triplet, $port, $vip, $row)
 		echo '<p><label>Priority:<br><input type=text name=prio value="'  . htmlspecialchars (is_array ($row) ? $row['prio'] : '', ENT_QUOTES) . '"></label>';
 	}
 	echo '<p><label>VS config:<br>';
-	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars (is_array ($row) ? $row['vsconfig'] : '') . '</textarea></label>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . (is_array ($row) ? stringForTextarea ($row['vsconfig']) : '') . '</textarea></label>';
 	echo '<p><label>RS config:<br>';
-	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars (is_array ($row) ? $row['rsconfig'] : '') . '</textarea></label>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . (is_array ($row) ? stringForTextarea ($row['rsconfig']) : '') . '</textarea></label>';
 	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form>';
 }
@@ -109,9 +107,9 @@ function renderPopupVSPortForm ($port, $used = 0)
 	echo '<p align=center>';
 	echo getOpLink (array ('op' => 'delPort') + $keys, $title, 'destroy', '', ($used ? 'del-used-slb' : '') );
 	echo '<p><label>VS config:<br>';
-	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($port['vsconfig']) . '</textarea></label>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . stringForTextarea ($port['vsconfig']) . '</textarea></label>';
 	echo '<p><label>RS config:<br>';
-	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($port['rsconfig']) . '</textarea></label>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . stringForTextarea ($port['rsconfig']) . '</textarea></label>';
 	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form>';
 }
@@ -124,9 +122,9 @@ function renderPopupVSVIPForm ($vip, $used = 0)
 	echo '<p align=center>';
 	echo getOpLink (array ('op' => 'delIP', 'ip' => $fmt_ip), $title, 'destroy', '', ($used ? 'del-used-slb' : '') );
 	echo '<p><label>VS config:<br>';
-	echo '<textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($vip['vsconfig']) . '</textarea></label>';
+	echo '<textarea name=vsconfig rows=3 cols=80>' . stringForTextarea ($vip['vsconfig']) . '</textarea></label>';
 	echo '<p><label>RS config:<br>';
-	echo '<textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vip['rsconfig']) . '</textarea></label>';
+	echo '<textarea name=rsconfig rows=3 cols=80>' . stringForTextarea ($vip['rsconfig']) . '</textarea></label>';
 	echo '<p align=center>' . getImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form>';
 }
@@ -145,8 +143,8 @@ function renderEditVS ($vs_id)
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo '<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['vsconfig']) . '</textarea></td></tr>';
-	echo '<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=3 cols=80>' . htmlspecialchars ($vsinfo['rsconfig']) . '</textarea></td></tr>';
+	echo '<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=3 cols=80>' . stringForTextarea ($vsinfo['vsconfig']) . '</textarea></td></tr>';
+	echo '<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=3 cols=80>' . stringForTextarea ($vsinfo['rsconfig']) . '</textarea></td></tr>';
 	echo '<tr><th></th><th>';
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	// delete link
@@ -508,17 +506,17 @@ function renderNewTripletForm ($realm1, $realm2)
 			case 'object':
 				$name = 'Load balancer';
 				$list = getNarrowObjectList ('IPV4LB_LISTSRC');
-				$options = array ('name' => 'object_id', 'tabindex' => 100);
+				$options = array ('name' => 'object_id');
 				break;
 			case 'ipvs':
 				$name = 'Virtual service';
 				$list = formatEntityList (listCells ('ipvs'));
-				$options = array ('name' => 'vs_id', 'tabindex' => 101);
+				$options = array ('name' => 'vs_id');
 				break;
 			case 'ipv4rspool':
 				$name = 'RS pool';
 				$list = formatEntityList (listCells ('ipv4rspool'));
-				$options = array ('name' => 'rspool_id', 'tabindex' => 102);
+				$options = array ('name' => 'rspool_id');
 				break;
 			default:
 				throw new InvalidArgException('realm', $realm);
@@ -536,7 +534,7 @@ function renderNewTripletForm ($realm1, $realm2)
 	printSelect ($realm1_data['list'], $realm1_data['options']);
 	echo '</td><td class=tdcenter valign=middle rowspan=2>';
 	if (count ($realm1_data['list']) && count ($realm2_data['list']))
-		printImageHREF ('ADD', 'Configure LB', TRUE, 120);
+		printImageHREF ('ADD', 'Configure LB', TRUE);
 	else
 	{
 		$names = array();

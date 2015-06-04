@@ -1,7 +1,9 @@
 @media print {
 	body table.maintable { font-size: 80%; }
 	.mainheader { display: none; }
-	.menubar { display: none; }
+	.searchbox { display: none; }
+	div.menubar { color: #000000; font-weight: bold; }
+	div.menubar a { color: #000000; font-weight: bold; }
 	.tabbar { display: none; }
 	div.greynavbar { border-top-width: 0px; }
 	.greynavbar * a[class=std] { display: none; }
@@ -910,4 +912,13 @@ a.noclick {
 	margin-top: 0.5em;
 	font-size: 12px;
 	line-height: 1.5em;
+}
+
+div.popupbar {
+	background-color: #f0f0f0;
+	border: 1px solid #3c78b5;
+	padding: 10px;
+	height: 100%;
+	text-align: center;
+	margin: 5px;
 }
