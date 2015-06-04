@@ -735,6 +735,23 @@ $iftable_processors['nexus-any-QSFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['nexus-3048-1000TX'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '24', // From database - check wwwroot/inc/install.php
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+$iftable_processors['nexus-3048-49-to-52-1000SFP'] = array
+(
+	'pattern' => '@^Ethernet([[:digit:]]+/)?(49|50|51|52)$@',
+	'replacement' => 'e\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\1\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ftos-any-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet 0/(\d+)$@',
@@ -3143,6 +3160,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'N5K-C5548P: 32 SFP+/10000',
 		'processors' => array ('nexus-any-10000SFP+', 'nexus-mgmt'),
 	),
+	'9.12.3.1.3.1106' => array
+	(
+		'dict_key' => 2333,
+		'text' => 'N3K-3048P: 48 RJ-45/100-1000TX + 4 SFP+/1000-10000',
+		'processors' => array ('nexus-3048-49-to-52-1000SFP', 'nexus-3048-1000TX', 'nexus-mgmt'),
+	),
 	'9.12.3.1.3.1417' => array
 	(
 		'dict_key' => 2331,
@@ -4106,6 +4129,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		(
 			'4.0' => 963,
 			'4.1' => 964,
+			'4.2' => 1365,
+			'5.0' => 1410,
+			'5.1' => 1411,
+			'5.2' => 1809,
+			'6.0' => 1643,
+			'6.1' => 2028,
 		);
 		if (array_key_exists ($major_line, $nxos_codes))
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
