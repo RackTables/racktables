@@ -762,6 +762,7 @@ function iosxr4ShortenIfName ($ifname)
 	$ifname = preg_replace ('@^GigabitEthernet\s*(.+)$@', 'gi\\1', $ifname);
 	$ifname = preg_replace ('@^TenGigE\s*(.*)$@', 'te\\1', $ifname);
 	$ifname = preg_replace ('@^BE\s*(\d+)$@', 'bundle-ether\\1', $ifname);
+	$ifname = preg_replace ('@^HundredGigE\s*(.+)$@i', 'hu\\1', $ifname);
 	$ifname = strtolower ($ifname);
 	return $ifname;
 }
