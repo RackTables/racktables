@@ -4586,48 +4586,53 @@ function formatLinkedPort ($port_info, $a_class = '')
 function compareDecomposedPortNames ($porta, $portb)
 {
 	$ret = 0;
-	if ($porta['numidx'] != $portb['numidx'])
-		$ret = numCompare ($porta['numidx'], $portb['numidx']);
-	else
+
+	$prefix_diff = numSign (strcmp ($porta['prefix'], $portb['prefix']));
+
+	// concatenation of 0..(n-1) numeric indices
+	$a_parent = $porta['idx_parent'];
+	$b_parent = $portb['idx_parent'];
+
+	$index_diff = 0;
+	for ($i = 0; $i < $porta['numidx']; $i++)
 	{
-		global $portsort_intersections;
-		$prefix_diff = numSign (strcmp ($porta['prefix'], $portb['prefix']));
-		$index_diff = 0;
-		$a_parent = $b_parent = ''; // concatenation of 0..(n-1) numeric indices
-		$separator = '';
-		for ($i = 0; $i < $porta['numidx']; $i++)
+		if ($i >= $portb['numidx'])
 		{
-			if ($i < $porta['numidx'] - 1)
-			{
-				$a_parent .= $separator . $porta['index'][$i];
-				$b_parent .= $separator . $portb['index'][$i];
-				$separator = '-';
-			}
-			if ($porta['index'][$i] != $portb['index'][$i])
-			{
-				$index_diff = numCompare ($porta['index'][$i], $portb['index'][$i]);
-				break;
-			}
+			$index_diff = 1; // a > b
+			break;
 		}
-		// compare by portname fields
-		if ($prefix_diff != 0 and $porta['numidx'] <= 1) // if index count is lte 1, sort by prefix
-			$ret = $prefix_diff;
-		// if index count > 1 and ports have different prefixes in intersecting index sections, sort by prefix
-		elseif ($prefix_diff != 0 and $a_parent != '' and $a_parent == $b_parent and in_array ($a_parent, $portsort_intersections))
-			$ret = $prefix_diff;
-		// if indices are not equal, sort by index
-		elseif ($index_diff != 0)
-			$ret = $index_diff;
-		// if all of name fields are equal, compare by some additional port fields
-		elseif ($porta['iif_id'] != $portb['iif_id'])
-			$ret = numCompare ($porta['iif_id'], $portb['iif_id']);
-		elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
-			$ret = numSign ($result);
-		elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
-			$ret = numSign ($result);
-		elseif ($porta['id'] != $portb['id'])
-			$ret = numCompare ($porta['id'], $portb['id']);
+		if ($porta['index'][$i] != $portb['index'][$i])
+		{
+			$index_diff = numCompare ($porta['index'][$i], $portb['index'][$i]);
+			break;
+		}
 	}
+	if ($index_diff == 0 && $porta['numidx'] < $portb['numidx'])
+		$index_diff = -1; // a < b
+
+	// compare by portname fields
+	if ($prefix_diff != 0 and ($porta['numidx'] <= 1 or $portb['numidx'] <= 1)) // if index count is lte 1, sort by prefix
+	{
+		$ret = numCompare($porta['numidx'], $portb['numidx']);
+		if ($ret == 0)
+			$ret = $prefix_diff;
+	}
+	// if index count > 1 and ports have different prefixes in intersecting index sections, sort by prefix
+	elseif ($prefix_diff != 0 and $a_parent != '' and $a_parent == $b_parent)
+		$ret = $prefix_diff;
+	// if indices are not equal, sort by index
+	elseif ($index_diff != 0)
+		$ret = $index_diff;
+	// if all of name fields are equal, compare by some additional port fields
+	elseif ($porta['iif_id'] != $portb['iif_id'])
+		$ret = numCompare ($porta['iif_id'], $portb['iif_id']);
+	elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
+		$ret = numSign ($result);
+	elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
+		$ret = numSign ($result);
+	elseif ($porta['id'] != $portb['id'])
+		$ret = numCompare ($porta['id'], $portb['id']);
+
 	return $ret;
 }
 
@@ -4646,31 +4651,25 @@ function sortPortList ($plist, $name_in_value = FALSE)
 {
 	$ret = array();
 	$to_sort = array();
-	$seen = array();
-	global $portsort_intersections;
-	$portsort_intersections = array();
 	$prefix_re = '/^([^0-9]*)[0-9].*$/';
 	foreach ($plist as $pkey => $pvalue)
 	{
 		$pn = $name_in_value ? $pvalue['name'] : $pkey;
 		$numbers = preg_split ('/[^0-9]+/', $pn, -1, PREG_SPLIT_NO_EMPTY);
+		$parent = implode ('-', array_slice ($numbers, 0, count ($numbers) - 1));
 		$to_sort[] = array
 		(
 			'key' => $pkey,
 			'prefix' => preg_replace ($prefix_re, '\\1', $pn),
 			'numidx' => count ($numbers),
 			'index' => $numbers,
+			'idx_parent' => $parent,
 			'iif_id' => isset($plist[$pkey]['iif_id']) ? $plist[$pkey]['iif_id'] : 0,
 			'label' => isset($plist[$pkey]['label']) ? $plist[$pkey]['label'] : '',
 			'l2address' => isset($plist[$pkey]['l2address']) ? $plist[$pkey]['l2address'] : '',
 			'id' => isset($plist[$pkey]['id']) ? $plist[$pkey]['id'] : 0,
 			'name' => $pn,
 		);
-		$parent = implode ('-', array_slice ($numbers, 0, count ($numbers) - 1));
-		if (! isset ($seen[$parent]))
-			$seen[$parent] = 1;
-		else
-			$portsort_intersections[$parent] = $parent;
 	}
 	usort ($to_sort, 'compareDecomposedPortNames');
 	foreach ($to_sort as $pvalue)
