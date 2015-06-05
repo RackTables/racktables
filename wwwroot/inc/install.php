@@ -256,9 +256,9 @@ function init_config ()
 # \$pdo_bufsize = 50 * 1024 * 1024;
 # Setting PDO SSL key, cert, and CA will allow a SSL/TLS connection to the MySQL
 # DB. Make sure the files are readable by the web server
-# \$pdo_ssl_key = '\\path\\to\\ssl\\key'
-# \$pdo_ssl_cert = '\\path\\to\\ssl\\cert'
-# \$pdo_ssl_ca = '\\path\\to\\ssl\\ca'
+# \$pdo_ssl_key = '/path/to/ssl/key'
+# \$pdo_ssl_cert = '/path/to/ssl/cert'
+# \$pdo_ssl_ca = '/path/to/ssl/ca'
 
 \$user_auth_src = 'database';
 \$require_local_account = TRUE;
