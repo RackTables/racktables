@@ -726,6 +726,16 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
+
+$iftable_processors['nexus-any-QSFP-split'] = array
+(
+	'pattern' => '@^Ethernet(([[:digit:]]+)/([[:digit:]]+)/([[:digit:]]+))$@',
+	'replacement' => 'e\\1',
+	'dict_key' => '9-1084',
+	'label' => '\\2/\\3:\\4',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nexus-any-QSFP+'] = array
 (
 	'pattern' => '@^Ethernet([[:digit:]]/[[:digit:]]+)$@',
@@ -3170,7 +3180,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2331,
 		'text' => 'Nexus 3132Q: 32 QSFP+',
-		'processors' => array ('nexus-any-QSFP+', 'nexus-mgmt'),
+		'processors' => array ('nexus-any-QSFP-split', 'nexus-any-QSFP+', 'nexus-mgmt'),
 	),
 	'11.2.3.7.11.9' => array
 	(
@@ -4056,7 +4066,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
 		return;
 	}
-	$sysObjectID = preg_replace ('/^.*(enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
+	$sysObjectID = preg_replace ('/^.*( \.1\.3\.6\.1\.|enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	if (!isset ($known_switches[$sysObjectID]))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
