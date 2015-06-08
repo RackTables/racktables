@@ -3901,23 +3901,11 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 			$employed[$vlan_id] = 1;
 
 	// find VLANs for object's L3 allocations
-	$cell = spotEntity ('object', $object_id);
-	amplifyCell ($cell);
-	foreach (array ('ipv4', 'ipv6') as $family)
-	{
-		$seen_nets = array();
-		foreach ($cell[$family] as $ip_bin => $allocation)
-			if ($net_id = getIPAddressNetworkId ($ip_bin))
-			{
-				if (isset ($seen_nets[$net_id]))
-					continue;
-				$seen_nets[$net_id] = 1;
-				$net = spotEntity ("${family}net", $net_id);
-				foreach ($net['8021q'] as $vlan)
-					if (isset ($domain_vlanlist[$vlan['vlan_id']]) and ! isset ($employed[$vlan['vlan_id']]))
-						$employed[$vlan['vlan_id']] = 1;
-			}
-	}
+	foreach (getObjectIPAllocationList ($object_id) as $ip_bin => $alloc)
+		if ($net = spotNetworkByIP ($ip_bin))
+			foreach ($net['8021q'] as $vlan)
+				if (isset ($domain_vlanlist[$vlan['vlan_id']]) and ! isset ($employed[$vlan['vlan_id']]))
+					$employed[$vlan['vlan_id']] = 1;
 	$ret = array_keys ($employed);
 	$override = callHook ('getEmployedVlans_hook', $ret, $object_id, $domain_vlanlist);
 	if (isset ($override))
