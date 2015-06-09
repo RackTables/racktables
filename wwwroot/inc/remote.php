@@ -737,7 +737,7 @@ function ios12ShortenIfName_real ($ifname)
 
 function nxos4ShortenIfName ($ifname)
 {
-	$ifname = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^(Ethernet|Eth)(.+)$@', 'e\\2', $ifname);
 	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
 	$ifname = preg_replace ('@^mgmt(.+)$@i', 'mgmt\\1', $ifname);
 	$ifname = strtolower ($ifname);
