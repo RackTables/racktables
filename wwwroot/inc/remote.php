@@ -710,6 +710,8 @@ function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 	{
 		case 'ios12':
 			return ios12ShortenIfName_real ($if_name);
+		case 'nxos4':
+			return nxos4ShortenIfName ($if_name);
 		case 'vrp53':
 		case 'vrp55':
 			return vrp5xShortenIfName ($if_name);
@@ -730,6 +732,16 @@ function ios12ShortenIfName_real ($ifname)
 	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
 	$ifname = strtolower ($ifname);
 	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
+}
+
+function nxos4ShortenIfName ($ifname)
+{
+	$ifname = preg_replace ('@^Ethernet(.+)$@', 'e\\1', $ifname);
+	$ifname = preg_replace ('@^port-channel(.+)$@i', 'po\\1', $ifname);
+	$ifname = preg_replace ('@^mgmt(.+)$@i', 'mgmt\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(e|po|mgmt)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
 }
 
