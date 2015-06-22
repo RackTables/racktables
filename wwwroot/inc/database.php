@@ -586,7 +586,6 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
 	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
 	$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['keycolumn']} = ?";
-	$query .= " ORDER BY tag_id";
 	$result = usePreparedSelectBlade ($query, array ($realm, $id));
 	$ret = array();
 	global $taglist;
