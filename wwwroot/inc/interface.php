@@ -6092,6 +6092,16 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 
 function renderCell ($cell)
 {
+	echo callHook ('getRenderedCell', $cell);
+}
+
+function getRenderedCell ($cell)
+{
+	return getOutputOf ('printCell', $cell);
+}
+
+function printCell ($cell)
+{
 	switch ($cell['realm'])
 	{
 	case 'user':
