@@ -943,6 +943,11 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 
 function renderNetVLAN ($cell)
 {
+	echo getRenderedNetVLAN ($cell);
+}
+
+function getRenderedNetVLAN ($cell)
+{
 	if (empty ($cell['8021q']))
 		return;
 	$links = array();
@@ -952,7 +957,7 @@ function renderNetVLAN ($cell)
 		$links[] = formatVLANAsShortLink ($vlan_info);
 	}
 	$noun = count ($cell['8021q']) > 1 ? 'VLANs' : 'VLAN';
-	echo "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
+	return "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
 }
 
 function includeJQueryUI ($do_css = TRUE)
