@@ -6092,6 +6092,12 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 
 function renderCell ($cell)
 {
+	$override = callHook ('getRenderedCell', $cell);
+	if (isset ($override))
+	{
+		echo $override;
+		return;
+	}
 	switch ($cell['realm'])
 	{
 	case 'user':
