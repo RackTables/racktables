@@ -2622,9 +2622,11 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 {
 	$query = 'select * from IPv4Network where ' .
 		"? & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
+		"and ip <= ? " .
 		"and mask < ? " .
 		'order by mask desc limit 1';
-	$result = usePreparedSelectBlade ($query, array (ip4_bin2db ($ip_bin), $masklen));
+	$ip_db = ip4_bin2db ($ip_bin);
+	$result = usePreparedSelectBlade ($query, array ($ip_db, $ip_db, $masklen));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	return $row === FALSE ? NULL : $row;
 }
