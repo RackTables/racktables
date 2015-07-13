@@ -634,14 +634,20 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	case 'ipv4net':
 		processIPNetVlans ($ret);
 		$ret = array_merge ($ret, constructIPRange (ip4_int2bin ($ret['ip_bin']), $ret['mask']));
-		$ret['spare_ranges'] = array();
-		$ret['kidc'] = 0;
+		if (! fillNetKids ($ret))
+		{
+			$ret['spare_ranges'] = array();
+			$ret['kidc'] = 0;
+		}
 		break;
 	case 'ipv6net':
 		processIPNetVlans ($ret);
 		$ret = array_merge ($ret, constructIPRange ($ret['ip_bin'], $ret['mask']));
-		$ret['spare_ranges'] = array();
-		$ret['kidc'] = 0;
+		if (! fillNetKids ($ret))
+		{
+			$ret['spare_ranges'] = array();
+			$ret['kidc'] = 0;
+		}
 		break;
 	case 'ipv4vs':
 		$ret['vip'] = ip_format ($ret['vip_bin']);
@@ -661,64 +667,55 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		break;
 	}
 
-	if ($realm == 'ipv4net')
-	{
-		$result = usePreparedSelectBlade ("
-SELECT n2.id, n2.ip as ip_bin, n2.mask FROM
-	IPv4Network n1,
-	IPv4Network n2
-WHERE
-	n1.id = ?
-	AND n2.ip BETWEEN n1.ip AND (n1.ip + (1 << (32 - n1.mask)) - 1)
-	AND n2.mask >= n1.mask
-ORDER BY n2.ip, n2.mask
-", array ($id));
-		$nets = $result->fetchAll (PDO::FETCH_ASSOC);
-		foreach ($nets as &$net_row)
-		{
-			$net_row = array_merge ($net_row, constructIPRange (ip4_int2bin ($net_row['ip_bin']), $net_row['mask']));
-			$net_row['spare_ranges'] = array();
-			$net_row['kidc'] = 0;
-		}
-		fillIPNetsCorrelation ($nets);
-		if (is_array ($nets[0]) and $nets[0]['id'] == $id)
-		{
-			$ret['spare_ranges'] = $nets[0]['spare_ranges'];
-			$ret['kidc'] = $nets[0]['kidc'];
-		}
-		unset ($result);
-	}
-	elseif ($realm == 'ipv6net')
-	{
-		$result = usePreparedSelectBlade ("
-SELECT n2.id, n2.ip as ip_bin, n2.mask FROM
-	IPv6Network n1,
-	IPv6Network n2
-WHERE
-	n1.id = ?
-	AND n2.ip BETWEEN n1.ip AND n1.last_ip
-	AND n2.mask >= n1.mask
-ORDER BY n2.ip, n2.mask
-", array ($id));
-		$nets = $result->fetchAll (PDO::FETCH_ASSOC);
-		foreach ($nets as &$net_row)
-		{
-			$net_row = array_merge ($net_row, constructIPRange ($net_row['ip_bin'], $net_row['mask']));
-			$net_row['spare_ranges'] = array();
-			$net_row['kidc'] = 0;
-		}
-		fillIPNetsCorrelation ($nets);
-		if (is_array ($nets[0]) and $nets[0]['id'] == $id)
-		{
-			$ret['spare_ranges'] = $nets[0]['spare_ranges'];
-			$ret['kidc'] = $nets[0]['kidc'];
-		}
-		unset ($result);
-	}
 	$ret['atags'] = generateEntityAutoTags ($ret);
 	if (! $ignore_cache)
 		$entityCache['partial'][$realm][$id] = $ret;
 	return $ret;
+}
+
+function fillNetKids (&$net_cell)
+{
+	if ($net_cell['realm'] == 'ipv6net')
+	{
+		$table = 'IPv6Network';
+		$ip_first = $net_cell['ip_bin'];
+		$ip_last = ip_last ($net_cell);
+	}
+	else
+	{
+		$table = 'IPv4Network';
+		$ip_first = ip4_bin2db ($net_cell['ip_bin']);
+		$ip_last = ip4_bin2db (ip_last ($net_cell));
+	}
+
+	$result = usePreparedSelectBlade ("
+SELECT id, ip as ip_bin, mask FROM $table
+WHERE ip BETWEEN ? AND ? AND mask >= ?
+ORDER BY ip, mask
+", array ($ip_first, $ip_last, $net_cell['mask']));
+	$nets = array();
+	while ($net_row = $result->fetch (PDO::FETCH_ASSOC))
+	{
+		$ip_bin = $net_row['ip_bin'];
+		if ($net_cell['realm'] == 'ipv4net')
+			$ip_bin = ip4_int2bin ($ip_bin);
+		$nets[] = constructIPRange ($ip_bin, $net_row['mask']) +
+			array(
+				'id' => $net_row['id'],
+				'spare_ranges' => array(),
+				'kidc' => 0,
+			);
+	}
+	unset ($result);
+
+	fillIPNetsCorrelation ($nets, 1);
+	if (is_array ($nets[0]) and $nets[0]['id'] == $net_cell['id'])
+	{
+		$net_cell['spare_ranges'] = $nets[0]['spare_ranges'];
+		$net_cell['kidc'] = $nets[0]['kidc'];
+		return TRUE;
+	}
+	return FALSE;
 }
 
 // This function can be used with array_walk().

@@ -5460,7 +5460,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 
 // takes a full sublist of ipv4net entities ordered by (ip,mask)
 // fills ['spare_ranges'] and ['kidc'] fields of each item of $nets.
-function fillIPNetsCorrelation (&$nets)
+function fillIPNetsCorrelation (&$nets, $max_depth = 0)
 {
 	$stack = array();
 	foreach ($nets as &$net)
@@ -5471,6 +5471,9 @@ function fillIPNetsCorrelation (&$nets)
 			$top = &$stack[count ($stack) - 1];
 			if (IPNetContains ($top, $net))
 			{
+				// skip the network if max_depth exceeded
+				if ($max_depth and count ($stack) > $max_depth)
+					continue 2;
 				$top['kidc']++;
 				break;
 			}
