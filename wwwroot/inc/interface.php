@@ -1814,9 +1814,9 @@ function renderPortsForObject ($object_id)
 	printOpFormIntro ('addMultiPorts');
 	echo 'Format: <select name=format>';
 	echo '<option value=c3600asy>Cisco 3600 async: sh line | inc TTY</option>';
-	echo '<option value=fiwg selected>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
+	echo '<option value=fiwg>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
 	echo '<option value=fisxii>Foundry FastIron SuperX/II4000: sh int br</option>';
-	echo '<option value=ssv1>SSV:&lt;interface name&gt; &lt;MAC address&gt;</option>';
+	echo '<option value=ssv1 selected>SSV:&lt;interface name&gt; [&lt;MAC address&gt;]</option>';
 	echo "</select>";
 	echo 'Default port type: ';
 	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);

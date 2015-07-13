@@ -918,7 +918,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
-				if (!strlen ($words[0]) or !strlen ($words[1]))
+				if (!strlen ($words[0])) // empty L2 address is OK
 					continue;
 				$ports[] = array
 				(
