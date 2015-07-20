@@ -1699,7 +1699,8 @@ WHERE O.objtype_id = 1562";
 (10,'QSFP+'),
 (11,'CFP'),
 (12,'CFP2'),
-(13,'CPAK')";
+(13,'CPAK'),
+(14,'CXP')";
 
 		$query[] = "INSERT INTO `PortOuterInterface` VALUES
 (16,'AC-in'),
@@ -1890,6 +1891,7 @@ WHERE O.objtype_id = 1562";
 (1588,'empty QSFP+'),
 (1589,'empty CFP2'),
 (1590,'empty CPAK'),
+(1591,'empty CXP'),
 (1603,'1000Base-T (HP c-Class)'),
 (1604,'100Base-TX (HP c-Class)'),
 (1642,'10GBase-T'),
@@ -1905,6 +1907,12 @@ WHERE O.objtype_id = 1562";
 (1672,'100GBase-SR4'),
 (1673,'100GBase-KR4'),
 (1674,'100GBase-KP4'),
+
+(1675,'100GBase-LR10'),
+(1676,'100GBase-ER10'),
+(1677,'100GBase-CR4'),
+(1678,'100GBase-CR10'),
+
 (1999,'10GBase-KR')
 ";
 // Add new outer interface types with id < 2000. Values 2000 and up are for
@@ -1943,7 +1951,9 @@ WHERE O.objtype_id = 1562";
 (21,1669),(22,1669),                              -- 100GBase-SR10: 20xMMF
 (18,1672),(19,1672),                              -- 100GBase-SR4: 8xMMF
 (5,1670),(6,1670),                                -- 100GBase-LR4: 2xSMF
-(5,1671),(6,1671)                                 -- 100GBase-ER4: 2xSMF";
+(5,1671),(6,1671),                                -- 100GBase-ER4: 2xSMF
+(5,1675),(6,1675),                                -- 100GBase-LR10: 2xSMF
+(5,1676),(6,1676)                                 -- 100GBase-ER10: 2xSMF";
 
 		$query[] = "INSERT INTO `ObjectParentCompat` VALUES
 (3,13),
@@ -1971,9 +1981,10 @@ WHERE O.objtype_id = 1562";
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
 (10,1588),(10,1660),(10,1662),(10,1663),(10,1664),
-(11,1668),(11,1669),(11,1670),(11,1671),(11,1672),(11,1673),(11,1674),
-(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),
-(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674),
+(11,1668),(11,1669),(11,1670),(11,1671),(11,1672),(11,1673),(11,1674),(11,1675),(11,1676),
+(12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),(12,1675),(12,1676),
+(13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674),(13,1675),(13,1676),
+(14,1591),(14,1677),(14,1678),
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
 		$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
@@ -2162,6 +2173,7 @@ WHERE O.objtype_id = 1562";
 (1589,1589),
 (1589,1590),
 (1590,1590),
+(1591,1591),
 (1603,1603),
 (1660,1660),
 (1661,1661),
@@ -2175,6 +2187,10 @@ WHERE O.objtype_id = 1562";
 (1672,1672),
 (1673,1673),
 (1674,1674),
+(1675,1675),
+(1676,1676),
+(1677,1677),
+(1678,1678),
 (1642,1642),
 (1999,1999)";
 
@@ -2229,7 +2245,7 @@ WHERE O.objtype_id = 1562";
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','yes','Tags quick list threshold'),
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable \"Add/update multiple ports\" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
-('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668','string','no','no','no','Default port outer interface IDs'),
+('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668; 12=1589; 13=1590; 14=1591','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),

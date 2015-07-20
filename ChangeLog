@@ -13,6 +13,7 @@
 	update: ability to clean rack mounts or drop entire row (even if it contains racks inside)
 		from user interface
 	update: IP network page renders a little faster
+	update: new 100G port types support (empty CXP, CR4, CR10, LR10, ER10)
 	update: warn when already used or reserved IP is assigned to object
 0.20.10 2015-01-26
 	bugfix: port type could not be changed for an unlinked modular port (#1393)

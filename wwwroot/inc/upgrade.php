@@ -1840,6 +1840,30 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			$query[] = "ALTER TABLE VLANDomain ADD COLUMN `group_id` int(10) UNSIGNED DEFAULT NULL AFTER `id`, " .
 				"ADD CONSTRAINT `VLANDomain-FK-group_id` FOREIGN KEY (`group_id`) REFERENCES `VLANDomain` (`id`) ON DELETE SET NULL";
 
+			// new 100GBase port types
+			$query[] = "INSERT INTO `PortInnerInterface` (`id`, `iif_name`) VALUES (14,'CXP')";
+			$query[] = "INSERT INTO `PortOuterInterface` (`id`, `oif_name`) VALUES
+				(1591,'empty CXP'),
+				(1675,'100GBase-LR10'),
+				(1676,'100GBase-ER10'),
+				(1677,'100GBase-CR4'),
+				(1678,'100GBase-CR10')";
+			$query[] = "INSERT INTO `PatchCableOIFCompat` (`pctype_id`, `oif_id`) VALUES
+				(5,1675),(6,1675),  -- 100GBase-LR10: 2xSMF
+				(5,1676),(6,1676)   -- 100GBase-ER10: 2xSMF";
+			$query[] = "INSERT INTO `PortInterfaceCompat` (`iif_id`, `oif_id`) VALUES
+				(11,1675),(11,1676),
+				(12,1675),(12,1676),
+				(13,1675),(13,1676),
+				(14,1591),(14,1677),(14,1678)";
+			$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
+				(1591,1591),
+				(1675,1675),
+				(1676,1676),
+				(1677,1677),
+				(1678,1678)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 14=1591') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
