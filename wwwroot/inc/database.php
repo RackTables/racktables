@@ -3175,7 +3175,7 @@ function getObjectSearchResults ($what)
 function getObjectAttrsSearchResults ($what)
 {
 	$ret = array();
-	foreach (array ('name', 'label', 'asset_no') as $column)
+	foreach (array ('name', 'label', 'asset_no', 'comment') as $column)
 	{
 		$tmp = getSearchResultByField
 		(
