@@ -469,10 +469,11 @@ function queryLDAPServer ($username, $password)
 {
 	global $LDAP_options;
 
-	if(extension_loaded('ldap') === FALSE)
+	if (extension_loaded ('ldap') === FALSE)
 		throw new RackTablesError ('LDAP misconfiguration. LDAP PHP Module is not installed.', RackTablesError::MISCONFIGURED);
 
-	$LDAP_CANT_CONNECT_CODES = array (
+	$ldap_cant_connect_codes = array
+	(
 		-1,			// Can't contact LDAP server error
 		-5,			// LDAP Timed out error
 		-11,		// LDAP connect error
@@ -500,7 +501,7 @@ function queryLDAPServer ($username, $password)
 			$tls = ldap_start_tls ($connect);
 			if ($LDAP_options['use_tls'] >= 2 && $tls == FALSE)
 			{
-				if (in_array (ldap_errno ($connect), $LDAP_CANT_CONNECT_CODES))
+				if (in_array (ldap_errno ($connect), $ldap_cant_connect_codes))
 					continue;
 				else
 					throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
@@ -510,7 +511,7 @@ function queryLDAPServer ($username, $password)
 		}
 		else
 		{
-			if (@ldap_bind ($connect) || !in_array (ldap_errno ($connect), $LDAP_CANT_CONNECT_CODES))
+			if (@ldap_bind ($connect) || !in_array (ldap_errno ($connect), $ldap_cant_connect_codes))
 			{
 				$success_server = $server;
 				// Cleanup after check. This connection will be used below
