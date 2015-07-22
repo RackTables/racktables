@@ -123,7 +123,7 @@ function trigger_autoports ()
 	$object = spotEntity ('object', getBypassValue());
 	if (count (getObjectPortsAndLinks ($object['id'])))
 		return '';
-	return count (getAutoPorts ($object['objtype_id'])) ? 'attn' : '';
+	return count (getAutoPorts ($object)) ? 'attn' : '';
 }
 
 function trigger_tags ()

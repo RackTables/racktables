@@ -5101,7 +5101,7 @@ function renderAutoPortsForm ($object_id)
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<caption>The following ports can be quickly added:</caption>";
 	echo "<tr><th>type</th><th>name</th></tr>";
-	foreach (getAutoPorts ($info['objtype_id']) as $autoport)
+	foreach (getAutoPorts ($info) as $autoport)
 		echo "<tr><td>" . $ptlist[$autoport['type']] . "</td><td>${autoport['name']}</td></tr>";
 	printOpFormIntro ('generate');
 	echo "<tr><td colspan=2 align=center>";

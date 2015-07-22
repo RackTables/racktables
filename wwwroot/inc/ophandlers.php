@@ -2203,7 +2203,7 @@ function generateAutoPorts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	$object = spotEntity ('object', getBypassValue());
-	executeAutoPorts ($object['id'], $object['objtype_id']);
+	executeAutoPorts ($object['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, 'ports');
 }

@@ -1215,10 +1215,20 @@ function email_regex_simple()
 }
 
 // Parse AUTOPORTS_CONFIG and return a list of generated pairs (port_type, port_name)
-// for the requested object_type_id.
-function getAutoPorts ($type_id)
+// for the requested object.
+function getAutoPorts ($object)
 {
-	$ret = array();
+	return parseAutoPortsConfig (getAutoPortsConfig ($object));
+}
+
+// Extract automatic ports schema from the AUTOPORTS_CONFIG
+// based on the given object's type. Can be overriden
+function getAutoPortsConfig ($object)
+{
+	$override = callHook ('getAutoPortsConfig_hook', $object);
+	if (isset ($override))
+		return $override;
+
 	$typemap = explode (';', str_replace (' ', '', getConfigVar ('AUTOPORTS_CONFIG')));
 	foreach ($typemap as $equation)
 	{
@@ -1226,22 +1236,27 @@ function getAutoPorts ($type_id)
 		if (count ($tmp) != 2)
 			continue;
 		$objtype_id = $tmp[0];
-		if ($objtype_id != $type_id)
+		if ($objtype_id == $object['objtype_id'])
+			return $tmp[1];
+	}
+}
+
+function parseAutoPortsConfig ($schema)
+{
+	$ret = array();
+
+	foreach (explode ('+', $schema) as $product)
+	{
+		$tmp = explode ('*', $product);
+		if (count ($tmp) > 4 || count ($tmp) < 3)
 			continue;
-		$portlist = $tmp[1];
-		foreach (explode ('+', $portlist) as $product)
-		{
-			$tmp = explode ('*', $product);
-			if (count ($tmp) > 4 || count ($tmp) < 3)
-				continue;
-			# format: <number of ports>*<port_type_id>[*<sprintf_name>*<startnumber>]
-			$nports = $tmp[0];
-			$port_type = $tmp[1];
-			$format = $tmp[2];
-			$startnum = isset ($tmp[3]) ? $tmp[3] : 0;
-			for ($i = 0; $i < $nports; $i++)
-				$ret[] = array ('type' => $port_type, 'name' => @sprintf ($format, $i + $startnum));
-		}
+		# format: <number of ports>*<port_type_id>[*<sprintf_name>*<startnumber>]
+		$nports = $tmp[0];
+		$port_type = $tmp[1];
+		$format = $tmp[2];
+		$startnum = isset ($tmp[3]) ? $tmp[3] : 0;
+		for ($i = 0; $i < $nports; $i++)
+			$ret[] = array ('type' => $port_type, 'name' => @sprintf ($format, $i + $startnum));
 	}
 	return $ret;
 }

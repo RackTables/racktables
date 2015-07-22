@@ -959,7 +959,7 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 
 	// Do AutoPorts magic
 	if ($realm == 'object')
-		executeAutoPorts ($object_id, $new_type_id);
+		executeAutoPorts ($object_id);
 	// Now tags...
 	produceTagsForNewRecord ($realm, $taglist, $object_id);
 	recordObjectHistory ($object_id);
@@ -4104,13 +4104,9 @@ function loadThumbCache ($rack_id = 0)
 	return $ret;
 }
 
-function executeAutoPorts ($object_id = 0, $type_id = 0)
+function executeAutoPorts ($object_id)
 {
-	if ($object_id == 0)
-		throw new InvalidArgException ('$object_id', $object_id);
-	if ($type_id == 0)
-		throw new InvalidArgException ('$type_id', $type_id);
-	foreach (getAutoPorts ($type_id) as $autoport)
+	foreach (getAutoPorts (spotEntity ('object', $object_id)) as $autoport)
 		commitAddPort ($object_id, $autoport['name'], $autoport['type'], '', '');
 }
 
