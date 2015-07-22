@@ -506,6 +506,7 @@ function queryLDAPServer ($username, $password)
 					throw new RackTablesError ('LDAP misconfiguration: LDAP TLS required but not successfully negotiated.', RackTablesError::MISCONFIGURED);
 			}
 			$success_server = $server;
+			break;
 		}
 		else
 		{
