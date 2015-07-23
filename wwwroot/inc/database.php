@@ -1981,7 +1981,7 @@ function commitUnlinkPort ($port_id)
 	}
 
 	// remove existing link
-	usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
+	return usePreparedDeleteBlade ('Link', array ('porta' => $port_id, 'portb' => $port_id), 'OR');
 }
 
 function addPortLogEntry ($port_id, $message)
