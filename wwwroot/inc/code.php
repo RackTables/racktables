@@ -889,6 +889,7 @@ function findAutoTagWarnings ($expr)
 		'$type_tcp',
 		'$type_udp',
 		'$unmounted',
+		'$has_problems',
 		'$untagged',
 		'$unused',
 	);
