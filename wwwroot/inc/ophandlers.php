@@ -3363,7 +3363,7 @@ function autoPopulateUCS()
 			else
 			{
 				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
-				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
+				$spname_id[$spname] = $new_object_id = commitAddObject ($spname, NULL, 4, NULL);
 			}
 			#    Set H/W Type for Blade Server
 			if (array_key_exists ($item['model'], $ucsproductmap))
@@ -3376,6 +3376,14 @@ function autoPopulateUCS()
 			if (array_key_exists ($parent_name, $chassis_id))
 				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
 			$done++;
+		}
+		elseif ($item['type'] == 'VnicPort')
+		{
+			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '${2}', $item['DN']) . "(" . $oinfo['name'] . ")";
+			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '${3}', $item['DN']);
+			#        Add "virtual"(1469) ports for associated blades only
+			if ($spid = $spname_id[$spname])
+				commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
 		}
 	} # endfor
 	showSuccess ("Auto-populated UCS Domain '${oinfo['name']}' with ${done} items");
