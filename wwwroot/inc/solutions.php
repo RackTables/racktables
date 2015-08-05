@@ -15,7 +15,7 @@ amount of other code (which should eventually be placed in a sort of
 
 require_once 'slb-interface.php';
 
-define ('RE_STATIC_URI', '#^([[:alpha:]]+)/(?:[[:alnum:]]+[[:alnum:]_.-]*/)*[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
+define ('RE_STATIC_URI', '#^(?:[[:alnum:]]+[[:alnum:]_.-]*/)+[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
 function castRackImageException ($e)
 {
@@ -385,8 +385,7 @@ function proxyStaticURI ($URI)
 	if
 	(
 		! preg_match (RE_STATIC_URI, $URI, $matches)
-		or ! in_array ($matches[1], array ('pix', 'css', 'js'))
-		or ! array_key_exists (strtolower ($matches[2]), $content_type)
+		or ! array_key_exists (strtolower ($matches[1]), $content_type)
 	)
 		printStatic404();
 	global $local_staticdir, $racktables_staticdir;
@@ -399,7 +398,7 @@ function proxyStaticURI ($URI)
 	if (FALSE !== $stat = fstat ($fh))
 		if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
 			exit;
-	header ('Content-type: ' . $content_type[$matches[2]]);
+	header ('Content-type: ' . $content_type[$matches[1]]);
 	fpassthru ($fh);
 	fclose ($fh);
 }
