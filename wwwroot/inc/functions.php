@@ -2518,7 +2518,7 @@ function constructIPRange ($ip_bin, $mask = NULL)
 		case 4: // IPv4
 			if ($mask === NULL)
 				$mask = 32;
-			elseif ($mask < 0 || $mask > 32)
+			elseif (! is_numeric($mask) || $mask < 0 || $mask > 32)
 				throw new InvalidArgException ('mask', $mask, "Invalid v4 prefix length");
 			$node['mask_bin'] = ip4_mask ($mask);
 			$node['mask'] = $mask;
@@ -2528,7 +2528,7 @@ function constructIPRange ($ip_bin, $mask = NULL)
 		case 16: // IPv6
 			if ($mask === NULL)
 				$mask = 128;
-			elseif ($mask < 0 || $mask > 128)
+			elseif (! is_numeric($mask) || $mask < 0 || $mask > 128)
 				throw new InvalidArgException ('mask', $mask, "Invalid v6 prefix length");
 			$node['mask_bin'] = ip6_mask ($mask);
 			$node['mask'] = $mask;
