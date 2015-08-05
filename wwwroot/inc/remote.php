@@ -91,6 +91,7 @@ $breedfunc = array
 	'ftos8-getallconf-main'    => 'ftos8SpotConfigText',
 	'air12-xlatepushq-main'    => 'air12TranslatePushQueue',
 	'air12-getallconf-main'    => 'ios12SpotConfigText',
+	'air12-getcdpstatus-main'  => 'ios12ReadCDPStatus',
 	'eos4-getallconf-main'     => 'eos4SpotConfigText',
 	'eos4-getmaclist-main'     => 'eos4ReadMacList',
 	'eos4-getportmaclist-main' => 'eos4ReadMacList',
