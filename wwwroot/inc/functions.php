@@ -3577,6 +3577,9 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	//  * keys are vlan_id's;
 	//  * values are the number of changed ports that were using this vlan in old configuration
 	$used_vlans = array();
+	foreach ($employed_vlans as $vlan_id)
+		$used_vlans[$vlan_id] = 1; // prevent deletion of an employed vlan
+
 	// 1
 	foreach ($domain_vlanlist as $vlan_id => $vlan)
 		if ($vlan['vlan_type'] == 'compulsory')
