@@ -3768,6 +3768,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
 	),
+	'2636.1.1.1.2.43' => array
+	(
+		'dict_key' => 2395,
+		'text' => 'Juniper EX2200 series',
+		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
 	'3955.6.1.2024.1' => array
 	(
 		'dict_key' => 2212,
@@ -4197,7 +4203,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		break;
-	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
+	case preg_match ('/^2636\.1\.1\.1\.2\.(30|31|43)/', $sysObjectID): // Juniper EX2200/EX3200/EX4200
 		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)

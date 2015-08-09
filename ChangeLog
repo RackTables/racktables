@@ -9,7 +9,7 @@
 	update: ability to delete a VLAN keeping it in the VLAN ranges on 802.1Q ports
 	new feature: VLAN domain groups.
 		A group is a domain that has all the VLANs of its members
-	update: SNMP support for Cisco Nexus 3132Q
+	update: SNMP support for Cisco Nexus 3132Q, Juniper EX2200 (#1395)
 	update: ability to clean rack mounts or drop entire row (even if it contains racks inside)
 		from user interface
 	update: IP network page renders a little faster
