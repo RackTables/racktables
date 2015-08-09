@@ -2279,6 +2279,10 @@ $dictionary = array
 	2388 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R630'),
 	2389 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R730'),
 	2390 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R730xd'),
+	2391 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3210'),
+	2392 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3220'),
+	2393 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3240'),
+	2394 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3270'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
