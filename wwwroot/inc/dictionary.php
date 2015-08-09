@@ -2284,6 +2284,7 @@ $dictionary = array
 	2393 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3240'),
 	2394 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3270'),
 	2395 => array ('chapter_id' => 12, 'dict_value' => 'Juniper%GPASS%EX2200-24P-4G'),
+	2396 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2620-24-PoE J9625A'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
