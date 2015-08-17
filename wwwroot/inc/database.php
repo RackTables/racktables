@@ -570,10 +570,8 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 		{
 			if (isset ($entityCache['complete'][$realm][$id]))
 				return $entityCache['complete'][$realm][$id];
-			// Emphasize the absence of record, if listCells() has already been called.
-			throw new EntityNotFoundException ($realm, $id);
 		}
-		if (isset ($entityCache['partial'][$realm][$id]))
+		elseif (isset ($entityCache['partial'][$realm][$id]))
 			return $entityCache['partial'][$realm][$id];
 	}
 	global $SQLSchema;
