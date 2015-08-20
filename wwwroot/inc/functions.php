@@ -4491,7 +4491,7 @@ function acceptable8021QConfig ($port)
 	case 'trunk':
 		return TRUE;
 	case 'access':
-		return count ($port['allowed']) == 1 &&
+		return $port['native'] > 0 && count ($port['allowed']) == 1 &&
 			in_array ($port['native'], $port['allowed']);
 	default:
 		return FALSE;
