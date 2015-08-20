@@ -4300,7 +4300,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
 	// aplly VST to the smallest set necessary
 	$requested_changes = apply8021QOrder ($vswitch, $requested_changes);
-	$before = getStored8021QConfig ($object_id, 'desired');
+	$before = getStored8021QConfig ($object_id, 'desired', array_keys ($requested_changes));
 	$changes_to_save = array();
 	// first filter by wrt_vlans constraint
 	foreach ($requested_changes as $pn => $requested)
@@ -4381,8 +4381,13 @@ function recalc8021QPorts ($switch_id)
 	$vswitch = getVLANSwitchInfo ($switch_id);
 	if (! $vswitch)
 		return $ret;
-	$ports = getObjectPortsAndLinks ($switch_id);
-	$order = apply8021QOrder ($vswitch, getStored8021QConfig ($switch_id, 'desired'));
+
+	$ports = array(); // only linked ports appear here
+	foreach (getObjectPortsAndLinks ($switch_id) as $portinfo)
+		if ($portinfo['linked'])
+			$ports[$portinfo['name']] = $portinfo;
+
+	$order = apply8021QOrder ($vswitch, getStored8021QConfig ($switch_id, 'desired', array_keys ($ports)));
 
 	$self_processed = FALSE;
 
@@ -4390,7 +4395,6 @@ function recalc8021QPorts ($switch_id)
 	foreach ($ports as $portinfo)
 		if
 		(
-			$portinfo['linked'] and
 			isset ($order[$portinfo['name']]) and
 			$order[$portinfo['name']]['vst_role'] == 'downlink'
 		)
@@ -6014,12 +6018,14 @@ function checkPortRole ($vswitch, $port_name, $port_order)
 			if (! $remote_vswitch)
 				return ! $local_auto;
 
-			$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired'));
-			if (! $remote = @$remote_ports[$portinfo['remote_name']])
+			$remote_pn = $portinfo['remote_name'];
+			$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired', array ($remote_pn)));
+			if (! array_key_exists($remote_pn, $remote_ports))
 				// linked auto-port must have corresponding remote 802.1Q port
 				return
 					! $local_auto &&
-					! isset ($remote_ports[shortenIfName ($portinfo['remote_name'], NULL, $portinfo['remote_object_id'])]); // typo in remote port name
+					! isset ($remote_ports[shortenIfName ($remote_pn, NULL, $portinfo['remote_object_id'])]); // typo in remote port name
+			$remote = $remote_ports[$remote_pn];
 
 			$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
 				$remote['vst_role'] :
@@ -6323,7 +6329,7 @@ function pinpointDeleteVlan ($domain_id, $vlan_id)
 	foreach ($used_ports as $object_id => $port_list)
 	{
 		$vswitch = getVLANSwitchInfo ($object_id); // get mutex rev
-		$D = getStored8021QConfig ($object_id);
+		$D = getStored8021QConfig ($object_id, $port_list);
 		$changes = array();
 		foreach ($port_list as $pn)
 		{
