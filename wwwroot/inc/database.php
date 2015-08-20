@@ -5255,16 +5255,32 @@ function getVLANSwitchInfoRows ($filter = array(), $extrasql = '')
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
-function getStored8021QConfig ($object_id, $instance = 'desired')
+// Reads the per-port VLAN configuration for a given object.
+// $instance could be either 'desired' or 'cached'.
+// $port_names is a filter enumerating names of ports to select. If empty, selects all ports.
+function getStored8021QConfig ($object_id, $instance = 'desired', $port_names = array())
 {
 	global $tablemap_8021q;
 	if (!array_key_exists ($instance, $tablemap_8021q))
 		throw new InvalidArgException ('instance', $instance);
+	$sql_filter = ' WHERE object_id = ?';
+	$sql_params = array ($object_id);
+	if (count ($port_names) == 1)
+	{
+		$sql_filter .= ' AND port_name = ?';
+		$sql_params[] = array_first ($port_names);
+	}
+	else if (count ($port_names) > 1)
+	{
+		$sql_filter .= ' AND port_name IN(' . questionMarks (count ($port_names)) . ')';
+		$sql_params = array_merge ($sql_params, $port_names);
+	}
+
 	$ret = array();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT port_name, vlan_mode FROM ' . $tablemap_8021q[$instance]['pvm'] . ' WHERE object_id = ?',
-		array ($object_id)
+		'SELECT port_name, vlan_mode FROM ' . $tablemap_8021q[$instance]['pvm'] . $sql_filter,
+		$sql_params
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_name']] = array
@@ -5276,16 +5292,16 @@ function getStored8021QConfig ($object_id, $instance = 'desired')
 	unset ($result);
 	$result = usePreparedSelectBlade
 	(
-		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pav'] . ' WHERE object_id = ?',
-		array ($object_id)
+		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pav'] . $sql_filter,
+		$sql_params
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_name']]['allowed'][] = $row['vlan_id'];
 	unset ($result);
 	$result = usePreparedSelectBlade
 	(
-		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pnv'] . ' WHERE object_id = ?',
-		array ($object_id)
+		'SELECT port_name, vlan_id FROM ' . $tablemap_8021q[$instance]['pnv'] . $sql_filter,
+		$sql_params
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		$ret[$row['port_name']]['native'] = $row['vlan_id'];
