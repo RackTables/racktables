@@ -410,6 +410,14 @@ END;
 	finishPortlet ();
 }
 
+function rackspaceCmp ($a, $b)
+{
+	$ret = strnatcasecmp ($a['location_tree'], $b['location_tree']);
+	if (!$ret)
+		$ret = strnatcasecmp ($a['row_name'], $b['row_name']);
+	return $ret;
+}
+
 function renderRackspace ()
 {
 	// Handle the location filter
@@ -432,15 +440,42 @@ function renderRackspace ()
 		{
 			$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
 			$found_racks = array_merge ($found_racks, $rackList);
+			$location_id = $rowInfo['location_id'];
+			$locationIdx = 0;
+			// contains location names in the form of 'grandparent parent child', used for sorting 
+			$locationTree = '';
+			// contains location names as well as links
+			$hrefLocationTree = '';
+			while ($location_id)
+			{
+				if ($locationIdx == 20)
+				{
+					showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
+					break;
+				}
+				$parentLocation = spotEntity ('location', $location_id);
+				$locationTree = sprintf ('%s %s', $parentLocation['name'], $locationTree);
+				$hrefLocationTree = "&raquo; <a href='" .
+					makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
+					"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
+					$hrefLocationTree;
+				$location_id = $parentLocation['parent_id'];
+				$locationIdx++;
+			}
+			$hrefLocationTree = substr ($hrefLocationTree, 8);
 			$rows[] = array (
 				'location_id' => $rowInfo['location_id'],
-				'location_name' => $rowInfo['location_name'],
+				'location_tree' => $locationTree,
+				'href_location_tree' => $hrefLocationTree,
 				'row_id' => $row_id,
 				'row_name' => $rowInfo['name'],
 				'racks' => $rackList
 			);
 			$rackCount += count($rackList);
 		}
+
+		// sort by location, then by row
+		usort ($rows, 'rackspaceCmp');
 
 		if (! renderEmptyResults($cellfilter, 'racks', $rackCount))
 		{
@@ -458,9 +493,6 @@ function renderRackspace ()
 				echo '<tr><th class=tdleft>Location</th><th class=tdleft>Row</th><th class=tdleft>Racks</th></tr>';
 				foreach ($rows as $row)
 				{
-					$location_id = $row['location_id'];
-					$row_id = $row['row_id'];
-					$row_name = $row['row_name'];
 					$rackList = $row['racks'];
 
 					if (
@@ -469,27 +501,8 @@ function renderRackspace ()
 					)
 						continue;
 					$rackListIdx = 0;
-					echo "<tr class=row_${order}><th class=tdleft>";
-					$locationIdx = 0;
-					$locationTree = '';
-					while ($location_id)
-					{
-						if ($locationIdx == 20)
-						{
-							showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
-							break;
-						}
-						$parentLocation = spotEntity ('location', $location_id);
-						$locationTree = "&raquo; <a href='" .
-							makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
-							"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
-							$locationTree;
-						$location_id = $parentLocation['parent_id'];
-						$locationIdx++;
-					}
-					$locationTree = substr ($locationTree, 8);
-					echo $locationTree;
-					echo "</th><th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row_id))."${cellfilter['urlextra']}'>${row_name}</a></th>";
+					echo "<tr class=row_${order}><th class=tdleft>${row['href_location_tree']}</th>";
+					echo "<th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row['row_id']))."${cellfilter['urlextra']}'>${row['row_name']}</a></th>";
 					echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
 					if (! count ($rackList))
 						echo '<td>(empty row)</td>';
@@ -499,7 +512,7 @@ function renderRackspace ()
 							if ($rackListIdx > 0 and $maxPerRow > 0 and $rackListIdx % $maxPerRow == 0)
 							{
 								echo '</tr></table></th></tr>';
-								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row_name} (continued)";
+								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row['row_name']} (continued)";
 								echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
 							}
 							echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";

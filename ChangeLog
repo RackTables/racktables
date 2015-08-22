@@ -8,6 +8,7 @@
 	bugfix: upgrading from < 0.20.0 to >= 0.20.8 failed (#1463, #1501)
 	update: SNMP support for Cisco C2960-Plus series
 	update: ability to delete a VLAN keeping it in the VLAN ranges on 802.1Q ports
+	update: sort by parent locations on the Rackspace page (#1153)
 	new feature: VLAN domain groups.
 		A group is a domain that has all the VLANs of its members
 	update: SNMP support for Cisco Nexus 3132Q, HP J9625A (#1459), Juniper EX2200 (#1395)
