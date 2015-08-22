@@ -27,11 +27,11 @@ class RenderDepotTest extends PHPUnit_Framework_TestCase
 		try {
 			ob_start ();
 			renderDepot ();
-			ob_clean ();
+			ob_end_clean ();
 			$this->assertTrue (TRUE);
 		}
  		catch (Exception $e) {
-			ob_clean ();
+			ob_end_clean ();
 	        $this->assertTrue (FALSE);
         }
 	}
