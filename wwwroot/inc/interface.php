@@ -8460,12 +8460,11 @@ function renderDiscoveredNeighbors ($object_id)
 					break;
 				}
 				$dp_remote_object = spotEntity ('object', $dp_remote_object_id);
-				amplifyCell($dp_remote_object);
 				$dp_neighbor['port'] = shortenIfName ($dp_neighbor['port'], NULL, $dp_remote_object['id']);
 
 				// get list of ports that have name matching CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
-				foreach ($dp_remote_object['ports'] as $port)
+				foreach (getObjectPortsAndLinks ($dp_remote_object_id) as $port)
 					if ($port['name'] == $dp_neighbor['port'])
 					{
 						$portinfo_remote = $port;
