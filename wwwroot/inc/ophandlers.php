@@ -3069,9 +3069,9 @@ function resolve8021QConflicts ()
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
 					throw new InvalidRequestArgException ("port ${port_name}", '(hidden)', 'expired form (switch data has changed)');
 				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
-					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port);
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port, $C[$port_name]);
 				elseif ($port['decision'] == 'left') // R wins, cross D up
-					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name]);
+					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $D[$port_name], $C[$port_name]);
 				// otherwise there was no decision made
 			}
 			elseif

@@ -5462,8 +5462,8 @@ function add8021QPort ($object_id, $port_name, $port)
 		$tablemap_8021q['desired']['pvm'],
 		array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_mode' => $port['mode'])
 	);
-	$changed += upd8021QPort ('cached', $object_id, $port_name, $port);
-	$changed += upd8021QPort ('desired', $object_id, $port_name, $port);
+	$changed += upd8021QPort ('cached', $object_id, $port_name, $port, NULL);
+	$changed += upd8021QPort ('desired', $object_id, $port_name, $port, NULL);
 	return $changed ? 1 : 0;
 }
 
@@ -5487,7 +5487,30 @@ function del8021QPort ($object_id, $port_name)
 	return $changed ? 1 : 0;
 }
 
-function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
+// Returns list of tuples ("where_text" params_array) that covers
+// all the VLANs in $vlan_list.
+// aggregates sparse VLANs into single IN() condition
+// each range larger than 5 is returned as separate BETWEEN condition
+function makeVlanListWhere ($db_field_name, $vlan_list)
+{
+	$ret = array();
+	$in_list = array();
+	foreach (listToRanges ($vlan_list) as $range)
+	{
+		if ($range['from'] == $range['to'])
+			$in_list[] = $range['from'];
+		elseif ($range['to'] - $range['from'] < 5)
+			for ($i = $range['from']; $i <= $range['to']; ++$i)
+				$in_list[] = $i;
+		else
+			$ret[] = array ("$db_field_name BETWEEN ? AND ?", array ($range['from'], $range['to']));
+	}
+	if ($in_list)
+		$ret[] = array ("$db_field_name IN(" . questionMarks(count ($in_list)) . ')', $in_list);
+	return $ret;
+}
+
+function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $before)
 {
 	global $tablemap_8021q;
 	if (!array_key_exists ($instance, $tablemap_8021q))
@@ -5501,38 +5524,62 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
 		return 0;
 	$changed = 0;
-	$changed += usePreparedUpdateBlade
-	(
-		$tablemap_8021q[$instance]['pvm'],
-		array ('vlan_mode' => $port['mode']),
-		array ('object_id' => $object_id, 'port_name' => $port_name)
-	);
-	$changed += usePreparedDeleteBlade (
-		$tablemap_8021q[$instance]['pav'],
-		array ('object_id' => $object_id, 'port_name' => $port_name)
-	);
+	if (! isset ($before) or $before['mode'] != $port['mode'])
+		$changed += usePreparedUpdateBlade
+		(
+			$tablemap_8021q[$instance]['pvm'],
+			array ('vlan_mode' => $port['mode']),
+			array ('object_id' => $object_id, 'port_name' => $port_name)
+		);
+
+
+	if (isset ($before))
+	{
+		$add_list = array_diff ($port['allowed'], $before['allowed']);
+		$del_list = array_diff ($before['allowed'], $port['allowed']);
+		foreach (makeVlanListWhere ('vlan_id', $del_list) as $where)
+			$changed += usePreparedExecuteBlade
+			(
+				'DELETE FROM ' . $tablemap_8021q[$instance]['pav'] .
+				' WHERE object_id = ? AND port_name = ? AND ' . $where[0],
+				array_merge (array ($object_id, $port_name), $where[1])
+			);
+	}
+	else
+	{
+		$add_list = $port['allowed'];
+		$changed += usePreparedDeleteBlade (
+			$tablemap_8021q[$instance]['pav'],
+			array ('object_id' => $object_id, 'port_name' => $port_name)
+		);
+	}
+
 	// The goal is to INSERT as many rows as there are values in 'allowed' list
 	// without wrapping each row with own INSERT (otherwise the SQL connection
 	// instantly becomes the bottleneck).
-	foreach (listToRanges ($port['allowed']) as $range)
+	foreach (makeVlanListWhere ('vlan_id', $add_list) as $where)
 		$changed += usePreparedExecuteBlade
 		(
 			'INSERT INTO ' . $tablemap_8021q[$instance]['pav'] . ' (object_id, port_name, vlan_id) ' .
-			'SELECT ?, ?, vlan_id FROM VLANValidID WHERE vlan_id BETWEEN ? AND ?',
-			array ($object_id, $port_name, $range['from'], $range['to'])
-		);
-	if
-	(
-		$port['native'] and
-		in_array ($port['native'], $port['allowed'])
-	)
-		$changed += usePreparedInsertBlade
-		(
-			$tablemap_8021q[$instance]['pnv'],
-			array ('object_id' => $object_id, 'port_name' => $port_name, 'vlan_id' => $port['native'])
+			'SELECT ?, ?, vlan_id FROM VLANValidID WHERE ' . $where[0],
+			array_merge (array ($object_id, $port_name), $where[1])
 		);
 
-	if ($instance == 'desired')
+	if (! $port['native'] and (! isset ($before) or in_array ($before['native'], $port['allowed'])))
+		$changed += usePreparedDeleteBlade
+		(
+			$tablemap_8021q[$instance]['pnv'],
+			array ('object_id' => $object_id, 'port_name' => $port_name)
+		);
+	elseif ($port['native'] and (! isset ($before) or $before['native'] != $port['native']))
+		$changed += usePreparedExecuteBlade
+		(
+			'REPLACE INTO ' . $tablemap_8021q[$instance]['pnv'] .
+			' (object_id, port_name, vlan_id) VALUES (?, ?, ?)',
+			array ($object_id, $port_name, $port['native'])
+		);
+
+	if ($instance == 'desired' and $changed)
 		callHook ('portConfChanged', $object_id, $port_name, $port);
 	return $changed ? 1 : 0;
 }
@@ -5540,13 +5587,8 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port)
 function replace8021QPorts ($instance = 'desired', $object_id, $before, $changes)
 {
 	$done = 0;
-	foreach ($changes as $port_name => $port)
-		if
-		(
-			!array_key_exists ($port_name, $before) or
-			!same8021QConfigs ($port, $before[$port_name])
-		)
-			$done += upd8021QPort ($instance, $object_id, $port_name, $port);
+	foreach ($changes as $pn => $port)
+		$done += upd8021QPort ($instance, $object_id, $pn, $port, array_fetch ($before, $pn, NULL));
 	return $done;
 }
 
