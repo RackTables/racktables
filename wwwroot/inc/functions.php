@@ -6328,7 +6328,7 @@ function pinpointDeleteVlan ($domain_id, $vlan_id)
 	foreach ($used_ports as $object_id => $port_list)
 	{
 		$vswitch = getVLANSwitchInfo ($object_id); // get mutex rev
-		$D = getStored8021QConfig ($object_id, $port_list);
+		$D = getStored8021QConfig ($object_id, 'desired', $port_list);
 		$changes = array();
 		foreach ($port_list as $pn)
 		{
