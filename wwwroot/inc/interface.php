@@ -1084,10 +1084,15 @@ function renderEditObjectForm()
 	if (objectTypeMayHaveParent ($object['objtype_id']))
 	{
 		$parents = getParents ($object, 'object');
-		foreach (groupBy ($parents, 'objtype_id') as $objtype_id => $parents_group)
+		// lookup the human-readable object type, sort by it
+		foreach ($parents as $parent_id => $parent)
+			$parents[$parent_id]['object_type'] = decodeObjectType ($parent['objtype_id']);
+		$grouped_parents = groupBy ($parents, 'object_type');
+		ksort ($grouped_parents);
+		foreach ($grouped_parents as $parents_group)
 		{
 			uasort ($parents_group, 'compare_name');
-			$label = decodeObjectType ($objtype_id) . (count($parents_group) > 1 ? ' containers:' : ' container:');
+			$label = $parents_group[key ($parents_group)]['object_type'] . (count($parents_group) > 1 ? ' containers:' : ' container:');
 			foreach ($parents_group as $link_id => $parent_cell)
 			{
 				echo "<tr><td>&nbsp;</td>";
@@ -1428,13 +1433,19 @@ function renderObject ($object_id)
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
 	$parents = getParents ($info, 'object');
-	foreach (groupBy ($parents, 'objtype_id') as $objtype_id => $parents_group)
+	// lookup the human-readable object type, sort by it
+	foreach ($parents as $parent_id => $parent)
+		$parents[$parent_id]['object_type'] = decodeObjectType ($parent['objtype_id']);
+	$grouped_parents = groupBy ($parents, 'object_type');
+	ksort ($grouped_parents);
+	foreach ($grouped_parents as $parents_group)
 	{
 		uasort ($parents_group, 'compare_name');
+		$label = $parents_group[key ($parents_group)]['object_type'] . (count($parents_group) > 1 ? ' containers' : ' container');
 		$fmt_parents = array();
 		foreach ($parents_group as $parent)
 			$fmt_parents[] = mkCellA ($parent);
-		$summary[decodeObjectType ($objtype_id) . " containers"] = implode ('<br>', $fmt_parents);
+		$summary[$label] = implode ('<br>', $fmt_parents);
 	}
 	$children = getChildren ($info, 'object');
 	foreach (groupBy ($children, 'objtype_id') as $objtype_id => $children_group)
