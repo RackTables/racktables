@@ -4218,14 +4218,17 @@ function exec8021QDeploy ($object_id, $do_push)
 			break;
 		}
 	}
-	// redo uplinks unconditionally
-	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
-	$Dnew = apply8021QOrder ($vswitch, $Dnew);
-	// Take new "desired" configuration and derive uplink port configuration
-	// from it. Then cancel changes to immune VLANs and save resulting
-	// changes (if any left).
-	$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew, $vswitch['object_id']));
-	$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
+	// redo uplinks if some changes were pulled
+	if ($nsaved)
+	{
+		$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
+		$Dnew = apply8021QOrder ($vswitch, $Dnew);
+		// Take new "desired" configuration and derive uplink port configuration
+		// from it. Then cancel changes to immune VLANs and save resulting
+		// changes (if any left).
+		$new_uplinks = filter8021QChangeRequests ($domain_vlanlist, $Dnew, produceUplinkPorts ($domain_vlanlist, $Dnew, $vswitch['object_id']));
+		$nsaved_uplinks += replace8021QPorts ('desired', $vswitch['object_id'], $Dnew, $new_uplinks);
+	}
 
 	$out_of_sync = FALSE;
 	$errno = E_8021Q_NOERROR;
