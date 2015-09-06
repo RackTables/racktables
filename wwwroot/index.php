@@ -271,6 +271,7 @@ try {
 
 	case 'upgrade':
 		require_once 'inc/config.php'; // for CODE_VERSION
+		require_once 'inc/database.php';
 		require_once 'inc/dictionary.php';
 		require_once 'inc/functions.php'; // for ip translation functions
 		require_once 'inc/upgrade.php';

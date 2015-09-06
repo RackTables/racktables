@@ -8,6 +8,12 @@ require_once '../wwwroot/inc/init.php';
 require_once '../wwwroot/inc/interface.php';
 require_once './TestHelper.php';
 
+global $db_name, $dbxlink;
+$db_name = $dbxlink->query ('SELECT DATABASE()')->fetchColumn ();
+
+global $mysql_bin;
+$mysql_bin = '/usr/bin/mysql';
+
 // Sanity check DB connection
 TestHelper::ensureUsingUnitTestDatabase ();
 ?>

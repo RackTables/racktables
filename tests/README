@@ -10,10 +10,7 @@ $ phpunit
 The Unit Testing Database
 -------------------------
 
-Tests should never be run against a production instance of Racktables.
-Data may be added, modified or deleted as part of the tests.  Even if
-tests clean up after themselves, it's possible for data to get left
-behind.
+Tests should never be run against a production instance of RackTables.
 
 The bootstrap.php script (configured for use in phpunit.xml) calls
 method TestHelper::ensureUsingUnitTestDatabase() to check that the
@@ -22,7 +19,7 @@ database DSN contains the string "_unittest".
 Checking the DSN is a relatively easy way to ensure that tests are
 only run with a dedicated testing database.  While PHPUnit supports
 Database_TestCases (ref
-https://phpunit.de/manual/current/en/database.html), the Racktables
+https://phpunit.de/manual/current/en/database.html), the RackTables
 tests do not yet use that framework.  This may be incorporated at a
 future date.
 
@@ -30,7 +27,7 @@ future date.
 Creating and configuring a Unit Testing Database
 ------------------------------------------------
 
-Assuming you have installed your development Racktables using the web
+Assuming you have installed your development RackTables using the web
 interface, you will already have a working database.  You can clone
 that database to a new dedicated unit testing database (where the
 database name contains the string "_unittest") from the command line.

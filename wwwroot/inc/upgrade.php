@@ -298,7 +298,7 @@ function getDBUpgradePath ($v1, $v2)
 function getUpgradeBatch ($batchid)
 {
 	$query = array();
-	global $dbxlink;
+	global $dbver, $dbxlink;
 	switch ($batchid)
 	{
 		case '0.18.0':
@@ -1620,210 +1620,77 @@ CREATE TABLE `PortOuterInterface` (
   UNIQUE KEY `oif_name` (`oif_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 ";
-			// load static values instead of `INSERT INTO ... SELECT FROM Dictionary` because the dictionary may not be in the proper state
-			$query[] = "INSERT INTO `PortOuterInterface` VALUES
-(16,'AC-in'),
-(17,'10Base2'),
-(18,'10Base-T'),
-(19,'100Base-TX'),
-(24,'1000Base-T'),
-(29,'RS-232 (RJ-45)'),
-(30,'10GBase-SR'),
-(31,'virtual bridge'),
-(32,'sync serial'),
-(33,'KVM (host)'),
-(34,'1000Base-ZX'),
-(35,'10GBase-ER'),
-(36,'10GBase-LR'),
-(37,'10GBase-LRM'),
-(38,'10GBase-ZR'),
-(39,'10GBase-LX4'),
-(40,'10GBase-CX4'),
-(41,'10GBase-KX4'),
-(42, '1000Base-EX'),
-(439,'dry contact'),
-(440,'unknown'),
-(446,'KVM (console)'),
-(681,'RS-232 (DB-9)'),
-(682,'RS-232 (DB-25)'),
-(1077,'empty SFP-1000'),
-(1078,'empty GBIC'),
-(1079,'empty XENPAK'),
-(1080,'empty X2'),
-(1081,'empty XPAK'),
-(1082,'empty XFP'),
-(1084,'empty SFP+'),
-(1087,'1000Base-T (Dell 1855)'),
-(1195,'100Base-FX'),
-(1196,'100Base-SX'),
-(1197,'100Base-LX10'),
-(1198,'100Base-BX10-D'),
-(1199,'100Base-BX10-U'),
-(1200,'100Base-EX'),
-(1201,'100Base-ZX'),
-(1202,'1000Base-SX'),
-(1203,'1000Base-SX+'),
-(1204,'1000Base-LX'),
-(1205,'1000Base-LX10'),
-(1206,'1000Base-BX10-D'),
-(1207,'1000Base-BX10-U'),
-(1208,'empty SFP-100'),
-(1209,'1000Base-CWDM80-1470 (gray)'),
-(1210,'1000Base-CWDM80-1490 (violet)'),
-(1211,'1000Base-CWDM80-1510 (blue)'),
-(1212,'1000Base-CWDM80-1530 (green)'),
-(1213,'1000Base-CWDM80-1550 (yellow)'),
-(1214,'1000Base-CWDM80-1570 (orange)'),
-(1215,'1000Base-CWDM80-1590 (red)'),
-(1216,'1000Base-CWDM80-1610 (brown)'),
-(1217,'1000Base-DWDM80-61.42 (ITU 20)'),
-(1218,'1000Base-DWDM80-60.61 (ITU 21)'),
-(1219,'1000Base-DWDM80-59.79 (ITU 22)'),
-(1220,'1000Base-DWDM80-58.98 (ITU 23)'),
-(1221,'1000Base-DWDM80-58.17 (ITU 24)'),
-(1222,'1000Base-DWDM80-57.36 (ITU 25)'),
-(1223,'1000Base-DWDM80-56.55 (ITU 26)'),
-(1224,'1000Base-DWDM80-55.75 (ITU 27)'),
-(1225,'1000Base-DWDM80-54.94 (ITU 28)'),
-(1226,'1000Base-DWDM80-54.13 (ITU 29)'),
-(1227,'1000Base-DWDM80-53.33 (ITU 30)'),
-(1228,'1000Base-DWDM80-52.52 (ITU 31)'),
-(1229,'1000Base-DWDM80-51.72 (ITU 32)'),
-(1230,'1000Base-DWDM80-50.92 (ITU 33)'),
-(1231,'1000Base-DWDM80-50.12 (ITU 34)'),
-(1232,'1000Base-DWDM80-49.32 (ITU 35)'),
-(1233,'1000Base-DWDM80-48.51 (ITU 36)'),
-(1234,'1000Base-DWDM80-47.72 (ITU 37)'),
-(1235,'1000Base-DWDM80-46.92 (ITU 38)'),
-(1236,'1000Base-DWDM80-46.12 (ITU 39)'),
-(1237,'1000Base-DWDM80-45.32 (ITU 40)'),
-(1238,'1000Base-DWDM80-44.53 (ITU 41)'),
-(1239,'1000Base-DWDM80-43.73 (ITU 42)'),
-(1240,'1000Base-DWDM80-42.94 (ITU 43)'),
-(1241,'1000Base-DWDM80-42.14 (ITU 44)'),
-(1242,'1000Base-DWDM80-41.35 (ITU 45)'),
-(1243,'1000Base-DWDM80-40.56 (ITU 46)'),
-(1244,'1000Base-DWDM80-39.77 (ITU 47)'),
-(1245,'1000Base-DWDM80-38.98 (ITU 48)'),
-(1246,'1000Base-DWDM80-38.19 (ITU 49)'),
-(1247,'1000Base-DWDM80-37.40 (ITU 50)'),
-(1248,'1000Base-DWDM80-36.61 (ITU 51)'),
-(1249,'1000Base-DWDM80-35.82 (ITU 52)'),
-(1250,'1000Base-DWDM80-35.04 (ITU 53)'),
-(1251,'1000Base-DWDM80-34.25 (ITU 54)'),
-(1252,'1000Base-DWDM80-33.47 (ITU 55)'),
-(1253,'1000Base-DWDM80-32.68 (ITU 56)'),
-(1254,'1000Base-DWDM80-31.90 (ITU 57)'),
-(1255,'1000Base-DWDM80-31.12 (ITU 58)'),
-(1256,'1000Base-DWDM80-30.33 (ITU 59)'),
-(1257,'1000Base-DWDM80-29.55 (ITU 60)'),
-(1258,'1000Base-DWDM80-28.77 (ITU 61)'),
-(1259,'10GBase-ZR-DWDM80-61.42 (ITU 20)'),
-(1260,'10GBase-ZR-DWDM80-60.61 (ITU 21)'),
-(1261,'10GBase-ZR-DWDM80-59.79 (ITU 22)'),
-(1262,'10GBase-ZR-DWDM80-58.98 (ITU 23)'),
-(1263,'10GBase-ZR-DWDM80-58.17 (ITU 24)'),
-(1264,'10GBase-ZR-DWDM80-57.36 (ITU 25)'),
-(1265,'10GBase-ZR-DWDM80-56.55 (ITU 26)'),
-(1266,'10GBase-ZR-DWDM80-55.75 (ITU 27)'),
-(1267,'10GBase-ZR-DWDM80-54.94 (ITU 28)'),
-(1268,'10GBase-ZR-DWDM80-54.13 (ITU 29)'),
-(1269,'10GBase-ZR-DWDM80-53.33 (ITU 30)'),
-(1270,'10GBase-ZR-DWDM80-52.52 (ITU 31)'),
-(1271,'10GBase-ZR-DWDM80-51.72 (ITU 32)'),
-(1272,'10GBase-ZR-DWDM80-50.92 (ITU 33)'),
-(1273,'10GBase-ZR-DWDM80-50.12 (ITU 34)'),
-(1274,'10GBase-ZR-DWDM80-49.32 (ITU 35)'),
-(1275,'10GBase-ZR-DWDM80-48.51 (ITU 36)'),
-(1276,'10GBase-ZR-DWDM80-47.72 (ITU 37)'),
-(1277,'10GBase-ZR-DWDM80-46.92 (ITU 38)'),
-(1278,'10GBase-ZR-DWDM80-46.12 (ITU 39)'),
-(1279,'10GBase-ZR-DWDM80-45.32 (ITU 40)'),
-(1280,'10GBase-ZR-DWDM80-44.53 (ITU 41)'),
-(1281,'10GBase-ZR-DWDM80-43.73 (ITU 42)'),
-(1282,'10GBase-ZR-DWDM80-42.94 (ITU 43)'),
-(1283,'10GBase-ZR-DWDM80-42.14 (ITU 44)'),
-(1284,'10GBase-ZR-DWDM80-41.35 (ITU 45)'),
-(1285,'10GBase-ZR-DWDM80-40.56 (ITU 46)'),
-(1286,'10GBase-ZR-DWDM80-39.77 (ITU 47)'),
-(1287,'10GBase-ZR-DWDM80-38.98 (ITU 48)'),
-(1288,'10GBase-ZR-DWDM80-38.19 (ITU 49)'),
-(1289,'10GBase-ZR-DWDM80-37.40 (ITU 50)'),
-(1290,'10GBase-ZR-DWDM80-36.61 (ITU 51)'),
-(1291,'10GBase-ZR-DWDM80-35.82 (ITU 52)'),
-(1292,'10GBase-ZR-DWDM80-35.04 (ITU 53)'),
-(1293,'10GBase-ZR-DWDM80-34.25 (ITU 54)'),
-(1294,'10GBase-ZR-DWDM80-33.47 (ITU 55)'),
-(1295,'10GBase-ZR-DWDM80-32.68 (ITU 56)'),
-(1296,'10GBase-ZR-DWDM80-31.90 (ITU 57)'),
-(1297,'10GBase-ZR-DWDM80-31.12 (ITU 58)'),
-(1298,'10GBase-ZR-DWDM80-30.33 (ITU 59)'),
-(1299,'10GBase-ZR-DWDM80-29.55 (ITU 60)'),
-(1300,'10GBase-ZR-DWDM80-28.77 (ITU 61)'),
-(1316,'1000Base-T (Dell M1000e)'),
-(1322,'AC-out'),
-(1399,'DC'),
-(1424,'1000Base-CX'),
-(1425,'10GBase-ER-DWDM40-61.42 (ITU 20)'),
-(1426,'10GBase-ER-DWDM40-60.61 (ITU 21)'),
-(1427,'10GBase-ER-DWDM40-59.79 (ITU 22)'),
-(1428,'10GBase-ER-DWDM40-58.98 (ITU 23)'),
-(1429,'10GBase-ER-DWDM40-58.17 (ITU 24)'),
-(1430,'10GBase-ER-DWDM40-57.36 (ITU 25)'),
-(1431,'10GBase-ER-DWDM40-56.55 (ITU 26)'),
-(1432,'10GBase-ER-DWDM40-55.75 (ITU 27)'),
-(1433,'10GBase-ER-DWDM40-54.94 (ITU 28)'),
-(1434,'10GBase-ER-DWDM40-54.13 (ITU 29)'),
-(1435,'10GBase-ER-DWDM40-53.33 (ITU 30)'),
-(1436,'10GBase-ER-DWDM40-52.52 (ITU 31)'),
-(1437,'10GBase-ER-DWDM40-51.72 (ITU 32)'),
-(1438,'10GBase-ER-DWDM40-50.92 (ITU 33)'),
-(1439,'10GBase-ER-DWDM40-50.12 (ITU 34)'),
-(1440,'10GBase-ER-DWDM40-49.32 (ITU 35)'),
-(1441,'10GBase-ER-DWDM40-48.51 (ITU 36)'),
-(1442,'10GBase-ER-DWDM40-47.72 (ITU 37)'),
-(1443,'10GBase-ER-DWDM40-46.92 (ITU 38)'),
-(1444,'10GBase-ER-DWDM40-46.12 (ITU 39)'),
-(1445,'10GBase-ER-DWDM40-45.32 (ITU 40)'),
-(1446,'10GBase-ER-DWDM40-44.53 (ITU 41)'),
-(1447,'10GBase-ER-DWDM40-43.73 (ITU 42)'),
-(1448,'10GBase-ER-DWDM40-42.94 (ITU 43)'),
-(1449,'10GBase-ER-DWDM40-42.14 (ITU 44)'),
-(1450,'10GBase-ER-DWDM40-41.35 (ITU 45)'),
-(1451,'10GBase-ER-DWDM40-40.56 (ITU 46)'),
-(1452,'10GBase-ER-DWDM40-39.77 (ITU 47)'),
-(1453,'10GBase-ER-DWDM40-38.98 (ITU 48)'),
-(1454,'10GBase-ER-DWDM40-38.19 (ITU 49)'),
-(1455,'10GBase-ER-DWDM40-37.40 (ITU 50)'),
-(1456,'10GBase-ER-DWDM40-36.61 (ITU 51)'),
-(1457,'10GBase-ER-DWDM40-35.82 (ITU 52)'),
-(1458,'10GBase-ER-DWDM40-35.04 (ITU 53)'),
-(1459,'10GBase-ER-DWDM40-34.25 (ITU 54)'),
-(1460,'10GBase-ER-DWDM40-33.47 (ITU 55)'),
-(1461,'10GBase-ER-DWDM40-32.68 (ITU 56)'),
-(1462,'10GBase-ER-DWDM40-31.90 (ITU 57)'),
-(1463,'10GBase-ER-DWDM40-31.12 (ITU 58)'),
-(1464,'10GBase-ER-DWDM40-30.33 (ITU 59)'),
-(1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
-(1466,'10GBase-ER-DWDM40-28.77 (ITU 61)'),
-(1469,'virtual port'),
-(1588,'empty QSFP+'),
-(1603,'1000Base-T (HP c-Class)'),
-(1604,'100Base-TX (HP c-Class)'),
-(1642,'10GBase-T'),
-(1660,'40GBase-FR'),
-(1661,'40GBase-KR4'),
-(1662,'40GBase-ER4'),
-(1663,'40GBase-SR4'),
-(1664,'40GBase-LR4'),
-(1668,'empty CFP'),
-(1669,'100GBase-SR10'),
-(1670,'100GBase-LR4'),
-(1671,'100GBase-ER4'),
-(1672,'100GBase-SR4'),
-(1673,'100GBase-KR4'),
-(1674,'100GBase-KP4'),
-(1999,'10GBase-KR')";
+			// if upgrading from certain older releases, inject some data to satisfy foreign keys
+			if (version_compare ($dbver, '0.19.2', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1399,'DC')";
+			if (version_compare ($dbver, '0.19.5', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1469,'virtual port')";
+			if (version_compare ($dbver, '0.19.7', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1588,'empty QSFP+')";
+			if (version_compare ($dbver, '0.19.8', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES
+(2,1424,'1000Base-CX'),
+(2,1425,'10GBase-ER-DWDM40-61.42 (ITU 20)'),
+(2,1426,'10GBase-ER-DWDM40-60.61 (ITU 21)'),
+(2,1427,'10GBase-ER-DWDM40-59.79 (ITU 22)'),
+(2,1428,'10GBase-ER-DWDM40-58.98 (ITU 23)'),
+(2,1429,'10GBase-ER-DWDM40-58.17 (ITU 24)'),
+(2,1430,'10GBase-ER-DWDM40-57.36 (ITU 25)'),
+(2,1431,'10GBase-ER-DWDM40-56.55 (ITU 26)'),
+(2,1432,'10GBase-ER-DWDM40-55.75 (ITU 27)'),
+(2,1433,'10GBase-ER-DWDM40-54.94 (ITU 28)'),
+(2,1434,'10GBase-ER-DWDM40-54.13 (ITU 29)'),
+(2,1435,'10GBase-ER-DWDM40-53.33 (ITU 30)'),
+(2,1436,'10GBase-ER-DWDM40-52.52 (ITU 31)'),
+(2,1437,'10GBase-ER-DWDM40-51.72 (ITU 32)'),
+(2,1438,'10GBase-ER-DWDM40-50.92 (ITU 33)'),
+(2,1439,'10GBase-ER-DWDM40-50.12 (ITU 34)'),
+(2,1440,'10GBase-ER-DWDM40-49.32 (ITU 35)'),
+(2,1441,'10GBase-ER-DWDM40-48.51 (ITU 36)'),
+(2,1442,'10GBase-ER-DWDM40-47.72 (ITU 37)'),
+(2,1443,'10GBase-ER-DWDM40-46.92 (ITU 38)'),
+(2,1444,'10GBase-ER-DWDM40-46.12 (ITU 39)'),
+(2,1445,'10GBase-ER-DWDM40-45.32 (ITU 40)'),
+(2,1446,'10GBase-ER-DWDM40-44.53 (ITU 41)'),
+(2,1447,'10GBase-ER-DWDM40-43.73 (ITU 42)'),
+(2,1448,'10GBase-ER-DWDM40-42.94 (ITU 43)'),
+(2,1449,'10GBase-ER-DWDM40-42.14 (ITU 44)'),
+(2,1450,'10GBase-ER-DWDM40-41.35 (ITU 45)'),
+(2,1451,'10GBase-ER-DWDM40-40.56 (ITU 46)'),
+(2,1452,'10GBase-ER-DWDM40-39.77 (ITU 47)'),
+(2,1453,'10GBase-ER-DWDM40-38.98 (ITU 48)'),
+(2,1454,'10GBase-ER-DWDM40-38.19 (ITU 49)'),
+(2,1455,'10GBase-ER-DWDM40-37.40 (ITU 50)'),
+(2,1456,'10GBase-ER-DWDM40-36.61 (ITU 51)'),
+(2,1457,'10GBase-ER-DWDM40-35.82 (ITU 52)'),
+(2,1458,'10GBase-ER-DWDM40-35.04 (ITU 53)'),
+(2,1459,'10GBase-ER-DWDM40-34.25 (ITU 54)'),
+(2,1460,'10GBase-ER-DWDM40-33.47 (ITU 55)'),
+(2,1461,'10GBase-ER-DWDM40-32.68 (ITU 56)'),
+(2,1462,'10GBase-ER-DWDM40-31.90 (ITU 57)'),
+(2,1463,'10GBase-ER-DWDM40-31.12 (ITU 58)'),
+(2,1464,'10GBase-ER-DWDM40-30.33 (ITU 59)'),
+(2,1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
+(2,1466,'10GBase-ER-DWDM40-28.77 (ITU 61)')";
+			if (version_compare ($dbver, '0.19.10', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1603,'1000Base-T (HP c-Class)')";
+			if (version_compare ($dbver, '0.19.11', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1642,'10GBase-T')";
+			if (version_compare ($dbver, '0.19.12', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES
+(2,1661,'40GBase-KR4'),
+(2,1663,'40GBase-SR4'),
+(2,1664,'40GBase-LR4'),
+(2,1668,'empty CFP'),
+(2,1669,'100GBase-SR10'),
+(2,1670,'100GBase-LR4'),
+(2,1671,'100GBase-ER4')";
+			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
+			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
+			// and 10GBase-KR. Make respective changes and make primary key auto
+			// increment start at 2000.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '10GBase-KX4' WHERE id = 41";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (1999, '10GBase-KR')";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (1999, 1999)";
 			$query[] = "DELETE FROM Dictionary WHERE chapter_id = 2";
 			$query[] = "DELETE FROM Chapter WHERE id = 2";
@@ -1831,6 +1698,12 @@ CREATE TABLE `PortOuterInterface` (
 			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id1` FOREIGN KEY (type1) REFERENCES PortOuterInterface (id)";
 			$query[] = "ALTER TABLE PortCompat ADD CONSTRAINT `PortCompat-FK-oif_id2` FOREIGN KEY (type2) REFERENCES PortOuterInterface (id)";
 			// Add more 40G and 100G standards.
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
+(1660,'40GBase-FR'),
+(1662,'40GBase-ER4'),
+(1672,'100GBase-SR4'),
+(1673,'100GBase-KR4'),
+(1674,'100GBase-KP4')";
 			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
 (10,1660),
 (10,1662),
@@ -1843,7 +1716,9 @@ CREATE TABLE `PortOuterInterface` (
 (1672,1672),
 (1673,1673),
 (1674,1674)";
-			// Refine 1G OIF list: add a new standard.
+			// Refine 1G OIF list: fix spelling and add a new standard.
+			$query[] = "UPDATE PortOuterInterface SET oif_name = '1000Base-LX10' WHERE id = 1205";
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES (42, '1000Base-EX')";
 			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES (42, 42)";
 			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (3, 42), (4,42)";
 			// patch cables
@@ -2230,6 +2105,7 @@ if (!platform_is_ok())
 }
 
 echo '<h1>Upgrade status</h1>';
+global $dbver;
 $dbver = getDatabaseVersion();
 echo '<table border=1 cellpadding=5>';
 echo "<tr><th>Current status</th><td>Data version: ${dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
@@ -2355,29 +2231,6 @@ END
 	// re-create foreign key in IPv4RS
 	$dbxlink->query ("ALTER TABLE `IPv4RS` DROP FOREIGN KEY `IPRS-FK`");
 	$dbxlink->query ("ALTER TABLE `IPv4RS` ADD CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE");
-}
-
-// This is a swiss-knife blade to insert a record into a table.
-// The first argument is table name.
-// The second argument is an array of "name" => "value" pairs.
-// returns integer - affected rows count. Throws exception on error
-function usePreparedInsertBlade ($tablename, $columns)
-{
-	global $dbxlink;
-	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
-	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
-	// Now the query should be as follows:
-	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
-	try
-	{
-		$prepared = $dbxlink->prepare ($query);
-		$prepared->execute (array_values ($columns));
-		return $prepared->rowCount();
-	}
-	catch (PDOException $e)
-	{
-		throw convertPDOException ($e);
-	}
 }
 
 // converts the values of old-style config vars TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC
