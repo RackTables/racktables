@@ -1,0 +1,16 @@
+{
+	"DC-1" : {
+			"DC-1-ROW1" : "active",
+			"DC-1-ROW2" : "active",
+			"DC-1-ROW3" : "active",
+			"DC-1-ROW4" : "active"
+		},
+
+	"DC-2": {
+			"DC-2-ROW1" : "active",
+                        "DC-2-ROW2" : "active",
+                        "DC-2-ROW3" : "active",
+                        "DC-2-ROW4" : "active" 
+               }
+
+}

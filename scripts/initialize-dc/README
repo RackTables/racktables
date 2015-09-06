@@ -1,0 +1,5 @@
+* Managing the entire DC through UI without any API is difficult and a tedious job for large infrastructure, so i am adding scripts to setup a new DC via scripts rather than via UI
+* Currently it contains only Create Operations, will be adding Read,Update and Delete to complete CRUD
+* Will be exposing the same through a Http API in the future
+* Run initialize_dc.py to setup the Containers(location,rows,racks), Racks are designed as per the matrix in objects/<ROW>/<RACK>.json
+* Run populate_hosts.py to Rack the hosts as per configs in objects/servers/<ROW>/<RACK>.json

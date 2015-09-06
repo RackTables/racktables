@@ -1,0 +1,12 @@
+{
+	"Server-3" : {
+			"Racking" :  ["1","2"],
+			"ServerType" : "Vendor-Model-MyServer-Type1",
+			"Tags"  : ["active","mytag1"]
+		     },
+	"Server-4" : {
+			"Racking" : ["13","14"],
+			"ServerType" : "Vendor-Model-MyServer-Type3",
+			"Tags"  : ["mytag1"]
+	             }
+}
