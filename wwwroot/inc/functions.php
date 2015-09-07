@@ -147,6 +147,18 @@ $wdm_packs = array
 	),
 );
 
+// Default input for renderExpirations(), can be overridden in local plugins.
+$expirations = array();
+$expirations[21] = array
+(
+	array ('from' => -365, 'to' => 0, 'class' => 'has_problems_', 'title' => 'has expired within last year'),
+	array ('from' => 0, 'to' => 30, 'class' => 'row_', 'title' => 'expires within 30 days'),
+	array ('from' => 30, 'to' => 60, 'class' => 'row_', 'title' => 'expires within 60 days'),
+	array ('from' => 60, 'to' => 90, 'class' => 'row_', 'title' => 'expires within 90 days'),
+);
+$expirations[22] = $expirations[21];
+$expirations[24] = $expirations[21];
+
 $log_messages = array(); // messages waiting for displaying
 
 function defineIfNotDefined ($constant, $value, $case_insensitive = FALSE)

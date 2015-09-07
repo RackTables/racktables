@@ -9166,19 +9166,9 @@ function renderEditVlan ($vlan_ck)
 
 function renderExpirations ()
 {
-	global $nextorder;
-	$breakdown = array();
-	$breakdown[21] = array
-	(
-		array ('from' => -365, 'to' => 0, 'class' => 'has_problems_', 'title' => 'has expired within last year'),
-		array ('from' => 0, 'to' => 30, 'class' => 'row_', 'title' => 'expires within 30 days'),
-		array ('from' => 30, 'to' => 60, 'class' => 'row_', 'title' => 'expires within 60 days'),
-		array ('from' => 60, 'to' => 90, 'class' => 'row_', 'title' => 'expires within 90 days'),
-	);
-	$breakdown[22] = $breakdown[21];
-	$breakdown[24] = $breakdown[21];
+	global $nextorder, $expirations;
 	$attrmap = getAttrMap();
-	foreach ($breakdown as $attr_id => $sections)
+	foreach ($expirations as $attr_id => $sections)
 	{
 		startPortlet ($attrmap[$attr_id]['name']);
 		foreach ($sections as $section)
