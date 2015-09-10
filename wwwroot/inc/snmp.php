@@ -2324,6 +2324,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-CE500-24TT: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
 	),
+	'9.1.726' => array
+	(
+		'dict_key' => 159,
+		'text' => 'WS-CE500-24PC: 24 RJ-45/10-100TX PoE + 2 combo',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000T', 'catalyst-chassis-any-100TX', 'catalyst-chassis-mgmt'),
+	),
 	'9.1.727' => array
 	(
 		'dict_key' => 161,
