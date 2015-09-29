@@ -613,7 +613,7 @@ function getRenderedIPv4NetCapacity ($range)
 			if ($mask = array_shift ($free_masks))
 			{
 				$cnt = count ($range['spare_ranges'][$mask]);
-				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}x</small>" : "") . "/$mask free";
+				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}&times;</small>" : "") . "/$mask free";
 			}
 		}
 		$text =  ip4_range_size ($range) . $free_text;
