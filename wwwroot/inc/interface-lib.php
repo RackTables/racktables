@@ -1144,4 +1144,13 @@ function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
 		">" . ($display_ifname ? $alloc['name'] . '@' : '') . $object_name . "</a>";
 }
 
+function makeHtmlTag ($tagname, $attributes = array())
+{
+	$ret = '<' . $tagname;
+	foreach ($attributes as $key => $value)
+		$ret .= " $key=\"" . htmlspecialchars($value, ENT_QUOTES) . '"';
+	$ret .= '>';
+	return $ret;
+}
+
 ?>
