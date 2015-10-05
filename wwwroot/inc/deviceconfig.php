@@ -2821,14 +2821,14 @@ function dlinkReadInterfaceStatus ($text)
 		$w = preg_split ('/\s+/', strtolower($line));
 		if (count($w) != 5)
 			continue;
-		$port_name = $w[0];
+		$portname = $w[0];
 		if ($w[1] != 'enabled')
 			$result[$portname] = array ('status'=>'disabled', 'speed'=>0, 'duplex'=>'');
 		elseif ($w[3] == 'linkdown')
 			$result[$portname] = array ('status'=>'down', 'speed'=>0, 'duplex'=>'');
 		else
 		{
-			$s = split('/', $w[3]);
+			$s = explode ('/', $w[3]);
 			$result[$portname] = array ('status'=>'up', 'speed'=>$s[0], 'duplex'=>$s[1]);
 		}
 	}
