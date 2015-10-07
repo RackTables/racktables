@@ -3308,6 +3308,7 @@ $ucsproductmap = array
 	'UCSB-B260-M4' => 2223,   # B260 M4
 	'UCSB-B460-M4' => 2224,   # B460 M4
 	'UCSB-B200-M4' => 2225,   # B200 M4
+	'UCSC-C240-M3S' => 1754,  # C240 M3 Rackmount Server
 );
 
 function autoPopulateUCS()
@@ -3375,6 +3376,24 @@ function autoPopulateUCS()
 			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
 			if (array_key_exists ($parent_name, $chassis_id))
 				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
+			$done++;
+		}
+		elseif ($item['type'] == 'ComputeRackUnit')
+		{
+			if ($item['assigned'] == '')
+				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
+			else
+			{
+				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
+				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
+			}
+			# Set H/W Type for RackmountServer
+			if (array_key_exists ($item['model'], $ucsproductmap))
+				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
+			# Set Serial#
+			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
+			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
+			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
 		}
 	} # endfor
