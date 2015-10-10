@@ -2285,6 +2285,16 @@ $dictionary = array
 	2394 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS3270'),
 	2395 => array ('chapter_id' => 12, 'dict_value' => 'Juniper%GPASS%EX2200-24P-4G'),
 	2396 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%E2620-24-PoE J9625A'),
+	2397 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 13'),
+	2398 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 14'),
+	2399 => array ('chapter_id' => 14, 'dict_value' => 'JunOS 15'),
+	2400 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 13'),
+	2401 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 14'),
+	2402 => array ('chapter_id' => 16, 'dict_value' => 'JunOS 15'),
+	2403 => array ('chapter_id' => 13, 'dict_value' => 'SUSE Enterprise%GSKIP%SLES9'),
+	2404 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V7 | http://www.centos.org/]]'),
+	2405 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 8 (Jessie) | http://debian.org/releases/jessie/]]'),
+	2406 => array ('chapter_id' => 13, 'dict_value' => '[[Gentoo%GSKIP%Gentoo | http://gentoo.org]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
