@@ -23,10 +23,10 @@ import sys
 try:
 	from UcsSdk import *
 	from UcsSdk.MoMeta.NetworkElement import NetworkElement
-        from UcsSdk.MoMeta.EquipmentChassis import EquipmentChassis
-        from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
-        from UcsSdk.MoMeta.VnicFc import VnicFc
-        from UcsSdk.MoMeta.VnicEther import VnicEther
+	from UcsSdk.MoMeta.EquipmentChassis import EquipmentChassis
+	from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
+	from UcsSdk.MoMeta.VnicFc import VnicFc
+	from UcsSdk.MoMeta.VnicEther import VnicEther
 	from UcsSdk.MoMeta.ComputeRackUnit import ComputeRackUnit
 	handle = UcsHandle()
 except Exception, err:
