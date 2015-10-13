@@ -2889,6 +2889,69 @@ function renderIPNetworkAddresses ($range)
 	}
 }
 
+function renderIPv4NetworkPageLink ($rangeid, $page, $title)
+{
+	global $pageno, $tabno;
+	return "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $rangeid, 'pg' => $page)) . "' title='".$title."'>".$page."</a> ";
+}
+
+function renderIPv4NetworkPagination ($range, $page, $numpages)
+{
+	$rendered_pager = '';
+	$startip = ip4_bin2int ($range['ip_bin']);
+	$endip = ip4_bin2int (ip_last ($range));
+	$rangeid = $range['id'];
+	// Should make this configurable perhaps
+	// How many pages before/after current page to show
+	$prepostpagecount = 8;
+	// Minimum pages where pagination does not happen
+	$paginationat = 16; // 16 pages is a /20, 32 is a /19
+	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
+	if ($numpages <= $paginationat)
+	{
+		// create original pagination
+		for ($i = 0; $i < $numpages; $i++)
+			if ($i == $page)
+				$rendered_pager .= "<b>".$i."</b> ";
+			else
+				$rendered_pager .= renderIPv4NetworkPageLink($rangeid, $i, ip4_format(ip4_int2bin($startip + $i * $maxperpage)));
+	}
+	else // number of pages > page range, create ranged pagination
+	{
+		// page is within first subset
+		if ($page - $prepostpagecount <= 1)
+		{
+			for ($i = 0; $i < $page; $i++)
+				$rendered_pager .= renderIPv4NetworkPageLink($rangeid, $i, ip4_format(ip4_int2bin($startip + $i * $maxperpage)));
+		}
+		// render 0 ... [page - prepostpagecount] [page - prepostpagecount + 1] ... [page - 1]
+		else
+		{
+			$rendered_pager .= renderIPv4NetworkPageLink($rangeid, 0, ip4_format(ip4_int2bin($startip)));
+			$rendered_pager .= "... ";
+			for ($i = $page - $prepostpagecount; $i < $page; $i++)
+				$rendered_pager .= renderIPv4NetworkPageLink($rangeid, $i, ip4_format(ip4_int2bin($startip + $i * $maxperpage)));
+		}
+		// render current page
+		$rendered_pager .= "<b>".$page."</b> ";
+		// page is within last subset
+		if ($page + $prepostpagecount >= $numpages-2)
+		{
+			for ($i = $page+1; $i < $numpages; $i++)
+				$rendered_pager .= renderIPv4NetworkPageLink($rangeid, $i, ip4_format(ip4_int2bin($startip + $i * $maxperpage)));
+		}
+		// render [page + 1] [page + 2] ... [page + postpagecount] ... [end page]
+		else
+		{
+			for ($i = $page+1; $i <= $page+$prepostpagecount; $i++)
+				$rendered_pager .= renderIPv4NetworkPageLink($rangeid, $i, ip4_format(ip4_int2bin($startip + $i * $maxperpage)));
+			$rendered_pager .= "... ";
+			$rendered_pager .= renderIPv4NetworkPageLink($rangeid, ($numpages-1), ip4_format(ip4_int2bin($endip)));
+		}
+	}
+	return $rendered_pager;
+}
+
 function renderIPv4NetworkAddresses ($range)
 {
 	global $pageno, $tabno, $aac_left;
@@ -2912,11 +2975,7 @@ function renderIPv4NetworkAddresses ($range)
 		if ($numpages = ceil ($address_count / $maxperpage))
 		{
 			echo '<h3>' . ip4_format (ip4_int2bin ($startip)) . ' ~ ' . ip4_format (ip4_int2bin ($endip)) . '</h3>';
-			for ($i = 0; $i < $numpages; $i++)
-				if ($i == $page)
-					$rendered_pager .= "<b>$i</b> ";
-				else
-					$rendered_pager .= "<a href='".makeHref (array ('page' => $pageno, 'tab' => $tabno, 'id' => $range['id'], 'pg' => $i)) . "'>$i</a> ";
+			$rendered_pager = renderIPv4NetworkPagination ($range, $page, $numpages);
 		}
 		$startip = $startip + $page * $maxperpage;
 		$endip = min ($startip + $maxperpage - 1, $endip);
