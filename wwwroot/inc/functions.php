@@ -5882,7 +5882,7 @@ function arePortsCompatible ($portinfo_a, $portinfo_b)
 }
 
 // returns HTML-formatted link to the given entity
-function mkCellA ($cell)
+function mkCellA ($cell, $title = NULL)
 {
 	global $page, $pageno_by_etype;
 	if (! isset ($pageno_by_etype[$cell['realm']]))
@@ -5906,10 +5906,12 @@ function mkCellA ($cell)
 		case 'ipv4vs':
 		case 'ipv4net':
 		case 'ipv6net':
-			$title = formatEntityName ($cell);
+			if (! isset ($title))
+				$title = formatEntityName ($cell);
 			break;
 		default:
-			$title = formatRealmName ($cell['realm']) . ' ' . formatEntityName ($cell);
+			if (! isset ($title))
+				$title = formatRealmName ($cell['realm']) . ' ' . formatEntityName ($cell);
 			break;
 	}
 	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
