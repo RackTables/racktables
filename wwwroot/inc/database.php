@@ -2134,6 +2134,14 @@ function amplifyAllocationList ($alloc_list)
 	return $ret;
 }
 
+function scanIPNet ($net_info, $filter_flags = IPSCAN_ANY)
+{
+	$pairlist = array(
+		array('first' => $net_info['ip_bin'], 'last' => ip_last ($net_info))
+	);
+	return scanIPSpace ($pairlist, $filter_flags);
+}
+
 function scanIPSpace ($pairlist, $filter_flags = IPSCAN_ANY)
 {
 	$v4_pairs = array();

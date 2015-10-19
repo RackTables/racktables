@@ -2045,7 +2045,7 @@ function findNetRouters ($net)
 	{
 		// do not call loadIPAddrList, it is expensive.
 		// instead, do our own DB scan only for router allocations
-		$rtrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), IPSCAN_DO_ALLOCS | IPSCAN_RTR_ONLY);
+		$rtrlist = scanIPNet ($net, IPSCAN_DO_ALLOCS | IPSCAN_RTR_ONLY);
 		$own_addrlist = filterOwnAddrList ($net, $rtrlist);
 	}
 	return findRouters ($own_addrlist);
@@ -2624,7 +2624,7 @@ function filterOwnAddrList ($net, $addrlist)
 
 function getIPAddrList ($net, $flags = IPSCAN_ANY)
 {
-	$addrlist = scanIPSpace (array (array ('first' => $net['ip_bin'], 'last' => ip_last ($net))), $flags);
+	$addrlist = scanIPNet ($net, $flags);
 	return filterOwnAddrList ($net, $addrlist);
 }
 
@@ -2632,7 +2632,7 @@ function getIPAddrList ($net, $flags = IPSCAN_ANY)
 // 'addrc' and 'own_addrc' are sizes of 'addrlist' and 'own_addrlist', respectively
 function loadIPAddrList (&$node)
 {
-	$node['addrlist'] = scanIPSpace (array (array ('first' => $node['ip_bin'], 'last' => ip_last ($node))));
+	$node['addrlist'] = scanIPNet ($node);
 
 	if (! isset ($node['id']))
 		$node['own_addrlist'] = $node['addrlist'];
