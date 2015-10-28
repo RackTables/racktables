@@ -215,7 +215,10 @@ function gotClearanceForTagChain ($const_base)
 					eval_expression ($sentence['condition'], $context, $ptable) and
 					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
 				) // recalculate implicit chain only after actual change, not just on matched condition
+				{
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
+					$context = array_merge ($const_base, $expl_tags, $impl_tags);
+				}
 				break;
 			default:
 				throw new RackTablesError ("Can't process sentence of unknown type '${sentence['type']}'", RackTablesError::INTERNAL);
