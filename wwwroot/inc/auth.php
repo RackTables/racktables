@@ -188,6 +188,8 @@ function gotClearanceForTagChain ($const_base)
 {
 	global $rackCode, $expl_tags, $impl_tags;
 	$ptable = array();
+	$context = array_merge ($const_base, $expl_tags, $impl_tags);
+
 	foreach ($rackCode as $sentence)
 	{
 		switch ($sentence['type'])
@@ -196,7 +198,7 @@ function gotClearanceForTagChain ($const_base)
 				$ptable[$sentence['term']] = $sentence['definition'];
 				break;
 			case 'SYNT_GRANT':
-				if (eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable))
+				if (eval_expression ($sentence['condition'], $context, $ptable))
 					switch ($sentence['decision'])
 					{
 						case 'LEX_ALLOW':
@@ -210,7 +212,7 @@ function gotClearanceForTagChain ($const_base)
 			case 'SYNT_ADJUSTMENT':
 				if
 				(
-					eval_expression ($sentence['condition'], array_merge ($const_base, $expl_tags, $impl_tags), $ptable) and
+					eval_expression ($sentence['condition'], $context, $ptable) and
 					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
 				) // recalculate implicit chain only after actual change, not just on matched condition
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
