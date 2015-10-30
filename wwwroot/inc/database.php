@@ -4302,14 +4302,21 @@ function generateEntityAutoTags ($cell)
 // Return a tag chain with all DB tags on it.
 function getTagList()
 {
-	$ret = array();
 	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-	{
-		$row['refcnt']['total'] = 0;
-		$ret[$row['id']] = $row;
-	}
-	unset ($result);
+	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+	return $ret;
+}
+
+function getTagUsage ($ignore_cache = FALSE)
+{
+	global $taglist;
+	static $ret = NULL;
+	if (isset ($ret) && ! $ignore_cache)
+		return $ret;
+	$ret = array();
+
+	foreach ($taglist as $id => $taginfo)
+		$ret[$id] = $taginfo + array('refcnt' => array('total' => 0));
 
 	$result = usePreparedSelectBlade ("SELECT entity_realm AS realm, tag_id AS id, count(*) AS refcnt FROM TagStorage GROUP BY tag_id, entity_realm");
 	while ($row = $result->fetch(PDO::FETCH_ASSOC))

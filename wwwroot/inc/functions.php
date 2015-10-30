@@ -3133,10 +3133,10 @@ function dump ($var)
 
 function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 {
-	global $taglist;
+	$taglist_usage = getTagUsage();
 	// first build top-N chart...
 	$toplist = array();
-	foreach ($taglist as $taginfo)
+	foreach ($taglist_usage as $taginfo)
 		if (isset ($taginfo['refcnt'][$realm]))
 			$toplist[$taginfo['id']] = $taginfo['refcnt'][$realm];
 	arsort ($toplist, SORT_NUMERIC);
@@ -3144,7 +3144,7 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 	$done = 0;
 	foreach (array_keys ($toplist) as $tag_id)
 	{
-		$ret[$tag_id] = $taglist[$tag_id];
+		$ret[$tag_id] = $taglist_usage[$tag_id];
 		if (++$done == $limit)
 			break;
 	}
@@ -3153,10 +3153,10 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 	$extra = array();
 	foreach ($special_tags as $taginfo)
 		if (!array_key_exists ($taginfo['id'], $ret))
-			$extra[$taginfo['id']] = $taglist[$taginfo['id']]['refcnt'][$realm];
+			$extra[$taginfo['id']] = $taglist_usage[$taginfo['id']]['refcnt'][$realm];
 	arsort ($extra, SORT_NUMERIC);
 	foreach (array_keys ($extra) as $tag_id)
-		$ret[] = $taglist[$tag_id];
+		$ret[] = $taglist_usage[$tag_id];
 	return $ret;
 }
 
