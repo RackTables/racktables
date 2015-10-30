@@ -1478,47 +1478,14 @@ function tagChainCmp ($chain1, $chain2)
 	return FALSE;
 }
 
-
-// returns the subtree of $tagtree representing child tags of $tagid
-// returns NULL if error occured
-function getTagSubtree ($tagid)
-{
-	global $tagtree, $taglist;
-
-	$subtree = array ('kids' => $tagtree);
-	$trace = $taglist[$tagid]['trace'];
-	$trace[] = $tagid;
-	while (count ($trace))
-	{
-		$search_for = array_shift ($trace);
-		foreach ($subtree['kids'] as $subtag)
-			if ($subtag['id'] == $search_for)
-			{
-				$subtree = $subtag;
-				continue 2;
-			}
-		return NULL;
-	}
-	return $subtree;
-}
-
 // returns an array of tag ids that have $tagid as its parent (all levels)
 function getTagDescendents ($tagid)
 {
+	global $taglist;
 	$ret = array();
-	if ($subtree = getTagSubtree ($tagid))
-	{
-		$stack = array ($subtree);
-		while (count ($stack))
-		{
-			$subtree = array_pop ($stack);
-			foreach ($subtree['kids'] as $subtag)
-			{
-				$ret[] = $subtag['id'];
-				array_push ($stack, $subtag);
-			}
-		}
-	}
+	foreach ($taglist as $id => $taginfo)
+		if (in_array($tagid, $taginfo['trace']))
+			$ret[] = $id;
 	return $ret;
 }
 
