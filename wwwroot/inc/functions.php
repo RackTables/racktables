@@ -1320,6 +1320,12 @@ function treeItemCmp ($a, $b)
 	return $a['__tree_index'] - $b['__tree_index'];
 }
 
+function getTagTree()
+{
+	$taglist_usage = getTagUsage();
+	return treeFromList ($taglist_usage);
+}
+
 // Build a tree from the item list and return it. Input and output data is
 // indexed by item id (nested items in output are recursively stored in 'kids'
 // key, which is in turn indexed by id. Functions that are ready to handle
@@ -1677,7 +1683,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 // 'Effectively' means reduce to non-empty result.
 function getShrinkedTagTree ($entity_list, $realm, $preselect)
 {
-	global $tagtree;
+	$tagtree = getTagTree();
 	if ($preselect['andor'] != 'and' || empty($entity_list) && $preselect['is_empty'])
 		return getObjectiveTagTree($tagtree, $realm, $preselect['tagidlist']);
 

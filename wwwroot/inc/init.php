@@ -91,7 +91,6 @@ $entityCache = array();
 $tagRelCache = array();
 
 $taglist = getTagList();
-$tagtree = treeFromList ($taglist);
 
 $auto_tags = array();
 if (! isCLIMode() && isset ($_SERVER['REMOTE_ADDR']))

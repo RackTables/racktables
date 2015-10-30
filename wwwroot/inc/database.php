@@ -4304,6 +4304,18 @@ function getTagList()
 {
 	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
 	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+
+	// calculate the 'trace' field of taginfo
+	foreach ($ret as $id => $taginfo)
+	{
+		$trace = array();
+		while ($taginfo['parent_id'])
+		{
+			$trace[] = $taginfo['parent_id'];
+			$taginfo = $ret[$taginfo['parent_id']];
+		}
+		$ret[$id]['trace'] = array_reverse ($trace);
+	}
 	return $ret;
 }
 

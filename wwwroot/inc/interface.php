@@ -5269,9 +5269,8 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 
 function renderTagTree ()
 {
-	global $tagtree;
 	echo '<center><table class=tagtree>';
-	foreach ($tagtree as $taginfo)
+	foreach (getTagTree() as $taginfo)
 		renderTagRowForViewer ($taginfo);
 	echo '</table></center>';
 }
@@ -5303,7 +5302,7 @@ END
 		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
 		echo '</tr></form>';
 	}
-	global $taglist, $tagtree;
+	global $taglist;
 
 	$options = array (0 => '-- NONE --');
 	foreach ($taglist as $taginfo)
@@ -5334,7 +5333,7 @@ END
 	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($options);
-	foreach ($tagtree as $taginfo)
+	foreach (getTagTree() as $taginfo)
 		renderTagRowForEditor ($taginfo);
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($options);
@@ -5427,7 +5426,7 @@ function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 
 function renderEntityTags ($entity_id)
 {
-	global $tagtree, $taglist, $target_given_tags;
+	global $taglist, $target_given_tags;
 	echo '<table border=0 width="100%"><tr>';
 
 	if (count ($taglist) > getConfigVar ('TAGS_QUICKLIST_THRESHOLD'))
@@ -5453,7 +5452,7 @@ function renderEntityTags ($entity_id)
 
 	// do not do anything about empty tree, trigger function ought to work this out
 	echo '<td class=pcright>';
-	renderEntityTagsPortlet ('Tag tree', $tagtree, $target_given_tags, etypeByPageno());
+	renderEntityTagsPortlet ('Tag tree', getTagTree(), $target_given_tags, etypeByPageno());
 	echo '</td>';
 
 	echo '</tr></table>';
@@ -5465,7 +5464,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	addJS ('js/tag-cb.js');
 	addJS ('tag_cb.enableNegation()', TRUE);
 
-	global $pageno, $tabno, $taglist, $tagtree;
+	global $pageno, $tabno, $taglist;
 	$filterc =
 	(
 		count ($preselect['tagidlist']) +
