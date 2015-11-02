@@ -187,7 +187,6 @@ function assertPermission ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 function gotClearanceForTagChain ($const_base)
 {
 	global $rackCode, $expl_tags, $impl_tags;
-	$ptable = array();
 	$context = array_merge ($const_base, $expl_tags, $impl_tags);
 	$context = reindexById ($context, 'tag', TRUE);
 
@@ -196,16 +195,15 @@ function gotClearanceForTagChain ($const_base)
 		switch ($sentence['type'])
 		{
 			case 'SYNT_DEFINITION':
-				$ptable[$sentence['term']] = $sentence['definition'];
 				break;
 			case 'SYNT_GRANT':
-				if (eval_expression ($sentence['condition'], $context, $ptable))
+				if (eval_expression ($sentence['condition'], $context))
 					return $sentence['decision'];
 				break;
 			case 'SYNT_ADJUSTMENT':
 				if
 				(
-					eval_expression ($sentence['condition'], $context, $ptable) and
+					eval_expression ($sentence['condition'], $context) and
 					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
 				) // recalculate implicit chain only after actual change, not just on matched condition
 				{

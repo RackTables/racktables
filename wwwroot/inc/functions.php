@@ -2935,9 +2935,11 @@ function filterCellList ($list_in, $expression = array())
 	return $list_out;
 }
 
-function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
+function eval_expression ($expr, $tagchain, $silent = FALSE)
 {
 	$self = __FUNCTION__;
+	global $pTable;
+
 	switch ($expr['type'])
 	{
 		// Return true, if given tag is present on the tag chain.
@@ -2945,24 +2947,24 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 			return isset ($tagchain[$expr['load']]);
 		case 'LEX_PREDICATE': // Find given predicate in the symbol table and evaluate it.
 			$pname = $expr['load'];
-			if (!isset ($ptable[$pname]))
+			if (!isset ($pTable[$pname]))
 			{
 				if (!$silent)
 					showWarning ("Undefined predicate [${pname}]");
 				return NULL;
 			}
-			return $self ($ptable[$pname], $tagchain, $ptable, $silent);
+			return $self ($pTable[$pname], $tagchain, $silent);
 		case 'LEX_BOOL':
 			return $expr['load'];
 		case 'SYNT_NOT_EXPR': // logical NOT
-			$tmp = $self ($expr['load'], $tagchain, $ptable, $silent);
+			$tmp = $self ($expr['load'], $tagchain, $silent);
 			return is_bool($tmp) ? !$tmp : $tmp;
 		case 'SYNT_AND_EXPR': // logical AND
 			foreach ($expr['tag_args'] as $tag)
 				if (! isset ($tagchain[$tag]))
 					return FALSE; // early failure
 			foreach ($expr['expr_args'] as $sub_expr)
-				if (! $self ($sub_expr, $tagchain, $ptable, $silent))
+				if (! $self ($sub_expr, $tagchain, $silent))
 					return FALSE; // early failure
 			return TRUE;
 		case 'SYNT_EXPR': // logical OR
@@ -2970,7 +2972,7 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 				if (isset ($tagchain[$tag]))
 					return TRUE; // early success
 			foreach ($expr['expr_args'] as $sub_expr)
-				if ($self ($sub_expr, $tagchain, $ptable, $silent))
+				if ($self ($sub_expr, $tagchain, $silent))
 					return TRUE; // early success
 			return FALSE;
 		default:
@@ -2984,28 +2986,25 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 // Tell, if the given expression is true for the given entity. Take complete record on input.
 function judgeCell ($cell, $expression)
 {
-	global $pTable;
 	$context = array_merge ($cell['etags'], $cell['itags'], $cell['atags']);
 	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
 		$context,
-		$pTable,
 		TRUE
 	);
 }
 
 function judgeContext ($expression)
 {
-	global $pTable, $expl_tags, $impl_tags, $auto_tags;
+	global $expl_tags, $impl_tags, $auto_tags;
 	$context = array_merge ($expl_tags, $impl_tags, $auto_tags);
 	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
 		$context,
-		$pTable,
 		TRUE
 	);
 }
