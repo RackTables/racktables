@@ -718,4 +718,137 @@ function invariantExpression ($expr)
 	}
 }
 
+function getRackCodeStats ()
+{
+	global $rackCode;
+	$defc = $grantc = $modc = 0;
+	foreach ($rackCode as $s)
+		switch ($s['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$defc++;
+				break;
+			case 'SYNT_GRANT':
+				$grantc++;
+				break;
+			case 'SYNT_CTXMOD':
+				$modc++;
+				break;
+			default:
+				break;
+		}
+	return array
+	(
+		'Definition sentences' => $defc,
+		'Grant sentences' => $grantc,
+		'Context mod sentences' => $modc
+	);
+}
+
+function getRackCodeWarnings ()
+{
+	$ret = array();
+	global $rackCode;
+	// tags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_ADJUSTMENT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				$ret = array_merge ($ret, findCtxModWarnings ($sentence['modlist']));
+				break;
+			case 'SYNT_GRANT':
+				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
+	// autotags
+	foreach ($rackCode as $sentence)
+		switch ($sentence['type'])
+		{
+			case 'SYNT_DEFINITION':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
+				break;
+			case 'SYNT_GRANT':
+			case 'SYNT_ADJUSTMENT':
+				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
+				break;
+			default:
+				$ret[] = array
+				(
+					'header' => 'internal error',
+					'class' => 'error',
+					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+				);
+		}
+	// predicates
+	$plist = array();
+	foreach ($rackCode as $sentence)
+		if ($sentence['type'] == 'SYNT_DEFINITION')
+			$plist[$sentence['term']] = $sentence['lineno'];
+	foreach ($plist as $pname => $lineno)
+	{
+		foreach ($rackCode as $sentence)
+			switch ($sentence['type'])
+			{
+				case 'SYNT_DEFINITION':
+					if (referencedPredicate ($pname, $sentence['definition']))
+						continue 3; // clear, next term
+					break;
+				case 'SYNT_GRANT':
+				case 'SYNT_ADJUSTMENT':
+					if (referencedPredicate ($pname, $sentence['condition']))
+						continue 3; // idem
+					break;
+			}
+		$ret[] = array
+		(
+			'header' => refRCLineno ($lineno),
+			'class' => 'warning',
+			'text' => "Predicate '${pname}' is defined, but never used."
+		);
+	}
+	// expressions
+	foreach ($rackCode as $sentence)
+		switch (invariantExpression ($sentence))
+		{
+			case 'always true':
+				$ret[] = array
+				(
+					'header' => refRCLineno ($sentence['lineno']),
+					'class' => 'warning',
+					'text' => "Expression is always true."
+				);
+				break;
+			case 'always false':
+				$ret[] = array
+				(
+					'header' => refRCLineno ($sentence['lineno']),
+					'class' => 'warning',
+					'text' => "Expression is always false."
+				);
+				break;
+			default:
+				break;
+		}
+	// bail out
+	$nwarnings = count ($ret);
+	$ret[] = array
+	(
+		'header' => 'summary',
+		'class' => $nwarnings ? 'error' : 'success',
+		'text' => "Analysis complete, ${nwarnings} issues discovered."
+	);
+	return $ret;
+}
+
 ?>
