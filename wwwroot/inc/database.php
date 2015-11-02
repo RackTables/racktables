@@ -3624,6 +3624,12 @@ function getRackspaceStats ()
 	return $ret;
 }
 
+function getPortsCount ($object_id)
+{
+	$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM Port WHERE object_id = ?", array($object_id));
+	return $result->fetch(PDO::FETCH_COLUMN, 0);
+}
+
 /*
 
 The following allows figuring out records in TagStorage that refer to non-existing entities:
