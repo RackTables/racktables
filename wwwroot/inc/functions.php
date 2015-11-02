@@ -3368,9 +3368,9 @@ function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 	$ret = array();
 	foreach ($input as $item)
 	{
-		if (! array_key_exists ($column_name, $item))
+		if (! isset ($item[$column_name])  && ! array_key_exists ($column_name, $item))
 			throw new InvalidArgException ('input', '(array)', 'ID column missing');
-		if (array_key_exists ($item[$column_name], $ret))
+		if (isset ($ret[$item[$column_name]]))
 		{
 			if (!$ignore_dups)
 				throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
