@@ -4983,7 +4983,10 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 	}
 	catch (ParserError $e)
 	{
-		return array ('result' => 'NAK', 'load' => $e->getMessage());
+		$msg = $e->getMessage();
+		if ($reqtype != 'SYNT_EXPR' || $e->lineno != 1)
+			$msg .= ", line {$e->lineno}";
+		return array ('result' => 'NAK', 'load' => $msg);
 	}
 }
 

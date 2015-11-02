@@ -15,9 +15,11 @@
 
 class ParserError extends Exception
 {
-	function set_lineno ($lineno)
+	public $lineno;
+	function __construct ($message, $lineno = 0)
 	{
-		$this->message = "Line $lineno: " . $this->message;
+		$this->message = $message;
+		$this->lineno = $lineno;
 	}
 };
 
@@ -54,7 +56,7 @@ class RackCodeParser
 		}
 		catch (ParserError $e)
 		{
-			$e->set_lineno ($this->lineno);
+			$e->lineno = $this->lineno;
 			throw $e;
 		}
 	}
