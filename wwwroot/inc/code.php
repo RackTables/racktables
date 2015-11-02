@@ -242,7 +242,7 @@ class RackCodeParser
 	function prog()
 	{
 		$this->prog_mode = TRUE;
-		$statements = [];
+		$statements = array();
 		while (NULL !== $this->token)
 			$statements[] = $this->statement();
 		return $statements;

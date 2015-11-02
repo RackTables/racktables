@@ -194,8 +194,6 @@ function gotClearanceForTagChain ($const_base)
 	{
 		switch ($sentence['type'])
 		{
-			case 'SYNT_DEFINITION':
-				break;
 			case 'SYNT_GRANT':
 				if (eval_expression ($sentence['condition'], $context))
 					return $sentence['decision'];

@@ -2907,12 +2907,21 @@ function unix2dos ($text)
 	return str_replace ("\n", "\r\n", $text);
 }
 
-function buildPredicateTable ($parsetree)
+function buildPredicateTable (&$rackCode)
 {
 	$ret = array();
-	foreach ($parsetree as $sentence)
+	$new_rackCode = array();
+
+	foreach ($rackCode as $sentence)
 		if ($sentence['type'] == 'SYNT_DEFINITION')
 			$ret[$sentence['term']] = $sentence['definition'];
+		else
+			$new_rackCode[] = $sentence;
+
+	// remove SYNT_DEFINITION statements from the original rackCode to
+	// make permitted() calls faster.
+	$rackCode = $new_rackCode;
+
 	// Now we have predicate table filled in with the latest definitions of each
 	// particular predicate met. This isn't as chik, as on-the-fly predicate
 	// overloading during allow/deny scan, but quite sufficient for this task.
