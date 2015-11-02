@@ -450,25 +450,6 @@ class RackCodeParser
 	}
 }
 
-
-// Accept a stack and figure out the cause of it not being parsed into a tree.
-// Return the line number or zero.
-function locateSyntaxError ($stack)
-{
-	// The first SYNT_CODETEXT node, if is present, holds stuff already
-	// successfully processed. Its line counter shows, where the last reduction
-	// took place (it _might_ be the same line that causes the syntax error).
-	// The next node (it's very likely to exist) should have its line counter
-	// pointing to the place, where the first (of 1 or more) error is located.
-	if (isset ($stack[0]['type']) and $stack[0]['type'] == 'SYNT_CODETEXT')
-		unset ($stack[0]);
-	foreach ($stack as $node)
-		// Satisfy with the first line number met.
-		if (isset ($node['lineno']))
-			return $node['lineno'];
-	return 0;
-}
-
 function refRCLineno ($ln)
 {
 	return "<a href='index.php?page=perms&tab=default#line${ln}'>line ${ln}</a>";
