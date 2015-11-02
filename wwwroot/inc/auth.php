@@ -189,6 +189,7 @@ function gotClearanceForTagChain ($const_base)
 	global $rackCode, $expl_tags, $impl_tags;
 	$ptable = array();
 	$context = array_merge ($const_base, $expl_tags, $impl_tags);
+	$context = reindexById ($context, 'tag', TRUE);
 
 	foreach ($rackCode as $sentence)
 	{
@@ -218,6 +219,7 @@ function gotClearanceForTagChain ($const_base)
 				{
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
 					$context = array_merge ($const_base, $expl_tags, $impl_tags);
+					$context = reindexById ($context, 'tag', TRUE);
 				}
 				break;
 			default:

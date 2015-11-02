@@ -2942,40 +2942,37 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 	{
 		// Return true, if given tag is present on the tag chain.
 		case 'LEX_TAG':
-		case 'LEX_AUTOTAG':
-			foreach ($tagchain as $tagInfo)
-				if ($expr['load'] == $tagInfo['tag'])
-					return TRUE;
-			return FALSE;
+			return isset ($tagchain[$expr['load']]);
 		case 'LEX_PREDICATE': // Find given predicate in the symbol table and evaluate it.
 			$pname = $expr['load'];
 			if (!isset ($ptable[$pname]))
 			{
 				if (!$silent)
-					showWarning ("Predicate '${pname}' is referenced before declaration");
+					showWarning ("Undefined predicate [${pname}]");
 				return NULL;
 			}
-			return $self ($ptable[$pname], $tagchain, $ptable);
-		case 'LEX_TRUE':
+			return $self ($ptable[$pname], $tagchain, $ptable, $silent);
+		case 'LEX_BOOL':
+			return $expr['load'];
+		case 'SYNT_NOT_EXPR': // logical NOT
+			$tmp = $self ($expr['load'], $tagchain, $ptable, $silent);
+			return is_bool($tmp) ? !$tmp : $tmp;
+		case 'SYNT_AND_EXPR': // logical AND
+			foreach ($expr['tag_args'] as $tag)
+				if (! isset ($tagchain[$tag]))
+					return FALSE; // early failure
+			foreach ($expr['expr_args'] as $sub_expr)
+				if (! $self ($sub_expr, $tagchain, $ptable, $silent))
+					return FALSE; // early failure
 			return TRUE;
-		case 'LEX_FALSE':
+		case 'SYNT_EXPR': // logical OR
+			foreach ($expr['tag_args'] as $tag)
+				if (isset ($tagchain[$tag]))
+					return TRUE; // early success
+			foreach ($expr['expr_args'] as $sub_expr)
+				if ($self ($sub_expr, $tagchain, $ptable, $silent))
+					return TRUE; // early success
 			return FALSE;
-		case 'SYNT_NOT_EXPR':
-			$tmp = $self ($expr['load'], $tagchain, $ptable);
-			if ($tmp === TRUE)
-				return FALSE;
-			elseif ($tmp === FALSE)
-				return TRUE;
-			else
-				return $tmp;
-		case 'SYNT_AND_EXPR': // binary AND
-			if (FALSE == $self ($expr['left'], $tagchain, $ptable))
-				return FALSE; // early failure
-			return $self ($expr['right'], $tagchain, $ptable);
-		case 'SYNT_EXPR': // binary OR
-			if (TRUE == $self ($expr['left'], $tagchain, $ptable))
-				return TRUE; // early success
-			return $self ($expr['right'], $tagchain, $ptable);
 		default:
 			if (!$silent)
 				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'");
@@ -2988,15 +2985,12 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 function judgeCell ($cell, $expression)
 {
 	global $pTable;
+	$context = array_merge ($cell['etags'], $cell['itags'], $cell['atags']);
+	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
-		array_merge
-		(
-			$cell['etags'],
-			$cell['itags'],
-			$cell['atags']
-		),
+		$context,
 		$pTable,
 		TRUE
 	);
@@ -3005,15 +2999,12 @@ function judgeCell ($cell, $expression)
 function judgeContext ($expression)
 {
 	global $pTable, $expl_tags, $impl_tags, $auto_tags;
+	$context = array_merge ($expl_tags, $impl_tags, $auto_tags);
+	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
-		array_merge
-		(
-			$expl_tags,
-			$impl_tags,
-			$auto_tags
-		),
+		$context,
 		$pTable,
 		TRUE
 	);
@@ -3372,7 +3363,7 @@ function array_values_same ($a1, $a2)
 # Reindex provided array of arrays by a column value that is present in
 # each sub-array and is assumed to be unique. Most often, make "id" column in
 # a list of cells into the key space.
-function reindexById ($input, $column_name = 'id')
+function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 {
 	$ret = array();
 	foreach ($input as $item)
@@ -3380,8 +3371,12 @@ function reindexById ($input, $column_name = 'id')
 		if (! array_key_exists ($column_name, $item))
 			throw new InvalidArgException ('input', '(array)', 'ID column missing');
 		if (array_key_exists ($item[$column_name], $ret))
-			throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
-		$ret[$item[$column_name]] = $item;
+		{
+			if (!$ignore_dups)
+				throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
+		}
+		else
+			$ret[$item[$column_name]] = $item;
 	}
 	return $ret;
 }
@@ -4972,19 +4967,16 @@ function getRackCodeWarnings ()
 function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 {
 	require_once 'code.php';
-	$lex = getLexemsFromRawText ($text);
-	if ($lex['result'] != 'ACK')
-		return $lex;
-	$stack = getParseTreeFromLexems ($lex['load']);
-	// The only possible way to "accept" is to have sole starting
-	// nonterminal on the stack (and it must be of the requested class).
-	if (count ($stack) == 1 and $stack[0]['type'] == $reqtype)
-		return array ('result' => 'ACK', 'load' => isset ($stack[0]['load']) ? $stack[0]['load'] : $stack[0]);
-	// No luck. Prepare to complain.
-	if ($lineno = locateSyntaxError ($stack))
-		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
-	// HCF!
-	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}', line number unknown");
+	try
+	{
+		$parser = new RackCodeParser();
+		$tree = $parser->parse ($text, $reqtype == 'SYNT_EXPR' ? 'expr' : 'prog');
+		return array ('result' => 'ACK', 'load' => $tree);
+	}
+	catch (ParserError $e)
+	{
+		return array ('result' => 'NAK', 'load' => $e->getMessage());
+	}
 }
 
 // Top-level wrapper for most of the code in this file. Get a text, return a parse tree
@@ -5001,8 +4993,7 @@ function getRackCode ($text)
 	// so checking intermediate result once more won't hurt.
 	if (!count ($synt['load']))
 		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
-	require_once 'code.php'; // for semanticFilter()
-	return semanticFilter ($synt['load']);
+	return $synt;
 }
 
 // returns array with 'from', 'length' keys.
