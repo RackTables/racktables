@@ -190,7 +190,7 @@ class RackCodeParser
 							$this->lex_value = $buffer;
 							return $buffer;
 						default:
-							die (__FUNCTION__ . "(): internal error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
 					}
 					break;
 				case self::LEX_S_TAG:
@@ -210,7 +210,7 @@ class RackCodeParser
 						case 'END':
 							throw new ParserError ("Expecting '$breaking_char' character");
 						default:
-							die (__FUNCTION__ . "(): internal error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
 					}
 					break;
 				case self::LEX_S_COMMENT:
@@ -225,11 +225,11 @@ class RackCodeParser
 							$buffer = '';
 							break;
 						default:
-							die (__FUNCTION__ . "(): internal error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
 					}
 					break;
 				default:
-					die (__FUNCTION__ . "(): internal error, state == ${state}");
+					throw new RackTablesError ("Lex FSM error, state == ${state}");
 			endswitch;
 		endwhile;
 		return NULL;
@@ -346,7 +346,7 @@ class RackCodeParser
 				$left = $this->un_expr();
 				break;
 			default:
-				die (__FUNCTION__ . "(): internal error, op == ${op}");
+				throw new InvalidArgException ('op', $op);
 		}
 
 		if ($this->accept ($op))
