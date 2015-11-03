@@ -4838,6 +4838,7 @@ function buildSearchRedirectURL ($result_type, $record)
 // Take a parse tree and figure out if it is a valid payload or not.
 // Depending on that return either NULL or an array filled with the load
 // of that expression.
+define('PARSER_ABI_VER', 2);
 function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 {
 	require_once 'code.php';
@@ -4845,14 +4846,14 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 	{
 		$parser = new RackCodeParser();
 		$tree = $parser->parse ($text, $reqtype == 'SYNT_EXPR' ? 'expr' : 'prog');
-		return array ('result' => 'ACK', 'load' => $tree);
+		return array ('result' => 'ACK', 'ABI_ver' => PARSER_ABI_VER, 'load' => $tree);
 	}
 	catch (ParserError $e)
 	{
 		$msg = $e->getMessage();
 		if ($reqtype != 'SYNT_EXPR' || $e->lineno != 1)
 			$msg .= ", line {$e->lineno}";
-		return array ('result' => 'NAK', 'load' => $msg);
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => $msg);
 	}
 }
 
@@ -4861,7 +4862,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 function getRackCode ($text)
 {
 	if (!mb_strlen ($text))
-		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
 	$text = str_replace ("\r", '', $text) . "\n";
 	$synt = spotPayload ($text, 'SYNT_CODETEXT');
 	if ($synt['result'] != 'ACK')
@@ -4869,7 +4870,7 @@ function getRackCode ($text)
 	// An empty sentence list is semantically valid, yet senseless,
 	// so checking intermediate result once more won't hurt.
 	if (!count ($synt['load']))
-		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => 'Empty parse tree found in ' . __FUNCTION__);
 	return $synt;
 }
 

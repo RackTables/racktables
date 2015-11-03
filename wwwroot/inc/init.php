@@ -70,6 +70,12 @@ else
 		saveScript ('RackCodeCache', '');
 		$rackCode = getRackCode (loadScript ('RackCode'));
 	}
+	elseif (! isset ($rackCode['ABI_ver']) || $rackCode['ABI_ver'] != PARSER_ABI_VER)
+	{
+		// Re-calculate rackCode locally, keep unsupported cache in place.
+		// This helps transition between version on master-slave installations.
+		$rackCode = getRackCode (loadScript ('RackCode'));
+	}
 }
 
 // avoid notices being thrown
