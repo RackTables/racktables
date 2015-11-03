@@ -187,37 +187,27 @@ function assertPermission ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 function gotClearanceForTagChain ($const_base)
 {
 	global $rackCode, $expl_tags, $impl_tags;
-	$ptable = array();
 	$context = array_merge ($const_base, $expl_tags, $impl_tags);
+	$context = reindexById ($context, 'tag', TRUE);
 
 	foreach ($rackCode as $sentence)
 	{
 		switch ($sentence['type'])
 		{
-			case 'SYNT_DEFINITION':
-				$ptable[$sentence['term']] = $sentence['definition'];
-				break;
 			case 'SYNT_GRANT':
-				if (eval_expression ($sentence['condition'], $context, $ptable))
-					switch ($sentence['decision'])
-					{
-						case 'LEX_ALLOW':
-							return TRUE;
-						case 'LEX_DENY':
-							return FALSE;
-						default:
-							throw new RackTablesError ("Condition match for unknown grant decision '${sentence['decision']}'", RackTablesError::INTERNAL);
-					}
+				if (eval_expression ($sentence['condition'], $context))
+					return $sentence['decision'];
 				break;
 			case 'SYNT_ADJUSTMENT':
 				if
 				(
-					eval_expression ($sentence['condition'], $context, $ptable) and
+					eval_expression ($sentence['condition'], $context) and
 					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
 				) // recalculate implicit chain only after actual change, not just on matched condition
 				{
 					$impl_tags = getImplicitTags ($expl_tags); // recalculate
 					$context = array_merge ($const_base, $expl_tags, $impl_tags);
+					$context = reindexById ($context, 'tag', TRUE);
 				}
 				break;
 			default:

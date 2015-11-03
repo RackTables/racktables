@@ -1934,33 +1934,6 @@ function redirectUser ($url)
 	die;
 }
 
-function getRackCodeStats ()
-{
-	global $rackCode;
-	$defc = $grantc = $modc = 0;
-	foreach ($rackCode as $s)
-		switch ($s['type'])
-		{
-			case 'SYNT_DEFINITION':
-				$defc++;
-				break;
-			case 'SYNT_GRANT':
-				$grantc++;
-				break;
-			case 'SYNT_CTXMOD':
-				$modc++;
-				break;
-			default:
-				break;
-		}
-	return array
-	(
-		'Definition sentences' => $defc,
-		'Grant sentences' => $grantc,
-		'Context mod sentences' => $modc
-	);
-}
-
 function getRackImageWidth ()
 {
 	global $rtwidth;
@@ -2907,12 +2880,21 @@ function unix2dos ($text)
 	return str_replace ("\n", "\r\n", $text);
 }
 
-function buildPredicateTable ($parsetree)
+function buildPredicateTable (&$rackCode)
 {
 	$ret = array();
-	foreach ($parsetree as $sentence)
+	$new_rackCode = array();
+
+	foreach ($rackCode as $sentence)
 		if ($sentence['type'] == 'SYNT_DEFINITION')
 			$ret[$sentence['term']] = $sentence['definition'];
+		else
+			$new_rackCode[] = $sentence;
+
+	// remove SYNT_DEFINITION statements from the original rackCode to
+	// make permitted() calls faster.
+	$rackCode = $new_rackCode;
+
 	// Now we have predicate table filled in with the latest definitions of each
 	// particular predicate met. This isn't as chik, as on-the-fly predicate
 	// overloading during allow/deny scan, but quite sufficient for this task.
@@ -2935,47 +2917,46 @@ function filterCellList ($list_in, $expression = array())
 	return $list_out;
 }
 
-function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
+function eval_expression ($expr, $tagchain, $silent = FALSE)
 {
 	$self = __FUNCTION__;
+	global $pTable;
+
 	switch ($expr['type'])
 	{
 		// Return true, if given tag is present on the tag chain.
 		case 'LEX_TAG':
-		case 'LEX_AUTOTAG':
-			foreach ($tagchain as $tagInfo)
-				if ($expr['load'] == $tagInfo['tag'])
-					return TRUE;
-			return FALSE;
+			return isset ($tagchain[$expr['load']]);
 		case 'LEX_PREDICATE': // Find given predicate in the symbol table and evaluate it.
 			$pname = $expr['load'];
-			if (!isset ($ptable[$pname]))
+			if (!isset ($pTable[$pname]))
 			{
 				if (!$silent)
-					showWarning ("Predicate '${pname}' is referenced before declaration");
+					showWarning ("Undefined predicate [${pname}]");
 				return NULL;
 			}
-			return $self ($ptable[$pname], $tagchain, $ptable);
-		case 'LEX_TRUE':
+			return $self ($pTable[$pname], $tagchain, $silent);
+		case 'LEX_BOOL':
+			return $expr['load'];
+		case 'SYNT_NOT_EXPR': // logical NOT
+			$tmp = $self ($expr['load'], $tagchain, $silent);
+			return is_bool($tmp) ? !$tmp : $tmp;
+		case 'SYNT_AND_EXPR': // logical AND
+			foreach ($expr['tag_args'] as $tag)
+				if (! isset ($tagchain[$tag]))
+					return FALSE; // early failure
+			foreach ($expr['expr_args'] as $sub_expr)
+				if (! $self ($sub_expr, $tagchain, $silent))
+					return FALSE; // early failure
 			return TRUE;
-		case 'LEX_FALSE':
+		case 'SYNT_EXPR': // logical OR
+			foreach ($expr['tag_args'] as $tag)
+				if (isset ($tagchain[$tag]))
+					return TRUE; // early success
+			foreach ($expr['expr_args'] as $sub_expr)
+				if ($self ($sub_expr, $tagchain, $silent))
+					return TRUE; // early success
 			return FALSE;
-		case 'SYNT_NOT_EXPR':
-			$tmp = $self ($expr['load'], $tagchain, $ptable);
-			if ($tmp === TRUE)
-				return FALSE;
-			elseif ($tmp === FALSE)
-				return TRUE;
-			else
-				return $tmp;
-		case 'SYNT_AND_EXPR': // binary AND
-			if (FALSE == $self ($expr['left'], $tagchain, $ptable))
-				return FALSE; // early failure
-			return $self ($expr['right'], $tagchain, $ptable);
-		case 'SYNT_EXPR': // binary OR
-			if (TRUE == $self ($expr['left'], $tagchain, $ptable))
-				return TRUE; // early success
-			return $self ($expr['right'], $tagchain, $ptable);
 		default:
 			if (!$silent)
 				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'");
@@ -2987,34 +2968,25 @@ function eval_expression ($expr, $tagchain, $ptable, $silent = FALSE)
 // Tell, if the given expression is true for the given entity. Take complete record on input.
 function judgeCell ($cell, $expression)
 {
-	global $pTable;
+	$context = array_merge ($cell['etags'], $cell['itags'], $cell['atags']);
+	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
-		array_merge
-		(
-			$cell['etags'],
-			$cell['itags'],
-			$cell['atags']
-		),
-		$pTable,
+		$context,
 		TRUE
 	);
 }
 
 function judgeContext ($expression)
 {
-	global $pTable, $expl_tags, $impl_tags, $auto_tags;
+	global $expl_tags, $impl_tags, $auto_tags;
+	$context = array_merge ($expl_tags, $impl_tags, $auto_tags);
+	$context = reindexById ($context, 'tag', TRUE);
 	return eval_expression
 	(
 		$expression,
-		array_merge
-		(
-			$expl_tags,
-			$impl_tags,
-			$auto_tags
-		),
-		$pTable,
+		$context,
 		TRUE
 	);
 }
@@ -3372,16 +3344,20 @@ function array_values_same ($a1, $a2)
 # Reindex provided array of arrays by a column value that is present in
 # each sub-array and is assumed to be unique. Most often, make "id" column in
 # a list of cells into the key space.
-function reindexById ($input, $column_name = 'id')
+function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 {
 	$ret = array();
 	foreach ($input as $item)
 	{
-		if (! array_key_exists ($column_name, $item))
+		if (! isset ($item[$column_name])  && ! array_key_exists ($column_name, $item))
 			throw new InvalidArgException ('input', '(array)', 'ID column missing');
-		if (array_key_exists ($item[$column_name], $ret))
-			throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
-		$ret[$item[$column_name]] = $item;
+		if (isset ($ret[$item[$column_name]]))
+		{
+			if (!$ignore_dups)
+				throw new InvalidArgException ('column_name', $column_name, 'duplicate ID value ' . $item[$column_name]);
+		}
+		else
+			$ret[$item[$column_name]] = $item;
 	}
 	return $ret;
 }
@@ -4859,132 +4835,26 @@ function buildSearchRedirectURL ($result_type, $record)
 	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
 
-function getRackCodeWarnings ()
-{
-	require_once 'code.php';
-	$ret = array();
-	global $rackCode;
-	// tags
-	foreach ($rackCode as $sentence)
-		switch ($sentence['type'])
-		{
-			case 'SYNT_DEFINITION':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
-				break;
-			case 'SYNT_ADJUSTMENT':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
-				$ret = array_merge ($ret, findCtxModWarnings ($sentence['modlist']));
-				break;
-			case 'SYNT_GRANT':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
-				break;
-			default:
-				$ret[] = array
-				(
-					'header' => 'internal error',
-					'class' => 'error',
-					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
-				);
-		}
-	// autotags
-	foreach ($rackCode as $sentence)
-		switch ($sentence['type'])
-		{
-			case 'SYNT_DEFINITION':
-				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
-				break;
-			case 'SYNT_GRANT':
-			case 'SYNT_ADJUSTMENT':
-				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
-				break;
-			default:
-				$ret[] = array
-				(
-					'header' => 'internal error',
-					'class' => 'error',
-					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
-				);
-		}
-	// predicates
-	$plist = array();
-	foreach ($rackCode as $sentence)
-		if ($sentence['type'] == 'SYNT_DEFINITION')
-			$plist[$sentence['term']] = $sentence['lineno'];
-	foreach ($plist as $pname => $lineno)
-	{
-		foreach ($rackCode as $sentence)
-			switch ($sentence['type'])
-			{
-				case 'SYNT_DEFINITION':
-					if (referencedPredicate ($pname, $sentence['definition']))
-						continue 3; // clear, next term
-					break;
-				case 'SYNT_GRANT':
-				case 'SYNT_ADJUSTMENT':
-					if (referencedPredicate ($pname, $sentence['condition']))
-						continue 3; // idem
-					break;
-			}
-		$ret[] = array
-		(
-			'header' => refRCLineno ($lineno),
-			'class' => 'warning',
-			'text' => "Predicate '${pname}' is defined, but never used."
-		);
-	}
-	// expressions
-	foreach ($rackCode as $sentence)
-		switch (invariantExpression ($sentence))
-		{
-			case 'always true':
-				$ret[] = array
-				(
-					'header' => refRCLineno ($sentence['lineno']),
-					'class' => 'warning',
-					'text' => "Expression is always true."
-				);
-				break;
-			case 'always false':
-				$ret[] = array
-				(
-					'header' => refRCLineno ($sentence['lineno']),
-					'class' => 'warning',
-					'text' => "Expression is always false."
-				);
-				break;
-			default:
-				break;
-		}
-	// bail out
-	$nwarnings = count ($ret);
-	$ret[] = array
-	(
-		'header' => 'summary',
-		'class' => $nwarnings ? 'error' : 'success',
-		'text' => "Analysis complete, ${nwarnings} issues discovered."
-	);
-	return $ret;
-}
-
 // Take a parse tree and figure out if it is a valid payload or not.
 // Depending on that return either NULL or an array filled with the load
 // of that expression.
+define('PARSER_ABI_VER', 2);
 function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 {
 	require_once 'code.php';
-	$lex = getLexemsFromRawText ($text);
-	if ($lex['result'] != 'ACK')
-		return $lex;
-	$stack = getParseTreeFromLexems ($lex['load']);
-	// The only possible way to "accept" is to have sole starting
-	// nonterminal on the stack (and it must be of the requested class).
-	if (count ($stack) == 1 and $stack[0]['type'] == $reqtype)
-		return array ('result' => 'ACK', 'load' => isset ($stack[0]['load']) ? $stack[0]['load'] : $stack[0]);
-	// No luck. Prepare to complain.
-	if ($lineno = locateSyntaxError ($stack))
-		return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}' near line ${lineno}");
-	// HCF!
-	return array ('result' => 'NAK', 'load' => "Syntax error for type '${reqtype}', line number unknown");
+	try
+	{
+		$parser = new RackCodeParser();
+		$tree = $parser->parse ($text, $reqtype == 'SYNT_EXPR' ? 'expr' : 'prog');
+		return array ('result' => 'ACK', 'ABI_ver' => PARSER_ABI_VER, 'load' => $tree);
+	}
+	catch (ParserError $e)
+	{
+		$msg = $e->getMessage();
+		if ($reqtype != 'SYNT_EXPR' || $e->lineno != 1)
+			$msg .= ", line {$e->lineno}";
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => $msg);
+	}
 }
 
 // Top-level wrapper for most of the code in this file. Get a text, return a parse tree
@@ -4992,7 +4862,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 function getRackCode ($text)
 {
 	if (!mb_strlen ($text))
-		return array ('result' => 'NAK', 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
 	$text = str_replace ("\r", '', $text) . "\n";
 	$synt = spotPayload ($text, 'SYNT_CODETEXT');
 	if ($synt['result'] != 'ACK')
@@ -5000,9 +4870,8 @@ function getRackCode ($text)
 	// An empty sentence list is semantically valid, yet senseless,
 	// so checking intermediate result once more won't hurt.
 	if (!count ($synt['load']))
-		return array ('result' => 'NAK', 'load' => 'Empty parse tree found in ' . __FUNCTION__);
-	require_once 'code.php'; // for semanticFilter()
-	return semanticFilter ($synt['load']);
+		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => 'Empty parse tree found in ' . __FUNCTION__);
+	return $synt;
 }
 
 // returns array with 'from', 'length' keys.

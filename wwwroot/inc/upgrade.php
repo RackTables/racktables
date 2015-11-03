@@ -1929,6 +1929,9 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 				(1678,1678)";
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 14=1591') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 
+			// ABI_ver = 2, invalidate RackCode cache
+			$query[] = "DELETE FROM Script WHERE script_name='RackCodeCache'";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
