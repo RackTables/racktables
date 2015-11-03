@@ -455,11 +455,10 @@ function refRCLineno ($ln)
 	return "<a href='index.php?page=perms&tab=default#line${ln}'>line ${ln}</a>";
 }
 
-// Scan the given expression and return any issues found about its autotags.
-function findAutoTagWarnings ($expr)
+// returns warning message or NULL
+function checkAutotagName ($atag_name)
 {
 	global $user_defined_atags;
-	$self = __FUNCTION__;
 	static $entityIDs = array // $Xid_YY auto tags
 	(
 		'' => array ('object', 'Object'),
@@ -468,7 +467,7 @@ function findAutoTagWarnings ($expr)
 		'rack' => array ('rack', 'Rack'),
 		'row' => array ('row', 'Row'),
 		'location' => array ('location', 'Location'),
-		'ipvs' => array ('ipv4vs', 'Virtual service'),
+		'ipvs' => array ('ipvs', 'Virtual service'),
 		'ipv4rsp' => array ('ipv4rspool', 'RS pool'),
 		'file' => array ('file', 'File'),
 		'vst' => array ('vst', '802.1Q template'),
@@ -502,129 +501,107 @@ function findAutoTagWarnings ($expr)
 		'$untagged',
 		'$unused',
 	);
-	switch ($expr['type'])
+	switch (1)
 	{
-		case 'LEX_TRUE':
-		case 'LEX_FALSE':
-		case 'LEX_PREDICATE':
-		case 'LEX_TAG':
-			return array();
-		case 'LEX_AUTOTAG':
-			switch (1)
+		case (in_array ($atag_name, $simple_autotags)):
+			break;
+		case preg_match ('/^\$(.*)?id_(\d+)$/', $atag_name, $m) && isset ($entityIDs[$m[1]]):
+			list ($realm, $description) = $entityIDs[$m[1]];
+			$recid = $m[2];
+			try
 			{
-				case (in_array ($expr['load'], $simple_autotags)):
-					return array();
-				case preg_match ('/^\$(.*)?id_(\d+)$/', $expr['load'], $m) && isset ($entityIDs[$m[1]]):
-					list ($realm, $description) = $entityIDs[$m[1]];
-					$recid = $m[2];
-					try
-					{
-						spotEntity ($realm, $m[2]);
-						return array();
-					}
-					catch (EntityNotFoundException $e)
-					{
-						return array (array
-						(
-							'header' => refRCLineno ($expr['lineno']),
-							'class' => 'warning',
-							'text' => "$description with ID '${recid}' does not exist."
-						));
-					}
-				case (preg_match ('/^\$username_/', $expr['load'])):
-					$recid = preg_replace ('/^\$username_/', '', $expr['load']);
-					global $require_local_account;
-					if (!$require_local_account)
-						return array();
-					if (NULL !== getUserIDByUsername ($recid))
-						return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "Local user account '${recid}' does not exist."
-					));
-				case (preg_match ('/^\$page_([\p{L}0-9]+)$/u', $expr['load'], $m)):
-					$recid = $m[1];
-					global $page;
-					if (isset ($page[$recid]))
-						return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "Page number '${recid}' does not exist."
-					));
-				case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $expr['load'])):
-				case (preg_match ('/^\$typeid_\d+$/', $expr['load'])): // FIXME: check value validity
-				case (preg_match ('/^\$cn_.+$/', $expr['load'])): // FIXME: check name validity and asset existence
-				case (preg_match ('/^\$lgcn_.+$/', $expr['load'])): // FIXME: check name validity
-				case (preg_match ('/^\$(vlan|fromvlan|tovlan)_\d+$/', $expr['load'])):
-				case (preg_match ('/^\$(masklen_eq|spare)_\d{1,3}$/', $expr['load'])):
-				case (preg_match ('/^\$attr_\d+(_\d+)?$/', $expr['load'])):
-				case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $expr['load'])):
-				case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $expr['load'])):
-				case (preg_match ('/^\$client_([0-9a-fA-F.:]+)$/', $expr['load'])):
-					return array();
-				default:
-					foreach ($user_defined_atags as $regexp)
-						if (preg_match ($regexp, $expr['load']))
-							return array();
-					return array (array
-					(
-						'header' => refRCLineno ($expr['lineno']),
-						'class' => 'warning',
-						'text' => "Martian autotag '${expr['load']}'"
-					));
+				spotEntity ($realm, $m[2]);
 			}
-		case 'SYNT_NOT_EXPR':
-			return $self ($expr['load']);
-		case 'SYNT_AND_EXPR':
-		case 'SYNT_EXPR':
-			return array_merge
-			(
-				$self ($expr['left']),
-				$self ($expr['right'])
-			);
+			catch (EntityNotFoundException $e)
+			{
+				return "$description with ID '${recid}' does not exist.";
+			}
+			break;
+		case (preg_match ('/^\$username_/', $atag_name)):
+			$recid = preg_replace ('/^\$username_/', '', $atag_name);
+			global $require_local_account;
+			if ($require_local_account and NULL === getUserIDByUsername ($recid))
+				return "Local user account '${recid}' does not exist.";
+			break;
+		case (preg_match ('/^\$page_([\p{L}0-9]+)$/u', $atag_name, $m)):
+			$recid = $m[1];
+			global $page;
+			if (! isset ($page[$recid]))
+				return "Page number '${recid}' does not exist.";
+			break;
+		case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $atag_name)):
+		case (preg_match ('/^\$typeid_\d+$/', $atag_name)): // FIXME: check value validity
+		case (preg_match ('/^\$cn_.+$/', $atag_name)): // FIXME: check name validity and asset existence
+		case (preg_match ('/^\$lgcn_.+$/', $atag_name)): // FIXME: check name validity
+		case (preg_match ('/^\$(vlan|fromvlan|tovlan)_\d+$/', $atag_name)):
+		case (preg_match ('/^\$(masklen_eq|spare)_\d{1,3}$/', $atag_name)):
+		case (preg_match ('/^\$attr_\d+(_\d+)?$/', $atag_name)):
+		case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $atag_name)):
+		case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $atag_name)):
+		case (preg_match ('/^\$client_([0-9a-fA-F.:]+)$/', $atag_name)):
+			break;
 		default:
-			return array (array
-			(
-				'header' => "internal error in ${self}",
-				'class' => 'error',
-				'text' => "Skipped expression of unknown type '${expr['type']}'"
-			));
+			foreach ($user_defined_atags as $regexp)
+				if (preg_match ($regexp, $atag_name))
+					break 2;
+			return "Martian autotag {{$atag_name}}.";
 	}
 }
 
-// Idem WRT tags.
 function findTagWarnings ($expr)
 {
 	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_TRUE':
-		case 'LEX_FALSE':
+		case 'LEX_BOOL':
 		case 'LEX_PREDICATE':
-		case 'LEX_AUTOTAG':
 			return array();
 		case 'LEX_TAG':
-			if (getTagByName ($expr['load']) !== NULL)
-				return array();
-			return array (array
-			(
-				'header' => refRCLineno ($expr['lineno']),
-				'class' => 'warning',
-				'text' => "Tag '${expr['load']}' does not exist."
-			));
+			$tag = $expr['load'];
+			if ('$' === substr ($tag, 0, 1))
+			{
+				if (NULL !== $msg = checkAutotagName ($tag))
+					return array (array
+					(
+						'header' => refRCLineno ($expr['lineno']),
+						'class' => 'warning',
+						'text' => $msg
+					));
+			}
+			elseif (getTagByName ($tag) === NULL)
+				return array (array
+				(
+					'header' => refRCLineno ($expr['lineno']),
+					'class' => 'warning',
+					'text' => "Tag {{$tag}} does not exist."
+				));
+			return array();
 		case 'SYNT_NOT_EXPR':
 			return $self ($expr['load']);
 		case 'SYNT_AND_EXPR':
 		case 'SYNT_EXPR':
-			return array_merge
-			(
-				$self ($expr['left']),
-				$self ($expr['right'])
-			);
+			$ret = array();
+			foreach ($expr['tag_args'] as $i => $tag)
+				if ('$' === substr ($tag, 0, 1))
+				{
+					if (NULL !== $msg = checkAutotagName ($tag))
+						$ret[] = array
+						(
+							'header' => refRCLineno ($expr['tag_lines'][$i]),
+							'class' => 'warning',
+							'text' => $msg
+						);
+				}
+				elseif (getTagByName ($tag) === NULL)
+					$ret[] = array
+					(
+						'header' => refRCLineno ($expr['tag_lines'][$i]),
+						'class' => 'warning',
+						'text' => "Tag {{$tag}} does not exist."
+					);
+			foreach ($expr['expr_args'] as $sub)
+				$ret = array_merge ($ret, $self ($sub));
+			return $ret;
 		default:
 			return array (array
 			(
@@ -645,31 +622,32 @@ function findCtxModWarnings ($modlist)
 			(
 				'header' => refRCLineno ($mod['lineno']),
 				'class' => 'warning',
-				'text' => "Tag '${mod['tag']}' does not exist."
+				'text' => "Tag {{$mod['tag']}} does not exist."
 			);
 	return $ret;
 }
 
-// Return true, if the expression makes use of the predicate given.
-function referencedPredicate ($pname, $expr)
+// Return list of used predicates
+function getReferencedPredicates ($expr)
 {
 	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'LEX_TRUE':
-		case 'LEX_FALSE':
+		case 'LEX_BOOL':
 		case 'LEX_TAG':
-		case 'LEX_AUTOTAG':
-			return FALSE;
+			return array();
 		case 'LEX_PREDICATE':
-			return $pname == $expr['load'];
+			return array ($expr['load'] => $expr['load']);
 		case 'SYNT_NOT_EXPR':
-			return $self ($pname, $expr['load']);
+			return $self ($expr['load']);
 		case 'SYNT_AND_EXPR':
 		case 'SYNT_EXPR':
-			return $self ($pname, $expr['left']) or $self ($pname, $expr['right']);
-		default: // This is actually an internal error.
-			return FALSE;
+			$ret = array();
+			foreach ($expr['expr_args'] as $sub)
+				$ret += $self ($sub);
+			return $ret;
+		default:
+			throw new RackTablesError ("Unknown expr type {$expr['type']}");
 	}
 }
 
@@ -679,59 +657,34 @@ function invariantExpression ($expr)
 	$self = __FUNCTION__;
 	switch ($expr['type'])
 	{
-		case 'SYNT_GRANT':
-			return $self ($expr['condition']);
-		case 'SYNT_DEFINITION':
-			return $self ($expr['definition']);
-		case 'LEX_TRUE':
-			return 'always true';
-		case 'LEX_FALSE':
-			return 'always false';
-		case 'LEX_TAG':
-		case 'LEX_AUTOTAG':
-		case 'LEX_PREDICATE':
-			return 'sometimes something';
+		case 'LEX_BOOL':
+			return $expr['load'];
 		case 'SYNT_NOT_EXPR':
-			return $self ($expr['load']);
+			$ret = $self ($expr['load']);
+			if (isset ($ret))
+				return ! $ret;
+			break;
 		case 'SYNT_AND_EXPR':
-			$leftanswer = $self ($expr['left']);
-			$rightanswer = $self ($expr['right']);
-			// "false and anything" is always false and thus const
-			if ($leftanswer == 'always false' or $rightanswer == 'always false')
-				return 'always false';
-			// "true and true" is true
-			if ($leftanswer == 'always true' and $rightanswer == 'always true')
-				return 'always true';
-			return '';
 		case 'SYNT_EXPR':
-			$leftanswer = $self ($expr['left']);
-			$rightanswer = $self ($expr['right']);
-			// "true or anything" is always true and thus const
-			if ($leftanswer == 'always true' or $rightanswer == 'always true')
-				return 'always true';
-			// "false or false" is false
-			if ($leftanswer == 'always false' and $rightanswer == 'always false')
-				return 'always false';
-			return '';
-		default: // This is actually an internal error.
+			$stop_on = $expr['type'] == 'SYNT_EXPR';
+			foreach ($expr['expr_args'] as $sub_expr)
+				if ($stop_on === $self ($sub_expr))
+					return $stop_on;
 			break;
 	}
 }
 
 function getRackCodeStats ()
 {
-	global $rackCode;
-	$defc = $grantc = $modc = 0;
+	global $rackCode, $pTable;
+	$grantc = $modc = 0;
 	foreach ($rackCode as $s)
 		switch ($s['type'])
 		{
-			case 'SYNT_DEFINITION':
-				$defc++;
-				break;
 			case 'SYNT_GRANT':
 				$grantc++;
 				break;
-			case 'SYNT_CTXMOD':
+			case 'SYNT_ADJUSTMENT':
 				$modc++;
 				break;
 			default:
@@ -739,7 +692,7 @@ function getRackCodeStats ()
 		}
 	return array
 	(
-		'Definition sentences' => $defc,
+		'Definition sentences' => count ($pTable),
 		'Grant sentences' => $grantc,
 		'Context mod sentences' => $modc
 	);
@@ -748,20 +701,21 @@ function getRackCodeStats ()
 function getRackCodeWarnings ()
 {
 	$ret = array();
-	global $rackCode;
-	// tags
+	global $rackCode, $pTable;
+
+	$seen_exprs = array();
+	foreach ($pTable as $pname => $expr)
+		$seen_exprs[] = $expr;
+
 	foreach ($rackCode as $sentence)
 		switch ($sentence['type'])
 		{
-			case 'SYNT_DEFINITION':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['definition']));
-				break;
 			case 'SYNT_ADJUSTMENT':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				$seen_exprs[] = $sentence['condition'];
 				$ret = array_merge ($ret, findCtxModWarnings ($sentence['modlist']));
 				break;
 			case 'SYNT_GRANT':
-				$ret = array_merge ($ret, findTagWarnings ($sentence['condition']));
+				$seen_exprs[] = $sentence['condition'];
 				break;
 			default:
 				$ret[] = array
@@ -771,75 +725,30 @@ function getRackCodeWarnings ()
 					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
 				);
 		}
-	// autotags
-	foreach ($rackCode as $sentence)
-		switch ($sentence['type'])
-		{
-			case 'SYNT_DEFINITION':
-				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['definition']));
-				break;
-			case 'SYNT_GRANT':
-			case 'SYNT_ADJUSTMENT':
-				$ret = array_merge ($ret, findAutoTagWarnings ($sentence['condition']));
-				break;
-			default:
-				$ret[] = array
-				(
-					'header' => 'internal error',
-					'class' => 'error',
-					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
-				);
-		}
-	// predicates
-	$plist = array();
-	foreach ($rackCode as $sentence)
-		if ($sentence['type'] == 'SYNT_DEFINITION')
-			$plist[$sentence['term']] = $sentence['lineno'];
-	foreach ($plist as $pname => $lineno)
+
+	$used_preds = array();
+	foreach ($seen_exprs as $expr)
 	{
-		foreach ($rackCode as $sentence)
-			switch ($sentence['type'])
-			{
-				case 'SYNT_DEFINITION':
-					if (referencedPredicate ($pname, $sentence['definition']))
-						continue 3; // clear, next term
-					break;
-				case 'SYNT_GRANT':
-				case 'SYNT_ADJUSTMENT':
-					if (referencedPredicate ($pname, $sentence['condition']))
-						continue 3; // idem
-					break;
-			}
-		$ret[] = array
-		(
-			'header' => refRCLineno ($lineno),
-			'class' => 'warning',
-			'text' => "Predicate '${pname}' is defined, but never used."
-		);
+		$ret = array_merge ($ret, findTagWarnings ($expr));
+		$used_preds += getReferencedPredicates ($expr);
+		if (NULL !== $const = invariantExpression ($expr))
+			$ret[] = array
+			(
+				'header' => refRCLineno ($sentence['lineno']),
+				'class' => 'warning',
+				'text' => sprintf ("Expression is always %s.", $const ? "true" : "false")
+			);
 	}
-	// expressions
-	foreach ($rackCode as $sentence)
-		switch (invariantExpression ($sentence))
-		{
-			case 'always true':
-				$ret[] = array
-				(
-					'header' => refRCLineno ($sentence['lineno']),
-					'class' => 'warning',
-					'text' => "Expression is always true."
-				);
-				break;
-			case 'always false':
-				$ret[] = array
-				(
-					'header' => refRCLineno ($sentence['lineno']),
-					'class' => 'warning',
-					'text' => "Expression is always false."
-				);
-				break;
-			default:
-				break;
-		}
+
+	foreach ($pTable as $pname => $pexpr)
+		if (! isset ($used_preds[$pname]))
+			$ret[] = array
+			(
+				'header' => refRCLineno ($pexpr['lineno']),
+				'class' => 'neutral',
+				'text' => "Predicate [{$pname}] is defined, but never used."
+			);
+
 	// bail out
 	$nwarnings = count ($ret);
 	$ret[] = array
