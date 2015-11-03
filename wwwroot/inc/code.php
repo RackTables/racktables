@@ -264,7 +264,7 @@ class RackCodeParser
 				return array(
 					'type' => 'SYNT_GRANT',
 					'condition' => $this->expr(),
-					'decision' => ($decision == 'allow' ? 'LEX_ALLOW' : 'LEX_DENY'),
+					'decision' => ($decision == 'allow' ? TRUE : FALSE),
 					'lineno' => $lineno,
 				);
 			case 'define':

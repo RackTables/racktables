@@ -200,15 +200,7 @@ function gotClearanceForTagChain ($const_base)
 				break;
 			case 'SYNT_GRANT':
 				if (eval_expression ($sentence['condition'], $context, $ptable))
-					switch ($sentence['decision'])
-					{
-						case 'LEX_ALLOW':
-							return TRUE;
-						case 'LEX_DENY':
-							return FALSE;
-						default:
-							throw new RackTablesError ("Condition match for unknown grant decision '${sentence['decision']}'", RackTablesError::INTERNAL);
-					}
+					return $sentence['decision'];
 				break;
 			case 'SYNT_ADJUSTMENT':
 				if
