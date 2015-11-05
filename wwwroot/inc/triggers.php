@@ -59,11 +59,11 @@ $known_APC_SKUs = array
 function trigger_liveports ()
 {
 	$breed = detectDeviceBreed (getBypassValue());
-	foreach (array ('getportstatus', 'getmaclist') as $command)
+	foreach (array ('getportstatus' => 'get_link_status', 'getmaclist' => 'get_mac_list') as $command => $opname)
 		if
 		(
 			validBreedFunction ($breed, $command) and
-			permitted (NULL, 'liveports', $command)
+			permitted (NULL, 'liveports', $opname)
 		)
 			return 'std';
 	return '';
