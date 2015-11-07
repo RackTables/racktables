@@ -4355,7 +4355,7 @@ function renderChapterEditor ($tgt_chapter_no)
 		echo '</td></tr></form>';
 	}
 	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	$words = readChapter ($tgt_chapter_no);
+	$words = readChapter ($tgt_chapter_no, 'r');
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
 	$order = 'odd';
 	echo "<tr><th>Origin</th><th>Key</th><th>&nbsp;</th><th>Word</th><th>&nbsp;</th></tr>\n";

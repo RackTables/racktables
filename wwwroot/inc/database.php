@@ -3666,8 +3666,14 @@ function readChapter ($chapter_id = 0, $style = '')
 	$chapter = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
-		parseWikiLink ($row);
-		$chapter[$row['dict_key']] = ($style == 'a' ? $row['a_value'] : $row['o_value']);
+		if ($style == 'r')
+			$value = $row['value'];
+		else
+		{
+			parseWikiLink ($row);
+			$value = ($style == 'a' ? $row['a_value'] : $row['o_value']);
+		}
+		$chapter[$row['dict_key']] = $value;
 	}
 	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
 	// Try to sort after the parsing in the same way as ORDER BY would do.
