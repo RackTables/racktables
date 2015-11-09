@@ -121,7 +121,7 @@ function trigger_natv4 ()
 function trigger_autoports ()
 {
 	$object_id = getBypassValue();
-	if (! getPortsCount ($object_id))
+	if (0 != getPortsCount ($object_id))
 		return '';
 	$object = spotEntity ('object', $object_id);
 	return count (getAutoPorts ($object)) ? 'attn' : '';
