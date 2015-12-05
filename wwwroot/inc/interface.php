@@ -9313,12 +9313,17 @@ function renderCactiConfig()
 	$servers = getCactiServers();
 	startPortlet ('Cacti servers (' . count ($servers) . ')');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>base URL</th><th>username</th><th>graph(s)</th></tr>';
+	echo '<tr>' .
+		'<th>base URL</th>' .
+		'<th>username</th>' .
+		'<th>graph(s)</th>' .
+		'</tr>';
 	foreach ($servers as $server)
-	{
-		echo '<tr align=left valign=top><td>' . stringForTD ($server['base_url']) . '</td>';
-		echo "<td>${server['username']}</td><td class=tdright>${server['num_graphs']}</td></tr>";
-	}
+		echo '<tr align=left valign=top>' .
+			'<td>' . stringForTD ($server['base_url']) . '</td>' .
+			'<td>' . stringForTD ($server['username']) . '</td>' .
+			"<td class=tdright>${server['num_graphs']}</td>" .
+			'</tr>';
 	echo '</table>';
 	finishPortlet();
 }
@@ -9328,17 +9333,24 @@ function renderCactiServersEditor()
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('add');
-		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '<td><input type=text size=48 name=base_url></td>';
-		echo '<td><input type=text size=24 name=username></td>';
-		echo '<td><input type=password size=24 name=password></td>';
-		echo '<td>&nbsp;</td>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '</tr></form>';
+		echo '<tr>' .
+			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
+			'<td><input type=text size=48 name=base_url></td>' .
+			'<td><input type=text size=24 name=username></td>' .
+			'<td><input type=password size=24 name=password></td>' .
+			'<td>&nbsp;</td>' .
+			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
+			'</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>base URL</th><th>username</th><th>password</th><th>graph(s)</th><th>&nbsp;</th></tr>';
+	echo '<tr>' .
+		'<th>&nbsp;</th>' .
+		'<th>base URL</th>' .
+		'<th>username</th>' .
+		'<th>password</th>' .
+		'<th>graph(s)</th>' .
+		'<th>&nbsp;</th>' .
+		'</tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (getCactiServers() as $server)
