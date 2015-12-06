@@ -1552,89 +1552,93 @@ function resetMyPreference ()
 function resetUIConfig()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 57));
-	setConfigVar ('MASSCOUNT','8');
-	setConfigVar ('MAXSELSIZE','30');
-	setConfigVar ('ROW_SCALE','2');
-	setConfigVar ('IPV4_ADDRS_PER_PAGE','256');
-	setConfigVar ('DEFAULT_RACK_HEIGHT','42');
-	setConfigVar ('DEFAULT_SLB_VS_PORT','');
-	setConfigVar ('DEFAULT_SLB_RS_PORT','');
-	setConfigVar ('DETECT_URLS','no');
-	setConfigVar ('RACK_PRESELECT_THRESHOLD','1');
-	setConfigVar ('DEFAULT_IPV4_RS_INSERVICE','no');
-	setConfigVar ('AUTOPORTS_CONFIG','4 = 1*33*kvm + 2*24*eth%u;15 = 1*446*kvm');
-	setConfigVar ('SHOW_EXPLICIT_TAGS','yes');
-	setConfigVar ('SHOW_IMPLICIT_TAGS','yes');
-	setConfigVar ('SHOW_AUTOMATIC_TAGS','no');
-	setConfigVar ('DEFAULT_OBJECT_TYPE','4');
-	setConfigVar ('IPV4_AUTO_RELEASE','1');
-	setConfigVar ('SHOW_LAST_TAB', 'yes');
-	setConfigVar ('EXT_IPV4_VIEW', 'yes');
-	setConfigVar ('TREE_THRESHOLD', '25');
-	setConfigVar ('IPV4_JAYWALK', 'no');
-	setConfigVar ('ADDNEW_AT_TOP', 'yes');
-	setConfigVar ('IPV4_TREE_SHOW_USAGE', 'no');
-	setConfigVar ('PREVIEW_TEXT_MAXCHARS', '10240');
-	setConfigVar ('PREVIEW_TEXT_ROWS', '25');
-	setConfigVar ('PREVIEW_TEXT_COLS', '80');
-	setConfigVar ('PREVIEW_IMAGE_MAXPXS', '320');
-	setConfigVar ('VENDOR_SIEVE', '');
-	setConfigVar ('IPV4LB_LISTSRC', 'false');
-	setConfigVar ('IPV4OBJ_LISTSRC','not ({$typeid_3} or {$typeid_9} or {$typeid_10} or {$typeid_11})');
-	setConfigVar ('IPV4NAT_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}');
-	setConfigVar ('ASSETWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
-	setConfigVar ('NAMEWARN_LISTSRC','{$typeid_4} or {$typeid_7} or {$typeid_8}');
-	setConfigVar ('RACKS_PER_ROW','12');
-	setConfigVar ('FILTER_PREDICATE_SIEVE','');
-	setConfigVar ('FILTER_DEFAULT_ANDOR','and');
-	setConfigVar ('FILTER_SUGGEST_ANDOR','yes');
-	setConfigVar ('FILTER_SUGGEST_TAGS','yes');
-	setConfigVar ('FILTER_SUGGEST_PREDICATES','yes');
-	setConfigVar ('FILTER_SUGGEST_EXTRA','no');
-	setConfigVar ('DEFAULT_SNMP_COMMUNITY','public');
-	setConfigVar ('IPV4_ENABLE_KNIGHT','yes');
-	setConfigVar ('TAGS_TOPLIST_SIZE','50');
-	setConfigVar ('TAGS_QUICKLIST_SIZE','20');
-	setConfigVar ('TAGS_QUICKLIST_THRESHOLD','50');
-	setConfigVar ('ENABLE_MULTIPORT_FORM', 'no');
-	setConfigVar ('DEFAULT_PORT_IIF_ID', '1');
-	setConfigVar ('DEFAULT_PORT_OIF_IDS', '1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668');
-	setConfigVar ('IPV4_TREE_RTR_AS_CELL', 'no');
-	setConfigVar ('PROXIMITY_RANGE', 0);
-	setConfigVar ('IPV4_TREE_SHOW_VLAN', 'yes');
-	setConfigVar ('VLANSWITCH_LISTSRC', '');
-	setConfigVar ('VLANIPV4NET_LISTSRC', '');
-	setConfigVar ('DEFAULT_VDOM_ID', '');
-	setConfigVar ('DEFAULT_VST_ID', '');
-	setConfigVar ('STATIC_FILTER', 'yes');
-	setConfigVar ('8021Q_DEPLOY_MINAGE', '300');
-	setConfigVar ('8021Q_DEPLOY_MAXAGE', '3600');
-	setConfigVar ('8021Q_DEPLOY_RETRY', '10800');
-	setConfigVar ('8021Q_WRI_AFTER_CONFT_LISTSRC', 'false');
-	setConfigVar ('8021Q_INSTANT_DEPLOY', 'no');
-	setConfigVar ('CDP_RUNNERS_LISTSRC', '');
-	setConfigVar ('LLDP_RUNNERS_LISTSRC', '');
-	setConfigVar ('SHRINK_TAG_TREE_ON_CLICK', 'yes');
-	setConfigVar ('MAX_UNFILTERED_ENTITIES', '0');
-	setConfigVar ('SYNCDOMAIN_MAX_PROCESSES', '0');
-	setConfigVar ('PORT_EXCLUSION_LISTSRC', '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}');
-	setConfigVar ('FILTER_RACKLIST_BY_TAGS', 'yes');
-	setConfigVar ('MGMT_PROTOS', 'ssh: {$typeid_4}; telnet: {$typeid_8}');
-	setConfigVar ('SYNC_802Q_LISTSRC', '');
-	setConfigVar ('QUICK_LINK_PAGES', 'depot,ipv4space,rackspace');
-	setConfigVar ('CACTI_LISTSRC', 'false');
-	setConfigVar ('CACTI_RRA_ID', '1');
-	setConfigVar ('MUNIN_LISTSRC', 'false');
-	setConfigVar ('VIRTUAL_OBJ_LISTSRC', '1504,1505,1506,1507');
-	setConfigVar ('DATETIME_ZONE', 'UTC');
-	setConfigVar ('DATETIME_FORMAT', '%Y-%m-%d');
-	setConfigVar ('SEARCH_DOMAINS', '');
-	setConfigVar ('8021Q_EXTSYNC_LISTSRC', 'false');
-	setConfigVar ('8021Q_MULTILINK_LISTSRC', 'false');
-	setConfigVar ('REVERSED_RACKS_LISTSRC', 'false');
-	setConfigVar ('NEAREST_RACKS_CHECKBOX', 'yes');
-	setConfigVar ('SHOW_OBJECTTYPE', 'yes');
-
+	$defaults = array
+	(
+		'MASSCOUNT' => '8',
+		'MAXSELSIZE' => '30',
+		'ROW_SCALE' => '2',
+		'IPV4_ADDRS_PER_PAGE' => '256',
+		'DEFAULT_RACK_HEIGHT' => '42',
+		'DEFAULT_SLB_VS_PORT' => '',
+		'DEFAULT_SLB_RS_PORT' => '',
+		'DETECT_URLS' => 'no',
+		'RACK_PRESELECT_THRESHOLD' => '1',
+		'DEFAULT_IPV4_RS_INSERVICE' => 'no',
+		'AUTOPORTS_CONFIG' => '4 = 1*33*kvm + 2*24*eth%u;15 = 1*446*kvm',
+		'SHOW_EXPLICIT_TAGS' => 'yes',
+		'SHOW_IMPLICIT_TAGS' => 'yes',
+		'SHOW_AUTOMATIC_TAGS' => 'no',
+		'DEFAULT_OBJECT_TYPE' => '4',
+		'IPV4_AUTO_RELEASE' => '1',
+		'SHOW_LAST_TAB' => 'yes',
+		'EXT_IPV4_VIEW' => 'yes',
+		'TREE_THRESHOLD' => '25',
+		'IPV4_JAYWALK' => 'no',
+		'ADDNEW_AT_TOP' => 'yes',
+		'IPV4_TREE_SHOW_USAGE' => 'no',
+		'PREVIEW_TEXT_MAXCHARS' => '10240',
+		'PREVIEW_TEXT_ROWS' => '25',
+		'PREVIEW_TEXT_COLS' => '80',
+		'PREVIEW_IMAGE_MAXPXS' => '320',
+		'VENDOR_SIEVE' => '',
+		'IPV4LB_LISTSRC' => 'false',
+		'IPV4OBJ_LISTSRC' => 'not ({$typeid_3} or {$typeid_9} or {$typeid_10} or {$typeid_11})',
+		'IPV4NAT_LISTSRC' => '{$typeid_4} or {$typeid_7} or {$typeid_8} or {$typeid_798}',
+		'ASSETWARN_LISTSRC' => '{$typeid_4} or {$typeid_7} or {$typeid_8}',
+		'NAMEWARN_LISTSRC' => '{$typeid_4} or {$typeid_7} or {$typeid_8}',
+		'RACKS_PER_ROW' => '12',
+		'FILTER_PREDICATE_SIEVE' => '',
+		'FILTER_DEFAULT_ANDOR' => 'and',
+		'FILTER_SUGGEST_ANDOR' => 'yes',
+		'FILTER_SUGGEST_TAGS' => 'yes',
+		'FILTER_SUGGEST_PREDICATES' => 'yes',
+		'FILTER_SUGGEST_EXTRA' => 'no',
+		'DEFAULT_SNMP_COMMUNITY' => 'public',
+		'IPV4_ENABLE_KNIGHT' => 'yes',
+		'TAGS_TOPLIST_SIZE' => '50',
+		'TAGS_QUICKLIST_SIZE' => '20',
+		'TAGS_QUICKLIST_THRESHOLD' => '50',
+		'ENABLE_MULTIPORT_FORM' => 'no',
+		'DEFAULT_PORT_IIF_ID' => '1',
+		'DEFAULT_PORT_OIF_IDS' => '1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668',
+		'IPV4_TREE_RTR_AS_CELL' => 'no',
+		'PROXIMITY_RANGE' => '0',
+		'IPV4_TREE_SHOW_VLAN' => 'yes',
+		'VLANSWITCH_LISTSRC' => '',
+		'VLANIPV4NET_LISTSRC' => '',
+		'DEFAULT_VDOM_ID' => '',
+		'DEFAULT_VST_ID' => '',
+		'STATIC_FILTER' => 'yes',
+		'8021Q_DEPLOY_MINAGE' => '300',
+		'8021Q_DEPLOY_MAXAGE' => '3600',
+		'8021Q_DEPLOY_RETRY' => '10800',
+		'8021Q_WRI_AFTER_CONFT_LISTSRC' => 'false',
+		'8021Q_INSTANT_DEPLOY' => 'no',
+		'CDP_RUNNERS_LISTSRC' => '',
+		'LLDP_RUNNERS_LISTSRC' => '',
+		'SHRINK_TAG_TREE_ON_CLICK' => 'yes',
+		'MAX_UNFILTERED_ENTITIES' => '0',
+		'SYNCDOMAIN_MAX_PROCESSES' => '0',
+		'PORT_EXCLUSION_LISTSRC' => '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}',
+		'FILTER_RACKLIST_BY_TAGS' => 'yes',
+		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
+		'SYNC_802Q_LISTSRC' => '',
+		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
+		'CACTI_LISTSRC' => 'false',
+		'CACTI_RRA_ID' => '1',
+		'MUNIN_LISTSRC' => 'false',
+		'VIRTUAL_OBJ_LISTSRC' => '1504,1505,1506,1507',
+		'DATETIME_ZONE' => 'UTC',
+		'DATETIME_FORMAT' => '%Y-%m-%d',
+		'SEARCH_DOMAINS' => '',
+		'8021Q_EXTSYNC_LISTSRC' => 'false',
+		'8021Q_MULTILINK_LISTSRC' => 'false',
+		'REVERSED_RACKS_LISTSRC' => 'false',
+		'NEAREST_RACKS_CHECKBOX' => 'yes',
+		'SHOW_OBJECTTYPE' => 'yes',
+	);
+	foreach ($defaults as $name => $value)
+		setConfigVar ($name, $value);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
