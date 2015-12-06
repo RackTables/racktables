@@ -701,6 +701,7 @@ $ophandler['cableconf']['conncompat']['add'] = 'tableHandler';
 $ophandler['cableconf']['conncompat']['del'] = 'tableHandler';
 $ophandler['cableconf']['oifcompat']['add'] = 'tableHandler';
 $ophandler['cableconf']['oifcompat']['del'] = 'tableHandler';
+$interface_requires['cableconf-*'] = 'interface-cables.php';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
@@ -863,6 +864,7 @@ $ophandler['cables']['heaps']['upd'] = 'tableHandler';
 $ophandler['cables']['amount']['dec'] = 'consumePatchCable';
 $ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
 $ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
+$interface_requires['cables-*'] = 'interface-cables.php';
 
 $ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
