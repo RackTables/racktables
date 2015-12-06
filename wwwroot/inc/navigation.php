@@ -35,6 +35,19 @@ $delayauth = array();
 $svghandler = array();
 $ajaxhandler = array();
 
+/*
+Syntax:
+// Require file.php when processing tab "tab" of the page "page":
+$interface_requires['page-tab'] = array ('file.php');
+
+// Same, different notation:
+$interface_requires['page-tab'] = 'file.php';
+
+// Require three files for every tab of the page "page":
+$interface_requires['page-*'] = array ('file1.php', 'file2.php', 'file3.php');
+*/
+$interface_requires = array();
+
 $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),

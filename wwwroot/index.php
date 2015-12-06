@@ -20,6 +20,7 @@ try {
 		// set by local.php get lost
 		require_once 'inc/init.php';
 		prepareNavigation();
+		requireExtraFiles ($interface_requires);
 		// Security context is built on the requested page/tab/bypass data,
 		// do not override.
 		fixContext();
