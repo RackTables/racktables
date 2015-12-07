@@ -724,6 +724,7 @@ $tabhandler['reports']['8021q'] = 'render8021QReport';
 $tabhandler['reports']['warranty'] = 'renderExpirations';
 $tabhandler['reports']['integrity'] = 'renderDataIntegrityReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
+$interface_requires['reports-*'] = 'interface-reports.php';
 
 $page['files']['title'] = 'Files';
 $page['files']['parent'] = 'index';
