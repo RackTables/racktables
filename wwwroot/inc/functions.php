@@ -6237,7 +6237,7 @@ function requireExtraFiles ($reqlist)
 			require $x;
 		else
 			foreach ($x as $filename)
-				require $filename;
+				require_once $filename;
 	}
 
 	if (array_key_exists ("${pageno}-${tabno}", $reqlist))
