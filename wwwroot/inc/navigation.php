@@ -511,6 +511,7 @@ $page['search']['bypass'] = 'q';
 $page['config']['title'] = 'Configuration';
 $page['config']['handler'] = 'renderConfigMainpage';
 $page['config']['parent'] = 'index';
+$interface_requires['config-*'] = 'interface-config.php';
 
 $page['userlist']['title'] = 'Local users';
 $page['userlist']['parent'] = 'config';
@@ -520,6 +521,7 @@ $tabhandler['userlist']['default'] = 'renderUserList';
 $tabhandler['userlist']['edit'] = 'renderUserListEditor';
 $ophandler['userlist']['edit']['updateUser'] = 'updateUser';
 $ophandler['userlist']['edit']['createUser'] = 'createUser';
+$interface_requires['userlist-*'] = 'interface-config.php';
 
 $page['user']['parent'] = 'userlist';
 $page['user']['bypass'] = 'user_id';
@@ -537,6 +539,7 @@ $ophandler['user']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['user']['files']['addFile'] = 'addFileToEntity';
 $ophandler['user']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['user']['files']['unlinkFile'] = 'unlinkFile';
+$interface_requires['user-*'] = 'interface-config.php';
 
 $page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
@@ -545,6 +548,7 @@ $tab['perms']['edit'] = 'Edit';
 $tabhandler['perms']['default'] = 'renderRackCodeViewer';
 $tabhandler['perms']['edit'] = 'renderRackCodeEditor';
 $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
+$interface_requires['perms-*'] = 'interface-config.php';
 
 $page['parentmap']['title'] = 'Object container compatibility';
 $page['parentmap']['parent'] = 'config';
@@ -554,6 +558,7 @@ $tabhandler['parentmap']['default'] = 'renderObjectParentCompatViewer';
 $tabhandler['parentmap']['edit'] = 'renderObjectParentCompatEditor';
 $ophandler['parentmap']['edit']['add'] = 'tableHandler';
 $ophandler['parentmap']['edit']['del'] = 'tableHandler';
+$interface_requires['parentmap-*'] = 'interface-config.php';
 
 $page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
@@ -565,6 +570,7 @@ $ophandler['portmap']['edit']['add'] = 'addOIFCompat';
 $ophandler['portmap']['edit']['del'] = 'delOIFCompat';
 $ophandler['portmap']['edit']['addPack'] = 'addOIFCompatPack';
 $ophandler['portmap']['edit']['delPack'] = 'delOIFCompatPack';
+$interface_requires['portmap-*'] = 'interface-config.php';
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';
@@ -576,6 +582,7 @@ $ophandler['portifcompat']['edit']['add'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['del'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['addPack'] = 'addIIFOIFCompatPack';
 $ophandler['portifcompat']['edit']['delPack'] = 'delIIFOIFCompatPack';
+$interface_requires['portifcompat-*'] = 'interface-config.php';
 
 $page['portoifs']['title'] = 'Port outer interfaces';
 $page['portoifs']['parent'] = 'config';
@@ -586,6 +593,7 @@ $tabhandler['portoifs']['edit'] = 'renderPortOIFEditor';
 $ophandler['portoifs']['edit']['add'] = 'tableHandler';
 $ophandler['portoifs']['edit']['del'] = 'tableHandler';
 $ophandler['portoifs']['edit']['upd'] = 'tableHandler';
+$interface_requires['portoifs-*'] = 'interface-config.php';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
@@ -600,6 +608,7 @@ $ophandler['attrs']['editattrs']['del'] = 'tableHandler';
 $ophandler['attrs']['editattrs']['upd'] = 'tableHandler';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'tableHandler';
+$interface_requires['attrs-*'] = 'interface-config.php';
 
 $page['dict']['title'] = 'Dictionary';
 $page['dict']['parent'] = 'config';
@@ -610,6 +619,7 @@ $tabhandler['dict']['chapters'] = 'renderChaptersEditor';
 $ophandler['dict']['chapters']['add'] = 'tableHandler';
 $ophandler['dict']['chapters']['del'] = 'tableHandler';
 $ophandler['dict']['chapters']['upd'] = 'tableHandler';
+$interface_requires['dict-*'] = 'interface-config.php';
 
 $page['chapter']['parent'] = 'dict';
 $page['chapter']['bypass'] = 'chapter_no';
@@ -621,6 +631,7 @@ $tabhandler['chapter']['edit'] = 'renderChapterEditor';
 $ophandler['chapter']['edit']['add'] = 'tableHandler';
 $ophandler['chapter']['edit']['del'] = 'tableHandler';
 $ophandler['chapter']['edit']['upd'] = 'tableHandler';
+$interface_requires['chapter-*'] = 'interface-config.php';
 
 $page['ui']['title'] = 'User interface';
 $page['ui']['parent'] = 'config';
@@ -632,6 +643,7 @@ $tabhandler['ui']['edit'] = 'renderConfigEditor';
 $tabhandler['ui']['reset'] = 'renderUIResetForm';
 $ophandler['ui']['edit']['upd'] = 'updateUI';
 $ophandler['ui']['reset']['go'] = 'resetUIConfig';
+$interface_requires['ui-*'] = 'interface-config.php';
 
 $page['tagtree']['title'] = 'Tag tree';
 $page['tagtree']['parent'] = 'config';
@@ -642,6 +654,7 @@ $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
 $ophandler['tagtree']['edit']['createTag'] = 'tableHandler';
 $ophandler['tagtree']['edit']['destroyTag'] = 'tableHandler';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
+$interface_requires['tagtree-*'] = 'interface-config.php';
 
 $page['myaccount']['title'] = 'My account';
 $page['myaccount']['parent'] = 'config';
@@ -658,6 +671,7 @@ $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';
 $ophandler['myaccount']['qlinks']['save'] = 'saveQuickLinks';
+$interface_requires['myaccount-*'] = 'interface-config.php';
 
 $page['cacti']['title'] = 'Cacti';
 $page['cacti']['parent'] = 'config';
@@ -668,6 +682,7 @@ $tabhandler['cacti']['servers'] = 'renderCactiServersEditor';
 $ophandler['cacti']['servers']['add'] = 'tableHandler';
 $ophandler['cacti']['servers']['del'] = 'tableHandler';
 $ophandler['cacti']['servers']['upd'] = 'tableHandler';
+$interface_requires['cacti-*'] = 'interface-config.php';
 
 $page['munin']['title'] = 'Munin';
 $page['munin']['parent'] = 'config';
@@ -678,6 +693,7 @@ $tabhandler['munin']['servers'] = 'renderMuninServersEditor';
 $ophandler['munin']['servers']['add'] = 'tableHandler';
 $ophandler['munin']['servers']['del'] = 'tableHandler';
 $ophandler['munin']['servers']['upd'] = 'tableHandler';
+$interface_requires['munin-*'] = 'interface-config.php';
 
 $page['cableconf']['title'] = 'Patch cables';
 $page['cableconf']['parent'] = 'config';
