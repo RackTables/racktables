@@ -47,14 +47,12 @@ function renderRackCodeReports ()
 			'title' => 'Stats',
 			'type' => 'counters',
 			'func' => 'getRackCodeStats',
-			'include' => 'code.php',
 		),
 		array
 		(
 			'title' => 'Warnings',
 			'type' => 'messages',
 			'func' => 'getRackCodeWarnings',
-			'include' => 'code.php',
 		),
 	);
 	renderReports ($tmp);
@@ -175,9 +173,6 @@ function renderReports ($what)
 	echo "<table align=center>\n";
 	foreach ($what as $item)
 	{
-		if (isset ($item['include']))
-			require_once $item['include'];
-
 		echo "<tr><th colspan=2><h3>${item['title']}</h3></th></tr>\n";
 		switch ($item['type'])
 		{
