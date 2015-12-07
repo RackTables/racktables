@@ -740,6 +740,14 @@ function renderChapterEditor ($tgt_chapter_no)
 	echo "</table>\n";
 }
 
+// $v is a $configCache item
+// prints HTML-formatted varname and description
+function renderConfigVarName ($v)
+{
+	echo '<span class="varname">' . $v['varname'] . '</span>';
+	echo '<p class="vardescr">' . $v['description'] . ($v['is_userdefined'] == 'yes' ? '' : ' (system-wide)') . '</p>';
+}
+
 function renderUIConfig ()
 {
 	global $nextorder;
@@ -782,7 +790,7 @@ function renderConfigEditor ()
 			continue;
 		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
 		echo '<tr><td class="tdright">';
-		echo renderConfigVarName ($v);
+		renderConfigVarName ($v);
 		echo '</td>';
 		echo "<td class=\"tdleft\"><input type=text name=${i}_varvalue value='" . htmlspecialchars ($v['varvalue'], ENT_QUOTES) . "' size=24></td>";
 		echo '<td class="tdleft">';

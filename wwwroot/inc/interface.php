@@ -4106,14 +4106,6 @@ function dragon ()
 	finishPortlet();
 }
 
-// $v is a $configCache item
-// prints HTML-formatted varname and description
-function renderConfigVarName ($v)
-{
-	echo '<span class="varname">' . $v['varname'] . '</span>';
-	echo '<p class="vardescr">' . $v['description'] . ($v['is_userdefined'] == 'yes' ? '' : ' (system-wide)') . '</p>';
-}
-
 function renderSNMPPortFinder ($object_id)
 {
 	if (!extension_loaded ('snmp'))
