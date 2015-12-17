@@ -1393,6 +1393,10 @@ function commitResetObject ($object_id = 0)
 	usePreparedDeleteBlade ('PortAllowedVLAN', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('CachedPVM', array ('object_id' => $object_id));
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
+	// SLB
+	usePreparedDeleteBlade ('IPv4LB', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('VSEnabledIPs', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('VSEnabledPorts', array ('object_id' => $object_id));
 	// Ports & links
 	usePreparedDeleteBlade ('Port', array ('object_id' => $object_id));
 	// CN
