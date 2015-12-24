@@ -835,14 +835,19 @@ function editPortForObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
-	assertUIntArg ('port_id');
-	assertStringArg ('port_type_id');
-	assertStringArg ('reservation_comment', TRUE);
-	genericAssertion ('l2address', 'l2address0');
-	genericAssertion ('name', 'string');
-	commitUpdatePort ($sic['object_id'], $sic['port_id'], $sic['name'], $sic['port_type_id'], $sic['label'], $sic['l2address'], $sic['reservation_comment']);
+	$port_id = assertUIntArg ('port_id');
+	commitUpdatePort
+	(
+		getBypassValue(),
+		$port_id,
+		genericAssertion ('name', 'string'),
+		assertStringArg ('port_type_id'),
+		genericAssertion ('label', 'string0'),
+		genericAssertion ('l2address', 'l2address0'),
+		assertStringArg ('reservation_comment', TRUE)
+	);
 	if (array_key_exists ('cable', $_REQUEST))
-		commitUpdatePortLink ($sic['port_id'], $sic['cable']);
+		commitUpdatePortLink ($port_id, $sic['cable']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
 
@@ -1181,14 +1186,13 @@ function supplementAttrMap ()
 function clearSticker ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	global $sic;
-	assertUIntArg ('attr_id');
-	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $sic['attr_id']))))
-		commitUpdateAttrValue (getBypassValue(), $sic['attr_id']);
+	$attr_id = assertUIntArg ('attr_id');
+	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $attr_id))))
+		commitUpdateAttrValue (getBypassValue(), $attr_id);
 	else
 	{
 		$oldvalues = getAttrValues (getBypassValue());
-		showError ('Permission denied, "' . $oldvalues[$sic['attr_id']]['name'] . '" left unchanged');
+		showError ('Permission denied, "' . $oldvalues[$attr_id]['name'] . '" left unchanged');
 	}
 }
 
