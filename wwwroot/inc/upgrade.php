@@ -219,6 +219,13 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
+
+	'0.20.11' => <<<ENDOFTEXT
+This release introduces a new plugin architecture.  If you experience issues
+after the upgrade, try disabling plugins.
+Refer to <a href="http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins">the wiki</a> for more information.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -1931,6 +1938,16 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 
 			// ABI_ver = 2, invalidate RackCode cache
 			$query[] = "DELETE FROM Script WHERE script_name='RackCodeCache'";
+
+			$query[] = "
+CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
 			break;

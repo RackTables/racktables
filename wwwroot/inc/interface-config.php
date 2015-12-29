@@ -1061,4 +1061,75 @@ function renderMuninServersEditor()
 	echo '</table>';
 }
 
+function renderPluginConfig ()
+{
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th></tr>\n";
+	global $nextorder;
+	$order = 'odd';
+	foreach ($plugins as $name => $plugin)
+	{
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdleft>${plugin['longname']}</td>";
+		echo "<td class=tdleft>${plugin['code_version']}</td>";
+		echo "<td class=tdleft>${plugin['db_version']}</td>";
+		echo "<td class=tdleft>${plugin['home_url']}</td>";
+		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
+		echo "</tr>\n";
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n";
+}
+
+function renderPluginEditor()
+{
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
+	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th><th></th></tr>\n";
+	global $nextorder;
+	$order = 'odd';
+	foreach ($plugins as $name => $plugin)
+	{
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdleft>${plugin['longname']}</td>";
+		echo "<td class=tdleft>${plugin['code_version']}</td>";
+		echo "<td class=tdleft>${plugin['db_version']}</td>";
+		echo "<td class=tdleft>${plugin['home_url']}</td>";
+		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
+		echo "<td>";
+		if ($plugin['state'] == 'disabled')
+			echo getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable');
+		if ($plugin['state'] == 'enabled')
+			echo getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable');
+		if ($plugin['state'] == 'not_installed')
+			echo getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install');
+		if ($plugin['state'] == 'disabled' or $plugin['state'] == 'enabled')
+			echo getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation');
+		if
+		(
+			$plugin['code_version'] != 'N/A' and
+			$plugin['db_version'] != 'N/A' and
+			$plugin['code_version'] != $plugin['db_version']
+		)
+			echo getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade');
+		echo "</td></tr>\n";
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n";
+}
+
 ?>

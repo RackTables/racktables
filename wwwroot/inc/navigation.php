@@ -884,6 +884,19 @@ $ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
 $ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
 $interface_requires['cables-*'] = 'interface-cables.php';
 
+$page['plugins']['title'] = 'Plugins';
+$page['plugins']['parent'] = 'config';
+$tab['plugins']['default'] = 'View';
+$tab['plugins']['edit'] = 'Edit';
+$tabhandler['plugins']['default'] = 'renderPluginConfig';
+$tabhandler['plugins']['edit'] = 'renderPluginEditor';
+$ophandler['plugins']['edit']['install'] = 'installPlugin';
+$ophandler['plugins']['edit']['uninstall'] = 'uninstallPlugin';
+$ophandler['plugins']['edit']['enable'] = 'tableHandler';
+$ophandler['plugins']['edit']['disable'] = 'tableHandler';
+$ophandler['plugins']['edit']['upgrade'] = 'upgradePlugin';
+$interface_requires['plugins-*'] = 'interface-config.php';
+
 $ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
 $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';

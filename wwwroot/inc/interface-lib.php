@@ -279,6 +279,15 @@ $image['html']['height'] = 16;
 $image['pencil']['path'] = 'pix/pencil-icon.png';
 $image['pencil']['width'] = 12;
 $image['pencil']['height'] = 12;
+$image['disable']['path'] = 'pix/link-disabled.png';
+$image['disable']['width'] = 16;
+$image['disable']['height'] = 16;
+$image['enable']['path'] = 'pix/link-up.png';
+$image['enable']['width'] = 16;
+$image['enable']['height'] = 16;
+$image['upgrade']['path'] = 'pix/tango-go-up.png';
+$image['upgrade']['width'] = 16;
+$image['upgrade']['height'] = 16;
 
 $page_by_realm = array();
 $page_by_realm['object'] = 'depot';

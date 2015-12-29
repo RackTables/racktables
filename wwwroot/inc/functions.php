@@ -4946,7 +4946,11 @@ function setMessage ($type, $message, $direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
 	elseif (isset ($script_mode) and $script_mode)
 	{
-		if ($type == 'warning' or $type == 'error')
+		// unit tests can't capture stdout or stderr, so treat it as normal output
+		global $test_mode;
+		if (isset ($test_mode) and $test_mode)
+			printf ("%s: %s\n", strtoupper($type), strip_tags ($message));
+		elseif ($type == 'warning' or $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
 	}
 	else
@@ -6244,6 +6248,21 @@ function requireExtraFiles ($reqlist)
 		requireListOfFiles ($reqlist["${pageno}-${tabno}"]);
 	if (array_key_exists ("${pageno}-*", $reqlist))
 		requireListOfFiles ($reqlist["${pageno}-*"]);
+}
+
+function formatPluginState ($state)
+{
+	switch ($state)
+	{
+	case 'disabled':
+		return 'Disabled';
+	case 'enabled':
+		return 'Enabled';
+	case 'not_installed':
+		return 'Not installed';
+	default:
+		return 'unknown';
+	}
 }
 
 ?>

@@ -723,6 +723,32 @@ $opspec_list['cableconf-oifcompat-del'] = array
 		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['plugins-edit-disable'] = array
+(
+	'table' => 'Plugin',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('fix_argname' => 'state', 'fix_argvalue' => 'disabled'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['plugins-edit-enable'] = array
+(
+	'table' => 'Plugin',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('fix_argname' => 'state', 'fix_argvalue' => 'enabled'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
 
 function setFuncMessages ($funcname, $messages)
 {
@@ -1643,6 +1669,7 @@ function resetUIConfig()
 	);
 	foreach ($defaults as $name => $value)
 		setConfigVar ($name, $value);
+	callHook ('resetUIConfig_hook');
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3824,6 +3851,76 @@ function updateVLANDomain()
 
 	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
 	showSuccess ("VLAN domain updated successfully");
+}
+
+
+function installPlugin ()
+{
+	global $sic;
+	assertStringArg ('name');
+
+	try
+	{
+		if (! is_callable ("plugin_${sic['name']}_install"))
+			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($sic['name']);
+		call_user_func ("plugin_${sic['name']}_install");
+		commitInstallPlugin ($plugin['name'], $plugin['longname'], $plugin['code_version'], $plugin['home_url']);
+	}
+	catch (Exception $e)
+	{
+		showError ('Install failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Installed plugin: ' . $sic['name']);
+}
+
+function uninstallPlugin ()
+{
+	global $sic;
+	assertStringArg ('name');
+
+	try
+	{
+		if (! is_callable ("plugin_${sic['name']}_uninstall"))
+			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
+		call_user_func ("plugin_${sic['name']}_uninstall");
+		commitUninstallPlugin ($sic['name']);
+	}
+	catch (Exception $e)
+	{
+		showError ('Uninstall failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Uninstalled plugin: ' . $sic['name']);
+}
+
+function upgradePlugin ()
+{
+	global $sic;
+	assertStringArg ('name');
+
+	try
+	{
+		if (! is_callable ("plugin_${sic['name']}_upgrade"))
+			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($sic['name']);
+		call_user_func ("plugin_${sic['name']}_upgrade");
+		// get details from the plugin code itself
+		$code_plugin = call_user_func ("plugin_${sic['name']}_info");
+		usePreparedUpdateBlade
+		(
+			'Plugin',
+			array ('longname' => $code_plugin['longname'], 'version' => $code_plugin['version'], 'home_url' => $code_plugin['home_url']),
+			array ('name' => $sic['name'])
+		);
+	}
+	catch (Exception $e)
+	{
+		showError ('Upgrade failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Upgraded plugin: ' . $sic['name']);
 }
 
 ?>

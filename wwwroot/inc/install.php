@@ -251,6 +251,9 @@ function init_config ()
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
 	fwrite ($conf, <<<ENDOFTEXT
+# Set this if you need to override the default plugins directory.
+#\$racktables_plugins_dir = '/path/to/plugins';
+
 # Setting MySQL client buffer size may be required to make downloading work for
 # larger files, but it does not work with mysqlnd.
 # \$pdo_bufsize = 50 * 1024 * 1024;
@@ -930,6 +933,15 @@ function get_pseudo_file ($name)
   `pctype` char(64) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `Port` (

@@ -48,7 +48,7 @@ function dispatchImageRequest()
 			throw castRackImageException ($e);
 		}
 		dispatchMiniRackThumbRequest (getBypassValue());
-		break;
+		return;
 	case 'midirack': // rack security context
 		$pageno = 'rack';
 		$tabno = 'default';
@@ -65,14 +65,14 @@ function dispatchImageRequest()
 		# Scaling implies no caching, there is no special dispatching.
 		header ('Content-type: image/png');
 		printRackThumbImage (getBypassValue(), $_REQUEST['scale']);
-		break;
+		return;
 	case 'preview': // file security context
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
 		assertPermission();
 		renderImagePreview (getBypassValue());
-		break;
+		return;
 	case 'cactigraph':
 		$pageno = 'object';
 		$tabno = 'cacti';
@@ -83,7 +83,7 @@ function dispatchImageRequest()
 		if (! array_key_exists ($_REQUEST['graph_id'], getCactiGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph_id', $_REQUEST['graph_id']);
 		proxyCactiRequest ($_REQUEST['server_id'], $_REQUEST['graph_id']);
-		break;
+		return;
 	case 'muningraph':
 		$pageno = 'object';
 		$tabno = 'munin';
@@ -94,10 +94,10 @@ function dispatchImageRequest()
 		if (! array_key_exists ($_REQUEST['graph'], getMuninGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph', $_REQUEST['graph']);
 		proxyMuninRequest ($_REQUEST['server_id'], $_REQUEST['graph']);
-		break;
-	default:
-		throw new InvalidRequestArgException ('img', $_REQUEST['img']);
+		return;
 	}
+	if (! callHook ('dispatchImageRequest_hook'))
+		throw new InvalidRequestArgException ('img', $_REQUEST['img']);
 }
 
 // XXX: deprecated

@@ -820,6 +820,16 @@ function renderDataIntegrityReport ()
 		'VSIPs-vs_id' => 'VSIPs',
 		'VS-vs_id' => 'VSPorts'
 	);
+
+	$plugins = getPlugins ('enabled');
+	foreach (array_keys ($plugins) as $plugin)
+	{
+		global ${"plugin_${plugin}_fkeys"};
+		if (isset (${"plugin_${plugin}_fkeys"}))
+			$fkeys = array_merge ($fkeys, ${"plugin_${plugin}_fkeys"});
+	}
+	ksort ($fkeys);
+
 	$result = usePreparedSelectBlade
 	(
 		'SELECT CONSTRAINT_NAME, TABLE_NAME ' .
