@@ -6234,7 +6234,7 @@ function requireExtraFiles ($reqlist)
 	function requireListOfFiles ($x)
 	{
 		if (! is_array ($x))
-			require $x;
+			require_once $x;
 		else
 			foreach ($x as $filename)
 				require_once $filename;
