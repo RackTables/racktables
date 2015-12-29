@@ -758,8 +758,6 @@ function renderDataIntegrityReport ()
 		'CachedPAV-FK-vlan_id' => 'CachedPAV',
 		'CachedPNV-FK-compound' => 'CachedPNV',
 		'CachedPVM-FK-object_id' => 'CachedPVM',
-		'CactiGraph-FK-server_id' => 'CactiGraph',
-		'CactiGraph-FK-server_id' => 'CactiGraph',
 		'Dictionary-FK-chapter_id' => 'Dictionary',
 		'FileLink-File_fkey' => 'FileLink',
 		'IPv4Allocation-FK-object_id' => 'IPv4Allocation',
@@ -774,8 +772,6 @@ function renderDataIntegrityReport ()
 		'MountOperation-FK-object_id' => 'MountOperation',
 		'MountOperation-FK-old_molecule_id' => 'MountOperation',
 		'MountOperation-FK-new_molecule_id' => 'MountOperation',
-		'MuninGraph-FK-server_id' => 'MuninGraph',
-		'MuninGraph-FK-server_id' => 'MuninGraph',
 		'ObjectHistory-FK-object_id' => 'ObjectHistory',
 		'ObjectLog-FK-object_id' => 'ObjectLog',
 		'PatchCableConnectorCompat-FK-connector_id' => 'PatchCableConnectorCompat',
@@ -820,6 +816,16 @@ function renderDataIntegrityReport ()
 		'VSIPs-vs_id' => 'VSIPs',
 		'VS-vs_id' => 'VSPorts'
 	);
+
+	$plugins = getPlugins ('enabled');
+	foreach (array_keys ($plugins) as $plugin)
+	{
+		global ${"plugin_${plugin}_fkeys"};
+		if (isset (${"plugin_${plugin}_fkeys"}))
+			$fkeys = array_merge ($fkeys, ${"plugin_${plugin}_fkeys"});
+	}
+	ksort ($fkeys);
+
 	$result = usePreparedSelectBlade
 	(
 		'SELECT CONSTRAINT_NAME, TABLE_NAME ' .

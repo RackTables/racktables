@@ -298,34 +298,6 @@ function triggerIPAddressLog ()
 	return '';
 }
 
-function triggerCactiGraphs ()
-{
-	if (! count (getCactiServers()))
-		return '';
-	if
-	(
-		count (getCactiGraphsForObject (getBypassValue())) or
-		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
-	)
-		return 'std';
-	else
-		return '';
-}
-
-function triggerMuninGraphs()
-{
-	if (! count (getMuninServers()))
-		return '';
-	if
-	(
-		count (getMuninGraphsForObject (getBypassValue())) or
-		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'MUNIN_LISTSRC')
-	)
-		return 'std';
-	else
-		return '';
-}
-
 function trigger_ucs()
 {
 	return checkTypeAndAttribute
