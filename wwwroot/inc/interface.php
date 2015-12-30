@@ -418,6 +418,20 @@ function rackspaceCmp ($a, $b)
 	return $ret;
 }
 
+function getRackThumbLink ($rack, $scale = 1)
+{
+	if (! is_int ($scale) || $scale <= 0)
+		throw new InvalidArgException ('scale', $scale, 'must be a natural number');
+	$width = getRackImageWidth() * $scale;
+	$height = getRackImageHeight ($rack['height']) * $scale;
+	$title = "${rack['height']} units";
+	$src = '?module=image' .
+		($scale == 1 ? '&img=minirack' : "&img=midirack&scale=${scale}") .
+		"&rack_id=${rack['id']}";
+	$img = "<img border=0 width=${width} height=${height} title='${title}' src='${src}'>";
+	return mkA ($img . '<br>' . stringForLabel ($rack['name']), 'rack', $rack['id']);
+}
+
 function renderRackspace ()
 {
 	// Handle the location filter
@@ -481,7 +495,6 @@ function renderRackspace ()
 		{
 			// generate thumb gallery
 			global $nextorder;
-			$rackwidth = getRackImageWidth();
 			// Zero value effectively disables the limit.
 			$maxPerRow = getConfigVar ('RACKS_PER_ROW');
 			$order = 'odd';
@@ -515,12 +528,7 @@ function renderRackspace ()
 								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row['row_name']} (continued)";
 								echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
 							}
-							echo "<td align=center valign=bottom><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-							echo "<img border=0 width=${rackwidth} height=";
-							echo getRackImageHeight ($rack['height']);
-							echo " title='${rack['height']} units'";
-							echo "src='?module=image&img=minirack&rack_id=${rack['id']}'>";
-							echo "<br>${rack['name']}</a></td>";
+							echo '<td align=center valign=bottom>' . getRackThumbLink ($rack) . '</td>';
 							$rackListIdx++;
 						}
 					$order = $nextorder[$order];
@@ -700,7 +708,6 @@ function renderRow ($row_id)
 	echo "</td><td class=pcright>";
 
 	global $nextorder;
-	$rackwidth = getRackImageWidth() * getConfigVar ('ROW_SCALE');
 	// Maximum number of racks per row is proportionally less, but at least 1.
 	$maxPerRow = max (floor (getConfigVar ('RACKS_PER_ROW') / getConfigVar ('ROW_SCALE')), 1);
 	$rackListIdx = 0;
@@ -716,11 +723,7 @@ function renderRow ($row_id)
 			echo '<tr>';
 		}
 		$class = ($rack['has_problems'] == 'yes') ? 'error' : $order;
-		echo "<td align=center valign=bottom class=row_${class}><a href='".makeHref(array('page'=>'rack', 'rack_id'=>$rack['id']))."'>";
-		echo "<img border=0 width=${rackwidth} height=" . (getRackImageHeight ($rack['height']) * getConfigVar ('ROW_SCALE'));
-		echo " title='${rack['height']} units'";
-		echo "src='?module=image&img=midirack&rack_id=${rack['id']}&scale=" . getConfigVar ('ROW_SCALE') . "'>";
-		echo "<br>${rack['name']}</a></td>";
+		echo "<td align=center valign=bottom class=row_${class}>" . getRackThumbLink ($rack, getConfigVar ('ROW_SCALE')) . '</td>';
 		$order = $nextorder[$order];
 		$rackListIdx++;
 	}
