@@ -167,52 +167,6 @@ $opspec_list['object-editrspvs-updLB'] = array
 		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['object-cacti-add'] = array
-(
-	'table' => 'CactiGraph',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'caption', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['object-cacti-del'] = array
-(
-	'table' => 'CactiGraph',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['object-munin-add'] = array
-(
-	'table' => 'MuninGraph',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph', 'assertion' => 'string'),
-		array ('url_argname' => 'caption', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['object-munin-del'] = array
-(
-	'table' => 'MuninGraph',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph', 'assertion' => 'string'),
-	),
-);
 $opspec_list['ipv4rspool-editrslist-delRS'] = array
 (
 	'table' => 'IPv4RS',
@@ -507,72 +461,6 @@ $opspec_list['dict-chapters-del'] = array
 	(
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
 		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
-	),
-);
-$opspec_list['cacti-servers-add'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-		array ('url_argname' => 'username', 'assertion' => 'string0'),
-		array ('url_argname' => 'password', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['cacti-servers-del'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['cacti-servers-upd'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-		array ('url_argname' => 'username', 'assertion' => 'string0'),
-		array ('url_argname' => 'password', 'assertion' => 'string0'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['munin-servers-add'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string')
-	),
-);
-$opspec_list['munin-servers-del'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['munin-servers-upd'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['cables-heaps-add'] = array
@@ -1654,9 +1542,6 @@ function resetUIConfig()
 		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
 		'SYNC_802Q_LISTSRC' => '',
 		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
-		'CACTI_LISTSRC' => 'false',
-		'CACTI_RRA_ID' => '1',
-		'MUNIN_LISTSRC' => 'false',
 		'VIRTUAL_OBJ_LISTSRC' => '1504,1505,1506,1507',
 		'DATETIME_ZONE' => 'UTC',
 		'DATETIME_FORMAT' => '%Y-%m-%d',
