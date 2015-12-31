@@ -219,6 +219,12 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
+        '0.20.11' => <<<ENDOFTEXT
+New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
+dsplaying unallocated networks in IPv4 space tree. Setting it also disables
+KNIGHT feature.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -1932,7 +1938,9 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			// ABI_ver = 2, invalidate RackCode cache
 			$query[] = "DELETE FROM Script WHERE script_name='RackCodeCache'";
 
+			$query[] = "INSERT INTO Config (varname, varvalue, is_hidden, is_userdefined, description) VALUES ('IPV4_TREE_SHOW_UNALLOCATED', 'yes', 'no', 'yes', 'Show unallocated networks in IPv4 tree'); ";
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
+
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
