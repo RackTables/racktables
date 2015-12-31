@@ -251,6 +251,9 @@ function init_config ()
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
 	fwrite ($conf, <<<ENDOFTEXT
+# Set this if you need to override the default plugins directory.
+#\$racktables_plugins_dir = '/path/to/plugins';
+
 # Setting MySQL client buffer size may be required to make downloading work for
 # larger files, but it does not work with mysqlnd.
 # \$pdo_bufsize = 50 * 1024 * 1024;
@@ -567,26 +570,6 @@ function get_pseudo_file ($name)
   CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
 
-		$query[] = "CREATE TABLE `CactiGraph` (
-  `object_id` int(10) unsigned NOT NULL,
-  `server_id` int(10) unsigned NOT NULL,
-  `graph_id` int(10) unsigned NOT NULL,
-  `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`object_id`,`server_id`,`graph_id`),
-  KEY `graph_id` (`graph_id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
-  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
-
-		$query[] = "CREATE TABLE `CactiServer` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `base_url` char(255) DEFAULT NULL,
-  `username` char(64) DEFAULT NULL,
-  `password` char(64) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
-
 		$query[] = "CREATE TABLE `Chapter` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `sticky` enum('yes','no') default 'no',
@@ -836,24 +819,6 @@ function get_pseudo_file ($name)
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
 
-		$query[] = "CREATE TABLE `MuninGraph` (
-  `object_id` int(10) unsigned NOT NULL,
-  `server_id` int(10) unsigned NOT NULL,
-  `graph` char(255) NOT NULL,
-  `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`object_id`,`server_id`,`graph`),
-  KEY `server_id` (`server_id`),
-  KEY `graph` (`graph`),
-  CONSTRAINT `MuninGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `MuninServer` (`id`),
-  CONSTRAINT `MuninGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
-
-		$query[] = "CREATE TABLE `MuninServer` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `base_url` char(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
-
 		$query[] = "CREATE TABLE `ObjectLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int(10) unsigned NOT NULL,
@@ -930,6 +895,15 @@ function get_pseudo_file ($name)
   `pctype` char(64) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `Port` (
@@ -2270,9 +2244,6 @@ WHERE O.objtype_id = 1562";
 ('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices'),
 ('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to display in quick links'),
-('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
-('CACTI_RRA_ID','1','uint','no','no','yes','RRA ID for Cacti graphs displayed in RackTables'),
-('MUNIN_LISTSRC','false','string','yes','no','no','List of object with Munin graphs'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
 ('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format to use for date output'),
