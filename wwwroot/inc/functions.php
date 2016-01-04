@@ -405,7 +405,7 @@ function genericAssertion ($argname, $argtype)
 		if ('' == assertStringArg ($argname, TRUE))
 			return array();
 		if (! $expr = compileExpression ($sic[$argname]))
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'RackCode parsing error');
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid RackCode expression');
 		return $expr;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
@@ -3013,7 +3013,7 @@ function considerGivenConstraint ($cell, $filter)
 	if (! strlen ($filter))
 		return TRUE;
 	if (! $expr = compileExpression ($filter))
-		throw new InvalidArgException ('filter', $filter, 'RackCode parsing error');
+		throw new InvalidArgException ('filter', $filter, 'not a valid RackCode expression');
 	if (isset ($cell))
 		return judgeCell ($cell, $expr);
 	else
