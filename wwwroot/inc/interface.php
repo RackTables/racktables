@@ -429,7 +429,7 @@ function getRackThumbLink ($rack, $scale = 1)
 		($scale == 1 ? '&img=minirack' : "&img=midirack&scale=${scale}") .
 		"&rack_id=${rack['id']}";
 	$img = "<img border=0 width=${width} height=${height} title='${title}' src='${src}'>";
-	return mkA ($img . '<br>' . stringForLabel ($rack['name']), 'rack', $rack['id']);
+	return mkA ($img, 'rack', $rack['id']);
 }
 
 function renderRackspace ()
@@ -528,7 +528,8 @@ function renderRackspace ()
 								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row['row_name']} (continued)";
 								echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
 							}
-							echo '<td align=center valign=bottom>' . getRackThumbLink ($rack) . '</td>';
+							echo '<td align=center valign=bottom>' . getRackThumbLink ($rack);
+							echo '<br>' . mkA (stringForLabel ($rack['name']), 'rack', $rack['id']) . '</td>';
 							$rackListIdx++;
 						}
 					$order = $nextorder[$order];
@@ -723,7 +724,9 @@ function renderRow ($row_id)
 			echo '<tr>';
 		}
 		$class = ($rack['has_problems'] == 'yes') ? 'error' : $order;
-		echo "<td align=center valign=bottom class=row_${class}>" . getRackThumbLink ($rack, getConfigVar ('ROW_SCALE')) . '</td>';
+		echo "<td align=center valign=bottom class=row_${class}>" .
+			getRackThumbLink ($rack, getConfigVar ('ROW_SCALE')) .
+			'<br>' . mkA (stringForLabel ($rack['name']), 'rack', $rack['id']) . '</td>';
 		$order = $nextorder[$order];
 		$rackListIdx++;
 	}
@@ -5145,11 +5148,7 @@ function renderCell ($cell)
 		break;
 	case 'rack':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
-		$thumbwidth = getRackImageWidth();
-		$thumbheight = getRackImageHeight ($cell['height']);
-		$img = "<img border=0 width=${thumbwidth} height=${thumbheight} title='${cell['height']} units' " .
-			"src='?module=image&img=minirack&rack_id=${cell['id']}'>";
-		echo mkA ($img, 'rack', $cell['id']);
+		echo getRackThumbLink ($cell);
 		echo "</td><td>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'rack', $cell['id']);
 		echo "</td></tr><tr><td>";
