@@ -5408,15 +5408,31 @@ function showTabs ($pageno, $tabno)
 	echo "</ul></div>";
 }
 
+function dynamic_title_decoder ($path_position)
+{
+	try
+	{
+		return dynamic_title_decoder_throwing ($path_position);
+	}
+	catch (RackTablesError $e)
+	{
+		return array
+		(
+			'name' => __FUNCTION__ . '() failure',
+			'params' => array()
+		);
+	}
+}
+
 // Arg is path page number, which can be different from the primary page number,
 // for example title for 'ipv4net' can be requested to build navigation path for
 // both IPv4 network and IPv4 address. Another such page number is 'row', which
 // fires for both row and its racks. Use pageno for decision in such cases.
-function dynamic_title_decoder ($path_position)
+function dynamic_title_decoder_throwing ($path_position)
 {
 	global $sic, $page_by_realm;
+	global $pageno;
 	static $net_id;
-	try {
 	switch ($path_position)
 	{
 	case 'index':
@@ -5477,7 +5493,6 @@ function dynamic_title_decoder ($path_position)
 			'params' => array ('location_id' => $location['id'])
 		);
 	case 'row':
-		global $pageno;
 		switch ($pageno)
 		{
 		case 'rack':
@@ -5533,7 +5548,6 @@ function dynamic_title_decoder ($path_position)
 		);
 	case 'ipv4net':
 	case 'ipv6net':
-		global $pageno;
 		switch ($pageno)
 		{
 			case 'ipaddress':
@@ -5560,7 +5574,6 @@ function dynamic_title_decoder ($path_position)
 		break;
 	case 'ipv4space':
 	case 'ipv6space':
-		global $pageno;
 		switch ($pageno)
 		{
 			case 'ipaddress':
@@ -5584,7 +5597,6 @@ function dynamic_title_decoder ($path_position)
 			'params' => $params,
 		);
 	case 'vlandomain':
-		global $pageno;
 		switch ($pageno)
 		{
 		case 'vlandomain':
@@ -5624,21 +5636,10 @@ function dynamic_title_decoder ($path_position)
 			'name' => 'queue "' . $dqtitle[$sic['dqcode']] . '"',
 			'params' => array ('qcode' => $sic['dqcode'])
 		);
-	default:
-		break;
 	}
 
 	// default behaviour is throwing an exception
 	throw new RackTablesError ('dynamic_title decoding error', RackTablesError::INTERNAL);
-	} // end-of try block
-	catch (RackTablesError $e)
-	{
-		return array
-		(
-			'name' => __FUNCTION__ . '() failure',
-			'params' => array()
-		);
-	}
 }
 
 function renderTwoColumnCompatTableViewer ($compat, $left, $right)
