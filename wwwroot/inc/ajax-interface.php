@@ -133,7 +133,6 @@ function getTagSelectAJAX()
 	{
 		$current_tag_id = $m[1];
 		$selected_id = $taglist[$current_tag_id]['parent_id'];
-		echo $selected_id;
 		$options[0] = '-- NONE --';
 		foreach ($taglist as $tag_id => $taginfo)
 			if (! in_array ($current_tag_id, $taginfo['trace']) && $current_tag_id != $tag_id)
@@ -159,7 +158,6 @@ function getLocationSelectAJAX()
 	{
 		$current_location_id = $m[1];
 		$selected_id = $locationlist[$current_location_id]['parent_id'];
-		echo $selected_id;
 		echo "<option value=0>-- NONE --</option>";
 	}
 	foreach ($locationtree as $location)
