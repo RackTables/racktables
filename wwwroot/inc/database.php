@@ -3833,9 +3833,9 @@ function fetchAttrsForObjects ($object_set = array())
 		"left join Dictionary as D on D.dict_key = AV.uint_value and AM.chapter_id = D.chapter_id " .
 		"left join Chapter as C on AM.chapter_id = C.id";
 	if (count ($object_set))
-		$query .= ' WHERE O.id IN (' . implode (', ', $object_set) . ')';
+		$query .= ' WHERE O.id IN (' . questionMarks (count ($object_set)) . ')';
 
-	$result = usePreparedSelectBlade ($query);
+	$result = usePreparedSelectBlade ($query, $object_set);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$object_id = $row['object_id'];
