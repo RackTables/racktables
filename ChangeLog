@@ -25,6 +25,8 @@
 	update: new 100G port types support (empty CXP, CR4, CR10, LR10, ER10)
 	update: warn when already used or reserved IP is assigned to object
 	update: allow to redefine the expiration report parameters in local plugins
+	update: allow to hide unallocated networks from IPv4 tree via
+		IPV4_TREE_SHOW_UNALLOCATED user configuration option
 0.20.10 2015-01-26
 	bugfix: port type could not be changed for an unlinked modular port (#1393)
 	bugfix: crash on object's rackspace page when PHP < 5.3 (array_replace is missing)

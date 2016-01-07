@@ -2576,7 +2576,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			if ($item['symbol'] == 'node-expanded' or $item['symbol'] == 'node-expanded-static')
 				$self ($item['kids'], $baseurl, $target, $level + 1);
 		}
-		else
+		elseif (getConfigVar ('IPV4_TREE_SHOW_UNALLOCATED') == 'yes')
 		{
 			// non-allocated (spare) IP range
 			echo "<tr valign=top>";

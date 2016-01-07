@@ -1640,6 +1640,7 @@ function resetUIConfig()
 		'REVERSED_RACKS_LISTSRC' => 'false',
 		'NEAREST_RACKS_CHECKBOX' => 'yes',
 		'SHOW_OBJECTTYPE' => 'yes',
+		'IPV4_TREE_SHOW_UNALLOCATED' => 'yes',
 	);
 	foreach ($defaults as $name => $value)
 		setConfigVar ($name, $value);

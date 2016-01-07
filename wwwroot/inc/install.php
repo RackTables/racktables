@@ -2198,6 +2198,7 @@ WHERE O.objtype_id = 1562";
 		$query[] = "INSERT INTO PortCompat SELECT pc1.type2, pc1.type1 FROM PortCompat pc1 LEFT JOIN PortCompat pc2 ON pc1.type1 = pc2.type2 AND pc1.type2 = pc2.type1 WHERE pc2.type1 IS NULL";
 
 		$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
+('IPV4_TREE_SHOW_UNALLOCATED', 'yes', 'string', 'no', 'no', 'yes', 'Show unallocated networks in IPv4 tree'),
 ('MASSCOUNT','8','uint','no','no','yes','&quot;Fast&quot; form is this many records tall'),
 ('MAXSELSIZE','30','uint','no','no','yes','&lt;SELECT&gt; lists height'),
 ('enterprise','MyCompanyName','string','no','no','no','Organization name'),
