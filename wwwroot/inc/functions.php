@@ -1322,8 +1322,7 @@ function treeItemCmp ($a, $b)
 
 function getTagTree()
 {
-	$taglist_usage = getTagUsage();
-	return treeFromList ($taglist_usage);
+	return treeFromList (getTagUsage());
 }
 
 // Build a tree from the item list and return it. Input and output data is
