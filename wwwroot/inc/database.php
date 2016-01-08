@@ -4351,7 +4351,7 @@ function getTagUsage ($ignore_cache = FALSE)
 	{
 		$ret[$row['id']]['refcnt'][$row['realm']] = $row['refcnt'];
 		$ret[$row['id']]['refcnt']['total'] += $row['refcnt'];
-		// introduce the 'pseudo'-ream 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
+		// introduce the 'pseudo'-realm 'ipnet' which combines 'ipv4net' and 'ipv6net' realms.
 		if ($row['realm'] == 'ipv4net' || $row['realm'] == 'ipv6net')
 			if (isset ($ret[$row['id']]['refcnt']['ipnet']))
 				$ret[$row['id']]['refcnt']['ipnet'] += $row['refcnt'];
