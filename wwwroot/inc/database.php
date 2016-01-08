@@ -4315,7 +4315,10 @@ function generateEntityAutoTags ($cell)
 	return $ret;
 }
 
-// Return a tag chain with all DB tags on it.
+// Return a tag chain with all DB tags on it. ORDER BY is important as it
+// enables treeFromList() and sortTree() to do their jobs properly. Doing
+// the same sorting in PHP is possible but complicated and may deliver
+// results different from MySQL.
 function getTagList()
 {
 	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
