@@ -61,7 +61,7 @@ class RackCodeParser
 		}
 	}
 
-	// $sym could either b  a string or a list of strings.
+	// $sym could either be a string or a list of strings.
 	// returns the value of the $sym class in the current position or throws the ParserError.
 	function expect ($sym)
 	{
@@ -70,7 +70,7 @@ class RackCodeParser
 		throw new ParserError ("expecting $sym");
 	}
 
-	// $sym could either b  a string or a list of strings.
+	// $sym could either be a string or a list of strings.
 	// returns the value of the $sym class in the current position or NULL.
 	function accept ($sym)
 	{
@@ -109,8 +109,8 @@ class RackCodeParser
 		return $this->get_char();
 	}
 
-	// Effectively iterates through the UTF-8 string $this->text.
 	// Returns the next available character or string "END"
+	// Deals with UTF-8 encoded string $this->text.
 	function get_char()
 	{
 		if ($this->i >= $this->text_len)
@@ -127,7 +127,7 @@ class RackCodeParser
 	}
 
 	// Implements the lexer FSM.
-	// Returns the next input token class (or token class) or NULL.
+	// Returns the next input token (or token class) or NULL.
 	// Fills $this->lex_value with the string value of a token.
 	const LEX_S_INIT = 0;
 	const LEX_S_COMMENT = 1;
