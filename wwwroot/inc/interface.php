@@ -1842,12 +1842,14 @@ function renderPortsForObject ($object_id)
 
 	startPortlet ('Add/update multiple ports');
 	printOpFormIntro ('addMultiPorts');
-	echo 'Format: <select name=format>';
-	echo '<option value=c3600asy>Cisco 3600 async: sh line | inc TTY</option>';
-	echo '<option value=fiwg>Foundry ServerIron/FastIron WorkGroup/Edge: sh int br</option>';
-	echo '<option value=fisxii>Foundry FastIron SuperX/II4000: sh int br</option>';
-	echo '<option value=ssv1 selected>SSV:&lt;interface name&gt; [&lt;MAC address&gt;]</option>';
-	echo "</select>";
+	$formats = array
+	(
+		'c3600asy' => 'Cisco 3600 async: sh line | inc TTY',
+		'fiwg' => 'Foundry ServerIron/FastIron WorkGroup/Edge: sh int br',
+		'fisxii' => 'Foundry FastIron SuperX/II4000: sh int br',
+		'ssv1' => 'SSV:&lt;interface name&gt; [&lt;MAC address&gt;]',
+	);
+	echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1');
 	echo 'Default port type: ';
 	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
 	echo "<input type=submit value='Parse output'><br>\n";
@@ -3423,17 +3425,18 @@ function renderNATv4ForObject ($object_id)
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo '</td><td>';
 		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP', 'ALL' => 'ALL'), array ('name' => 'proto'));
-		echo "<select name='localip'>";
 
+		$options = array();
 		foreach ($alloclist as $ip_bin => $alloc)
 		{
 			$ip = $alloc['addrinfo']['ip'];
 			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . stringForLabel ($alloc['addrinfo']['name']) . ')');
 			$osif = (!isset ($alloc['osif']) or !strlen ($alloc['osif'])) ? '' : ($alloc['osif'] . ': ');
-			echo "<option value='${ip}'>${osif}${ip}${name}</option>";
+			$options[$ip] = $osif . $ip . $name;
 		}
+		printSelect ($options, array ('name' => 'localip'));
 
-		echo "</select>:<input type='text' name='localport' size='4'></td>";
+		echo ":<input type='text' name='localport' size='4'></td>";
 		echo "<td><input type='text' name='remoteip' id='remoteip' size='10'>";
 		echo getPopupLink ('inet4list', array(), 'findobjectip', 'find', 'Find object');
 		echo ":<input type='text' name='remoteport' size='4'></td><td></td>";
@@ -4143,6 +4146,12 @@ function renderSNMPPortFinder ($object_id)
 
 	startPortlet ('SNMPv3');
 	printOpFormIntro ('querySNMPData', array ('ver' => 3));
+	$sloptions = array
+	(
+		'noAuthNoPriv' => 'noAuth and noPriv',
+		'authNoPriv' => 'auth without Priv',
+		'authPriv' => 'auth with Priv',
+	);
 ?>
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
@@ -4151,11 +4160,7 @@ function renderSNMPPortFinder ($object_id)
 	</tr>
 	<tr>
 		<th class=tdright><label for="sec_level">Security Level:</label></th>
-		<td class=tdleft><select id="sec_level" name="sec_level">
-			<option value="noAuthNoPriv" selected="selected">noAuth and no Priv</option>
-			<option value="authNoPriv" >auth without Priv</option>
-			<option value="authPriv" >auth with Priv</option>
-		</select></td>
+		<td class=tdleft><?php printSelect ($sloptions, array ('name' => 'sec_level'), 'noAuthNoPriv'); ?></td>
 	</tr>
 	<tr>
 		<th class=tdright><label for="auth_protocol_1">Auth Type:</label></th>
