@@ -1511,7 +1511,8 @@ function redirectIfNecessary ()
 	)
 		redirectUser (buildRedirectURL ($pageno, $_SESSION['RTLT'][$pageno]['tabname']));
 
-	// check if we accidentaly got on a dynamic tab that shouldn't be shown for this object
+	// Fall back to default when a trigger was OK about a tab when generating the previous page
+	// but isn't OK anymore when generating the current page and the tab is the requested tab.
 	if
 	(
 		isset ($trigger[$pageno][$tabno]) and
