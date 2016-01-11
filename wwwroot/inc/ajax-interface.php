@@ -169,7 +169,7 @@ function getLocationSelectAJAX()
 			echo 'selected ';
 		echo "style='font-weight: bold'>${location['name']}</option>";
 		if ($location['kidc'] > 0)
-			printLocationChildrenSelectOptions ($location, 0, $selected_id, $current_location_id);
+			printLocationChildrenSelectOptions ($location, $selected_id, $current_location_id);
 	}
 }
 

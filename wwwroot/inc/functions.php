@@ -5966,7 +5966,7 @@ function nullEmptyStr ($str)
 	return strlen ($str) ? $str : NULL;
 }
 
-function printLocationChildrenSelectOptions ($location, $level, $parent_id, $location_id = NULL)
+function printLocationChildrenSelectOptions ($location, $parent_id, $location_id = NULL, $level = 0)
 {
 	$self = __FUNCTION__;
 	$level++;
@@ -5979,7 +5979,7 @@ function printLocationChildrenSelectOptions ($location, $level, $parent_id, $loc
 			echo ' selected';
 		echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
 		if ($subLocation['kidc'] > 0)
-			$self ($subLocation, $level, $parent_id, $location_id);
+			$self ($subLocation, $parent_id, $location_id, $level);
 	}
 }
 

@@ -586,7 +586,7 @@ function renderLocationSelectTree ($selected_id = NULL)
 		if ($location['id'] == $selected_id )
 		    echo ' selected';
 		echo ">${location['name']}</option>";
-		printLocationChildrenSelectOptions ($location, 0, $selected_id);
+		printLocationChildrenSelectOptions ($location, $selected_id);
 	}
 	echo '</select>';
 }
