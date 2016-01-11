@@ -1296,6 +1296,7 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 	}
 }
 
+// DEPRECATED, remove in 0.21.0
 // Likewise traverse the tree with the trace and return the final node.
 function peekNode ($tree, $trace, $target_id)
 {
