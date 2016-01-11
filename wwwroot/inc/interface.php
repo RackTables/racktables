@@ -576,8 +576,9 @@ function renderLocationRowForEditor ($subtree, $level = 0)
 	}
 }
 
-function renderLocationSelectTree ($selected_id = NULL)
+function renderLocationSelectTree ($select_name, $selected_id = NULL)
 {
+	echo "<select name='${select_name}'>";
 	echo '<option value=0>-- NONE --</option>';
 	$locationlist = listCells ('location');
 	foreach (treeFromList ($locationlist) as $location)
@@ -609,8 +610,8 @@ JSTXT;
 		printOpFormIntro ('addLocation');
 		echo '<tr><td>';
 		printImageHREF ('create', 'Add new location', TRUE);
-		echo '</td><td><select name=parent_id>';
-		renderLocationSelectTree ();
+		echo '</td><td>';
+		renderLocationSelectTree ('parent_id');
 		echo '</td><td><input type=text size=48 name=name></td><td>';
 		printImageHREF ('create', 'Add new location', TRUE);
 		echo "</td></tr></form>\n";
@@ -640,8 +641,8 @@ function renderRackspaceRowEditor ()
 		printImageHREF ('create', 'Add new row', TRUE);
 		echo '</td><td>&nbsp;';
 		echo '</td><td>&nbsp;';
-		echo '</td><td><select name=location_id>';
-		renderLocationSelectTree ();
+		echo '</td><td>';
+		renderLocationSelectTree ('location_id');
 		echo '</td><td><input type=text name=name></td><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
 		echo '</td></tr></form>';
@@ -663,8 +664,7 @@ function renderRackspaceRowEditor ()
 		echo '</td><td>';
 		echo getRowMountsCount ($row_id);
 		echo '</td><td>';
-		echo '<select name=location_id>';
-		renderLocationSelectTree ($rowInfo['location_id']);
+		renderLocationSelectTree ('location_id', $rowInfo['location_id']);
 		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td>";
