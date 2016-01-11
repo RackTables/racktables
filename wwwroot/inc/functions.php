@@ -2077,17 +2077,15 @@ function ip_in_range ($ip_bin, $range)
 	return ($ip_bin & $range['mask_bin']) === $range['ip_bin'];
 }
 
-// Modify the given tag tree so, that each level's items are sorted alphabetically.
-function sortTree (&$tree, $sortfunc = '')
+// Sort each level of the tree independently using the given compare function.
+function sortTree (&$tree, $cmpfunc = '')
 {
-	if (!strlen ($sortfunc))
-		return;
 	$self = __FUNCTION__;
-	usort ($tree, $sortfunc);
-	// Don't make a mistake of directly iterating over the items of current level, because this way
-	// the sorting will be performed on a _copy_ if each item, not the item itself.
+	if (! is_callable ($cmpfunc))
+		throw new InvalidArgException ('cmpfunc', $cmpfunc, 'is not a callable function');
+	usort ($tree, $cmpfunc);
 	foreach (array_keys ($tree) as $tagid)
-		$self ($tree[$tagid]['kids'], $sortfunc);
+		$self ($tree[$tagid]['kids'], $cmpfunc);
 }
 
 function iptree_fill (&$netdata)
