@@ -31,7 +31,11 @@ class UpgradeTest extends PHPUnit_Framework_TestCase
 			$dbver = $version;
 			$dbxlink->exec ("DROP DATABASE ${db_name}");
 			$dbxlink->exec ("CREATE DATABASE ${db_name} CHARACTER SET utf8 COLLATE utf8_general_ci");
-			exec ("MYSQL_PWD=${db_password} ${mysql_bin} -u ${db_username} ${db_name} < ./data/${version}.sql", $output, $exitcode);
+			// FIXME: Importing the dump for 0.20.0 (and likely for the subsequent releases) fails when the configured
+			// MySQL username is different from "racktables", which is the recorded trigger definer in the file.
+			// A quick workaround, which may be not appropriate for a production server, is to grant the SUPER privilege:
+			// mysql> GRANT SUPER ON *.* TO racktables_user@localhost;
+			exec ("${mysql_bin} --user=${db_username} --password=${db_password} ${db_name} < ./data/${version}.sql", $output, $exitcode);
 			$this->assertEquals ($exitcode, 0, "Populating the ${version} database failed");
 
 			// the DB was deleted & re-created, so the current connection is invalid; re-connect
