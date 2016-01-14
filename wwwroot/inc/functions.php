@@ -1338,11 +1338,11 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 
 	// index the tree items by their order in $orig_nodelist
 	$ti = 0;
-	foreach ($nodelist as &$node_ref)
+	foreach (array_keys ($nodelist) as $key)
 	{
-		$node_ref['__tree_index'] = $ti++;
-		$node_ref['kidc'] = 0;
-		$node_ref['kids'] = array();
+		$nodelist[$key]['__tree_index'] = $ti++;
+		$nodelist[$key]['kidc'] = 0;
+		$nodelist[$key]['kids'] = array();
 	}
 
 	// Array equivalent of traceEntity() function.
