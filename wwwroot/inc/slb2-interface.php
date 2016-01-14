@@ -258,8 +258,8 @@ function groupTriplets ($tr_list)
 			}
 			else
 			{
-				foreach ($group as &$tr_ref)
-					$tr_ref['span'][$group_by] = count ($group);
+				foreach (array_keys ($group) as $key)
+					$group[$key]['span'][$group_by] = count ($group);
 				foreach ($self ($group) as $tr)
 					if (isset ($index[$tr['key']]))
 					{

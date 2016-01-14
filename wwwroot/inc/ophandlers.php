@@ -1245,8 +1245,8 @@ function updateObjectAllocation ()
 		}
 	}
 
-	foreach ($workingRacksData as &$rd)
-		applyObjectMountMask ($rd, $object_id);
+	foreach (array_keys ($workingRacksData) as $key)
+		applyObjectMountMask ($workingRacksData[$key], $object_id);
 
 	$oldMolecule = getMoleculeForObject ($object_id);
 	foreach ($workingRacksData as $rack_id => $rackData)
