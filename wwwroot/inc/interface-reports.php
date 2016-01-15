@@ -931,19 +931,8 @@ function renderDataIntegrityReport ()
 	}
 
 	// check 10.3: tags
-	$invalids = array ();
-	$tags = getTagList ();
-	foreach ($tags as $tag)
-	{
-		try
-		{
-			$children = getTagChildrenList ($tag['id']);
-		}
-		catch (RackTablesError $e)
-		{
-			$invalids[] = $tag;
-		}
-	}
+	global $taglist;
+	$invalids = getOrphanedTags();
 	if (count ($invalids))
 	{
 		$violations = TRUE;
@@ -957,7 +946,7 @@ function renderDataIntegrityReport ()
 			echo "<td>${invalid['id']}</td>";
 			echo "<td>${invalid['tag']}</td>";
 			echo "<td>${invalid['parent_id']}</td>";
-			printf('<td>%s</td>', $tags[$invalid['parent_id']]['tag']);
+			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 			$order = $nextorder[$order];
 		}

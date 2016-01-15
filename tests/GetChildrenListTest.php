@@ -43,6 +43,9 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 			$parent_tag_id = lastInsertID ();
 		}
 		self::$last_tag_id = $parent_tag_id;
+		// Refresh the structured version of the table so that getTagDescendents() works as expected.
+		global $taglist;
+		$taglist = addTraceToNodes (getTagList());
 	}
 
 	public static function tearDownAfterClass ()
@@ -108,7 +111,7 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 
 	public function testGetTagChildrenList ()
 	{
-		$children = getTagChildrenList (self::$first_tag_id);
+		$children = getTagDescendents (self::$first_tag_id);
 		$this->assertCount (self::$num_children, $children);
 	}
 }

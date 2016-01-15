@@ -2219,11 +2219,20 @@ function generateAutoPorts ()
 
 function updateTag ()
 {
-	assertUIntArg ('tag_id');
-	genericAssertion ('tag_name', 'tag');
-	assertUIntArg ('parent_id', TRUE);
-	genericAssertion ('is_assignable', 'enum/yesno');
-	commitUpdateTag ($_REQUEST['tag_id'], $_REQUEST['tag_name'], $_REQUEST['parent_id'], $_REQUEST['is_assignable']);
+	try
+	{
+		commitUpdateTag
+		(
+			genericAssertion ('tag_id', 'uint'),
+			genericAssertion ('tag_name', 'tag'),
+			genericAssertion ('parent_id', 'uint0'),
+			genericAssertion ('is_assignable', 'enum/yesno')
+		);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE ('parent_id');
+	}
 	showSuccess ('Tag updated successfully');
 }
 
