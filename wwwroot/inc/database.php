@@ -6067,6 +6067,7 @@ function getDBName()
 	global $pdo_dsn;
 	if (preg_match ('/\bdbname=(.+?)(;|$)/', $pdo_dsn, $m))
 		return $m[1];
+	throw new RackTablesError ('failed to spot "dbname" in $pdo_dsn', RackTablesError::INTERNAL);
 }
 
 // Sets exclusive server-global named lock.
