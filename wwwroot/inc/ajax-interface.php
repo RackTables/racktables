@@ -135,7 +135,12 @@ function getTagSelectAJAX()
 		$selected_id = $taglist[$current_tag_id]['parent_id'];
 		$options[0] = '-- NONE --';
 		foreach ($taglist as $tag_id => $taginfo)
-			if (! in_array ($current_tag_id, $taginfo['trace']) && $current_tag_id != $tag_id)
+			if
+			(
+				array_key_exists ('trace', $taginfo) &&
+				! in_array ($current_tag_id, $taginfo['trace']) &&
+				$current_tag_id != $tag_id
+			)
 				$options[$tag_id] = $taginfo['tag'];
 	}
 	foreach ($options as $tag_id => $value)

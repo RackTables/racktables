@@ -96,7 +96,7 @@ $entityCache = array();
 // used by getExplicitTagsOnly()
 $tagRelCache = array();
 
-$taglist = getTagList();
+$taglist = addTraceToNodes (getTagList());
 
 $auto_tags = array();
 if (! isCLIMode() && isset ($_SERVER['REMOTE_ADDR']))

@@ -1316,6 +1316,56 @@ function peekNode ($tree, $trace, $target_id)
 	throw new RackTablesError ('inconsistent tree data', RackTablesError::INTERNAL);
 }
 
+// The structure used in RackTables to represent tags is called a forest of rooted
+// trees, which is a set of directed graphs each having a node appointed as root
+// and exactly one path possible from the root node to every other node of the
+// graph.
+//
+// The TagTree database table contains a generic list of graph nodes with each node
+// having an optional incoming directed edge from any existing node. This table
+// generally can encode any set of any directed graphs that allow at most one
+// incoming edge per node. This includes but is not limited to the forest of rooted
+// trees. However, a number of RackTables functions specifically relies upon
+// consistent relations between the tags (presented either as a complete forest
+// structure or just as each node's path from the root), hence an early validation
+// step is required in the PHP code to implement the constraints in full.
+//
+// The function below implements this step. For every node on the input list that
+// belongs to a forest of rooted trees it sets the 'trace' key to the sequence of
+// node IDs that leads from tree root up to (but not including) the node. As an
+// edge case, for each root node it sets this sequence to an empty list. For any
+// nodes not in the forest (i.e., those that form any graph cycle or descend from
+// such a cycle) it leaves 'trace' unset.
+function addTraceToNodes ($nodelist)
+{
+	do
+	{
+		$nextpass = FALSE;
+		foreach ($nodelist as $nodeid => $node)
+		{
+			if (array_key_exists ('trace', $node))
+				continue; // already processed
+			$parentid = $node['parent_id'];
+			if ($parentid == NULL)
+			{
+				// a root node
+				$nodelist[$nodeid]['trace'] = array();
+				$nextpass = TRUE;
+				continue;
+			}
+			$parent = $nodelist[$parentid];
+			if (array_key_exists ('trace', $parent))
+			{
+				// fits directly under a previously processed node
+				$nodelist[$nodeid]['trace'] = array_merge ($parent['trace'], array ($parentid));
+				$nextpass = TRUE;
+			}
+		}
+	}
+	while ($nextpass);
+	return $nodelist;
+}
+
 function treeItemCmp ($a, $b)
 {
 	return $a['__tree_index'] - $b['__tree_index'];
@@ -1331,12 +1381,14 @@ function getTagTree()
 // key, which is in turn indexed by id. Functions that are ready to handle
 // tree collapsion/expansion themselves may request non-zero threshold value
 // for smaller resulting tree.
-function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = TRUE)
+// FIXME: The 2nd argument to this function seems not to be used any more.
+// FIXME: The structure this function returns is a forest of rooted trees
+//        despite the terminology it used to use.
+function treeFromList ($nodelist, $threshold = 0)
 {
 	$tree = array();
-	$nodelist = $orig_nodelist;
 
-	// index the tree items by their order in $orig_nodelist
+	// Preserve original ordering in __tree_index.
 	$ti = 0;
 	foreach (array_keys ($nodelist) as $key)
 	{
@@ -1345,57 +1397,69 @@ function treeFromList (&$orig_nodelist, $threshold = 0, $return_main_payload = T
 		$nodelist[$key]['kids'] = array();
 	}
 
-	// Array equivalent of traceEntity() function.
-	$trace = array();
+	$done_ids = array();
 	do
 	{
 		$nextpass = FALSE;
 		foreach (array_keys ($nodelist) as $nodeid)
 		{
 			$node = $nodelist[$nodeid];
+			// Skip any irrelevant nodes early as they will fail the checks below anyway.
+			if (! array_key_exists ('trace', $node))
+				continue;
 			$parentid = $node['parent_id'];
-			// When adding a node to the working tree, book another
-			// iteration, because the new item could make a way for
-			// others onto the tree. Also remove any item added from
-			// the input list, so iteration base shrinks.
-			// First check if we can assign directly.
-			if ($parentid == NULL)
+			// Moving a node from the input list to the output tree potentially enables more
+			// nodes to make it from the list to the same tree as well, hence in this case make
+			// another full round after the current one.
+
+			if ($parentid == NULL) // A root node?
 			{
 				$tree[$nodeid] = $node;
-				$trace[$nodeid] = array(); // Trace to root node is empty
 				unset ($nodelist[$nodeid]);
+				$done_ids[] = $nodeid;
 				$nextpass = TRUE;
 			}
-			// Now look if it fits somewhere on already built tree.
-			elseif (isset ($trace[$parentid]))
+			elseif (in_array ($parentid, $done_ids)) // Has a direct parent node already on the tree?
 			{
-				// Trace to a node is a trace to its parent plus parent id.
-				$trace[$nodeid] = $trace[$parentid];
-				$trace[$nodeid][] = $parentid;
-				pokeNode ($tree, $trace[$nodeid], $nodeid, $node, $threshold);
-				// path to any other node is made of all parent nodes plus the added node itself
+				// Being here implies the current node's trace is at least one element long.
+				pokeNode ($tree, $node['trace'], $nodeid, $node, $threshold);
 				unset ($nodelist[$nodeid]);
+				$done_ids[] = $nodeid;
 				$nextpass = TRUE;
 			}
 		}
 	}
 	while ($nextpass);
-	if (!$return_main_payload)
-		return $nodelist;
-	// update each input node with its backtrace route
-	foreach ($trace as $nodeid => $route)
-		$orig_nodelist[$nodeid]['trace'] = $route;
 	sortTree ($tree, 'treeItemCmp'); // sort the resulting tree by the order in original list
 	return $tree;
 }
 
-// Build a tree from the tag list and return everything _except_ the tree.
-// IOW, return taginfo items that have parent_id set and pointing outside
-// of the "normal" tree, which originates from the root.
+// Return those tags that belong to the full list of tags but don't belong
+// to the forest of rooted trees as found by addTraceToNodes().
 function getOrphanedTags ()
 {
 	global $taglist;
-	return treeFromList ($taglist, 0, FALSE);
+	$ret = array();
+	foreach ($taglist as $tagid => $taginfo)
+		if (! array_key_exists ('trace', $taginfo))
+			$ret[$tagid] = $taginfo;
+	return $ret;
+}
+
+// Throw an exception unless it is OK to assign the given parent ID
+// to the node with the given ID.
+function assertValidParentId ($nodelist, $node_id, $parent_id)
+{
+	if ($parent_id == 0)
+		return;
+	if ($parent_id == $node_id)
+		throw new InvalidArgException ('parent_id', $parent_id, 'must be different from the tag ID');
+	if (! array_key_exists ($parent_id, $nodelist))
+		throw new InvalidArgException ('parent_id', $parent_id, 'must refer to an existing tag');
+	if (! array_key_exists ('trace', $nodelist[$parent_id]))
+		throw new InvalidArgException ('parent_id', $parent_id, 'would add to an existing graph cycle');
+	if (in_array ($node_id, $nodelist[$parent_id]['trace']))
+		throw new InvalidArgException ('parent_id', $parent_id, 'would create a new graph cycle');
 }
 
 // removes implicit tags from ['etags'] array and fills ['itags'] array
@@ -1490,7 +1554,7 @@ function getTagDescendents ($tagid)
 	global $taglist;
 	$ret = array();
 	foreach ($taglist as $id => $taginfo)
-		if (in_array($tagid, $taginfo['trace']))
+		if (array_key_exists ('trace', $taginfo) && in_array ($tagid, $taginfo['trace']))
 			$ret[] = $id;
 	return $ret;
 }

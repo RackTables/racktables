@@ -938,7 +938,7 @@ END
 	$otags = getOrphanedTags();
 	if (count ($otags))
 	{
-		startPortlet ('fallen leaves');
+		startPortlet ('circular references');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 		echo '<tr class=trerror><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
 		foreach ($otags as $taginfo)

@@ -1099,6 +1099,7 @@ function getLocationChildrenList ($location_id, $children = array ())
 	return $children;
 }
 
+// DEPRECATED: use getTagDescendents() instead
 // This function is recursive and returns only tag IDs.
 function getTagChildrenList ($tag_id, $children = array ())
 {
@@ -4319,23 +4320,10 @@ function generateEntityAutoTags ($cell)
 // enables treeFromList() and sortTree() to do their jobs properly. Doing
 // the same sorting in PHP is possible but complicated and may deliver
 // results different from MySQL.
-function getTagList()
+function getTagList ($extra_sql = '')
 {
-	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag");
-	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
-
-	// calculate the 'trace' field of taginfo
-	foreach ($ret as $id => $taginfo)
-	{
-		$trace = array();
-		while ($taginfo['parent_id'])
-		{
-			$trace[] = $taginfo['parent_id'];
-			$taginfo = $ret[$taginfo['parent_id']];
-		}
-		$ret[$id]['trace'] = array_reverse ($trace);
-	}
-	return $ret;
+	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag ${extra_sql}");
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getTagUsage ($ignore_cache = FALSE)
@@ -4378,23 +4366,39 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 	return usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id, 'tag_id' => $tag_id));
 }
 
+// A tag's parent may not be one of its children, the tag itself or a tag
+// that does not belong to the forest of rooted trees because of a cycle.
 function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
 {
-	// a tag's parent may not be one of its children
-	if ($parent_id > 0 && in_array ($parent_id, getTagChildrenList ($tag_id)))
-		throw new RackTablesError ("Circular reference for tag ${tag_id}", RackTablesError::INTERNAL);
-
-	usePreparedUpdateBlade
-	(
-		'TagTree',
-		array
+	global $dbxlink;
+	$dbxlink->beginTransaction();
+	try
+	{
+		// Use the copy from within the transaction.
+		assertValidParentId (addTraceToNodes (getTagList ('FOR UPDATE')), $tag_id, $parent_id);
+		usePreparedUpdateBlade
 		(
-			'tag' => $tag_name,
-			'parent_id' => $parent_id == 0 ? NULL : $parent_id,
-			'is_assignable' => $is_assignable
-		),
-		array ('id' => $tag_id)
-	);
+			'TagTree',
+			array
+			(
+				'tag' => $tag_name,
+				'parent_id' => $parent_id == 0 ? NULL : $parent_id,
+				'is_assignable' => $is_assignable
+			),
+			array ('id' => $tag_id)
+		);
+		$dbxlink->commit();
+	}
+	catch (PDOException $pe)
+	{
+		$dbxlink->rollBack();
+		throw convertPDOException ($pe);
+	}
+	catch (Exception $e)
+	{
+		$dbxlink->rollBack();
+		throw $e;
+	}
 }
 
 // Push a record into TagStorage unconditionally.
