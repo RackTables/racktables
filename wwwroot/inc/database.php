@@ -4033,9 +4033,11 @@ function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 // This swiss-knife blade deletes any number of records from the specified table
 // using the specified key names and values.
 // returns integer - affected rows count. Throws exception on error
-function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
+function usePreparedDeleteBlade ($tablename, $columns = array(), $conjunction = 'AND')
 {
 	global $dbxlink;
+	if (! count ($columns))
+		throw new InvalidArgException ('columns', '(empty array)', 'in this function DELETE must have WHERE');
 	$query = "DELETE FROM ${tablename} WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
 	try
 	{
@@ -4065,9 +4067,13 @@ function usePreparedSelectBlade ($query, $args = array())
 }
 
 // returns integer - affected rows count. Throws exception on error
-function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
+function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_columns = array(), $conjunction = 'AND')
 {
 	global $dbxlink;
+	if (! count ($set_columns))
+		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
+	if (! count ($where_columns))
+		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
 	$conj = '';
 	$query = "UPDATE ${tablename} SET ";
 	foreach (array_keys ($set_columns) as $colname)
