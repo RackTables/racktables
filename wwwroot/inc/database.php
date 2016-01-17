@@ -948,7 +948,7 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 			$realm = 'row';
 			break;
 		case 1562:
-			$realm = 'localtion';
+			$realm = 'location';
 			break;
 		default:
 			$realm = 'object';
