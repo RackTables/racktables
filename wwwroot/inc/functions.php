@@ -3105,10 +3105,7 @@ function scanRealmByText ($realm, $ftext = '')
 
 function getVSTOptions()
 {
-	$ret = array();
-	foreach (listCells ('vst') as $vst)
-		$ret[$vst['id']] = stringForOption ($vst['description']);
-	return $ret;
+	return reduceSubarraysToColumn (reindexById (listCells ('vst')), 'description');
 }
 
 # Return an array in the format understood by getNiftySelect() and getOptionTree(),

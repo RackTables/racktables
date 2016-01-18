@@ -290,6 +290,18 @@ $page_by_realm['ipv4rspool'] = 'ipv4slb';
 $page_by_realm['file'] = 'files';
 $page_by_realm['user'] = 'userlist';
 
+function getSelectOptions ($options, $selected_id = NULL)
+{
+	$ret = '';
+	foreach ($options as $key => $value)
+	{
+		$selected = is_array ($selected_id) ? in_array ($key, $selected_id) : $key == $selected_id;
+		$ret .= "<option value='${key}'" . ($selected ? ' selected' : '') . '>';
+		$ret .= stringForOption ($value) . '</option>';
+	}
+	return $ret;
+}
+
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getSelect ($optionList, $select_attrs, $selected_id);
@@ -318,16 +330,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	$ret .= '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
-	$ret .= '>';
-	foreach ($optionList as $dict_key => $dict_value)
-	{
-		if (is_array ($selected_id))
-			$is_selected = in_array ($dict_key, $selected_id);
-		else
-			$is_selected = $dict_key == $selected_id;
-		$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>";
-	}
-	$ret .= '</select>';
+	$ret .= '>' . getSelectOptions ($optionList, $selected_id) . '</select>';
 	return $ret;
 }
 

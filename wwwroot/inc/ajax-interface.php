@@ -143,10 +143,7 @@ function getTagSelectAJAX()
 			)
 				$options[$tag_id] = $taginfo['tag'];
 	}
-	foreach ($options as $tag_id => $value)
-		echo "<option value='$tag_id'" .
-			($tag_id == $selected_id ? ' selected' : '') .
-			'>' . htmlspecialchars ($value) . '</option>';
+	echo getSelectOptions ($options, $selected_id);
 }
 
 function getLocationSelectAJAX()
