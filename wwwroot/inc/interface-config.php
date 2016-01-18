@@ -517,21 +517,30 @@ function renderEditAttributesForm ()
 	finishPortlet();
 }
 
+function getAttributeOptions ($attrMap)
+{
+	$ret = array();
+	$shortType = array
+	(
+		'uint' => 'U',
+		'float' => 'F',
+		'string' => 'S',
+		'dict' => 'D',
+		'date' => 'T',
+	);
+	foreach ($attrMap as $attr)
+		$ret[$attr['id']] = sprintf ('[%s] %s', $shortType[$attr['type']], $attr['name']);
+	return $ret;
+}
+
 function renderEditAttrMapForm ()
 {
-	function printNewItemTR ($attrMap)
+	function printNewItemTR ($aselect)
 	{
 		printOpFormIntro ('add');
-		echo '<tr><td colspan=2 class=tdleft>';
-		echo '<select name=attr_id>';
-		$shortType['uint'] = 'U';
-		$shortType['float'] = 'F';
-		$shortType['string'] = 'S';
-		$shortType['dict'] = 'D';
-		$shortType['date'] = 'T';
-		foreach ($attrMap as $attr)
-			echo "<option value=${attr['id']}>[" . $shortType[$attr['type']] . "] ${attr['name']}</option>";
-		echo "</select></td><td class=tdleft>";
+		echo '<tr>';
+		echo "<td colspan=2 class=tdleft>${aselect}</td>";
+		echo '<td class=tdleft>';
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
 		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
@@ -546,11 +555,12 @@ function renderEditAttrMapForm ()
 	global $attrtypes, $nextorder;
 	$order = 'odd';
 	$attrMap = getAttrMap();
+	$aselect = getSelect (getAttributeOptions ($attrMap), array ('name' => 'attr_id'));
 	startPortlet ('Attribute map');
 	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>";
 	echo '<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR ($attrMap);
+		printNewItemTR ($aselect);
 	foreach ($attrMap as $attr)
 	{
 		if (!count ($attr['application']))
@@ -575,7 +585,7 @@ function renderEditAttrMapForm ()
 		$order = $nextorder[$order];
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR ($attrMap);
+		printNewItemTR ($aselect);
 	echo "</table>\n";
 	finishPortlet();
 }
