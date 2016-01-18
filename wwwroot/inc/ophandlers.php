@@ -1738,9 +1738,9 @@ function addVService ()
 			'vip' => $vip_bin,
 			'vport' => $vport,
 			'proto' => $_REQUEST['proto'],
-			'name' => !mb_strlen ($_REQUEST['name']) ? NULL : $_REQUEST['name'],
-			'vsconfig' => !strlen ($sic['vsconfig']) ? NULL : $sic['vsconfig'],
-			'rsconfig' => !strlen ($sic['rsconfig']) ? NULL : $sic['rsconfig'],
+			'name' => nullEmptyStr ($_REQUEST['name']),
+			'vsconfig' => nullEmptyStr ($sic['vsconfig']),
+			'rsconfig' => nullEmptyStr ($sic['rsconfig']),
 		)
 	);
 	$vs_id = lastInsertID();
