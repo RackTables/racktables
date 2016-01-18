@@ -392,7 +392,7 @@ END;
 		echo "<img src=?module=chrome&uri=pix/1x1t.gif onLoad=collapseAll(this)>"; // dirty hack to collapse all when page is displayed
 		echo "</label></td></tr>\n";
 		echo "<tr><td class=tagbox><hr>\n";
-		renderLocationCheckbox (treeFromList ($locationlist));
+		renderLocationCheckbox (treeFromList (addTraceToNodes ($locationlist)));
 		echo "<hr></td></tr>\n";
 		echo '<tr><td>';
 		printImageHREF ('setfilter', 'set filter', TRUE);
@@ -581,7 +581,7 @@ function renderLocationSelectTree ($select_name, $selected_id = NULL)
 	echo "<select name='${select_name}'>";
 	echo '<option value=0>-- NONE --</option>';
 	$locationlist = listCells ('location');
-	foreach (treeFromList ($locationlist) as $location)
+	foreach (treeFromList (addTraceToNodes ($locationlist)) as $location)
 	{
 		echo "<option value=${location['id']} style='font-weight: bold' ";
 		if ($location['id'] == $selected_id )
@@ -624,7 +624,7 @@ JSTXT;
 		printNewItemTR();
 
 	$locations = listCells ('location');
-	renderLocationRowForEditor (treeFromList ($locations));
+	renderLocationRowForEditor (treeFromList (addTraceToNodes ($locations)));
 
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();

@@ -2723,7 +2723,7 @@ function makeIPTree ($netlist)
 	}
 	unset ($stack);
 
-	return treeFromList ($netlist);
+	return treeFromList (addTraceToNodes ($netlist));
 }
 
 function prepareIPTree ($netlist, $expanded_id = 0)
