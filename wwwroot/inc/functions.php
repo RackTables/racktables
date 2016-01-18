@@ -6029,7 +6029,7 @@ function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
 
 function nullEmptyStr ($str)
 {
-	return strlen ($str) ? $str : NULL;
+	return $str != '' ? $str : NULL;
 }
 
 function printLocationChildrenSelectOptions ($location, $parent_id, $location_id = NULL, $level = 0)

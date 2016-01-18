@@ -567,8 +567,8 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 			'rsip' => $rsip_bin,
 			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			'inservice' => $inservice == 'yes' ? 'yes' : 'no',
-			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
-			'comment' => !strlen ($comment) ? NULL : $comment,
+			'rsconfig' => nullEmptyStr ($rsconfig),
+			'comment' => nullEmptyStr ($comment),
 		)
 	);
 	lastCreated ('iprs', lastInsertID());
@@ -585,9 +585,9 @@ function addLBtoRSPool ($pool_id = 0, $object_id = 0, $vs_id = 0, $vsconfig = ''
 			'object_id' => $object_id,
 			'rspool_id' => $pool_id,
 			'vs_id' => $vs_id,
-			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
-			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig),
-			'prio' => (!strlen ($prio) ? NULL : $prio),
+			'vsconfig' => nullEmptyStr ($vsconfig),
+			'rsconfig' => nullEmptyStr ($rsconfig),
+			'prio' => nullEmptyStr ($prio),
 		)
 	);
 }
@@ -609,8 +609,8 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 			$rsip_bin,
 			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
 			$inservice,
-			!strlen ($rsconfig) ? NULL : $rsconfig,
-			!strlen ($comment) ? NULL : $comment,
+			nullEmptyStr ($rsconfig),
+			nullEmptyStr ($comment),
 			$rsid,
 		)
 	);
@@ -631,9 +631,9 @@ function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $
 			'vip' => $vip_bin,
 			'vport' => ($proto == 'MARK' ? NULL : $vport),
 			'proto' => $proto,
-			'name' => !strlen ($name) ? NULL : $name,
-			'vsconfig' => !strlen ($vsconfig) ? NULL : $vsconfig,
-			'rsconfig' => !strlen ($rsconfig) ? NULL : $rsconfig,
+			'name' => nullEmptyStr ($name),
+			'vsconfig' => nullEmptyStr ($vsconfig),
+			'rsconfig' => nullEmptyStr ($rsconfig),
 		),
 		array ('id' => $vsid)
 	);
@@ -646,9 +646,9 @@ function commitCreateRSPool ($name = '', $vsconfig = '', $rsconfig = '', $tagidl
 		'IPv4RSPool',
 		array
 		(
-			'name' => (!strlen ($name) ? NULL : $name),
-			'vsconfig' => (!strlen ($vsconfig) ? NULL : $vsconfig),
-			'rsconfig' => (!strlen ($rsconfig) ? NULL : $rsconfig)
+			'name' => nullEmptyStr ($name),
+			'vsconfig' => nullEmptyStr ($vsconfig),
+			'rsconfig' => nullEmptyStr ($rsconfig),
 		)
 	);
 	$new_pool_id = lastInsertID();
