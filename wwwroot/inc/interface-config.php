@@ -536,11 +536,12 @@ function renderEditAttrMapForm ()
 		echo ' ';
 		$objtypes = readChapter (CHAP_OBJTYPE, 'o');
 		printNiftySelect (cookOptgroups ($objtypes), array ('name' => 'objtype_id'));
-		echo ' <select name=chapter_no><option value=0>-- dictionary chapter for [D] attributes --</option>';
+		$choptions = array (0 => '-- dictionary chapter for [D] attributes --');
 		foreach (getChapterList() as $chapter)
 			if ($chapter['sticky'] != 'yes')
-				echo "<option value='${chapter['id']}'>${chapter['name']}</option>";
-		echo '</select></td></tr></form>';
+				$choptions[$chapter['id']] = $chapter['name'];
+		echo ' ' . getSelect ($choptions, array ('name' => 'chapter_no'));
+		echo '</td></tr></form>';
 	}
 	global $attrtypes, $nextorder;
 	$order = 'odd';
