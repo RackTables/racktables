@@ -930,7 +930,6 @@ END
 	);
 	function printNewItemTR ($options)
 	{
-		global $taglist;
 		printOpFormIntro ('createTag');
 		echo '<tr>';
 		echo '<td align=left style="padding-left: 16px;">' . getImageHREF ('create', 'Create tag', TRUE) . '</td>';
