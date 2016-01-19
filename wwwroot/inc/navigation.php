@@ -884,7 +884,7 @@ $ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
 $ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
 $interface_requires['cables-*'] = 'interface-cables.php';
 
-$ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
+$ajaxhandler['get-parent-node-options'] = 'getParentNodeOptionsAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
 $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
 $ajaxhandler['get-port-link'] = 'getPortInfoAJAX';
