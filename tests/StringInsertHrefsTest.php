@@ -24,7 +24,7 @@ class StringInsertHrefsTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testStringInsertHrefs ($input, $output)
 	{
-		$this->assertEquals (string_insert_hrefs ($input), $output);
+		$this->assertEquals ($output, string_insert_hrefs ($input));
 	}
 
 	public function provider ()

@@ -36,7 +36,7 @@ class UpgradeTest extends PHPUnit_Framework_TestCase
 			// A quick workaround, which may be not appropriate for a production server, is to grant the SUPER privilege:
 			// mysql> GRANT SUPER ON *.* TO racktables_user@localhost;
 			exec ("${mysql_bin} --user=${db_username} --password=${db_password} ${db_name} < ./data/${version}.sql", $output, $exitcode);
-			$this->assertEquals ($exitcode, 0, "Populating the ${version} database failed");
+			$this->assertEquals (0, $exitcode, "Populating the ${version} database failed");
 
 			// the DB was deleted & re-created, so the current connection is invalid; re-connect
 			connectDB ();
