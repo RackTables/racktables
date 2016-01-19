@@ -1338,31 +1338,32 @@ function peekNode ($tree, $trace, $target_id)
 // such a cycle) it leaves 'trace' unset.
 function addTraceToNodes ($nodelist)
 {
-	do
+	foreach ($nodelist as $nodeid => $node)
 	{
-		$nextpass = FALSE;
-		foreach ($nodelist as $nodeid => $node)
+		$trace = array();
+		$parentid = $node['parent_id'];
+		while ($parentid != NULL)
 		{
-			if (array_key_exists ('trace', $node))
-				continue; // already processed
-			$parentid = $node['parent_id'];
-			if ($parentid == NULL)
+			if (! isset ($nodelist[$parentid]))
 			{
-				// a root node
-				$nodelist[$nodeid]['trace'] = array();
-				$nextpass = TRUE;
-				continue;
+				// bad parent_id
+				$trace = NULL;
+				break;
 			}
-			$parent = $nodelist[$parentid];
-			if (array_key_exists ('trace', $parent))
+
+			// check for cycles every 10 steps
+			if (0 == (count ($trace) % 10) and in_array ($parentid, $trace))
 			{
-				// fits directly under a previously processed node
-				$nodelist[$nodeid]['trace'] = array_merge ($parent['trace'], array ($parentid));
-				$nextpass = TRUE;
+				// cycle detected
+				$trace = NULL;
+				break;
 			}
+			array_unshift ($trace, $parentid);
+			$parentid = $nodelist[$parentid]['parent_id'];
 		}
+		if (isset ($trace))
+			$nodelist[$nodeid]['trace'] = $trace;
 	}
-	while ($nextpass);
 	return $nodelist;
 }
 
