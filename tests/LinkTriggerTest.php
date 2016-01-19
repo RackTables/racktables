@@ -98,7 +98,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 			'SELECT COUNT(*) FROM Link WHERE porta=? AND portb=?',
 			array (self::$porta, self::$portb)
 		);
-		$this->assertEquals ($result->fetchColumn (), 1);
+		$this->assertEquals (1, $result->fetchColumn ());
 	}
 
 	public function testUpdateLinkWithPortAGreaterThanPortB ()
@@ -119,7 +119,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 			'SELECT COUNT(*) FROM Link WHERE porta=? AND portb=?',
 			array (self::$porta, self::$portb)
 		);
-		$this->assertEquals ($result->fetchColumn (), 1);
+		$this->assertEquals (1, $result->fetchColumn ());
 	}
 
 	/**
