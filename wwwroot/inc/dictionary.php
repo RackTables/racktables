@@ -2361,6 +2361,12 @@ $dictionary = array
 	2470 => array ('chapter_id' => 12, 'dict_value' => 'HP EI%GPASS%5130-48G-PoE+-2SFP+-2XGT (JG941A)'),
 	2471 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1072-1G-8S+'),
 	2472 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%3011UiAS-RM'),
+	2473 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 14'),
+	2474 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 15'),
+	2475 => array ('chapter_id' => 16, 'dict_value' => 'RouterOS 6'),
+	2476 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 14'),
+	2477 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 15'),
+	2478 => array ('chapter_id' => 37, 'dict_value' => 'RouterOS 6'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
