@@ -1462,6 +1462,23 @@ function assertValidParentId ($nodelist, $node_id, $parent_id)
 		throw new InvalidArgException ('parent_id', $parent_id, 'would create a new graph cycle');
 }
 
+// Filter a list of traced nodes and silently skip the options that don't
+// qualify. Filtering criteria are effectively the same as in the function
+// above but use a simpler expression.
+function getParentNodeOptions ($nodelist, $textfield, $node_id)
+{
+	$ret = array (0 => '-- NONE --');
+	foreach ($nodelist as $key => $each)
+		if
+		(
+			$key != $node_id &&
+			array_key_exists ('trace', $each) &&
+			! in_array ($node_id, $each['trace'])
+		)
+			$ret[$key] = $each[$textfield];
+	return $ret;
+}
+
 // removes implicit tags from ['etags'] array and fills ['itags'] array
 // Replaces call sequence "getExplicitTagsOnly, getImplicitTags"
 function sortEntityTags (&$cell)

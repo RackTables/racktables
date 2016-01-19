@@ -120,32 +120,6 @@ function formatLoggedSpan ($log_item, $text, $html_class = '')
 		">$text</span>";
 }
 
-function getTagSelectAJAX()
-{
-	global $taglist;
-	$options = array();
-	$selected_id = '';
-	if (! isset($_REQUEST['tagid']))
-		$options['error'] = "Sorry, param 'tagid' is empty. Reload page and try again";
-	elseif (! preg_match("/tagid_(\d+)/i", $_REQUEST['tagid'], $m))
-		$options['error'] = "Sorry, wrong format tagid:'".$_REQUEST['tagid']."'. Reload page and try again";
-	else
-	{
-		$current_tag_id = $m[1];
-		$selected_id = $taglist[$current_tag_id]['parent_id'];
-		$options[0] = '-- NONE --';
-		foreach ($taglist as $tag_id => $taginfo)
-			if
-			(
-				array_key_exists ('trace', $taginfo) &&
-				! in_array ($current_tag_id, $taginfo['trace']) &&
-				$current_tag_id != $tag_id
-			)
-				$options[$tag_id] = $taginfo['tag'];
-	}
-	echo getSelectOptions ($options, $selected_id);
-}
-
 function getLocationSelectAJAX()
 {
 	$locationlist = listCells ('location');
@@ -173,6 +147,38 @@ function getLocationSelectAJAX()
 		if ($location['kidc'] > 0)
 			printLocationChildrenSelectOptions ($location, $selected_id, $current_location_id);
 	}
+}
+
+function getParentNodeOptionsAJAX()
+{
+	global $pageno, $tabno;
+	$selected_id = NULL;
+	try
+	{
+		$tmp = genericAssertion ('node_id', 'string');
+		if (! preg_match ('/^nodeid_(\d+)$/', $tmp, $m))
+			throw new InvalidRequestArgException ('node_id', $tmp, 'format mismatch');
+		$node_id = $m[1];
+		switch ($node_type = genericAssertion ('node_type', 'string'))
+		{
+			case 'tag':
+				$pageno = 'tagtree';
+				$tabno = 'default';
+				fixContext();
+				assertPermission();
+				global $taglist;
+				$selected_id = $taglist[$node_id]['parent_id'];
+				$options = getParentNodeOptions ($taglist, 'tag', $node_id);
+				break;
+			default:
+				throw new InvalidRequestArgException ('node_type', $node_type, 'unknown type');
+		}
+	}
+	catch (Exception $e)
+	{
+		$options = array ('error' => $e->getMessage());
+	}
+	echo getSelectOptions ($options, $selected_id);
 }
 
 function verifyCodeAJAX()

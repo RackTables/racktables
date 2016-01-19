@@ -904,7 +904,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	echo getSelect
 	(
 		array ($parent_id => $parent_name),
-		array ('name' => 'parent_id', 'id' => 'tagid_' . $taginfo['id'], 'class' => 'taglist-popup'),
+		array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'taglist-popup'),
 		$taginfo['parent_id'],
 		FALSE
 	);
@@ -919,7 +919,7 @@ function renderTagTreeEditor ()
 	(
 <<<END
 function tageditor_showselectbox(e) {
-	$(this).load('index.php', {module: 'ajax', ac: 'get-tag-select', tagid: this.id});
+	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: 'tag', node_id: this.id});
 	$(this).unbind('mousedown', tageditor_showselectbox);
 }
 $(document).ready(function () {
