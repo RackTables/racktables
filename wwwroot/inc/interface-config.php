@@ -953,9 +953,9 @@ END
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
 			echo "<input type=hidden name=is_assignable value=${taginfo['is_assignable']}>";
 			echo '<tr>';
-			echo '<td>' . $taginfo['tag'] . '</td>';
-			echo '<td>' . stringForLabel ($taglist[$taginfo['parent_id']]['tag']) . '</td>';
-			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taglist[$taginfo['id']]['parent_id']) . '</td>';
+			echo '<td class=tdleft>' . stringForLabel ($taginfo['tag']) . '</td>';
+			echo '<td class=tdleft>' . stringForLabel ($taglist[$taginfo['parent_id']]['tag']) . '</td>';
+			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taginfo['parent_id']) . '</td>';
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</tr></form>';
 		}
