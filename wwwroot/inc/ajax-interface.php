@@ -161,14 +161,14 @@ function getParentNodeOptionsAJAX()
 		$node_id = $m[1];
 		switch ($node_type = genericAssertion ('node_type', 'string'))
 		{
-			case 'tag':
+			case 'existing tag':
 				$pageno = 'tagtree';
 				$tabno = 'default';
 				fixContext();
 				assertPermission();
 				global $taglist;
 				$selected_id = $taglist[$node_id]['parent_id'];
-				$options = getParentNodeOptions ($taglist, 'tag', $node_id);
+				$options = getParentNodeOptionsExisting ($taglist, 'tag', $node_id);
 				break;
 			default:
 				throw new InvalidRequestArgException ('node_type', $node_type, 'unknown type');
