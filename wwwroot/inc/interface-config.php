@@ -919,7 +919,7 @@ function renderTagTreeEditor ()
 	(
 <<<END
 function tageditor_showselectbox(e) {
-	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: 'tag', node_id: this.id});
+	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: 'existing tag', node_id: this.id});
 	$(this).unbind('mousedown', tageditor_showselectbox);
 }
 $(document).ready(function () {
@@ -941,22 +941,20 @@ END
 	}
 	global $taglist;
 
-	$options = array (0 => '-- NONE --');
-	foreach ($taglist as $taginfo)
-		$options[$taginfo['id']] = htmlspecialchars ($taginfo['tag']);
-
+	$options = getParentNodeOptionsNew ($taglist, 'tag');
 	$otags = getOrphanedTags();
 	if (count ($otags))
 	{
 		startPortlet ('circular references');
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo '<tr class=trerror><th>tag name</th><th>parent tag</th><th>&nbsp;</th></tr>';
+		echo '<tr class=trerror><th>tag name</th><th>current parent tag</th><th>new parent tag</th><th>&nbsp;</th></tr>';
 		foreach ($otags as $taginfo)
 		{
 			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
 			echo "<input type=hidden name=is_assignable value=${taginfo['is_assignable']}>";
 			echo '<tr>';
 			echo '<td>' . $taginfo['tag'] . '</td>';
+			echo '<td>' . stringForLabel ($taglist[$taginfo['parent_id']]['tag']) . '</td>';
 			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taglist[$taginfo['id']]['parent_id']) . '</td>';
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</tr></form>';

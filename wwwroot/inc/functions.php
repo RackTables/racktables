@@ -1463,10 +1463,10 @@ function assertValidParentId ($nodelist, $node_id, $parent_id)
 		throw new InvalidArgException ('parent_id', $parent_id, 'would create a new graph cycle');
 }
 
-// Filter a list of traced nodes and silently skip the options that don't
-// qualify. Filtering criteria are effectively the same as in the function
-// above but use a simpler expression.
-function getParentNodeOptions ($nodelist, $textfield, $node_id)
+// Given an existing node ID filter a list of traced nodes and silently skip
+// the nodes that are not valid parent node options. Filtering criteria are
+// effectively the same as in the function above but use a simpler expression.
+function getParentNodeOptionsExisting ($nodelist, $textfield, $node_id)
 {
 	$ret = array (0 => '-- NONE --');
 	foreach ($nodelist as $key => $each)
@@ -1476,6 +1476,17 @@ function getParentNodeOptions ($nodelist, $textfield, $node_id)
 			array_key_exists ('trace', $each) &&
 			! in_array ($node_id, $each['trace'])
 		)
+			$ret[$key] = $each[$textfield];
+	return $ret;
+}
+
+// Idem, but for a new node, which doesn't yet exist, or a node that is based
+// on a circular reference. The condition is even simpler in this case.
+function getParentNodeOptionsNew ($nodelist, $textfield)
+{
+	$ret = array (0 => '-- NONE --');
+	foreach ($nodelist as $key => $each)
+		if (array_key_exists ('trace', $each))
 			$ret[$key] = $each[$textfield];
 	return $ret;
 }
