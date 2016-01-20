@@ -122,6 +122,11 @@ function formatLoggedSpan ($log_item, $text, $html_class = '')
 
 function getLocationSelectAJAX()
 {
+	global $pageno, $tabno;
+	$pageno = 'rackspace';
+	$tabno = 'default';
+	fixContext();
+	assertPermission();
 	$locationlist = listCells ('location');
 	$locationtree = treeFromList (addTraceToNodes ($locationlist));
 	$options = array ();
