@@ -290,6 +290,11 @@ function updateCableIdAJAX()
 
 function updateRackSortOrderAJAX()
 {
+	global $pageno, $tabno;
+	$pageno = 'row';
+	$tabno = 'editracks';
+	fixContext();
+	assertPermission (NULL, NULL, 'save'); // FIXME: operation code not in navigation.php
 	updateRackSortOrder ($_REQUEST['racks']);
 	echo 'OK';
 }

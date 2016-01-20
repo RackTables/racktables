@@ -1011,7 +1011,7 @@ function renderRackSortForm ($row_id)
 				update : function () {
 					serial = $('#sortRacks').sortable('serialize');
 					$.ajax({
-						url: 'index.php?module=ajax&ac=upd-rack-sort-order',
+						url: 'index.php?module=ajax&ac=upd-rack-sort-order&row_id=${row_id}',
 						type: 'post',
 						data: serial,
 					});
