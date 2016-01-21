@@ -3457,6 +3457,8 @@ function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 # provided subindex name, e.g.:
 # array (10 => array ('a' => 'x1', 'b' => 'y1'), 20 => array ('a' => 'x2', 'b' => 'y2'))
 # would map to (using subindex 'b'): array (10 => 'y1', 20 => 'y2')
+#
+# A similar array_column() function is available in PHP 5 >= 5.5.0.
 function reduceSubarraysToColumn ($input, $column)
 {
 	$ret = array();
