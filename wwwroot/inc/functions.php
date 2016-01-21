@@ -1437,13 +1437,12 @@ function treeFromList ($nodelist, $threshold = 0)
 
 // Return those tags that belong to the full list of tags but don't belong
 // to the forest of rooted trees as found by addTraceToNodes().
-function getOrphanedTags ()
+function getInvalidNodes ($nodelist)
 {
-	global $taglist;
 	$ret = array();
-	foreach ($taglist as $tagid => $taginfo)
-		if (! array_key_exists ('trace', $taginfo))
-			$ret[$tagid] = $taginfo;
+	foreach ($nodelist as $node_id => $node)
+		if (! array_key_exists ('trace', $node))
+			$ret[$node_id] = $node;
 	return $ret;
 }
 
