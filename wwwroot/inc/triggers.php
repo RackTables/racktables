@@ -342,4 +342,19 @@ function triggerPatchCableHeapsConfigured()
 	return count (getPatchCableHeapSummary()) ? 'std' : '';
 }
 
+function triggerGraphCycleResolver()
+{
+	global $pageno;
+	switch ($pageno)
+	{
+		case 'tagtree':
+			global $taglist;
+			$nodelist = $taglist;
+			break;
+		default:
+			throw new RackTablesError ('unexpected call to trigger function', RackTablesError::INTERNAL);
+	}
+	return count (getInvalidNodes ($nodelist)) ? 'attn' : '';
+}
+
 ?>

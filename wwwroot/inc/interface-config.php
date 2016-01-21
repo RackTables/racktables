@@ -940,31 +940,8 @@ END
 		echo '</tr></form>';
 	}
 	global $taglist;
-
 	$options = getParentNodeOptionsNew ($taglist, 'tag');
-	$otags = getOrphanedTags();
-	if (count ($otags))
-	{
-		startPortlet ('circular references');
-		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-		echo '<tr class=trerror><th>tag name</th><th>current parent tag</th><th>new parent tag</th><th>&nbsp;</th></tr>';
-		foreach ($otags as $taginfo)
-		{
-			printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id'], 'tag_name' => $taginfo['tag']));
-			echo "<input type=hidden name=is_assignable value=${taginfo['is_assignable']}>";
-			echo '<tr>';
-			echo '<td class=tdleft>' . stringForLabel ($taginfo['tag']) . '</td>';
-			echo '<td class=tdleft>' . stringForLabel ($taglist[$taginfo['parent_id']]['tag']) . '</td>';
-			echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $taginfo['parent_id']) . '</td>';
-			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
-			echo '</tr></form>';
-		}
-		echo '</table>';
-		finishPortlet();
-	}
-
-	startPortlet ('tag tree');
-	echo "<table cellspacing=0 cellpadding=5 align=center class=widetable>\n";
+	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($options);
@@ -973,7 +950,47 @@ END
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($options);
 	echo '</table>';
-	finishPortlet();
+}
+
+function renderGraphCycleResolver()
+{
+	global $pageno;
+	// $fieldmap below does not contain 'parent_id' as it is done by the SELECT.
+	switch ($pageno)
+	{
+		case 'tagtree';
+			global $taglist;
+			$nodelist = $taglist;
+			$textfield = 'tag';
+			$opcode = 'updateTag';
+			$fieldmap = array
+			(
+				'tag_id' => 'id',
+				'tag_name' => 'tag',
+				'is_assignable' => 'is_assignable',
+			);
+			break;
+		default:
+			throw new RackTablesError ('unexpected call to tabhandler function', RackTablesError::INTERNAL);
+	}
+	$invalids = getInvalidNodes ($nodelist);
+	$options = getParentNodeOptionsNew ($nodelist, $textfield);
+	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>node</th><th>current parent node</th><th>new parent node</th><th>&nbsp;</th></tr>';
+	foreach ($invalids as $node)
+	{
+		$formvalues = array();
+		foreach ($fieldmap as $form_param => $nodefield)
+			$formvalues[$form_param] = $node[$nodefield];
+		printOpFormIntro ($opcode, $formvalues);
+		echo '<tr>';
+		echo '<td class=tdleft>' . stringForLabel ($node[$textfield]) . '</td>';
+		echo '<td class="tdleft trerror">' . stringForLabel ($invalids[$node['parent_id']][$textfield]) . '</td>';
+		echo '<td>' . getSelect ($options, array ('name' => 'parent_id'), $node['parent_id']) . '</td>';
+		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '</table>';
 }
 
 function renderMyAccount ()

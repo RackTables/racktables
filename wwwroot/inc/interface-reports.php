@@ -932,7 +932,7 @@ function renderDataIntegrityReport ()
 
 	// check 10.3: tags
 	global $taglist;
-	$invalids = getOrphanedTags();
+	$invalids = getInvalidNodes ($taglist);
 	if (count ($invalids))
 	{
 		$violations = TRUE;
