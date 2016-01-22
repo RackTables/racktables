@@ -874,10 +874,9 @@ function renderTagTree ()
 	echo '</table></center>';
 }
 
-function renderTagRowForEditor ($taginfo, $level = 0)
+function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 {
 	$self = __FUNCTION__;
-	global $taglist;
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
 	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' class=trnull' : ' class=trwarning');
@@ -897,18 +896,16 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	else
 		printSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable'), $taginfo['is_assignable']);
 	echo '</td><td class=tdleft>';
-	$parent_id = $taginfo['parent_id'] ? $taginfo['parent_id'] : 0;
-	$parent_name = $taginfo['parent_id'] ? htmlspecialchars ($taglist[$taginfo['parent_id']]['tag']) : '-- NONE --';
-	echo getSelect
-	(
-		array ($parent_id => $parent_name),
-		array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'nodelist-popup'),
-		$taginfo['parent_id'],
-		FALSE
-	);
+
+	$poptions = $parent_name === NULL ?
+		array (0 => '-- NONE --') :
+		array ($taginfo['parent_id'] => $parent_name);
+	$sparams = array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'nodelist-popup');
+	echo getSelect ($poptions, $sparams, $taginfo['parent_id'], FALSE);
+
 	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . '</form></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
-		$self ($kid, $level + 1);
+		$self ($kid, $taginfo['tag'], $level + 1);
 }
 
 function addParentNodeOptionsJS ($prefix, $nodetype)
