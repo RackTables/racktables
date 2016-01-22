@@ -5,15 +5,13 @@
 # licensing information.
 
 // Find direct sub-pages and dump as a list.
-// FIXME: assume all config kids to have static titles at the moment,
-// but use some proper abstract function later.
 function renderConfigMainpage ()
 {
 	global $pageno, $page;
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
 		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno  && permitted($cpageno))
-			echo "<li><a href='index.php?page=${cpageno}'>" . $cpage['title'] . "</li>\n";
+			echo '<li>' . mkA (getTitle ($cpageno), $cpageno) . "</li>\n";
 	echo '</ul>';
 }
 
