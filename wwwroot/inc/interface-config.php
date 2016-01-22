@@ -902,7 +902,7 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 	echo getSelect
 	(
 		array ($parent_id => $parent_name),
-		array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'taglist-popup'),
+		array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'nodelist-popup'),
 		$taginfo['parent_id'],
 		FALSE
 	);
@@ -911,21 +911,25 @@ function renderTagRowForEditor ($taginfo, $level = 0)
 		$self ($kid, $level + 1);
 }
 
-function renderTagTreeEditor ()
+function addParentNodeOptionsJS ($prefix, $nodetype)
 {
 	addJS
 	(
 <<<END
-function tageditor_showselectbox(e) {
-	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: 'existing tag', node_id: this.id});
-	$(this).unbind('mousedown', tageditor_showselectbox);
+function ${prefix}_showselectbox(e) {
+	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: '${nodetype}', node_id: this.id});
+	$(this).unbind('mousedown', ${prefix}_showselectbox);
 }
 $(document).ready(function () {
-	$('select.taglist-popup').bind('mousedown', tageditor_showselectbox);
+	$('select.nodelist-popup').bind('mousedown', ${prefix}_showselectbox);
 });
 END
 		, TRUE
 	);
+}
+
+function renderTagTreeEditor ()
+{
 	function printNewItemTR ($options)
 	{
 		printOpFormIntro ('createTag');
@@ -938,6 +942,7 @@ END
 		echo '</tr></form>';
 	}
 	global $taglist;
+	addParentNodeOptionsJS ('tageditor', 'existing tag');
 	$options = getParentNodeOptionsNew ($taglist, 'tag');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
