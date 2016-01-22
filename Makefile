@@ -16,7 +16,7 @@ INSTALL_DATA    := $(INSTALL) -m 644
 INSTALL_DIR     := $(INSTALL) -m 755 -d
 INSTALL_PROGRAM := $(INSTALL) -m 755
 
-install-docs: COPYING ChangeLog LICENSE README
+install-docs: COPYING ChangeLog LICENSE README.md
 	$(INSTALL_DIR) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) $^ $(DESTDIR)$(docdir)
 
