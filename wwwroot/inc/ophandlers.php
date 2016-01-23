@@ -156,9 +156,9 @@ $opspec_list['object-editrspvs-updLB'] = array
 	'action' => 'UPDATE',
 	'set_arglist' => array
 	(
-		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'if_empty' => 'NULL'),
-		array ('url_argname' => 'prio', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'vsconfig', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+		array ('url_argname' => 'rsconfig', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+		array ('url_argname' => 'prio', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
 	),
 	'where_arglist' => array
 	(
@@ -391,7 +391,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
-		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'translator' => 'nullIfZero'),
 		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
 	),
 );
@@ -456,7 +456,7 @@ $opspec_list['vlandomain-vlanlist-add'] = array
 		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
-		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
 	),
 );
 $opspec_list['vlandomain-vlanlist-del'] = array
@@ -477,7 +477,7 @@ $opspec_list['vlandomain-vlanlist-upd'] = array
 	'set_arglist' => array
 	(
 		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
-		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'if_empty' => 'NULL'),
+		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
 	),
 	'where_arglist' => array
 	(
@@ -3603,7 +3603,13 @@ function buildOpspecColumns ($opspec, $listname)
 				$argspec['table_colname'] :
 				$argspec['url_argname'];
 			$arg_value = $sic[$argspec['url_argname']];
-			if
+			if (array_key_exists ('translator', $argspec))
+			{
+				if (! is_callable ($argspec['translator']))
+					throw new RackTablesError ('opspec translator function is not callable', RackTablesError::INTERNAL);
+				$arg_value = $argspec['translator'] ($arg_value);
+			}
+			elseif // FIXME: remove the old declaration style at a later point
 			(
 				($argspec['assertion'] == 'uint0' and $arg_value == 0)
 				or ($argspec['assertion'] == 'string0' and $arg_value == '')
