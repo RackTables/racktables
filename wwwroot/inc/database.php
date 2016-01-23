@@ -4386,7 +4386,7 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
 			array
 			(
 				'tag' => $tag_name,
-				'parent_id' => $parent_id == 0 ? NULL : $parent_id,
+				'parent_id' => nullIfZero ($parent_id),
 				'is_assignable' => $is_assignable
 			),
 			array ('id' => $tag_id)
