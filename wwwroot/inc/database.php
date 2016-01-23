@@ -2640,8 +2640,7 @@ function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 		'order by mask desc limit 1';
 	$ip_db = ip4_bin2db ($ip_bin);
 	$result = usePreparedSelectBlade ($query, array ($ip_db, $ip_db, $masklen));
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row === FALSE ? NULL : $row;
+	return nullIfFalse ($result->fetch (PDO::FETCH_ASSOC));
 }
 
 // Return the id of the smallest IPv6 network containing the given IPv6 address
@@ -2656,8 +2655,7 @@ function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 {
 	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
 	$result = usePreparedSelectBlade ($query, array ($ip_bin, $ip_bin, $masklen));
-	$row = $result->fetch (PDO::FETCH_ASSOC);
-	return $row === FALSE ? NULL : $row;
+	return nullIfFalse ($result->fetch (PDO::FETCH_ASSOC));
 }
 
 // This function is actually used not only to update, but also to create records,
@@ -4564,8 +4562,7 @@ function destroyIPv6Prefix ($id)
 function loadScript ($name)
 {
 	$result = usePreparedSelectBlade ("select script_text from Script where script_name = ?", array ($name));
-	$script_text = $result->fetchColumn();
-	return $script_text === FALSE ? NULL : $script_text;
+	return nullIfFalse ($result->fetchColumn());
 }
 
 function saveScript ($name = '', $text)
@@ -4915,8 +4912,7 @@ function getChapterList ()
 function findFileByName ($filename)
 {
 	$result = usePreparedSelectBlade ('SELECT id FROM File WHERE name = ?', array ($filename));
-	$file_id = $result->fetchColumn();
-	return $file_id === FALSE ? NULL : $file_id;
+	return nullIfFalse ($result->fetchColumn());
 }
 
 function fetchLDAPCacheRow ($username, $extrasql = '')
@@ -4999,8 +4995,7 @@ function discardLDAPCache ($maxage = 0)
 function getUserIDByUsername ($username)
 {
 	$result = usePreparedSelectBlade ('SELECT user_id FROM UserAccount WHERE user_name = ?', array ($username));
-	$user_id = $result->fetchColumn();
-	return $user_id === FALSE ? NULL : $user_id;
+	return nullIfFalse ($result->fetchColumn());
 }
 
 # Derive a complete cell structure from the given username regardless
