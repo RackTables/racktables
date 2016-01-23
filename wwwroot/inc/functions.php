@@ -6054,7 +6054,13 @@ function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
 	return FALSE;
 }
 
+// The old name, remove at a later point.
 function nullEmptyStr ($str)
+{
+	return nullIfEmptyStr ($x);
+}
+
+function nullIfEmptyStr ($x)
 {
 	return $str != '' ? $str : NULL;
 }
