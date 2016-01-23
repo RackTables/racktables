@@ -3599,9 +3599,7 @@ function buildOpspecColumns ($opspec, $listname)
 			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
 			// "table_colname" is normally used for an override, if it is not
 			// set, use the URL argument name
-			$table_colname = array_key_exists ('table_colname', $argspec) ?
-				$argspec['table_colname'] :
-				$argspec['url_argname'];
+			$table_colname = array_fetch ($argspec, 'table_colname', $argspec['url_argname']);
 			$arg_value = $sic[$argspec['url_argname']];
 			if (array_key_exists ('translator', $argspec))
 			{
