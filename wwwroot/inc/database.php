@@ -932,10 +932,10 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 		'Object',
 		array
 		(
-			'name' => nullEmptyStr ($new_name),
-			'label' => nullEmptyStr ($new_label),
+			'name' => nullIfEmptyStr ($new_name),
+			'label' => nullIfEmptyStr ($new_label),
 			'objtype_id' => $new_type_id,
-			'asset_no' => nullEmptyStr ($new_asset_no),
+			'asset_no' => nullIfEmptyStr ($new_asset_no),
 		)
 	);
 	$object_id = lastInsertID();
@@ -973,7 +973,7 @@ function commitRenameObject ($object_id, $new_name)
 		'Object',
 		array
 		(
-			'name' => nullEmptyStr ($new_name),
+			'name' => nullIfEmptyStr ($new_name),
 		),
 		array
 		(
@@ -992,11 +992,11 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		'Object',
 		array
 		(
-			'name' => nullEmptyStr ($new_name),
-			'label' => nullEmptyStr ($new_label),
+			'name' => nullIfEmptyStr ($new_name),
+			'label' => nullIfEmptyStr ($new_label),
 			'has_problems' => !mb_strlen ($new_has_problems) ? 'no' : $new_has_problems,
-			'asset_no' => nullEmptyStr ($new_asset_no),
-			'comment' => nullEmptyStr ($new_comment),
+			'asset_no' => nullIfEmptyStr ($new_asset_no),
+			'comment' => nullIfEmptyStr ($new_comment),
 		),
 		array
 		(
@@ -1769,7 +1769,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 				'label' => $port_label,
 				'iif_id' => $iif_id,
 				'type' => $oif_id,
-				'l2address' => nullEmptyStr ($db_l2address),
+				'l2address' => nullIfEmptyStr ($db_l2address),
 			)
 		);
 		lastCreated ('port', lastInsertID());
@@ -1811,7 +1811,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 			throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
 		}
 		$prev_comment = getPortReservationComment ($port_id);
-		$reservation_comment = nullEmptyStr ($port_reservation_comment);
+		$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
 		switch (1)
 		{
 		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
@@ -1835,7 +1835,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 				'type' => $oif_id,
 				'label' => $port_label,
 				'reservation_comment' => $reservation_comment,
-				'l2address' => nullEmptyStr ($db_l2address),
+				'l2address' => nullIfEmptyStr ($db_l2address),
 			),
 			array
 			(
@@ -1861,7 +1861,7 @@ function commitUpdatePortComment ($port_id, $port_reservation_comment)
 	global $dbxlink;
 	$dbxlink->beginTransaction();
 	$prev_comment = getPortReservationComment ($port_id, 'FOR UPDATE');
-	$reservation_comment = nullEmptyStr ($port_reservation_comment);
+	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
 	usePreparedUpdateBlade
 	(
 		'Port',
@@ -1924,7 +1924,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		(
 			'porta' => $porta,
 			'portb' => $portb,
-			'cable' => nullEmptyStr ($cable),
+			'cable' => nullIfEmptyStr ($cable),
 		)
 	);
 	usePreparedExecuteBlade
@@ -1955,7 +1955,7 @@ function commitUpdatePortLink ($port_id, $cable = NULL)
 	return usePreparedUpdateBlade
 	(
 		'Link',
-		array ('cable' => nullEmptyStr ($cable)),
+		array ('cable' => nullIfEmptyStr ($cable)),
 		array ('porta' => $port_id, 'portb' => $port_id),
 		'OR'
 	);

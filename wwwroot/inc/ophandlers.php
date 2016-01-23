@@ -1738,9 +1738,9 @@ function addVService ()
 			'vip' => $vip_bin,
 			'vport' => $vport,
 			'proto' => $_REQUEST['proto'],
-			'name' => nullEmptyStr ($_REQUEST['name']),
-			'vsconfig' => nullEmptyStr ($sic['vsconfig']),
-			'rsconfig' => nullEmptyStr ($sic['rsconfig']),
+			'name' => nullIfEmptyStr ($_REQUEST['name']),
+			'vsconfig' => nullIfEmptyStr ($sic['vsconfig']),
+			'rsconfig' => nullIfEmptyStr ($sic['rsconfig']),
 		)
 	);
 	$vs_id = lastInsertID();
@@ -1859,8 +1859,8 @@ function updateVS ()
 	$taglist = genericAssertion ('taglist', 'array0');
 	$vs_id = assertUIntArg ('vs_id');
 	$name = assertStringArg ('name');
-	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
-	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
 
 	usePreparedUpdateBlade ('VS', array ('name' => $name, 'vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('id' => $vs_id));
 	rebuildTagChainForEntity ('ipvs', $vs_id, buildTagChainFromIds ($taglist), TRUE);
@@ -1920,8 +1920,8 @@ function updateIPInVS()
 {
 	$vs_id = assertUIntArg ('vs_id');
 	$ip_bin = assertIPArg ('ip');
-	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
-	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
 	if (usePreparedUpdateBlade ('VSIPs', array ('vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('vs_id' => $vs_id, 'vip' => $ip_bin)))
 		showSuccess ("IP configuration updated");
 	else
@@ -1933,8 +1933,8 @@ function updatePortInVS()
 	$vs_id = assertUIntArg ('vs_id');
 	$proto = assertStringArg ('proto');
 	$vport = assertUIntArg ('port', TRUE);
-	$vsconfig = nullEmptyStr (assertStringArg ('vsconfig', TRUE));
-	$rsconfig = nullEmptyStr (assertStringArg ('rsconfig', TRUE));
+	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
+	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
 	if (usePreparedUpdateBlade ('VSPorts', array ('vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('vs_id' => $vs_id, 'proto' => $proto, 'vport' => $vport)))
 		showSuccess ("Port configuration updated");
 	else
@@ -1981,8 +1981,8 @@ function updateTripletConfig()
 	);
 	$config_fields = array
 	(
-		'vsconfig' => nullEmptyStr (assertStringArg ('vsconfig', TRUE)),
-		'rsconfig' => nullEmptyStr (assertStringArg ('rsconfig', TRUE)),
+		'vsconfig' => nullIfEmptyStr (assertStringArg ('vsconfig', TRUE)),
+		'rsconfig' => nullIfEmptyStr (assertStringArg ('rsconfig', TRUE)),
 	);
 
 	$vsinfo = spotEntity ('ipvs', $key_fields['vs_id']);
@@ -2009,7 +2009,7 @@ function updateTripletConfig()
 	{
 		$table = 'VSEnabledIPs';
 		$vip = assertIPArg ('vip');
-		$config_fields['prio'] = nullEmptyStr (assertStringArg ('prio', TRUE));
+		$config_fields['prio'] = nullIfEmptyStr (assertStringArg ('prio', TRUE));
 		$key_fields['vip'] = $vip;
 		$key = "IP " . ip_format ($vip);
 		// check if such VIP exists in VS
