@@ -6059,6 +6059,11 @@ function nullEmptyStr ($str)
 	return $str != '' ? $str : NULL;
 }
 
+function nullIfFalse ($x)
+{
+	return $x === FALSE ? NULL : $x;
+}
+
 function printLocationChildrenSelectOptions ($location, $parent_id, $location_id = NULL, $level = 0)
 {
 	$self = __FUNCTION__;
