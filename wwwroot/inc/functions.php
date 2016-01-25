@@ -3348,7 +3348,7 @@ function formatVLANAsOption ($vlaninfo)
 {
 	$ret = $vlaninfo['vlan_id'];
 	if ($vlaninfo['vlan_descr'] != '')
-		$ret .= ' ' . niftyString ($vlaninfo['vlan_descr']);
+		$ret .= ' ' . $vlaninfo['vlan_descr'];
 	return $ret;
 }
 

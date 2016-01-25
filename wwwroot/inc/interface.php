@@ -5688,7 +5688,7 @@ function render8021QOrderForm ($some_id)
 				$decision = permitted (NULL, NULL, 'add');
 				restoreContext ($ctx);
 				if ($decision)
-					$options[$nominee['id']] = niftyString ($nominee['description'], 30, FALSE);
+					$options[$nominee['id']] = $nominee['description'];
 			}
 			echo '<td>' . getSelect ($options, array ('name' => 'vst_id', 'size' => getConfigVar ('MAXSELSIZE')), $focus['prev_vstid']) . '</td>';
 		}
