@@ -6222,7 +6222,7 @@ function formatPatchCableHeapAsPlainText ($heap)
 	$text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
 	if ($heap['description'] != '')
 		$text .=  " (${heap['description']})";
-	return niftyString ($text, 512);
+	return niftyString ($text, 512, FALSE);
 }
 
 // takes a list of structures and the field name in those structures.
