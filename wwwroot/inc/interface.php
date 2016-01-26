@@ -2205,7 +2205,6 @@ function renderRackSpaceForObject ($object_id)
 	if (! isset ($_REQUEST['show_all_racks']) and getConfigVar ('FILTER_RACKLIST_BY_TAGS') == 'yes')
 	{
 		$matching_racks = array();
-		$object = spotEntity ('object', $object_id);
 		$matched_tags = array();
 		foreach ($allRacksData as $rack)
 		{
