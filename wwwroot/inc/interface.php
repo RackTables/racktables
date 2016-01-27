@@ -3206,7 +3206,8 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 function renderIPNetworkProperties()
 {
-	$netdata = spotEntity (etypeByPageno(), getBypassValue());
+	global $pageno;
+	$netdata = spotEntity ($pageno, getBypassValue());
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	printOpFormIntro ('editRange');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align='center'>\n";
