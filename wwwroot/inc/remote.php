@@ -441,6 +441,8 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$commands = "skip-page-display\n" . $commands;
 			break;
 		case 'vrp55':
+			$commands = "terminal echo-mode line\n" . $commands;
+			/* fall-through */
 		case 'vrp85':
 			$commands = "screen-length 0 temporary\n" . $commands;
 			/* fall-through */
