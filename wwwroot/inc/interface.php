@@ -677,9 +677,8 @@ function renderRackspaceRowEditor ()
 	finishPortlet();
 }
 
-function renderRow()
+function renderRow ($row_id)
 {
-	$row_id = getBypassValue();
 	$rowInfo = getRowInfo ($row_id);
 	$cellfilter = getCellFilter();
 	$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
@@ -736,9 +735,8 @@ function renderRow()
 	echo "</td></tr></table>";
 }
 
-function renderEditRowForm()
+function renderEditRowForm ($row_id)
 {
-	$row_id = getBypassValue();
 	$row = getRowInfo ($row_id);
 
 	startPortlet ('Attributes');
@@ -1003,9 +1001,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "</center>\n";
 }
 
-function renderRackSortForm()
+function renderRackSortForm ($row_id)
 {
-	$row_id = getBypassValue();
 	includeJQueryUI (false);
 	$js = <<<JSTXT
 	$(document).ready(
@@ -1035,7 +1032,7 @@ JSTXT;
 	finishPortlet();
 }
 
-function renderNewRackForm()
+function renderNewRackForm ($row_id)
 {
 	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($default_height == 0)
@@ -1187,10 +1184,9 @@ function renderEditObjectForm()
 	echo '</td></tr></table>';
 }
 
-function renderEditRackForm()
+function renderEditRackForm ($rack_id)
 {
 	global $pageno;
-	$rack_id = getBypassValue();
 	$rack = spotEntity ('rack', $rack_id);
 	amplifyCell ($rack);
 
@@ -1414,10 +1410,9 @@ function renderObjectPortRow ($port, $is_highlighted)
 	echo "</tr>";
 }
 
-function renderObject()
+function renderObject ($object_id)
 {
 	global $nextorder, $virtual_obj_types;
-	$object_id = getBypassValue();
 	$info = spotEntity ('object', $object_id);
 	amplifyCell ($info);
 	// Main layout starts.
@@ -1693,7 +1688,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 }
 
 // This function renders a form for port edition.
-function renderPortsForObject()
+function renderPortsForObject ($object_id)
 {
 	$prefs = getPortListPrefs();
 	function printNewItemTR ($prefs)
@@ -1713,7 +1708,7 @@ function renderPortsForObject()
 		startPortlet ('Ports and interfaces');
 	else
 		echo '<br>';
-	$object = spotEntity ('object', getBypassValue());
+	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && getConfigVar('ENABLE_BULKPORT_FORM') == 'yes'){
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
@@ -1756,7 +1751,7 @@ function renderPortsForObject()
 		$hl_port_id = intval ($_REQUEST['hl_port_id']);
 		addAutoScrollScript ("port-$hl_port_id");
 	}
-	switchportInfoJS ($object['id']); // load JS code to make portnames interactive
+	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($object['ports'] as $port)
 	{
 		// highlight port name with yellow if it's name is not canonical
@@ -1863,7 +1858,7 @@ function renderPortsForObject()
 	finishPortlet();
 }
 
-function renderIPForObject()
+function renderIPForObject ($object_id)
 {
 	function printNewItemTR ($default_type)
 	{
@@ -1900,7 +1895,6 @@ function renderIPForObject()
 
 	$alloc_list = ''; // most of the output is stored here
 	$used_alloc_types = array();
-	$object_id = getBypassValue();
 	foreach (getObjectIPAllocations ($object_id) as $alloc)
 	{
 		if (! isset ($used_alloc_types[$alloc['type']]))
@@ -2070,9 +2064,8 @@ function showMessageOrError ()
 }
 
 // renders two tables: port link status and learned MAC list
-function renderPortsInfo()
+function renderPortsInfo($object_id)
 {
-	$object_id = getBypassValue();
 	$breed = detectDeviceBreed ($object_id);
 	try
 	{
@@ -2181,9 +2174,8 @@ already exists in RackSpace, it can't be used for mounting.
 2. We can't unmount from 'W' atoms. Operator should review appropriate comments
 and either delete them before unmounting or refuse to unmount the object.
 */
-function renderRackSpaceForObject()
+function renderRackSpaceForObject ($object_id)
 {
-	$object_id = getBypassValue();
 	// Always process occupied racks plus racks chosen by user. First get racks with
 	// already allocated rackspace...
 	$workingRacksData = getResidentRacksData ($object_id);
@@ -2791,11 +2783,11 @@ function getRenderedIPNetBacktrace ($range)
 	return $ret;
 }
 
-function renderIPNetwork()
+function renderIPNetwork ($id)
 {
 	global $pageno;
 	$realm = $pageno; // 'ipv4net', 'ipv6net'
-	$range = spotEntity ($realm, getBypassValue());
+	$range = spotEntity ($realm, $id);
 	loadIPAddrList ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
@@ -2836,7 +2828,7 @@ function renderIPNetwork()
 		finishPortlet ();
 	}
 
-	renderFilesPortlet ($realm, $range['id']);
+	renderFilesPortlet ($realm, $id);
 	echo "</td>\n";
 
 	echo "<td class=pcright>";
@@ -3204,10 +3196,10 @@ function renderIPv6NetworkAddresses ($netinfo)
 		addJS ('js/inplace-edit.js');
 }
 
-function renderIPNetworkProperties()
+function renderIPNetworkProperties ($id)
 {
 	global $pageno;
-	$netdata = spotEntity ($pageno, getBypassValue());
+	$netdata = spotEntity ($pageno, $id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	printOpFormIntro ('editRange');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align='center'>\n";
@@ -3228,7 +3220,7 @@ function renderIPNetworkProperties()
 	if (! isIPNetworkEmpty ($netdata))
 		echo getOpLink (NULL, 'delete this prefix', 'nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
 	else
-		echo getOpLink (array('op'=>'del'), 'delete this prefix', 'destroy');
+		echo getOpLink (array('op'=>'del','id'=>$id), 'delete this prefix', 'destroy');
 	echo '</center>';
 }
 
@@ -3423,7 +3415,7 @@ function renderIPAddressAllocations ($ip_bin)
 	echo "</table><br><br>";
 }
 
-function renderNATv4ForObject()
+function renderNATv4ForObject ($object_id)
 {
 	function printNewItemTR ($alloclist)
 	{
@@ -3452,7 +3444,7 @@ function renderNATv4ForObject()
 		echo "</td></tr></form>";
 	}
 
-	$focus = spotEntity ('object', getBypassValue());
+	$focus = spotEntity ('object', $object_id);
 	amplifyCell ($focus);
 	echo "<center><h2>locally performed NAT</h2></center>";
 
@@ -3951,9 +3943,9 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 	echo "</td></tr></table>\n";
 }
 
-function renderLocationPage()
+function renderLocationPage ($location_id)
 {
-	$locationData = spotEntity ('location', getBypassValue());
+	$locationData = spotEntity ('location', $location_id);
 	amplifyCell ($locationData);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
@@ -3982,7 +3974,7 @@ function renderLocationPage()
 		echo '<div class=commentblock>' . string_insert_hrefs ($locationData['comment']) . '</div>';
 		finishPortlet ();
 	}
-	renderFilesPortlet ('location', $locationData['id']);
+	renderFilesPortlet ('location', $location_id);
 	echo '</td>';
 
 	// Right column with list of rows and child locations
@@ -4003,10 +3995,10 @@ function renderLocationPage()
 	echo '</tr></table>';
 }
 
-function renderEditLocationForm()
+function renderEditLocationForm ($location_id)
 {
 	global $pageno;
-	$location = spotEntity ('location', getBypassValue());
+	$location = spotEntity ('location', $location_id);
 	amplifyCell ($location);
 
 	startPortlet ('Attributes');
@@ -4025,7 +4017,7 @@ function renderEditLocationForm()
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	// optional attributes
-	$values = getAttrValuesSorted ($location['id']);
+	$values = getAttrValuesSorted ($location_id);
 	$num_attrs = count($values);
 	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
 	$i = 0;
@@ -4074,26 +4066,26 @@ function renderEditLocationForm()
 	finishPortlet();
 
 	startPortlet ('History');
-	renderObjectHistory ($location['id']);
+	renderObjectHistory ($location_id);
 	finishPortlet();
 }
 
-function renderRackPage()
+function renderRackPage ($rack_id)
 {
-	$rackData = spotEntity ('rack', getBypassValue());
+	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0><tr>";
 
 	// Left column with information.
 	echo "<td class=pcleft>";
 	renderRackInfoPortlet ($rackData);
-	renderFilesPortlet ('rack', $rackData['id']);
+	renderFilesPortlet ('rack', $rack_id);
 	echo '</td>';
 
 	// Right column with rendered rack.
 	echo '<td class=pcright>';
 	startPortlet ('Rack diagram');
-	renderRack ($rackData['id']);
+	renderRack ($rack_id);
 	finishPortlet();
 	echo '</td>';
 
@@ -4122,7 +4114,7 @@ function dragon ()
 	finishPortlet();
 }
 
-function renderSNMPPortFinder()
+function renderSNMPPortFinder ($object_id)
 {
 	if (!extension_loaded ('snmp'))
 	{
@@ -4202,7 +4194,7 @@ function renderSNMPPortFinder()
 	finishPortlet();
 }
 
-function renderLivePTR()
+function renderLivePTR ($id)
 {
 	if (isset($_REQUEST['pg']))
 		$page = $_REQUEST['pg'];
@@ -4210,7 +4202,7 @@ function renderLivePTR()
 		$page=0;
 	global $pageno, $tabno;
 	$maxperpage = getConfigVar ('IPV4_ADDRS_PER_PAGE');
-	$range = spotEntity ('ipv4net', getBypassValue());
+	$range = spotEntity ('ipv4net', $id);
 	loadIPAddrList ($range);
 	$can_import = permitted (NULL, NULL, 'importPTRData');
 	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
@@ -4233,7 +4225,7 @@ function renderLivePTR()
 		if ($i == $page)
 			echo "<b>$i</b> ";
 		else
-			echo "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$range['id'], 'pg'=>$i))."'>$i</a> ";
+			echo "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'id'=>$id, 'pg'=>$i))."'>$i</a> ";
 	echo "</center>";
 
 	// FIXME: address counter could be calculated incorrectly in some cases
@@ -4334,9 +4326,9 @@ function renderLivePTR()
 	echo "</td></tr></table>\n";
 }
 
-function renderAutoPortsForm()
+function renderAutoPortsForm ($object_id)
 {
-	$info = spotEntity ('object', getBypassValue());
+	$info = spotEntity ('object', $object_id);
 	$ptlist = getPortOIFOptions();
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center'>\n";
 	echo "<caption>The following ports can be quickly added:</caption>";
@@ -4640,7 +4632,7 @@ END
 	finishPortlet();
 }
 
-function renderTagRollerForRow()
+function renderTagRollerForRow ($row_id)
 {
 	$a = rand (1, 20);
 	$b = rand (1, 20);
@@ -4716,16 +4708,16 @@ function renderFilePreview ($pcode)
 }
 
 // File-related functions
-function renderFile()
+function renderFile ($file_id)
 {
-	$file = spotEntity ('file', getBypassValue());
+	$file = spotEntity ('file', $file_id);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>" . htmlspecialchars ($file['name']) . "</h1></td></tr>\n";
 	echo "<tr><td class=pcleft>";
 
 	callHook ('renderFileSummary', $file);
 
-	$links = getFileLinks ($file['id']);
+	$links = getFileLinks ($file_id);
 	if (count ($links))
 		callHook ('renderFileLinks', $links);
 
@@ -4751,17 +4743,16 @@ function renderFileReuploader ()
 	finishPortlet();
 }
 
-function renderFileDownloader()
+function renderFileDownloader ($file_id)
 {
-	$args = array ('module' => 'download', 'file_id' => getBypassValue(), 'asattach' => 1);
-	echo "<br><center><a target='_blank' href='" . makeHref ($args) . "'>";
+	echo "<br><center><a target='_blank' href='?module=download&file_id=${file_id}&asattach=1'>";
 	printImageHREF ('DOWNLOAD');
 	echo '</a></center>';
 }
 
-function renderFileProperties()
+function renderFileProperties ($file_id)
 {
-	$file = spotEntity ('file', getBypassValue());
+	$file = spotEntity ('file', $file_id);
 	printOpFormIntro ('updateFile');
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>MIME-type:</th><td class=tdleft><input type=text name=file_type value='";
@@ -4774,7 +4765,7 @@ function renderFileProperties()
 	echo "<tr><th class=tdright>Comment:</th><td class=tdleft><textarea name=file_comment rows=10 cols=80>\n";
 	echo stringForTextarea ($file['comment']) . "</textarea></td></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
-	echo getOpLink (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id' => $file['id']), '', 'destroy', 'Delete file', 'need-confirmation');
+	echo getOpLink (array ('op'=>'deleteFile', 'page'=>'files', 'tab'=>'manage', 'file_id'=>$file_id), '', 'destroy', 'Delete file', 'need-confirmation');
 	echo '</td></tr>';
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -5183,10 +5174,10 @@ function getFilePreviewCode ($file)
 	return $ret;
 }
 
-function renderTextEditor()
+function renderTextEditor ($file_id)
 {
 	global $CodePressMap;
-	$fullInfo = getFile (getBypassValue());
+	$fullInfo = getFile ($file_id);
 	printOpFormIntro ('updateFileText', array ('mtime_copy' => $fullInfo['mtime']));
 	preg_match('/.+\.([^.]*)$/', $fullInfo['name'], $matches); # get file extension
 	if (isset ($matches[1]) && isset ($CodePressMap[$matches[1]]))
@@ -6062,10 +6053,9 @@ function get8021QPortTrClass ($port, $domain_vlans, $desired_mode = NULL)
 
 // Show a list of 802.1Q-eligible ports in any way, but when one of
 // them is selected as current, also display a form for its setup.
-function renderObject8021QPorts()
+function renderObject8021QPorts ($object_id)
 {
 	global $pageno, $tabno, $sic;
-	$object_id = getBypassValue();
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_fetch ($sic, 'port_name', '');
@@ -6703,17 +6693,17 @@ function renderVLANIPLinks ($some_id)
 	echo '</table>';
 }
 
-function renderObject8021QSync()
+function renderObject8021QSync ($object_id)
 {
-	$object = spotEntity ('object', getBypassValue());
-	$vswitch = getVLANSwitchInfo ($object['id']);
+	$vswitch = getVLANSwitchInfo ($object_id);
+	$object = spotEntity ('object', $object_id);
 	amplifyCell ($object);
 	$maxdecisions = 0;
 	$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
 	$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 	try
 	{
-		$R = getRunning8021QConfig ($object['id']);
+		$R = getRunning8021QConfig ($object_id);
 		$plan = apply8021QOrder ($vswitch, get8021QSyncOptions ($vswitch, $D, $C, $R['portdata']));
 		foreach ($plan as $port)
 			if
@@ -7098,9 +7088,9 @@ function renderVSTRules ($rules, $title = NULL)
 	finishPortlet();
 }
 
-function renderVST()
+function renderVST ($vst_id)
 {
-	$vst = spotEntity ('vst', getBypassValue());
+	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	echo '<tr><td colspan=2 align=center><h1>' . stringForTD ($vst['description'], 0) . '</h1></td></tr>';
@@ -7131,9 +7121,9 @@ function renderVST()
 	echo '</td></tr></table>';
 }
 
-function renderVSTRulesEditor()
+function renderVSTRulesEditor ($vst_id)
 {
-	$vst = spotEntity ('vst', getBypassValue());
+	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
 	if ($vst['rulec'])
 		$source_options = array();
@@ -7218,7 +7208,7 @@ function renderDeployQueue()
 		}
 }
 
-function renderDiscoveredNeighbors()
+function renderDiscoveredNeighbors ($object_id)
 {
 	global $tabno;
 
@@ -7227,10 +7217,9 @@ function renderDiscoveredNeighbors()
 		'livecdp' => 'getcdpstatus',
 		'livelldp' => 'getlldpstatus',
 	);
-	$mydevice = spotEntity ('object', getBypassValue());
 	try
 	{
-		$neighbors = queryDevice ($mydevice['id'], $opcode_by_tabno[$tabno]);
+		$neighbors = queryDevice ($object_id, $opcode_by_tabno[$tabno]);
 		$neighbors = sortPortList ($neighbors);
 	}
 	catch (RTGatewayError $e)
@@ -7238,6 +7227,7 @@ function renderDiscoveredNeighbors()
 		showError ($e->getMessage());
 		return;
 	}
+	$mydevice = spotEntity ('object', $object_id);
 	amplifyCell ($mydevice);
 
 	// reindex by port name
@@ -7254,7 +7244,7 @@ function renderDiscoveredNeighbors()
 		addAutoScrollScript ("port-$hl_port_id");
 	}
 
-	switchportInfoJS($mydevice['id']); // load JS code to make portnames interactive
+	switchportInfoJS($object_id); // load JS code to make portnames interactive
 	printOpFormIntro ('importDPData');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th colspan=2>local port</th><th></th><th>remote device</th><th colspan=2>remote port</th><th><input type="checkbox" checked id="cb-toggle"></th></tr>';
@@ -7830,7 +7820,7 @@ function renderIPAddressLog ($ip_bin)
 	finishPortlet();
 }
 
-function renderObjectCactiGraphs()
+function renderObjectCactiGraphs ($object_id)
 {
 	function printNewItemTR ($options)
 	{
@@ -7857,7 +7847,7 @@ function renderObjectCactiGraphs()
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && permitted('object','cacti','add'))
 		printNewItemTR ($options);
 	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">";
-	foreach (getCactiGraphsForObject (getBypassValue()) as $graph_id => $graph)
+	foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
 	{
 		$cacti_url = $servers[$graph['server_id']]['base_url'];
 		$text = "(graph ${graph_id} on server ${graph['server_id']})";
@@ -7875,9 +7865,8 @@ function renderObjectCactiGraphs()
 	finishPortlet ();
 }
 
-function renderObjectMuninGraphs()
+function renderObjectMuninGraphs ($object_id)
 {
-	$object_id = getBypassValue();
 	function printNewItem ($options)
 	{
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
