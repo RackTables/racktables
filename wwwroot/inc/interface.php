@@ -1032,7 +1032,7 @@ JSTXT;
 	finishPortlet();
 }
 
-function renderNewRackForm ($row_id)
+function renderNewRackForm()
 {
 	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
 	if ($default_height == 0)
@@ -3199,7 +3199,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 function renderIPNetworkProperties ($id)
 {
 	global $pageno;
-	$netdata = spotEntity ($pageno, $id);
+	$netdata = spotEntity (etypeByPageno(), $id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	printOpFormIntro ('editRange');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align='center'>\n";
@@ -3220,7 +3220,7 @@ function renderIPNetworkProperties ($id)
 	if (! isIPNetworkEmpty ($netdata))
 		echo getOpLink (NULL, 'delete this prefix', 'nodestroy', 'There are ' . count ($netdata['addrlist']) . ' allocations inside');
 	else
-		echo getOpLink (array('op'=>'del','id'=>$id), 'delete this prefix', 'destroy');
+		echo getOpLink (array('op'=>'del'), 'delete this prefix', 'destroy');
 	echo '</center>';
 }
 
@@ -4745,7 +4745,8 @@ function renderFileReuploader ()
 
 function renderFileDownloader ($file_id)
 {
-	echo "<br><center><a target='_blank' href='?module=download&file_id=${file_id}&asattach=1'>";
+	$args = array ('module' => 'download', 'file_id' => $file_id, 'asattach' => 1);
+	echo "<br><center><a target='_blank' href='" . makeHref ($args) . "'>";
 	printImageHREF ('DOWNLOAD');
 	echo '</a></center>';
 }
