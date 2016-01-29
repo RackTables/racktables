@@ -7124,17 +7124,14 @@ function renderVST ($vst_id)
 
 function renderVSTRulesEditor ($vst_id)
 {
+	global $port_role_options;
 	$vst = spotEntity ('vst', $vst_id);
 	amplifyCell ($vst);
-	if ($vst['rulec'])
-		$source_options = array();
-	else
-	{
-		$source_options = array();
+	$source_options = array();
+	if (! $vst['rulec'])
 		foreach (listCells ('vst') as $vst_id => $vst_info)
 			if ($vst_info['rulec'])
-				$source_options[$vst_id] = stringForLabel ('(' . $vst_info['rulec'] . ') ' . $vst_info['description']);
-	}
+				$source_options[$vst_id] = '(' . $vst_info['rulec'] . ') ' . $vst_info['description'];
 	addJS ('js/vst_editor.js');
 	echo '<center><h1>' . stringForLabel ($vst['description']) . '</h1></center>';
 	if (count ($source_options))
@@ -7148,14 +7145,13 @@ function renderVSTRulesEditor ($vst_id)
 		finishPortlet();
 		startPortlet ('add rules one by one');
 	}
-	printOpFormIntro ('upd');
+	printOpFormIntro ('upd', array ('mutex_rev' => $vst['mutex_rev']));
 	echo '<table cellspacing=0 cellpadding=5 align=center class="widetable template-rules">';
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft style='border-top: none;'>";
 	printTagsPicker ();
 	echo "</td></tr>";
 	echo '<tr><th></th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'Add rule') . '</a></th></tr>';
-	global $port_role_options;
 	$row_html  = '<td><a href="#" class="vst-del-rule">' . getImageHREF ('destroy', 'delete rule') . '</a></td>';
 	$row_html .= '<td><input type=text name=rule_no value="%s" size=3></td>';
 	$row_html .= '<td><input type=text name=port_pcre value="%s"></td>';
@@ -7165,11 +7161,10 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
 	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
 	startSession();
-	foreach (isset ($_SESSION['vst_edited']) ? $_SESSION['vst_edited'] : $vst['rules'] as $item)
+	foreach (array_fetch ($_SESSION, 'vst_edited', $vst['rules']) as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';
 	echo '<input type=hidden name="template_json">';
-	echo '<input type=hidden name="mutex_rev" value="' . $vst['mutex_rev'] . '">';
 	echo '<center>' . getImageHref ('SAVE', 'Save template', TRUE) . '</center>';
 	echo '</form>';
 	if (isset ($_SESSION['vst_edited']))
