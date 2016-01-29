@@ -5367,7 +5367,7 @@ function getVlanRow ($vlan_ck)
 		'(SELECT group_id FROM VLANDomain WHERE id = domain_id) AS domain_group_id ' .
 		'FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?';
 	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
-	if (NULL == ($ret = $result->fetch (PDO::FETCH_ASSOC)))
+	if (NULL === $ret = $result->fetch (PDO::FETCH_ASSOC))
 		throw new EntityNotFoundException ('VLAN', $vlan_ck);
 	$ret['vlan_ck'] = $vlan_ck;
 	return $ret;
