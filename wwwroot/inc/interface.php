@@ -3907,10 +3907,7 @@ function renderAtomGrid ($data, $is_ro=FALSE)
 function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $celllist = NULL)
 {
 	if ($realm === NULL)
-	{
-		global $pageno;
-		$realm = $pageno;
-	}
+		$realm = etypeByPageno();
 	global $nextorder;
 	$order = 'odd';
 	$cellfilter = getCellFilter();
