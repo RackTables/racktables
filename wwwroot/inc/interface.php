@@ -4651,14 +4651,9 @@ function renderFileSummary ($file)
 {
 	$summary = array();
 	$summary['Type'] = stringForTD ($file['type']);
-	$summary['Size'] =
-	(
-		isolatedPermission ('file', 'download', $file) ?
-		(
-			"<a href='?module=download&file_id=${file['id']}'>" .
-			getImageHREF ('download', 'Download file') . '</a>&nbsp;'
-		) : ''
-	) . formatFileSize ($file['size']);
+	$btn = isolatedPermission ('file', 'download', $file) ?
+		(makeFileDownloadButton ($file['id']) . '&nbsp;') : '';
+	$summary['Size'] = $btn . formatFileSize ($file['size']);
 	$summary['Created'] = $file['ctime'];
 	$summary['Modified'] = $file['mtime'];
 	$summary['Accessed'] = $file['atime'];
@@ -4742,10 +4737,7 @@ function renderFileReuploader ()
 
 function renderFileDownloader ($file_id)
 {
-	$args = array ('module' => 'download', 'file_id' => $file_id, 'asattach' => 1);
-	echo "<br><center><a target='_blank' href='" . makeHref ($args) . "'>";
-	printImageHREF ('DOWNLOAD');
-	echo '</a></center>';
+	echo '<br><center>' . makeFileDownloadButton ($file_id, 'DOWNLOAD') . '</center>';
 }
 
 function renderFileProperties ($file_id)
@@ -5040,12 +5032,7 @@ function renderCell ($cell)
 		echo count ($cell['etags']) ? ("<small>" . serializeTags ($cell['etags']) . "</small>") : '&nbsp;';
 		echo '</td></tr><tr><td>';
 		if (isolatedPermission ('file', 'download', $cell))
-		{
-			// FIXME: reuse renderFileDownloader()
-			echo "<a href='?module=download&file_id=${cell['id']}'>";
-			printImageHREF ('download', 'Download file');
-			echo '</a>&nbsp;';
-		}
+			echo makeFileDownloadButton ($cell['id']) . '&nbsp;';
 		echo formatFileSize ($cell['size']);
 		echo "</td></tr></table>";
 		break;

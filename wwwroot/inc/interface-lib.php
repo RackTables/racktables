@@ -1013,6 +1013,13 @@ function serializeFileLinks ($links, $scissors = FALSE)
 	return $ret;
 }
 
+function makeFileDownloadButton ($file_id, $imgname = 'download')
+{
+	$href = makeHref (array ('module' => 'download', 'file_id' => $file_id));
+	$img = getImageHREF ($imgname, 'download file');
+	return "<a href='${href}'>${img}</a>";
+}
+
 // XXX: in new code please use one of the stringFor... functions below
 //
 // This is a dual-purpose formating function:
