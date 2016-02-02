@@ -16,12 +16,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	/**
 	 * @dataProvider providerUnaryEquals
 	 */
-/*
 	public function testUnaryEquals ($func, $input1, $output)
 	{
 		$this->assertEquals ($output, $func ($input1));
 	}
-*/
 
 	/**
 	 * @dataProvider providerUnarySame
@@ -73,6 +71,19 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	{
 		return array
 		(
+			// Test the implicit 2nd argument (not the same as the 2-ary tests below).
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x5d\xb8\xd8\x22"),
+				'<a href="index.php?page=ipaddress&ip=93.184.216.34">93.184.216.34</a>'
+			),
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x26\x06\x28\x00\x02\x20\x00\x01\x02\x48\x18\x93\x25\xc8\x19\x46"),
+				'<a href="index.php?page=ipaddress&ip=2606%3A2800%3A220%3A1%3A248%3A1893%3A25c8%3A1946">2606:2800:220:1:248:1893:25c8:1946</a>'
+			),
 		);
 	}
 
@@ -180,6 +191,34 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				'<option value=\'2\'>&amp;two;</option>' .
 				'<option value=\'3\'>&#039;&quot;three&quot;&#039;</option>' .
 				'<option value=\'4\'>    </option>'
+			),
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x5d\xb8\xd8\x22"),
+				TRUE,
+				'93.184.216.34'
+			),
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x5d\xb8\xd8\x22"),
+				FALSE,
+				'<a href="index.php?page=ipaddress&ip=93.184.216.34">93.184.216.34</a>'
+			),
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x26\x06\x28\x00\x02\x20\x00\x01\x02\x48\x18\x93\x25\xc8\x19\x46"),
+				TRUE,
+				'2606:2800:220:1:248:1893:25c8:1946'
+			),
+			array
+			(
+				'formatVSIP',
+				array ('vip' => "\x26\x06\x28\x00\x02\x20\x00\x01\x02\x48\x18\x93\x25\xc8\x19\x46"),
+				FALSE,
+				'<a href="index.php?page=ipaddress&ip=2606%3A2800%3A220%3A1%3A248%3A1893%3A25c8%3A1946">2606:2800:220:1:248:1893:25c8:1946</a>'
 			),
 		);
 	}
