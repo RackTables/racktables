@@ -7,7 +7,7 @@ that takes one argument. Binary and ternary functions take two and three
 arguments respectively.
 
 For every given combination of pure function name, argument(s) and expected
-return value test that the actual return value is equal (assertEqual) or
+return value test that the actual return value is equal (assertEquals) or
 identical (assertSame) to the expected return value.
 */
 
