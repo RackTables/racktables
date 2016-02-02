@@ -1855,6 +1855,7 @@ function mergeTagChains ($chainA, $chainB)
 
 # Return a list consisting of tag ID of the given tree node and IDs of all
 # nodes it contains.
+# This is an earlier and more generic variety of getTagDescendents().
 function getTagIDListForNode ($treenode)
 {
 	$self = __FUNCTION__;
