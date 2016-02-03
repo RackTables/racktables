@@ -3780,7 +3780,7 @@ function renameObjectPorts()
 {
 	$object_id = getBypassValue();
 	$n = 0;
-	foreach (getObjectPortsAndLinks ($object_id) as $port)
+	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $port)
 	{
 		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
 		if ($canon_pn != $port['name'])

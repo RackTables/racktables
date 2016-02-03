@@ -4398,7 +4398,7 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	// Filter and regroup all requests (regardless of how many will succeed)
 	// to end up with no more, than one execution per remote object.
 	$upstream_config = array();
-	foreach (getObjectPortsAndLinks ($object_id) as $portinfo)
+	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $portinfo)
 		if
 		(
 			$portinfo['linked'] and
@@ -4444,7 +4444,7 @@ function recalc8021QPorts ($switch_id)
 		return $ret;
 
 	$ports = array(); // only linked ports appear here
-	foreach (getObjectPortsAndLinks ($switch_id) as $portinfo)
+	foreach (getObjectPortsAndLinks ($switch_id, FALSE) as $portinfo)
 		if ($portinfo['linked'])
 			$ports[$portinfo['name']] = $portinfo;
 
