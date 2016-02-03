@@ -3481,13 +3481,18 @@ function apply8021QOrder ($vswitch, $portlist)
 	$vst_id = $vswitch['template_id'];
 	$vst = spotEntity ('vst', $vswitch['template_id']);
 	amplifyCell ($vst);
+
+	// warm the vlan_filter cache for every rule
+	foreach ($vst['rules'] as $i_rule => $rule)
+		$vst['rules'][$i_rule]['vlan_filter'] = buildVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+
 	foreach (array_keys ($portlist) as $port_name)
 	{
 		foreach ($vst['rules'] as $rule)
 			if (preg_match ($rule['port_pcre'], $port_name))
 			{
 				$portlist[$port_name]['vst_role'] = $rule['port_role'];
-				$portlist[$port_name]['wrt_vlans'] = buildVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+				$portlist[$port_name]['wrt_vlans'] = $rule['vlan_filter'];
 				continue 2;
 			}
 		$portlist[$port_name]['vst_role'] = 'none';
