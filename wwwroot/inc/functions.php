@@ -4658,7 +4658,7 @@ function compareDecomposedPortNames ($porta, $portb)
 {
 	$ret = 0;
 
-	$prefix_diff = numSign (strcmp ($porta['prefix'], $portb['prefix']));
+	$prefix_diff = strcmp ($porta['prefix'], $portb['prefix']);
 
 	// concatenation of 0..(n-1) numeric indices
 	$a_parent = $porta['idx_parent'];
@@ -4674,7 +4674,7 @@ function compareDecomposedPortNames ($porta, $portb)
 		}
 		if ($porta['index'][$i] != $portb['index'][$i])
 		{
-			$index_diff = numCompare ($porta['index'][$i], $portb['index'][$i]);
+			$index_diff = $porta['index'][$i] - $portb['index'][$i];
 			break;
 		}
 	}
@@ -4684,7 +4684,7 @@ function compareDecomposedPortNames ($porta, $portb)
 	// compare by portname fields
 	if ($prefix_diff != 0 and ($porta['numidx'] <= 1 or $portb['numidx'] <= 1)) // if index count is lte 1, sort by prefix
 	{
-		$ret = numCompare($porta['numidx'], $portb['numidx']);
+		$ret = $porta['numidx'] - $portb['numidx'];
 		if ($ret == 0)
 			$ret = $prefix_diff;
 	}
@@ -4696,15 +4696,15 @@ function compareDecomposedPortNames ($porta, $portb)
 		$ret = $index_diff;
 	// if all of name fields are equal, compare by some additional port fields
 	elseif ($porta['iif_id'] != $portb['iif_id'])
-		$ret = numCompare ($porta['iif_id'], $portb['iif_id']);
+		$ret = $porta['iif_id'] - $portb['iif_id'];
 	elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
-		$ret = numSign ($result);
+		$ret = $result;
 	elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
-		$ret = numSign ($result);
+		$ret = $result;
 	elseif ($porta['id'] != $portb['id'])
-		$ret = numCompare ($porta['id'], $portb['id']);
+		$ret = $porta['id'] - $portb['id'];
 
-	return $ret;
+	return ($ret > 0) - ($ret < 0);
 }
 
 // Sort provided port list in a way based on natural. For example,
