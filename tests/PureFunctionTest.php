@@ -225,11 +225,77 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				FALSE,
 				'<a href="index.php?page=ipaddress&ip=2606%3A2800%3A220%3A1%3A248%3A1893%3A25c8%3A1946">2606:2800:220:1:248:1893:25c8:1946</a>'
 			),
+
 			array ('numCompare', 100, 0, 1),
 			array ('numCompare', -100, 1, -1),
 			array ('numCompare', 100, 100, 0),
 			array ('numCompare', 0, -100, 1),
 			array ('numCompare', 0, 100, -1),
+
+			array
+			(
+				'tagOnChain',
+				array ('id' => 1),
+				array(),
+				FALSE
+			),
+			array
+			(
+				'tagOnChain',
+				array ('id' => 1),
+				array (array ('id' => 1)),
+				TRUE
+			),
+			array
+			(
+				'tagOnChain',
+				array ('id' => 4),
+				array (array ('id' => 1), array ('id' => 2), array ('id' => 3)),
+				FALSE
+			),
+			array
+			(
+				'tagOnChain',
+				array ('id' => 4),
+				array (array ('id' => 1), array ('id' => 2), array ('id' => 3), array ('id' => 4)),
+				TRUE
+			),
+			array
+			(
+				'tagOnChain',
+				array ('key' => 1), // wrong keying
+				array (array ('id' => 1)),
+				FALSE
+			),
+
+			array
+			(
+				'tagNameOnChain',
+				'one',
+				array(),
+				FALSE
+			),
+			array
+			(
+				'tagNameOnChain',
+				'one',
+				array (array ('tag' => 'one')),
+				TRUE
+			),
+			array
+			(
+				'tagNameOnChain',
+				'four',
+				array (array ('tag' => 'one'), array ('tag' => 'two'), array ('tag' => 'FOUR')), // case-sensitive
+				FALSE
+			),
+			array
+			(
+				'tagNameOnChain',
+				'tag' => 'four',
+				array (array ('tag' => 'one'), array ('tag' => 'two'), array ('tag' => 'three'), array ('tag' => 'four')),
+				TRUE
+			),
 		);
 	}
 
