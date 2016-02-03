@@ -887,10 +887,12 @@ END;
 	return $ret;
 }
 
-function getObjectPortsAndLinks ($object_id)
+function getObjectPortsAndLinks ($object_id, $sorted = TRUE)
 {
 	$ret = fetchPortList ("Port.object_id = ?", array ($object_id));
-	return sortPortList ($ret, TRUE);
+	if ($sorted)
+		$ret = sortPortList ($ret, TRUE);
+	return $ret;
 }
 
 // Fetch the object type via SQL.
