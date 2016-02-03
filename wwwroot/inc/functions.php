@@ -5949,47 +5949,42 @@ function sameDomains ($domain_id_1, $domain_id_2)
 
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
 // Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
-function checkPortRole ($vswitch, $port_name, $port_order)
+function checkPortRole ($vswitch, $portinfo, $port_name, $port_order)
 {
-	static $links_cache = array();
-	if (! isset ($links_cache[$vswitch['object_id']]))
-		$links_cache = array ($vswitch['object_id'] => getObjectPortsAndLinks ($vswitch['object_id']));
+	if (! $portinfo || ! $portinfo['linked'])
+		return TRUE; // not linked port
+
+
+	// find linked port with the same name
+	if ($port_name != $portinfo['name'])
+		return FALSE; // typo in local port name
 
 	$local_auto = ($port_order['vst_role'] == 'uplink' || $port_order['vst_role'] == 'downlink') ?
 		$port_order['vst_role'] :
 		FALSE;
+	$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
+	if (! $remote_vswitch)
+		return ! $local_auto;
 
-	// find linked port with the same name
-	foreach ($links_cache[$vswitch['object_id']] as $portinfo)
-		if ($portinfo['linked'] && shortenIfName ($portinfo['name'], NULL, $portinfo['object_id']) == $port_name)
-		{
-			if ($port_name != $portinfo['name'])
-				return FALSE; // typo in local port name
-			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
-			if (! $remote_vswitch)
-				return ! $local_auto;
+	$remote_pn = $portinfo['remote_name'];
+	$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired', array ($remote_pn)));
+	if (! array_key_exists($remote_pn, $remote_ports))
+		// linked auto-port must have corresponding remote 802.1Q port
+		return
+			! $local_auto &&
+			! isset ($remote_ports[shortenIfName ($remote_pn, NULL, $portinfo['remote_object_id'])]); // typo in remote port name
+	$remote = $remote_ports[$remote_pn];
 
-			$remote_pn = $portinfo['remote_name'];
-			$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired', array ($remote_pn)));
-			if (! array_key_exists($remote_pn, $remote_ports))
-				// linked auto-port must have corresponding remote 802.1Q port
-				return
-					! $local_auto &&
-					! isset ($remote_ports[shortenIfName ($remote_pn, NULL, $portinfo['remote_object_id'])]); // typo in remote port name
-			$remote = $remote_ports[$remote_pn];
+	$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
+		$remote['vst_role'] :
+		FALSE;
 
-			$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
-				$remote['vst_role'] :
-				FALSE;
-
-			if (! $remote_auto && ! $local_auto)
-				return TRUE;
-			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
-				return TRUE; // auto-calc link ends must belong to the same domain
-			else
-				return FALSE;
-		}
-	return TRUE; // not linked port
+	if (! $remote_auto && ! $local_auto)
+		return TRUE;
+	elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
+		return TRUE; // auto-calc link ends must belong to the same domain
+	else
+		return FALSE;
 }
 
 # Convert InvalidArgException to InvalidRequestArgException with a choice of

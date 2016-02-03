@@ -6040,7 +6040,7 @@ function get8021QPortTrClass ($port, $domain_vlans, $desired_mode = NULL)
 // them is selected as current, also display a form for its setup.
 function renderObject8021QPorts ($object_id)
 {
-	global $pageno, $tabno, $sic;
+	global $sic;
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_fetch ($sic, 'port_name', '');
@@ -6055,8 +6055,6 @@ function renderObject8021QPorts ($object_id)
 	echo $req_port_name == '' ? '<th width="25%">new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
 	if ($req_port_name == '');
 		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'save'));
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
 	$sockets = array();
 	if (isset ($_REQUEST['hl_port_id']))
 	{
@@ -6065,22 +6063,28 @@ function renderObject8021QPorts ($object_id)
 		$hl_port_name = NULL;
 		addAutoScrollScript ("port-$hl_port_id");
 	}
-	foreach ($object['ports'] as $port)
+	$indexed_ports = array();
+	$breed = detectDeviceBreed ($object_id);
+	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $port)
+	{
+		$pn = shortenIfName ($port['name'], $breed);
+		if (! isset ($indexed_ports[$pn]) || ! $indexed_ports[$pn]['linked'])
+			$indexed_ports[$pn] = $port;
 		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
 		{
 			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
 				$hl_port_name = $port['name'];
-			$socket = array ('interface' => formatPortIIFOIF ($port));
+			$socket = array ('interface' => formatPortIIFOIF ($port), 'link' => '&nbsp;');
 			if ($port['remote_object_id'])
 				$socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
 			elseif (strlen ($port['reservation_comment']))
-				$socket['link'] = formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline') . ' ' .
-				formatLoggedSpan ($port['last_log'], $port['reservation_comment']);
-			else
-				$socket['link'] = '&nbsp;';
+				$socket['link'] = implode (' ', array(
+					formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline'),
+					formatLoggedSpan ($port['last_log'], $port['reservation_comment'])
+				));
 			$sockets[$port['name']][] = $socket;
 		}
-	unset ($object);
+	}
 	$nports = 0; // count only access ports
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($desired_config as $port_name => $port)
@@ -6120,7 +6124,7 @@ function renderObject8021QPorts ($object_id)
 		default:
 			throw new InvalidArgException ('vst_role', $port['vst_role']);
 		}
-		if (!checkPortRole ($vswitch, $port_name, $port))
+		if (isset ($indexed_ports[$port_name]) && ! checkPortRole ($vswitch, $indexed_ports[$port_name], $port_name, $port))
 			$trclass = 'trerror';
 
 		if (!array_key_exists ($port_name, $sockets))
