@@ -7260,7 +7260,7 @@ function renderDiscoveredNeighbors ($object_id)
 
 				// get list of ports that have name matching CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
-				foreach (getObjectPortsAndLinks ($dp_remote_object_id) as $port)
+				foreach (getObjectPortsAndLinks ($dp_remote_object_id, FALSE) as $port)
 					if ($port['name'] == $dp_neighbor['port'])
 					{
 						$portinfo_remote = $port;
