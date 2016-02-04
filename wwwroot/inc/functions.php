@@ -3995,7 +3995,7 @@ function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 		if ($port['vst_role'] != 'uplink')
 			foreach ($port['allowed'] as $vlan_id)
 				if (! isset ($employed[$vlan_id]) && isset ($domain_vlanlist[$vlan_id]))
-					$employed[] = $vlan_id;
+					$employed[$vlan_id] = $vlan_id;
 
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] == 'uplink')
