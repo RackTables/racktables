@@ -3570,6 +3570,15 @@ function matchVLANFilter ($vlan_id, $vfilter)
 	return FALSE;
 }
 
+function filterVLANList ($vlan_list, $vfilter)
+{
+	$ret = array();
+	foreach ($vlan_list as $vid)
+		if (matchVLANFilter ($vid, $vfilter))
+			$ret[] = $vid;
+	return $ret;
+}
+
 function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 {
 	$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
@@ -3999,19 +4008,13 @@ function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] == 'uplink')
-		{
-			$employed_here = array();
-			foreach ($employed as $vlan_id)
-				if (matchVLANFilter ($vlan_id, $port['wrt_vlans']))
-					$employed_here[] = $vlan_id;
 			$ret[$port_name] = array
 			(
 				'vst_role' => 'uplink',
 				'mode' => 'trunk',
-				'allowed' => $employed_here,
+				'allowed' => filterVLANList ($employed, $port['wrt_vlans']),
 				'native' => 0,
 			);
-		}
 	return $ret;
 }
 
@@ -4362,20 +4365,13 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	// first filter by wrt_vlans constraint
 	foreach ($requested_changes as $pn => $requested)
 		if (array_key_exists ($pn, $before) and $requested['vst_role'] == 'downlink')
-		{
-			$negotiated = array
+			$changes_to_save[$pn] = array
 			(
 				'vst_role' => 'downlink',
 				'mode' => 'trunk',
-				'allowed' => array(),
+				'allowed' => filterVLANList ($requested['allowed'], $requested['wrt_vlans']),
 				'native' => 0,
 			);
-			// wrt_vlans filter
-			foreach ($requested['allowed'] as $vlan_id)
-				if (matchVLANFilter ($vlan_id, $requested['wrt_vlans']))
-					$negotiated['allowed'][] = $vlan_id;
-			$changes_to_save[$pn] = $negotiated;
-		}
 	// immune VLANs filter
 	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, $changes_to_save) as $pn => $finalconfig)
 		$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig, $before[$pn]);
@@ -4487,13 +4483,8 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 {
 	$new_order = array ($portname => $order[$portname]);
 	$new_order[$portname]['mode'] = 'trunk';
-	$new_order[$portname]['allowed'] = array();
+	$new_order[$portname]['allowed'] = filterVLANList ($uplink_order['allowed'], $new_order[$portname]['wrt_vlans']);
 	$new_order[$portname]['native'] = 0;
-	foreach ($uplink_order['allowed'] as $vlan_id)
-	{
-		if (matchVLANFilter ($vlan_id, $new_order[$portname]['wrt_vlans']))
-		$new_order[$portname]['allowed'][] = $vlan_id;
-	}
 	return filter8021QChangeRequests ($domain_vlanlist, $order, $new_order);
 }
 
