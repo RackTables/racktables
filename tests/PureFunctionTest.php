@@ -84,11 +84,24 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				array ('vip' => "\x26\x06\x28\x00\x02\x20\x00\x01\x02\x48\x18\x93\x25\xc8\x19\x46"),
 				'<a href="index.php?page=ipaddress&ip=2606%3A2800%3A220%3A1%3A248%3A1893%3A25c8%3A1946">2606:2800:220:1:248:1893:25c8:1946</a>'
 			),
+
 			array ('numSign', -100, -1),
 			array ('numSign', -1, -1),
 			array ('numSign', 0, 0),
 			array ('numSign', 1, 1),
 			array ('numSign', 100, 1),
+
+			array ('dos2unix', "", ""),
+			array ('dos2unix', "\r\n", "\n"),
+			array ('dos2unix', "line1\r\nline2\r\nline3", "line1\nline2\nline3"),
+			array ('dos2unix', "line1\r\n\r\n\r\nline2\r\n", "line1\n\n\nline2\n"),
+			array ('dos2unix', "line1\n\rline2\n\r", "line1\n\rline2\n\r"), // Mac style
+
+			array ('unix2dos', "", ""),
+			array ('unix2dos', "\n", "\r\n"),
+			array ('unix2dos', "line1\nline2", "line1\r\nline2"),
+			array ('unix2dos', "\n\nline1\n\nline2\n\n\n", "\r\n\r\nline1\r\n\r\nline2\r\n\r\n\r\n"),
+			array ('unix2dos', "line1", "line1"),
 		);
 	}
 
