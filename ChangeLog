@@ -1,4 +1,4 @@
-0.20.11
+0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)
 	bugfix: catch EntityNotFound exceptions in data integrity report (#1439)
