@@ -119,6 +119,12 @@ and initialize the application.
 
 ## Release notes
 
+### Upgrading to 0.20.11
+
+New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
+dsplaying unallocated networks in IPv4 space tree. Setting it also disables
+KNIGHT feature.
+
 ### Upgrading to 0.20.7
 
 From now on the minimum (oldest) release of PHP that can run RackTables is
