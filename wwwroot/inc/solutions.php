@@ -6,10 +6,10 @@
 
 /*
 
-The purpose of this file is to contain functions that generate a complete
-HTTP response body and are either "dead ends" or depend on just a small
-amount of other code (which should eventually be placed in a sort of
-"first order" library file).
+This file contains functions that produce a complete HTTP response (headers
+and body) and are either self-contained or depend on just a small amount of
+other code such that they can do the job quicker than the functions that
+implement the "interface" module.
 
 */
 
