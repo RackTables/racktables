@@ -3477,13 +3477,18 @@ function apply8021QOrder ($vswitch, $portlist)
 	$vst_id = $vswitch['template_id'];
 	$vst = spotEntity ('vst', $vswitch['template_id']);
 	amplifyCell ($vst);
+
+	// warm the vlan_filter cache for every rule
+	foreach ($vst['rules'] as $i_rule => $rule)
+		$vst['rules'][$i_rule]['vlan_filter'] = buildVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+
 	foreach (array_keys ($portlist) as $port_name)
 	{
 		foreach ($vst['rules'] as $rule)
 			if (preg_match ($rule['port_pcre'], $port_name))
 			{
 				$portlist[$port_name]['vst_role'] = $rule['port_role'];
-				$portlist[$port_name]['wrt_vlans'] = buildVLANFilter ($rule['port_role'], $rule['wrt_vlans']);
+				$portlist[$port_name]['wrt_vlans'] = $rule['vlan_filter'];
 				continue 2;
 			}
 		$portlist[$port_name]['vst_role'] = 'none';
@@ -3565,6 +3570,15 @@ function matchVLANFilter ($vlan_id, $vfilter)
 		if ($range['from'] <= $vlan_id and $vlan_id <= $range['to'])
 			return TRUE;
 	return FALSE;
+}
+
+function filterVLANList ($vlan_list, $vfilter)
+{
+	$ret = array();
+	foreach ($vlan_list as $vid)
+		if (matchVLANFilter ($vid, $vfilter))
+			$ret[] = $vid;
+	return $ret;
 }
 
 function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
@@ -3984,28 +3998,25 @@ function produceUplinkPorts ($domain_vlanlist, $portlist, $object_id)
 {
 	$ret = array();
 
-	$employed = getEmployedVlans ($object_id, $domain_vlanlist);
+	$employed = array();
+	foreach (getEmployedVlans ($object_id, $domain_vlanlist) as $vlan_id)
+		$employed[$vlan_id] = $vlan_id;
+
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] != 'uplink')
 			foreach ($port['allowed'] as $vlan_id)
-				if (array_key_exists ($vlan_id, $domain_vlanlist) && !in_array ($vlan_id, $employed))
-					$employed[] = $vlan_id;
+				if (! isset ($employed[$vlan_id]) && isset ($domain_vlanlist[$vlan_id]))
+					$employed[$vlan_id] = $vlan_id;
 
 	foreach ($portlist as $port_name => $port)
 		if ($port['vst_role'] == 'uplink')
-		{
-			$employed_here = array();
-			foreach ($employed as $vlan_id)
-				if (matchVLANFilter ($vlan_id, $port['wrt_vlans']))
-					$employed_here[] = $vlan_id;
 			$ret[$port_name] = array
 			(
 				'vst_role' => 'uplink',
 				'mode' => 'trunk',
-				'allowed' => $employed_here,
+				'allowed' => filterVLANList ($employed, $port['wrt_vlans']),
 				'native' => 0,
 			);
-		}
 	return $ret;
 }
 
@@ -4356,20 +4367,13 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	// first filter by wrt_vlans constraint
 	foreach ($requested_changes as $pn => $requested)
 		if (array_key_exists ($pn, $before) and $requested['vst_role'] == 'downlink')
-		{
-			$negotiated = array
+			$changes_to_save[$pn] = array
 			(
 				'vst_role' => 'downlink',
 				'mode' => 'trunk',
-				'allowed' => array(),
+				'allowed' => filterVLANList ($requested['allowed'], $requested['wrt_vlans']),
 				'native' => 0,
 			);
-			// wrt_vlans filter
-			foreach ($requested['allowed'] as $vlan_id)
-				if (matchVLANFilter ($vlan_id, $requested['wrt_vlans']))
-					$negotiated['allowed'][] = $vlan_id;
-			$changes_to_save[$pn] = $negotiated;
-		}
 	// immune VLANs filter
 	foreach (filter8021QChangeRequests ($domain_vlanlist, $before, $changes_to_save) as $pn => $finalconfig)
 		$nsaved += upd8021QPort ('desired', $vswitch['object_id'], $pn, $finalconfig, $before[$pn]);
@@ -4387,7 +4391,7 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	// Filter and regroup all requests (regardless of how many will succeed)
 	// to end up with no more, than one execution per remote object.
 	$upstream_config = array();
-	foreach (getObjectPortsAndLinks ($object_id) as $portinfo)
+	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $portinfo)
 		if
 		(
 			$portinfo['linked'] and
@@ -4433,7 +4437,7 @@ function recalc8021QPorts ($switch_id)
 		return $ret;
 
 	$ports = array(); // only linked ports appear here
-	foreach (getObjectPortsAndLinks ($switch_id) as $portinfo)
+	foreach (getObjectPortsAndLinks ($switch_id, FALSE) as $portinfo)
 		if ($portinfo['linked'])
 			$ports[$portinfo['name']] = $portinfo;
 
@@ -4481,13 +4485,8 @@ function produceDownlinkPort ($domain_vlanlist, $portname, $order, $uplink_order
 {
 	$new_order = array ($portname => $order[$portname]);
 	$new_order[$portname]['mode'] = 'trunk';
-	$new_order[$portname]['allowed'] = array();
+	$new_order[$portname]['allowed'] = filterVLANList ($uplink_order['allowed'], $new_order[$portname]['wrt_vlans']);
 	$new_order[$portname]['native'] = 0;
-	foreach ($uplink_order['allowed'] as $vlan_id)
-	{
-		if (matchVLANFilter ($vlan_id, $new_order[$portname]['wrt_vlans']))
-		$new_order[$portname]['allowed'][] = $vlan_id;
-	}
 	return filter8021QChangeRequests ($domain_vlanlist, $order, $new_order);
 }
 
@@ -4647,7 +4646,7 @@ function compareDecomposedPortNames ($porta, $portb)
 {
 	$ret = 0;
 
-	$prefix_diff = numSign (strcmp ($porta['prefix'], $portb['prefix']));
+	$prefix_diff = strcmp ($porta['prefix'], $portb['prefix']);
 
 	// concatenation of 0..(n-1) numeric indices
 	$a_parent = $porta['idx_parent'];
@@ -4663,7 +4662,7 @@ function compareDecomposedPortNames ($porta, $portb)
 		}
 		if ($porta['index'][$i] != $portb['index'][$i])
 		{
-			$index_diff = numCompare ($porta['index'][$i], $portb['index'][$i]);
+			$index_diff = $porta['index'][$i] - $portb['index'][$i];
 			break;
 		}
 	}
@@ -4673,7 +4672,7 @@ function compareDecomposedPortNames ($porta, $portb)
 	// compare by portname fields
 	if ($prefix_diff != 0 and ($porta['numidx'] <= 1 or $portb['numidx'] <= 1)) // if index count is lte 1, sort by prefix
 	{
-		$ret = numCompare($porta['numidx'], $portb['numidx']);
+		$ret = $porta['numidx'] - $portb['numidx'];
 		if ($ret == 0)
 			$ret = $prefix_diff;
 	}
@@ -4685,15 +4684,15 @@ function compareDecomposedPortNames ($porta, $portb)
 		$ret = $index_diff;
 	// if all of name fields are equal, compare by some additional port fields
 	elseif ($porta['iif_id'] != $portb['iif_id'])
-		$ret = numCompare ($porta['iif_id'], $portb['iif_id']);
+		$ret = $porta['iif_id'] - $portb['iif_id'];
 	elseif (0 != $result = strcmp ($porta['label'], $portb['label']))
-		$ret = numSign ($result);
+		$ret = $result;
 	elseif (0 != $result = strcmp ($porta['l2address'], $portb['l2address']))
-		$ret = numSign ($result);
+		$ret = $result;
 	elseif ($porta['id'] != $portb['id'])
-		$ret = numCompare ($porta['id'], $portb['id']);
+		$ret = $porta['id'] - $portb['id'];
 
-	return $ret;
+	return ($ret > 0) - ($ret < 0);
 }
 
 // Sort provided port list in a way based on natural. For example,
@@ -5943,47 +5942,42 @@ function sameDomains ($domain_id_1, $domain_id_2)
 
 // Checks if 802.1Q port uplink/downlink feature is misconfigured.
 // Returns FALSE if 802.1Q port role/linking is wrong, TRUE otherwise.
-function checkPortRole ($vswitch, $port_name, $port_order)
+function checkPortRole ($vswitch, $portinfo, $port_name, $port_order)
 {
-	static $links_cache = array();
-	if (! isset ($links_cache[$vswitch['object_id']]))
-		$links_cache = array ($vswitch['object_id'] => getObjectPortsAndLinks ($vswitch['object_id']));
+	if (! $portinfo || ! $portinfo['linked'])
+		return TRUE; // not linked port
+
+
+	// find linked port with the same name
+	if ($port_name != $portinfo['name'])
+		return FALSE; // typo in local port name
 
 	$local_auto = ($port_order['vst_role'] == 'uplink' || $port_order['vst_role'] == 'downlink') ?
 		$port_order['vst_role'] :
 		FALSE;
+	$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
+	if (! $remote_vswitch)
+		return ! $local_auto;
 
-	// find linked port with the same name
-	foreach ($links_cache[$vswitch['object_id']] as $portinfo)
-		if ($portinfo['linked'] && shortenIfName ($portinfo['name'], NULL, $portinfo['object_id']) == $port_name)
-		{
-			if ($port_name != $portinfo['name'])
-				return FALSE; // typo in local port name
-			$remote_vswitch = getVLANSwitchInfo ($portinfo['remote_object_id']);
-			if (! $remote_vswitch)
-				return ! $local_auto;
+	$remote_pn = $portinfo['remote_name'];
+	$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired', array ($remote_pn)));
+	if (! array_key_exists($remote_pn, $remote_ports))
+		// linked auto-port must have corresponding remote 802.1Q port
+		return
+			! $local_auto &&
+			! isset ($remote_ports[shortenIfName ($remote_pn, NULL, $portinfo['remote_object_id'])]); // typo in remote port name
+	$remote = $remote_ports[$remote_pn];
 
-			$remote_pn = $portinfo['remote_name'];
-			$remote_ports = apply8021QOrder ($remote_vswitch, getStored8021QConfig ($remote_vswitch['object_id'], 'desired', array ($remote_pn)));
-			if (! array_key_exists($remote_pn, $remote_ports))
-				// linked auto-port must have corresponding remote 802.1Q port
-				return
-					! $local_auto &&
-					! isset ($remote_ports[shortenIfName ($remote_pn, NULL, $portinfo['remote_object_id'])]); // typo in remote port name
-			$remote = $remote_ports[$remote_pn];
+	$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
+		$remote['vst_role'] :
+		FALSE;
 
-			$remote_auto = ($remote['vst_role'] == 'uplink' || $remote['vst_role'] == 'downlink') ?
-				$remote['vst_role'] :
-				FALSE;
-
-			if (! $remote_auto && ! $local_auto)
-				return TRUE;
-			elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
-				return TRUE; // auto-calc link ends must belong to the same domain
-			else
-				return FALSE;
-		}
-	return TRUE; // not linked port
+	if (! $remote_auto && ! $local_auto)
+		return TRUE;
+	elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
+		return TRUE; // auto-calc link ends must belong to the same domain
+	else
+		return FALSE;
 }
 
 # Convert InvalidArgException to InvalidRequestArgException with a choice of
