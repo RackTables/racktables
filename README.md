@@ -18,6 +18,15 @@ Below is a list of known-good distributions with respective setup notes.
 * To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
   section of `/etc/my.cnf` file and restart mysqld.
 
+### Fedora 23
+* MySQL: `dnf install mariadb-server mariadb`
+* Apache/PHP: `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`
+* To enable Unicode:
+```
+printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf
+systemctl restart mariadb
+```
+
 ### Debian 6
 * MySQL: `aptitude install mysql-server-5.1`
 * Apache/PHP: `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`
@@ -46,8 +55,6 @@ content - so maximum of 60 seconds is advised, but by default it is not enabled.
 printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf
 service mysql restart
 ```
-* During install time: MySQL UNIX socket path is `/var/run/mysqld/mysqld.sock`
-  and Apache httpd runs as www-data:www-data.
 
 ### ALTLinux 4.0
 * MySQL: `apt-get install MySQL-server`
@@ -104,6 +111,11 @@ also possible and often adisable (see `README.Fedora`).
 ## III. Run the installer
 Open the configured RackTables URL and you will be prompted to configure
 and initialize the application.
+
+| Distribution    | Apache httpd UID:GID    | MySQL UNIX socket path           |
+| --------------- | ----------------------- | -------------------------------- |
+| Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
+| Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
 # Upgrading RackTables
 
