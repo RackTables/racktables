@@ -3419,6 +3419,8 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 
 // Return TRUE, if every value of A1 is present in A2 and vice versa,
 // regardless of each array's sort order and indexing.
+// Any duplicate values in either of the arguments would be treated same
+// as a single occurrence, IOW, there is an implicit array_unique() here.
 function array_values_same ($a1, $a2)
 {
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
