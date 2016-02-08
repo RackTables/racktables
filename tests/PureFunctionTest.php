@@ -310,6 +310,77 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				array (array ('tag' => 'one'), array ('tag' => 'two'), array ('tag' => 'three'), array ('tag' => 'four')),
 				TRUE
 			),
+
+			array
+			(
+				'array_values_same',
+				array(),
+				array(),
+				TRUE
+			),
+			array
+			(
+				'array_values_same',
+				array (1, 2, 3, 4, 5),
+				array (5, 4, 3, 2, 1),
+				TRUE
+			),
+			array
+			(
+				'array_values_same',
+				array (1, 2, 3, 4, 5),
+				array (1, 2, 3, 4),
+				FALSE
+			),
+			array
+			(
+				'array_values_same',
+				array (1, 2, 3),
+				array (1, 2, 3, 3),
+				TRUE // a non-obvious but valid behaviour
+			),
+			array
+			(
+				'array_values_same',
+				array (1 => 'a', 2 => 'a', 3 => 'a', 4 => 'b', 5 => 'b'),
+				array (6 => 'a', 7 => 'b'),
+				TRUE // idem
+			),
+			array
+			(
+				'array_values_same',
+				array ('0', '1'),
+				array (1, 0),
+				TRUE
+			),
+			array
+			(
+				'array_values_same',
+				array (0, 1),
+				array (FALSE, TRUE),
+				FALSE
+			),
+			array
+			(
+				'array_values_same',
+				array (NULL),
+				array (0),
+				FALSE
+			),
+			array
+			(
+				'array_values_same',
+				array (FALSE),
+				array (NULL),
+				TRUE // string representation is the same
+			),
+			array
+			(
+				'array_values_same',
+				array (TRUE),
+				array (1),
+				TRUE // idem
+			),
 		);
 	}
 
