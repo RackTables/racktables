@@ -849,10 +849,10 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
 				$slotClass[$slot] = 'state_T';
-				if ($childData['has_problems'] == 'yes')
-					$slotClass[$slot] = 'state_Tw';
 				if ($childData['id'] == $hl_obj_id)
-					$slotClass[$slot] = 'state_Th';
+					$slotClass[$slot] .= 'h';
+				if ($childData['has_problems'] == 'yes')
+					$slotClass[$slot] .= 'w';
 			}
 		}
 		natsort($childNames);

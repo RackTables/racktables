@@ -639,7 +639,8 @@ function applyRackProblemMask (&$rackData)
 			}
 }
 
-// This function highlights specified object (and removes previous highlight).
+// This function highlights specified object by amending the
+// 'hl' suffix of the class name.
 function highlightObject (&$rackData, $object_id)
 {
 	// Also highlight parent objects
@@ -655,7 +656,7 @@ function highlightObject (&$rackData, $object_id)
 				$atom['state'] == 'T' and
 				($atom['object_id'] == $object_id or isset ($parents[$atom['object_id']]))
 			)
-				$atom['hl'] = 'h';
+				$atom['hl'] = 'h' . $atom['hl'];
 		}
 }
 
