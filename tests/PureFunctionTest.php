@@ -210,6 +210,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				'<option value=\'3\'>&#039;&quot;three&quot;&#039;</option>' .
 				'<option value=\'4\'>    </option>'
 			),
+
 			array
 			(
 				'formatVSIP',
@@ -305,7 +306,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array
 			(
 				'tagNameOnChain',
-				'tag' => 'four',
+				'four',
 				array (array ('tag' => 'one'), array ('tag' => 'two'), array ('tag' => 'three'), array ('tag' => 'four')),
 				TRUE
 			),
