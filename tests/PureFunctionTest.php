@@ -131,6 +131,16 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nullIfZero', 1, 1),
 			array ('nullIfZero', NULL, NULL), // type conversion: NULL == 0
 			array ('nullIfZero', FALSE, NULL), // type conversion: FALSE == 0
+
+			array ('array_first', array (1, 2, 3), 1),
+			array ('array_first', array (FALSE, NULL, 0), FALSE),
+			array ('array_first', array (-1, 0, 1), -1),
+			array ('array_first', array (), NULL), // not an exception in the current implementation
+
+			array ('array_last', array (1, 2, 3), 3),
+			array ('array_last', array (FALSE, NULL, 0), 0),
+			array ('array_last', array (-1, 0, 1), 1),
+			array ('array_last', array (), NULL), // not an exception in the current implementation
 		);
 	}
 
