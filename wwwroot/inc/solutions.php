@@ -56,7 +56,7 @@ function dispatchImageRequest()
 		{
 			fixContext();
 			assertPermission();
-			genericAssertion ('scale', 'uint');
+			$scale = genericAssertion ('scale', 'uint');
 			$object_id = array_key_exists ('object_id', $_REQUEST) ?
 				genericAssertion ('object_id', 'uint') : NULL;
 		}
@@ -66,7 +66,7 @@ function dispatchImageRequest()
 		}
 		// Scaling or highlighting implies no caching and thus no extra wrapper code around.
 		header ('Content-type: image/png');
-		printRackThumbImage (getBypassValue(), $_REQUEST['scale'], $object_id);
+		printRackThumbImage (getBypassValue(), $scale, $object_id);
 		break;
 	case 'preview': // file security context
 		$pageno = 'file';
