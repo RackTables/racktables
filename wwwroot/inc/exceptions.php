@@ -293,7 +293,7 @@ class RackCodeError extends RackTablesError
 class RTImageError extends RackTablesError
 {
 	protected $imgbin;
-	function __construct ($subject)
+	function __construct ($subject = NULL)
 	{
 		$map = array
 		(
