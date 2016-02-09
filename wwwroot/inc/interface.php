@@ -899,9 +899,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 								echo " class='${slotClass[$s]}'>${slotTitle[$s]}";
 								if ($layout == 'V')
 								{
-									$tmp = substr ($slotInfo[$s], 0, 1);
-									foreach (str_split (substr ($slotInfo[$s], 1)) as $letter)
-										$tmp .= '<br>' . $letter;
+									$tmp = mb_substr($slotInfo[$s], 0, 1);
+									for($i = 1; $i < mb_strlen($slotInfo[$s]); $i++)
+									{
+										$tmp .= '<br>' . mb_substr($slotInfo[$s], $i, 1);
+									}
 									$slotInfo[$s] = $tmp;
 								}
 								echo mkA ($slotInfo[$s], 'object', $slotData[$s]);
