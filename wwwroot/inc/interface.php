@@ -418,7 +418,7 @@ function rackspaceCmp ($a, $b)
 	return $ret;
 }
 
-function getRackThumbLink ($rack, $scale = 1)
+function getRackThumbLink ($rack, $scale = 1, $object_id = NULL)
 {
 	if (! is_int ($scale) || $scale <= 0)
 		throw new InvalidArgException ('scale', $scale, 'must be a natural number');
@@ -426,8 +426,9 @@ function getRackThumbLink ($rack, $scale = 1)
 	$height = getRackImageHeight ($rack['height']) * $scale;
 	$title = "${rack['height']} units";
 	$src = '?module=image' .
-		($scale == 1 ? '&img=minirack' : "&img=midirack&scale=${scale}") .
-		"&rack_id=${rack['id']}";
+		($scale == 1 && $object_id === NULL ? '&img=minirack' : "&img=midirack&scale=${scale}") .
+		"&rack_id=${rack['id']}" .
+		($object_id === NULL ? '' : "&object_id=${object_id}");
 	$img = "<img border=0 width=${width} height=${height} title='${title}' src='${src}'>";
 	return mkA ($img, 'rack', $rack['id']);
 }
@@ -849,10 +850,10 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
 				$slotClass[$slot] = 'state_T';
-				if ($childData['has_problems'] == 'yes')
-					$slotClass[$slot] = 'state_Tw';
 				if ($childData['id'] == $hl_obj_id)
-					$slotClass[$slot] = 'state_Th';
+					$slotClass[$slot] .= 'h';
+				if ($childData['has_problems'] == 'yes')
+					$slotClass[$slot] .= 'w';
 			}
 		}
 		natsort($childNames);
@@ -898,9 +899,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 								echo " class='${slotClass[$s]}'>${slotTitle[$s]}";
 								if ($layout == 'V')
 								{
-									$tmp = substr ($slotInfo[$s], 0, 1);
-									foreach (str_split (substr ($slotInfo[$s], 1)) as $letter)
-										$tmp .= '<br>' . $letter;
+									$tmp = mb_substr($slotInfo[$s], 0, 1);
+									for($i = 1; $i < mb_strlen($slotInfo[$s]); $i++)
+									{
+										$tmp .= '<br>' . mb_substr($slotInfo[$s], $i, 1);
+									}
 									$slotInfo[$s] = $tmp;
 								}
 								echo mkA ($slotInfo[$s], 'object', $slotData[$s]);
@@ -6040,7 +6043,7 @@ function get8021QPortTrClass ($port, $domain_vlans, $desired_mode = NULL)
 // them is selected as current, also display a form for its setup.
 function renderObject8021QPorts ($object_id)
 {
-	global $pageno, $tabno, $sic;
+	global $sic;
 	$vswitch = getVLANSwitchInfo ($object_id);
 	$vdom = getVLANDomain ($vswitch['domain_id']);
 	$req_port_name = array_fetch ($sic, 'port_name', '');
@@ -6055,8 +6058,6 @@ function renderObject8021QPorts ($object_id)
 	echo $req_port_name == '' ? '<th width="25%">new&nbsp;config</th></tr>' : '<th>(zooming)</th></tr>';
 	if ($req_port_name == '');
 		printOpFormIntro ('save8021QConfig', array ('mutex_rev' => $vswitch['mutex_rev'], 'form_mode' => 'save'));
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
 	$sockets = array();
 	if (isset ($_REQUEST['hl_port_id']))
 	{
@@ -6065,22 +6066,28 @@ function renderObject8021QPorts ($object_id)
 		$hl_port_name = NULL;
 		addAutoScrollScript ("port-$hl_port_id");
 	}
-	foreach ($object['ports'] as $port)
+	$indexed_ports = array();
+	$breed = detectDeviceBreed ($object_id);
+	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $port)
+	{
+		$pn = shortenIfName ($port['name'], $breed);
+		if (! isset ($indexed_ports[$pn]) || ! $indexed_ports[$pn]['linked'])
+			$indexed_ports[$pn] = $port;
 		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
 		{
 			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
 				$hl_port_name = $port['name'];
-			$socket = array ('interface' => formatPortIIFOIF ($port));
+			$socket = array ('interface' => formatPortIIFOIF ($port), 'link' => '&nbsp;');
 			if ($port['remote_object_id'])
 				$socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
 			elseif (strlen ($port['reservation_comment']))
-				$socket['link'] = formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline') . ' ' .
-				formatLoggedSpan ($port['last_log'], $port['reservation_comment']);
-			else
-				$socket['link'] = '&nbsp;';
+				$socket['link'] = implode (' ', array(
+					formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline'),
+					formatLoggedSpan ($port['last_log'], $port['reservation_comment'])
+				));
 			$sockets[$port['name']][] = $socket;
 		}
-	unset ($object);
+	}
 	$nports = 0; // count only access ports
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($desired_config as $port_name => $port)
@@ -6120,7 +6127,7 @@ function renderObject8021QPorts ($object_id)
 		default:
 			throw new InvalidArgException ('vst_role', $port['vst_role']);
 		}
-		if (!checkPortRole ($vswitch, $port_name, $port))
+		if (isset ($indexed_ports[$port_name]) && ! checkPortRole ($vswitch, $indexed_ports[$port_name], $port_name, $port))
 			$trclass = 'trerror';
 
 		if (!array_key_exists ($port_name, $sockets))
@@ -7260,7 +7267,7 @@ function renderDiscoveredNeighbors ($object_id)
 
 				// get list of ports that have name matching CDP portname
 				$remote_ports = array(); // list of remote (by DP info) ports
-				foreach (getObjectPortsAndLinks ($dp_remote_object_id) as $port)
+				foreach (getObjectPortsAndLinks ($dp_remote_object_id, FALSE) as $port)
 					if ($port['name'] == $dp_neighbor['port'])
 					{
 						$portinfo_remote = $port;
