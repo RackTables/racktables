@@ -3,42 +3,58 @@ Thank you for selecting RackTables as your datacenter management solution!
 If you are looking for documentation or wish to send feedback, please
 look for the respective links at [project's web-site](http://racktables.org).
 
-# Installing RackTables
+# How to install RackTables
 
-## I. Prepare the server
+## 1. Prepare the server
 
-RackTables requires a MySQL server version 5.x built with InnoDB and
-Unicode support and configured appropriately. By default RackTables is 
-developed on Apache httpd with PHP 5 module and several PHP extensions.
-Below is a list of known-good distributions with respective setup notes.
+RackTables uses a web-server with PHP (5.2.10 or newer) for front-end and a
+MySQL/MariaDB server version 5 for back-end. The most commonly used web-server
+for RackTables is Apache httpd.
 
-### Fedora 8-16
-* MySQL: `yum install mysql-server mysql`
-* Apache/PHP: `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`
-* To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
-  section of `/etc/my.cnf` file and restart mysqld.
+### 1.1. Install MySQL server
 
-### Fedora 23
-* MySQL: `dnf install mariadb-server mariadb`
-* Apache/PHP: `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`
-* To enable Unicode:
-```
-printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf
-systemctl restart mariadb
-```
+| Distribution       | How to do                                                               |
+| ------------------ | ----------------------------------------------------------------------- |
+| ALTLinux 4.0       | `apt-get install MySQL-server`                                          |
+| CentOS 5           | `yum install mysql-server mysql`                                        |
+| Debian 6           | `aptitude install mysql-server-5.1`                                     |
+| Debian 7           | `aptitude install mysql-server-5.1`                                     |
+| Fedora 8-16        | `yum install mysql-server mysql`                                        |
+| Fedora 23          | `dnf install mariadb-server mariadb`                                    |
+| openSUSE 11.0      | YaST -> Software -> software management -> Web and LAMP server -> mysql |
+| Scientific Linux 6 | `yum install mysql-server mysql`                                        |
+| Ubuntu 14.04       | `apt-get install mysql-server`                                          |
 
-### Debian 6
-* MySQL: `aptitude install mysql-server-5.1`
-* Apache/PHP: `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`
-* To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
-  section of `/etc/mysql/my.cnf` file and restart mysqld.
+### 1.2. Enable Unicode in the MySQL server
 
-### Debian 7 with nginx
-* MySQL: `aptitude install mysql-server-5.1`
-* nginx: `aptitude install nginx php5-fpm`
-* To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
-  section of `/etc/mysql/my.cnf` file and restart mysqld.
+| Distribution       | How to do                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| ALTLinux 4.0       | add `CHSET=utf8` line to `/etc/sysconfig/mysqld` file and restart mysqld                                           |
+| CentOS 5           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
+| Debian 6           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
+| Debian 7           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
+| Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
+| Fedora 23          | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
+| openSUSE 11.0      | add `default-character-set=utf8` line to `[mysql]` section of `/etc/my.cnf` file and restart mysqld                |
+| Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
+| Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 
+### 1.3. Install PHP and Apache httpd (or nginx)
+
+| Distribution       | How to do                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| Debian 6           | `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`                  |
+| Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
+| Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
+| ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
+| openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
+| Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
+| CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
+| FreeBSD 8          | see note below                                                                       |
+
+#### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
 will point to localhost (and thus fail).
 Notice, that fpm.sock is advised, keep the rest on default configuration, or
@@ -47,42 +63,7 @@ some external addons like fping, which may take some time in certain situations.
 Please note that setting aggresive caching for php scripts may result in stale
 content - so maximum of 60 seconds is advised, but by default it is not enabled.
 
-### Ubuntu 14.04
-* MySQL: `apt-get install mysql-server`
-* Apache/PHP: `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`
-* To enable Unicode:
-```
-printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf
-service mysql restart
-```
-
-### ALTLinux 4.0
-* MySQL: `apt-get install MySQL-server`
-* Apache/PHP: `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
-* To enable Unicode, add `CHSET=utf8` line to `/etc/sysconfig/mysqld` file
-  and restart mysqld.
-
-### openSUSE 11.0
-* MySQL: YaST -> Software -> software management -> Web and LAMP server -> mysql
-* Apache/PHP: use YaST to install apache2-mod_php5, php5-gd, php5-mbstring,
-  php5-mysql, php5-bcmath, php5-snmp and php5-ldap
-* To enable Unicode, add `default-character-set=utf8` line to `[mysql]`
-  section of `/etc/my.cnf` file and restart mysqld.
-
-### Scientific Linux 6
-* MySQL: `yum install mysql-server mysql`
-* Apache/PHP: `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`
-* To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
-  section of `/etc/my.cnf` file and restart mysqld.
-
-### CentOS 5
-* MySQL: `yum install mysql-server mysql`
-* Apache/PHP: `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath`
-* To enable Unicode, add `character-set-server=utf8` line to `[mysqld]`
-  section of `/etc/my.cnf` file and restart mysqld.
-
-### FreeBSD 8
-* Apache/PHP:
+#### 1.3.b. FreeBSD 8
 ```
 # make -C /usr/ports/www/apache13-modssl install
 # make -C /usr/ports/www/php5-session install
@@ -102,13 +83,13 @@ service mysql restart
 # make -C /usr/ports/net/php5-ldap install
 ```
 
-## II. Copy the files
+## 2. Copy the files
 Unpack the tar.gz/zip archive to a directory of your choice and configure Apache
 httpd to use `wwwroot` subdirectory as a new DocumentRoot. Alternatively,
 symlinks to `wwwroot` or even to `index.php` from an existing DocumentRoot are
 also possible and often adisable (see `README.Fedora`).
 
-## III. Run the installer
+## 3. Run the installer
 Open the configured RackTables URL and you will be prompted to configure
 and initialize the application.
 
@@ -117,7 +98,7 @@ and initialize the application.
 | Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
 | Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
-# Upgrading RackTables
+# How to upgrade RackTables
 
 0. **Backup your database** and check the release notes below before actually
    starting the upgrade.
