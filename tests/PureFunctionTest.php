@@ -401,6 +401,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				array (1),
 				TRUE // idem
 			),
+
+			array ('cmp_array_sizes', array(), array(), 0),
+			array ('cmp_array_sizes', array (NULL), array (FALSE), 0),
+			array ('cmp_array_sizes', array (0, TRUE), array (FALSE, ''), 0),
+			array ('cmp_array_sizes', array (0), array(), 1),
+			array ('cmp_array_sizes', array (2), array(1, 1), -1),
 		);
 	}
 
