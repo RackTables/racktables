@@ -22,6 +22,7 @@ for RackTables is Apache httpd.
 | Fedora 8-16        | `yum install mysql-server mysql`                                        |
 | Fedora 23          | `dnf install mariadb-server mariadb`                                    |
 | openSUSE 11.0      | YaST -> Software -> software management -> Web and LAMP server -> mysql |
+| openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
 
@@ -36,6 +37,7 @@ for RackTables is Apache httpd.
 | Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Fedora 23          | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
 | openSUSE 11.0      | add `default-character-set=utf8` line to `[mysql]` section of `/etc/my.cnf` file and restart mysqld                |
+| openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 
@@ -50,6 +52,7 @@ for RackTables is Apache httpd.
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
 | ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
 | openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
+| openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
 | FreeBSD 8          | see note below                                                                       |
@@ -96,6 +99,7 @@ and initialize the application.
 | Distribution    | Apache httpd UID:GID    | MySQL UNIX socket path           |
 | --------------- | ----------------------- | -------------------------------- |
 | Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
+| openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
 | Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
 # How to upgrade RackTables
