@@ -1,4 +1,5 @@
 0.20.12
+	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
 0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
