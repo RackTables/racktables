@@ -418,7 +418,7 @@ function rackspaceCmp ($a, $b)
 	return $ret;
 }
 
-function getRackThumbLink ($rack, $scale = 1)
+function getRackThumbLink ($rack, $scale = 1, $object_id = NULL)
 {
 	if (! is_int ($scale) || $scale <= 0)
 		throw new InvalidArgException ('scale', $scale, 'must be a natural number');
@@ -426,8 +426,9 @@ function getRackThumbLink ($rack, $scale = 1)
 	$height = getRackImageHeight ($rack['height']) * $scale;
 	$title = "${rack['height']} units";
 	$src = '?module=image' .
-		($scale == 1 ? '&img=minirack' : "&img=midirack&scale=${scale}") .
-		"&rack_id=${rack['id']}";
+		($scale == 1 && $object_id === NULL ? '&img=minirack' : "&img=midirack&scale=${scale}") .
+		"&rack_id=${rack['id']}" .
+		($object_id === NULL ? '' : "&object_id=${object_id}");
 	$img = "<img border=0 width=${width} height=${height} title='${title}' src='${src}'>";
 	return mkA ($img, 'rack', $rack['id']);
 }

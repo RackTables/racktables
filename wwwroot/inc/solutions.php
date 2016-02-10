@@ -56,15 +56,17 @@ function dispatchImageRequest()
 		{
 			fixContext();
 			assertPermission();
-			genericAssertion ('scale', 'uint');
+			$scale = genericAssertion ('scale', 'uint');
+			$object_id = array_key_exists ('object_id', $_REQUEST) ?
+				genericAssertion ('object_id', 'uint') : NULL;
 		}
 		catch (RackTablesError $e)
 		{
 			throw castRackImageException ($e);
 		}
-		# Scaling implies no caching, there is no special dispatching.
+		// Scaling or highlighting implies no caching and thus no extra wrapper code around.
 		header ('Content-type: image/png');
-		printRackThumbImage (getBypassValue(), $_REQUEST['scale']);
+		printRackThumbImage (getBypassValue(), $scale, $object_id);
 		break;
 	case 'preview': // file security context
 		$pageno = 'file';
@@ -163,10 +165,12 @@ function dispatchMiniRackThumbRequest ($rack_id)
 }
 
 # Generate a binary PNG image for a rack contents.
-function printRackThumbImage ($rack_id, $scale = 1)
+function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 {
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
+	if ($object_id !== NULL)
+		highlightObject ($rackData, $object_id);
 	global $rtwidth;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
