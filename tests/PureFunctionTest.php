@@ -40,12 +40,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	/**
 	 * @dataProvider providerBinarySame
 	 */
-/*
 	public function testBinarySame ($func, $input1, $input2, $output)
 	{
 		$this->assertSame ($output, $func ($input1, $input2));
 	}
-*/
 
 	/**
 	 * @dataProvider providerTernaryEquals
@@ -141,6 +139,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('array_last', array (FALSE, NULL, 0), 0),
 			array ('array_last', array (-1, 0, 1), 1),
 			array ('array_last', array (), NULL), // not an exception in the current implementation
+
+			// implicit 2nd argument
+			array ('groupIntsToRanges', array(), array()),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), array ('1-5')),
+			array ('groupIntsToRanges', array (11, 12, 13, 20, 21), array ('11-13', '20-21')),
+			array ('groupIntsToRanges', array (1, 2, 3, 15, 16, 17, 18, 23, 24), array ('1-3', '15-18', '23-24')),
+			array ('groupIntsToRanges', array (10), array (10)),
+			array ('groupIntsToRanges', array (10, 14), array (10, 14)),
+			array ('groupIntsToRanges', array (10, 12, 14), array (10, 12, 14)),
+			array ('groupIntsToRanges', array (10, 12, 13, 14), array (10, '12-14')),
+			array ('groupIntsToRanges', array (10, 11, 12, 14), array ('10-12', 14)),
+			array ('groupIntsToRanges', array (10, 11, 13, 15, 16), array ('10-11', 13, '15-16')),
 		);
 	}
 
@@ -398,6 +408,23 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	{
 		return array
 		(
+			// explicit 2nd argument
+			array ('groupIntsToRanges', array(), NULL, array()),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), NULL, array ('1-5')),
+			array ('groupIntsToRanges', array (11, 12, 13, 20, 21), NULL, array ('11-13', '20-21')),
+			array ('groupIntsToRanges', array (1, 2, 3, 15, 16, 17, 18, 23, 24), NULL, array ('1-3', '15-18', '23-24')),
+			array ('groupIntsToRanges', array (10), NULL, array (10)),
+			array ('groupIntsToRanges', array (10, 14), NULL, array (10, 14)),
+			array ('groupIntsToRanges', array (10, 12, 14), NULL, array (10, 12, 14)),
+			array ('groupIntsToRanges', array (10, 12, 13, 14), NULL, array (10, '12-14')),
+			array ('groupIntsToRanges', array (10, 11, 12, 14), NULL, array ('10-12', 14)),
+			array ('groupIntsToRanges', array (10, 11, 13, 15, 16), NULL, array ('10-11', 13, '15-16')),
+
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 1, array ('2-5')),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 2, array (1, '3-5')),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 3, array ('1-2', '4-5')),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 4, array ('1-3', 5)),
+			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 5, array ('1-4')),
 		);
 	}
 
