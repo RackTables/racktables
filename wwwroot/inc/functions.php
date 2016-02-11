@@ -5813,37 +5813,25 @@ function arePortsCompatible ($portinfo_a, $portinfo_b)
 // returns HTML-formatted link to the given entity
 function mkCellA ($cell, $title = NULL)
 {
-	global $page, $pageno_by_etype;
+	global $pageno_by_etype;
 	if (! isset ($pageno_by_etype[$cell['realm']]))
 		throw new RackTablesError ("Internal structure error in array \$pageno_by_etype. Page for realm '${cell['realm']}' is not set", RackTablesError::INTERNAL);
-	else
-		$cell_page = $pageno_by_etype[$cell['realm']];
-
-	if ($cell['realm'] == 'user')
-		$cell_key = $cell['user_id'];
-	else
-		$cell_key = $cell['id'];
-
-	if (! isset ($page[$cell_page]['bypass']))
-		throw new RackTablesError ("Internal structure error. Bypass key for page '$cell_page' is not set", RackTablesError::INTERNAL);
-	else
-		$bypass_key = $page[$cell_page]['bypass'];
-
-	switch ($cell['realm'])
-	{
-		case 'object':
-		case 'ipv4vs':
-		case 'ipv4net':
-		case 'ipv6net':
-			if (! isset ($title))
+	$cell_page = $pageno_by_etype[$cell['realm']];
+	$cell_key = $cell[$cell['realm'] == 'user' ? 'user_id' : 'id'];
+	if ($title === NULL)
+		switch ($cell['realm'])
+		{
+			case 'object':
+			case 'ipv4vs':
+			case 'ipv4net':
+			case 'ipv6net':
 				$title = formatEntityName ($cell);
-			break;
-		default:
-			if (! isset ($title))
+				break;
+			default:
 				$title = formatRealmName ($cell['realm']) . ' ' . formatEntityName ($cell);
-			break;
-	}
-	return '<a href="' . makeHref (array ('page' => $cell_page, $bypass_key => $cell_key)) . '">' . $title . '</a>';
+				break;
+		}
+	return mkA ($title, $cell_page, $cell_key);
 }
 
 // Returns a list of entities of a given realm, like listCells.
