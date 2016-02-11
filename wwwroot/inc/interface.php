@@ -861,7 +861,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 	}
 	else
 		$suffix = "'>";
-	echo "${prefix}${body}${suffix}" . mkA ($objectData['dname'], 'object', $objectData['id']) . '</div>';
+	echo "${prefix}${body}${suffix}" . mkCellA ($objectData) . '</div>';
 	if (in_array ($objectData['objtype_id'], array (1502,1503))) // server chassis, network chassis
 	{
 		$objAttr = getAttrValues ($objectData['id']);
@@ -2676,7 +2676,6 @@ function renderIPSpaceEditor()
 {
 	global $pageno;
 	$realm = ($pageno == 'ipv4space' ? 'ipv4net' : 'ipv6net');
-	$net_page = $realm; // 'ipv4net', 'ipv6net'
 	$addrspaceList = listCells ($realm);
 	startPortlet ('Manage existing (' . count ($addrspaceList) . ')');
 	if (count ($addrspaceList))
@@ -2690,7 +2689,7 @@ function renderIPSpaceEditor()
 				printImageHREF ('nodestroy', 'There are ' . count ($netinfo['addrlist']) . ' allocations inside');
 			else
 				echo getOpLink (array	('op' => 'del', 'id' => $netinfo['id']), '', 'destroy', 'Delete this prefix');
-			echo '</td><td class=tdleft>' . mkA ("${netinfo['ip']}/${netinfo['mask']}", $net_page, $netinfo['id']) . '</td>';
+			echo '</td><td class=tdleft>' . mkCellA ($netinfo) . '</td>';
 			echo '<td class=tdleft>' . stringForTD ($netinfo['name']);
 			if (count ($netinfo['etags']))
 				echo '<br><small>' . serializeTags ($netinfo['etags']) . '</small>';
@@ -5048,7 +5047,7 @@ function renderCell ($cell)
 	case 'ipv6net':
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
-		echo '</td><td>' . mkA ("${cell['ip']}/${cell['mask']}", $cell['realm'], $cell['id']);
+		echo '</td><td>' . mkCellA ($cell);
 		echo getRenderedIPNetCapacity ($cell);
 		echo '</td></tr>';
 
@@ -5258,7 +5257,7 @@ function showPathAndSearch ($pageno, $tabno)
 			if ($object['rack_id'])
 			{
 				$rack = spotEntity ('rack', $object['rack_id']);
-				$items[] = mkA ($rack['name'], 'rack', $rack['id']);
+				$items[] = mkCellA ($rack);
 				$items[] = mkA ($rack['row_name'], 'row', $rack['row_id']);
 				if ($rack['location_id'])
 				{
@@ -5761,7 +5760,7 @@ function render8021QOrderForm ($some_id)
 		if ($pageno != 'object')
 		{
 			$object = spotEntity ('object', $item_object_id);
-			echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
+			echo '<td>' . mkCellA ($object) . '</td>';
 		}
 		if ($pageno != 'vlandomain')
 			echo '<td>' . mkA (stringForTD ($vdomlist[$item['vdom_id']], 64), 'vlandomain', $item['vdom_id']) . '</td>';

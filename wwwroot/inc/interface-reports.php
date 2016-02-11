@@ -289,7 +289,7 @@ function renderExpirations ()
 				$oem_sn_1 = array_key_exists (1, $attributes) ? $attributes[1]['a_value'] : '&nbsp;';
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
 				echo "<td>${count}</td>";
-				echo '<td>' . mkA ($object['dname'], 'object', $object['id']) . '</td>';
+				echo '<td>' . mkCellA ($object) . '</td>';
 				echo "<td>${object['asset_no']}</td>";
 				echo "<td>${oem_sn_1}</td>";
 				echo "<td>${date_value}</td>";
