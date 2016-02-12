@@ -116,7 +116,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <body>
 <div class="maintable">
  <div class="mainheader">
-  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
+  <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
  </div>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
@@ -3628,7 +3628,7 @@ function renderSearchResults ($terms, $summary)
 		switch ($where)
 		{
 			case 'object':
-				startPortlet ("<a href='index.php?page=depot'>Objects</a>");
+				startPortlet (mkA ('Objects', 'depot'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				echo '<tr><th>what</th><th>why</th></tr>';
 				foreach ($what as $obj)
@@ -3708,9 +3708,9 @@ function renderSearchResults ($terms, $summary)
 			case 'ipv4net':
 			case 'ipv6net':
 				if ($where == 'ipv4net')
-					startPortlet ("<a href='index.php?page=ipv4space'>IPv4 networks</a>");
+					startPortlet (mkA ('IPv4 networks', 'ipv4space'));
 				elseif ($where == 'ipv6net')
-					startPortlet ("<a href='index.php?page=ipv6space'>IPv6 networks</a>");
+					startPortlet (mkA ('IPv6 networks', 'ipv6space'));
 
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
@@ -3745,7 +3745,7 @@ function renderSearchResults ($terms, $summary)
 								'hl_ip' => $fmt,
 							)) . "'>${fmt}</a></td>";
 					else
-						echo "<a href='index.php?page=ipaddress&tab=default&ip=${fmt}'>${fmt}</a></td>";
+						echo mkA ($fmt, 'ipaddress', $fmt, 'default') . '</td>';
 					echo "<td class=tdleft>${addr['name']}</td><td>${addr['comment']}</td></tr>";
 					$order = $nextorder[$order];
 				}
@@ -3753,7 +3753,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'ipv4rspool':
-				startPortlet ("<a href='index.php?page=ipv4slb&tab=rspools'>RS pools</a>");
+				startPortlet (mkA ('RS pools', 'ipv4slb', NULL, 'rspools'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3766,7 +3766,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'ipvs':
-				startPortlet ("<a href='index.php?page=ipv4slb&tab=vs'>VS groups</a>");
+				startPortlet (mkA ('VS groups', 'ipv4slb', NULL, 'vs'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3779,7 +3779,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'ipv4vs':
-				startPortlet ("<a href='index.php?page=ipv4slb&tab=default'>Virtual services</a>");
+				startPortlet (mkA ('Virtual services', 'ipv4slb', NULL, 'default'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3792,7 +3792,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'user':
-				startPortlet ("<a href='index.php?page=userlist'>Users</a>");
+				startPortlet (mkA ('Users', 'userlist'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $item)
 				{
@@ -3805,7 +3805,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'file':
-				startPortlet ("<a href='index.php?page=files'>Files</a>");
+				startPortlet (mkA ('Files', 'files'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3818,7 +3818,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'rack':
-				startPortlet ("<a href='index.php?page=rackspace'>Racks</a>");
+				startPortlet (mkA ('Racks', 'rackspace'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3831,7 +3831,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'row':
-				startPortlet ("<a href='index.php?page=rackspace'>Rack rows</a>");
+				startPortlet (mkA ('Rack rows', 'rackspace'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3844,7 +3844,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'location':
-				startPortlet ("<a href='index.php?page=rackspace'>Locations</a>");
+				startPortlet (mkA ('Locations', 'rackspace'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $cell)
 				{
@@ -3857,7 +3857,7 @@ function renderSearchResults ($terms, $summary)
 				finishPortlet();
 				break;
 			case 'vlan':
-				startPortlet ("<a href='index.php?page=8021q'>VLANs</a>");
+				startPortlet (mkA ('VLANs', '8021q'));
 				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
 				foreach ($what as $vlan)
 				{
@@ -7534,7 +7534,7 @@ function renderObjectLogEditor ()
 {
 	global $nextorder;
 
-	echo "<center><h2>Log records for this object (<a href=?page=objectlog>complete list</a>)</h2></center>";
+	echo '<center><h2>Log records for this object (' . mkA ('complete list', 'objectlog') . ')</h2></center>';
 	printOpFormIntro ('add');
 	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>';
