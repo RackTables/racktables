@@ -2694,20 +2694,17 @@ function addFileToEntity ()
 function linkFileToEntity ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 71));
-	assertUIntArg ('file_id');
-	global $sic;
-
+	$fi = spotEntity ('file', genericAssertion ('file_id', 'uint'));
 	usePreparedInsertBlade
 	(
 		'FileLink',
 		array
 		(
-			'file_id' => $sic['file_id'],
+			'file_id' => $fi['id'],
 			'entity_type' => etypeByPageno(),
 			'entity_id' => getBypassValue(),
 		)
 	);
-	$fi = spotEntity ('file', $sic['file_id']);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($fi['name'])));
 }
 
@@ -2732,46 +2729,42 @@ function replaceFile ()
 function unlinkFile ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 72));
-	assertUIntArg ('link_id');
-	commitUnlinkFile ($_REQUEST['link_id']);
+	commitUnlinkFile (genericAssertion ('link_id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function deleteFile ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7));
-	assertUIntArg ('file_id');
-	$shortInfo = spotEntity ('file', $_REQUEST['file_id']);
-	commitDeleteFile ($_REQUEST['file_id']);
+	$file_id = genericAssertion ('file_id', 'uint');
+	$shortInfo = spotEntity ('file', $file_id);
+	commitDeleteFile ($file_id);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 function updateFileText ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6, 'ERR1' => 179, 'ERR2' => 155));
-	assertStringArg ('mtime_copy');
-	assertStringArg ('file_text', TRUE); // it's Ok to save empty
 	$shortInfo = spotEntity ('file', getBypassValue());
-	if ($shortInfo['mtime'] != $_REQUEST['mtime_copy'])
+	if ($shortInfo['mtime'] != genericAssertion ('mtime_copy', 'string'))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1');
 		return;
 	}
-	global $sic;
-	commitReplaceFile ($shortInfo['id'], $sic['file_text']);
+	commitReplaceFile ($shortInfo['id'], genericAssertion ('file_text', 'string0'));
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
 }
 
 function addIIFOIFCompatPack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 37));
-	genericAssertion ('standard', 'enum/wdmstd');
-	genericAssertion ('iif_id', 'iif');
-	global $wdm_packs, $sic;
+	$standard = genericAssertion ('standard', 'enum/wdmstd');
+	$iif_id = genericAssertion ('iif_id', 'iif');
+	global $wdm_packs;
 	$ngood = 0;
-	foreach ($wdm_packs[$sic['standard']]['oif_ids'] as $oif_id)
+	foreach ($wdm_packs[$standard]['oif_ids'] as $oif_id)
 	{
-		commitSupplementPIC ($sic['iif_id'], $oif_id);
+		commitSupplementPIC ($iif_id, $oif_id);
 		$ngood++;
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
@@ -2796,13 +2789,13 @@ function delOIFCompat ()
 function delIIFOIFCompatPack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 38));
-	genericAssertion ('standard', 'enum/wdmstd');
-	genericAssertion ('iif_id', 'iif');
-	global $wdm_packs, $sic;
+	$standard = genericAssertion ('standard', 'enum/wdmstd');
+	$iif_id = genericAssertion ('iif_id', 'iif');
+	global $wdm_packs;
 	$ngood = 0;
-	foreach ($wdm_packs[$sic['standard']]['oif_ids'] as $oif_id)
+	foreach ($wdm_packs[$standard]['oif_ids'] as $oif_id)
 	{
-		usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $sic['iif_id'], 'oif_id' => $oif_id));
+		usePreparedDeleteBlade ('PortInterfaceCompat', array ('iif_id' => $iif_id, 'oif_id' => $oif_id));
 		$ngood++;
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($ngood));
@@ -2989,40 +2982,28 @@ function save8021QPorts ()
 function bindVLANtoIPv4 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-vlan1');
-	global $sic;
-	commitSupplementVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	commitSupplementVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function bindVLANtoIPv6 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-vlan1');
-	global $sic;
-	commitSupplementVLANIPv6 ($sic['vlan_ck'], $_REQUEST['id']);
+	commitSupplementVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function unbindVLANfromIPv4 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-vlan1');
-	global $sic;
-	commitReduceVLANIPv4 ($sic['vlan_ck'], $sic['id']);
+	commitReduceVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function unbindVLANfromIPv6 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	genericAssertion ('id', 'uint');
-	genericAssertion ('vlan_ck', 'uint-vlan1');
-	global $sic;
-	commitReduceVLANIPv6 ($sic['vlan_ck'], $sic['id']);
+	commitReduceVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3030,8 +3011,8 @@ function process8021QSyncRequest ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR' => 191));
 	// behave depending on current operation: exec8021QPull or exec8021QPush
-	global $sic, $op;
-	if (FALSE === $done = exec8021QDeploy ($sic['object_id'], $op == 'exec8021QPush'))
+	global $op;
+	if (FALSE === $done = exec8021QDeploy (getBypassValue(), $op == 'exec8021QPush'))
 		showFuncMessage (__FUNCTION__, 'ERR');
 	else
 		showFuncMessage (__FUNCTION__, 'OK', array ($done));
@@ -3162,11 +3143,9 @@ function update8021QPortList()
 function cloneVST()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	assertUIntArg ('mutex_rev', TRUE);
-	assertUIntArg ('from_id');
-	$src_vst = spotEntity ('vst', $_REQUEST['from_id']);
+	$src_vst = spotEntity ('vst', genericAssertion ('from_id', 'uint'));
 	amplifyCell ($src_vst);
-	commitUpdateVSTRules (getBypassValue(), $_REQUEST['mutex_rev'], $src_vst['rules']);
+	commitUpdateVSTRules (getBypassValue(), genericAssertion ('mutex_rev', 'uint0'), $src_vst['rules']);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3180,9 +3159,10 @@ function updVSTRule()
 		return isset ($haystack[$name]) ? $haystack[$name] : NULL;
 	}
 
-	global $port_role_options, $sic;
+	global $port_role_options;
+	$vst_id = getBypassValue();
 	$taglist = genericAssertion ('taglist', 'array0');
-	assertUIntArg ('mutex_rev', TRUE);
+	$mutex_rev = genericAssertion ('mutex_rev', 'uint0');
 	$data = genericAssertion ('template_json', 'json');
 	$rule_no = 0;
 	try
@@ -3203,7 +3183,7 @@ function updVSTRule()
 			)
 				throw new InvalidRequestArgException ($last_field, $rule[$last_field], "rule #$rule_no");
 		}
-		commitUpdateVSTRules ($_REQUEST['vst_id'], $_REQUEST['mutex_rev'], $data);
+		commitUpdateVSTRules ($vst_id, $mutex_rev, $data);
 	}
 	catch (Exception $e)
 	{
@@ -3216,7 +3196,7 @@ function updVSTRule()
 		}
 		throw $e;
 	}
-	rebuildTagChainForEntity ('vst', $_REQUEST['vst_id'], buildTagChainFromIds ($taglist), TRUE);
+	rebuildTagChainForEntity ('vst', $vst_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3225,6 +3205,7 @@ function importDPData()
 	setFuncMessages (__FUNCTION__, array ('OK' => 44));
 	global $sic, $dbxlink;
 	assertUIntArg ('nports');
+	$object_id = getBypassValue();
 	$nignored = $ndone = 0;
 	for ($i = 0; $i < $sic['nports']; $i++)
 		if (array_key_exists ("do_${i}", $sic))
@@ -3248,7 +3229,7 @@ function importDPData()
 			(
 				$porta['linked'] or
 				$portb['linked'] or
-				($porta['object_id'] != $sic['object_id'] and $portb['object_id'] != $sic['object_id'])
+				($porta['object_id'] != $object_id and $portb['object_id'] != $object_id)
 			)
 			{
 				$nignored++;
