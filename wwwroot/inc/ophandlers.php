@@ -1053,7 +1053,7 @@ function addIPv4Prefix ()
 		else
 			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
 	}
-	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv4net', $net_id) . ' has been created');
+	showSuccess ('IP network ' . mkCellA ($net_cell) . ' has been created');
 }
 
 function addIPv6Prefix ()
@@ -1072,7 +1072,7 @@ function addIPv6Prefix ()
 		else
 			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
 	}
-	showSuccess ('IP network ' . mkA ($_REQUEST['range'], 'ipv6net', $net_id) . ' has been created');
+	showSuccess ('IP network ' . mkCellA ($net_cell) . ' has been created');
 }
 
 function delIPv4Prefix ()
