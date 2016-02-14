@@ -2740,7 +2740,8 @@ END
 	echo '<tr><th class=tdright>Tags:</th><td class="tdleft">';
 	printTagsPicker ();
 	echo '</td></tr>';
-	echo '<tr><td class=tdright><input type=checkbox name="is_connected"></td><th class=tdleft>reserve subnet-router anycast address</th></tr>';
+	echo '<tr><td class=tdright><input type=checkbox name="is_connected" id="is_connected"></td>';
+	echo '<th class=tdleft><label for="is_connected">reserve subnet-router anycast address</label></th></tr>';
 	echo "<tr><td colspan=2>";
 	printImageHREF ('CREATE', 'Add a new network', TRUE);
 	echo '</td></tr>';
