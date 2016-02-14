@@ -669,15 +669,21 @@ function renderChapter ($tgt_chapter_no)
 	{
 		echo "<tr class=row_${order}><td>";
 		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
-		echo "</td><td class=tdright>${key}</td><td>";
+		echo "</td><td class=tdright>${key}</td><td class=tdright>";
 		if ($refcnt[$key])
 		{
-			$cfe = '';
-			foreach ($attrs as $attr_id)
+			// For the ObjectType chapter the extra filter is as simple as "{\$typeid_${key}}" but
+			// the reference counter also includes the relations with AttributeMap.objtype_id hence
+			// it often is not the same as the amount of objects that match the expression. With
+			// this in mind don't display the counter as a link for this specific chapter.
+			if ($tgt_chapter_no == CHAP_OBJTYPE)
+				$cfe = '';
+			else
 			{
-				if (! empty($cfe))
-					$cfe .= ' or ';
-				$cfe .= '{$attr_' . $attr_id . '_' . $key . '}';
+				$tmp = array();
+				foreach ($attrs as $attr_id)
+					$tmp[] = "{\$attr_${attr_id}_${key}}";
+				$cfe = implode (' or ', $tmp);
 			}
 
 			if (! empty($cfe))
