@@ -987,10 +987,14 @@ function updIPAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$ip_bin = assertIPArg ('ip');
-	assertUIntArg ('object_id');
 	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/alloc_type');
-	updateIPBond ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	updateIPBond
+	(
+		$ip_bin,
+		genericAssertion ('object_id', 'uint'),
+		$_REQUEST['bond_name'],
+		genericAssertion ('bond_type', 'enum/alloc_type')
+	);
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
 }
@@ -998,10 +1002,7 @@ function updIPAllocation ()
 function delIPAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$ip_bin = assertIPArg ('ip');
-	assertUIntArg ('object_id');
-
-	unbindIPFromObject ($ip_bin, $_REQUEST['object_id']);
+	unbindIPFromObject (genericAssertion ('ip', 'inet'), genericAssertion ('object_id', 'uint'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1009,14 +1010,12 @@ function addIPAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
 	$ip_bin = assertIPArg ('ip');
-	assertUIntArg ('object_id');
-	assertStringArg ('bond_name', TRUE);
-	genericAssertion ('bond_type', 'enum/alloc_type');
+	$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
 
 	// check if address is alread allocated
 	$address = getIPAddress($ip_bin);
 
-	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($_REQUEST['bond_type'] != 'shared') ) )
+	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($alloc_type != 'shared') ) )
 		showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
 
 	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
@@ -1031,7 +1030,13 @@ function addIPAllocation ()
 		//TODO ask to take reserved IP or not !
 	}
 
-	bindIPToObject ($ip_bin, $_REQUEST['object_id'], $_REQUEST['bond_name'], $_REQUEST['bond_type']);
+	bindIPToObject
+	(
+		$ip_bin,
+		genericAssertion ('object_id', 'uint'),
+		genericAssertion ('bond_name', 'string0'),
+		$alloc_type
+	);
 
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
@@ -1039,12 +1044,15 @@ function addIPAllocation ()
 
 function addIPv4Prefix ()
 {
-	assertStringArg ('range');
-	assertStringArg ('name', TRUE);
-	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv4Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_id = createIPv4Prefix
+	(
+		genericAssertion ('range', 'string'),
+		genericAssertion ('name', 'string0'),
+		isCheckSet ('is_connected'),
+		genericAssertion ('taglist', 'array0')
+	);
 	$net_cell = spotEntity ('ipv4net', $net_id);
 	if (isset ($vlan_ck))
 	{
@@ -1058,12 +1066,15 @@ function addIPv4Prefix ()
 
 function addIPv6Prefix ()
 {
-	assertStringArg ('range');
-	assertStringArg ('name', TRUE);
-	$taglist = genericAssertion ('taglist', 'array0');
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv6Prefix ($_REQUEST['range'], $sic['name'], isCheckSet ('is_connected'), $taglist);
+	$net_id = createIPv6Prefix
+	(
+		genericAssertion ('range', 'string'),
+		genericAssertion ('name', 'string0'),
+		isCheckSet ('is_connected'),
+		genericAssertion ('taglist', 'array0')
+	);
 	$net_cell = spotEntity ('ipv6net', $net_id);
 	if (isset ($vlan_ck))
 	{
@@ -1078,8 +1089,7 @@ function addIPv6Prefix ()
 function delIPv4Prefix ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('id');
-	$netinfo = spotEntity ('ipv4net', $_REQUEST['id']);
+	$netinfo = spotEntity ('ipv4net', genericAssertion ('id', 'uint'));
 	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 	{
@@ -1091,7 +1101,7 @@ function delIPv4Prefix ()
 	$last_ip = ip_last ($netinfo);
 	if (array_key_exists ($last_ip, $netinfo['addrlist']))
 		updateV4Address ($last_ip, '', 'no');
-	destroyIPv4Prefix ($_REQUEST['id']);
+	destroyIPv4Prefix ($netinfo['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	global $pageno;
 	if ($pageno == 'ipv4net')
@@ -1101,8 +1111,7 @@ function delIPv4Prefix ()
 function delIPv6Prefix ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('id');
-	$netinfo = spotEntity ('ipv6net', $_REQUEST['id']);
+	$netinfo = spotEntity ('ipv6net', genericAssertion ('id', 'uint'));
 	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 	{
@@ -1111,7 +1120,7 @@ function delIPv6Prefix ()
 	}
 	if (array_key_exists ($netinfo['ip_bin'], $netinfo['addrlist']))
 		updateV6Address ($netinfo['ip_bin'], '', 'no');
-	destroyIPv6Prefix ($_REQUEST['id']);
+	destroyIPv6Prefix ($netinfo['id']);
 	showFuncMessage (__FUNCTION__, 'OK');
 	global $pageno;
 	if ($pageno == 'ipv6net')
@@ -1123,8 +1132,13 @@ function editAddress ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	assertStringArg ('name', TRUE);
 	assertStringArg ('comment', TRUE);
-	$ip_bin = assertIPArg ('ip');
-	updateAddress ($ip_bin, $_REQUEST['name'], isCheckSet ('reserved', 'yesno'), $_REQUEST['comment']);
+	updateAddress
+	(
+		genericAssertion ('ip', 'inet'),
+		$_REQUEST['name'],
+		isCheckSet ('reserved', 'yesno'),
+		$_REQUEST['comment']
+	);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1163,23 +1177,21 @@ function supplementAttrMap ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 154));
 	$attr_id = assertUIntArg ('attr_id');
-	assertUIntArg ('objtype_id');
 	if (getAttrType ($attr_id) != 'dict')
 		$chapter_id = NULL;
 	else
 	{
 		try
 		{
-			assertUIntArg ('chapter_no');
+			$chapter_id = genericAssertion ('chapter_no', 'uint');
 		}
 		catch (InvalidRequestArgException $e)
 		{
 			showFuncMessage (__FUNCTION__, 'ERR1', array ('chapter not selected'));
 			return;
 		}
-		$chapter_id = $_REQUEST['chapter_no'];
 	}
-	commitSupplementAttrMap ($attr_id, $_REQUEST['objtype_id'], $chapter_id);
+	commitSupplementAttrMap ($attr_id, genericAssertion ('objtype_id', 'uint'), $chapter_id);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1466,17 +1478,12 @@ function addLotOfObjects()
 
 function linkObjects ()
 {
-	assertStringArg ('parent_entity_type');
-	assertUIntArg ('parent_entity_id');
-	assertStringArg ('child_entity_type');
-	assertUIntArg ('child_entity_id');
-
 	commitLinkEntities
 	(
-		$_REQUEST['parent_entity_type'],
-		$_REQUEST['parent_entity_id'],
-		$_REQUEST['child_entity_type'],
-		$_REQUEST['child_entity_id']
+		genericAssertion ('parent_entity_type', 'string'),
+		genericAssertion ('parent_entity_id', 'uint'),
+		genericAssertion ('child_entity_type', 'string'),
+		genericAssertion ('child_entity_id', 'uint')
 	);
 	showSuccess ('Container set successfully');
 }
@@ -1484,11 +1491,10 @@ function linkObjects ()
 function deleteObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7));
-	assertUIntArg ('object_id');
-	$oinfo = spotEntity ('object', $_REQUEST['object_id']);
+	$oinfo = spotEntity ('object', genericAssertion ('object_id', 'uint'));
 
-	$racklist = getResidentRacksData ($_REQUEST['object_id'], FALSE);
-	commitDeleteObject ($_REQUEST['object_id']);
+	$racklist = getResidentRacksData ($oinfo['id'], FALSE);
+	commitDeleteObject ($oinfo['id']);
 	foreach ($racklist as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	showFuncMessage (__FUNCTION__, 'OK', array ($oinfo['dname']));
@@ -1507,13 +1513,12 @@ function resetObject ()
 function updateUI ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	assertUIntArg ('num_vars');
+	$num_vars = genericAssertion ('num_vars', 'uint');
 
-	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
+	for ($i = 0; $i < $num_vars; $i++)
 	{
-		assertStringArg ("${i}_varname");
 		assertStringArg ("${i}_varvalue", TRUE);
-		$varname = $_REQUEST["${i}_varname"];
+		$varname = genericAssertion ("${i}_varname", 'string');
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
@@ -1528,13 +1533,12 @@ function updateUI ()
 function saveMyPreferences ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	assertUIntArg ('num_vars');
+	$num_vars = genericAssertion ('num_vars', 'uint');
 
-	for ($i = 0; $i < $_REQUEST['num_vars']; $i++)
+	for ($i = 0; $i < $num_vars; $i++)
 	{
-		assertStringArg ("${i}_varname");
 		assertStringArg ("${i}_varvalue", TRUE);
-		$varname = $_REQUEST["${i}_varname"];
+		$varname = genericAssertion ("${i}_varname", 'string');
 		$varvalue = $_REQUEST["${i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
@@ -1548,8 +1552,7 @@ function saveMyPreferences ()
 function resetMyPreference ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	assertStringArg ("varname");
-	resetUserConfigVar ($_REQUEST["varname"]);
+	resetUserConfigVar (genericAssertion ('varname', 'string'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1651,19 +1654,14 @@ function resetUIConfig()
 function addRealServer ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	global $sic;
-	$rsip_bin = assertIPArg ('rsip');
-	assertStringArg ('rsport', TRUE);
-	assertStringArg ('rsconfig', TRUE);
-	assertStringArg ('comment', TRUE);
 	addRStoRSPool
 	(
 		getBypassValue(),
-		$rsip_bin,
-		$_REQUEST['rsport'],
+		genericAssertion ('rsip', 'inet'),
+		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
-		$sic['rsconfig'],
-		$sic['comment']
+		genericAssertion ('rsconfig', 'string0'),
+		genericAssertion ('comment', 'string0')
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1717,36 +1715,25 @@ function addRealServers ()
 
 function addVService ()
 {
-	global $sic;
-	$vip_bin = assertIPArg ('vip');
-	genericAssertion ('proto', 'enum/ipproto');
 	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
-	if ($_REQUEST['proto'] == 'MARK')
-		$vport = NULL;
-	else
-	{
-		assertUIntArg ('vport');
-		$vport = $_REQUEST['vport'];
-	}
+	$proto = genericAssertion ('proto', 'enum/ipproto');
 	usePreparedInsertBlade
 	(
 		'IPv4VS',
 		array
 		(
-			'vip' => $vip_bin,
-			'vport' => $vport,
-			'proto' => $_REQUEST['proto'],
+			'vip' => genericAssertion ('vip', 'inet'),
+			'vport' => $proto == 'MARK' ? NULL : genericAssertion ('vport', 'uint'),
+			'proto' => $proto,
 			'name' => nullIfEmptyStr ($_REQUEST['name']),
-			'vsconfig' => nullIfEmptyStr ($sic['vsconfig']),
-			'rsconfig' => nullIfEmptyStr ($sic['rsconfig']),
+			'vsconfig' => nullIfEmptyStr (genericAssertion ('vsconfig', 'string0')),
+			'rsconfig' => nullIfEmptyStr (genericAssertion ('rsconfig', 'string0')),
 		)
 	);
 	$vs_id = lastInsertID();
 	lastCreated ('ipv4vs', $vs_id);
 	if (isset ($_REQUEST['taglist']))
-		produceTagsForNewRecord ('ipv4vs', $_REQUEST['taglist'], $vs_id);
+		produceTagsForNewRecord ('ipv4vs', genericAssertion ('taglist', 'array0'), $vs_id);
 	$vsinfo = spotEntity ('ipv4vs', $vs_id);
 	showSuccess (mkCellA ($vsinfo) . ' created successfully');
 }
