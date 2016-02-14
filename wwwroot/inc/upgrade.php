@@ -222,7 +222,7 @@ ENDOFTEXT
         '0.20.11' => <<<ENDOFTEXT
 New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
 dsplaying unallocated networks in IPv4 space tree. Setting it also disables
-KNIGHT feature.
+the "knight" feature.
 ENDOFTEXT
 ,
 );

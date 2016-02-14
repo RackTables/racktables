@@ -120,7 +120,7 @@ and initialize the application.
 
 New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
 dsplaying unallocated networks in IPv4 space tree. Setting it also disables
-KNIGHT feature.
+the "knight" feature.
 
 ### Upgrading to 0.20.7
 
