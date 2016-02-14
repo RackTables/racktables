@@ -5678,7 +5678,7 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	return count ($rows) == 1 ? $rows[0]['id'] : NULL;
 }
 
-// returns an array of attribute_id`s wich use specified chapter id.
+// Returns an array of attribute IDs that are mapped to the specified chapter.
 function getChapterAttributes($chapter_id)
 {
 	$prepared = usePreparedSelectBlade ('SELECT DISTINCT attr_id FROM AttributeMap WHERE chapter_id = ?', array ($chapter_id));
