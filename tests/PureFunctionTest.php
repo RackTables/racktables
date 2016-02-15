@@ -65,6 +65,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	}
 */
 
+	// There is a separate test/provider method pair for each exception class as
+	// $this->expectException() is only available in later versions of PHPUnit.
+
+	/**
+	 * @dataProvider providerUnaryIAE
+	 * @expectedException InvalidArgException
+	 */
+	public function testUnaryIAE ($func, $input)
+	{
+		$func ($input);
+	}
+
 	public function providerUnaryEquals ()
 	{
 		return array
@@ -100,6 +112,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('unix2dos', "line1\nline2", "line1\r\nline2"),
 			array ('unix2dos', "\n\nline1\n\nline2\n\n\n", "\r\n\r\nline1\r\n\r\nline2\r\n\r\n\r\n"),
 			array ('unix2dos', "line1", "line1"),
+
+			array ('questionMarks', 1, '?'),
+			array ('questionMarks', 2, '?, ?'),
+			array ('questionMarks', 3, '?, ?, ?'),
 		);
 	}
 
@@ -445,6 +461,14 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	{
 		return array
 		(
+		);
+	}
+
+	public function providerUnaryIAE ()
+	{
+		return array
+		(
+			array ('questionMarks', 0),
 		);
 	}
 }
