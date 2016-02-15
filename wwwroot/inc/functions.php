@@ -4749,6 +4749,8 @@ function usort_portlist(&$array)
 // return a "?, ?, ?, ... ?, ?" string consisting of N question marks
 function questionMarks ($count = 0)
 {
+	if ($count <= 0)
+		throw new InvalidArgException ('count', $count, 'must be greater than zero');
 	return implode (', ', array_fill (0, $count, '?'));
 }
 
