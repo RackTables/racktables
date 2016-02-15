@@ -1297,8 +1297,8 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 	}
 }
 
-// DEPRECATED, remove in 0.21.0
 // Likewise traverse the tree with the trace and return the final node.
+// This function is not currently used in RackTables main code but it works well.
 function peekNode ($tree, $trace, $target_id)
 {
 	$self = __FUNCTION__;
