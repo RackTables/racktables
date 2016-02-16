@@ -20,6 +20,7 @@ class StringInsertHrefsTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @dataProvider provider
 	 */
 	public function testStringInsertHrefs ($input, $output)

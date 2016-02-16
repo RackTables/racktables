@@ -65,18 +65,27 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtype_id));
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testGetLocationChildrenList ()
 	{
 		$children = getLocationChildrenList (array_first (self::$locations));
 		$this->assertCount (self::$num_children, $children);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testGetObjectChildrenList ()
 	{
 		$children = getObjectContentsList (array_first (self::$objects));
 		$this->assertCount (self::$num_children, $children);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testGetTagChildrenList ()
 	{
 		$children = getTagDescendents (array_first (self::$tags));

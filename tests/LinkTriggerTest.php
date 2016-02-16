@@ -57,6 +57,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testCreateLinkToSelf ()
@@ -69,6 +70,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkToSelf ()
@@ -86,6 +88,9 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testCreateLinkWithPortAGreaterThanPortB ()
 	{
 		usePreparedInsertBlade
@@ -101,6 +106,9 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals (1, $result->fetchColumn ());
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testUpdateLinkWithPortAGreaterThanPortB ()
 	{
 		usePreparedInsertBlade
@@ -123,6 +131,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testCreateLinkBetweenIncompatiblePorts ()
@@ -135,6 +144,7 @@ class LinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkBetweenIncompatiblePorts ()

@@ -22,6 +22,9 @@ class UpgradeTest extends PHPUnit_Framework_TestCase
 		natsort (self::$versions);
 	}
 
+	/**
+	 * @group large
+	 */
 	public function testUpgrades ()
 	{
 		global $db_name, $db_username, $db_password, $dbver, $dbxlink, $mysql_bin;

@@ -14,6 +14,7 @@ identical (assertSame) to the expected return value.
 class PureFunctionTest extends PHPUnit_Framework_TestCase
 {
 	/**
+	 * @group small
 	 * @dataProvider providerUnaryEquals
 	 */
 	public function testUnaryEquals ($func, $input1, $output)
@@ -22,6 +23,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @dataProvider providerUnarySame
 	 */
 	public function testUnarySame ($func, $input1, $output)
@@ -30,6 +32,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @dataProvider providerBinaryEquals
 	 */
 	public function testBinaryEquals ($func, $input1, $input2, $output)
@@ -38,6 +41,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @dataProvider providerBinarySame
 	 */
 	public function testBinarySame ($func, $input1, $input2, $output)
@@ -46,6 +50,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @dataProvider providerTernaryEquals
 	 */
 /*
@@ -56,6 +61,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 */
 
 	/**
+	 * @group small
 	 * @dataProvider providerTernarySame
 	 */
 /*
@@ -69,6 +75,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	// $this->expectException() is only available in later versions of PHPUnit.
 
 	/**
+	 * @group small
 	 * @dataProvider providerUnaryIAE
 	 * @expectedException InvalidArgException
 	 */

@@ -16,6 +16,7 @@ class EmptySQLWhere extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedDelete ()
@@ -24,6 +25,7 @@ class EmptySQLWhere extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedUpdate1 ()
@@ -32,6 +34,7 @@ class EmptySQLWhere extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedUpdate2 ()

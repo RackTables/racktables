@@ -31,6 +31,7 @@ class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException InvalidArgException
 	 */
 	public function testCreateCircularReference ()
