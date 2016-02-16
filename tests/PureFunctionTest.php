@@ -116,6 +116,31 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('questionMarks', 1, '?'),
 			array ('questionMarks', 2, '?, ?'),
 			array ('questionMarks', 3, '?, ?, ?'),
+
+			array
+			(
+				'formatPortIIFOIF',
+				array ('iif_id' => 1, 'iif_name' => 'hardwired', 'oif_id' => 24, 'oif_name' => '1000Base-T'),
+				'1000Base-T'
+			),
+			array
+			(
+				'formatPortIIFOIF',
+				array ('iif_id' => 1, 'iif_name' => 'hardwired', 'oif_id' => 40, 'oif_name' => '10GBase-CX4'),
+				'10GBase-CX4'
+			),
+			array
+			(
+				'formatPortIIFOIF',
+				array ('iif_id' => 8, 'iif_name' => 'XFP', 'oif_id' => 30, 'oif_name' => '10GBase-SR'),
+				'XFP/10GBase-SR'
+			),
+			array
+			(
+				'formatPortIIFOIF',
+				array ('iif_id' => 10, 'iif_name' => 'QSFP+', 'oif_id' => 1663, 'oif_name' => '40GBase-SR4'),
+				'QSFP+/40GBase-SR4'
+			),
 		);
 	}
 
