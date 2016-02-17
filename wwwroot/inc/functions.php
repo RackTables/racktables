@@ -4937,7 +4937,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 		$tree = $parser->parse ($text, $reqtype == 'SYNT_EXPR' ? 'expr' : 'prog');
 		return array ('result' => 'ACK', 'ABI_ver' => PARSER_ABI_VER, 'load' => $tree);
 	}
-	catch (ParserError $e)
+	catch (RCParserError $e)
 	{
 		$msg = $e->getMessage();
 		if ($reqtype != 'SYNT_EXPR' || $e->lineno != 1)

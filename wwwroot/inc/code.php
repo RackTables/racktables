@@ -13,7 +13,7 @@
  */
 
 
-class ParserError extends Exception
+class RCParserError extends Exception
 {
 	public $lineno;
 	function __construct ($message, $lineno = 0)
@@ -51,10 +51,10 @@ class RackCodeParser
 
 			// check that all input characters are consumed by grammar
 			if ($this->token !== NULL)
-				throw new ParserError ("unexpected {$this->token}");
+				throw new RCParserError ("unexpected {$this->token}");
 			return $ret;
 		}
-		catch (ParserError $e)
+		catch (RCParserError $e)
 		{
 			$e->lineno = $this->lineno;
 			throw $e;
@@ -62,12 +62,12 @@ class RackCodeParser
 	}
 
 	// $sym could either be a string or a list of strings.
-	// returns the value of the $sym class in the current position or throws the ParserError.
+	// returns the value of the $sym class in the current position or throws the RCParserError.
 	function expect ($sym)
 	{
 		if (NULL !== $ret = $this->accept ($sym))
 			return $ret;
-		throw new ParserError ("expecting $sym");
+		throw new RCParserError ("expecting $sym");
 	}
 
 	// $sym could either be a string or a list of strings.
@@ -172,7 +172,7 @@ class RackCodeParser
 								$buffer = $char;
 							}
 							else
-								throw new ParserError ("Invalid char '$char'");
+								throw new RCParserError ("Invalid char '$char'");
 					}
 					break;
 				case self::LEX_S_KEYWORD:
@@ -203,12 +203,12 @@ class RackCodeParser
 						case $breaking_char:
 							$buffer = trim ($buffer, "\t ");
 							if (!validTagName ($buffer, $tag_mode))
-								throw new ParserError ("Invalid tag name '$buffer'");
+								throw new RCParserError ("Invalid tag name '$buffer'");
 							$this->lex_value = $buffer;
 							return $tag_mode ? 'LEX_TAG' : 'LEX_PREDICATE';
 						case "\n":
 						case 'END':
-							throw new ParserError ("Expecting '$breaking_char' character");
+							throw new RCParserError ("Expecting '$breaking_char' character");
 						default:
 							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
 					}
@@ -274,7 +274,7 @@ class RackCodeParser
 				$this->expect ('define');
 				$pred_name = $this->expect ('LEX_PREDICATE');
 				if (isset ($this->defined_preds[$pred_name]))
-					throw new ParserError ("Duplicate definition of [$pred_name]");
+					throw new RCParserError ("Duplicate definition of [$pred_name]");
 				$ret = array(
 					'type' => 'SYNT_DEFINITION',
 					'term' => $pred_name,
@@ -295,7 +295,7 @@ class RackCodeParser
 					'lineno' => $lineno,
 				);
 			default:
-				throw new ParserError ("unexpected {$this->token}");
+				throw new RCParserError ("unexpected {$this->token}");
 		}
 	}
 
@@ -322,7 +322,7 @@ class RackCodeParser
 					'lineno' => $lineno,
 				);
 			elseif (! $list) // we need at least one CTXMOD
-				throw new ParserError ("expecting CTXMOD");
+				throw new RCParserError ("expecting CTXMOD");
 			else
 				break;
 		}
@@ -433,7 +433,7 @@ class RackCodeParser
 		elseif ($k = $this->accept ('LEX_PREDICATE'))
 		{
 			if ($this->prog_mode and ! isset ($this->defined_preds[$k]))
-				throw new ParserError ("Undefined predicate [$k] refered");
+				throw new RCParserError ("Undefined predicate [$k] refered");
 			return array(
 				'type' => 'LEX_PREDICATE',
 				'load' => $k,
@@ -446,7 +446,7 @@ class RackCodeParser
 				'load' => $k,
 				'lineno' => $lineno,
 			);
-		throw new ParserError ("Unexpected token {$this->token}");
+		throw new RCParserError ("Unexpected token {$this->token}");
 	}
 }
 
