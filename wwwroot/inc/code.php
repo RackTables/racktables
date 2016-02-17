@@ -51,7 +51,7 @@ class RackCodeParser
 
 			// check that all input characters are consumed by grammar
 			if ($this->token !== NULL)
-				throw new ParseError ("unexpected {$this->token}");
+				throw new ParserError ("unexpected {$this->token}");
 			return $ret;
 		}
 		catch (ParserError $e)
