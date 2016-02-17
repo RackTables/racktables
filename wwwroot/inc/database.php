@@ -2175,6 +2175,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
 		return $ret;
+	$pairlist = reduceIPPairList ($pairlist);
 	// FIXME: this is a copy-and-paste prototype
 	$or = '';
 	$whereexpr1 = '(';
@@ -2390,6 +2391,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$ret = array();
 	if (!count ($pairlist)) // this is normal for a network completely divided into smaller parts
 		return $ret;
+	$pairlist = reduceIPPairList ($pairlist);
 
 	$or = '';
 	$whereexpr1 = '(';
