@@ -1857,10 +1857,7 @@ function addIPToVS()
 
 function addPortToVS()
 {
-	global $vs_proto;
-	$proto = assertStringArg ('proto');
-	if (! in_array ($proto, $vs_proto))
-		throw new InvalidRequestArgException ('proto', "Invalid VS protocol");
+	$proto = genericAssertion ('proto', 'enum/ipproto');
 	$vport = assertUIntArg ('port', TRUE);
 	if ($proto == 'MARK')
 	{
@@ -1877,7 +1874,7 @@ function addPortToVS()
 			return;
 		}
 
-	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$row = array ('vs_id' => $vsinfo['id'], 'proto' => $proto, 'vport' => $vport, 'vsconfig' => NULL, 'rsconfig' => NULL);
 	if ($port = isPortEnabled ($row, $vsinfo['ports']))
