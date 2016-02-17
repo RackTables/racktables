@@ -210,6 +210,17 @@ tr.has_problems_odd {
 	background-color: #ffd0d0;
 }
 
+/* In the zebra table the 1st TR always contains TH, which have a different
+ * style and are exempt from the zebra pattern. In this sense the 2nd TR
+ * where the TDs start is considered "odd" and the 3rd -- "even" and so on.
+ */
+table.zebra tr:nth-child(2n+3) {
+	background: #d0d0d0;
+}
+table.zebra tr:nth-child(2n) {
+	background: #e8e8e8;
+}
+
 table.cooltable {
 	border: 1px solid black;
 }
