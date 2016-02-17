@@ -27,11 +27,13 @@ class UpgradeTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testUpgrades ()
 	{
-		global $db_name, $db_username, $db_password, $dbver, $dbxlink, $mysql_bin;
+		global $db_username, $db_password, $dbver, $dbxlink;
 
 		foreach (self::$versions as $version)
 		{
 			$dbver = $version;
+			$db_name = getDBName();
+			$mysql_bin = '/usr/bin/mysql';
 			$dbxlink->exec ("DROP DATABASE ${db_name}");
 			$dbxlink->exec ("CREATE DATABASE ${db_name} CHARACTER SET utf8 COLLATE utf8_general_ci");
 			// FIXME: Importing the dump for 0.20.0 (and likely for the subsequent releases) fails when the configured

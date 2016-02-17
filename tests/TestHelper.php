@@ -9,8 +9,7 @@ class TestHelper
 	// that string.  See tests/README for more details.
 	public static function ensureUsingUnitTestDatabase ()
 	{
-		global $db_name;
-		if (stristr ($db_name, '_unittest') === FALSE)
+		if (stristr (getDBName(), '_unittest') === FALSE)
 			throw new Exception ('Test must connect to unit testing database (see tests/README).');
 	}
 }
