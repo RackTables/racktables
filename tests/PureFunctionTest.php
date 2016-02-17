@@ -53,12 +53,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	 * @group small
 	 * @dataProvider providerTernaryEquals
 	 */
-/*
 	public function testTernaryEquals ($func, $input1, $input2, $input3, $output)
 	{
 		$this->assertEquals ($output, $func ($input1, $input2, $input3));
 	}
-*/
 
 	/**
 	 * @group small
@@ -486,6 +484,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	{
 		return array
 		(
+			array ('array_fetch', array(), 1, 'default', 'default'),
+			array ('array_fetch', array (3 => 'three', 2 => 'two', 1 => 'one'), 1, 'four', 'one'),
+			array ('array_fetch', array (3 => 'three', 2 => 'two', 1 => 'one'), 5, 'five', 'five'),
+			array ('array_fetch', array (1 => 'one', 2 => 'two'), 3, NULL, NULL),
+			// PHP array keying uses equality, not identity
+			array ('array_fetch', array (1 => 'one', 2 => 'two'), '1', 'default', 'one'),
 		);
 	}
 
