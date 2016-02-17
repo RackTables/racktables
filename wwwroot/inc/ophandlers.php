@@ -1781,13 +1781,12 @@ function deleteVS()
 function updateSLBDefConfig ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 43));
-	global $sic;
 	commitUpdateSLBDefConf
 	(
 		array
 		(
-			'vs' => $sic['vsconfig'],
-			'rs' => $sic['rsconfig'],
+			'vs' => genericAssertion ('vsconfig', 'string0'),
+			'rs' => genericAssertion ('rsconfig', 'string0'),
 		)
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -1796,19 +1795,13 @@ function updateSLBDefConfig ()
 function updateRealServer ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	global $sic;
-	assertUIntArg ('rs_id');
-	$rsip_bin = assertIPArg ('rsip');
-	assertStringArg ('rsport', TRUE);
-	assertStringArg ('rsconfig', TRUE);
-	assertStringArg ('comment', TRUE);
 	commitUpdateRS (
-		$_REQUEST['rs_id'],
-		$rsip_bin,
-		$_REQUEST['rsport'],
+		genericAssertion ('rs_id', 'uint'),
+		genericAssertion ('rsip', 'inet'),
+		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
-		$sic['rsconfig'],
-		$sic['comment']
+		genericAssertion ('rsconfig', 'string0'),
+		genericAssertion ('comment', 'string0')
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1816,28 +1809,21 @@ function updateRealServer ()
 function updateVService ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	global $sic;
-	assertUIntArg ('vs_id');
+	$vs_id = getBypassValue();
 	$taglist = genericAssertion ('taglist', 'array0');
-	$vip_bin = assertIPArg ('vip');
-	genericAssertion ('proto', 'enum/ipproto');
-	if ($_REQUEST['proto'] == 'MARK')
-		assertStringArg ('vport', TRUE);
-	else
-		assertUIntArg ('vport');
+	$proto = genericAssertion ('proto', 'enum/ipproto');
+	genericAssertion ('vport', $proto == 'MARK' ? 'string0' : 'uint');
 	assertStringArg ('name', TRUE);
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
 	commitUpdateVS (
-		$_REQUEST['vs_id'],
-		$vip_bin,
+		$vs_id,
+		genericAssertion ('vip', 'inet'),
 		$_REQUEST['vport'],
-		$_REQUEST['proto'],
+		$proto,
 		$_REQUEST['name'],
-		$sic['vsconfig'],
-		$sic['rsconfig']
+		genericAssertion ('vsconfig', 'string0'),
+		genericAssertion ('rsconfig', 'string0')
 	);
-	rebuildTagChainForEntity ('ipvs', $_REQUEST['vs_id'], buildTagChainFromIds ($taglist), TRUE);
+	rebuildTagChainForEntity ('ipvs', $vs_id, buildTagChainFromIds ($taglist), TRUE);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
