@@ -257,17 +257,15 @@ function renderOIFCompatEditor()
 	global $nextorder, $wdm_packs;
 
 	startPortlet ('WDM wideband receivers');
-	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
+	echo '<table border=0 align=center cellspacing=0 cellpadding=5 class=zebra>';
 	echo '<tr><th>&nbsp;</th><th>enable</th><th>disable</th></tr>';
-	$order = 'odd';
 	foreach ($wdm_packs as $codename => $packinfo)
 	{
-		echo "<tr class=row_${order}><td class=tdleft>" . $packinfo['title'] . '</td><td>';
+		echo '<tr><td class=tdleft>' . $packinfo['title'] . '</td><td>';
 		echo getOpLink (array ('op' => 'addPack', 'standard' => $codename), '', 'add');
 		echo '</td><td>';
 		echo getOpLink (array ('op' => 'delPack', 'standard' => $codename), '', 'delete');
 		echo '</td></tr>';
-		$order = $nextorder[$order];
 	}
 	echo '</table>';
 	finishPortlet();
@@ -278,6 +276,7 @@ function renderOIFCompatEditor()
 	echo '<tr><th>&nbsp;</th><th>From Interface</th><th>To Interface</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewitemTR();
+	$order = 'odd';
 	foreach (getPortOIFCompat() as $pair)
 	{
 		if ($last_left_oif_id != $pair['type1'])
@@ -368,20 +367,17 @@ function renderIIFOIFCompatEditor()
 
 function renderPortOIFViewer()
 {
-	global $nextorder;
-	echo '<br><table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
+	echo '<br><table class="cooltable zebra" align=center border=0 cellpadding=5 cellspacing=0>';
 	echo '<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Outer Interface</th></tr>';
-	$order = 'odd';
 	$refcnt = getPortOIFRefc();
 	foreach (getPortOIFOptions() as $oif_id => $oif_name)
 	{
-		echo "<tr class=row_${order}>";
+		echo '<tr>';
 		echo '<td class=tdleft>' . getImageHREF ($oif_id < 2000 ? 'computer' : 'favorite') . '</td>';
 		echo "<td class=tdright>${oif_id}</td>";
 		echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
 		echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
 		echo '</tr>';
-		$order = $nextorder[$order];
 	}
 	echo '</table>';
 }
@@ -768,21 +764,18 @@ function renderConfigVarName ($v)
 
 function renderUIConfig ()
 {
-	global $nextorder;
 	startPortlet ('Current configuration');
-	echo '<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center width="70%">';
+	echo '<table class="cooltable zebra" border=0 cellpadding=5 cellspacing=0 align=center width="70%">';
 	echo '<tr><th class=tdleft>Option</th><th class=tdleft>Value</th></tr>';
-	$order = 'odd';
 	foreach (loadConfigCache() as $v)
 	{
 		if ($v['is_hidden'] != 'no')
 			continue;
-		echo "<tr class=row_${order}>";
+		echo '<tr>';
 		echo "<td nowrap valign=top class=tdright>";
 		renderConfigVarName ($v);
 		echo '</td>';
 		echo "<td valign=top class=tdleft>${v['varvalue']}</td></tr>";
-		$order = $nextorder[$order];
 	}
 	echo "</table>\n";
 	finishPortlet();

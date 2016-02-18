@@ -140,8 +140,6 @@ function renderPatchCableHeapAmount()
 
 function renderPatchCableConfiguration()
 {
-	global $nextorder;
-
 	echo '<table class=objview border=0 width="100%"><tr><td class=pcleft>';
 
 	startPortlet ('Connectors');

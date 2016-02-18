@@ -313,7 +313,6 @@ function renderExpirations ()
 //        - columns, indexes, character sets
 function renderDataIntegrityReport ()
 {
-	global $nextorder;
 	$violations = FALSE;
 
 	// check 1: EntityLink rows referencing not-existent relatives
@@ -343,9 +342,8 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['parent_entity_type']);
@@ -358,12 +356,11 @@ function renderDataIntegrityReport ()
 			{
 				$parent_name = 'missing from DB';
 			}
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${realm_name}: ${parent_name}</td>";
 			echo "<td>${orphan['child_entity_type']}</td>";
 			echo "<td>${orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -388,9 +385,8 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['child_entity_type']);
@@ -403,12 +399,11 @@ function renderDataIntegrityReport ()
 			{
 				$child_name = 'missing from DB';
 			}
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${realm_name}: ${child_name}</td>";
 			echo "<td>${orphan['parent_entity_type']}</td>";
 			echo "<td>${orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -432,17 +427,15 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['attr_name']}</td>";
 			echo "<td>${orphan['chapter_name']}</td>";
 			echo "<td>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -462,17 +455,15 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -492,17 +483,15 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -524,18 +513,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['parent_name']}</td>";
 			echo "<td>${orphan['parent_objtype_id']}</td>";
 			echo "<td>${orphan['child_name']}</td>";
 			echo "<td>${orphan['child_objtype_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -562,18 +549,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Violate Object Container Compatibility rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Contained Obj Name</th><th>Contained Obj Type</th><th>Container Obj Name</th><th>Container Obj Type</th></tr>\n";
-		$order = 'odd';
 		foreach ($invalids as $invalid)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${invalid['child_name']}</td>";
 			echo "<td>${invalid['child_type']}</td>";
 			echo "<td>${invalid['parent_name']}</td>";
 			echo "<td>${invalid['parent_type']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -601,12 +586,11 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Port Links: Violate Port Compatibility Rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Object A</th><th>Port A Name</th><th>Port A Type</th><th>Object B</th><th>Port B Name</th><th>Port B Type</th></tr>\n";
-		$order = 'odd';
 		foreach ($invalids as $invalid)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${invalid['obja_name']}</td>";
 			echo "<td>${invalid['porta_name']}</td>";
 			echo "<td>${invalid['porta_type']}</td>";
@@ -614,7 +598,6 @@ function renderDataIntegrityReport ()
 			echo "<td>${invalid['portb_name']}</td>";
 			echo "<td>${invalid['portb_type']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -654,18 +637,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_realm']);
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['tag']}</td>";
 			echo "<td>${realm_name}</td>";
 			echo "<td>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -694,18 +675,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
-		$order = 'odd';
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_type']);
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${realm_name}</td>";
 			echo "<td>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -734,16 +713,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Triggers (' . count ($missing_triggers) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Table</th><th>Trigger</th></tr>\n";
-		$order = 'odd';
 		foreach ($missing_triggers as $trigger => $table)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${table}</td>";
 			echo "<td>${trigger}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -842,16 +819,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Foreign Keys (' . count ($missing_fkeys) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Table</th><th>Key</th></tr>\n";
-		$order = 'odd';
 		foreach ($missing_fkeys as $fkey => $table)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${table}</td>";
 			echo "<td>${fkey}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -878,18 +853,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Locations: Tree Contains Circular References (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Child ID</th><th>Child Location</th><th>Parent ID</th><th>Parent Location</th></tr>\n";
-		$order = 'odd';
 		foreach ($invalids as $invalid)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
 			echo "<td>${invalid['parent_id']}</td>";
 			echo "<td>${invalid['parent_name']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -913,18 +886,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Contained ID</th><th>Contained Object</th><th>Container ID</th><th>Container Object</th></tr>\n";
-		$order = 'odd';
 		foreach ($invalids as $invalid)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
 			echo "<td>${invalid['container_id']}</td>";
 			echo "<td>${invalid['container_name']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
@@ -937,18 +908,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Tags: Tree Contains Circular References (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Child ID</th><th>Child Tag</th><th>Parent ID</th><th>Parent Tag</th></tr>\n";
-		$order = 'odd';
 		foreach ($invalids as $invalid)
 		{
-			echo "<tr class=row_${order}>";
+			echo '<tr>';
 			echo "<td>${invalid['id']}</td>";
 			echo "<td>${invalid['tag']}</td>";
 			echo "<td>${invalid['parent_id']}</td>";
 			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 		finishPortLet ();
