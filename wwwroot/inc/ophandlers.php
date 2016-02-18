@@ -1302,10 +1302,10 @@ function updateObject ()
 	genericAssertion ('object_label', 'string0');
 	genericAssertion ('object_asset_no', 'string0');
 	genericAssertion ('object_comment', 'string0');
-	genericAssertion ('object_type_id', 'uint');
+	$object_type_id = genericAssertion ('object_type_id', 'uint');
 	$object_id = getBypassValue();
 
-	global $dbxlink, $sic;
+	global $dbxlink;
 	$dbxlink->beginTransaction();
 	commitUpdateObject
 	(
@@ -1318,11 +1318,11 @@ function updateObject ()
 	);
 	updateObjectAttributes ($object_id);
 	$object = spotEntity ('object', $object_id);
-	if ($sic['object_type_id'] != $object['objtype_id'])
+	if ($object_type_id != $object['objtype_id'])
 	{
-		if (! array_key_exists ($sic['object_type_id'], getObjectTypeChangeOptions ($object_id)))
-			throw new InvalidRequestArgException ('new type_id', $sic['object_type_id'], 'incompatible with requested attribute values');
-		usePreparedUpdateBlade ('Object', array ('objtype_id' => $sic['object_type_id']), array ('id' => $object_id));
+		if (! array_key_exists ($object_type_id, getObjectTypeChangeOptions ($object_id)))
+			throw new InvalidRequestArgException ('new type_id', $object_type_id, 'incompatible with requested attribute values');
+		usePreparedUpdateBlade ('Object', array ('objtype_id' => $object_type_id), array ('id' => $object_id));
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
 	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
@@ -1670,17 +1670,15 @@ function addRealServer ()
 function addRealServers ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 37, 'ERR1' => 131));
-	global $sic;
-	assertStringArg ('format');
-	assertStringArg ('rawtext');
+	$format = genericAssertion ('format', 'string');
 	$ngood = 0;
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
-	foreach (explode ("\n", dos2unix ($sic['rawtext'])) as $line)
+	foreach (explode ("\n", dos2unix (genericAssertion ('rawtext', 'string'))) as $line)
 	{
 		if (!strlen ($line))
 			continue;
 		$match = array ();
-		switch ($_REQUEST['format'])
+		switch ($format)
 		{
 			case 'ipvs_2': // address and port only
 				if (!preg_match ('/^  -> ([0-9\.]+):([0-9]+) /', $line, $match))
@@ -2092,20 +2090,14 @@ function createTriplet()
 function addLoadBalancer ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	global $sic;
-	assertUIntArg ('pool_id');
-	assertUIntArg ('object_id');
-	assertUIntArg ('vs_id');
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
 	assertStringArg ('prio', TRUE);
 
 	addLBtoRSPool (
-		$_REQUEST['pool_id'],
-		$_REQUEST['object_id'],
-		$_REQUEST['vs_id'],
-		$sic['vsconfig'],
-		$sic['rsconfig'],
+		genericAssertion ('pool_id', 'uint'),
+		genericAssertion ('object_id', 'uint'),
+		genericAssertion ('vs_id', 'uint'),
+		genericAssertion ('vsconfig', 'string0'),
+		genericAssertion ('rsconfig', 'string0'),
 		$_REQUEST['prio']
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -2113,15 +2105,12 @@ function addLoadBalancer ()
 
 function addRSPool ()
 {
-	global $sic;
 	assertStringArg ('name');
-	assertStringArg ('vsconfig', TRUE);
-	assertStringArg ('rsconfig', TRUE);
 	$pool_id = commitCreateRSPool
 	(
 		$_REQUEST['name'],
-		$sic['vsconfig'],
-		$sic['rsconfig'],
+		genericAssertion ('vsconfig', 'string0'),
+		genericAssertion ('rsconfig', 'string0'),
 		isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array()
 	);
 	showSuccess ('RS pool ' . mkA ($_REQUEST['name'], 'ipv4rspool', $pool_id) . ' created successfully');
@@ -2130,8 +2119,7 @@ function addRSPool ()
 function deleteRSPool ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('pool_id');
-	$poolinfo = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
+	$poolinfo = spotEntity ('ipv4rspool', genericAssertion ('pool_id', 'uint'));
 	if ($poolinfo['refcnt'] != 0)
 	{
 		showError ("Could not delete linked RS pool");
@@ -2617,8 +2605,7 @@ function addFileWithoutLink ()
 		return;
 	}
 
-	global $sic;
-	$file_id = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
+	$file_id = commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, genericAssertion ('comment', 'string0'));
 	if (isset ($_REQUEST['taglist']))
 		produceTagsForNewRecord ('file', $_REQUEST['taglist'], $file_id);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($_FILES['file']['name'])));
@@ -2646,8 +2633,7 @@ function addFileToEntity ()
 		return;
 	}
 
-	global $sic;
-	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, $sic['comment']);
+	commitAddFile ($_FILES['file']['name'], $_FILES['file']['type'], $fp, genericAssertion ('comment', 'string0'));
 	usePreparedInsertBlade
 	(
 		'FileLink',
@@ -2809,21 +2795,21 @@ function delOIFCompatPack ()
 function add8021QOrder ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	assertUIntArg ('vdom_id');
-	assertUIntArg ('object_id');
-	assertUIntArg ('vst_id');
-	global $sic, $pageno;
+	$vdom_id = genericAssertion ('vdom_id', 'uint');
+	$object_id = genericAssertion ('object_id', 'uint');
+	$vst_id = genericAssertion ('vst_id', 'uint');
+	global $pageno;
 	fixContext();
 	if ($pageno != 'object')
-		spreadContext (spotEntity ('object', $sic['object_id']));
+		spreadContext (spotEntity ('object', $object_id));
 	if ($pageno != 'vst')
-		spreadContext (spotEntity ('vst', $sic['vst_id']));
+		spreadContext (spotEntity ('vst', $vst_id));
 	assertPermission();
 	usePreparedExecuteBlade
 	(
 		'INSERT INTO VLANSwitch (domain_id, object_id, template_id, last_change, out_of_sync) ' .
 		'VALUES (?, ?, ?, NOW(), "yes")',
-		array ($sic['vdom_id'], $sic['object_id'], $sic['vst_id'])
+		array ($vdom_id, $object_id, $vst_id)
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -2831,17 +2817,17 @@ function add8021QOrder ()
 function del8021QOrder ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('object_id');
-	assertUIntArg ('vdom_id');
-	assertUIntArg ('vst_id');
-	global $sic, $pageno;
+	$object_id = genericAssertion ('object_id', 'uint');
+	$vdom_id = genericAssertion ('vdom_id', 'uint');
+	$vst_id = genericAssertion ('vst_id', 'uint');
+	global $pageno;
 	fixContext();
 	if ($pageno != 'object')
-		spreadContext (spotEntity ('object', $sic['object_id']));
+		spreadContext (spotEntity ('object', $object_id));
 	if ($pageno != 'vst')
-		spreadContext (spotEntity ('vst', $sic['vst_id']));
+		spreadContext (spotEntity ('vst', $vst_id));
 	assertPermission();
-	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $sic['object_id']));
+	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	$focus_hints = array
 	(
 		'prev_objid' => $_REQUEST['object_id'],
@@ -2855,14 +2841,12 @@ function del8021QOrder ()
 function createVLANDomain ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	assertStringArg ('vdom_descr');
-	global $sic;
 	usePreparedInsertBlade
 	(
 		'VLANDomain',
 		array
 		(
-			'description' => $sic['vdom_descr'],
+			'description' => genericAssertion ('vdom_descr', 'string'),
 		)
 	);
 	$domain_id = lastInsertID();
