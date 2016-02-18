@@ -437,8 +437,8 @@ function getBulkRealsFormats()
 {
 	return array
 	(
-		'ssv_1' => 'SSV: &lt;IP address&gt;',
-		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;',
+		'ssv_1' => 'SSV: <IP address>',
+		'ssv_2' => 'SSV: <IP address> <port>',
 		'ipvs_2' => 'ipvsadm -l -n (address and port)',
 		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
 	);
