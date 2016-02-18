@@ -197,6 +197,27 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('groupIntsToRanges', array (10, 12, 13, 14), array (10, '12-14')),
 			array ('groupIntsToRanges', array (10, 11, 12, 14), array ('10-12', 14)),
 			array ('groupIntsToRanges', array (10, 11, 13, 15, 16), array ('10-11', 13, '15-16')),
+
+			array ('HTTPDateToUnixTime', '', FALSE),
+			array ('HTTPDateToUnixTime', 'now', FALSE),
+			array ('HTTPDateToUnixTime', 'next Tuesday', FALSE),
+			# RFC 822 (1123)
+			array ('HTTPDateToUnixTime', 'Thu, 01 Jan 1970 00:00:00 +0000', 0), # OK
+			array ('HTTPDateToUnixTime', 'Thu, 15 Feb 2007 15:00:00 +0000', 1171551600), # OK
+			array ('HTTPDateToUnixTime', 'Thu, 29 Feb 2000 00:00:00 GMT', 951782400), # OK, leap year
+			array ('HTTPDateToUnixTime', 'Thu, 29 Feb 2001 00:00:00 GMT', FALSE), # invalid date
+			array ('HTTPDateToUnixTime', 'Thu, 29 Feb 2000 12:20:60 GMT', FALSE), # invalid time
+			array ('HTTPDateToUnixTime', 'Thu, 01 January 1970 00:00:00 +0000', FALSE), # invalid month name
+			# RFC 850 (1036)
+			array ('HTTPDateToUnixTime', 'Sunday, 21-Feb-07 15:00:00 -0000', 1172070000), # OK
+			array ('HTTPDateToUnixTime', 'Monday, 15-Oct-07 19:00:00 +0000', 1192474800), # OK
+			array ('HTTPDateToUnixTime', 'Tuesda, 15-Oct-07 19:00:00 +0000', FALSE), # invalid week day name
+			array ('HTTPDateToUnixTime', 'Monday, 15-Oct-07 19:00:00 JST', FALSE), # invalid time zone
+			array ('HTTPDateToUnixTime', 'Thursday, 01-Jan-98 00:00:00 GMT', 883612800), # OK
+			# asctime()
+			array ('HTTPDateToUnixTime', 'Thu Mar  8 12:00:00 2007', 1173355200), # OK
+			array ('HTTPDateToUnixTime', 'Tus Mar  8 12:00:00 2007', FALSE), # invalid week day name
+			array ('HTTPDateToUnixTime', 'Wed Dec 31 23:59:59 1997', 883612799), # OK
 		);
 	}
 

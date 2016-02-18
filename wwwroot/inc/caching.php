@@ -64,7 +64,7 @@ function HTTPDateToUnixTime ($string)
 	# to "-0000" and "+0000".
 	$formats['rfc1123'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), (\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
 	$formats['rfc850'] = '/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
-	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}|\d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
+	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}| \d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
 
 	$matches = array();
 	if (preg_match ($formats['rfc1123'], $string, $matches))
@@ -81,7 +81,7 @@ function HTTPDateToUnixTime ($string)
 		$hours = $matches[5];
 		$minutes = $matches[6];
 		$seconds = $matches[7];
-		$month = $month_number[substr($matches[3],0,3)];
+		$month = $month_number[$matches[3]];
 		$day = $matches[2];
 		$year = $matches[4];
 	}
@@ -96,6 +96,8 @@ function HTTPDateToUnixTime ($string)
 	}
 	else
 		return false;
+	if ($hours > 23 || $minutes > 59 || $seconds > 59 || ! checkdate ($month, $day, $year))
+		return FALSE;
 	return gmmktime ($hours, $minutes, $seconds, $month, $day, $year);
 }
 
