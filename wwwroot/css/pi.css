@@ -214,11 +214,14 @@ tr.has_problems_odd {
  * style and are exempt from the zebra pattern. In this sense the 2nd TR
  * where the TDs start is considered "odd" and the 3rd -- "even" and so on.
  */
-table.zebra tr:nth-child(2n+3) {
+table.zebra tr:nth-child(2n+3):not(.highlight) {
 	background: #d0d0d0;
 }
-table.zebra tr:nth-child(2n) {
+table.zebra tr:nth-child(2n):not(.highlight) {
 	background: #e8e8e8;
+}
+table.zebra table:not(.zebra) tr {
+	background: inherit !important;
 }
 
 table.cooltable {
