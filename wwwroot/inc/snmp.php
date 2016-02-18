@@ -2069,6 +2069,15 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-stack-any-StackWise'] = array
+(
+	'pattern' => '@^StackSub-St(\d+)-(\d+)$@',
+	'replacement' => 'St\\1-\\2',
+	'dict_key' => '1-440', # Unknown interface type
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -3971,6 +3980,17 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'IBM System Networking RackSwitch G8000',
 		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
 	),
+        '9.1.1745' => array
+        (
+                'dict_key' => 2190,
+                'text' => 'Cisco Catalyst WS-C3850-48T',
+		  'processors' => array
+		  (
+			   'catalyst-stack-uplinks-10000SFP+',
+			   'catalyst-stack-any-1000T',
+			   'catalyst-stack-any-StackWise',
+		  ),
+	 ),
 
 );
 
