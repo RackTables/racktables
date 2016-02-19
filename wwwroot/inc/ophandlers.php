@@ -928,7 +928,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				$ports[] = array
 				(
 					'name' => $words[0],
-					'l2address' => $words[1],
+					'l2address' => array_fetch ($words, 1, ''),
 					'label' => ''
 				);
 				break;
