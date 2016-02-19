@@ -5792,7 +5792,7 @@ function universalHookHandler()
 	$bk_params = func_get_args();
 	$hook_name = array_shift ($bk_params);
 	if (! array_key_exists ($hook_name, $hooks_stack) || ! is_array ($hooks_stack[$hook_name]))
-		throw new InvalidRequestArgException ('$hooks_stack["' . $hook_name . '"]', $hooks_stack[$hook_name]);
+		throw new InvalidRequestArgException ('hooks_stack["' . $hook_name . '"]', $hooks_stack[$hook_name]);
 	foreach ($hooks_stack[$hook_name] as $callback)
 	{
 		$params = $bk_params;
