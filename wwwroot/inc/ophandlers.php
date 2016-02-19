@@ -854,12 +854,10 @@ function editPortForObject ()
 function addMultiPorts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 10));
-	assertStringArg ('format');
 	assertStringArg ('input');
-	assertStringArg ('port_type');
-	$format = $_REQUEST['format'];
-	$port_type = $_REQUEST['port_type'];
-	$object_id = $_REQUEST['object_id'];
+	$format = genericAssertion ('format', 'string');
+	$port_type = genericAssertion ('port_type', 'string');
+	$object_id = getBypassValue();
 	// Input lines are escaped, so we have to explode and to chop by 2-char
 	// \n and \r respectively.
 	$lines1 = explode ("\n", $_REQUEST['input']);
@@ -959,18 +957,15 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 function addBulkPorts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 82));
-	assertStringArg ('port_type_id');
 	assertStringArg ('port_name', TRUE);
 	assertStringArg ('port_label', TRUE);
-	assertUIntArg ('port_numbering_start', TRUE);
-	assertUIntArg ('port_numbering_count');
 
-	$object_id = $_REQUEST['object_id'];
+	$object_id = getBypassValue();
 	$port_name = $_REQUEST['port_name'];
-	$port_type_id = $_REQUEST['port_type_id'];
+	$port_type_id = genericAssertion ('port_type_id', 'string');
 	$port_label = $_REQUEST['port_label'];
-	$port_numbering_start = $_REQUEST['port_numbering_start'];
-	$port_numbering_count = $_REQUEST['port_numbering_count'];
+	$port_numbering_start = genericAssertion ('port_numbering_start', 'uint0');
+	$port_numbering_count = genericAssertion ('port_numbering_count', 'uint');
 
 	$added_count = $error_count = 0;
 	if(strrpos($port_name, "%u") === false )
@@ -1159,14 +1154,14 @@ function createUser ()
 function updateUser ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	genericAssertion ('user_id', 'uint');
+	$user_id = genericAssertion ('user_id', 'uint');
 	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	$new_password = assertStringArg ('password', TRUE);
-	$userinfo = spotEntity ('user', $_REQUEST['user_id']);
+	$userinfo = spotEntity ('user', $user_id);
 	// Set new password only if provided.
 	$new_password = mb_strlen ($new_password) ? sha1 ($new_password) : $userinfo['user_password_hash'];
-	commitUpdateUserAccount ($_REQUEST['user_id'], $username, $_REQUEST['realname'], $new_password);
+	commitUpdateUserAccount ($user_id, $username, $_REQUEST['realname'], $new_password);
 	// if user account renaming is being performed, change key value in UserConfig table
 	if ($userinfo['user_name'] !== $username)
 		usePreparedUpdateBlade ('UserConfig', array ('user' => $username), array('user' => $userinfo['user_name']));
@@ -1438,9 +1433,8 @@ function addMultipleObjects()
 function addLotOfObjects()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
-	assertUIntArg ('global_type_id', TRUE);
 	assertStringArg ('namelist', TRUE);
-	$global_type_id = $_REQUEST['global_type_id'];
+	$global_type_id = genericAssertion ('global_type_id', 'uint0');
 	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
 	{
 		showError ('Incomplete form has been ignored. Cheers.');
@@ -1751,8 +1745,7 @@ function addVSG ()
 function deleteVService ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('vs_id');
-	$vsinfo = spotEntity ('ipv4vs', $_REQUEST['vs_id']);
+	$vsinfo = spotEntity ('ipv4vs', genericAssertion ('vs_id', 'uint'));
 	if ($vsinfo['refcnt'] != 0)
 	{
 		showError ("Could not delete linked virtual service");
@@ -1941,6 +1934,7 @@ function removePortFromVS()
 
 function updateTripletConfig()
 {
+	global $op;
 	$key_fields = array
 	(
 		'object_id' => assertUIntArg ('object_id'),
@@ -1957,7 +1951,7 @@ function updateTripletConfig()
 	amplifyCell ($vsinfo);
 	$found = FALSE;
 
-	if ($_REQUEST['op'] == 'updPort')
+	if ($op == 'updPort')
 	{
 		$table = 'VSEnabledPorts';
 		$proto = assertStringArg ('proto');
@@ -2134,9 +2128,9 @@ function importPTRData ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 26, 'ERR' => 141));
 	$net = spotEntity ('ipv4net', getBypassValue());
-	assertUIntArg ('addrcount');
+	$addrcount = genericAssertion ('addrcount', 'uint');
 	$nbad = $ngood = 0;
-	for ($i = 1; $i <= $_REQUEST['addrcount']; $i++)
+	for ($i = 1; $i <= $addrcount; $i++)
 	{
 		$inputname = "import_${i}";
 		if (! isCheckSet ($inputname))
@@ -2207,9 +2201,7 @@ function saveEntityTags ()
 function rollTags ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 67, 'ERR' => 149));
-	assertStringArg ('sum', TRUE);
-	assertUIntArg ('realsum');
-	if ($_REQUEST['sum'] != $_REQUEST['realsum'])
+	if (genericAssertion ('sum', 'string0') != genericAssertion ('realsum', 'uint'))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR');
 		return;
@@ -2303,8 +2295,8 @@ function updateLocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $pageno;
-	assertUIntArg ('location_id');
-	assertUIntArg ('parent_id', TRUE);
+	$location_id = genericAssertion ('location_id', 'uint');
+	$parent_id = genericAssertion ('parent_id', 'uint0');
 	assertStringArg ('name');
 
 	if ($pageno == 'location')
@@ -2312,30 +2304,30 @@ function updateLocation ()
 		$taglist = genericAssertion ('taglist', 'array0');
 		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
 		assertStringArg ('comment', TRUE);
-		commitUpdateObject ($_REQUEST['location_id'], $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
-		updateObjectAttributes ($_REQUEST['location_id']);
-		rebuildTagChainForEntity ('location', $_REQUEST['location_id'], buildTagChainFromIds ($taglist), TRUE);
+		commitUpdateObject ($location_id, $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
+		updateObjectAttributes ($location_id);
+		rebuildTagChainForEntity ('location', $location_id, buildTagChainFromIds ($taglist), TRUE);
 	}
 	else
-		commitRenameObject ($_REQUEST['location_id'], $_REQUEST['name']);
+		commitRenameObject ($location_id, $_REQUEST['name']);
 
-	$locationData = spotEntity ('location', $_REQUEST['location_id']);
+	$locationData = spotEntity ('location', $location_id);
 
 	// parent_id was submitted, but no link exists - create it
-	if ($_REQUEST['parent_id'] > 0 && !$locationData['parent_id'])
-		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $_REQUEST['location_id']);
+	if ($parent_id > 0 && !$locationData['parent_id'])
+		commitLinkEntities ('location', $parent_id, 'location', $location_id);
 
 	// parent_id was submitted, but it doesn't match the existing link - update it
-	if ($_REQUEST['parent_id'] > 0 && $_REQUEST['parent_id'] != $locationData['parent_id'])
+	if ($parent_id > 0 && $parent_id != $locationData['parent_id'])
 		commitUpdateEntityLink
 		(
-			'location', $locationData['parent_id'], 'location', $_REQUEST['location_id'],
-			'location', $_REQUEST['parent_id'], 'location', $_REQUEST['location_id']
+			'location', $locationData['parent_id'], 'location', $location_id,
+			'location', $parent_id, 'location', $location_id
 		);
 
 	// no parent_id was submitted, but a link exists - delete it
-	if ($_REQUEST['parent_id'] == 0 && $locationData['parent_id'])
-		commitUnlinkEntities ('location', $locationData['parent_id'], 'location', $_REQUEST['location_id']);
+	if ($parent_id == 0 && $locationData['parent_id'])
+		commitUnlinkEntities ('location', $locationData['parent_id'], 'location', $location_id);
 
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
@@ -2343,17 +2335,17 @@ function updateLocation ()
 function deleteLocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
-	assertUIntArg ('location_id');
-	$locationData = spotEntity ('location', $_REQUEST['location_id']);
+	$location_id = genericAssertion ('location_id', 'uint');
+	$locationData = spotEntity ('location', $location_id);
 	amplifyCell ($locationData);
 	if (count ($locationData['locations']) || count ($locationData['rows']))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array ($locationData['name']));
 		return;
 	}
-	releaseFiles ('location', $_REQUEST['location_id']);
-	destroyTagsForEntity ('location', $_REQUEST['location_id']);
-	commitDeleteObject ($_REQUEST['location_id']);
+	releaseFiles ('location', $location_id);
+	destroyTagsForEntity ('location', $location_id);
+	commitDeleteObject ($location_id);
 	showFuncMessage (__FUNCTION__, 'OK', array ($locationData['name']));
 	return buildRedirectURL ('rackspace', 'editlocations');
 }
@@ -2375,33 +2367,33 @@ function addRow ()
 function updateRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	assertUIntArg ('row_id');
-	assertUIntArg ('location_id', TRUE);
+	$row_id = genericAssertion ('row_id', 'uint');
+	$location_id = genericAssertion ('location_id', 'uint0');
 	assertStringArg ('name');
 
-	commitUpdateObject ($_REQUEST['row_id'], $_REQUEST['name'], NULL, 'no', NULL, NULL);
+	commitUpdateObject ($row_id, $_REQUEST['name'], NULL, 'no', NULL, NULL);
 
 	global $pageno;
 	if ($pageno == 'row')
-		updateObjectAttributes ($_REQUEST['row_id']);
+		updateObjectAttributes ($row_id);
 
-	$rowData = spotEntity ('row', $_REQUEST['row_id']);
+	$rowData = spotEntity ('row', $row_id);
 
 	// location_id was submitted, but no link exists - create it
-	if ($_REQUEST['location_id'] > 0 && !$rowData['location_id'])
-		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $_REQUEST['row_id']);
+	if ($location_id > 0 && !$rowData['location_id'])
+		commitLinkEntities ('location', $location_id, 'row', $row_id);
 
 	// location_id was submitted, but it doesn't match the existing link - update it
-	if ($_REQUEST['location_id'] > 0 && $_REQUEST['location_id'] != $rowData['location_id'])
+	if ($location_id > 0 && $location_id != $rowData['location_id'])
 		commitUpdateEntityLink
 		(
-			'location', $rowData['location_id'], 'row', $_REQUEST['row_id'],
-			'location', $_REQUEST['location_id'], 'row', $_REQUEST['row_id']
+			'location', $rowData['location_id'], 'row', $row_id,
+			'location', $location_id, 'row', $row_id
 		);
 
 	// no parent_id was submitted, but a link exists - delete it
-	if ($_REQUEST['location_id'] == 0 && $rowData['location_id'])
-		commitUnlinkEntities ('location', $rowData['location_id'], 'row', $_REQUEST['row_id']);
+	if ($location_id == 0 && $rowData['location_id'])
+		commitUnlinkEntities ('location', $rowData['location_id'], 'row', $row_id);
 
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
 }
@@ -3073,14 +3065,13 @@ function update8021QPortList()
 {
 	genericAssertion ('ports', 'array');
 	$enabled = $disabled = 0;
-	global $sic;
 	$default_port = array
 	(
 		'mode' => 'access',
 		'allowed' => array (VLAN_DFL_ID),
 		'native' => VLAN_DFL_ID,
 	);
-	foreach ($sic['ports'] as $line)
+	foreach (genericAssertion ('ports', 'array') as $line)
 		if (preg_match ('/^enable (.+)$/', $line, $m))
 			$enabled += add8021QPort (getBypassValue(), $m[1], $default_port);
 		elseif (preg_match ('/^disable (.+)$/', $line, $m))
