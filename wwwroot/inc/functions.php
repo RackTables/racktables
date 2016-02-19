@@ -920,7 +920,7 @@ function l2addressForDatabase ($string)
 			$ret = str_replace ('-', '', $string);
 			break;
 		default:
-			throw new InvalidArgException ('$string', $string, 'malformed MAC/WWN address');
+			throw new InvalidArgException ('string', $string, 'malformed MAC/WWN address');
 	}
 	// some switches provide this fake address through SNMP. Store it as NULL to allow multiple copies
 	if ($ret === '000000000000')
@@ -1057,7 +1057,7 @@ function getMuninNameAndDomain ($object_id)
 	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
 		$hd = $attrs[3]['value'];
 	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
-		throw new InvalidArgException ('$object_id', $object_id, 'the name is not in the host.do.ma.in format');
+		throw new InvalidArgException ('object_id', $object_id, 'the name is not in the host.do.ma.in format');
 	return $ret;
 }
 
@@ -1497,7 +1497,7 @@ function sortEntityTags (&$cell)
 {
 	global $taglist;
 	if (! is_array ($cell['etags']))
-		throw new InvalidArgException ('$cell[etags]', $cell['etags']);
+		throw new InvalidArgException ('cell[etags]', $cell['etags']);
 	$cell['itags'] = array();
 	foreach ($cell['etags'] as $tag_id => $taginfo)
 		foreach ($taglist[$tag_id]['trace'] as $parent_id)
@@ -5172,7 +5172,7 @@ function isConfigVarChanged ($varname, $varvalue)
 	if (!isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if ($varname == '')
-		throw new InvalidArgException('$varname', $varname, 'Empty variable name');
+		throw new InvalidArgException('varname', $varname, 'Empty variable name');
 	if (!isset ($configCache[$varname]))
 		return TRUE;
 	if ($configCache[$varname]['vartype'] == 'uint')
@@ -5193,7 +5193,7 @@ function getConfigVar ($varname = '')
 		$varname == ''
 		or ! array_key_exists ($varname, $configCache)
 	)
-		throw new InvalidArgException ('$varname', $varname);
+		throw new InvalidArgException ('varname', $varname);
 	return $configCache[$varname]['varvalue'];
 }
 

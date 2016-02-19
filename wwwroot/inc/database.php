@@ -3797,9 +3797,9 @@ function getAttrMap ()
 function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0)
 {
 	if ($attr_id <= 0)
-		throw new InvalidArgException ('$attr_id', $attr_id);
+		throw new InvalidArgException ('attr_id', $attr_id);
 	if ($objtype_id <= 0)
-		throw new InvalidArgException ('$objtype_id', $objtype_id);
+		throw new InvalidArgException ('objtype_id', $objtype_id);
 
 	usePreparedInsertBlade
 	(
@@ -3925,7 +3925,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		array ($object_id, $attr_id)
 	);
 	if (! $row = $result->fetch (PDO::FETCH_ASSOC))
-		throw new InvalidArgException ('$attr_id', $attr_id, 'No such attribute #'.$attr_id);
+		throw new InvalidArgException ('attr_id', $attr_id, 'No such attribute #'.$attr_id);
 	$attr_type = $row['attr_type'];
 	unset ($result);
 	switch ($attr_type)
@@ -3940,7 +3940,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			throw new InvalidArgException ('$attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
+			throw new InvalidArgException ('attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
 	}
 	if (isset ($row['attr_id']))
 	{
@@ -4120,7 +4120,7 @@ function loadConfigCache ()
 function loadUserConfigCache ($username = NULL)
 {
 	if (!strlen ($username))
-		throw new InvalidArgException ('$username', $username);
+		throw new InvalidArgException ('username', $username);
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
@@ -4570,7 +4570,7 @@ function loadScript ($name)
 function saveScript ($name = '', $text)
 {
 	if (!strlen ($name))
-		throw new InvalidArgException ('$name', $name);
+		throw new InvalidArgException ('name', $name);
 	if (!isset ($text))
 		return deleteScript ($name);
 	return usePreparedExecuteBlade
@@ -4584,7 +4584,7 @@ function saveScript ($name = '', $text)
 function deleteScript ($name)
 {
 	if (!strlen ($name))
-		throw new InvalidArgException ('$name', $name);
+		throw new InvalidArgException ('name', $name);
 	return usePreparedDeleteBlade ('Script', array ('script_name' => $name));
 }
 
@@ -5717,7 +5717,7 @@ function setConfigVar ($varname = '', $varvalue = '', $softfail = FALSE)
 		$varname == ''
 		or ! array_key_exists ($varname, $configCache)
 	)
-		throw new InvalidArgException ('$varname', $varname);
+		throw new InvalidArgException ('varname', $varname);
 	if ($configCache[$varname]['is_hidden'] != 'no')
 		throw new InvalidRequestArgException ('varname', $varname, 'a hidden variable cannot be changed by user');
 	if (!mb_strlen ($varvalue) && $configCache[$varname]['emptyok'] != 'yes')
@@ -5740,7 +5740,7 @@ function setUserConfigVar ($varname = '', $varvalue = '')
 		$varname == ''
 		or ! array_key_exists ($varname, $configCache)
 	)
-		throw new InvalidArgException ('$varname', $varname);
+		throw new InvalidArgException ('varname', $varname);
 	if ($configCache[$varname]['is_userdefined'] != 'yes')
 		throw new InvalidRequestArgException ('varname', $varname, 'a system-wide setting cannot be changed by user');
 	if ($configCache[$varname]['is_hidden'] != 'no')
@@ -5769,7 +5769,7 @@ function resetUserConfigVar ($varname = '')
 		$varname == ''
 		or ! array_key_exists ($varname, $configCache)
 	)
-		throw new InvalidArgException ('$varname', $varname);
+		throw new InvalidArgException ('varname', $varname);
 	if ($configCache[$varname]['is_userdefined'] != 'yes')
 		throw new InvalidRequestArgException ('varname', $varname, 'a system-wide setting cannot be changed by user');
 	if ($configCache[$varname]['is_hidden'] != 'no')
