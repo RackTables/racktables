@@ -2126,6 +2126,32 @@ function IPCmp ($ip_binA, $ip_binB)
 	return numSign (strcmp ($ip_binA, $ip_binB));
 }
 
+// Binary compare the first addresses of each pair
+// If the first addresses of the compared pairs are equal, compare last addresses in reverse order
+// valid return values are: 1, 0, -1
+function IPSpaceCmp ($pairA, $pairB)
+{
+	$first = IPCmp ($pairA['first'], $pairB['first']);
+	return $first ? $first : IPCmp ($pairB['last'], $pairA['last']);
+}
+
+// filter netsted ip pairs
+function reduceIPPairList ($pairlist)
+{
+	$ret = array();
+	$left = $pairlist;
+	usort ($left, 'IPSpaceCmp');
+	while ($left)
+	{
+		$agg = array_shift ($left);
+		$ret[] = $agg;
+		foreach ($left as $id => $pair)
+			if ($pair['first'] >= $agg['first'] && $pair['last'] <= $agg['last'])
+				unset ($left[$id]);
+	}
+	return $ret;
+}
+
 // Compare networks. When sorting a tree, the records on the list will have
 // distinct base IP addresses.
 // valid return values are: 2, 1, 0, -1, -2
