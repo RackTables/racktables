@@ -1850,7 +1850,7 @@ function renderPortsForObject ($object_id)
 		'c3600asy' => 'Cisco 3600 async: sh line | inc TTY',
 		'fiwg' => 'Foundry ServerIron/FastIron WorkGroup/Edge: sh int br',
 		'fisxii' => 'Foundry FastIron SuperX/II4000: sh int br',
-		'ssv1' => 'SSV:&lt;interface name&gt; [&lt;MAC address&gt;]',
+		'ssv1' => 'SSV:<interface name> [<MAC address>]',
 	);
 	echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1');
 	echo 'Default port type: ';
