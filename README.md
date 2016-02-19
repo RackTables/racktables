@@ -45,17 +45,17 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
-| Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
+| CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
 | Debian 6           | `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`                  |
 | Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
-| Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
-| ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
+| Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| FreeBSD 8          | see note below                                                                       |
 | openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
-| CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
-| FreeBSD 8          | see note below                                                                       |
+| Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
 
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
