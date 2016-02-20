@@ -118,7 +118,7 @@ class RackTablesError extends Exception
 	{
 		if (isCLIMode())
 			return $string;
-		return stringForLabel ($string);
+		return stringForLabel ($string, 80);
 	}
 	public function dispatch()
 	{
