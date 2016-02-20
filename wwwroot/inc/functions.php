@@ -6005,9 +6005,7 @@ function convertToIRAE ($iae, $override_argname = NULL)
 {
 	if (! ($iae instanceof InvalidArgException))
 		throw new InvalidArgException ('iae', '(object)', 'not an instance of InvalidArgException class');
-	return is_null ($override_argname) ?
-		$iae->newIRAESameArgument() : # for backward compatibility only
-		$iae->newIRAE ($override_argname);
+	return $iae->newIRAE ($override_argname);
 }
 
 # Produce a textual date/time from a given UNIX timestamp
