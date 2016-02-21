@@ -1518,8 +1518,14 @@ function updateUI ()
 		// If form value = value in DB, don't bother updating DB
 		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
-		// any exceptions will be handled by process.php
-		setConfigVar ($varname, $varvalue, TRUE);
+		try
+		{
+			setConfigVar ($varname, $varvalue);
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw $iae->newIRAE();
+		}
 	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1538,7 +1544,14 @@ function saveMyPreferences ()
 		// If form value = value in DB, don't bother updating DB
 		if (!isConfigVarChanged($varname, $varvalue))
 			continue;
-		setUserConfigVar ($varname, $varvalue);
+		try
+		{
+			setUserConfigVar ($varname, $varvalue);
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw $iae->newIRAE();
+		}
 	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1546,7 +1559,14 @@ function saveMyPreferences ()
 function resetMyPreference ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	resetUserConfigVar (genericAssertion ('varname', 'string'));
+	try
+	{
+		resetUserConfigVar (genericAssertion ('varname', 'string'));
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3237,12 +3257,15 @@ function addObjectlog ()
 
 function saveQuickLinks()
 {
-	genericAssertion ('page_list', 'array0');
-	if (is_array ($_REQUEST['page_list']))
+	try
 	{
-		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', $_REQUEST['page_list']));
-		showSuccess ('Quick links list is saved');
+		setUserConfigVar ('QUICK_LINK_PAGES', implode(',', genericAssertion ('page_list', 'array0')));
 	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
+	showSuccess ('Quick links list is saved');
 }
 
 $ucsproductmap = array
