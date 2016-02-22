@@ -3422,11 +3422,12 @@ function renderNATv4ForObject ($object_id)
 {
 	function printNewItemTR ($alloclist)
 	{
+		global $natv4_proto;
 		printOpFormIntro ('addNATv4Rule');
 		echo "<tr align='center'><td>";
 		printImageHREF ('add', 'Add new NAT rule', TRUE);
 		echo '</td><td>';
-		printSelect (array ('TCP' => 'TCP', 'UDP' => 'UDP', 'ALL' => 'ALL'), array ('name' => 'proto'));
+		printSelect ($natv4_proto, array ('name' => 'proto'));
 
 		$options = array();
 		foreach ($alloclist as $ip_bin => $alloc)

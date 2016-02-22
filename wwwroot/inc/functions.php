@@ -159,6 +159,8 @@ $expirations[21] = array
 $expirations[22] = $expirations[21];
 $expirations[24] = $expirations[21];
 
+$natv4_proto = array ('TCP' => 'TCP', 'UDP' => 'UDP', 'ALL' => 'ALL');
+
 $log_messages = array(); // messages waiting for displaying
 
 function defineIfNotDefined ($constant, $value, $case_insensitive = FALSE)
@@ -360,6 +362,12 @@ function genericAssertion ($argname, $argtype)
 		assertStringArg ($argname);
 		global $vs_proto;
 		if (!array_key_exists ($sic[$argname], $vs_proto))
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
+		return $sic[$argname];
+	case 'enum/natv4proto':
+		assertStringArg ($argname);
+		global $natv4_proto;
+		if (! array_key_exists ($sic[$argname], $natv4_proto))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
 	case 'enum/alloc_type':
