@@ -4591,9 +4591,9 @@ function deleteScript ($name)
 function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip_bin))
-		throw new InvalidRequestArgException ('localip_bin', $localip_bin, 'Non-existent ip');
+		throw new InvalidRequestArgException ('localip_bin', ip4_format ($localip_bin), 'address does not belong to a known network');
 	if (NULL === getIPv4AddressNetworkId ($remoteip_bin))
-		throw new InvalidRequestArgException ('remoteip_bin', $remoteip_bin, 'Non-existent ip');
+		throw new InvalidRequestArgException ('remoteip_bin', ip4_format ($remoteip_bin), 'address does not belong to a known network');
 	if ( $proto == "ALL" )
 	{
 		$localport = 0;
