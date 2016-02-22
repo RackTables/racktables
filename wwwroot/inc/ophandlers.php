@@ -734,7 +734,6 @@ function setFuncMessages ($funcname, $messages)
 function addPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
 	if ($_REQUEST['proto'] != 'ALL')
@@ -750,7 +749,7 @@ function addPortForwarding ()
 
 	newPortForwarding
 	(
-		$_REQUEST['object_id'],
+		getBypassValue(),
 		$localip_bin,
 		$_REQUEST['localport'],
 		$remoteip_bin,
@@ -765,7 +764,6 @@ function addPortForwarding ()
 function delPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
 	if ($_REQUEST['proto'] != 'ALL')
@@ -777,7 +775,7 @@ function delPortForwarding ()
 
 	deletePortForwarding
 	(
-		$_REQUEST['object_id'],
+		getBypassValue(),
 		$localip_bin,
 		$_REQUEST['localport'],
 		$remoteip_bin,
@@ -790,7 +788,6 @@ function delPortForwarding ()
 function updPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	assertUIntArg ('object_id');
 	$localip_bin = assertIPv4Arg ('localip');
 	$remoteip_bin = assertIPv4Arg ('remoteip');
 	if ($_REQUEST['proto'] != 'ALL')
@@ -803,7 +800,7 @@ function updPortForwarding ()
 
 	updatePortForwarding
 	(
-		$_REQUEST['object_id'],
+		getBypassValue(),
 		$localip_bin,
 		$_REQUEST['localport'],
 		$remoteip_bin,
@@ -822,7 +819,7 @@ function addPortForObject ()
 	genericAssertion ('port_name', 'string');
 	commitAddPort
 	(
-		$_REQUEST['object_id'],
+		getBypassValue(),
 		trim ($_REQUEST['port_name']),
 		$_REQUEST['port_type_id'],
 		trim ($_REQUEST['port_label']),
