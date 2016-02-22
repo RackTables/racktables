@@ -734,14 +734,12 @@ function setFuncMessages ($funcname, $messages)
 function addPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	$localip_bin = assertIPv4Arg ('localip');
-	$remoteip_bin = assertIPv4Arg ('remoteip');
-	if ($_REQUEST['proto'] != 'ALL')
+	$proto = genericAssertion ('proto', 'enum/natv4proto');
+	if ($proto != 'ALL')
 	{
 		assertUIntArg ('localport');
 		assertUIntArg ('remoteport');
 	}
-	assertStringArg ('proto');
 	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
 	if (!strlen ($remoteport))
@@ -750,37 +748,34 @@ function addPortForwarding ()
 	newPortForwarding
 	(
 		getBypassValue(),
-		$localip_bin,
+		genericAssertion ('localip', 'inet4'),
 		$_REQUEST['localport'],
-		$remoteip_bin,
+		genericAssertion ('remoteip', 'inet4'),
 		$remoteport,
-		$_REQUEST['proto'],
+		$proto,
 		$_REQUEST['description']
 	);
-
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function delPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$localip_bin = assertIPv4Arg ('localip');
-	$remoteip_bin = assertIPv4Arg ('remoteip');
-	if ($_REQUEST['proto'] != 'ALL')
+	$proto = genericAssertion ('proto', 'enum/natv4proto');
+	if ($proto != 'ALL')
 	{
 		assertUIntArg ('localport');
 		assertUIntArg ('remoteport');
 	}
-	assertStringArg ('proto');
 
 	deletePortForwarding
 	(
 		getBypassValue(),
-		$localip_bin,
+		genericAssertion ('localip', 'inet4'),
 		$_REQUEST['localport'],
-		$remoteip_bin,
+		genericAssertion ('remoteip', 'inet4'),
 		$_REQUEST['remoteport'],
-		$_REQUEST['proto']
+		$proto
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -788,24 +783,22 @@ function delPortForwarding ()
 function updPortForwarding ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	$localip_bin = assertIPv4Arg ('localip');
-	$remoteip_bin = assertIPv4Arg ('remoteip');
-	if ($_REQUEST['proto'] != 'ALL')
+	$proto = genericAssertion ('proto', 'enum/natv4proto');
+	if ($proto != 'ALL')
 	{
 		assertUIntArg ('localport');
 		assertUIntArg ('remoteport');
 	}
-	assertStringArg ('proto');
 	assertStringArg ('description', TRUE);
 
 	updatePortForwarding
 	(
 		getBypassValue(),
-		$localip_bin,
+		genericAssertion ('localip', 'inet4'),
 		$_REQUEST['localport'],
-		$remoteip_bin,
+		genericAssertion ('remoteip', 'inet4'),
 		$_REQUEST['remoteport'],
-		$_REQUEST['proto'],
+		$proto,
 		$_REQUEST['description']
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
