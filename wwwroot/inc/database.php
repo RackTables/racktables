@@ -5710,7 +5710,7 @@ function setConfigVar ($varname, $varvalue)
 	global $configCache;
 	if (!isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
-	if (NULL === $var = array_fetch ($configCache, $varname))
+	if (NULL === $var = array_fetch ($configCache, $varname, NULL))
 		throw new InvalidArgException ('varname', $varname, 'unknown variable');
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
@@ -5729,7 +5729,7 @@ function setUserConfigVar ($varname, $varvalue)
 	global $remote_username;
 	if (!isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
-	if (NULL === $var = array_fetch ($configCache, $varname))
+	if (NULL === $var = array_fetch ($configCache, $varname, NULL))
 		throw new InvalidArgException ('varname', $varname, 'unknown variable');
 	if ($var['is_userdefined'] != 'yes')
 		throw new InvalidArgException ('varname', $varname, 'a system-wide setting cannot be changed by user');
@@ -5754,7 +5754,7 @@ function resetUserConfigVar ($varname)
 	global $remote_username;
 	if (!isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
-	if (NULL === $var = array_fetch ($configCache, $varname))
+	if (NULL === $var = array_fetch ($configCache, $varname, NULL))
 		throw new InvalidArgException ('varname', $varname, 'unknown variable');
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
