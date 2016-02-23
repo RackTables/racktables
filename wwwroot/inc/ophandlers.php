@@ -807,16 +807,14 @@ function updPortForwarding ()
 function addPortForObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	assertStringArg ('port_name', TRUE);
-	genericAssertion ('port_l2address', 'l2address0');
 	genericAssertion ('port_name', 'string');
 	commitAddPort
 	(
 		getBypassValue(),
 		trim ($_REQUEST['port_name']),
-		$_REQUEST['port_type_id'],
+		genericAssertion ('port_type_id', 'string'),
 		trim ($_REQUEST['port_label']),
-		trim ($_REQUEST['port_l2address'])
+		trim (genericAssertion ('port_l2address', 'l2address0'))
 	);
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
@@ -2425,9 +2423,10 @@ function addRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('ERR2' => 172));
 	$taglist = genericAssertion ('taglist', 'array0');
+	$row_id = getBypassValue();
 
 	// The new rack(s) should be placed on the bottom of the list, sort-wise
-	$rowInfo = getRowInfo($_REQUEST['row_id']);
+	$rowInfo = getRowInfo ($row_id);
 	$sort_order = $rowInfo['count']+1;
 
 	if (isset ($_REQUEST['got_data']))
@@ -2442,7 +2441,7 @@ function addRack ()
 		commitUpdateAttrValue ($rack_id, 29, $sort_order);
 
 		// Link it to the row
-		commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
+		commitLinkEntities ('row', $row_id, 'rack', $rack_id);
 		showSuccess ('added rack ' . mkA ($_REQUEST['name'], 'rack', $rack_id));
 	}
 	elseif (isset ($_REQUEST['got_mdata']))
@@ -2471,7 +2470,7 @@ function addRack ()
 			$sort_order++;
 
 			// Link it to the row
-			commitLinkEntities ('row', $_REQUEST['row_id'], 'rack', $rack_id);
+			commitLinkEntities ('row', $row_id, 'rack', $rack_id);
 			showSuccess ('added rack ' . mkA ($cname, 'rack', $rack_id));
 		}
 	}
