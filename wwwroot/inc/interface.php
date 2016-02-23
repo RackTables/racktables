@@ -4049,10 +4049,11 @@ function renderEditLocationForm ($location_id)
 		echo "</td></tr>\n";
 		$i++;
 	}
-	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=has_problems";
-	if ($location['has_problems'] == 'yes')
-		echo ' checked';
-	echo "></td></tr>\n";
+	echo '<tr>' .
+		'<td>&nbsp;</td>' .
+		'<th class=tdright><label for=has_problems>Has problems:</label></th>' .
+		'<td class=tdleft><input type=checkbox name=has_problems id=has_problems' . ($location['has_problems'] == 'yes' ? ' checked' : '') . '></td>' .
+		"</tr>\n";
 	if (count ($location['locations']) == 0 and count ($location['rows']) == 0)
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
