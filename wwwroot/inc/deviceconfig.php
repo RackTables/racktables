@@ -51,6 +51,18 @@ function ios12ReadLLDPStatus ($input)
 
 		switch (count ($matches))
 		{
+		case 4:
+			// check if $remote_name has port glued - it is known that IOS does not insert whitespace between
+			// remote name and port if remote name is too long
+			$remote_name_raw = array_shift ($matches);
+			if (preg_match ("#^(.+?)((?:Fa|Gi|Te)[0-9/.]+)$#", $remote_name_raw, $rmatches))
+			{
+				array_unshift ($matches, $rmatches[2]);
+				array_unshift ($matches, $rmatches[1]);
+				// fall though to 5
+			}
+			else
+				break;
 		case 5:
 			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
 			$local_port = shortenIfName ($local_port);
