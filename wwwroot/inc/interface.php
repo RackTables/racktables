@@ -646,6 +646,7 @@ function renderRackspaceRowEditor ()
 		renderLocationSelectTree ('location_id');
 		echo '</td><td><input type=text name=name></td><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
+		echo '</td><td>&nbsp;';
 		echo '</td></tr></form>';
 	}
 	startPortlet ('Rows');
