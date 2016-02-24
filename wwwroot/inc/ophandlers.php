@@ -1194,7 +1194,7 @@ function clearSticker ()
 function updateObjectAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63));
-	global $remote_username, $sic;
+	global $remote_username;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
@@ -1269,7 +1269,7 @@ function updateObjectAllocation ()
 				'old_molecule_id' => count ($oldMolecule) ? createMolecule ($oldMolecule) : NULL,
 				'new_molecule_id' => count ($newMolecule) ? createMolecule ($newMolecule) : NULL,
 				'user_name' => $remote_username,
-				'comment' => empty ($sic['comment']) ? NULL : $sic['comment'],
+				'comment' => nullIfEmptyStr (genericAssertion ('comment', 'string0')),
 			)
 		);
 	}
@@ -2870,24 +2870,24 @@ function save8021QPorts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 21));
 	global $sic;
-	assertUIntArg ('mutex_rev', TRUE); // counts from 0
-	assertStringArg ('form_mode');
-	if ($sic['form_mode'] != 'save' and $sic['form_mode'] != 'duplicate')
-		throw new InvalidRequestArgException ('form_mode', $sic['form_mode']);
+	$object_id = getBypassValue();
+	$form_mode = genericAssertion ('form_mode', 'string');
+	if ($form_mode != 'save' and $form_mode != 'duplicate')
+		throw new InvalidRequestArgException ('form_mode', $form_mode);
 	$extra = array();
 
 	// prepare the $changes array
 	$changes = array();
-	switch ($sic['form_mode'])
+	switch ($form_mode)
 	{
 	case 'save':
-		assertUIntArg ('nports');
-		if ($sic['nports'] == 1)
+		$nports = genericAssertion ('nports', 'uint');
+		if ($nports == 1)
 		{
 			assertStringArg ('pn_0');
 			$extra = array ('port_name' => $sic['pn_0']);
 		}
-		for ($i = 0; $i < $sic['nports']; $i++)
+		for ($i = 0; $i < $nports; $i++)
 		{
 			assertStringArg ('pn_' . $i);
 			assertStringArg ('pm_' . $i);
@@ -2918,19 +2918,18 @@ function save8021QPorts ()
 		}
 		break;
 	case 'duplicate':
-		assertStringArg ('from_port');
-#			assertArrayArg ('to_ports');
-		$before = getStored8021QConfig ($sic['object_id'], 'desired');
-		if (!array_key_exists ($sic['from_port'], $before))
-			throw new InvalidArgException ('from_port', $sic['from_port'], 'this port does not exist');
-		foreach ($sic['to_ports'] as $tpn)
+		$from_port = genericAssertion ('from_port', 'string');
+		$before = getStored8021QConfig ($object_id, 'desired');
+		if (!array_key_exists ($from_port, $before))
+			throw new InvalidArgException ('from_port', $from_port, 'this port does not exist');
+		foreach (genericAssertion ('to_ports', 'array0') as $tpn)
 			if (!array_key_exists ($tpn, $before))
 				throw new InvalidArgException ('to_ports[]', $tpn, 'this port does not exist');
-			elseif ($tpn != $sic['from_port'])
-				$changes[$tpn] = $before[$sic['from_port']];
+			elseif ($tpn != $from_port)
+				$changes[$tpn] = $before[$from_port];
 		break;
 	}
-	apply8021qChangeRequest ($sic['object_id'], $changes, TRUE, $sic['mutex_rev']);
+	apply8021qChangeRequest ($object_id, $changes, TRUE, genericAssertion ('mutex_rev', 'uint0'));
 	return buildRedirectURL (NULL, NULL, $extra);
 }
 
