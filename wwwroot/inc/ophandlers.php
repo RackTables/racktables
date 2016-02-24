@@ -2310,7 +2310,7 @@ function updateLocation ()
 	if ($pageno == 'location')
 	{
 		$taglist = genericAssertion ('taglist', 'array0');
-		$has_problems = (isset ($_REQUEST['has_problems']) and $_REQUEST['has_problems'] == 'on') ? 'yes' : 'no';
+		$has_problems = isCheckSet ('has_problems', 'yesno');
 		assertStringArg ('comment', TRUE);
 		commitUpdateObject ($location_id, $_REQUEST['name'], NULL, $has_problems, NULL, $_REQUEST['comment']);
 		updateObjectAttributes ($location_id);

@@ -1569,10 +1569,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				continue;
 			// detect a change
 			$state = $rackData[$unit_no][$locidx]['state'];
-			if (isset ($_REQUEST["atom_${rack_id}_${unit_no}_${locidx}"]) and $_REQUEST["atom_${rack_id}_${unit_no}_${locidx}"] == 'on')
-				$newstate = $checked_state;
-			else
-				$newstate = $unchecked_state;
+			$newstate = isCheckSet ("atom_${rack_id}_${unit_no}_${locidx}") ? $checked_state : $unchecked_state;
 			if ($state == $newstate)
 				continue;
 			$rackchanged = TRUE;

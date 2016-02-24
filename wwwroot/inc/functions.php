@@ -692,15 +692,9 @@ function mergeGridFormToRack (&$rackData)
 	$rack_id = $rackData['id'];
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
-		{
-			if ($rackData[$unit_no][$locidx]['enabled'] != TRUE)
-				continue;
-			$inputname = "atom_${rack_id}_${unit_no}_${locidx}";
-			if (isset ($_REQUEST[$inputname]) and $_REQUEST[$inputname] == 'on')
-				$rackData[$unit_no][$locidx]['checked'] = ' checked';
-			else
-				$rackData[$unit_no][$locidx]['checked'] = '';
-		}
+			if ($rackData[$unit_no][$locidx]['enabled'])
+				$rackData[$unit_no][$locidx]['checked'] =
+					isCheckSet ("atom_${rack_id}_${unit_no}_${locidx}") ? ' checked' : '';
 }
 
 // wrapper around ip4_mask and ip6_mask
