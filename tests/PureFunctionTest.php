@@ -146,6 +146,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				array ('iif_id' => 10, 'iif_name' => 'QSFP+', 'oif_id' => 1663, 'oif_name' => '40GBase-SR4'),
 				'QSFP+/40GBase-SR4'
 			),
+
+			array ('acceptable8021QConfig', array ('mode' => 'unknown'), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'trunk', 'native' => 0, 'allowed' => array (1, 2, 3)), TRUE),
+			array ('acceptable8021QConfig', array ('mode' => 'trunk', 'native' => 1, 'allowed' => array (1, 2, 3)), TRUE),
+			array ('acceptable8021QConfig', array ('mode' => 'trunk', 'native' => 2, 'allowed' => array()), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'trunk', 'native' => 4, 'allowed' => array (1, 2, 3)), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 2, 'allowed' => array (2)), TRUE),
+			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 0, 'allowed' => array (3)), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 2, 'allowed' => array (3)), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 1, 'allowed' => array (1, 2, 3)), FALSE),
+			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 3, 'allowed' => array()), FALSE),
 		);
 	}
 

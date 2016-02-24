@@ -4567,7 +4567,7 @@ function acceptable8021QConfig ($port)
 	switch ($port['mode'])
 	{
 	case 'trunk':
-		return TRUE;
+		return $port['native'] == 0 || in_array ($port['native'], $port['allowed']);
 	case 'access':
 		return $port['native'] > 0 && count ($port['allowed']) == 1 &&
 			in_array ($port['native'], $port['allowed']);
