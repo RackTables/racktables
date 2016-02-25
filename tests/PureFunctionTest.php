@@ -537,6 +537,11 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		return array
 		(
 			array ('questionMarks', array (0)),
+
+			array ('array_values_same', array ('', array (1, 2, 3))),
+			array ('array_values_same', array (0, array ())),
+			array ('array_values_same', array (array (1), '1')),
+			array ('array_values_same', array (NULL, NULL)),
 		);
 	}
 }

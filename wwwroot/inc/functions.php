@@ -3452,6 +3452,10 @@ function scanArrayForItem ($table, $scan_column, $scan_value)
 // as a single occurrence, IOW, there is an implicit array_unique() here.
 function array_values_same ($a1, $a2)
 {
+	if (! is_array ($a1))
+		throw new InvalidArgException ('a1', $a1, 'is not an array');
+	if (! is_array ($a2))
+		throw new InvalidArgException ('a2', $a2, 'is not an array');
 	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
 }
 
