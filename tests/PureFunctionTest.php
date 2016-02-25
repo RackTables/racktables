@@ -74,12 +74,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group small
-	 * @dataProvider providerUnaryIAE
+	 * @dataProvider providerNaryIAE
 	 * @expectedException InvalidArgException
 	 */
-	public function testUnaryIAE ($func, $input)
+	public function testNaryIAE ($func, $input)
 	{
-		$func ($input);
+		call_user_func_array ($func, $input);
 	}
 
 	public function providerUnaryEquals ()
@@ -532,11 +532,11 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function providerUnaryIAE ()
+	public function providerNaryIAE ()
 	{
 		return array
 		(
-			array ('questionMarks', 0),
+			array ('questionMarks', array (0)),
 		);
 	}
 }
