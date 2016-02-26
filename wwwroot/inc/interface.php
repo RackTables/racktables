@@ -1042,7 +1042,7 @@ function renderNewRackForm()
 	if ($default_height == 0)
 		$default_height = '';
 	startPortlet ('Add one');
-	printOpFormIntro ('addRack', array ('got_data' => 'TRUE'));
+	printOpFormIntro ('addRack', array ('mode' => 'one'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name></td>";
 	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 value='${default_height}'></td></tr>\n";
@@ -1056,7 +1056,7 @@ function renderNewRackForm()
 	finishPortlet();
 
 	startPortlet ('Add many');
-	printOpFormIntro ('addRack', array ('got_mdata' => 'TRUE'));
+	printOpFormIntro ('addRack', array ('mode' => 'many'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
 	echo "<tr><th class=tdright>Assign tags:</td><td class=tdleft>";

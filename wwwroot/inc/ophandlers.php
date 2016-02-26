@@ -2429,53 +2429,45 @@ function addRack ()
 	$rowInfo = getRowInfo ($row_id);
 	$sort_order = $rowInfo['count']+1;
 
-	if (isset ($_REQUEST['got_data']))
+	switch (genericAssertion ('mode', 'string'))
 	{
+	case 'one':
 		assertStringArg ('name');
-		assertUIntArg ('height1');
+		$height = genericAssertion ('height1', 'uint');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
 
 		// Set the height and sort order
-		commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height1']);
+		commitUpdateAttrValue ($rack_id, 27, $height);
 		commitUpdateAttrValue ($rack_id, 29, $sort_order);
 
 		// Link it to the row
 		commitLinkEntities ('row', $row_id, 'rack', $rack_id);
-		showSuccess ('added rack ' . mkA ($_REQUEST['name'], 'rack', $rack_id));
-	}
-	elseif (isset ($_REQUEST['got_mdata']))
-	{
-		assertUIntArg ('height2');
+		showSuccess ('added ' . mkCellA (spotEntity ('rack', $rack_id)));
+		break;
+	case 'many':
+		$height = genericAssertion ('height2', 'uint');
 		assertStringArg ('names', TRUE);
-		// copy-and-paste from renderAddMultipleObjectsForm()
-		$names1 = explode ("\n", $_REQUEST['names']);
-		$names2 = array();
-		foreach ($names1 as $line)
-		{
-			$parts = explode ('\r', $line);
-			reset ($parts);
-			if (!strlen ($parts[0]))
-				continue;
-			else
-				$names2[] = rtrim ($parts[0]);
-		}
+		$names2 = explode ("\n", dos2unix ($_REQUEST['names']));
+		$names2 = array_map ('trim', $names2);
+		$names2 = array_filter ($names2, 'mb_strlen');
 		foreach ($names2 as $cname)
 		{
 			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
 
 			// Set the height and sort order
-			commitUpdateAttrValue ($rack_id, 27, $_REQUEST['height2']);
+			commitUpdateAttrValue ($rack_id, 27, $height);
 			commitUpdateAttrValue ($rack_id, 29, $sort_order);
 			$sort_order++;
 
 			// Link it to the row
 			commitLinkEntities ('row', $row_id, 'rack', $rack_id);
-			showSuccess ('added rack ' . mkA ($cname, 'rack', $rack_id));
+			showSuccess ('added ' . mkCellA (spotEntity ('rack', $rack_id)));
 		}
-	}
-	else
+		break;
+	default:
 		showFuncMessage (__FUNCTION__, 'ERR2');
+	}
 }
 
 function updateRack ()
