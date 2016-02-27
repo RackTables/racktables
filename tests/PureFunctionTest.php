@@ -157,6 +157,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 2, 'allowed' => array (3)), FALSE),
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 1, 'allowed' => array (1, 2, 3)), FALSE),
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 3, 'allowed' => array()), FALSE),
+
+			array ('listToRanges', array(), array()),
+			array ('listToRanges', array (7), array (array ('from' => 7, 'to' => 7))),
+			array ('listToRanges', array (2, 4, 3, 5, 1), array (array ('from' => 1, 'to' => 5))),
+			array ('listToRanges', array (12, 24, 23, 25, 11), array (array ('from' => 11, 'to' => 12), array ('from' => 23, 'to' => 25))),
+			array ('listToRanges', array (22, 24, 23, 25, 11), array (array ('from' => 11, 'to' => 11), array ('from' => 22, 'to' => 25))),
 		);
 	}
 
@@ -517,6 +523,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('buildVLANFilter', 'none', '100-20000', array ()),
 			array ('buildVLANFilter', 'none', '0-20000', array ()),
 			array ('buildVLANFilter', 'abcde', '', array ()), // this is a bug, ought to be InvalidArgException
+
+			// explicit 2nd argument
+			array ('listToRanges', array(), 0, array()),
+			array ('listToRanges', array (7), 0, array (array ('from' => 7, 'to' => 7))),
+			array ('listToRanges', array (2, 4, 3, 5, 1), 0, array (array ('from' => 1, 'to' => 5))),
+			array ('listToRanges', array (12, 24, 23, 25, 11), 0, array (array ('from' => 11, 'to' => 12), array ('from' => 23, 'to' => 25))),
+			array ('listToRanges', array (22, 24, 23, 25, 11), 0, array (array ('from' => 11, 'to' => 11), array ('from' => 22, 'to' => 25))),
+
+			array ('listToRanges', array (2, 3, 1), 1, array (array ('from' => 1, 'to' => 1), array ('from' => 2, 'to' => 2), array ('from' => 3, 'to' => 3))),
+			array ('listToRanges', array (10, 11, 12), 4, array (array ('from' => 10, 'to' => 12))),
+			array ('listToRanges', array (10, 11, 12, 13, 14, 15, 16, 17), 4, array (array ('from' => 10, 'to' => 13), array ('from' => 14, 'to' => 17))),
 		);
 	}
 
