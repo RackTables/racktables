@@ -163,6 +163,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('listToRanges', array (2, 4, 3, 5, 1), array (array ('from' => 1, 'to' => 5))),
 			array ('listToRanges', array (12, 24, 23, 25, 11), array (array ('from' => 11, 'to' => 12), array ('from' => 23, 'to' => 25))),
 			array ('listToRanges', array (22, 24, 23, 25, 11), array (array ('from' => 11, 'to' => 11), array ('from' => 22, 'to' => 25))),
+
+			array ('iosParseVLANString', '10', array (10)),
+			array ('iosParseVLANString', '10,20', array (10, 20)),
+			array ('iosParseVLANString', '10, 20, 30', array (10, 20, 30)),
+			array ('iosParseVLANString', '3-8', array (3, 4, 5, 6, 7, 8)),
+			array ('iosParseVLANString', '10, 20-25, 30', array (10, 20, 21, 22, 23, 24, 25, 30)),
 		);
 	}
 
@@ -591,6 +597,11 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('array_values_same', array (0, array ())),
 			array ('array_values_same', array (array (1), '1')),
 			array ('array_values_same', array (NULL, NULL)),
+
+			array ('iosParseVLANString', array ('')),
+			array ('iosParseVLANString', array ('x')),
+			array ('iosParseVLANString', array ('1,x,3')),
+			array ('iosParseVLANString', array ('1-3,x,10')),
 		);
 	}
 }
