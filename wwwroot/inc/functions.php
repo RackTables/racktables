@@ -3529,7 +3529,11 @@ function apply8021QOrder ($vswitch, $portlist)
 	return $portlist;
 }
 
-// return a sequence of ranges for given string form and port role
+// Return a sequence of integer ranges for given port role and VLAN filter string.
+// FIXME: for an "anymode" port the same filter currently applies to the "trunk"
+// and "access" configurations of the port, i.e. such a port cannot be set to "A1"
+// by means of the user interface though as far as the data model goes "A1" is a
+// valid configuration for an "anymode" port.
 function buildVLANFilter ($role, $string)
 {
 	// set base
