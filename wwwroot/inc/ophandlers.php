@@ -2875,18 +2875,15 @@ function save8021QPorts ()
 	case 'save':
 		$nports = genericAssertion ('nports', 'uint');
 		if ($nports == 1)
-		{
-			assertStringArg ('pn_0');
-			$extra = array ('port_name' => $sic['pn_0']);
-		}
+			$extra = array ('port_name' => genericAssertion ('pn_0', 'string'));
 		for ($i = 0; $i < $nports; $i++)
 		{
-			assertStringArg ('pn_' . $i);
-			assertStringArg ('pm_' . $i);
+			$portname = assertStringArg ('pn_' . $i);
+			$portmode = assertStringArg ('pm_' . $i);
 			// An access port only generates form input for its native VLAN,
 			// which we derive allowed VLAN list from.
 			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
-			switch ($sic["pm_${i}"])
+			switch ($portmode)
 			{
 			case 'trunk':
 #				assertArrayArg ('pav_' . $i);
@@ -2899,11 +2896,11 @@ function save8021QPorts ()
 				$allowed = array ($native);
 				break;
 			default:
-				throw new InvalidRequestArgException ("pm_${i}", $_REQUEST["pm_${i}"], 'unknown port mode');
+				throw new InvalidRequestArgException ("pm_${i}", $portmode, 'unknown port mode');
 			}
-			$changes[$sic['pn_' . $i]] = array
+			$changes[$portname] = array
 			(
-				'mode' => $sic['pm_' . $i],
+				'mode' => $portmode,
 				'allowed' => $allowed,
 				'native' => $native,
 			);
