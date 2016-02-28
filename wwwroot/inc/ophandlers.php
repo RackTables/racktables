@@ -1416,22 +1416,16 @@ function addLotOfObjects()
 		showError ('Incomplete form has been ignored. Cheers.');
 		return;
 	}
-	else
-	{
-		foreach (textareaCooked ($_REQUEST['namelist']) as $name)
-			try
-			{
-				$object_id = commitAddObject ($name, NULL, $global_type_id, '', $taglist);
-				$info = spotEntity ('object', $object_id);
-				amplifyCell ($info);
-				showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
-			}
-			catch (RackTablesError $e)
-			{
-				showError ("Error creating object '$name': " . $e->getMessage());
-				continue;
-			}
-	}
+	foreach (textareaCooked ($_REQUEST['namelist']) as $name)
+		try
+		{
+			$object_id = commitAddObject ($name, NULL, $global_type_id, '', $taglist);
+			showSuccess ('added object ' . mkCellA (spotEntity ('object', $object_id)));
+		}
+		catch (RackTablesError $e)
+		{
+			showError ("Failed to add object '$name': " . $e->getMessage());
+		}
 }
 
 function linkObjects ()
