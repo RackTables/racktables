@@ -846,20 +846,8 @@ function addMultiPorts ()
 	$format = genericAssertion ('format', 'string');
 	$port_type = genericAssertion ('port_type', 'string');
 	$object_id = getBypassValue();
-	// Input lines are escaped, so we have to explode and to chop by 2-char
-	// \n and \r respectively.
-	$lines1 = explode ("\n", $_REQUEST['input']);
-	foreach ($lines1 as $line)
-	{
-		$parts = explode ('\r', $line);
-		reset ($parts);
-		if (!strlen ($parts[0]))
-			continue;
-		else
-			$lines2[] = rtrim ($parts[0]);
-	}
 	$ports = array();
-	foreach ($lines2 as $line)
+	foreach (textareaCooked ($_REQUEST['input']) as $line)
 	{
 		switch ($format)
 		{
@@ -1430,19 +1418,7 @@ function addLotOfObjects()
 	}
 	else
 	{
-		// The name extractor below was stolen from ophandlers.php:addMultiPorts()
-		$names1 = explode ("\n", $_REQUEST['namelist']);
-		$names2 = array();
-		foreach ($names1 as $line)
-		{
-			$parts = explode ('\r', $line);
-			reset ($parts);
-			if (!strlen ($parts[0]))
-				continue;
-			else
-				$names2[] = rtrim ($parts[0]);
-		}
-		foreach ($names2 as $name)
+		foreach (textareaCooked ($_REQUEST['namelist']) as $name)
 			try
 			{
 				$object_id = commitAddObject ($name, NULL, $global_type_id, '', $taglist);
@@ -2448,10 +2424,7 @@ function addRack ()
 	case 'many':
 		$height = genericAssertion ('height2', 'uint');
 		assertStringArg ('names', TRUE);
-		$names2 = explode ("\n", dos2unix ($_REQUEST['names']));
-		$names2 = array_map ('trim', $names2);
-		$names2 = array_filter ($names2, 'mb_strlen');
-		foreach ($names2 as $cname)
+		foreach (textareaCooked ($_REQUEST['names']) as $cname)
 		{
 			$rack_id = commitAddObject ($cname, NULL, 1560, NULL, $taglist);
 

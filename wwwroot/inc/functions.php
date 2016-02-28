@@ -6368,4 +6368,16 @@ function requireExtraFiles ($reqlist)
 		requireListOfFiles ($reqlist["${pageno}-*"]);
 }
 
+// Return the text as a list of lines after removing CRs, empty lines
+// and leading/trailing whitespace.
+function textareaCooked ($text)
+{
+	$ret = dos2unix ($text);
+	$ret = explode ("\n", $ret);
+	$ret = array_map ('trim', $ret);
+	$ret = array_diff ($ret, array (''));
+	$ret = array_values ($ret); // reindex to be consistent enough for the tests
+	return $ret;
+}
+
 ?>

@@ -169,6 +169,15 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('iosParseVLANString', '10, 20, 30', array (10, 20, 30)),
 			array ('iosParseVLANString', '3-8', array (3, 4, 5, 6, 7, 8)),
 			array ('iosParseVLANString', '10, 20-25, 30', array (10, 20, 21, 22, 23, 24, 25, 30)),
+
+			array ('textareaCooked', '', array()),
+			array ('textareaCooked', '  ', array()),
+			array ('textareaCooked', "\r\n\r\n", array()),
+			array ('textareaCooked', "\n \n\t\n \n", array()),
+			array ('textareaCooked', 'abcd', array ('abcd')),
+			array ('textareaCooked', "\nabcd\n", array ('abcd')),
+			array ('textareaCooked', "\r\n  \r\nabcd\r\n  \t\t         \r\n", array ('abcd')),
+			array ('textareaCooked', "abcd\r\n   efgh\r\nijkl        \r\n", array ('abcd', 'efgh', 'ijkl')),
 		);
 	}
 
