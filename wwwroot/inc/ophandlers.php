@@ -745,16 +745,23 @@ function addPortForwarding ()
 	if (!strlen ($remoteport))
 		$remoteport = $_REQUEST['localport'];
 
-	newPortForwarding
-	(
-		getBypassValue(),
-		genericAssertion ('localip', 'inet4'),
-		$_REQUEST['localport'],
-		genericAssertion ('remoteip', 'inet4'),
-		$remoteport,
-		$proto,
-		$_REQUEST['description']
-	);
+	try
+	{
+		newPortForwarding
+		(
+			getBypassValue(),
+			genericAssertion ('localip', 'inet4'),
+			$_REQUEST['localport'],
+			genericAssertion ('remoteip', 'inet4'),
+			$remoteport,
+			$proto,
+			$_REQUEST['description']
+		);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 

@@ -4588,9 +4588,9 @@ function deleteScript ($name)
 function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin, $remoteport, $proto, $description)
 {
 	if (NULL === getIPv4AddressNetworkId ($localip_bin))
-		throw new InvalidRequestArgException ('localip_bin', ip4_format ($localip_bin), 'address does not belong to a known network');
+		throw new InvalidArgException ('localip_bin', ip4_format ($localip_bin), 'address does not belong to a known network');
 	if (NULL === getIPv4AddressNetworkId ($remoteip_bin))
-		throw new InvalidRequestArgException ('remoteip_bin', ip4_format ($remoteip_bin), 'address does not belong to a known network');
+		throw new InvalidArgException ('remoteip_bin', ip4_format ($remoteip_bin), 'address does not belong to a known network');
 	if ( $proto == "ALL" )
 	{
 		$localport = 0;
@@ -4599,9 +4599,9 @@ function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin,
 	else
 	{
 		if ( $localport <= 0 or $localport >= 65536 )
-			throw new InvalidRequestArgException ('localport', $localport, 'Invaild port');
+			throw new InvalidArgException ('localport', $localport, 'Invaild port');
 		if ( $remoteport <= 0 or $remoteport >= 65536 )
-			throw new InvalidRequestArgException ('remoteport', $remoteport, 'Invaild port');
+			throw new InvalidArgException ('remoteport', $remoteport, 'Invaild port');
 	}
 
 	return usePreparedInsertBlade
