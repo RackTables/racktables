@@ -579,7 +579,7 @@ function renderEditRSPool ($pool_id)
 
 	// clone link
 	echo '<p class="centered">';
-	echo getOpLink (array	('op' => 'cloneIPv4RSP', 'pool_id' => $poolinfo['id']), 'Clone RS pool', 'copy');
+	echo getOpLink (array ('op' => 'cloneIPv4RSP'), 'Clone RS pool', 'copy');
 	echo '</p>';
 
 	// delete link
@@ -587,7 +587,7 @@ function renderEditRSPool ($pool_id)
 	if ($poolinfo['refcnt'] > 0)
 		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB links");
 	else
-		echo getOpLink (array	('op' => 'del', 'id' => $poolinfo['id']), 'Delete RS pool', 'destroy');
+		echo getOpLink (array ('op' => 'del'), 'Delete RS pool', 'destroy');
 	echo '</p>';
 }
 
