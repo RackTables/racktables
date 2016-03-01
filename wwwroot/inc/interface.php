@@ -3594,9 +3594,19 @@ function renderAddMultipleObjectsForm ()
 
 function searchHandler()
 {
-	$terms = trim ($_REQUEST['q']);
-	if (!strlen ($terms))
-		throw new InvalidRequestArgException('q', $_REQUEST['q'], 'Search string cannot be empty.');
+	try
+	{
+		$terms = trim (genericAssertion ('q', 'string'));
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		$terms = '';
+	}
+	if ($terms == '')
+	{
+		showError ('Search string cannot be empty.');
+		redirectUser (buildRedirectURL ('index', 'default'));
+	}
 	renderSearchResults ($terms, searchEntitiesByText ($terms));
 }
 
