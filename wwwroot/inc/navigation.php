@@ -293,6 +293,9 @@ $ophandler['object']['ucs']['cleanupUCS'] = 'cleanupUCS';
 $delayauth['object-8021qports-save8021QConfig'] = TRUE;
 $delayauth['object-8021qorder-add'] = TRUE;
 $delayauth['object-8021qorder-del'] = TRUE;
+$interface_requires['object-8021qorder'] = 'interface-8021q.php';
+$interface_requires['object-8021qports'] = 'interface-8021q.php';
+$interface_requires['object-8021qsync'] = 'interface-8021q.php';
 
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
@@ -341,6 +344,7 @@ $ophandler['ipv4net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv4net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv4net']['8021q']['bind'] = 'bindVLANtoIPv4';
 $ophandler['ipv4net']['8021q']['unbind'] = 'unbindVLANfromIPv4';
+$interface_requires['ipv4net-8021q'] = 'interface-8021q.php';
 
 $page['ipv6net']['parent'] = 'ipv6space';
 $page['ipv6net']['bypass'] = 'id';
@@ -365,6 +369,7 @@ $ophandler['ipv6net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv6net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv6net']['8021q']['bind'] = 'bindVLANtoIPv6';
 $ophandler['ipv6net']['8021q']['unbind'] = 'unbindVLANfromIPv6';
+$interface_requires['ipv6net-8021q'] = 'interface-8021q.php';
 
 //$page['ipaddress']['parent'] = 'ipnet'; - this is commented intentionally, there is a special hack in getPath
 $page['ipaddress']['bypass'] = 'ip';
@@ -793,6 +798,7 @@ $ophandler['8021q']['vdlist']['upd'] = 'updateVLANDomain';
 $ophandler['8021q']['vstlist']['add'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['del'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['upd'] = 'tableHandler';
+$interface_requires['8021q-*'] = 'interface-8021q.php';
 
 $page['vlandomain']['parent'] = '8021q';
 $page['vlandomain']['bypass'] = 'vdom_id';
@@ -811,6 +817,7 @@ $ophandler['vlandomain']['vlanlist']['del'] = 'tableHandler';
 $ophandler['vlandomain']['vlanlist']['upd'] = 'tableHandler';
 $delayauth['vlandomain-8021qorder-add'] = TRUE;
 $delayauth['vlandomain-8021qorder-del'] = TRUE;
+$interface_requires['vlandomain-*'] = 'interface-8021q.php';
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';
@@ -832,6 +839,7 @@ $ophandler['vlan']['ipv4']['bind'] = 'bindVLANtoIPv4';
 $ophandler['vlan']['ipv4']['unbind'] = 'unbindVLANfromIPv4';
 $ophandler['vlan']['ipv6']['bind'] = 'bindVLANtoIPv6';
 $ophandler['vlan']['ipv6']['unbind'] = 'unbindVLANfromIPv6';
+$interface_requires['vlan-*'] = 'interface-8021q.php';
 
 $page['vst']['parent'] = '8021q';
 $page['vst']['bypass'] = 'vst_id';
@@ -854,12 +862,14 @@ $ophandler['vst']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['vst']['tags']['saveTags'] = 'saveEntityTags';
 $delayauth['vst-8021qorder-add'] = TRUE;
 $delayauth['vst-8021qorder-del'] = TRUE;
+$interface_requires['vst-*'] = 'interface-8021q.php';
 
 $page['dqueue']['parent'] = '8021q';
 $page['dqueue']['bypass'] = 'dqcode';
 $page['dqueue']['bypass_type'] = 'enum/dqcode';
 $tab['dqueue']['default'] = 'View';
 $tabhandler['dqueue']['default'] = 'renderDeployQueue';
+$interface_requires['dqueue-*'] = 'interface-8021q.php';
 
 $page['objectlog']['title'] = 'Log records';
 $page['objectlog']['parent'] = 'index';
