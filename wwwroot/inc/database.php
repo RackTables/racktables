@@ -2634,13 +2634,14 @@ function fetchIPAddressNetworkRow ($ip_bin, $masklen = NULL)
 
 function fetchIPv4AddressNetworkRow ($ip_bin, $masklen = 32)
 {
-	$query = 'select * from IPv4Network where ' .
-		"? & (4294967295 >> (32 - mask)) << (32 - mask) = ip " .
-		"and ip <= ? " .
-		"and mask < ? " .
-		'order by mask desc limit 1';
 	$ip_db = ip4_bin2db ($ip_bin);
-	$result = usePreparedSelectBlade ($query, array ($ip_db, $ip_db, $masklen));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, ip, mask, name, comment FROM IPv4Network ' .
+		'WHERE ? & (4294967295 >> (32 - mask)) << (32 - mask) = ip AND ip <= ? AND mask < ? ' .
+		'ORDER BY mask DESC LIMIT 1',
+		array ($ip_db, $ip_db, $masklen)
+	);
 	return nullIfFalse ($result->fetch (PDO::FETCH_ASSOC));
 }
 
@@ -2654,8 +2655,13 @@ function getIPv6AddressNetworkId ($ip_bin, $masklen = 128)
 
 function fetchIPv6AddressNetworkRow ($ip_bin, $masklen = 128)
 {
-	$query = 'select * from IPv6Network where ip <= ? AND last_ip >= ? and mask < ? order by mask desc limit 1';
-	$result = usePreparedSelectBlade ($query, array ($ip_bin, $ip_bin, $masklen));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, ip, mask, last_ip, name, comment FROM IPv6Network ' .
+		'WHERE ip <= ? AND last_ip >= ? AND mask < ? ' .
+		'ORDER BY mask DESC LIMIT 1',
+		array ($ip_bin, $ip_bin, $masklen)
+	);
 	return nullIfFalse ($result->fetch (PDO::FETCH_ASSOC));
 }
 
