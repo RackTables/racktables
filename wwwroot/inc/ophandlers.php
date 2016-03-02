@@ -2264,12 +2264,11 @@ function submitSLBConfig ()
 function addLocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 5));
-	assertUIntArg ('parent_id', TRUE);
 	assertStringArg ('name');
 
 	$location_id = commitAddObject ($_REQUEST['name'], NULL, 1562, NULL);
-	if ($_REQUEST['parent_id'])
-		commitLinkEntities ('location', $_REQUEST['parent_id'], 'location', $location_id);
+	if (0 != $parent_id = genericAssertion ('parent_id', 'uint0'))
+		commitLinkEntities ('location', $parent_id, 'location', $location_id);
 	showSuccess ('added location ' . mkA ($_REQUEST['name'], 'location', $location_id));
 }
 
@@ -2473,23 +2472,22 @@ function updateRack ()
 function deleteRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
-	assertUIntArg ('rack_id');
-	$rackData = spotEntity ('rack', $_REQUEST['rack_id']);
+	$rackData = spotEntity ('rack', getBypassValue());
 	amplifyCell ($rackData);
 	if (!$rackData['isDeletable'])
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1');
 		return;
 	}
-	commitDeleteRack ($_REQUEST['rack_id']);
-	showFuncMessage (__FUNCTION__, 'OK', array ($rackData['name']));
+	commitDeleteRack ($rackData['id']);
+	showFuncMessage (__FUNCTION__, 'OK', array (formatEntityName ($rackData)));
 	return buildRedirectURL ('rackspace', 'default');
 }
 
 function cleanRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 58));
-	$rack_id = assertUIntArg ('rack_id');
+	$rack_id = getBypassValue();
 	$unmounted = getRackMountsCount ($rack_id);
 	commitCleanRack ($rack_id);
 	showFuncMessage (__FUNCTION__, 'OK', array ($unmounted));
@@ -3422,8 +3420,7 @@ function deleteVlan()
 
 function cloneRSPool()
 {
-	assertUIntArg ('pool_id');
-	$pool = spotEntity ('ipv4rspool', $_REQUEST['pool_id']);
+	$pool = spotEntity ('ipv4rspool', getBypassValue());
 	$rs_list = getRSListInPool ($pool['id']);
 	$tagidlist = array();
 	foreach ($pool['etags'] as $taginfo)
