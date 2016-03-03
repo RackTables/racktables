@@ -585,7 +585,7 @@ function renderEditRSPool ($pool_id)
 	// delete link
 	echo '<p class="centered">';
 	if ($poolinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB links");
+		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB link(s)");
 	else
 		echo getOpLink (array ('op' => 'del'), 'Delete RS pool', 'destroy');
 	echo '</p>';
@@ -616,7 +616,7 @@ function renderEditVService ($vsid)
 	// delete link
 	echo '<p class="centered">';
 	if ($vsinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB links");
+		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB link(s)");
 	else
 		echo getOpLink (array	('op' => 'del', 'id' => $vsinfo['id']), 'Delete virtual service', 'destroy');
 }

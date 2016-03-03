@@ -393,7 +393,7 @@ function renderVLANDomainVLANList ($vdom_id)
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td>';
 		if ($vlan_info['portc'] or $vlan_id == VLAN_DFL_ID)
-			printImageHREF ('nodestroy', $vlan_info['portc'] . ' ports configured');
+			printImageHREF ('nodestroy', $vlan_info['portc'] . ' port(s) configured');
 		else
 			echo getOpLink (array ('op' => 'del', 'vlan_id' => $vlan_id), '', 'destroy', 'delete VLAN');
 		echo '</td><td class=tdright><tt>' . $vlan_id . '</tt></td><td>';
@@ -1631,8 +1631,8 @@ function renderEditVlan ($vlan_ck)
 	if ($portc)
 	{
 		$clear_line .= '<p>';
-		$clear_line .= getOpLink (array ('op' => 'clear'), 'remove', 'clear', "remove this VLAN from $portc ports") .
-			' this VLAN from ' . mkA ("${portc} ports", 'vlan', $vlan_ck);
+		$clear_line .= getOpLink (array ('op' => 'clear'), 'remove', 'clear', "remove this VLAN from $portc port(s)") .
+			' this VLAN from ' . mkA ("${portc} port(s)", 'vlan', $vlan_ck);
 	}
 
 	$reason = '';

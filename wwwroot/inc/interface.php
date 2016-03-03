@@ -1747,7 +1747,7 @@ function renderPortsForObject ($object_id)
 		if ($port['name'] != shortenPortName ($port['name'], $object['id']))
 			$n_ports_to_rename++;
 	if ($n_ports_to_rename)
-		echo '<p>' . getOpLink (array ('op'=>'renameAll'), "Auto-rename $n_ports_to_rename ports", 'recalc', 'Use RackTables naming convention for this device type') . '</p>';
+		echo '<p>' . getOpLink (array ('op'=>'renameAll'), "Auto-rename $n_ports_to_rename port(s)", 'recalc', 'Use RackTables naming convention for this device type') . '</p>';
 
 	if (isset ($_REQUEST['hl_port_id']))
 	{

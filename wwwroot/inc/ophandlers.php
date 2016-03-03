@@ -3402,7 +3402,7 @@ function clearVlan()
 
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
-		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
+		showSuccess ("VLAN $vlan_id removed from $n_cleared port(s)");
 }
 
 function deleteVlan()
@@ -3411,7 +3411,7 @@ function deleteVlan()
 	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
-		showSuccess ("VLAN $vlan_id removed from $n_cleared ports");
+		showSuccess ("VLAN $vlan_id removed from $n_cleared port(s)");
 	// since there is no strict foreign keys refering VLANDescription, we can delete a row
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
@@ -3702,7 +3702,7 @@ function renameObjectPorts()
 		}
 	}
 	if ($n)
-		showSuccess ("Renamed $n ports");
+		showSuccess ("Renamed $n port(s)");
 	else
 		showNotice ("Nothing renamed");
 }

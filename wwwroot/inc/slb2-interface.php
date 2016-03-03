@@ -151,7 +151,7 @@ function renderEditVS ($vs_id)
 	$triplets = getTriplets ($vsinfo);
 	echo '<span style="margin-left: 2em"></span>';
 	if (count ($triplets) > 0)
-		echo getOpLink (NULL, '', 'NODESTROY', "Could not delete: there are " . count ($triplets) . " LB links");
+		echo getOpLink (NULL, '', 'NODESTROY', "Could not delete: there are " . count ($triplets) . " LB link(s)");
 	else
 		echo getOpLink (array ('op' => 'del', 'id' => $vsinfo['id']), '', 'DESTROY', 'Delete', 'need-confirmation');
 	echo '</th></tr>';
