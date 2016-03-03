@@ -618,7 +618,7 @@ function renderEditVService ($vsid)
 	if ($vsinfo['refcnt'] > 0)
 		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB link(s)");
 	else
-		echo getOpLink (array	('op' => 'del', 'id' => $vsinfo['id']), 'Delete virtual service', 'destroy');
+		echo getOpLink (array ('op' => 'del'), 'Delete virtual service', 'destroy');
 }
 
 function renderLVSConfig ($object_id)
