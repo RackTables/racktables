@@ -2517,9 +2517,9 @@ function updateRackProblems ()
 
 function querySNMPData ()
 {
-	genericAssertion ('ver', 'uint');
+	$ver = genericAssertion ('ver', 'uint');
 	$snmpsetup = array ();
-	switch ($_REQUEST['ver'])
+	switch ($ver)
 	{
 	case 1:
 	case 2:
@@ -2542,9 +2542,9 @@ function querySNMPData ()
 		$snmpsetup['priv_passphrase'] = $_REQUEST['priv_passphrase'];
 		break;
 	default:
-		throw new InvalidRequestArgException ('ver', $_REQUEST['ver']);
+		throw new InvalidRequestArgException ('ver', $ver);
 	}
-	$snmpsetup['version'] = $_REQUEST['ver'];
+	$snmpsetup['version'] = $ver;
 	doSNMPmining (getBypassValue(), $snmpsetup); // shows message by itself
 }
 
@@ -2725,9 +2725,8 @@ function delIIFOIFCompatPack ()
 function addOIFCompatPack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 21));
-	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
-	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
+	$oifs = $wdm_packs[genericAssertion ('standard', 'enum/wdmstd')]['oif_ids'];
 	foreach ($oifs as $oif_id_1)
 	{
 		$args = $qmarks = array();
@@ -2747,9 +2746,8 @@ function addOIFCompatPack ()
 function delOIFCompatPack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 21));
-	genericAssertion ('standard', 'enum/wdmstd');
 	global $wdm_packs;
-	$oifs = $wdm_packs[$_REQUEST['standard']]['oif_ids'];
+	$oifs = $wdm_packs[genericAssertion ('standard', 'enum/wdmstd')]['oif_ids'];
 	foreach ($oifs as $oif_id_1)
 		foreach ($oifs as $oif_id_2)
 			if ($oif_id_1 != $oif_id_2) # leave narrow-band mapping intact
@@ -2795,9 +2793,9 @@ function del8021QOrder ()
 	usePreparedDeleteBlade ('VLANSwitch', array ('object_id' => $object_id));
 	$focus_hints = array
 	(
-		'prev_objid' => $_REQUEST['object_id'],
-		'prev_vstid' => $_REQUEST['vst_id'],
-		'prev_vdid' => $_REQUEST['vdom_id'],
+		'prev_objid' => $object_id,
+		'prev_vstid' => $vst_id,
+		'prev_vdid' => $vdom_id,
 	);
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, $focus_hints);
@@ -3390,15 +3388,13 @@ function getOpspec()
 
 function unlinkPort ()
 {
-	assertUIntArg ('port_id');
-	commitUnlinkPort ($_REQUEST['port_id']);
+	commitUnlinkPort (genericAssertion ('port_id', 'uint'));
 	showSuccess ("Port unlinked successfully");
 }
 
 function clearVlan()
 {
-	genericAssertion ('vlan_ck', 'uint-vlan1');
-	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	list ($vdom_id, $vlan_id) = decodeVLANCK (genericAssertion ('vlan_ck', 'uint-vlan1'));
 
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
@@ -3407,8 +3403,7 @@ function clearVlan()
 
 function deleteVlan()
 {
-	genericAssertion ('vlan_ck', 'uint-vlan');
-	list ($vdom_id, $vlan_id) = decodeVLANCK ($_REQUEST['vlan_ck']);
+	list ($vdom_id, $vlan_id) = decodeVLANCK (genericAssertion ('vlan_ck', 'uint-vlan'));
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
 		showSuccess ("VLAN $vlan_id removed from $n_cleared port(s)");
