@@ -251,6 +251,14 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('HTTPDateToUnixTime', 'Thu Mar 8 12:00:00 2007', FALSE), # missing space
 			array ('HTTPDateToUnixTime', 'Tus Mar  8 12:00:00 2007', FALSE), # invalid week day name
 			array ('HTTPDateToUnixTime', 'Wed Dec 31 23:59:59 1997', 883612799), # OK
+
+			array ('ip4_mask', 0, "\x00\x00\x00\x00"),
+			array ('ip4_mask', 24, "\xFF\xFF\xFF\x00"),
+			array ('ip4_mask', 32, "\xFF\xFF\xFF\xFF"),
+
+			array ('ip6_mask', 0, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"),
+			array ('ip6_mask', 80, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00"),
+			array ('ip6_mask', 128, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
 		);
 	}
 
@@ -612,6 +620,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('iosParseVLANString', array ('x')),
 			array ('iosParseVLANString', array ('1,x,3')),
 			array ('iosParseVLANString', array ('1-3,x,10')),
+
+			array ('ip4_mask', array (-1)),
+			array ('ip4_mask', array (33)),
+
+			array ('ip6_mask', array (-1)),
+			array ('ip6_mask', array (129)),
 		);
 	}
 }
