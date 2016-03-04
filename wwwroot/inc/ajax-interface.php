@@ -233,7 +233,7 @@ function updatePortRsvAJAX()
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if ($port_info['linked'])
-		throw new RackTablesError ('Cant update port comment: port is already linked');
+		throw new RackTablesError ('Can\'t update port comment: port is already linked');
 	if (! isset ($port_info['reservation_comment']))
 		$port_info['reservation_comment'] = '';
 	if ($port_info['reservation_comment'] !== $sic['text'])
@@ -248,7 +248,7 @@ function updateIPNameAJAX()
 	$ip_bin = assertIPArg ('id');
 	$addr = getIPAddress ($ip_bin);
 	if (! empty ($addr['allocs']) && empty ($addr['name']))
-		throw new RackTablesError ('Cant update IP name: address is allocated');
+		throw new RackTablesError ('Can\'t update IP name: address is allocated');
 	$net = spotNetworkByIP ($ip_bin);
 	if (isset ($net))
 		fixContext ($net);
@@ -282,7 +282,7 @@ function updateCableIdAJAX()
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if (! $port_info['linked'])
-		throw new RackTablesError ('Cant update cable ID: port is not linked');
+		throw new RackTablesError ('Can\'t update cable ID: port is not linked');
 	if ($port_info['reservation_comment'] !== $sic['text'])
 		commitUpdatePortLink ($sic['id'], $sic['text']);
 	echo 'OK';
