@@ -248,6 +248,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('HTTPDateToUnixTime', 'Thursday, 01-Jan-98 00:00:00 GMT', 883612800), # OK
 			# asctime()
 			array ('HTTPDateToUnixTime', 'Thu Mar  8 12:00:00 2007', 1173355200), # OK
+			array ('HTTPDateToUnixTime', 'Thu Mar 8 12:00:00 2007', FALSE), # missing space
 			array ('HTTPDateToUnixTime', 'Tus Mar  8 12:00:00 2007', FALSE), # invalid week day name
 			array ('HTTPDateToUnixTime', 'Wed Dec 31 23:59:59 1997', 883612799), # OK
 		);
