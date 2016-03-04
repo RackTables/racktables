@@ -2946,14 +2946,15 @@ function resolve8021QConflicts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR1' => 179, 'ERR2' => 109));
 	global $sic, $dbxlink;
-	assertUIntArg ('mutex_rev', TRUE); // counts from 0
-	assertUIntArg ('nrows');
+	$mutex_rev = genericAssertion ('mutex_rev', 'uint0'); // counts from 0
+	$nrows = genericAssertion ('nrows', 'uint');
+	$object_id = getBypassValue();
 	// Divide submitted radio buttons into 3 groups:
 	// left (saved version wins)
 	// asis (ignore)
 	// right (running version wins)
 	$F = array();
-	for ($i = 0; $i < $sic['nrows']; $i++)
+	for ($i = 0; $i < $nrows; $i++)
 	{
 		if (!array_key_exists ("i_${i}", $sic))
 			continue;
@@ -2977,10 +2978,10 @@ function resolve8021QConflicts ()
 	$dbxlink->beginTransaction();
 	try
 	{
-		if (NULL === $vswitch = getVLANSwitchInfo ($sic['object_id'], 'FOR UPDATE'))
-			throw new InvalidArgException ('object_id', $sic['object_id'], 'VLAN domain is not set for this object');
-		if ($vswitch['mutex_rev'] != $sic['mutex_rev'])
-			throw new InvalidRequestArgException ('mutex_rev', $sic['mutex_rev'], 'expired form (table data has changed)');
+		if (NULL === $vswitch = getVLANSwitchInfo ($object_id, 'FOR UPDATE'))
+			throw new InvalidArgException ('object_id', $object_id, 'VLAN domain is not set for this object');
+		if ($vswitch['mutex_rev'] != $mutex_rev)
+			throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, 'expired form (table data has changed)');
 		$D = getStored8021QConfig ($vswitch['object_id'], 'desired');
 		$C = getStored8021QConfig ($vswitch['object_id'], 'cached');
 		$R = getRunning8021QConfig ($vswitch['object_id']);
