@@ -178,6 +178,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('textareaCooked', "\nabcd\n", array ('abcd')),
 			array ('textareaCooked', "\r\n  \r\nabcd\r\n  \t\t         \r\n", array ('abcd')),
 			array ('textareaCooked', "abcd\r\n   efgh\r\nijkl        \r\n", array ('abcd', 'efgh', 'ijkl')),
+
+			array ('l2addressForDatabase', '', ''),
+			array ('l2addressForDatabase', ' ', ''),
+			array ('l2addressForDatabase', ' 010203abcdef ', '010203ABCDEF'), // RE_L2_SOLID
+			array ('l2addressForDatabase', '1:2:3:ab:cd:ef ', '010203ABCDEF'), // RE_L2_IFCFG
+			array ('l2addressForDatabase', ' 0102.03ab.cdef', '010203ABCDEF'), // RE_L2_CISCO
+			array ('l2addressForDatabase', '0102-03ab-cdef', '010203ABCDEF'), // RE_L2_HUAWEI
+			array ('l2addressForDatabase', '01-02-03-ab-cd-ef', '010203ABCDEF'), // RE_L2_IPCFG
+			array ('l2addressForDatabase', '000000000000', ''), // a special case
+			array ('l2addressForDatabase', '0102030405abcdef  ', '0102030405ABCDEF'), // RE_L2_WWN_SOLID
+			array ('l2addressForDatabase', ' 01-02-03-04-05-ab-cd-ef', '0102030405ABCDEF'), // RE_L2_WWN_HYPHEN
+			array ('l2addressForDatabase', ' 1:2:3:4:5:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
 		);
 	}
 
@@ -626,6 +638,14 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 			array ('ip6_mask', array (-1)),
 			array ('ip6_mask', array (129)),
+
+			array ('l2addressForDatabase', array ('010203abcd')), // invalid length
+			array ('l2addressForDatabase', array ('010203abcdefff')), // invalid length
+			array ('l2addressForDatabase', array ('010203abcdeh')), // length OK but not hexadecimal
+			array ('l2addressForDatabase', array ('0102:03ab:cdef')), // not a known format
+			array ('l2addressForDatabase', array ('01.02.03.ab.cd.ef')), // not a known format
+			array ('l2addressForDatabase', array (' 1. 2. 3.ab.cd.ef')), // not a known format
+			array ('l2addressForDatabase', array ('01.02.03-ab-cd:ef')), // not a known format
 		);
 	}
 }
