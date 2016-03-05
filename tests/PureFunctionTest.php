@@ -190,6 +190,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('l2addressForDatabase', '0102030405abcdef  ', '0102030405ABCDEF'), // RE_L2_WWN_SOLID
 			array ('l2addressForDatabase', ' 01-02-03-04-05-ab-cd-ef', '0102030405ABCDEF'), // RE_L2_WWN_HYPHEN
 			array ('l2addressForDatabase', ' 1:2:3:4:5:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
+
+			array ('nextMACAddress', '12:34:56:78:90:ab', '12:34:56:78:90:AC'),
+			array ('nextMACAddress', '12:34:56:78:90:ff', '12:34:56:78:91:00'),
+			array ('nextMACAddress', '12:34:56:78:ff:ff', '12:34:56:79:00:00'),
+			array ('nextMACAddress', '12:34:56:ff:ff:ff', '12:34:57:00:00:00'),
+			array ('nextMACAddress', '12:34:56:fe:ff:ff', '12:34:56:FF:00:00'),
 		);
 	}
 
