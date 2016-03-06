@@ -4687,6 +4687,8 @@ function nextMACAddress ($addr)
 {
 	if ($addr == '')
 		return '';
+	if (! preg_match ('/^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/i', $addr))
+		throw new InvalidArgException ('addr', $addr, 'invalid MAC address format');
 	$bytes = array();
 	foreach (explode (':', $addr) as $hex)
 		$bytes[] = hexdec ($hex);

@@ -191,6 +191,7 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('l2addressForDatabase', ' 01-02-03-04-05-ab-cd-ef', '0102030405ABCDEF'), // RE_L2_WWN_HYPHEN
 			array ('l2addressForDatabase', ' 1:2:3:4:5:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
 
+			array ('nextMACAddress', '', ''),
 			array ('nextMACAddress', '12:34:56:78:90:ab', '12:34:56:78:90:AC'),
 			array ('nextMACAddress', '12:34:56:78:90:ff', '12:34:56:78:91:00'),
 			array ('nextMACAddress', '12:34:56:78:ff:ff', '12:34:56:79:00:00'),
@@ -652,6 +653,14 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('l2addressForDatabase', array ('01.02.03.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array (' 1. 2. 3.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array ('01.02.03-ab-cd:ef')), // not a known format
+
+			array ('nextMACAddress', array ('010203abcdef')),
+			array ('nextMACAddress', array ('0102.03ab.cdef')),
+			array ('nextMACAddress', array ('01-02-03-ab-cd-ef')),
+			array ('nextMACAddress', array ('abcd')),
+			array ('nextMACAddress', array ('01:02:03:ab:cd:gg')),
+			array ('nextMACAddress', array ('01:02:03:ab:cd')),
+			array ('nextMACAddress', array ('1:2:3:ab:cd:ef')),
 		);
 	}
 }
