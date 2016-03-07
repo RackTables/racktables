@@ -577,6 +577,36 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('listToRanges', array (2, 3, 1), 1, array (array ('from' => 1, 'to' => 1), array ('from' => 2, 'to' => 2), array ('from' => 3, 'to' => 3))),
 			array ('listToRanges', array (10, 11, 12), 4, array (array ('from' => 10, 'to' => 12))),
 			array ('listToRanges', array (10, 11, 12, 13, 14, 15, 16, 17), 4, array (array ('from' => 10, 'to' => 13), array ('from' => 14, 'to' => 17))),
+
+			array ('mergeTagChains', array(), array(), array()),
+			array
+			(
+				'mergeTagChains',
+				array (array ('id' => 1, 'tag' => 'one')),
+				array (array ('id' => 10, 'tag' => 'ten')),
+				array (1 => array ('id' => 1, 'tag' => 'one'), 10 => array ('id' => 10, 'tag' => 'ten')),
+			),
+			array
+			(
+				'mergeTagChains',
+				array(),
+				array (array ('id' => 10, 'tag' => 'ten')),
+				array (10 => array ('id' => 10, 'tag' => 'ten')),
+			),
+			array
+			(
+				'mergeTagChains',
+				array (array ('id' => 1, 'tag' => 'one')),
+				array(),
+				array (1 => array ('id' => 1, 'tag' => 'one')),
+			),
+			array
+			(
+				'mergeTagChains',
+				array (array ('id' => 1, 'tag' => 'one'), array ('id' => 2, 'tag' => 'two')),
+				array (array ('id' => 10, 'tag' => 'ten'), array ('id' => 2, 'tag' => 'two')),
+				array (1 => array ('id' => 1, 'tag' => 'one'), 2 => array ('id' => 2, 'tag' => 'two'), 10 => array ('id' => 10, 'tag' => 'ten')),
+			),
 		);
 	}
 
