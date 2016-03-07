@@ -226,18 +226,16 @@ function getPortInfoAJAX()
 
 function updatePortRsvAJAX()
 {
-	global $sic;
-	assertUIntArg ('id');
-	assertStringArg ('text', TRUE);
-	$port_info = getPortInfo ($sic['id']);
+	$text = genericAssertion ('text', 'string0');
+	$port_info = getPortInfo (genericAssertion ('id', 'uint'));
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if ($port_info['linked'])
 		throw new RackTablesError ('Can\'t update port comment: port is already linked');
 	if (! isset ($port_info['reservation_comment']))
 		$port_info['reservation_comment'] = '';
-	if ($port_info['reservation_comment'] !== $sic['text'])
-		commitUpdatePortComment ($sic['id'], $sic['text']);
+	if ($port_info['reservation_comment'] !== $text)
+		commitUpdatePortComment ($port_info['id'], $text);
 	echo 'OK';
 }
 

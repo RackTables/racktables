@@ -3188,10 +3188,10 @@ function importDPData()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 44));
 	global $sic, $dbxlink;
-	assertUIntArg ('nports');
+	$nports = genericAssertion ('nports', 'uint');
 	$object_id = getBypassValue();
 	$nignored = $ndone = 0;
-	for ($i = 0; $i < $sic['nports']; $i++)
+	for ($i = 0; $i < $nports; $i++)
 		if (array_key_exists ("do_${i}", $sic))
 		{
 			$params = array();
@@ -3567,7 +3567,6 @@ function doVSMigrate()
 # validate user input and produce SQL columns per the opspec descriptor
 function buildOpspecColumns ($opspec, $listname)
 {
-	global $sic;
 	$columns = array();
 	if (! array_key_exists ($listname, $opspec))
 		throw new InvalidArgException ('opspec', '(malformed structure)', "missing '${listname}'");
@@ -3575,11 +3574,10 @@ function buildOpspecColumns ($opspec, $listname)
 		switch (TRUE)
 		{
 		case array_key_exists ('url_argname', $argspec): # HTTP input
-			genericAssertion ($argspec['url_argname'], $argspec['assertion']);
+			$arg_value = genericAssertion ($argspec['url_argname'], $argspec['assertion']);
 			// "table_colname" is normally used for an override, if it is not
 			// set, use the URL argument name
 			$table_colname = array_fetch ($argspec, 'table_colname', $argspec['url_argname']);
-			$arg_value = $sic[$argspec['url_argname']];
 			if (array_key_exists ('translator', $argspec))
 			{
 				if (! is_callable ($argspec['translator']))
