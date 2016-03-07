@@ -334,7 +334,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	return $ret;
 }
 
-function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL, $autocomplete = false)
+function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getNiftySelect ($groupList, $select_attrs, $selected_id);
 }
