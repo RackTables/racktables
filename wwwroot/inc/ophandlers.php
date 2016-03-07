@@ -3205,7 +3205,7 @@ function importDPData()
 			}
 			if (! isset ($params['a_id']) || ! isset ($params['b_id']) ||
 				! intval ($params['a_id']) || ! intval ($params['b_id']))
-				throw new InvalidArgException ("ports_${i}", $_REQUEST["ports_${i}"], "can not unpack port ids");
+				throw new InvalidRequestArgException ("ports_${i}", $_REQUEST["ports_${i}"], "can not unpack port ids");
 
 			$porta = getPortInfo ($params['a_id']);
 			$portb = getPortInfo ($params['b_id']);
