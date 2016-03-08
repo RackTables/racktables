@@ -241,8 +241,7 @@ function updatePortRsvAJAX()
 
 function updateIPNameAJAX()
 {
-	global $sic;
-	assertStringArg ('text', TRUE);
+	$text = genericAssertion ('text', 'string0');
 	$ip_bin = assertIPArg ('id');
 	$addr = getIPAddress ($ip_bin);
 	if (! empty ($addr['allocs']) && empty ($addr['name']))
@@ -251,38 +250,35 @@ function updateIPNameAJAX()
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	$reserved = (empty ($sic['text']) ? 'no' : $addr['reserved']); // unset reservation if user clears name
+	$reserved = (empty ($text) ? 'no' : $addr['reserved']); // unset reservation if user clears name
 	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
-	updateAddress ($ip_bin, $sic['text'], $reserved, $comment);
+	updateAddress ($ip_bin, $text, $reserved, $comment);
 	echo 'OK';
 }
 
 function updateIPCommentAJAX()
 {
-	global $sic;
-	assertStringArg ('text', TRUE);
+	$text = genericAssertion ('text', 'string0');
 	$ip_bin = assertIPArg ('id');
 	$addr = getIPAddress ($ip_bin);
 	$net = spotNetworkByIP ($ip_bin);
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	updateAddress ($ip_bin, $addr['name'], $addr['reserved'], $sic['text']);
+	updateAddress ($ip_bin, $addr['name'], $addr['reserved'], $text);
 	echo 'OK';
 }
 
 function updateCableIdAJAX()
 {
-	global $sic;
-	assertUIntArg ('id');
-	assertStringArg ('text', TRUE);
-	$port_info = getPortInfo ($sic['id']);
+	$text = genericAssertion ('text', 'string0');
+	$port_info = getPortInfo (genericAssertion ('id', 'uint'));
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if (! $port_info['linked'])
 		throw new RackTablesError ('Can\'t update cable ID: port is not linked');
-	if ($port_info['reservation_comment'] !== $sic['text'])
-		commitUpdatePortLink ($sic['id'], $sic['text']);
+	if ($port_info['reservation_comment'] !== $text)
+		commitUpdatePortLink ($port_info['id'], $text);
 	echo 'OK';
 }
 
