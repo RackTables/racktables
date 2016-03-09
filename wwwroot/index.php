@@ -52,8 +52,7 @@ try {
 	case 'chrome':
 		require_once 'inc/init.php';
 		require_once 'inc/solutions.php';
-		genericAssertion ('uri', 'string');
-		proxyStaticURI ($_REQUEST['uri']);
+		proxyStaticURI (genericAssertion ('uri', 'string'));
 		break;
 
 	case 'download':
@@ -98,12 +97,12 @@ try {
 		echo '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">' . "\n";
 		try
 		{
-			genericAssertion ('view', 'string');
-			if (! array_key_exists ($_REQUEST['view'], $svghandler))
-				throw new InvalidRequestArgException ('view', $_REQUEST['view'], 'undefined view');
-			if (! is_callable ($svghandler[$_REQUEST['view']]))
+			$view = genericAssertion ('view', 'string');
+			if (! array_key_exists ($view, $svghandler))
+				throw new InvalidRequestArgException ('view', $view, 'undefined view');
+			if (! is_callable ($svghandler[$view]))
 				throw new RackTablesError ('missing handler function', RackTablesError::INTERNAL);
-			call_user_func ($svghandler[$_REQUEST['view']]);
+			call_user_func ($svghandler[$view]);
 		}
 		catch (RTPermissionDenied $e)
 		{
@@ -139,11 +138,10 @@ try {
 		require_once 'inc/solutions.php';
 		try
 		{
-			genericAssertion ('done', 'uint0');
 			// 'progressbar's never change, make browser cache the result
 			if (checkCachedResponse (0, CACHE_DURATION))
 				break;
-			renderProgressBarImage ($_REQUEST['done']);
+			renderProgressBarImage (genericAssertion ('done', 'uint0'));
 		}
 		catch (Exception $e)
 		{
@@ -159,7 +157,12 @@ try {
 		require_once 'inc/solutions.php';
 		try
 		{
-			renderProgressBar4Image ($_REQUEST['px1'], $_REQUEST['px2'], $_REQUEST['px3']);
+			renderProgressBar4Image
+			(
+				genericAssertion ('px1', 'uint0'),
+				genericAssertion ('px2', 'uint0'),
+				genericAssertion ('px3', 'uint0')
+			);
 		}
 		catch (Exception $e)
 		{
@@ -174,8 +177,7 @@ try {
 		require_once 'inc/solutions.php';
 		try
 		{
-			genericAssertion ('ac', 'string');
-			$ac = $_REQUEST['ac'];
+			$ac = genericAssertion ('ac', 'string');
 			if (isset ($ajaxhandler[$ac]))
 				$ajaxhandler[$ac]();
 			else
@@ -206,8 +208,7 @@ try {
 		require_once 'inc/init.php';
 		try
 		{
-			genericAssertion ('op', 'string');
-			$op = $_REQUEST['op'];
+			$op = genericAssertion ('op', 'string');
 			prepareNavigation();
 			$location = buildRedirectURL();
 			// FIXME: find a better way to handle this error

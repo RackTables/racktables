@@ -218,10 +218,10 @@ function getPortInfoAJAX()
 		'get-port-portmac' => 'get_port_mac_list',
 		'get-port-conf' => 'get_port_conf',
 	);
-	genericAssertion ('object_id', 'uint');
-	fixContext (spotEntity ('object', $_REQUEST['object_id']));
+	$object_id = genericAssertion ('object_id', 'uint');
+	fixContext (spotEntity ('object', $object_id));
 	assertPermission ('object', 'liveports', $opmap[$_REQUEST['ac']]);
-	echo json_encode ($funcmap[$_REQUEST['ac']] ($_REQUEST['object_id']));
+	echo json_encode ($funcmap[$_REQUEST['ac']] ($object_id));
 }
 
 function updatePortRsvAJAX()
