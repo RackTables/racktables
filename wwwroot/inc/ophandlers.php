@@ -923,15 +923,22 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	foreach ($ports as $port)
 	{
 		$port_ids = getPortIDs ($object_id, $port['name']);
-		if (!count ($port_ids))
+		try
 		{
-			commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
-			$added_count++;
+			if (!count ($port_ids))
+			{
+				commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
+				$added_count++;
+			}
+			elseif (count ($port_ids) == 1) // update only single-socket ports
+			{
+				commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
+				$updated_count++;
+			}
 		}
-		elseif (count ($port_ids) == 1) // update only single-socket ports
+		catch (InvalidArgException $iae)
 		{
-			commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
-			$updated_count++;
+			showError ($iae->getMessage());
 		}
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
