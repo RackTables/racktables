@@ -57,7 +57,7 @@ if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
 $rackCodeCache = loadScript ('RackCodeCache');
-if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
+if ($rackCodeCache == NULL or $rackCodeCache == '')
 {
 	$rackCode = getRackCode (loadScript ('RackCode'));
 	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));

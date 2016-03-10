@@ -996,7 +996,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		(
 			'name' => nullIfEmptyStr ($new_name),
 			'label' => nullIfEmptyStr ($new_label),
-			'has_problems' => !mb_strlen ($new_has_problems) ? 'no' : $new_has_problems,
+			'has_problems' => $new_has_problems == '' ? 'no' : $new_has_problems,
 			'asset_no' => nullIfEmptyStr ($new_asset_no),
 			'comment' => nullIfEmptyStr ($new_comment),
 		),
@@ -3557,7 +3557,7 @@ function getRackspaceStats ()
 	{
 		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = !strlen ($row[0]) ? 0 : $row[0];
+		$ret[$item['txt']] = $row[0] == '' ? 0 : $row[0];
 		unset ($result);
 	}
 	return $ret;
@@ -4139,7 +4139,7 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$nameless');
 			if (validTagName ('$cn_' . $cell['name'], TRUE))
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
-			if (!strlen ($cell['rack_id']) and !strlen ($cell['container_id']))
+			if ($cell['rack_id'] == '' and $cell['container_id'] == '')
 				$ret[] = array ('tag' => '$unmounted');
 			if (!$cell['nports'])
 				$ret[] = array ('tag' => '$portless');
@@ -4501,7 +4501,7 @@ function loadScript ($name)
 
 function saveScript ($name = '', $text)
 {
-	if (!strlen ($name))
+	if ($name == '')
 		throw new InvalidArgException ('name', $name);
 	if (!isset ($text))
 		return deleteScript ($name);
@@ -4515,7 +4515,7 @@ function saveScript ($name = '', $text)
 
 function deleteScript ($name)
 {
-	if (!strlen ($name))
+	if ($name == '')
 		throw new InvalidArgException ('name', $name);
 	return usePreparedDeleteBlade ('Script', array ('script_name' => $name));
 }
