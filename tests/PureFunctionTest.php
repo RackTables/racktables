@@ -158,6 +158,16 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 1, 'allowed' => array (1, 2, 3)), FALSE),
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 3, 'allowed' => array()), FALSE),
 
+			// XXX: The data set below covers only two modes though the function can accept more. It is not
+			// clear whether those additional branches are dead or they need to be tested as well. Also there
+			// are no tests for invalid input as the function does not throw an exception on error and that
+			// should be fixed first.
+			array ('serializeVLANPack', array ('mode' => 'access', 'allowed' => array (290), 'native' => 290), 'A290'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (290), 'native' => 290), 'T290'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (291, 292, 293), 'native' => 0), 'T+291-293'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (294, 300, 305), 'native' => 305), 'T305+294, 300'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (2, 3, 4, 5, 6, 7, 8, 9), 'native' => 5), 'T5+2-4, 6-9'),
+
 			array ('listToRanges', array(), array()),
 			array ('listToRanges', array (7), array (array ('from' => 7, 'to' => 7))),
 			array ('listToRanges', array (2, 4, 3, 5, 1), array (array ('from' => 1, 'to' => 5))),
