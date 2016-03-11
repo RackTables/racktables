@@ -742,7 +742,7 @@ function addPortForwarding ()
 	}
 	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
-	if (!strlen ($remoteport))
+	if ($remoteport == '')
 		$remoteport = $_REQUEST['localport'];
 
 	try
@@ -904,7 +904,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
-				if (!strlen ($words[0])) // empty L2 address is OK
+				if ($words[0] == '') // empty L2 address is OK
 					continue;
 				$ports[] = array
 				(
@@ -1009,7 +1009,7 @@ function addIPAllocation ()
 		return;
 	}
 
-	if($address['reserved'] && strlen ($address['name']))
+	if($address['reserved'] && $address['name'] != '')
 	{
 		showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
 		//TODO ask to take reserved IP or not !
@@ -1150,7 +1150,7 @@ function updateUser ()
 	$new_password = assertStringArg ('password', TRUE);
 	$userinfo = spotEntity ('user', $user_id);
 	// Set new password only if provided.
-	$new_password = mb_strlen ($new_password) ? sha1 ($new_password) : $userinfo['user_password_hash'];
+	$new_password = $new_password != '' ? sha1 ($new_password) : $userinfo['user_password_hash'];
 	commitUpdateUserAccount ($user_id, $username, $_REQUEST['realname'], $new_password);
 	// if user account renaming is being performed, change key value in UserConfig table
 	if ($userinfo['user_name'] !== $username)
@@ -1496,7 +1496,7 @@ function addLotOfObjects()
 	$taglist = genericAssertion ('taglist', 'array0');
 	assertStringArg ('namelist', TRUE);
 	$global_type_id = genericAssertion ('global_type_id', 'uint0');
-	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
+	if ($global_type_id == 0 or $_REQUEST['namelist'] == '')
 	{
 		showError ('Incomplete form has been ignored. Cheers.');
 		return;
@@ -1732,7 +1732,7 @@ function addRealServers ()
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ("\n", dos2unix (genericAssertion ('rawtext', 'string'))) as $line)
 	{
-		if (!strlen ($line))
+		if ($line == '')
 			continue;
 		$match = array ();
 		switch ($format)

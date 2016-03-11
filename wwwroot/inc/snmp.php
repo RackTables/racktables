@@ -4005,8 +4005,8 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 	if
 	(
 		isset ($cell['attrs'][$attr_id])
-		and !strlen ($cell['attrs'][$attr_id]['value'])
-		and	strlen ($new_value)
+		and $cell['attrs'][$attr_id]['value'] == ''
+		and $new_value != ''
 	)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
@@ -4326,7 +4326,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			checkPIC ('1-16');
 			commitAddPort ($objectInfo['id'], 'PSU1', '1-16', 'PSU1', '');
 		}
-		if (strlen ($serialNo))
+		if ($serialNo != '')
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^171\.10\.63\.8/', $sysObjectID): // D-Link DES-3052
@@ -4400,7 +4400,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
-		if (strlen ($serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1'))) # entPhysicalSerialNumber.1
+		if ('' != $serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1')) # entPhysicalSerialNumber.1
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^119\.1\.203\.2\.2\./', $sysObjectID): # NEC
@@ -4482,7 +4482,7 @@ function doPDUSNMPmining ($objectInfo, $switch)
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
 	{
-		$label = mb_strlen ($port[0]) ? $port[0] : $portno;
+		$label = $port[0] != '' ? $port[0] : $portno;
 		checkPIC ('1-1322');
 		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
 		$portno++;
