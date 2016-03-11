@@ -932,7 +932,8 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 			}
 			elseif (count ($port_ids) == 1) // update only single-socket ports
 			{
-				commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
+				$rsvc = getPortReservationComment (array_first ($port_ids));
+				commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address'], $rsvc);
 				$updated_count++;
 			}
 		}
