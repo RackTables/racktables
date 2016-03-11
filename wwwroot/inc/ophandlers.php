@@ -1451,31 +1451,24 @@ function updateObjectAttributes ($object_id)
 function addMultipleObjects()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
-	$max = getConfigVar ('MASSCOUNT');
+	$max = genericAssertion ('num_records', 'uint');
 	for ($i = 0; $i < $max; $i++)
 	{
-		if (!isset ($_REQUEST["${i}_object_type_id"]))
-		{
-			showError ('Submitted form is invalid at line ' . ($i + 1));
-			return;
-		}
-
-		assertUIntArg ("${i}_object_type_id", TRUE);
+		$tid = genericAssertion ("${i}_object_type_id", 'uint0');
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
 		assertStringArg ("${i}_object_asset_no", TRUE);
 		$name = $_REQUEST["${i}_object_name"];
 
-		// It's better to skip silently, than to print a notice.
-		if ($_REQUEST["${i}_object_type_id"] == 0)
-			continue;
+		if ($tid == 0)
+			continue; // Just skip on intact SELECT.
 		try
 		{
 			$object_id = commitAddObject
 			(
 				$name,
 				$_REQUEST["${i}_object_label"],
-				$_REQUEST["${i}_object_type_id"],
+				$tid,
 				$_REQUEST["${i}_object_asset_no"],
 				$taglist
 			);
@@ -1486,7 +1479,6 @@ function addMultipleObjects()
 		catch (RTDatabaseError $e)
 		{
 			showError ("Error creating object '$name': " . $e->getMessage());
-			continue;
 		}
 	}
 }

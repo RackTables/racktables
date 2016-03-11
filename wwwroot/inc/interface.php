@@ -3551,7 +3551,7 @@ function renderAddMultipleObjectsForm ()
 	$max = getConfigVar ('MASSCOUNT');
 
 	startPortlet ('Distinct types, same tags');
-	printOpFormIntro ('addObjects');
+	printOpFormIntro ('addObjects', array ('num_records' => $max));
 	echo '<table border=0 align=center>';
 	echo "<tr><th>Object type</th><th>Common name</th><th>Visible label</th>";
 	echo "<th>Asset tag</th><th>Tags</th></tr>\n";
