@@ -1472,9 +1472,7 @@ function addMultipleObjects()
 				$_REQUEST["${i}_object_asset_no"],
 				$taglist
 			);
-			$info = spotEntity ('object', $object_id);
-			amplifyCell ($info);
-			showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
+			showSuccess ('added object ' . mkCellA (spotEntity ('object', $object_id)));
 		}
 		catch (RTDatabaseError $e)
 		{

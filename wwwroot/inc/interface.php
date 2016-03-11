@@ -5725,8 +5725,7 @@ function renderDiscoveredNeighbors ($object_id)
 				}
 				if (empty ($remote_ports))
 				{
-					$error_message = "No such port on "
-						. formatPortLink ($dp_remote_object['id'], $dp_remote_object['name'], NULL, NULL);
+					$error_message = 'No such port on ' . mkCellA ($dp_remote_object);
 					break;
 				}
 
