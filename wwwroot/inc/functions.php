@@ -214,7 +214,7 @@ function assertStringArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
-	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
+	if (!$ok_if_empty and $_REQUEST[$argname] == '')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 	return $sic[$argname];
 }
@@ -225,7 +225,7 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
-	if (!$ok_if_empty and !strlen ($_REQUEST[$argname]))
+	if (!$ok_if_empty and $_REQUEST[$argname] == '')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 	return $_REQUEST[$argname] == TRUE;
 }
@@ -1035,14 +1035,14 @@ function sortTokenize ($a, $b)
 function findAllEndpoints ($object_id, $fallback = '')
 {
 	foreach (getAttrValues ($object_id) as $record)
-		if ($record['id'] == 3 && strlen ($record['value'])) // FQDN
+		if ($record['id'] == 3 && $record['value'] != '') // FQDN
 			return array ($record['value']);
 	$regular = array();
 	foreach (getObjectIPv4AllocationList ($object_id) as $ip_bin => $alloc)
 		if ($alloc['type'] == 'regular')
 			$regular[] = ip4_format ($ip_bin);
 	// FIXME: add IPv6 allocations to this list
-	if (!count ($regular) && strlen ($fallback))
+	if (!count ($regular) && $fallback != '')
 		return array ($fallback);
 	return $regular;
 }
@@ -1103,7 +1103,7 @@ function extractLayout (&$record)
 		$record['rows'] = $matches[1];
 		$record['cols'] = $matches[2];
 		$record['layout'] = $matches[3];
-		if (!strlen ($record['layout']))
+		if ($record['layout'] == '')
 			$record['layout'] = ($record['cols'] >= 4) ? 'V' : 'H';
 	}
 }
@@ -1606,7 +1606,7 @@ function redirectIfNecessary ()
 	if
 	(
 		isset ($trigger[$pageno][$tabno]) and
-		!strlen (call_user_func ($trigger[$pageno][$tabno]))
+		'' == call_user_func ($trigger[$pageno][$tabno])
 	)
 	{
 		$_SESSION['RTLT'][$pageno]['dont_remember'] = 1;
@@ -1970,20 +1970,20 @@ function getCellFilter ()
 		$ret['urlextra'] .= '&cfe=' . $ret['extratext'];
 	}
 	$finaltext = array();
-	if (strlen ($ret['text']))
+	if ($ret['text'] != '')
 		$finaltext[] = '(' . $ret['text'] . ')';
-	if (strlen ($ret['extratext']))
+	if ($ret['extratext'] != '')
 		$finaltext[] = '(' . $ret['extratext'] . ')';
 	$andor_used = $andor_used || (count($finaltext) > 1);
 	$finaltext = implode (' ' . $andor . ' ', $finaltext);
-	if (strlen ($finaltext))
+	if ($finaltext != '')
 	{
 		$ret['is_empty'] = FALSE;
 		$ret['expression'] = compileExpression ($finaltext);
 		// It's not quite fair enough to put the blame of the whole text onto
 		// non-empty "extra" portion of it, but it's the only user-generated portion
 		// of it, thus the most probable cause of parse error.
-		if (strlen ($ret['extratext']))
+		if ($ret['extratext'] != '')
 			$ret['extraclass'] = $ret['expression'] ? 'validation-success' : 'validation-error';
 	}
 	if (! $andor_used)
@@ -2647,13 +2647,13 @@ function constructIPAddress ($ip_bin)
 
 function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 {
-	if (!strlen ($func))
+	if ($func == '')
 		return;
 	$self = __FUNCTION__;
 	foreach (array_keys ($tree) as $key)
 	{
 		$func ($tree[$key]);
-		if (strlen ($stopfunc) and $stopfunc ($tree[$key]))
+		if ($stopfunc != '' and $stopfunc ($tree[$key]))
 			continue;
 		$self ($tree[$key]['kids'], $func);
 	}
@@ -3125,7 +3125,7 @@ function considerConfiguredConstraint ($cell, $varname)
 // An undefined $cell means current context.
 function considerGivenConstraint ($cell, $filter)
 {
-	if (! strlen ($filter))
+	if ($filter == '')
 		return TRUE;
 	if (! $expr = compileExpression ($filter))
 		throw new InvalidArgException ('filter', $filter, 'not a valid RackCode expression');
@@ -3144,7 +3144,7 @@ function considerGivenConstraint ($cell, $filter)
 // realm.
 function scanRealmByText ($realm, $ftext = '')
 {
-	if (!strlen ($ftext = trim ($ftext)))
+	if ('' == $ftext = trim ($ftext))
 		$fexpr = array();
 	else
 	{
@@ -3334,7 +3334,7 @@ function serializeVLANPack ($vlanport)
 	$tagged_bits = groupIntsToRanges ($vlanport['allowed'], $vlanport['native']);
 	if (count ($tagged_bits))
 		$ret .= '+' . implode (', ', $tagged_bits);
-	return strlen ($ret) ? $ret : 'default';
+	return $ret != '' ? $ret : 'default';
 }
 
 function groupIntsToRanges ($list, $exclude_value = NULL)
@@ -4986,7 +4986,7 @@ function spotPayload ($text, $reqtype = 'SYNT_CODETEXT')
 // (or error message).
 function getRackCode ($text)
 {
-	if (!mb_strlen ($text))
+	if ($text == '')
 		return array ('result' => 'NAK', 'ABI_ver' => PARSER_ABI_VER, 'load' => 'The RackCode text was found empty in ' . __FUNCTION__);
 	$text = str_replace ("\r", '', $text) . "\n";
 	$synt = spotPayload ($text, 'SYNT_CODETEXT');
@@ -5361,7 +5361,7 @@ function guessTableStructure ($line)
 {
 	$ret = array();
 	$i = 0;
-	while (strlen ($line))
+	while ($line != '')
 	{
 		if (! preg_match ('/^(\s*\S+\s*)/', $line, $m))
 			break;
@@ -5680,7 +5680,7 @@ function universalOpHandler()
 	foreach ($op_stack as $callback)
 	{
 		$ret_i = call_user_func ($callback);
-		if (strlen ($ret_i) || ! isset ($ret))
+		if ($ret_i != '' || ! isset ($ret))
 			$ret = $ret_i;
 		if ($ophandler_propagation_stop)
 			break;
@@ -5877,7 +5877,7 @@ function mkCellA ($cell, $title = NULL)
 function listConstraint ($realm, $varname = '')
 {
 	$wideList = listCells ($realm);
-	if (strlen ($varname) and strlen ($filter = getConfigVar ($varname)))
+	if (($varname != '') and ('' != $filter = getConfigVar ($varname)))
 	{
 		$expr = compileExpression ($filter);
 		if (! $expr)
@@ -5916,7 +5916,7 @@ function formatEntityName ($entity)
 			$ret = $entity['dname'];
 			break;
 		case 'ipv4vs':
-			$ret = $entity['name'] . (strlen ($entity['name']) ? ' ' : '') . '(' . $entity['dname'] . ')';
+			$ret = $entity['name'] . ($entity['name'] != '' ? ' ' : '') . '(' . $entity['dname'] . ')';
 			break;
 		case 'ipv4net':
 		case 'ipv6net':
@@ -6164,7 +6164,7 @@ function getMgmtProtosConfig ($ignore_cache = FALSE)
 	foreach (explode (';', $config) as $item)
 	{
 		$item = trim ($item);
-		if (! strlen ($item))
+		if ($item == '')
 			continue;
 		if (preg_match('/^(\S+)\s*:\s*(.*)$/', $item, $m))
 			$cache[$m[1]] = $m[2];
