@@ -389,7 +389,7 @@ function ios12ReadSwitchPortList (&$work, $line)
 function ios12PickSwitchportCommand (&$work, $line)
 {
 	$port_name = $work['current']['port_name'];
-	if (! strlen ($line) || $line[0] != ' ') // end of interface section
+	if ($line == '' || $line[0] != ' ') // end of interface section
 	{
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 
@@ -625,7 +625,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	{
 	case (preg_match ('@^ dual-mode( +[[:digit:]]+ *)?$@', $line, $matches)):
 		// default VLAN ID for dual-mode command is 1
-		$work['current']['dual-mode'] = strlen (trim ($matches[1])) ? trim ($matches[1]) : 1;
+		$work['current']['dual-mode'] = trim ($matches[1]) != '' ? trim ($matches[1]) : 1;
 		break;
 	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
 	default: // nom-nom

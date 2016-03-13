@@ -115,8 +115,8 @@ function formatLoggedSpan ($log_item, $text, $html_class = '')
 		$title = htmlspecialchars ($log_item['user'] . ', ' . formatAge ($log_item['time']), ENT_QUOTES);
 	}
 	return "<span" .
-		(strlen ($html_class) ? " class='$html_class'" : '') .
-		(strlen ($title) ? " title='$title'" : '') .
+		($html_class != '' ? " class='$html_class'" : '') .
+		($title != '' ? " title='$title'" : '') .
 		">$text</span>";
 }
 
