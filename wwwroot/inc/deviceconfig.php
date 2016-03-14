@@ -1931,8 +1931,7 @@ function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "vlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			if (isset ($vlan_names[$cmd['arg1']]))
-				$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan ${cmd['arg1']}\n";
 			break;
 		case 'set access':
 			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
