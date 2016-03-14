@@ -82,6 +82,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		call_user_func_array ($func, $input);
 	}
 
+	/**
+	 * @group small
+	 * @dataProvider providerMakeWhereSQL
+	 */
+	public function testMakeWhereSQL ($where_columns, $conjunction, $expected_str, $expected_params)
+	{
+		$actual_str = makeWhereSQL ($where_columns, $conjunction, $actual_params);
+		$this->assertEquals ($expected_str, $actual_str);
+		$this->assertSame ($expected_params, $actual_params);
+	}
+
 	public function providerUnaryEquals ()
 	{
 		return array
@@ -701,6 +712,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nextMACAddress', array ('01:02:03:ab:cd:gg')),
 			array ('nextMACAddress', array ('01:02:03:ab:cd')),
 			array ('nextMACAddress', array ('1:2:3:ab:cd:ef')),
+		);
+	}
+
+	public function providerMakeWhereSQL ()
+	{
+		return array
+		(
+			array (array ('one' => 1), 'AND', '  one=?', array (1)),
+			array (array ('one' => NULL), 'AND', '  one IS NULL', array()),
+			array (array ('one' => 1, 'two' => 2), 'AND', '  one=? AND two=?', array (1, 2)),
+			array (array ('one' => NULL, 'two' => 2), 'AND', '  one IS NULL AND two=?', array (2)),
+			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', '  one=? OR two=? OR three=?', array (1, 2, 3)),
 		);
 	}
 }
