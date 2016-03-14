@@ -3945,21 +3945,21 @@ function usePreparedInsertBlade ($tablename, $columns)
 
 function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 {
-	$query = '';
+	if (! in_array (strtoupper ($conjunction), array ('AND', '&&', 'OR', '||', 'XOR')))
+		throw new InvalidArgException ('conjunction', $conjunction, 'invalid operator');
+	if (! count ($where_columns))
+		throw new InvalidArgException ('where_columns', '(empty array)', 'must not be empty');
 	$params = array();
-	$conj = '';
+	$tmp = array();
 	foreach ($where_columns as $colname => $colvalue)
-	{
 		if ($colvalue === NULL)
-			$query .= " ${conj} ${colname} IS NULL";
+			$tmp[] = "${colname} IS NULL";
 		else
 		{
-			$query .= " ${conj} ${colname}=?";
+			$tmp[] = "${colname}=?";
 			$params[] = $colvalue;
 		}
-		$conj = $conjunction;
-	}
-	return $query;
+	return implode (" ${conjunction} ", $tmp);
 }
 
 // This swiss-knife blade deletes any number of records from the specified table
