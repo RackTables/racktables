@@ -2006,8 +2006,7 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "vlan database\nvlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			if (isset ($vlan_names[$cmd['arg1']]))
-				$ret .= "vlan database\nno vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan database\nno vlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'set access':
 			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
