@@ -403,7 +403,7 @@ function getVSIDsByGroup ($group_id)
 
 function concatConfig (&$config, $line)
 {
-	if (strlen ($config))
+	if ($config != '')
 		$config .= "\n";
 	$config .= $line;
 }

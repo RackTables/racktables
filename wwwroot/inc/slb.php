@@ -395,7 +395,7 @@ class MacroParser
 					else
 					{
 						// trim last newline of expansion
-						if ($after_blank && strlen ($e_value) && $e_value[strlen ($e_value) - 1] == "\n")
+						if ($after_blank && $e_value != '' && $e_value[strlen ($e_value) - 1] == "\n")
 							$e_value = substr ($e_value, 0, -1);
 						// indent each line of $e_value
 						if ($indent != '')
@@ -565,7 +565,7 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 		(
 			'rspool_id' => $pool_id,
 			'rsip' => $rsip_bin,
-			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			'rsport' => ($rsport == '' or $rsport === 0) ? NULL : $rsport,
 			'inservice' => $inservice == 'yes' ? 'yes' : 'no',
 			'rsconfig' => nullIfEmptyStr ($rsconfig),
 			'comment' => nullIfEmptyStr ($comment),
@@ -607,7 +607,7 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 		array
 		(
 			$rsip_bin,
-			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			($rsport == '' or $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			nullIfEmptyStr ($rsconfig),
 			nullIfEmptyStr ($comment),
@@ -621,7 +621,7 @@ function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $
 {
 	if ($proto != 'MARK' && $vport <= 0)
 		throw new InvalidArgException ('vport', $vport);
-	if (!strlen ($proto))
+	if ($proto == '')
 		throw new InvalidArgException ('proto', $proto);
 	return usePreparedUpdateBlade
 	(
