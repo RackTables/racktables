@@ -299,6 +299,29 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('ip6_mask', 0, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"),
 			array ('ip6_mask', 80, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00"),
 			array ('ip6_mask', 128, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
+
+			array ('ip_get_arpa', "\x0A\x0B\x0C\x0D", '13.12.11.10.in-addr.arpa'),
+			array ('ip_get_arpa', "\xC0\x00\x02\xFF", '255.2.0.192.in-addr.arpa'),
+			array ('ip_get_arpa', "\xC0\xA8\xC0\xFF", '255.192.168.192.in-addr.arpa'),
+			array ('ip_get_arpa', "\xAC\x11\xBB\x00", '0.187.17.172.in-addr.arpa'),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01",
+				'1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
+				'c.0.b.0.a.0.9.0.8.0.7.0.6.0.5.0.4.0.3.0.2.0.1.0.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
+				'f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
 		);
 	}
 
@@ -715,6 +738,9 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 			array ('makeWhereSQL', array (array ('abc' => NULL), 'NOT')),
 			array ('makeWhereSQL', array (array(), 'AND')),
+
+			array ('ip_get_arpa', array ("\xAC\x11\xBB")),
+			array ('ip_get_arpa', array ("\xAC\x11\xBB\x00\x00")),
 		);
 	}
 
