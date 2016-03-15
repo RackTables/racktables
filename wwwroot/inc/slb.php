@@ -74,7 +74,8 @@ class SLBTriplet
 		}
 		$result = usePreparedSelectBlade
 		(
-			"SELECT * FROM IPv4LB WHERE `$db_field` = ? ORDER BY $order_fields",
+			'SELECT object_id, rspool_id, vs_id, prio, vsconfig, rsconfig FROM IPv4LB ' .
+			"WHERE `$db_field` = ? ORDER BY $order_fields",
 			array ($cell['id'])
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
