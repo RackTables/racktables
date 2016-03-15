@@ -2406,11 +2406,11 @@ function deleteLocation ()
 function addRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 5));
-	assertUIntArg ('location_id', TRUE);
+	$location_id = genericAssertion ('location_id', 'uint0');
 	assertStringArg ('name');
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
-	if ($_REQUEST['location_id'])
-		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $row_id);
+	if ($location_id)
+		commitLinkEntities ('location', $location_id, 'row', $row_id);
 	showSuccess ('added row ' . mkA ($_REQUEST['name'], 'row', $row_id));
 }
 
@@ -2515,9 +2515,9 @@ function addRack ()
 function updateRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	assertUIntArg ('row_id');
+	$row_id = genericAssertion ('row_id', 'uint');
 	assertStringArg ('name');
-	assertUIntArg ('height');
+	$height = genericAssertion ('height', 'uint');
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
 	$taglist = genericAssertion ('taglist', 'array0');
@@ -2526,9 +2526,9 @@ function updateRack ()
 	commitUpdateRack
 	(
 		$rack_id,
-		$_REQUEST['row_id'],
+		$row_id,
 		$_REQUEST['name'],
-		$_REQUEST['height'],
+		$height,
 		isCheckSet ('has_problems', 'yesno'),
 		$_REQUEST['asset_no'],
 		$_REQUEST['comment']
@@ -3257,7 +3257,6 @@ function importDPData()
 
 function addObjectlog ()
 {
-	assertStringArg ('logentry');
 	global $remote_username, $sic;
 	if (isset ($sic['rack_id']))
 		$object_id = $sic['rack_id'];
@@ -3268,7 +3267,11 @@ function addObjectlog ()
 	else
 		$object_id = $sic['object_id'];
 
-	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
+	usePreparedExecuteBlade
+	(
+		'INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?',
+		array ($object_id, $remote_username, genericAssertion ('logentry', 'string'))
+	);
 	showSuccess ('Log entry added');
 }
 
