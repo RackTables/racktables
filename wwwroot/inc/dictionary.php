@@ -2367,6 +2367,10 @@ $dictionary = array
 	2476 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 14'),
 	2477 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 15'),
 	2478 => array ('chapter_id' => 37, 'dict_value' => 'RouterOS 6'),
+	2479 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7702 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-2-slot-switch/index.html]]'),
+	2480 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7706 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-6-slot-switch/index.html]]'),
+	2481 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7710 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-10-slot-switch/index.html]]'),
+	2482 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7718 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-18-slot-switch/index.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
