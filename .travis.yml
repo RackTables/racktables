@@ -23,4 +23,5 @@ before_script:
  - echo "?>" >> wwwroot/inc/secret.php
 
 script:
- - cd tests; phpunit --group small
+ - cd tests; phpunit --group small; cd ..
+ - cd wwwroot; ../scripts/syncdomain.php --help; cd ..
