@@ -411,7 +411,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 			"<input type=image name=submit class=icon " .
 			"src='${img['path']}' " .
 			"border=0 " .
-			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
+			($title == '' ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
 		return
@@ -420,7 +420,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 			"width=${img['width']} " .
 			"height=${img['height']} " .
 			"border=0 " .
-			(!strlen ($title) ? '' : "title='${title}'") .
+			($title == '' ? '' : "title='${title}'") .
 			">";
 }
 
@@ -751,11 +751,11 @@ function serializeTags ($chain, $baseurl = '')
 			foreach ($taglist[$taginfo['id']]['trace'] as $tag_id)
 				$parent_info[] = $taglist[$tag_id]['tag'];
 			$parent_info[] = $taginfo['tag'];
-			if (strlen ($title))
+			if ($title != '')
 				$title .= "\n";
 			$title .= implode (" &rarr;  ", $parent_info);
 		}
-		if (strlen ($title))
+		if ($title != '')
 			$title = "title='$title'";
 
 		$class = '';
@@ -1028,7 +1028,7 @@ function makeFileDownloadButton ($file_id, $imgname = 'download')
 function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1
-	if (!mb_strlen ($string))
+	if ($string == '')
 		return '&nbsp;';
 	// a tab counts for a space
 	$string = preg_replace ("/\t/", ' ', $string);
@@ -1142,7 +1142,7 @@ function enableTagsPicker ()
 
 function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
 {
-	$object_name = ! isset ($object_name) || ! strlen ($object_name) ?
+	$object_name = ! isset ($object_name) || $object_name == '' ?
 		formatEntityName (spotEntity ('object', $alloc['object_id'])) :
 		$alloc['object_name'];
 	$title = $display_ifname ?

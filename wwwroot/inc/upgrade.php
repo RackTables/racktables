@@ -1213,7 +1213,7 @@ CREATE TABLE `CactiServer` (
 			$cacti_url_row = $result->fetch (PDO::FETCH_ASSOC);
 			unset ($result);
 
-			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && strlen ($cacti_url_row['varvalue']))
+			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && $cacti_url_row['varvalue'] != '')
 			{
 				$query[] = "INSERT INTO CactiServer (id) VALUES (1)";
 				$query[] = "UPDATE CactiServer SET base_url = (SELECT varvalue FROM Config WHERE varname = 'CACTI_URL') WHERE id = 1";
@@ -2011,7 +2011,7 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query failed with error ' . $errorInfo[2]);
 	}
 	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+	if (count ($rows) != 1 || $rows[0][0] == '')
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
 	$ret = $rows[0][0];
 	return $ret;
@@ -2024,7 +2024,7 @@ function showUpgradeError ($info = '', $location = 'N/A')
 	elseif ($location != 'N/A')
 		$location = $location . '()';
 	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (!strlen ($info))
+	if ($info == '')
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
@@ -2066,9 +2066,9 @@ function renderUpgraderHTML()
 	if
 	(
 		!isset ($_SERVER['PHP_AUTH_USER']) or
-		!strlen ($_SERVER['PHP_AUTH_USER']) or
+		$_SERVER['PHP_AUTH_USER'] == '' or
 		!isset ($_SERVER['PHP_AUTH_PW']) or
-		!strlen ($_SERVER['PHP_AUTH_PW']) or
+		$_SERVER['PHP_AUTH_PW'] == '' or
 		!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 	)
 	{

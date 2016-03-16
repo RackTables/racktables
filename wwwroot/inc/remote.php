@@ -527,7 +527,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	}
 	elseif (! empty ($errors)) // ssh and tolerate and non-empty $errors
 		foreach (explode ("\n", $errors) as $line)
-			if (strlen ($line))
+			if ($line != '')
 				showWarning ("${settings['protocol']} ${settings['hostname']}: $line");
 	return strtr($out, array("\r" => "")); // cut ^M symbols
 }
@@ -612,9 +612,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			}
 		}
 		foreach ($read_fd as $fd)
-		{
-			$str = fread ($fd, $buff_size);
-			if (strlen ($str) == 0)
+			if ('' == $str = fread ($fd, $buff_size))
 			{
 				// close output fd
 				$read_left = array_diff ($read_left, array ($fd));
@@ -631,7 +629,6 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 				elseif ($fd == $pipes[2])
 					$errors .= $str;
 			}
-		}
 
 		$write_fd = $write_left;
 		$read_fd = $read_left;

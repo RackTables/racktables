@@ -452,14 +452,14 @@ function renderObject8021QPorts ($object_id)
 		$pn = shortenIfName ($port['name'], $breed);
 		if (! isset ($indexed_ports[$pn]) || ! $indexed_ports[$pn]['linked'])
 			$indexed_ports[$pn] = $port;
-		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
+		if ($port['name'] != '' and array_key_exists ($port['name'], $desired_config))
 		{
 			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
 				$hl_port_name = $port['name'];
 			$socket = array ('interface' => formatPortIIFOIF ($port), 'link' => '&nbsp;');
 			if ($port['remote_object_id'])
 				$socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
-			elseif (strlen ($port['reservation_comment']))
+			elseif ($port['reservation_comment'] != '')
 				$socket['link'] = implode (' ', array(
 					formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline'),
 					formatLoggedSpan ($port['last_log'], $port['reservation_comment'])
@@ -797,7 +797,7 @@ function renderVLANInfo ($vlan_ck)
 	$summary = array();
 	$summary['Domain'] = stringForTD ($vlan['domain_descr'], 0);
 	$summary['VLAN ID'] = $vlan['vlan_id'];
-	if (strlen ($vlan['vlan_descr']))
+	if ($vlan['vlan_descr'] != '')
 		$summary['Description'] = stringForTD ($vlan['vlan_descr'], 0);
 	$summary['Propagation'] = $vtoptions[$vlan['vlan_prop']];
 
@@ -1172,7 +1172,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 		addAutoScrollScript ("port-$hl_port_id");
 
 		foreach ($object['ports'] as $port)
-			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+			if ($port['name'] != '' && $port['id'] == $hl_port_id)
 			{
 				$hl_port_name = $port['name'];
 				break;
