@@ -4049,10 +4049,10 @@ function loadConfigCache ()
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
-function loadUserConfigCache ($username = NULL)
+function loadUserConfigCache ($username)
 {
 	if ($username == '')
-		throw new InvalidArgException ('username', $username);
+		throw new InvalidArgException ('username', $username, 'must not be empty');
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
