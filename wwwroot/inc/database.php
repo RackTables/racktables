@@ -4051,7 +4051,7 @@ function loadConfigCache ()
 
 function loadUserConfigCache ($username = NULL)
 {
-	if (!strlen ($username))
+	if ($username == '')
 		throw new InvalidArgException ('username', $username);
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');

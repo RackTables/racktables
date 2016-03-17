@@ -231,7 +231,7 @@ function getRenderedAlloc ($object_id, $alloc)
 	else
 		$ret['td_ip'] .= "<span class='$ip_class' $ip_title>$dottedquad</span>";
 	$ret['td_ip'] .= $aac_right[$alloc['type']];
-	if (strlen ($alloc['addrinfo']['name']))
+	if ($alloc['addrinfo']['name'] != '')
 		$ret['td_ip'] .= ' (' . stringForLabel ($alloc['addrinfo']['name']) . ')';
 	$ret['td_ip'] .= '</td>';
 
@@ -763,7 +763,7 @@ function renderEditRowForm ($row_id)
 	{
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo '<tr><td>';
-		if (strlen ($record['value']))
+		if ($record['value'] != '')
 			echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
         else
 			echo '&nbsp;';
@@ -807,13 +807,13 @@ function renderEditRowForm ($row_id)
 function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 {
 	$objectData = spotEntity ('object', $object_id);
-	if (strlen ($objectData['asset_no']))
+	if ($objectData['asset_no'] != '')
 		$prefix = "<div title='${objectData['asset_no']}";
 	else
 		$prefix = "<div title='no asset tag";
 	// Don't tell about label, if it matches common name.
 	$body = '';
-	if ($objectData['name'] != $objectData['label'] and strlen ($objectData['label']))
+	if ($objectData['name'] != $objectData['label'] and $objectData['label'] != '')
 		$body = ", visible label is \"${objectData['label']}\"";
 	// Display list of child objects, if any
 	$objectChildren = getChildren ($objectData, 'object');
@@ -843,11 +843,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 				$slotCols[$slot] = $numCols;
 				$slotInfo[$slot] = $childData['dname'];
 				$slotData[$slot] = $childData['id'];
-				if (strlen ($childData['asset_no']))
+				if ($childData['asset_no'] != '')
 					$slotTitle[$slot] = "<div title='${childData['asset_no']}";
 				else
 					$slotTitle[$slot] = "<div title='no asset tag";
-				if (strlen ($childData['label']) and $childData['label'] != $childData['dname'])
+				if ($childData['label'] != '' and $childData['label'] != $childData['dname'])
 					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
 				$slotClass[$slot] = 'state_T';
@@ -1133,7 +1133,7 @@ function renderEditObjectForm()
 				continue;
 			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 			echo '<tr><td>';
-			if (strlen ($record['value']))
+			if ($record['value'] != '')
 				echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
 			else
 				echo '&nbsp;';
@@ -1226,7 +1226,7 @@ function renderEditRackForm ($rack_id)
 			continue;
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo '<tr><td>';
-		if (strlen ($record['value']))
+		if ($record['value'] != '')
 			echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
 		else
 			echo '&nbsp;';
@@ -1313,7 +1313,7 @@ function renderRackInfoPortlet ($rackData)
 	$summary['Rack row'] = mkA ($rackData['row_name'], 'row', $rackData['row_id']);
 	$summary['Name'] = $rackData['name'];
 	$summary['Height'] = $rackData['height'];
-	if (strlen ($rackData['asset_no']))
+	if ($rackData['asset_no'] != '')
 		$summary['Asset tag'] = $rackData['asset_no'];
 	if ($rackData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
@@ -1321,7 +1321,7 @@ function renderRackInfoPortlet ($rackData)
 	// Display populated attributes, but skip 'height' since it's already displayed above
 	// and skip 'sort_order' because it's modified using AJAX
 	foreach (getAttrValuesSorted ($rackData['id']) as $record)
-		if ($record['id'] != 27 && $record['id'] != 29 && strlen ($record['value']))
+		if ($record['id'] != 27 && $record['id'] != 29 && $record['value'] != '')
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
 	$summary['Objects'] = count ($rackData['mountedObjects']);
@@ -1427,7 +1427,7 @@ function renderObject ($object_id)
 
 	// display summary portlet
 	$summary  = array();
-	if (strlen ($info['name']))
+	if ($info['name'] != '')
 		$summary['Common name'] = $info['name'];
 	elseif (considerConfiguredConstraint ($info, 'NAMEWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Common name is missing.</td></tr>');
@@ -1436,9 +1436,9 @@ function renderObject ($object_id)
 		'tab' => 'default',
 		'cfe' => '{$typeid_' . $info['objtype_id'] . '}'
 	)) . '">' .  decodeObjectType ($info['objtype_id']) . '</a>';
-	if (strlen ($info['label']))
+	if ($info['label'] != '')
 		$summary['Visible label'] = $info['label'];
-	if (strlen ($info['asset_no']))
+	if ($info['asset_no'] != '')
 		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
@@ -1471,7 +1471,7 @@ function renderObject ($object_id)
 	foreach (getAttrValuesSorted ($object_id) as $record)
 		if
 		(
-			strlen ($record['value']) and
+			$record['value'] != '' and
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
 			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
@@ -1490,7 +1490,7 @@ function renderObject ($object_id)
 	));
 	renderEntitySummary ($info, 'summary', $summary);
 
-	if (strlen ($info['comment']))
+	if ($info['comment'] != '')
 	{
 		startPortlet ('Comment');
 		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
@@ -1618,7 +1618,7 @@ function renderObject ($object_id)
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
 						echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
-				elseif (strlen ($pf['remote_addr_name']))
+				elseif ($pf['remote_addr_name'] != '')
 					echo '(' . $pf['remote_addr_name'] . ')';
 				echo "</td><td class='description'>${pf['description']}</td></tr>";
 			}
@@ -1799,7 +1799,7 @@ function renderPortsForObject ($object_id)
 			echo getOpLink (array('op'=>'unlinkPort', 'port_id'=>$port['id'], ), '', 'cut', 'Unlink this port');
 			echo "</td>";
 		}
-		elseif (strlen ($port['reservation_comment']))
+		elseif ($port['reservation_comment'] != '')
 		{
 			echo "<td>" . formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') . "</td>";
 			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
@@ -2825,7 +2825,7 @@ function renderIPNetwork ($id)
 	$summary['tags'] = '';
 	renderEntitySummary ($range, 'summary', $summary);
 
-	if (strlen ($range['comment']))
+	if ($range['comment'] != '')
 	{
 		startPortlet ('Comment');
 		echo '<div class=commentblock>' . string_insert_hrefs (htmlspecialchars ($range['comment'], ENT_QUOTES, 'UTF-8')) . '</div>';
@@ -3238,9 +3238,9 @@ function renderIPAddress ($ip_bin)
 	echo "<tr><td class=pcleft>";
 
 	$summary = array();
-	if (strlen ($address['name']))
+	if ($address['name'] != '')
 		$summary['Name'] = $address['name'];
-	if (strlen ($address['comment']))
+	if ($address['comment'] != '')
 		$summary['Comment'] = $address['comment'];
 	$summary['Reserved'] = $address['reserved'];
 	$summary['Allocations'] = count ($address['allocs']);
@@ -3359,7 +3359,7 @@ function renderIPAddressProperties ($ip_bin)
 	echo "></tr><tr><td class=tdleft>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></form><td class=tdright>";
-	if (!strlen ($address['name']) and $address['reserved'] == 'no')
+	if ($address['name'] == '' and $address['reserved'] == 'no')
 		printImageHREF ('CLEAR gray');
 	else
 	{
@@ -3434,8 +3434,8 @@ function renderNATv4ForObject ($object_id)
 		foreach ($alloclist as $ip_bin => $alloc)
 		{
 			$ip = $alloc['addrinfo']['ip'];
-			$name = (!isset ($alloc['addrinfo']['name']) or !strlen ($alloc['addrinfo']['name'])) ? '' : (' (' . stringForLabel ($alloc['addrinfo']['name']) . ')');
-			$osif = (!isset ($alloc['osif']) or !strlen ($alloc['osif'])) ? '' : ($alloc['osif'] . ': ');
+			$name = (!isset ($alloc['addrinfo']['name']) or $alloc['addrinfo']['name'] == '') ? '' : (' (' . stringForLabel ($alloc['addrinfo']['name']) . ')');
+			$osif = (!isset ($alloc['osif']) or $alloc['osif'] == '') ? '' : ($alloc['osif'] . ': ');
 			$options[$ip] = $osif . $ip . $name;
 		}
 		printSelect ($options, array ('name' => 'localip'));
@@ -3481,7 +3481,7 @@ function renderNATv4ForObject ($object_id)
 			), '', 'delete', 'Delete NAT rule'
 		) . "</td>";
 		echo "<td>${pf['proto']}/${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']);
-		if (strlen ($pf['local_addr_name']))
+		if ($pf['local_addr_name'] != '')
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
 		echo "<td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
@@ -3492,7 +3492,7 @@ function renderNATv4ForObject ($object_id)
 		if (count ($address['allocs']))
 			foreach ($address['allocs'] as $bond)
 				echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
-		elseif (strlen ($pf['remote_addr_name']))
+		elseif ($pf['remote_addr_name'] != '')
 			echo '(' . $pf['remote_addr_name'] . ')';
 		printOpFormIntro
 		(
@@ -4037,7 +4037,7 @@ function renderEditLocationForm ($location_id)
 	{
 		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
 		echo '<tr><td>';
-		if (strlen ($record['value']))
+		if ($record['value'] != '')
 			echo getOpLink (array ('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
 		else
 			echo '&nbsp;';
@@ -4278,13 +4278,13 @@ function renderLivePTR ($id)
 			echo ' class=trbusy';
 		if ($addr['name'] == $ptrname)
 		{
-			if (strlen ($ptrname))
+			if ($ptrname != '')
 			{
 				echo ' class=trok';
 				$cnt_match++;
 			}
 		}
-		elseif (!strlen ($addr['name']) or !strlen ($ptrname))
+		elseif ($addr['name'] == '' or $ptrname == '')
 		{
 			echo ' class=trwarning';
 			$print_cbox = TRUE;
@@ -4297,7 +4297,7 @@ function renderLivePTR ($id)
 			$cnt_mismatch++;
 		}
 		echo "><td class='tdleft";
-		if (isset ($range['addrlist'][$ip_bin]['class']) and strlen ($range['addrlist'][$ip_bin]['class']))
+		if (isset ($range['addrlist'][$ip_bin]['class']) and $range['addrlist'][$ip_bin]['class'] != '')
 			echo ' ' . $range['addrlist'][$ip_bin]['class'];
 		echo "'>" . mkA ($straddr, 'ipaddress', $straddr) . '</td>';
 		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td>";
@@ -4389,7 +4389,7 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 		$ret['input_extraattrs'] = 'disabled';
 		$ret['tr_class'] .= (array_key_exists ('kidc', $taginfo) and $taginfo['kidc'] == 0) ? ' trwarning' : ' trnull';
 	}
-	if (strlen ($refcnt_realm) and isset ($taginfo['refcnt'][$refcnt_realm]))
+	if ($refcnt_realm != '' and isset ($taginfo['refcnt'][$refcnt_realm]))
 		$ret['text_refcnt'] = $taginfo['refcnt'][$refcnt_realm];
 	$ret = array ($ret);
 	if (array_key_exists ('kids', $taginfo))
@@ -4483,7 +4483,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	(
 		count ($preselect['tagidlist']) +
 		count ($preselect['pnamelist']) +
-		(mb_strlen ($preselect['extratext']) ? 1 : 0)
+		($preselect['extratext'] != '' ? 1 : 0)
 	);
 	$title = $filterc ? "Tag filters (${filterc})" : 'Tag filters';
 	startPortlet ($title);
@@ -4496,11 +4496,11 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	// "apply filter" button only gets active when there are checkbox/textarea inputs on the roster
 	$enable_apply = FALSE;
 	// and/or block
-	if (getConfigVar ('FILTER_SUGGEST_ANDOR') == 'yes' or strlen ($preselect['andor']))
+	if (getConfigVar ('FILTER_SUGGEST_ANDOR') == 'yes' or $preselect['andor'] != '')
 	{
 		echo $hr;
 		$hr = $ruler;
-		$andor = strlen ($preselect['andor']) ? $preselect['andor'] : getConfigVar ('FILTER_DEFAULT_ANDOR');
+		$andor = $preselect['andor'] != '' ? $preselect['andor'] : getConfigVar ('FILTER_DEFAULT_ANDOR');
 		echo '<tr>';
 		foreach (array ('and', 'or') as $boolop)
 		{
@@ -4563,11 +4563,11 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 	}
 	// extra code
 	$enable_textify = FALSE;
-	if (getConfigVar ('FILTER_SUGGEST_EXTRA') == 'yes' or strlen ($preselect['extratext']))
+	if (getConfigVar ('FILTER_SUGGEST_EXTRA') == 'yes' or $preselect['extratext'] != '')
 	{
 		$enable_textify = !empty ($preselect['text']) || !empty($preselect['extratext']);
 		$enable_apply = TRUE;
-		if (strlen ($preselect['extratext']))
+		if ($preselect['extratext'] != '')
 			$enable_reset = TRUE;
 		echo $hr;
 		$hr = $ruler;
@@ -4674,7 +4674,7 @@ function renderFileSummary ($file)
 	$summary['Modified'] = $file['mtime'];
 	$summary['Accessed'] = $file['atime'];
 	$summary['tags'] = '';
-	if (strlen ($file['comment']))
+	if ($file['comment'] != '')
 		$summary['Comment'] = '<div class="dashed commentblock">' . string_insert_hrefs (htmlspecialchars ($file['comment'])) . '</div>';
 	renderEntitySummary ($file, 'summary', $summary);
 }
@@ -4953,7 +4953,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	if (array_key_exists ('tdclass', $decor))
 		echo ' ' . $decor['tdclass'];
 	echo '" style="padding-left: ' . ($decor['indent'] * 16) . 'px;">';
-	if (strlen ($netinfo['symbol']))
+	if ($netinfo['symbol'] != '')
 	{
 		if (array_key_exists ('symbolurl', $decor))
 			echo "<a href='${decor['symbolurl']}'>";
@@ -5013,7 +5013,7 @@ function renderCell ($cell)
 		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
 		echo '</td><td>' . mkA (stringForTD ($cell['user_name']), 'user', $cell['user_id']) . '</td></tr>';
-		if (strlen ($cell['user_realname']))
+		if ($cell['user_realname'] != '')
 			echo "<tr><td><strong>" . stringForTD ($cell['user_realname']) . "</strong></td></tr>";
 		else
 			echo "<tr><td class=sparenetwork>no name</td></tr>";
@@ -5066,7 +5066,7 @@ function renderCell ($cell)
 		echo '</td></tr>';
 
 		echo "<tr><td>";
-		if (strlen ($cell['name']))
+		if ($cell['name'] != '')
 			echo "<strong>" . stringForTD ($cell['name']) . "</strong>";
 		else
 			echo "<span class=sparenetwork>no name</span>";
@@ -5117,7 +5117,7 @@ function renderRouterCell ($ip_bin, $ifname, $cell)
 {
 	$dottedquad = ip_format ($ip_bin);
 	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
-	if (strlen ($ifname))
+	if ($ifname != '')
 		echo '@' . $ifname;
 	echo "</td>";
 	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_ip=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
@@ -5328,7 +5328,7 @@ function showTabs ($pageno, $tabno)
 		// Dynamic tabs should only be shown in certain cases (trigger exists and returns true).
 		if (!isset ($trigger[$pageno][$tabidx]))
 			$tabclass = 'std';
-		elseif (!strlen ($tabclass = call_user_func ($trigger[$pageno][$tabidx])))
+		elseif ('' == $tabclass = call_user_func ($trigger[$pageno][$tabidx]))
 			continue;
 		if ($tabidx == $tabno)
 			$tabclass = 'current'; // override any class for an active selection
@@ -5392,7 +5392,7 @@ function dynamic_title_decoder_throwing ($path_position)
 		$pool_info = spotEntity ('ipv4rspool', assertUIntArg ('pool_id'));
 		return array
 		(
-			'name' => !strlen ($pool_info['name']) ? 'ANONYMOUS' : $pool_info['name'],
+			'name' => $pool_info['name'] == '' ? 'ANONYMOUS' : $pool_info['name'],
 			'params' => array ('pool_id' => $pool_info['id'])
 		);
 	case 'ipv4vs':
@@ -5663,7 +5663,7 @@ function renderDiscoveredNeighbors ($object_id)
 	// reindex by port name
 	$myports = array();
 	foreach ($mydevice['ports'] as $port)
-		if (mb_strlen ($port['name']))
+		if ($port['name'] != '')
 			$myports[$port['name']][] = $port;
 
 	// scroll to selected port
@@ -5881,9 +5881,9 @@ function formatIfTypeVariants ($variants, $select_name)
 		$left_text = ($multiple_left ? $item['left']['portinfo']['iif_name'] . '/' : '') . $item['left']['name'];
 		$right_text = ($multiple_right ? $item['right']['portinfo']['iif_name'] . '/' : '') . $item['right']['name'];
 		$text = $left_text;
-		if ($left_text != $right_text && strlen ($right_text))
+		if ($left_text != $right_text && $right_text != '')
 		{
-			if (strlen ($text))
+			if ($text != '')
 				$text .= " | ";
 			$text .= $right_text;
 		}
@@ -6330,7 +6330,7 @@ function formatPortReservation ($port)
 {
 	$ret = array();
 	$ret[] = '<td class=tdleft>' .
-		(strlen ($port['reservation_comment']) ? formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') : '').
+		($port['reservation_comment'] != '' ? formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') : '').
 		'</td>';
 	$editable = permitted ('object', 'ports', 'editPort')
 		? 'editable'
