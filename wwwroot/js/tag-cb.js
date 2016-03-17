@@ -44,7 +44,7 @@ function cbClick (event, bInvert) {
 	var checked = cb.attr('checked');
 	if (bInvert)
 		checked = ! checked;
-	if (event.ctrlKey && ! td.hasClass('inverted') && checked) {
+	if ((event.ctrlKey || event.metaKey) && ! td.hasClass('inverted') && checked) {
 		var name = cb.attr('name');
 		if (name.match(/^cf([tp]\[\])$/))
 			cb.attr('name', 'nf' + RegExp.$1);
