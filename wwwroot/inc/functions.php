@@ -6118,15 +6118,14 @@ function validTagName ($s, $allow_autotag = FALSE)
 // link: if each name should be wrapped in an href
 function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 {
-	$locations = listCells ('location');
-
+	// XXX: $location_tree is an array, not a tree
 	static $location_tree = array ();
 	if (count ($location_tree) == 0)
-		foreach ($locations as $location)
+		foreach (listCells ('location') as $location)
 			$location_tree[$location['id']] = array ('parent_id' => $location['parent_id'], 'name' => $location['name']);
 
 	// prepend parent location(s) to given location string
-	$name = '';
+	$names = array();
 	$id = $location_id;
 	$locationIdx = 0;
 	while (isset ($id))
@@ -6136,14 +6135,12 @@ function getLocationTrail ($location_id, $link = TRUE, $spacer = ' : ')
 			showWarning ('Warning: There is likely a circular reference in the location tree.');
 			break;
 		}
-		if ($link)
-			$name = mkA ($location_tree[$id]['name'], 'location', $id) . $spacer . $name;
-		else
-			$name = $location_tree[$id]['name'] . $spacer . $name;
+		$name = $location_tree[$id]['name'];
+		array_unshift ($names, $link ? mkA ($name, 'location', $id) : $name);
 		$id = $location_tree[$id]['parent_id'];
 		$locationIdx++;
 	}
-	return substr ($name, 0, 0 - strlen ($spacer));
+	return implode ($spacer, $names);
 }
 
 function cmp_array_sizes ($a, $b)
