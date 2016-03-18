@@ -31,9 +31,8 @@ function castRackImageException ($e)
 
 function dispatchImageRequest()
 {
-	genericAssertion ('img', 'string');
 	global $pageno, $tabno;
-	switch ($_REQUEST['img'])
+	switch ($img = genericAssertion ('img', 'string'))
 	{
 	case 'minirack': // rack security context
 		$pageno = 'rack';
@@ -80,25 +79,23 @@ function dispatchImageRequest()
 		$tabno = 'cacti';
 		fixContext();
 		assertPermission();
-		genericAssertion ('server_id', 'uint');
-		genericAssertion ('graph_id', 'uint');
-		if (! array_key_exists ($_REQUEST['graph_id'], getCactiGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph_id', $_REQUEST['graph_id']);
-		proxyCactiRequest ($_REQUEST['server_id'], $_REQUEST['graph_id']);
+		$graph_id = genericAssertion ('graph_id', 'uint');
+		if (! array_key_exists ($graph_id, getCactiGraphsForObject (getBypassValue())))
+			throw new InvalidRequestArgException ('graph_id', $graph_id);
+		proxyCactiRequest (genericAssertion ('server_id', 'uint'), $graph_id);
 		break;
 	case 'muningraph':
 		$pageno = 'object';
 		$tabno = 'munin';
 		fixContext();
 		assertPermission();
-		genericAssertion ('server_id', 'uint');
-		genericAssertion ('graph', 'string');
-		if (! array_key_exists ($_REQUEST['graph'], getMuninGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph', $_REQUEST['graph']);
-		proxyMuninRequest ($_REQUEST['server_id'], $_REQUEST['graph']);
+		$graph = genericAssertion ('graph', 'string');
+		if (! array_key_exists ($graph, getMuninGraphsForObject (getBypassValue())))
+			throw new InvalidRequestArgException ('graph', $graph);
+		proxyMuninRequest (genericAssertion ('server_id', 'uint'), $graph);
 		break;
 	default:
-		throw new InvalidRequestArgException ('img', $_REQUEST['img']);
+		throw new InvalidRequestArgException ('img', $img);
 	}
 }
 
