@@ -38,16 +38,16 @@ function authenticate ()
 	// Phase 2. Do some method-specific processing, initialize $remote_username on success.
 	switch (TRUE)
 	{
-		case isset ($script_mode) && $script_mode && isset ($remote_username) && strlen ($remote_username):
+		case isset ($script_mode) && $script_mode && isset ($remote_username) && $remote_username != '':
 			break; // skip this phase
 		case 'database' == $user_auth_src:
 		case 'ldap' == $user_auth_src:
 			if
 			(
 				! isset ($_SERVER['PHP_AUTH_USER']) or
-				! strlen ($_SERVER['PHP_AUTH_USER']) or
+				$_SERVER['PHP_AUTH_USER'] == '' or
 				! isset ($_SERVER['PHP_AUTH_PW']) or
-				! strlen ($_SERVER['PHP_AUTH_PW'])
+				$_SERVER['PHP_AUTH_PW'] == ''
 			)
 				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
@@ -56,7 +56,7 @@ function authenticate ()
 			if
 			(
 				! isset ($_SERVER['REMOTE_USER']) or
-				! strlen ($_SERVER['REMOTE_USER'])
+				$_SERVER['REMOTE_USER'] == ''
 			)
 				throw new RackTablesError ('The web-server didn\'t authenticate the user, although ought to do.', RackTablesError::MISCONFIGURED);
 			$remote_username = $_SERVER['REMOTE_USER'];
@@ -84,14 +84,14 @@ function authenticate ()
 			return; // success
 		// Just trust the server, because the password isn't known.
 		case 'httpd' == $user_auth_src:
-			$remote_displayname = strlen ($userinfo['user_realname']) ?
+			$remote_displayname = $userinfo['user_realname'] != '' ?
 				$userinfo['user_realname'] :
 				$remote_username;
 			return; // success
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
 		case array_key_exists ('user_id', $userinfo) and $userinfo['user_id'] == 1:
 		case 'database' == $user_auth_src:
-			$remote_displayname = strlen ($userinfo['user_realname']) ?
+			$remote_displayname = $userinfo['user_realname'] != '' ?
 				$userinfo['user_realname'] :
 				$remote_username;
 			if (authenticated_via_database ($userinfo, $_SERVER['PHP_AUTH_PW']))
@@ -101,12 +101,12 @@ function authenticate ()
 			$ldap_dispname = '';
 			if (! authenticated_via_ldap ($remote_username, $_SERVER['PHP_AUTH_PW'], $ldap_dispname))
 				break; // failure
-			$remote_displayname = strlen ($userinfo['user_realname']) ? // local value is most preferred
+			$remote_displayname = $userinfo['user_realname'] != '' ? // local value is most preferred
 				$userinfo['user_realname'] :
-				(strlen ($ldap_dispname) ? $ldap_dispname : $remote_username); // then one from LDAP
+				($ldap_dispname != '' ? $ldap_dispname : $remote_username); // then one from LDAP
 			return; // success
 		case 'saml' == $user_auth_src:
-			$remote_displayname = strlen ($saml_dispname) ? $saml_dispname : $saml_username;
+			$remote_displayname = $saml_dispname != '' ? $saml_dispname : $saml_username;
 			return; // success
 		default:
 			throw new RackTablesError ('Invalid authentication source!', RackTablesError::MISCONFIGURED);
@@ -126,7 +126,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 		$p = $pageno;
 	if ($t === NULL)
 		$t = $tabno;
-	if ($o === NULL and strlen ($op)) // $op can be set to empty string
+	if ($o === NULL and $op != '') // $op can be set to empty string
 		$o = $op;
 	$my_auto_tags = $auto_tags;
 	$my_auto_tags[] = array ('tag' => '$page_' . $p);
@@ -527,21 +527,21 @@ function queryLDAPServer ($username, $password)
 			ldap_set_option ($connect, $opt_code, $opt_value);
 
 	// Decide on the username we will actually authenticate for.
-	if (isset ($LDAP_options['domain']) and strlen ($LDAP_options['domain']))
+	if (isset ($LDAP_options['domain']) and $LDAP_options['domain'] != '')
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];
 	elseif
 	(
 		isset ($LDAP_options['search_dn']) and
-		strlen ($LDAP_options['search_dn']) and
+		$LDAP_options['search_dn'] != '' and
 		isset ($LDAP_options['search_attr']) and
-		strlen ($LDAP_options['search_attr'])
+		$LDAP_options['search_attr'] != ''
 	)
 	{
 		// If a search_bind_rdn is supplied, bind to that and use it to search.
 		// This is required unless a server offers anonymous searching.
 		// Using bind again on the connection works as expected.
 		// The password is optional as it might be optional on server, too.
-		if (isset ($LDAP_options['search_bind_rdn']) && strlen ($LDAP_options['search_bind_rdn']))
+		if (isset ($LDAP_options['search_bind_rdn']) && $LDAP_options['search_bind_rdn'] != '')
 		{
 			$search_bind = @ldap_bind
 			(
@@ -588,11 +588,11 @@ function queryLDAPServer ($username, $password)
 	if
 	(
 		isset ($LDAP_options['displayname_attrs']) and
-		strlen ($LDAP_options['displayname_attrs']) and
+		$LDAP_options['displayname_attrs'] != '' and
 		isset ($LDAP_options['search_dn']) and
-		strlen ($LDAP_options['search_dn']) and
+		$LDAP_options['search_dn'] != '' and
 		isset ($LDAP_options['search_attr']) and
-		strlen ($LDAP_options['search_attr'])
+		$LDAP_options['search_attr'] != ''
 	)
 	{
 		$results = @ldap_search
