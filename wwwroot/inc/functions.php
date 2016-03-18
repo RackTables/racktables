@@ -6201,13 +6201,14 @@ function shortenPortName ($if_name, $object_id)
 function splitNetworkByMask ($netinfo, $dst_mask)
 {
 	$self = __FUNCTION__;
-    if ($netinfo['mask'] >= $dst_mask)
-        return array ($netinfo);
+	if ($netinfo['mask'] >= $dst_mask)
+		return array ($netinfo);
 
-    return array_merge (
-        $self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
-        $self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
-    );
+	return array_merge
+	(
+		$self (constructIPRange ($netinfo['ip_bin'], $netinfo['mask'] + 1), $dst_mask),
+		$self (constructIPRange (ip_last ($netinfo), $netinfo['mask'] + 1), $dst_mask)
+	);
 }
 
 // this function is used both to remember and to retrieve the last created entity's ID
