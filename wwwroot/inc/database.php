@@ -4499,10 +4499,10 @@ function loadScript ($name)
 	return nullIfFalse ($result->fetchColumn());
 }
 
-function saveScript ($name = '', $text)
+function saveScript ($name, $text)
 {
 	if ($name == '')
-		throw new InvalidArgException ('name', $name);
+		throw new InvalidArgException ('name', $name, 'must not be empty');
 	if (!isset ($text))
 		return deleteScript ($name);
 	return usePreparedExecuteBlade

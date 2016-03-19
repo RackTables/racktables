@@ -34,6 +34,24 @@ class ScriptFunctions extends PHPUnit_Framework_TestCase
 		saveScript (self::SCRIPT_NAME, NULL); // deletes
 		$this->assertSame (NULL, loadScript (self::SCRIPT_NAME));
 	}
+
+	/**
+	 * @group small
+	 * @expectedException InvalidArgException
+	 */
+	public function testSaveEmptyName ()
+	{
+		saveScript ('', NULL);
+	}
+
+	/**
+	 * @group small
+	 * @expectedException InvalidArgException
+	 */
+	public function testSaveNULLName ()
+	{
+		saveScript (NULL, NULL);
+	}
 }
 
 ?>
