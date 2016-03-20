@@ -1623,8 +1623,8 @@ function redirectIfNecessary ()
 function prepareNavigation()
 {
 	global $pageno, $tabno;
-	$pageno = isset ($_REQUEST['page']) ? $_REQUEST['page'] : 'index';
-	$tabno = isset ($_REQUEST['tab']) ? $_REQUEST['tab'] : 'default';
+	$pageno = array_fetch ($_REQUEST, 'page', 'index');
+	$tabno = array_fetch ($_REQUEST, 'tab', 'default');
 }
 
 function fixContext ($target = NULL)
