@@ -226,7 +226,7 @@ function renderProgressBarImage ($done)
 	if ($done > 100)
 		throw new RTImageError ('pbar_arg_error');
 	$img = createTrueColorOrThrow ('pbar_php_gd_error', 100, 10);
-	switch (isset ($_REQUEST['theme']) ? $_REQUEST['theme'] : 'rackspace')
+	switch (array_fetch ($_REQUEST, 'theme', 'rackspace'))
 	{
 		case 'sparenetwork':
 			$color['T'] = colorFromHex ($img, '808080');
