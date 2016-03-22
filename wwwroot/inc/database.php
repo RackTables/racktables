@@ -5133,9 +5133,9 @@ function getDomainGroupMembers ($vdom_group_id)
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANs ($vdom_id, $strict = FALSE)
 {
+	$self = __FUNCTION__;
 	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
 	{
-		$self = __FUNCTION__;
 		$ret = $self ($vdom_id, TRUE);
 		foreach ($members as $member_vdom_id)
 			foreach ($self ($member_vdom_id, TRUE) as $vid => $vlan_info)
@@ -5178,8 +5178,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id, $vdom_id)
 	);
-	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 // faster than getDomainVLANs, but w/o statistics.
