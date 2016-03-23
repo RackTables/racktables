@@ -4122,7 +4122,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (array_key_exists ($major_line, $ios_codes))
 			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
 		$sysChassi = $device->snmpget ('1.3.6.1.4.1.9.3.6.3.0');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
@@ -4135,7 +4135,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
 			commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		}
-		elseif ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
+		elseif ($sysObjectID != '9.1.749' && $sysObjectID != '9.1.920')
 		{
 			// assume the rest have one AC input, but exclude blade devices
 			checkPIC ('1-16'); // AC input
@@ -4168,7 +4168,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$sysChassi = $device->snmpget ('1.3.6.1.2.1.47.1.1.1.1.11.149');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
@@ -4241,7 +4241,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
 		$sysChassi = $device->snmpget ('enterprises.1991.1.1.1.1.2.0');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 
 		# Type of uplink module installed.

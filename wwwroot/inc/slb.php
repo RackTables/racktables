@@ -48,7 +48,7 @@ class SLBTriplet
 
 	static public function getTriplets ($cell)
 	{
-		if (isset ($cell['ip_bin']) and isset ($cell['vslist']))
+		if (isset ($cell['ip_bin']) && isset ($cell['vslist']))
 			// cell is IPAddress
 			return self::getTripletsByIP ($cell['ip_bin']);
 		$ret = array();
@@ -302,7 +302,7 @@ class MacroParser
 				for ($i = 0; $i < strlen ($line); $i++)
 				{
 					$c = $line[$i];
-					if ($c == "'" and 0 == --$macro_deep)
+					if ($c == "'" && 0 == --$macro_deep)
 					{
 						if ($op === ':=')
 							$this->macros[$mname] = $this->expand ($mvalue);
@@ -566,7 +566,7 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 		(
 			'rspool_id' => $pool_id,
 			'rsip' => $rsip_bin,
-			'rsport' => ($rsport == '' or $rsport === 0) ? NULL : $rsport,
+			'rsport' => ($rsport == '' || $rsport === 0) ? NULL : $rsport,
 			'inservice' => $inservice == 'yes' ? 'yes' : 'no',
 			'rsconfig' => nullIfEmptyStr ($rsconfig),
 			'comment' => nullIfEmptyStr ($comment),
@@ -608,7 +608,7 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 		array
 		(
 			$rsip_bin,
-			($rsport == '' or $rsport === 0) ? NULL : $rsport,
+			($rsport == '' || $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			nullIfEmptyStr ($rsconfig),
 			nullIfEmptyStr ($comment),

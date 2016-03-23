@@ -1004,7 +1004,7 @@ function addIPAllocation ()
 	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($alloc_type != 'shared') ) )
 		showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
 
-	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
+	if (getConfigVar ('IPV4_JAYWALK') != 'yes' && NULL === getIPAddressNetworkId ($ip_bin))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
 		return;
@@ -1237,7 +1237,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 			usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom));
 			if ($newstate != 'F')
 				usePreparedInsertBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom, 'state' => $newstate));
-			if ($newstate == 'T' and $object_id != 0)
+			if ($newstate == 'T' && $object_id != 0)
 			{
 				// At this point we already have a record in RackSpace.
 				usePreparedUpdateBlade
@@ -1406,7 +1406,7 @@ function updateObjectAttributes ($object_id)
 
 		// If the object is a rack, skip certain attributes as they are handled elsewhere
 		// (height, sort_order)
-		if ($type_id == 1560 and ($attr_id == 27 or $attr_id == 29))
+		if ($type_id == 1560 && ($attr_id == 27 || $attr_id == 29))
 			continue;
 
 		// Delete attribute and move on, when the field is empty or if the field
@@ -1487,7 +1487,7 @@ function addLotOfObjects()
 	$taglist = genericAssertion ('taglist', 'array0');
 	assertStringArg ('namelist', TRUE);
 	$global_type_id = genericAssertion ('global_type_id', 'uint0');
-	if ($global_type_id == 0 or $_REQUEST['namelist'] == '')
+	if ($global_type_id == 0 || $_REQUEST['namelist'] == '')
 	{
 		showError ('Incomplete form has been ignored. Cheers.');
 		return;
@@ -2903,7 +2903,7 @@ function save8021QPorts ()
 	global $sic;
 	$object_id = getBypassValue();
 	$form_mode = genericAssertion ('form_mode', 'string');
-	if ($form_mode != 'save' and $form_mode != 'duplicate')
+	if ($form_mode != 'save' && $form_mode != 'duplicate')
 		throw new InvalidRequestArgException ('form_mode', $form_mode);
 	$extra = array();
 
@@ -3155,13 +3155,13 @@ function updVSTRule()
 			$rule_no++;
 			if
 			(
-				! isInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field))
-				or ! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field))
-				or NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field)
-				or ! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options)
-				or NULL ===  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field)
-				or ! preg_match ('/^[ 0-9\-,]*$/',  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field))
-				or NULL ===  updVSTRule_get_named_param ('description', $rule, $last_field)
+				! isInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field)) ||
+				! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field)) ||
+				NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field) ||
+				! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options) ||
+				NULL ===  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field) ||
+				! preg_match ('/^[ 0-9\-,]*$/',  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field)) ||
+				NULL ===  updVSTRule_get_named_param ('description', $rule, $last_field)
 			)
 				throw new InvalidRequestArgException ($last_field, $rule[$last_field], "rule #$rule_no");
 		}
@@ -3170,7 +3170,7 @@ function updVSTRule()
 	catch (Exception $e)
 	{
 		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
-		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
+		if ($e instanceof InvalidRequestArgException || $e instanceof RTDatabaseError)
 		{
 			startSession();
 			$_SESSION['vst_edited'] = $data;
@@ -3209,9 +3209,9 @@ function importDPData()
 			$portb = getPortInfo ($params['b_id']);
 			if
 			(
-				$porta['linked'] or
-				$portb['linked'] or
-				($porta['object_id'] != $object_id and $portb['object_id'] != $object_id)
+				$porta['linked'] ||
+				$portb['linked'] ||
+				($porta['object_id'] != $object_id && $portb['object_id'] != $object_id)
 			)
 			{
 				$nignored++;
@@ -3422,7 +3422,7 @@ function cleanupUCS()
 		$o = spotEntity ('object', $item_id);
 		$attrs = getAttrValues ($item_id);
 		# use HW type to decide if the object was produced by autoPopulateUCS()
-		if (! array_key_exists (2, $attrs) or ! in_array ($attrs[2]['key'], $ucsproductmap))
+		if (! array_key_exists (2, $attrs) || ! in_array ($attrs[2]['key'], $ucsproductmap))
 		{
 			showWarning ('Contained object ' . mkA ($o['dname'], 'object', $item_id) . ' is not an automatic UCS object');
 			$clear = FALSE;
@@ -3451,8 +3451,8 @@ function getOpspec()
 	$ret = $opspec_list[$pageno . '-' . $tabno . '-' . $op];
 	if
 	(
-		!array_key_exists ('table', $ret)
-		or !array_key_exists ('action', $ret)
+		! array_key_exists ('table', $ret) ||
+		! array_key_exists ('action', $ret)
 		// add further checks here
 	)
 		throw new RackTablesError ('malformed array structure in opspec_list', RackTablesError::INTERNAL);
@@ -3587,8 +3587,8 @@ function buildOpspecColumns ($opspec, $listname)
 			}
 			elseif // FIXME: remove the old declaration style at a later point
 			(
-				($argspec['assertion'] == 'uint0' and $arg_value == 0)
-				or ($argspec['assertion'] == 'string0' and $arg_value == '')
+				($argspec['assertion'] == 'uint0' && $arg_value == 0) ||
+				($argspec['assertion'] == 'string0' && $arg_value == '')
 			)
 				switch (TRUE)
 				{

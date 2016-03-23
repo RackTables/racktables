@@ -328,7 +328,7 @@ function stringTrace($trace)
 			$ret .= $line['file'].':'.$line['line'].' ';
 		$ret .= $line['function'].'(';
 		$f = true;
-		if (isset ($line['args']) and is_array ($line['args']))
+		if (isset ($line['args']) && is_array ($line['args']))
 			foreach ($line['args'] as $arg)
 			{
 				if (! $f) $ret .= ', ';

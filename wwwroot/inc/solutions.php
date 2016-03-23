@@ -132,7 +132,7 @@ function createTrueColorOrThrow ($context, $width, $height)
 	// Sometimes GD is missing even though it was available at install time.
 	if
 	(
-		! function_exists ('imagecreatetruecolor') or
+		! function_exists ('imagecreatetruecolor') ||
 		FALSE === $img = @imagecreatetruecolor ($width, $height)
 	)
 		throw new RTImageError ($context);
@@ -272,7 +272,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 	{
 		$off = $offsets[$i];
 		$clr = $colors[$i];
-		if ($pos + $off > $width or $off < 0)
+		if ($pos + $off > $width || $off < 0)
 			throw new RTImageError ('pbar_arg_error');
 		if ($off > 0)
 			imagefilledrectangle ($img, $pos, 0, $pos + $off, $height, $clr);
@@ -336,7 +336,7 @@ function renderImagePreview ($file_id)
 	unset ($file);
 	$width = imagesx ($image);
 	$height = imagesy ($image);
-	if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') or $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
+	if ($width > getConfigVar ('PREVIEW_IMAGE_MAXPXS') || $height > getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
 	{
 		$ratio = getConfigVar ('PREVIEW_IMAGE_MAXPXS') / max ($width, $height);
 		$newwidth = $width * $ratio;
@@ -385,14 +385,14 @@ function proxyStaticURI ($URI)
 	$matches = array();
 	if
 	(
-		! preg_match (RE_STATIC_URI, $URI, $matches)
-		or ! array_key_exists (strtolower ($matches[1]), $content_type)
+		! preg_match (RE_STATIC_URI, $URI, $matches) ||
+		! array_key_exists (strtolower ($matches[1]), $content_type)
 	)
 		printStatic404();
 	global $local_staticdir, $racktables_staticdir;
 	if (isset ($local_staticdir))
 		$fh = @fopen ("${local_staticdir}/${URI}", 'r');
-	if (! isset ($fh) or FALSE === $fh)
+	if (! isset ($fh) || FALSE === $fh)
 		$fh = @fopen ("${racktables_staticdir}/${URI}", 'r');
 	if (FALSE === $fh)
 		printStatic404();

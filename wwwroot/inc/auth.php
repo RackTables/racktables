@@ -27,11 +27,11 @@ function authenticate ()
 		$script_mode,
 		$require_local_account;
 	// Phase 1. Assert basic pre-requisites, short-circuit the logout request.
-	if (!isset ($user_auth_src) or !isset ($require_local_account))
+	if (! isset ($user_auth_src) || ! isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))
 	{
-		if (isset ($user_auth_src) and 'saml' == $user_auth_src)
+		if (isset ($user_auth_src) && 'saml' == $user_auth_src)
 			saml_logout ();
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED); // Reset browser credentials cache.
 	}
@@ -44,9 +44,9 @@ function authenticate ()
 		case 'ldap' == $user_auth_src:
 			if
 			(
-				! isset ($_SERVER['PHP_AUTH_USER']) or
-				$_SERVER['PHP_AUTH_USER'] == '' or
-				! isset ($_SERVER['PHP_AUTH_PW']) or
+				! isset ($_SERVER['PHP_AUTH_USER']) ||
+				$_SERVER['PHP_AUTH_USER'] == '' ||
+				! isset ($_SERVER['PHP_AUTH_PW']) ||
 				$_SERVER['PHP_AUTH_PW'] == ''
 			)
 				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
@@ -73,7 +73,7 @@ function authenticate ()
 	}
 	// Phase 3. Handle local account requirement, pull user tags into security context.
 	$userinfo = constructUserCell ($remote_username);
-	if ($require_local_account and !isset ($userinfo['user_id']))
+	if ($require_local_account && ! isset ($userinfo['user_id']))
 		throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 	$user_given_tags = $userinfo['etags'];
 	$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
@@ -89,7 +89,7 @@ function authenticate ()
 				$remote_username;
 			return; // success
 		// When using LDAP, leave a mean to fix things. Admin user is always authenticated locally.
-		case array_key_exists ('user_id', $userinfo) and $userinfo['user_id'] == 1:
+		case array_key_exists ('user_id', $userinfo) && $userinfo['user_id'] == 1:
 		case 'database' == $user_auth_src:
 			$remote_displayname = $userinfo['user_realname'] != '' ?
 				$userinfo['user_realname'] :
@@ -126,7 +126,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 		$p = $pageno;
 	if ($t === NULL)
 		$t = $tabno;
-	if ($o === NULL and $op != '') // $op can be set to empty string
+	if ($o === NULL && $op != '') // $op can be set to empty string
 		$o = $op;
 	$my_auto_tags = $auto_tags;
 	$my_auto_tags[] = array ('tag' => '$page_' . $p);
@@ -201,7 +201,7 @@ function gotClearanceForTagChain ($const_base)
 			case 'SYNT_ADJUSTMENT':
 				if
 				(
-					eval_expression ($sentence['condition'], $context) and
+					eval_expression ($sentence['condition'], $context) &&
 					processAdjustmentSentence ($sentence['modlist'], $expl_tags)
 				) // recalculate implicit chain only after actual change, not just on matched condition
 				{
@@ -330,7 +330,7 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 
 		if
 		(
-			$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] or
+			$LDAP_options['cache_retry'] > $LDAP_options['cache_refresh'] ||
 			$LDAP_options['cache_refresh'] > $LDAP_options['cache_expiry']
 		)
 			throw new RackTablesError ('LDAP misconfiguration: refresh/retry/expiry mismatch', RackTablesError::MISCONFIGURED);
@@ -522,18 +522,18 @@ function queryLDAPServer ($username, $password)
 		$last_successful_server !== $success_server)
 		saveScript ('LDAPLastSuccessfulServer', $success_server);
 
-	if (array_key_exists ('options', $LDAP_options) and is_array ($LDAP_options['options']))
+	if (array_key_exists ('options', $LDAP_options) && is_array ($LDAP_options['options']))
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
 			ldap_set_option ($connect, $opt_code, $opt_value);
 
 	// Decide on the username we will actually authenticate for.
-	if (isset ($LDAP_options['domain']) and $LDAP_options['domain'] != '')
+	if (isset ($LDAP_options['domain']) && $LDAP_options['domain'] != '')
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];
 	elseif
 	(
-		isset ($LDAP_options['search_dn']) and
-		$LDAP_options['search_dn'] != '' and
-		isset ($LDAP_options['search_attr']) and
+		isset ($LDAP_options['search_dn']) &&
+		$LDAP_options['search_dn'] != '' &&
+		isset ($LDAP_options['search_attr']) &&
 		$LDAP_options['search_attr'] != ''
 	)
 	{
@@ -587,11 +587,11 @@ function queryLDAPServer ($username, $password)
 	// Displayed name only makes sense for authenticated users anyway.
 	if
 	(
-		isset ($LDAP_options['displayname_attrs']) and
-		$LDAP_options['displayname_attrs'] != '' and
-		isset ($LDAP_options['search_dn']) and
-		$LDAP_options['search_dn'] != '' and
-		isset ($LDAP_options['search_attr']) and
+		isset ($LDAP_options['displayname_attrs']) &&
+		$LDAP_options['displayname_attrs'] != '' &&
+		isset ($LDAP_options['search_dn']) &&
+		$LDAP_options['search_dn'] != '' &&
+		isset ($LDAP_options['search_attr']) &&
 		$LDAP_options['search_attr'] != ''
 	)
 	{
@@ -621,8 +621,8 @@ function queryLDAPServer ($username, $password)
 			for ($i = 0; $i < $info[0][$LDAP_options['group_attr']]['count']; $i++)
 				if
 				(
-					preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches)
-					and validTagName ('$lgcn_' . $matches[1], TRUE)
+					preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches) &&
+					validTagName ('$lgcn_' . $matches[1], TRUE)
 				)
 					$ret['memberof'][] = '$lgcn_' . $matches[1];
 	}

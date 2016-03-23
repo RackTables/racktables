@@ -345,7 +345,7 @@ function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = N
 function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 {
 	// special treatment for ungrouped data
-	if (count ($groupList) == 1 and isset ($groupList['other']))
+	if (count ($groupList) == 1 && isset ($groupList['other']))
 		return getSelect ($groupList['other'], $select_attrs, $selected_id);
 	if (!array_key_exists ('name', $select_attrs))
 		return '';
@@ -440,7 +440,7 @@ function transformRequestData()
 	global $sic;
 	// Magic quotes feature is deprecated, but just in case the local system
 	// still has it activated, reverse its effect.
-	$do_magic_quotes = (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc());
+	$do_magic_quotes = function_exists ('get_magic_quotes_gpc') && get_magic_quotes_gpc();
 	$seen_keys = array();
 
 	// Escape any globals before we ever try to use them, but keep a copy of originals.
@@ -559,7 +559,7 @@ function getRenderedIPv4NetCapacity ($range)
 		$total = ip4_range_size ($range);
 
 		// compute $a_total: own range size, without subranges
-		if (! isset ($range['kidc']) or $range['kidc'] == 0)
+		if (! isset ($range['kidc']) || $range['kidc'] == 0)
 			$a_total = $total;
 		else
 		{
@@ -609,7 +609,7 @@ function getRenderedIPv4NetCapacity ($range)
 		addJS ('js/net-usage.js');
 
 		$free_text = '';
-		if (isset ($range['kidc']) and $range['kidc'] > 0)
+		if (isset ($range['kidc']) && $range['kidc'] > 0)
 		{
 			$free_masks = array_keys ($range['spare_ranges']);
 			sort ($free_masks, SORT_NUMERIC);
@@ -743,7 +743,7 @@ function serializeTags ($chain, $baseurl = '')
 	foreach ($chain as $taginfo)
 	{
 		$title = '';
-		if (isset ($taginfo['user']) and isset ($taginfo['time']))
+		if (isset ($taginfo['user']) && isset ($taginfo['time']))
 			$title = htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES);
 		if (isset($taginfo['parent_id']))
 		{
@@ -796,17 +796,17 @@ function getPageName ($page_code)
 
 function printTagTRs ($cell, $baseurl = '')
 {
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($cell['etags']))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' && count ($cell['etags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['etags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($cell['itags']))
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' && count ($cell['itags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Implicit tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['itags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($cell['atags']))
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' && count ($cell['atags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['atags']) . "</td></tr>\n";
@@ -835,7 +835,7 @@ function renderEntitySummary ($cell, $title, $values = array())
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	foreach ($values as $name => $value)
 	{
-		if (is_array ($value) and count ($value) == 1)
+		if (is_array ($value) && count ($value) == 1)
 		{
 			$value = array_shift ($value);
 			echo $value;
@@ -1032,7 +1032,7 @@ function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 		return '&nbsp;';
 	// a tab counts for a space
 	$string = preg_replace ("/\t/", ' ', $string);
-	if (!$maxlen or mb_strlen ($string) <= $maxlen)
+	if (! $maxlen || mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 	return
 		($usetags ? ("<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>") : '') .

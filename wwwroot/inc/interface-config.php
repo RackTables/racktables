@@ -10,7 +10,7 @@ function renderConfigMainpage ()
 	global $pageno, $page;
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
-		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno  && permitted($cpageno))
+		if (isset ($cpage['parent']) && $cpage['parent'] == $pageno && permitted ($cpageno))
 			echo '<li>' . mkA (getTitle ($cpageno), $cpageno) . "</li>\n";
 	echo '</ul>';
 }
@@ -881,7 +881,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
-	if ($taginfo['refcnt']['total'] > 0 or $taginfo['kidc'])
+	if ($taginfo['refcnt']['total'] > 0 || $taginfo['kidc'])
 		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . $taginfo['kidc'] . ' sub-tags');
 	else
 		echo getOpLink (array ('op' => 'destroyTag', 'tag_id' => $taginfo['id']), '', 'destroy', 'Delete tag');

@@ -179,7 +179,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
 	if ($_REQUEST[$argname] < 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
-	if (!$allow_zero and $_REQUEST[$argname] == 0)
+	if (! $allow_zero && $_REQUEST[$argname] == 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
 	return $_REQUEST[$argname];
 }
@@ -214,7 +214,7 @@ function assertStringArg ($argname, $ok_if_empty = FALSE)
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_string ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
-	if (!$ok_if_empty and $_REQUEST[$argname] == '')
+	if (! $ok_if_empty && $_REQUEST[$argname] == '')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 	return $sic[$argname];
 }
@@ -223,9 +223,9 @@ function assertBoolArg ($argname, $ok_if_empty = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
-	if (!is_string ($_REQUEST[$argname]) or $_REQUEST[$argname] != 'on')
+	if (! is_string ($_REQUEST[$argname]) || $_REQUEST[$argname] != 'on')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a string');
-	if (!$ok_if_empty and $_REQUEST[$argname] == '')
+	if (! $ok_if_empty && $_REQUEST[$argname] == '')
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is an empty string');
 	return $_REQUEST[$argname] == TRUE;
 }
@@ -395,18 +395,18 @@ function genericAssertion ($argname, $argtype)
 	case 'vlan':
 	case 'vlan1':
 		assertUIntArg ($argname);
-		if ($argtype == 'vlan' and $sic[$argname] == VLAN_DFL_ID)
+		if ($argtype == 'vlan' && $sic[$argname] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		if ($sic[$argname] > VLAN_MAX_ID or $sic[$argname] < VLAN_MIN_ID)
+		if ($sic[$argname] > VLAN_MAX_ID || $sic[$argname] < VLAN_MIN_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'uint-vlan':
 	case 'uint-vlan1':
 		if (! preg_match ('/^([1-9][0-9]*)-([1-9][0-9]*)$/', assertStringArg ($argname), $m))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
-		if ($argtype == 'uint-vlan' and $m[2] == VLAN_DFL_ID)
+		if ($argtype == 'uint-vlan' && $m[2] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		if ($m[2] > VLAN_MAX_ID or $m[2] < VLAN_MIN_ID)
+		if ($m[2] > VLAN_MAX_ID || $m[2] < VLAN_MIN_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'rackcode/expr':
@@ -518,7 +518,7 @@ function rectHeight ($rackData, $startRow, $template_idx)
 			}
 		}
 		// If the first row can't offer anything, bail out.
-		if ($height == 0 and $object_id == 0)
+		if ($height == 0 && $object_id == 0)
 			break;
 		$height++;
 	}
@@ -661,8 +661,8 @@ function highlightObject (&$rackData, $object_id)
 			$atom = &$rackData[$unit_no][$locidx];
 			if
 			(
-				$atom['state'] == 'T' and
-				($atom['object_id'] == $object_id or isset ($parents[$atom['object_id']]))
+				$atom['state'] == 'T' &&
+				($atom['object_id'] == $object_id || isset ($parents[$atom['object_id']]))
 			)
 				$atom['hl'] = 'h' . $atom['hl'];
 		}
@@ -747,7 +747,7 @@ function ip4_mask ($prefix_len)
 		"\xFF\xFF\xFF\xFF", // 32
 	);
 
-	if ($prefix_len >= 0 and $prefix_len <= 32)
+	if ($prefix_len >= 0 && $prefix_len <= 32)
 		return $mask[$prefix_len];
 	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
@@ -889,7 +889,7 @@ function ip6_mask ($prefix_len)
 		"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", // 128
 	);
 
-	if ($prefix_len >= 0 and $prefix_len <= 128)
+	if ($prefix_len >= 0 && $prefix_len <= 128)
 		return $mask[$prefix_len];
 	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
@@ -902,10 +902,10 @@ function l2addressForDatabase ($string)
 	$ret = '';
 	switch (TRUE)
 	{
-		case ($string == '' or preg_match (RE_L2_SOLID, $string) or preg_match (RE_L2_WWN_SOLID, $string)):
+		case ($string == '' || preg_match (RE_L2_SOLID, $string) || preg_match (RE_L2_WWN_SOLID, $string)):
 			$ret = $string;
 			break;
-		case (preg_match (RE_L2_IFCFG, $string) or preg_match (RE_L2_WWN_COLON, $string)):
+		case (preg_match (RE_L2_IFCFG, $string) || preg_match (RE_L2_WWN_COLON, $string)):
 			// reformat output of SunOS ifconfig
 			$ret = '';
 			foreach (explode (':', $string) as $byte)
@@ -918,7 +918,7 @@ function l2addressForDatabase ($string)
 		case (preg_match (RE_L2_HUAWEI, $string)):
 			$ret = str_replace ('-', '', $string);
 			break;
-		case (preg_match (RE_L2_IPCFG, $string) or preg_match (RE_L2_WWN_HYPHEN, $string)):
+		case (preg_match (RE_L2_IPCFG, $string) || preg_match (RE_L2_WWN_HYPHEN, $string)):
 			$ret = str_replace ('-', '', $string);
 			break;
 		default:
@@ -1014,7 +1014,7 @@ function sortTokenize ($a, $b)
 	for ($i=0; $i<count($ar) && $i<count($br); $i++)
 	{
 		$ret = 0;
-		if (is_numeric($ar[$i]) and is_numeric($br[$i]))
+		if (is_numeric($ar[$i]) && is_numeric($br[$i]))
 			$ret = ($ar[$i]==$br[$i])?0:($ar[$i]<$br[$i]?-1:1);
 		else
 			$ret = strcasecmp($ar[$i], $br[$i]);
@@ -1290,7 +1290,7 @@ function pokeNode (&$tree, $trace, $key, $value, $threshold = 0)
 		$self ($tree[$myid]['kids'], $trace, $key, $value, $threshold);
 	else // just did
 	{
-		if (!$threshold or ($threshold and $tree[$myid]['kidc'] + 1 < $threshold))
+		if (! $threshold || ($threshold && $tree[$myid]['kidc'] + 1 < $threshold))
 			$tree[$myid]['kids'][$key] = $value;
 		// Reset accumulated records once, when the limit is reached, not each time
 		// after that.
@@ -1307,13 +1307,13 @@ function peekNode ($tree, $trace, $target_id)
 	if (NULL === ($next = array_shift ($trace))) // warm
 	{
 		foreach ($tree as $node)
-			if (array_key_exists ('id', $node) and $node['id'] == $target_id) // hot
+			if (array_key_exists ('id', $node) && $node['id'] == $target_id) // hot
 				return $node;
 	}
 	else // cold
 	{
 		foreach ($tree as $node)
-			if (array_key_exists ('id', $node) and $node['id'] == $next) // warmer
+			if (array_key_exists ('id', $node) && $node['id'] == $next) // warmer
 				return $self ($node['kids'], $trace, $target_id);
 	}
 	throw new RackTablesError ('inconsistent tree data', RackTablesError::INTERNAL);
@@ -1355,7 +1355,7 @@ function addTraceToNodes ($nodelist)
 			}
 
 			// check for cycles every 10 steps
-			if (0 == (count ($trace) % 10) and in_array ($parentid, $trace))
+			if (0 == (count ($trace) % 10) && in_array ($parentid, $trace))
 			{
 				// cycle detected
 				$trace = NULL;
@@ -1593,10 +1593,10 @@ function redirectIfNecessary ()
 	startSession();
 	if
 	(
-		! isset ($_REQUEST['tab']) and
-		isset ($_SESSION['RTLT'][$pageno]) and
-		getConfigVar ('SHOW_LAST_TAB') == 'yes' and
-		permitted ($pageno, $_SESSION['RTLT'][$pageno]['tabname']) and
+		! isset ($_REQUEST['tab']) &&
+		isset ($_SESSION['RTLT'][$pageno]) &&
+		getConfigVar ('SHOW_LAST_TAB') == 'yes' &&
+		permitted ($pageno, $_SESSION['RTLT'][$pageno]['tabname']) &&
 		time() - $_SESSION['RTLT'][$pageno]['time'] <= TAB_REMEMBER_TIMEOUT
 	)
 		redirectUser (buildRedirectURL ($pageno, $_SESSION['RTLT'][$pageno]['tabname']));
@@ -1605,7 +1605,7 @@ function redirectIfNecessary ()
 	// but isn't OK anymore when generating the current page and the tab is the requested tab.
 	if
 	(
-		isset ($trigger[$pageno][$tabno]) and
+		isset ($trigger[$pageno][$tabno]) &&
 		'' == call_user_func ($trigger[$pageno][$tabno])
 	)
 	{
@@ -1748,8 +1748,8 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 		// regardless of how many sub-nodes it features.
 		if
 		(
-			isset ($taginfo['refcnt'][$realm]) or
-			count ($subsearch) > 1 or
+			isset ($taginfo['refcnt'][$realm]) ||
+			count ($subsearch) > 1 ||
 			in_array ($taginfo['id'], $preselect)
 		)
 			$ret[] = array
@@ -1882,11 +1882,11 @@ function getCellFilter ()
 		unset($_SESSION[$pageno]); // delete saved filter
 
 	// otherwise inject saved filter to the $_REQUEST and $sic vars
-	elseif (isset ($_SESSION[$pageno]['filter']) and is_array ($_SESSION[$pageno]['filter']) and getConfigVar ('STATIC_FILTER') == 'yes')
+	elseif (isset ($_SESSION[$pageno]['filter']) && is_array ($_SESSION[$pageno]['filter']) && getConfigVar ('STATIC_FILTER') == 'yes')
 		foreach (array('andor', 'cfe', 'cft[]', 'cfp[]', 'nft[]', 'nfp[]') as $param)
 		{
 			$param = str_replace ('[]', '', $param, $is_array);
-			if (! isset ($_REQUEST[$param]) and isset ($_SESSION[$pageno]['filter'][$param]) and (!$is_array or is_array ($_SESSION[$pageno]['filter'][$param])))
+			if (! isset ($_REQUEST[$param]) && isset ($_SESSION[$pageno]['filter'][$param]) && (! $is_array || is_array ($_SESSION[$pageno]['filter'][$param])))
 			{
 				$_REQUEST[$param] = $_SESSION[$pageno]['filter'][$param];
 				if (! $is_array)
@@ -1926,7 +1926,7 @@ function getCellFilter ()
 	// handled somehow. Discard them silently for now.
 	global $taglist, $pTable;
 	foreach (array ('cft', 'cfp', 'nft', 'nfp') as $param)
-		if (isset ($_REQUEST[$param]) and is_array ($_REQUEST[$param]))
+		if (isset ($_REQUEST[$param]) && is_array ($_REQUEST[$param]))
 		{
 			$_SESSION[$pageno]['filter'][$param] = $_REQUEST[$param];
 			foreach ($_REQUEST[$param] as $req_key)
@@ -2166,9 +2166,9 @@ function IPNetworkCmp ($netA, $netB)
 	$ret = IPCmp ($netA['ip_bin'], $netB['ip_bin']);
 	if ($ret == 0)
 		$ret = $netA['mask'] < $netB['mask'] ? -1 : ($netA['mask'] > $netB['mask'] ? 1 : 0);
-	if ($ret == -1 and $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
+	if ($ret == -1 && $netA['ip_bin'] === ($netB['ip_bin'] & $netA['mask_bin']))
 		$ret = -2;
-	if ($ret == 1 and $netB['ip_bin'] === ($netA['ip_bin'] & $netB['mask_bin']))
+	if ($ret == 1 && $netB['ip_bin'] === ($netA['ip_bin'] & $netB['mask_bin']))
 		$ret = 2;
 	return $ret;
 }
@@ -2208,7 +2208,7 @@ function sortTree (&$tree, $cmpfunc = '')
 
 function iptree_fill (&$netdata)
 {
-	if (!isset ($netdata['kids']) or !count ($netdata['kids']))
+	if (! isset ($netdata['kids']) || ! count ($netdata['kids']))
 		return;
 
 	foreach ($netdata['spare_ranges'] as $mask => $list)
@@ -2540,7 +2540,7 @@ function ip_next ($ip_bin)
 	{
 		$oct = $p + ord ($ret[$i]);
 		$ret[$i] = chr ($oct & 0xff);
-		if ($oct <= 255 and $oct >= 0)
+		if ($oct <= 255 && $oct >= 0)
 			break;
 	}
 	return $ret;
@@ -2554,7 +2554,7 @@ function ip_prev ($ip_bin)
 	{
 		$oct = $p + ord ($ret[$i]);
 		$ret[$i] = chr ($oct & 0xff);
-		if ($oct <= 255 and $oct >= 0)
+		if ($oct <= 255 && $oct >= 0)
 			break;
 	}
 	return $ret;
@@ -2653,7 +2653,7 @@ function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
 	foreach (array_keys ($tree) as $key)
 	{
 		$func ($tree[$key]);
-		if ($stopfunc != '' and $stopfunc ($tree[$key]))
+		if ($stopfunc != '' && $stopfunc ($tree[$key]))
 			continue;
 		$self ($tree[$key]['kids'], $func);
 	}
@@ -2794,7 +2794,7 @@ function getTerminalNetworks ($tree)
 	$self = __FUNCTION__;
 	$ret = array();
 	foreach ($tree as $node)
-		if ($node['kidc'] == 0 and isset ($node['realm']))
+		if ($node['kidc'] == 0 && isset ($node['realm']))
 			$ret[] = $node;
 		else
 			$ret = array_merge ($ret, $self ($node['kids']));
@@ -2810,18 +2810,18 @@ function iptree_markup_collapsion (&$tree, $threshold = 1024, $target = 0)
 	$ret = FALSE;
 	foreach (array_keys ($tree) as $key)
 	{
-		$here = ($target === 'ALL' or ($target > 0 and isset ($tree[$key]['id']) and $tree[$key]['id'] == $target));
+		$here = $target === 'ALL' || ($target > 0 && isset ($tree[$key]['id']) && $tree[$key]['id'] == $target);
 		$below = $self ($tree[$key]['kids'], $threshold, $target);
 		$expand_enabled = ($target !== 'NONE');
 		if (!$tree[$key]['kidc']) // terminal node
 			$tree[$key]['symbol'] = 'spacer';
-		elseif ($expand_enabled and $tree[$key]['kidc'] < $threshold)
+		elseif ($expand_enabled && $tree[$key]['kidc'] < $threshold)
 			$tree[$key]['symbol'] = 'node-expanded-static';
-		elseif ($expand_enabled and ($here or $below))
+		elseif ($expand_enabled && ($here || $below))
 			$tree[$key]['symbol'] = 'node-expanded';
 		else
 			$tree[$key]['symbol'] = 'node-collapsed';
-		$ret = ($ret or $here or $below); // parentheses are necessary for this to be computed correctly
+		$ret = $ret || $here || $below;
 	}
 	return $ret;
 }
@@ -3249,7 +3249,7 @@ function getPortListPrefs()
 	foreach (explode (';', getConfigVar ('DEFAULT_PORT_OIF_IDS')) as $tmp)
 	{
 		$tmp = explode ('=', trim ($tmp));
-		if (count ($tmp) == 2 and $tmp[0] > 0 and $tmp[1] > 0)
+		if (count ($tmp) == 2 && $tmp[0] > 0 && $tmp[1] > 0)
 			$ret['oif_picks'][$tmp[0]] = $tmp[1];
 	}
 	// enforce default value
@@ -3289,7 +3289,7 @@ function getUnlinkedPortTypeOptions ($port_iif_id)
 	{
 		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
 			$optgroup = $row['iif_name'];
-		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) and $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
+		elseif (array_key_exists ($row['iif_id'], $prefs['oif_picks']) && $prefs['oif_picks'][$row['iif_id']] == $row['oif_id'])
 			$optgroup = 'other';
 		else
 			continue;
@@ -3344,7 +3344,7 @@ function groupIntsToRanges ($list, $exclude_value = NULL)
 	$id_from = $id_to = 0;
 	$list[] = -1;
 	foreach ($list as $next_id)
-		if (!isset ($exclude_value) or $next_id != $exclude_value)
+		if (! isset ($exclude_value) || $next_id != $exclude_value)
 			if ($id_to && $next_id == $id_to + 1)
 				$id_to = $next_id; // merge
 			else
@@ -3456,7 +3456,7 @@ function array_values_same ($a1, $a2)
 		throw new InvalidArgException ('a1', $a1, 'is not an array');
 	if (! is_array ($a2))
 		throw new InvalidArgException ('a2', $a2, 'is not an array');
-	return !count (array_diff ($a1, $a2)) and !count (array_diff ($a2, $a1));
+	return ! count (array_diff ($a1, $a2)) && ! count (array_diff ($a2, $a1));
 }
 
 # Reindex provided array of arrays by a column value that is present in
@@ -3558,7 +3558,7 @@ function buildVLANFilter ($role, $string)
 	// transform
 	$vlanidlist = array();
 	foreach (iosParseVLANString ($string) as $vlan_id)
-		if ($min <= $vlan_id and $vlan_id <= $max)
+		if ($min <= $vlan_id && $vlan_id <= $max)
 			$vlanidlist[] = $vlan_id;
 	return listToRanges ($vlanidlist);
 }
@@ -3604,7 +3604,7 @@ function listToRanges ($vlanidlist, $limit = 0)
 function matchVLANFilter ($vlan_id, $vfilter)
 {
 	foreach ($vfilter as $range)
-		if ($range['from'] <= $vlan_id and $vlan_id <= $range['to'])
+		if ($range['from'] <= $vlan_id && $vlan_id <= $range['to'])
 			return TRUE;
 	return FALSE;
 }
@@ -3628,7 +3628,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	foreach ($device_vlanlist as $vlan_id)
 		if
 		(
-			!array_key_exists ($vlan_id, $domain_vlanlist) or
+			! array_key_exists ($vlan_id, $domain_vlanlist) ||
 			$domain_vlanlist[$vlan_id]['vlan_type'] != 'alien'
 		)
 			$old_managed_vlans[] = $vlan_id;
@@ -3692,7 +3692,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 					continue;
 				if
 				(
-					array_key_exists ($vlan_id, $domain_vlanlist) and
+					array_key_exists ($vlan_id, $domain_vlanlist) &&
 					$domain_vlanlist[$vlan_id]['vlan_type'] == 'alien'
 				)
 					continue;
@@ -3711,8 +3711,8 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		foreach ($port['allowed'] as $vlan_id)
 			if
 			(
-				isset ($domain_vlanlist[$vlan_id]) and
-				$domain_vlanlist[$vlan_id]['vlan_type'] == 'ondemand' and
+				isset ($domain_vlanlist[$vlan_id]) &&
+				$domain_vlanlist[$vlan_id]['vlan_type'] == 'ondemand' &&
 				!in_array ($vlan_id, $new_managed_vlans)
 			)
 				$new_managed_vlans[] = $vlan_id;
@@ -3742,7 +3742,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 		{
 		case 'trunk->trunk':
 			// "old" native is set and differs from the "new" native
-			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+			if ($port['old_native'] && $port['old_native'] != $port['new_native'])
 				$crq[] = array
 				(
 					'opcode' => 'unset native',
@@ -3767,7 +3767,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				}
 			break;
 		case 'access->access':
-			if ($port['old_native'] and $port['old_native'] != $port['new_native'])
+			if ($port['old_native'] && $port['old_native'] != $port['new_native'])
 			{
 				$crq[] = array
 				(
@@ -3865,7 +3865,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				);
 			// One of the "allowed" VLANs for this port may probably be "native".
 			// "new native" is set and differs from "old native"
-			if ($port['new_native'] and $port['new_native'] != $port['old_native'])
+			if ($port['new_native'] && $port['new_native'] != $port['old_native'])
 				$crq[] = array
 				(
 					'opcode' => 'set native',
@@ -3874,7 +3874,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 				);
 			break;
 		case 'access->access':
-			if ($port['new_native'] and $port['new_native'] != $port['old_native'])
+			if ($port['new_native'] && $port['new_native'] != $port['old_native'])
 				$crq[] = array
 				(
 					'opcode' => 'set access',
@@ -3972,7 +3972,7 @@ function filter8021QChangeRequests
 				// discarded the old contents of 'allowed' for current port.
 				if
 				(
-					$before[$port_name]['native'] == $immune or
+					$before[$port_name]['native'] == $immune ||
 					$port['native'] == $immune
 				)
 				{
@@ -4021,7 +4021,7 @@ function getEmployedVlans ($object_id, $domain_vlanlist)
 	foreach (getObjectIPAllocationList ($object_id) as $ip_bin => $alloc)
 		if ($net = spotNetworkByIP ($ip_bin))
 			foreach ($net['8021q'] as $vlan)
-				if (isset ($domain_vlanlist[$vlan['vlan_id']]) and ! isset ($employed[$vlan['vlan_id']]))
+				if (isset ($domain_vlanlist[$vlan['vlan_id']]) && ! isset ($employed[$vlan['vlan_id']]))
 					$employed[$vlan['vlan_id']] = 1;
 	$ret = array_keys ($employed);
 	$override = callHook ('getEmployedVlans_hook', $ret, $object_id, $domain_vlanlist);
@@ -4153,7 +4153,7 @@ function get8021QSyncOptions
 		// catch anomalies early
 		if ($port['vst_role'] == 'none')
 		{
-			if ((!array_key_exists ($pn, $R) or $R[$pn]['mode'] == 'none') and !array_key_exists ($pn, $C))
+			if ((! array_key_exists ($pn, $R) || $R[$pn]['mode'] == 'none') && ! array_key_exists ($pn, $C))
 				$ret[$pn] = array ('status' => 'none');
 			else
 				$ret[$pn] = array
@@ -4164,7 +4164,7 @@ function get8021QSyncOptions
 				);
 			continue;
 		}
-		elseif ((!array_key_exists ($pn, $R) or $R[$pn]['mode'] == 'none') and array_key_exists ($pn, $C))
+		elseif ((! array_key_exists ($pn, $R) || $R[$pn]['mode'] == 'none') && array_key_exists ($pn, $C))
 		{
 			$ret[$pn] = array
 			(
@@ -4203,7 +4203,7 @@ function get8021QSyncOptions
 		$D_eq_C = same8021QConfigs ($D[$pn], $C[$pn]);
 		$C_eq_R = same8021QConfigs ($C[$pn], $R[$pn]);
 		// (DCR), D = C = R: data in sync
-		if ($D_eq_C and $C_eq_R) // implies D == R
+		if ($D_eq_C && $C_eq_R) // implies D == R
 		{
 			$ret[$pn] = array
 			(
@@ -4328,7 +4328,7 @@ function exec8021QDeploy ($object_id, $do_push)
 
 	$out_of_sync = FALSE;
 	$errno = E_8021Q_NOERROR;
-	if ($nsaved + $nsaved_uplinks or count ($ok_to_push))
+	if ($nsaved + $nsaved_uplinks || count ($ok_to_push))
 		$out_of_sync = TRUE;
 	if ($conflict)
 	{
@@ -4403,7 +4403,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 	$changes_to_save = array();
 	// first filter by wrt_vlans constraint
 	foreach ($requested_changes as $pn => $requested)
-		if (array_key_exists ($pn, $before) and $requested['vst_role'] == 'downlink')
+		if (array_key_exists ($pn, $before) && $requested['vst_role'] == 'downlink')
 			$changes_to_save[$pn] = array
 			(
 				'vst_role' => 'downlink',
@@ -4431,7 +4431,7 @@ function initiateUplinksReverb ($object_id, $uplink_ports)
 	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $portinfo)
 		if
 		(
-			$portinfo['linked'] and
+			$portinfo['linked'] &&
 			array_key_exists ($portinfo['name'], $uplink_ports)
 		)
 			$upstream_config[$portinfo['remote_object_id']][$portinfo['remote_name']] = $uplink_ports[$portinfo['name']];
@@ -4486,7 +4486,7 @@ function recalc8021QPorts ($switch_id)
 	foreach ($ports as $portinfo)
 		if
 		(
-			isset ($order[$portinfo['name']]) and
+			isset ($order[$portinfo['name']]) &&
 			$order[$portinfo['name']]['vst_role'] == 'downlink'
 		)
 		{
@@ -4605,7 +4605,7 @@ function authorize8021QChangeRequests ($before, $changes, $op = NULL)
 	if (NULL !== $ret = callHook ('authorize8021QChangeRequests_hook', $before, $changes, $op))
 		return $ret;
 	global $script_mode;
-	if (isset ($script_mode) and $script_mode)
+	if (isset ($script_mode) && $script_mode)
 		return $changes;
 	$ret = array();
 	foreach ($changes as $pn => $change)
@@ -4707,14 +4707,14 @@ function compareDecomposedPortNames ($porta, $portb)
 		$index_diff = -1; // a < b
 
 	// compare by portname fields
-	if ($prefix_diff != 0 and ($porta['numidx'] <= 1 or $portb['numidx'] <= 1)) // if index count is lte 1, sort by prefix
+	if ($prefix_diff != 0 && ($porta['numidx'] <= 1 || $portb['numidx'] <= 1)) // if index count is lte 1, sort by prefix
 	{
 		$ret = $porta['numidx'] - $portb['numidx'];
 		if ($ret == 0)
 			$ret = $prefix_diff;
 	}
 	// if index count > 1 and ports have different prefixes in intersecting index sections, sort by prefix
-	elseif ($prefix_diff != 0 and $a_parent != '' and $a_parent == $b_parent)
+	elseif ($prefix_diff != 0 && $a_parent != '' && $a_parent == $b_parent)
 		$ret = $prefix_diff;
 	// if indices are not equal, sort by index
 	elseif ($index_diff != 0)
@@ -4852,7 +4852,7 @@ function searchEntitiesByText ($terms)
 		// search by FQDN has special treatment - if single object found, do not search by other fields
 		$object_id_by_fqdn = NULL;
 		$domains = preg_split ('/\s*,\s*/', strtolower (getConfigVar ('SEARCH_DOMAINS')));
-		if (! empty ($domains) and $object_id = searchByMgmtHostname ($terms))
+		if (! empty ($domains) && $object_id = searchByMgmtHostname ($terms))
 		{
 			// get FQDN
 			$attrs = getAttrValues ($object_id);
@@ -4943,7 +4943,7 @@ function buildSearchRedirectURL ($result_type, $record)
 				return NULL;
 			$next_page = $pageno_by_etype[$result_type];
 			if ($result_type == 'object')
-				if (isset ($record['by_port']) and 1 == count ($record['by_port']))
+				if (isset ($record['by_port']) && 1 == count ($record['by_port']))
 				{
 					$found_ports_ids = array_keys ($record['by_port']);
 					$params['hl_port_id'] = $found_ports_ids[0];
@@ -4955,7 +4955,7 @@ function buildSearchRedirectURL ($result_type, $record)
 	if (! isset ($key) || ! isset ($id))
 		return NULL;
 	$params[$key] = $id;
-	if (isset ($_REQUEST['last_tab']) and isset ($_REQUEST['last_page']) and $next_page == $_REQUEST['last_page'])
+	if (isset ($_REQUEST['last_tab']) && isset ($_REQUEST['last_page']) && $next_page == $_REQUEST['last_page'])
 		$next_tab = assertStringArg('last_tab');
 	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
@@ -5069,9 +5069,9 @@ function setMessage ($type, $message, $direct_rendering)
 	global $script_mode;
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
-	elseif (isset ($script_mode) and $script_mode)
+	elseif (isset ($script_mode) && $script_mode)
 	{
-		if ($type == 'warning' or $type == 'error')
+		if ($type == 'warning' || $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
 	}
 	else
@@ -5146,7 +5146,7 @@ function getMessagesCount ($message_type = 'all')
 
 function isEthernetPort($port)
 {
-	return ($port['iif_id'] != 1 or preg_match('/Base|LACP/i', $port['oif_name']));
+	return ($port['iif_id'] != 1 || preg_match('/Base|LACP/i', $port['oif_name']));
 }
 
 function loadConfigDefaults()
@@ -5200,8 +5200,8 @@ function getConfigVar ($varname = '')
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
 	if
 	(
-		$varname == ''
-		or ! array_key_exists ($varname, $configCache)
+		$varname == '' ||
+		! array_key_exists ($varname, $configCache)
 	)
 		throw new InvalidArgException ('varname', $varname);
 	return $configCache[$varname]['varvalue'];
@@ -5269,8 +5269,8 @@ function getObjectTypeChangeOptions ($object_id)
 			$app = $map[$attr['id']]['application'];
 			if
 			(
-				(NULL === $appidx = scanArrayForItem ($app, 'objtype_id', $test_id)) or
-				($attr['type'] == 'dict' and $attr['chapter_id'] != $app[$appidx]['chapter_no'])
+				(NULL === $appidx = scanArrayForItem ($app, 'objtype_id', $test_id)) ||
+				($attr['type'] == 'dict' && $attr['chapter_id'] != $app[$appidx]['chapter_no'])
 			)
 				continue 2; // next type ID
 		}
@@ -5400,7 +5400,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 	{
 		if (NULL === $vswitch = getVLANSwitchInfo ($switch_id, 'FOR UPDATE'))
 			throw new InvalidArgException ('object_id', $switch_id, 'VLAN domain is not set for this object');
-		if (isset ($mutex_rev) and $vswitch['mutex_rev'] != $mutex_rev)
+		if (isset ($mutex_rev) && $vswitch['mutex_rev'] != $mutex_rev)
 			throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, 'expired form data');
 		$after = $before = apply8021QOrder ($vswitch, getStored8021QConfig ($vswitch['object_id'], 'desired'));
 		$domain_vlanlist = getDomainVLANList ($vswitch['domain_id']);
@@ -5434,7 +5434,7 @@ function apply8021qChangeRequest ($switch_id, $changes, $verbose = TRUE, $mutex_
 	$nsaved_downlinks = initiateUplinksReverb ($vswitch['object_id'], $new_uplinks);
 	// instant deploy to that switch if configured
 	$done = 0;
-	if ($npulled + $nsaved_uplinks > 0 and getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
+	if ($npulled + $nsaved_uplinks > 0 && getConfigVar ('8021Q_INSTANT_DEPLOY') == 'yes')
 	{
 		try
 		{
@@ -5475,7 +5475,7 @@ function fillIPNetsCorrelation (&$nets, $max_depth = 0)
 			if (IPNetContains ($top, $net))
 			{
 				// skip the network if max_depth exceeded
-				if ($max_depth and count ($stack) > $max_depth)
+				if ($max_depth && count ($stack) > $max_depth)
 					continue 2;
 				$top['kidc']++;
 				break;
@@ -5544,7 +5544,7 @@ function fillIPSpareListBstr (&$net, $a, $b)
 		{
 			$bmask = ip_mask ($mask, $len == 128);
 			$last_a = $a | ~ $bmask;
-			if ($a == ($a & $bmask) and 0 >= strcmp ($last_a, $b))
+			if ($a == ($a & $bmask) && 0 >= strcmp ($last_a, $b))
 			{
 				$net['spare_ranges'][$mask][] = $a;
 				$a = ip_next ($last_a);
@@ -5596,9 +5596,9 @@ function isIPNetworkEmpty (&$netinfo)
 	foreach ($pure_array as $ip => $comment)
 		if
 		(
-			array_key_exists ($ip, $netinfo['addrlist']) and
-			$netinfo['addrlist'][$ip]['name'] == $comment and
-			$netinfo['addrlist'][$ip]['reserved'] == 'yes' and
+			array_key_exists ($ip, $netinfo['addrlist']) &&
+			$netinfo['addrlist'][$ip]['name'] == $comment &&
+			$netinfo['addrlist'][$ip]['reserved'] == 'yes' &&
 			isIPAddressEmpty ($netinfo['addrlist'][$ip], array ('name', 'reserved'))
 		)
 			$pure_auto++;
@@ -5877,7 +5877,7 @@ function mkCellA ($cell, $title = NULL)
 function listConstraint ($realm, $varname = '')
 {
 	$wideList = listCells ($realm);
-	if (($varname != '') and ('' != $filter = getConfigVar ($varname)))
+	if ($varname != '' && ('' != $filter = getConfigVar ($varname)))
 	{
 		$expr = compileExpression ($filter);
 		if (! $expr)
@@ -6065,7 +6065,7 @@ function checkTypeAndAttribute ($object_id, $type_id, $attr_id, $values)
 	$object = spotEntity ('object', $object_id);
 	if ($object['objtype_id'] == $type_id)
 		foreach (getAttrValues ($object_id) as $record)
-			if ($record['id'] == $attr_id and in_array ($record['key'], $values))
+			if ($record['id'] == $attr_id && in_array ($record['key'], $values))
 				return TRUE;
 	return FALSE;
 }

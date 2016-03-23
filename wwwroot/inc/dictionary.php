@@ -43,7 +43,7 @@ function isInnoDBSupported ()
 	$dbxlink->query("CREATE TRIGGER `trigger_test` BEFORE INSERT ON `innodb_test` FOR EACH ROW BEGIN END");
 	$trigger_row = $dbxlink->query("SELECT COUNT(*) AS count FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA() AND TRIGGER_NAME = 'trigger_test'")->fetch(PDO::FETCH_ASSOC);
 	$dbxlink->query("DROP TABLE `innodb_test`");
-	return ($innodb_row['Engine'] == 'InnoDB' and $trigger_row['count'] == 1);
+	return $innodb_row['Engine'] == 'InnoDB' && $trigger_row['count'] == 1;
 }
 
 function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'trerror')
@@ -88,7 +88,7 @@ function platform_is_ok ()
 	$nerrs += platform_function_test ('bcmul', 'BC Math extension');
 	platform_generic_test
 	(
-		(!empty($_SERVER['HTTPS']) and $_SERVER['HTTPS'] != 'off'),
+		(! empty ($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off'),
 		'accessed over HTTPS',
 		'No! (all your passwords will be transmitted in cleartext)',
 		'trwarning'
