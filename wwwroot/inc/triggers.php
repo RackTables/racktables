@@ -193,9 +193,7 @@ function trigger_object_8021qorder ()
 
 function trigger_8021q_configured ()
 {
-	if (! count (getVLANDomainOptions()) || ! getEntitiesCount ('vst'))
-		return '';
-	return 'std';
+	return (count (getVLANDomainOptions()) && getEntitiesCount ('vst')) ? 'std' : '';
 }
 
 // implement similar logic for IPv4 networks
