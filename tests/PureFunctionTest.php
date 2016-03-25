@@ -741,6 +741,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('validTagName', 'tag', TRUE, TRUE), // not quite expected but as far as the function goes is correct
 			array ('validTagName', '$2015-', TRUE, FALSE),
 			array ('validTagName', '$iqn.domain.', TRUE, FALSE),
+
+			array ('goodModeForVSTRole', 'access', 'access', TRUE),
+			array ('goodModeForVSTRole', 'access', 'trunk', FALSE),
+			array ('goodModeForVSTRole', 'access', 'anymode', TRUE),
+			array ('goodModeForVSTRole', 'access', 'uplink', FALSE),
+			array ('goodModeForVSTRole', 'access', 'downlink', FALSE),
+			array ('goodModeForVSTRole', 'trunk', 'access', FALSE),
+			array ('goodModeForVSTRole', 'trunk', 'trunk', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'anymode', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'uplink', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'downlink', TRUE),
 		);
 	}
 
@@ -831,6 +842,11 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 			array ('ip_get_arpa', array ("\xAC\x11\xBB")),
 			array ('ip_get_arpa', array ("\xAC\x11\xBB\x00\x00")),
+
+			array ('goodModeForVSTRole', array (NULL, NULL)),
+			array ('goodModeForVSTRole', array (FALSE, NULL)),
+			array ('goodModeForVSTRole', array ('', NULL)),
+			array ('goodModeForVSTRole', array ('unknown', NULL)),
 		);
 	}
 
