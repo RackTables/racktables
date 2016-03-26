@@ -641,6 +641,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('buildVLANFilter', 'none', '0-20000', array ()),
 			array ('buildVLANFilter', 'abcde', '', array ()), // this is a bug, ought to be InvalidArgException
 
+			array ('matchVLANFilter', 5, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 10, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 20, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 25, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 35, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 41, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 45, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+
+			array ('filterVLANList', array (5, 6, 7, 8, 16, 20, 21), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array (7, 16, 20)),
+			array ('filterVLANList', array (8, 30), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array()),
+			array ('filterVLANList', array (14, 19), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array (14, 19)),
+
 			// explicit 2nd argument
 			array ('listToRanges', array(), 0, array()),
 			array ('listToRanges', array (7), 0, array (array ('from' => 7, 'to' => 7))),
