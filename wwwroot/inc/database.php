@@ -1667,7 +1667,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
-	if ($do_locks = !empty ($db_l2address))
+	if ($do_locks = $db_l2address != '')
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
@@ -1727,7 +1727,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
 	$portinfo = getPortInfo ($port_id);
-	if ($do_locks = (! empty ($db_l2address) && $portinfo['l2address'] !== $port_l2address))
+	if ($do_locks = ($db_l2address != '' && $portinfo['l2address'] !== $port_l2address))
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
@@ -5698,12 +5698,9 @@ function getConfiguredQuickLinks()
 {
 	$ret = array();
 	foreach (explode (',', getConfigVar('QUICK_LINK_PAGES')) as $page_code)
-		if (! empty ($page_code))
-		{
-			$title = getPageName ($page_code);
-			if (! empty ($title))
+		if ($page_code != '')
+			if ('' != $title = getPageName ($page_code))
 				$ret[] = array ('href' => makeHref (array ('page' => $page_code)), 'title' => $title);
-		}
 	return $ret;
 }
 

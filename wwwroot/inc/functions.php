@@ -4642,7 +4642,7 @@ function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
 		$additional = "name=\"port-$port_id\"";
 	}
 	if (! empty($a_class))
-		$additional .= (empty($additional) ? '' : ' '). "class='$a_class'";
+		$additional .= ($additional == '' ? '' : ' '). "class='$a_class'";
 
 	$text_items = array();
 	if (isset ($hostname))

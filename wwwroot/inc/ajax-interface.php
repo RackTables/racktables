@@ -250,7 +250,7 @@ function updateIPNameAJAX()
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	$reserved = (empty ($text) ? 'no' : $addr['reserved']); // unset reservation if user clears name
+	$reserved = ($text == '' ? 'no' : $addr['reserved']); // unset reservation if user clears name
 	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
 	updateAddress ($ip_bin, $text, $reserved, $comment);
 	echo 'OK';
