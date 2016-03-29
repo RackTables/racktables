@@ -902,7 +902,7 @@ function renderVLANInfo ($vlan_ck)
 				if ($portinfo['linked'] && ! isset ($confports[$portinfo['remote_object_id']]))
 					$foreign_devices[$portinfo['remote_object_id']][] = $portinfo;
 	}
-	if (! empty ($foreign_devices))
+	if (count ($foreign_devices))
 	{
 		startPortlet ("Non-switch devices");
 		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
@@ -1591,9 +1591,9 @@ function formatVLANPackDiff ($old, $current)
 		$removed = groupIntsToRanges (array_diff ($old['allowed'], $current['allowed']));
 		if ($old['mode'] == $current['mode'] && $current['mode'] == 'trunk')
 		{
-			if (! empty ($added))
+			if (count ($added))
 				$ret .= '<span class="vlan-diff diff-add">+ ' . implode (', ', $added) . '</span><br>';
-			if (! empty ($removed))
+			if (count ($removed))
 				$ret .= '<span class="vlan-diff diff-rem">- ' . implode (', ', $removed) . '</span><br>';
 		}
 	}

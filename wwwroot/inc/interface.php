@@ -1924,7 +1924,7 @@ function renderIPForObject ($object_id)
 		$alloc_list .= "</form></tr>\n";
 	}
 	asort ($used_alloc_types, SORT_NUMERIC);
-	$most_popular_type = empty ($used_alloc_types) ? 'regular' : array_last (array_keys ($used_alloc_types));
+	$most_popular_type = ! count ($used_alloc_types) ? 'regular' : array_last (array_keys ($used_alloc_types));
 
 	if ($list_on_top = (getConfigVar ('ADDNEW_AT_TOP') != 'yes'))
 		echo $alloc_list;
