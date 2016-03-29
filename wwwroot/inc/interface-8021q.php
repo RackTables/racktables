@@ -1635,11 +1635,8 @@ function renderEditVlan ($vlan_ck)
 			' this VLAN from ' . mkA ("${portc} port(s)", 'vlan', $vlan_ck);
 	}
 
-	$reason = '';
 	if ($vlan['vlan_id'] == VLAN_DFL_ID)
-		$reason = "You can not delete default VLAN";
-	if (! empty ($reason))
-		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', $reason);
+		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', 'You can not delete default VLAN');
 	else
 		echo getOpLink (array ('op' => 'del', 'vlan_ck' => $vlan_ck), 'delete VLAN', 'destroy', '', 'need-confirmation');
 	echo $clear_line;
