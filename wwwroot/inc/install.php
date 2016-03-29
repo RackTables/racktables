@@ -386,9 +386,6 @@ function init_database_static ()
 		echo "<tr><td>${part}</td>";
 		$nq = $nerrs = 0;
 		foreach (get_pseudo_file ($part) as $q)
-		{
-			if (empty ($q))
-				continue;
 			try
 			{
 				$result = $dbxlink->query ($q);
@@ -400,7 +397,6 @@ function init_database_static ()
 				$errorInfo = $dbxlink->errorInfo();
 				$failures[] = array ($q, $errorInfo[2]);
 			}
-		}
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	if (!count ($failures))
