@@ -250,7 +250,7 @@ function updateIPNameAJAX()
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	$reserved = (empty ($text) ? 'no' : $addr['reserved']); // unset reservation if user clears name
+	$reserved = ($text == '' ? 'no' : $addr['reserved']); // unset reservation if user clears name
 	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
 	updateAddress ($ip_bin, $text, $reserved, $comment);
 	echo 'OK';
@@ -299,7 +299,7 @@ function getNetUsageAJAX()
 	list ($ip, $mask) = explode ('/', $_REQUEST['net_id']);
 	$ip_bin = ip_parse ($ip);
 	$net = spotNetworkByIP ($ip_bin, $mask + 1);
-	if (! isset ($net) or $net['mask'] != $mask)
+	if (! isset ($net) || $net['mask'] != $mask)
 		$net = constructIPRange ($ip_bin, $mask);
 	loadIPAddrList ($net);
 	echo getRenderedIPNetCapacity ($net);

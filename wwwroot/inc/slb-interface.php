@@ -352,7 +352,7 @@ function prepareRealServersTable ($rs_list)
 	$not_seen = $columns;
 	foreach ($rs_list as $rs)
 		foreach ($rs as $key => $value)
-			if (! empty ($value) and isset ($not_seen[$key]))
+			if (! empty ($value) && isset ($not_seen[$key]))
 				unset ($not_seen[$key]);
 	foreach (array_keys ($not_seen) as $key)
 		if ($key != 'rsip')

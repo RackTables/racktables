@@ -62,7 +62,7 @@ function trigger_liveports ()
 	foreach (array ('getportstatus' => 'get_link_status', 'getmaclist' => 'get_mac_list') as $command => $opname)
 		if
 		(
-			validBreedFunction ($breed, $command) and
+			validBreedFunction ($breed, $command) &&
 			permitted (NULL, 'liveports', $opname)
 		)
 			return 'std';
@@ -184,7 +184,7 @@ function trigger_object_8021qorder ()
 {
 	if (NULL !== getVLANSwitchInfo (getBypassValue()))
 		return 'std';
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
+	if (! count (getVLANDomainOptions()) || ! getEntitiesCount ('vst'))
 		return '';
 	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'VLANSWITCH_LISTSRC'))
 		return 'attn';
@@ -193,9 +193,7 @@ function trigger_object_8021qorder ()
 
 function trigger_8021q_configured ()
 {
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
-		return '';
-	return 'std';
+	return (count (getVLANDomainOptions()) && getEntitiesCount ('vst')) ? 'std' : '';
 }
 
 // implement similar logic for IPv4 networks
@@ -266,7 +264,7 @@ function trigger_anyDP ($command, $constraint)
 {
 	if
 	(
-		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) and
+		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) &&
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint)
 	)
 		return 'std';
@@ -304,7 +302,7 @@ function triggerCactiGraphs ()
 		return '';
 	if
 	(
-		count (getCactiGraphsForObject (getBypassValue())) or
+		count (getCactiGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
 	)
 		return 'std';
@@ -318,7 +316,7 @@ function triggerMuninGraphs()
 		return '';
 	if
 	(
-		count (getMuninGraphsForObject (getBypassValue())) or
+		count (getMuninGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'MUNIN_LISTSRC')
 	)
 		return 'std';

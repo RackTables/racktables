@@ -195,11 +195,11 @@ function detectDeviceBreed ($object_id)
 {
 	global $breed_by_swcode, $breed_by_hwcode, $breed_by_mgmtcode;
 	foreach (getAttrValues ($object_id) as $record)
-		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
+		if ($record['id'] == 4 && array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
-		elseif ($record['id'] == 2 and array_key_exists ($record['key'], $breed_by_hwcode))
+		elseif ($record['id'] == 2 && array_key_exists ($record['key'], $breed_by_hwcode))
 			return $breed_by_hwcode[$record['key']];
-		elseif ($record['id'] == 30 and array_key_exists ($record['key'], $breed_by_mgmtcode))
+		elseif ($record['id'] == 30 && array_key_exists ($record['key'], $breed_by_mgmtcode))
 			return $breed_by_mgmtcode[$record['key']];
 	return '';
 }

@@ -274,7 +274,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.10',
 		'0.20.11',
 	);
-	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
+	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
 	$skip = TRUE;
 	$path = NULL;
@@ -284,7 +284,7 @@ function getDBUpgradePath ($v1, $v2)
 	// Now collect all versions > $v1 and <= $v2
 	foreach ($versionhistory as $v)
 	{
-		if ($skip and $v == $v1)
+		if ($skip && $v == $v1)
 		{
 			$skip = FALSE;
 			$path = array();
@@ -2065,10 +2065,10 @@ function renderUpgraderHTML()
 
 	if
 	(
-		!isset ($_SERVER['PHP_AUTH_USER']) or
-		$_SERVER['PHP_AUTH_USER'] == '' or
-		!isset ($_SERVER['PHP_AUTH_PW']) or
-		$_SERVER['PHP_AUTH_PW'] == '' or
+		! isset ($_SERVER['PHP_AUTH_USER']) ||
+		$_SERVER['PHP_AUTH_USER'] == '' ||
+		! isset ($_SERVER['PHP_AUTH_PW']) ||
+		$_SERVER['PHP_AUTH_PW'] == '' ||
 		!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 	)
 	{

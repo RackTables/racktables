@@ -64,7 +64,7 @@ try {
 		$file = getFile (getBypassValue());
 		header("Content-Type: {$file['type']}");
 		header("Content-Length: {$file['size']}");
-		if (! array_key_exists ('asattach', $_REQUEST) or $_REQUEST['asattach'] != 'no')
+		if (! array_key_exists ('asattach', $_REQUEST) || $_REQUEST['asattach'] != 'no')
 			header("Content-Disposition: attachment; filename={$file['name']}");
 		echo $file['contents'];
 		break;
@@ -203,7 +203,7 @@ try {
 		// Include init after ophandlers/snmp, not before, so local.php can redefine things.
 		require_once 'inc/ophandlers.php';
 		// snmp.php is an exception, it is treated by a special hack
-		if (isset ($_REQUEST['op']) and $_REQUEST['op'] == 'querySNMPData')
+		if (isset ($_REQUEST['op']) && $_REQUEST['op'] == 'querySNMPData')
 			require_once 'inc/snmp.php';
 		require_once 'inc/init.php';
 		try
@@ -217,7 +217,7 @@ try {
 			fixContext();
 			if
 			(
-				!isset ($ophandler[$pageno][$tabno][$op]) or
+				! isset ($ophandler[$pageno][$tabno][$op]) ||
 				! is_callable ($ophandler[$pageno][$tabno][$op])
 			)
 				throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
@@ -229,7 +229,7 @@ try {
 			# arguments. And it would be even better to pass returned value to ophandler,
 			# so it is not necessary to remember the name of bypass in it.
 			getBypassValue();
-			if (strlen ($redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op])))
+			if ('' != $redirect_to = call_user_func ($ophandler[$pageno][$tabno][$op]))
 				$location = $redirect_to;
 		}
 		// known "soft" failures require a short error message
@@ -262,7 +262,7 @@ try {
 
 		header ('Content-Type: text/html; charset=UTF-8');
 		// call the main handler - page or tab handler.
-		if (isset ($popuphandler[$helper]) and is_callable ($popuphandler[$helper]))
+		if (isset ($popuphandler[$helper]) && is_callable ($popuphandler[$helper]))
 			call_user_func ($popuphandler[$helper], $helper);
 		else
 			throw new RackTablesError ("Missing handler function for node '${handler}'", RackTablesError::INTERNAL);

@@ -450,7 +450,7 @@ function listCells ($realm, $parent_id = 0)
 		$query .= ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}") . ', ';
 	$query = trim($query, ', ');
 	$query .= " FROM ${SQLinfo['table']}";
-	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
+	if (isset ($SQLinfo['pidcolumn']) && $parent_id)
 	{
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
 		$qparams[] = $parent_id;
@@ -543,7 +543,7 @@ function listCells ($realm, $parent_id = 0)
 			break;
 		}
 	}
-	if ($realm == 'ipv4net' or $realm == 'ipv6net')
+	if ($realm == 'ipv4net' || $realm == 'ipv6net')
 		fillIPNetsCorrelation ($ret);
 
 	foreach (array_keys ($ret) as $entity_id)
@@ -707,7 +707,7 @@ ORDER BY ip, mask
 	unset ($result);
 
 	fillIPNetsCorrelation ($nets, 1);
-	if (is_array ($nets[0]) and $nets[0]['id'] == $net_cell['id'])
+	if (is_array ($nets[0]) && $nets[0]['id'] == $net_cell['id'])
 	{
 		$net_cell['spare_ranges'] = $nets[0]['spare_ranges'];
 		$net_cell['kidc'] = $nets[0]['kidc'];
@@ -761,7 +761,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['hl'] = $row['has_problems'] == 'yes' ? 'w' : '';
-			if ($row['state'] == 'T' and $row['object_id'] != NULL)
+			if ($row['state'] == 'T' && $row['object_id'] != NULL)
 				$mounted_objects[$row['object_id']] = TRUE;
 		}
 
@@ -1124,8 +1124,8 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 	// a location's parent may not be one of its children
 	if
 	(
-		$parent_entity_type == 'location' and
-		$child_entity_type == 'location' and
+		$parent_entity_type == 'location' &&
+		$child_entity_type == 'location' &&
 		in_array ($parent_entity_id, getLocationChildrenList ($child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for location ${parent_entity_id}", RackTablesError::INTERNAL);
@@ -1133,8 +1133,8 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 	// an object's container may not be one of its contained objects
 	if
 	(
-		$parent_entity_type == 'object' and
-		$child_entity_type == 'object' and
+		$parent_entity_type == 'object' &&
+		$child_entity_type == 'object' &&
 		in_array ($parent_entity_id, getObjectContentsList ($child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for object ${parent_entity_id}", RackTablesError::INTERNAL);
@@ -1161,8 +1161,8 @@ function commitUpdateEntityLink
 	// a location's parent may not be one of its children
 	if
 	(
-		$new_parent_entity_type == 'location' and
-		$new_child_entity_type == 'location' and
+		$new_parent_entity_type == 'location' &&
+		$new_child_entity_type == 'location' &&
 		in_array ($new_parent_entity_id, getLocationChildrenList ($new_child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for location ${new_parent_entity_id}", RackTablesError::INTERNAL);
@@ -1170,8 +1170,8 @@ function commitUpdateEntityLink
 	// an object's container may not be one of its contained objects
 	if
 	(
-		$new_parent_entity_type == 'object' and
-		$new_child_entity_type == 'object' and
+		$new_parent_entity_type == 'object' &&
+		$new_child_entity_type == 'object' &&
 		in_array ($new_parent_entity_id, getObjectContentsList ($new_child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for object ${new_parent_entity_id}", RackTablesError::INTERNAL);
@@ -1667,7 +1667,7 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
-	if ($do_locks = !empty ($db_l2address))
+	if ($do_locks = $db_l2address != '')
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
@@ -1727,7 +1727,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
 	$portinfo = getPortInfo ($port_id);
-	if ($do_locks = (! empty ($db_l2address) && $portinfo['l2address'] !== $port_l2address))
+	if ($do_locks = ($db_l2address != '' && $portinfo['l2address'] !== $port_l2address))
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
@@ -2626,7 +2626,7 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 	// If not, retain the old value.
 	$comment = (func_num_args () == 4 ) ? $comment : $old_comment;
 	$new_row = array ('name' => $name, 'comment' => $comment, 'reserved' => $reserved);
-	$new_row_empty = !($name != '' or $comment != '' or $reserved != 'no');
+	$new_row_empty = $name == '' && $comment == '' && $reserved == 'no';
 
 	unset ($result);
 	$messages = array ();
@@ -4139,7 +4139,7 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$nameless');
 			if (validTagName ('$cn_' . $cell['name'], TRUE))
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
-			if ($cell['rack_id'] == '' and $cell['container_id'] == '')
+			if ($cell['rack_id'] == '' && $cell['container_id'] == '')
 				$ret[] = array ('tag' => '$unmounted');
 			if (!$cell['nports'])
 				$ret[] = array ('tag' => '$portless');
@@ -4434,7 +4434,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	$network_id = lastInsertID();
 	lastCreated ('ipv4net', $network_id);
 
-	if ($is_connected and $mask < 31)
+	if ($is_connected && $mask < 31)
 	{
 		updateV4Address ($net['ip_bin'], 'network', 'yes');
 		updateV4Address (ip_last ($net), 'broadcast', 'yes');
@@ -4499,10 +4499,10 @@ function loadScript ($name)
 	return nullIfFalse ($result->fetchColumn());
 }
 
-function saveScript ($name = '', $text)
+function saveScript ($name, $text)
 {
 	if ($name == '')
-		throw new InvalidArgException ('name', $name);
+		throw new InvalidArgException ('name', $name, 'must not be empty');
 	if (!isset ($text))
 		return deleteScript ($name);
 	return usePreparedExecuteBlade
@@ -4533,9 +4533,9 @@ function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin,
 	}
 	else
 	{
-		if ( $localport <= 0 or $localport >= 65536 )
+		if ($localport <= 0 || $localport >= 65536)
 			throw new InvalidArgException ('localport', $localport, 'Invaild port');
-		if ( $remoteport <= 0 or $remoteport >= 65536 )
+		if ($remoteport <= 0 || $remoteport >= 65536)
 			throw new InvalidArgException ('remoteport', $remoteport, 'Invaild port');
 	}
 
@@ -5133,9 +5133,9 @@ function getDomainGroupMembers ($vdom_group_id)
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANs ($vdom_id, $strict = FALSE)
 {
-	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	$self = __FUNCTION__;
+	if (! $strict && $members = getDomainGroupMembers ($vdom_id))
 	{
-		$self = __FUNCTION__;
 		$ret = $self ($vdom_id, TRUE);
 		foreach ($members as $member_vdom_id)
 			foreach ($self ($member_vdom_id, TRUE) as $vid => $vlan_info)
@@ -5178,8 +5178,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id, $vdom_id)
 	);
-	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 // faster than getDomainVLANs, but w/o statistics.
@@ -5187,7 +5186,7 @@ END
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANList ($vdom_id, $strict = FALSE)
 {
-	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	if (! $strict && $members = getDomainGroupMembers ($vdom_id))
 	{
 		$self = __FUNCTION__;
 		$ret = $self ($vdom_id, TRUE);
@@ -5506,10 +5505,10 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 	// This function indicates an error, but doesn't revert it, so it is
 	// assummed, that the calling function performs necessary transaction wrapping.
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
-	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
+	if ($port['mode'] != 'trunk' && ! count ($port['allowed']))
 		return 0;
 	$changed = 0;
-	if (! isset ($before) or $before['mode'] != $port['mode'])
+	if (! isset ($before) || $before['mode'] != $port['mode'])
 		$changed += usePreparedUpdateBlade
 		(
 			$tablemap_8021q[$instance]['pvm'],
@@ -5550,13 +5549,13 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 			array_merge (array ($object_id, $port_name), $where[1])
 		);
 
-	if (! $port['native'] and (! isset ($before) or in_array ($before['native'], $port['allowed'])))
+	if (! $port['native'] && (! isset ($before) || in_array ($before['native'], $port['allowed'])))
 		$changed += usePreparedDeleteBlade
 		(
 			$tablemap_8021q[$instance]['pnv'],
 			array ('object_id' => $object_id, 'port_name' => $port_name)
 		);
-	elseif ($port['native'] and (! isset ($before) or $before['native'] != $port['native']))
+	elseif ($port['native'] && (! isset ($before) || $before['native'] != $port['native']))
 		$changed += usePreparedExecuteBlade
 		(
 			'REPLACE INTO ' . $tablemap_8021q[$instance]['pnv'] .
@@ -5564,7 +5563,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 			array ($object_id, $port_name, $port['native'])
 		);
 
-	if ($instance == 'desired' and $changed)
+	if ($instance == 'desired' && $changed)
 		callHook ('portConfChanged', $object_id, $port_name, $port);
 	return $changed ? 1 : 0;
 }
@@ -5648,7 +5647,7 @@ function setConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && (! is_numeric ($varvalue) || $varvalue < 0 ))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
@@ -5669,7 +5668,7 @@ function setUserConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && (! is_numeric ($varvalue) || $varvalue < 0 ))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedExecuteBlade
@@ -5699,12 +5698,9 @@ function getConfiguredQuickLinks()
 {
 	$ret = array();
 	foreach (explode (',', getConfigVar('QUICK_LINK_PAGES')) as $page_code)
-		if (! empty ($page_code))
-		{
-			$title = getPageName ($page_code);
-			if (! empty ($title))
+		if ($page_code != '')
+			if ('' != $title = getPageName ($page_code))
 				$ret[] = array ('href' => makeHref (array ('page' => $page_code)), 'title' => $title);
-		}
 	return $ret;
 }
 

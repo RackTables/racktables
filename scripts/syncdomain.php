@@ -153,7 +153,7 @@ foreach ($switch_queue as $object)
 		}
 		$i_am_child = (0 === $fork_res = pcntl_fork());
 	}
-	if (! $do_fork or $i_am_child)
+	if (! $do_fork || $i_am_child)
 	{
 		try
 		{

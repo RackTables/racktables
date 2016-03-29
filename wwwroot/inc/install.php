@@ -21,7 +21,7 @@ else
 
 if ($step > count ($stepfunc))
 {
-	$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
+	$root = (empty ($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
 	$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
 	// "Since PHP 4.3.0, you will often get a slash or a dot back from
 	// dirname() in situations where the older functionality would have given
@@ -89,7 +89,7 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 function not_already_installed()
 {
 	global $found_secret_file, $pdo_dsn;
-	if ($found_secret_file and isset ($pdo_dsn))
+	if ($found_secret_file && isset ($pdo_dsn))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
 		return FALSE;
@@ -156,7 +156,7 @@ function init_config ()
 		print_form();
 		return FALSE;
 	}
-	if (empty ($_REQUEST['mysql_db']) or empty ($_REQUEST['mysql_username']))
+	if (empty ($_REQUEST['mysql_db']) || empty ($_REQUEST['mysql_username']))
 	{
 		print_form
 		(
@@ -171,7 +171,7 @@ function init_config ()
 		echo '<h2 class=trerror>Missing database/username parameter!</h2>';
 		return FALSE;
 	}
-	if ($_REQUEST['conn'] == 'conn_tcp' and empty ($_REQUEST['mysql_host']))
+	if ($_REQUEST['conn'] == 'conn_tcp' && empty ($_REQUEST['mysql_host']))
 	{
 		print_form
 		(
@@ -186,7 +186,7 @@ function init_config ()
 		echo '<h2 class=trerror>Missing TCP hostname parameter!</h2>';
 		return FALSE;
 	}
-	if ($_REQUEST['conn'] == 'conn_unix' and empty ($_REQUEST['mysql_socket']))
+	if ($_REQUEST['conn'] == 'conn_unix' && empty ($_REQUEST['mysql_socket']))
 	{
 		print_form
 		(
@@ -207,7 +207,7 @@ function init_config ()
 	{
 	case 'conn_tcp':
 		$pdo_dsn .= 'host=' . $_REQUEST['mysql_host'];
-		if (!empty ($_REQUEST['mysql_port']) and $_REQUEST['mysql_port'] != '3306')
+		if (! empty ($_REQUEST['mysql_port']) && $_REQUEST['mysql_port'] != '3306')
 			$pdo_dsn .= ';port=' . $_REQUEST['mysql_port'];
 		break;
 	case 'conn_unix':
@@ -312,7 +312,7 @@ ENDOFTEXT
 function get_process_owner()
 {
 	// this function requires the posix extention and returns the fallback value otherwise
-	if (is_callable('posix_getpwuid') and is_callable('posix_geteuid'))
+	if (is_callable ('posix_getpwuid') && is_callable ('posix_geteuid'))
 	{
 		$user = posix_getpwuid(posix_geteuid());
 		if (isset ($user['name']))
@@ -324,7 +324,7 @@ function get_process_owner()
 function check_config_access()
 {
 	global $path_to_secret_php;
-	if (! is_writable ($path_to_secret_php) and is_readable ($path_to_secret_php))
+	if (! is_writable ($path_to_secret_php) && is_readable ($path_to_secret_php))
 	{
 		echo 'The configuration file ownership/permissions seem to be OK.<br>';
 		return TRUE;
@@ -386,9 +386,6 @@ function init_database_static ()
 		echo "<tr><td>${part}</td>";
 		$nq = $nerrs = 0;
 		foreach (get_pseudo_file ($part) as $q)
-		{
-			if (empty ($q))
-				continue;
 			try
 			{
 				$result = $dbxlink->query ($q);
@@ -400,7 +397,6 @@ function init_database_static ()
 				$errorInfo = $dbxlink->errorInfo();
 				$failures[] = array ($q, $errorInfo[2]);
 			}
-		}
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	if (!count ($failures))
@@ -445,7 +441,7 @@ function init_database_dynamic ()
 {
 	connect_to_db_or_die();
 	global $dbxlink;
-	if (!isset ($_REQUEST['password']) or empty ($_REQUEST['password']))
+	if (! isset ($_REQUEST['password']) || empty ($_REQUEST['password']))
 	{
 		$result = $dbxlink->query ('select count(user_id) from UserAccount where user_id = 1');
 		$row = $result->fetch (PDO::FETCH_NUM);
