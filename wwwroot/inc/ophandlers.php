@@ -1705,7 +1705,7 @@ function addRealServer ()
 	addRStoRSPool
 	(
 		getBypassValue(),
-		genericAssertion ('rsip', 'inet4'),
+		genericAssertion ('rsip', 'inet'),
 		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
 		genericAssertion ('rsconfig', 'string0'),
@@ -1768,7 +1768,7 @@ function addVService ()
 		'IPv4VS',
 		array
 		(
-			'vip' => genericAssertion ('vip', 'inet4'),
+			'vip' => genericAssertion ('vip', 'inet'),
 			'vport' => $proto == 'MARK' ? NULL : genericAssertion ('vport', 'uint'),
 			'proto' => $proto,
 			'name' => nullIfEmptyStr ($_REQUEST['name']),
@@ -1842,7 +1842,7 @@ function updateRealServer ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	commitUpdateRS (
 		genericAssertion ('rs_id', 'uint'),
-		genericAssertion ('rsip', 'inet4'),
+		genericAssertion ('rsip', 'inet'),
 		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
 		genericAssertion ('rsconfig', 'string0'),
@@ -1861,7 +1861,7 @@ function updateVService ()
 	assertStringArg ('name', TRUE);
 	commitUpdateVS (
 		$vs_id,
-		genericAssertion ('vip', 'inet4'),
+		genericAssertion ('vip', 'inet'),
 		$_REQUEST['vport'],
 		$proto,
 		$_REQUEST['name'],
