@@ -2228,9 +2228,10 @@ function renderRackSpaceForObject ($object_id)
 		// if matching racks found, and rack list is reduced, show 'show all' link
 		if (count ($matching_racks) && count ($matching_racks) != count ($allRacksData))
 		{
-			$filter_text = '';
+			$tmp = array();
 			foreach ($matched_tags as $tag)
-				$filter_text .= (empty ($filter_text) ? '' : ' or ') . '{' . $tag['tag'] . '}';
+				$tmp[] = '{' . $tag['tag'] . '}';
+			$filter_text = implode (' or ', $tmp);
 			$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
 			$href_show_all .= htmlspecialchars('&show_all_racks=1');
 			echo "(filtered by <span class='filter-text'>$filter_text</span>, <a href='$href_show_all'>show all</a>)<p>";
