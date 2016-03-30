@@ -488,7 +488,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		return $javascript;
 	}
 	// Add jquery.js and racktables.js the first time a Javascript file is added.
-	if (empty($javascript))
+	if (! count ($javascript))
 	{
 		$javascript = array
 		(
@@ -881,16 +881,16 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 		$ret = '<a href="#" onclick="return false;"';
 		$class .= ' noclick';
 	}
-	if (! empty ($comment))
+	if ($comment != '')
 		$ret .= ' title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
 	$class = trim ($class);
-	if (! empty ($class))
+	if ($class != '')
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
 	$ret .= '>';
-	if (! empty ($img_name))
+	if ($img_name != '')
 	{
 		$ret .= getImageHREF ($img_name, $comment);
-		if (! empty ($title))
+		if ($title != '')
 			$ret .= ' ';
 	}
 	if (FALSE !== strpos ($class, 'need-confirmation'))
@@ -905,17 +905,17 @@ function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $tit
 	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
 	$ret .= '<a href="#"';
 	$class = trim ($class);
-	if (! empty ($class))
+	if ($class != '')
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
-	if (! empty ($comment))
+	if ($comment != '')
 		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
 	$href = makeHref (array ('module' => 'popup', 'helper' => $helper) + makePageParams ($params));
 	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
 
-	if (! empty ($img_name))
+	if ($img_name != '')
 	{
 		$ret .= getImageHREF ($img_name, $comment);
-		if (! empty ($title))
+		if ($title != '')
 			$ret .= ' ';
 	}
 	$ret .= $title;
