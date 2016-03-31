@@ -3943,6 +3943,17 @@ function usePreparedInsertBlade ($tablename, $columns)
 	}
 }
 
+function makeSetSQL ($column_names)
+{
+	if (! count ($column_names))
+		throw new InvalidArgException ('column_names', '(empty array)', 'must not be empty');
+	$tmp = array();
+	// Same syntax works for NULL as well.
+	foreach ($column_names as $each)
+		$tmp[] = "${each}=?";
+	return implode (', ', $tmp);
+}
+
 function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 {
 	if (! in_array (strtoupper ($conjunction), array ('AND', '&&', 'OR', '||', 'XOR')))
@@ -4006,13 +4017,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_colu
 		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
 	if (! count ($where_columns))
 		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
-	$conj = '';
-	$query = "UPDATE ${tablename} SET ";
-	foreach (array_keys ($set_columns) as $colname)
-	{
-		$query .= "${conj}${colname}=?";
-		$conj = ', ';
-	}
+	$query = "UPDATE ${tablename} SET " . makeSetSQL (array_keys ($set_columns));
 	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
 	try
 	{

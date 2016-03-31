@@ -133,6 +133,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('questionMarks', 2, '?, ?'),
 			array ('questionMarks', 3, '?, ?, ?'),
 
+			array ('makeSetSQL', array ('one'), 'one=?'),
+			array ('makeSetSQL', array ('one', 'two'), 'one=?, two=?'),
+			array ('makeSetSQL', array ('one', 'two', 'three'), 'one=?, two=?, three=?'),
+
 			array
 			(
 				'formatPortIIFOIF',
@@ -859,6 +863,8 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('goodModeForVSTRole', array (FALSE, NULL)),
 			array ('goodModeForVSTRole', array ('', NULL)),
 			array ('goodModeForVSTRole', array ('unknown', NULL)),
+
+			array ('makeSetSQL', array (array())),
 		);
 	}
 
