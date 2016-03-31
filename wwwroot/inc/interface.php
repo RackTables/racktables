@@ -1667,8 +1667,7 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 	$rdata = array();
 	foreach ($racks as $rack)
 	{
-		$trail = getLocationTrail ($rack['location_id'], FALSE);
-		if(!empty ($trail))
+		if ('' != $trail = getLocationTrail ($rack['location_id'], FALSE))
 			$row_name = $trail . ' : ' . $rack['row_name'];
 		else
 			$row_name = $rack['row_name'];
@@ -2228,9 +2227,10 @@ function renderRackSpaceForObject ($object_id)
 		// if matching racks found, and rack list is reduced, show 'show all' link
 		if (count ($matching_racks) && count ($matching_racks) != count ($allRacksData))
 		{
-			$filter_text = '';
+			$tmp = array();
 			foreach ($matched_tags as $tag)
-				$filter_text .= (empty ($filter_text) ? '' : ' or ') . '{' . $tag['tag'] . '}';
+				$tmp[] = '{' . $tag['tag'] . '}';
+			$filter_text = implode (' or ', $tmp);
 			$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
 			$href_show_all .= htmlspecialchars('&show_all_racks=1');
 			echo "(filtered by <span class='filter-text'>$filter_text</span>, <a href='$href_show_all'>show all</a>)<p>";
@@ -3072,7 +3072,7 @@ function renderIPv4NetworkAddresses ($range)
 		addJS ('js/inplace-edit.js');
 
 	echo "</table>";
-	if (! empty ($rendered_pager))
+	if ($rendered_pager != '')
 		echo '<p>' . $rendered_pager . '</p>';
 }
 
@@ -4134,8 +4134,7 @@ function renderSNMPPortFinder ($object_id)
 		echo "<div class=msg_error>The PHP SNMP extension is not loaded.  Cannot continue.</div>";
 		return;
 	}
-	$snmpcomm = getConfigVar('DEFAULT_SNMP_COMMUNITY');
-	if (empty($snmpcomm))
+	if ('' == $snmpcomm = getConfigVar ('DEFAULT_SNMP_COMMUNITY'))
 		$snmpcomm = 'public';
 
 	startPortlet ('SNMPv1');
@@ -5273,17 +5272,12 @@ function showPathAndSearch ($pageno, $tabno)
 				$rack = spotEntity ('rack', $object['rack_id']);
 				$items[] = mkCellA ($rack);
 				$items[] = mkA ($rack['row_name'], 'row', $rack['row_id']);
-				if ($rack['location_id'])
-				{
-					$trail = getLocationTrail ($rack['location_id']);
-					if (! empty ($trail))
-						$items[] = $trail;
-				}
+				if ($rack['location_id'] && ('' != $trail = getLocationTrail ($rack['location_id'])))
+					$items[] = $trail;
 			}
 			break;
 		case 'row':
-			$trail = getLocationTrail ($title['params']['location_id']);
-			if (! empty ($trail))
+			if ('' != $trail = getLocationTrail ($title['params']['location_id']))
 				$items[] = $trail;
 			break;
 		case 'location':
