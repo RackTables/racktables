@@ -677,7 +677,7 @@ function getSLBDefaults ($do_cache_result = FALSE)
 
 	if (! $do_cache_result)
 		$ret = array();
-	elseif (! empty ($ret))
+	elseif (count ($ret))
 		return $ret;
 
 	$ret['vsconfig'] = loadScript ('DefaultVSConfig');
