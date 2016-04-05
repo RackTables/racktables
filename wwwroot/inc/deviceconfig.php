@@ -2931,7 +2931,7 @@ function ftos8ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Description\s+Status\s+Speed\s+Duplex\b/', $line))
 				$table_schema = guessTableStructure ($line);
@@ -2961,7 +2961,7 @@ function eos4ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Name\s+Status\s+Vlan\s+Duplex\s+Speed\b/', $line))
 				$table_schema = guessTableStructure ($line);
