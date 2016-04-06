@@ -3754,7 +3754,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$queues[] = array_intersect ($employed_vlans, $vlans_to_remove); // remove employed vlans first
 			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
 			foreach ($queues as $queue)
-				if (! empty ($queue))
+				if (count ($queue))
 				{
 					$crq[] = array
 					(
@@ -3800,7 +3800,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 			$queues[] = array_intersect ($employed_vlans, $vlans_to_remove); // remove employed vlans first
 			$queues[] = array_diff ($vlans_to_remove, $employed_vlans);// remove other vlans afterwards
 			foreach ($queues as $queue)
-				if (! empty ($queue))
+				if (count ($queue))
 				{
 					$crq[] = array
 					(
