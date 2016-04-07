@@ -2758,7 +2758,7 @@ function makeIPTree ($netlist)
 	$stack = array();
 	foreach ($netlist as $net_id => &$net)
 	{
-		while (! empty ($stack))
+		while (count ($stack))
 		{
 			$top_id = $stack[count ($stack) - 1];
 			if (! IPNetContains ($netlist[$top_id], $net)) // unless $net is a child of stack top
@@ -2769,7 +2769,7 @@ function makeIPTree ($netlist)
 				break;
 			}
 		}
-		if (empty ($stack))
+		if (! count ($stack))
 			$net['parent_id'] = NULL;
 		array_push ($stack, $net_id);
 	}

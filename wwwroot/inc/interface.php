@@ -2129,7 +2129,7 @@ function renderPortsInfo($object_id)
 				$info .= $link['speed'];
 			if (isset ($link['duplex']))
 			{
-				if (! empty ($info))
+				if ($info != '')
 					$info .= ', ';
 				$info .= $link['duplex'];
 			}
