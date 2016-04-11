@@ -378,7 +378,7 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			break;
 		case 'ucssdk': # remote XML through a Python backend
 			# UCS in its current implementation besides the terminal_settings() provides
-			# an additional username/password feed through the HTML from. Whenever the
+			# an additional username/password feed through the HTML form. Whenever the
 			# user provides the credentials through the form, use these instead of the
 			# credentials [supposedly] set by terminal_settings().
 			global $script_mode;
