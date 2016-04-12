@@ -5069,7 +5069,7 @@ function getPortIIFStats ($iif_id)
 function getPortInfo ($port_id)
 {
 	$result = fetchPortList ('Port.id = ?', array ($port_id));
-	return empty ($result) ? NULL : $result[0];
+	return count ($result) ? $result[0] : NULL;
 }
 
 function getVLANDomainStats ()

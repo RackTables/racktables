@@ -1721,7 +1721,7 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			if (count ($cmd['vlans']) > VLAN_MAX_ID - VLAN_MIN_ID)
 				$ret .= "$pre " . ($del ? '' : 'all') . "\n";
 			else
-				while (! empty ($cmd['vlans']))
+				while (count ($cmd['vlans']))
 				{
 					$vlan = array_shift ($cmd['vlans']);
 					$ret .= "$pre $vlan\n";
@@ -1832,7 +1832,7 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "no int vlan ${cmd['arg1']}\n";
 			break;
 		case 'rem allowed':
-			while (! empty ($cmd['vlans']))
+			while (count ($cmd['vlans']))
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
@@ -1841,7 +1841,7 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			}
 			break;
 		case 'add allowed':
-			while (! empty ($cmd['vlans']))
+			while (count ($cmd['vlans']))
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
@@ -2931,7 +2931,7 @@ function ftos8ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Description\s+Status\s+Speed\s+Duplex\b/', $line))
 				$table_schema = guessTableStructure ($line);
@@ -2961,7 +2961,7 @@ function eos4ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Name\s+Status\s+Vlan\s+Duplex\s+Speed\b/', $line))
 				$table_schema = guessTableStructure ($line);

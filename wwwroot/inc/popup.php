@@ -421,7 +421,7 @@ function renderPopupPortSelector()
 
 	// display results
 	startPortlet ('Compatible spare ports');
-	if (empty ($spare_ports))
+	if (! count ($spare_ports))
 		echo '(nothing found)';
 	else
 	{
