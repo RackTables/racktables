@@ -3317,12 +3317,6 @@ function autoPopulateUCS()
 	$oinfo = spotEntity ('object', $ucsm_id);
 	$chassis_id = array();
 	$done = 0;
-	# Temporarily disable any "AUTOPORTS_CONFIG" setting as we will be using the config from each blade
-	if (isCheckSet ('disable_autoports'))
-	{
-		$autoportsTemp = getConfigVar ('AUTOPORTS_CONFIG');
-		setConfigVar ('AUTOPORTS_CONFIG', '');
-	}
 	# There are three request parameters (use_terminal_settings, ucs_login and
 	# ucs_password) not processed here. These are asserted and used inside
 	# queryTerminal().
@@ -3335,6 +3329,12 @@ function autoPopulateUCS()
 	{
 		showError ($e->getMessage());
 		return;
+	}
+	# Temporarily disable any "AUTOPORTS_CONFIG" setting as we will be using the config from each blade
+	if (isCheckSet ('disable_autoports'))
+	{
+		$autoportsTemp = getConfigVar ('AUTOPORTS_CONFIG');
+		setConfigVar ('AUTOPORTS_CONFIG', '');
 	}
 	foreach ($contents as $item)
 	{
