@@ -219,6 +219,12 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
+        '0.20.11' => <<<ENDOFTEXT
+New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
+dsplaying unallocated networks in IPv4 space tree. Setting it also disables
+the "knight" feature.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -268,7 +274,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.10',
 		'0.20.11',
 	);
-	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
+	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
 	$skip = TRUE;
 	$path = NULL;
@@ -278,7 +284,7 @@ function getDBUpgradePath ($v1, $v2)
 	// Now collect all versions > $v1 and <= $v2
 	foreach ($versionhistory as $v)
 	{
-		if ($skip and $v == $v1)
+		if ($skip && $v == $v1)
 		{
 			$skip = FALSE;
 			$path = array();
@@ -298,7 +304,7 @@ function getDBUpgradePath ($v1, $v2)
 function getUpgradeBatch ($batchid)
 {
 	$query = array();
-	global $dbxlink;
+	global $dbver, $dbxlink;
 	switch ($batchid)
 	{
 		case '0.18.0':
@@ -1207,7 +1213,7 @@ CREATE TABLE `CactiServer` (
 			$cacti_url_row = $result->fetch (PDO::FETCH_ASSOC);
 			unset ($result);
 
-			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && strlen ($cacti_url_row['varvalue']))
+			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && $cacti_url_row['varvalue'] != '')
 			{
 				$query[] = "INSERT INTO CactiServer (id) VALUES (1)";
 				$query[] = "UPDATE CactiServer SET base_url = (SELECT varvalue FROM Config WHERE varname = 'CACTI_URL') WHERE id = 1";
@@ -1620,6 +1626,71 @@ CREATE TABLE `PortOuterInterface` (
   UNIQUE KEY `oif_name` (`oif_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 ";
+			// if upgrading from certain older releases, inject some data to satisfy foreign keys
+			if (version_compare ($dbver, '0.19.2', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1399,'DC')";
+			if (version_compare ($dbver, '0.19.5', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1469,'virtual port')";
+			if (version_compare ($dbver, '0.19.7', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1588,'empty QSFP+')";
+			if (version_compare ($dbver, '0.19.8', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES
+(2,1424,'1000Base-CX'),
+(2,1425,'10GBase-ER-DWDM40-61.42 (ITU 20)'),
+(2,1426,'10GBase-ER-DWDM40-60.61 (ITU 21)'),
+(2,1427,'10GBase-ER-DWDM40-59.79 (ITU 22)'),
+(2,1428,'10GBase-ER-DWDM40-58.98 (ITU 23)'),
+(2,1429,'10GBase-ER-DWDM40-58.17 (ITU 24)'),
+(2,1430,'10GBase-ER-DWDM40-57.36 (ITU 25)'),
+(2,1431,'10GBase-ER-DWDM40-56.55 (ITU 26)'),
+(2,1432,'10GBase-ER-DWDM40-55.75 (ITU 27)'),
+(2,1433,'10GBase-ER-DWDM40-54.94 (ITU 28)'),
+(2,1434,'10GBase-ER-DWDM40-54.13 (ITU 29)'),
+(2,1435,'10GBase-ER-DWDM40-53.33 (ITU 30)'),
+(2,1436,'10GBase-ER-DWDM40-52.52 (ITU 31)'),
+(2,1437,'10GBase-ER-DWDM40-51.72 (ITU 32)'),
+(2,1438,'10GBase-ER-DWDM40-50.92 (ITU 33)'),
+(2,1439,'10GBase-ER-DWDM40-50.12 (ITU 34)'),
+(2,1440,'10GBase-ER-DWDM40-49.32 (ITU 35)'),
+(2,1441,'10GBase-ER-DWDM40-48.51 (ITU 36)'),
+(2,1442,'10GBase-ER-DWDM40-47.72 (ITU 37)'),
+(2,1443,'10GBase-ER-DWDM40-46.92 (ITU 38)'),
+(2,1444,'10GBase-ER-DWDM40-46.12 (ITU 39)'),
+(2,1445,'10GBase-ER-DWDM40-45.32 (ITU 40)'),
+(2,1446,'10GBase-ER-DWDM40-44.53 (ITU 41)'),
+(2,1447,'10GBase-ER-DWDM40-43.73 (ITU 42)'),
+(2,1448,'10GBase-ER-DWDM40-42.94 (ITU 43)'),
+(2,1449,'10GBase-ER-DWDM40-42.14 (ITU 44)'),
+(2,1450,'10GBase-ER-DWDM40-41.35 (ITU 45)'),
+(2,1451,'10GBase-ER-DWDM40-40.56 (ITU 46)'),
+(2,1452,'10GBase-ER-DWDM40-39.77 (ITU 47)'),
+(2,1453,'10GBase-ER-DWDM40-38.98 (ITU 48)'),
+(2,1454,'10GBase-ER-DWDM40-38.19 (ITU 49)'),
+(2,1455,'10GBase-ER-DWDM40-37.40 (ITU 50)'),
+(2,1456,'10GBase-ER-DWDM40-36.61 (ITU 51)'),
+(2,1457,'10GBase-ER-DWDM40-35.82 (ITU 52)'),
+(2,1458,'10GBase-ER-DWDM40-35.04 (ITU 53)'),
+(2,1459,'10GBase-ER-DWDM40-34.25 (ITU 54)'),
+(2,1460,'10GBase-ER-DWDM40-33.47 (ITU 55)'),
+(2,1461,'10GBase-ER-DWDM40-32.68 (ITU 56)'),
+(2,1462,'10GBase-ER-DWDM40-31.90 (ITU 57)'),
+(2,1463,'10GBase-ER-DWDM40-31.12 (ITU 58)'),
+(2,1464,'10GBase-ER-DWDM40-30.33 (ITU 59)'),
+(2,1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
+(2,1466,'10GBase-ER-DWDM40-28.77 (ITU 61)')";
+			if (version_compare ($dbver, '0.19.10', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1603,'1000Base-T (HP c-Class)')";
+			if (version_compare ($dbver, '0.19.11', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES (2,1642,'10GBase-T')";
+			if (version_compare ($dbver, '0.19.12', '<'))
+				$query[] = "INSERT INTO Dictionary (chapter_id,dict_key,dict_value) VALUES
+(2,1661,'40GBase-KR4'),
+(2,1663,'40GBase-SR4'),
+(2,1664,'40GBase-LR4'),
+(2,1668,'empty CFP'),
+(2,1669,'100GBase-SR10'),
+(2,1670,'100GBase-LR4'),
+(2,1671,'100GBase-ER4')";
 			$query[] = "INSERT INTO PortOuterInterface SELECT dict_key, dict_value FROM Dictionary WHERE chapter_id = 2";
 			// Previously listed 10GBase-Kx actually means two standards: 10GBase-KX4
 			// and 10GBase-KR. Make respective changes and make primary key auto
@@ -1864,7 +1935,12 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 				(1678,1678)";
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 14=1591') WHERE varname = 'DEFAULT_PORT_OIF_IDS'";
 
+			// ABI_ver = 2, invalidate RackCode cache
+			$query[] = "DELETE FROM Script WHERE script_name='RackCodeCache'";
+
+			$query[] = "INSERT INTO Config (varname, varvalue, is_hidden, is_userdefined, description) VALUES ('IPV4_TREE_SHOW_UNALLOCATED', 'yes', 'no', 'yes', 'Show unallocated networks in IPv4 tree'); ";
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
+
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
@@ -1935,7 +2011,7 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query failed with error ' . $errorInfo[2]);
 	}
 	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+	if (count ($rows) != 1 || $rows[0][0] == '')
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
 	$ret = $rows[0][0];
 	return $ret;
@@ -1948,7 +2024,7 @@ function showUpgradeError ($info = '', $location = 'N/A')
 	elseif ($location != 'N/A')
 		$location = $location . '()';
 	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (!strlen ($info))
+	if ($info == '')
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
@@ -1989,10 +2065,10 @@ function renderUpgraderHTML()
 
 	if
 	(
-		!isset ($_SERVER['PHP_AUTH_USER']) or
-		!strlen ($_SERVER['PHP_AUTH_USER']) or
-		!isset ($_SERVER['PHP_AUTH_PW']) or
-		!strlen ($_SERVER['PHP_AUTH_PW']) or
+		! isset ($_SERVER['PHP_AUTH_USER']) ||
+		$_SERVER['PHP_AUTH_USER'] == '' ||
+		! isset ($_SERVER['PHP_AUTH_PW']) ||
+		$_SERVER['PHP_AUTH_PW'] == '' ||
 		!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 	)
 	{
@@ -2040,6 +2116,7 @@ if (!platform_is_ok())
 }
 
 echo '<h1>Upgrade status</h1>';
+global $dbver;
 $dbver = getDatabaseVersion();
 echo '<table border=1 cellpadding=5>';
 echo "<tr><th>Current status</th><td>Data version: ${dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
@@ -2165,29 +2242,6 @@ END
 	// re-create foreign key in IPv4RS
 	$dbxlink->query ("ALTER TABLE `IPv4RS` DROP FOREIGN KEY `IPRS-FK`");
 	$dbxlink->query ("ALTER TABLE `IPv4RS` ADD CONSTRAINT `IPv4RS-FK` FOREIGN KEY (`rspool_id`) REFERENCES `IPv4RSPool` (`id`) ON DELETE CASCADE");
-}
-
-// This is a swiss-knife blade to insert a record into a table.
-// The first argument is table name.
-// The second argument is an array of "name" => "value" pairs.
-// returns integer - affected rows count. Throws exception on error
-function usePreparedInsertBlade ($tablename, $columns)
-{
-	global $dbxlink;
-	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
-	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
-	// Now the query should be as follows:
-	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
-	try
-	{
-		$prepared = $dbxlink->prepare ($query);
-		$prepared->execute (array_values ($columns));
-		return $prepared->rowCount();
-	}
-	catch (PDOException $e)
-	{
-		throw convertPDOException ($e);
-	}
 }
 
 // converts the values of old-style config vars TELNET_OBJS_LISTSRC, SSH_OBJS_LISTSRC, RDP_OBJS_LISTSRC

@@ -62,6 +62,7 @@ class ObjectCircularReferenceTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException RackTablesError
 	 */
 	public function testCreateObjectCircularReference ()
@@ -74,6 +75,7 @@ class ObjectCircularReferenceTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException RackTablesError
 	 */
 	public function testUpdateObjectCircularReference ()
@@ -90,6 +92,7 @@ class ObjectCircularReferenceTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException RackTablesError
 	 */
 	public function testCreateLocationCircularReference ()
@@ -102,6 +105,7 @@ class ObjectCircularReferenceTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException RackTablesError
 	 */
 	public function testUpdateLocationCircularReference ()

@@ -59,11 +59,11 @@ $known_APC_SKUs = array
 function trigger_liveports ()
 {
 	$breed = detectDeviceBreed (getBypassValue());
-	foreach (array ('getportstatus', 'getmaclist') as $command)
+	foreach (array ('getportstatus' => 'get_link_status', 'getmaclist' => 'get_mac_list') as $command => $opname)
 		if
 		(
-			validBreedFunction ($breed, $command) and
-			permitted (NULL, 'liveports', $command)
+			validBreedFunction ($breed, $command) &&
+			permitted (NULL, 'liveports', $opname)
 		)
 			return 'std';
 	return '';
@@ -120,9 +120,10 @@ function trigger_natv4 ()
 
 function trigger_autoports ()
 {
-	$object = spotEntity ('object', getBypassValue());
-	if (count (getObjectPortsAndLinks ($object['id'])))
+	$object_id = getBypassValue();
+	if (0 != getPortsCount ($object_id))
 		return '';
+	$object = spotEntity ('object', $object_id);
 	return count (getAutoPorts ($object)) ? 'attn' : '';
 }
 
@@ -183,7 +184,7 @@ function trigger_object_8021qorder ()
 {
 	if (NULL !== getVLANSwitchInfo (getBypassValue()))
 		return 'std';
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
+	if (! count (getVLANDomainOptions()) || ! getEntitiesCount ('vst'))
 		return '';
 	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'VLANSWITCH_LISTSRC'))
 		return 'attn';
@@ -192,9 +193,7 @@ function trigger_object_8021qorder ()
 
 function trigger_8021q_configured ()
 {
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
-		return '';
-	return 'std';
+	return (count (getVLANDomainOptions()) && getEntitiesCount ('vst')) ? 'std' : '';
 }
 
 // implement similar logic for IPv4 networks
@@ -265,7 +264,7 @@ function trigger_anyDP ($command, $constraint)
 {
 	if
 	(
-		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) and
+		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) &&
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint)
 	)
 		return 'std';
@@ -303,7 +302,7 @@ function triggerCactiGraphs ()
 		return '';
 	if
 	(
-		count (getCactiGraphsForObject (getBypassValue())) or
+		count (getCactiGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
 	)
 		return 'std';
@@ -317,7 +316,7 @@ function triggerMuninGraphs()
 		return '';
 	if
 	(
-		count (getMuninGraphsForObject (getBypassValue())) or
+		count (getMuninGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'MUNIN_LISTSRC')
 	)
 		return 'std';
@@ -339,6 +338,21 @@ function trigger_ucs()
 function triggerPatchCableHeapsConfigured()
 {
 	return count (getPatchCableHeapSummary()) ? 'std' : '';
+}
+
+function triggerGraphCycleResolver()
+{
+	global $pageno;
+	switch ($pageno)
+	{
+		case 'tagtree':
+			global $taglist;
+			$nodelist = $taglist;
+			break;
+		default:
+			throw new RackTablesError ('unexpected call to trigger function', RackTablesError::INTERNAL);
+	}
+	return count (getInvalidNodes ($nodelist)) ? 'attn' : '';
 }
 
 ?>

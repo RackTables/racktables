@@ -51,6 +51,18 @@ function ios12ReadLLDPStatus ($input)
 
 		switch (count ($matches))
 		{
+		case 4:
+			// check if $remote_name has port glued - it is known that IOS does not insert whitespace between
+			// remote name and port if remote name is too long
+			$remote_name_raw = array_shift ($matches);
+			if (preg_match ("#^(.+?)((?:Fa|Gi|Te)[0-9/.]+)$#", $remote_name_raw, $rmatches))
+			{
+				array_unshift ($matches, $rmatches[2]);
+				array_unshift ($matches, $rmatches[1]);
+				// fall though to 5
+			}
+			else
+				break;
 		case 5:
 			list ($remote_name, $local_port, $ttl, $caps, $remote_port) = $matches;
 			$local_port = shortenIfName ($local_port);
@@ -83,8 +95,8 @@ function xos12ReadLLDPStatus ($input)
 		case preg_match ('/^    - System Name: "(.+)"$/', $line, $matches):
 			if
 			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('local_port', $ret['current']) and
+				array_key_exists ('current', $ret) &&
+				array_key_exists ('local_port', $ret['current']) &&
 				array_key_exists ('remote_port', $ret['current'])
 			)
 				$ret[$ret['current']['local_port']][] = array
@@ -107,9 +119,9 @@ function xos12ReadInterfaceStatus ($input)
 		if (preg_match('/^(\d+|\d:\d+)\s+.*\s+([ED])\s+([AR])\s+/', $line, $m))
 		{
 			$portname = $m[1];
-                        if ($m[2] == 'E' and $m[3] == 'A')
+			if ($m[2] == 'E' && $m[3] == 'A')
 				$status = 'up';
-			elseif ($m[2] == 'E' and $m[3] == 'R' )
+			elseif ($m[2] == 'E' && $m[3] == 'R')
 				$status = 'down';
 			elseif ($m[2] == 'D')
 				$status = 'disabled';
@@ -171,8 +183,8 @@ function vrpReadLLDPStatus ($input)
 		case preg_match ('/^Sys(?:tem)? ?name\s*:\s*(.+)$/i', $line, $matches):
 			if
 			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('PortIdSubtype', $ret['current']) and
+				array_key_exists ('current', $ret) &&
+				array_key_exists ('PortIdSubtype', $ret['current']) &&
 				array_key_exists ('local_port', $ret['current'])
 			)
 			{
@@ -223,10 +235,10 @@ function ftos8ReadLLDPStatus ($input)
 		case preg_match ('/^    Remote System Name:  (.+)$/', $line, $matches):
 			if
 			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('remote_subtype', $ret['current']) and
-				in_array ($ret['current']['remote_subtype'], $valid_subtypes) and
-				array_key_exists ('remote_port', $ret['current']) and
+				array_key_exists ('current', $ret) &&
+				array_key_exists ('remote_subtype', $ret['current']) &&
+				in_array ($ret['current']['remote_subtype'], $valid_subtypes) &&
+				array_key_exists ('remote_port', $ret['current']) &&
 				array_key_exists ('local_port', $ret['current'])
 			)
 				$ret[$ret['current']['local_port']][] = array
@@ -268,10 +280,10 @@ function eos4ReadLLDPStatus ($input)
 		case preg_match ('/^    - System Name: "(.+)"$/', $line, $matches):
 			if
 			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('remote_subtype', $ret['current']) and
-				in_array ($ret['current']['remote_subtype'], $valid_subtypes) and
-				array_key_exists ('remote_port', $ret['current']) and
+				array_key_exists ('current', $ret) &&
+				array_key_exists ('remote_subtype', $ret['current']) &&
+				in_array ($ret['current']['remote_subtype'], $valid_subtypes) &&
+				array_key_exists ('remote_port', $ret['current']) &&
 				array_key_exists ('local_port', $ret['current'])
 			)
 				$ret[$ret['current']['local_port']][] = array
@@ -305,8 +317,8 @@ function ros11ReadLLDPStatus ($input)
 		case preg_match ('/^System Name: (.+)$/', $line, $m):
 			if
 			(
-				array_key_exists ('current', $ret) and
-				array_key_exists ('remote_port', $ret['current']) and
+				array_key_exists ('current', $ret) &&
+				array_key_exists ('remote_port', $ret['current']) &&
 				array_key_exists ('local_port', $ret['current'])
 			)
 				$ret[$ret['current']['local_port']][] = array
@@ -377,7 +389,7 @@ function ios12ReadSwitchPortList (&$work, $line)
 function ios12PickSwitchportCommand (&$work, $line)
 {
 	$port_name = $work['current']['port_name'];
-	if (! strlen ($line) || $line[0] != ' ') // end of interface section
+	if ($line == '' || $line[0] != ' ') // end of interface section
 	{
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 
@@ -613,7 +625,7 @@ function fdry5PickInterfaceSubcommand (&$work, $line)
 	{
 	case (preg_match ('@^ dual-mode( +[[:digit:]]+ *)?$@', $line, $matches)):
 		// default VLAN ID for dual-mode command is 1
-		$work['current']['dual-mode'] = strlen (trim ($matches[1])) ? trim ($matches[1]) : 1;
+		$work['current']['dual-mode'] = trim ($matches[1]) != '' ? trim ($matches[1]) : 1;
 		break;
 	// FIXME: trunk/link-aggregate/ip address pulls port from 802.1Q field
 	default: // nom-nom
@@ -1709,11 +1721,11 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			if (count ($cmd['vlans']) > VLAN_MAX_ID - VLAN_MIN_ID)
 				$ret .= "$pre " . ($del ? '' : 'all') . "\n";
 			else
-				while (! empty ($cmd['vlans']))
+				while (count ($cmd['vlans']))
 				{
 					$vlan = array_shift ($cmd['vlans']);
 					$ret .= "$pre $vlan\n";
-					if ($del and isset ($vlan_names[$vlan]))
+					if ($del && isset ($vlan_names[$vlan]))
 						$ret .= "$pre ${vlan_names[$vlan]}\n";
 				}
 			break;
@@ -1820,7 +1832,7 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "no int vlan ${cmd['arg1']}\n";
 			break;
 		case 'rem allowed':
-			while (! empty ($cmd['vlans']))
+			while (count ($cmd['vlans']))
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
@@ -1829,7 +1841,7 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			}
 			break;
 		case 'add allowed':
-			while (! empty ($cmd['vlans']))
+			while (count ($cmd['vlans']))
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
@@ -1919,8 +1931,7 @@ function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "vlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			if (isset ($vlan_names[$cmd['arg1']]))
-				$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan ${cmd['arg1']}\n";
 			break;
 		case 'set access':
 			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
@@ -1995,8 +2006,7 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "vlan database\nvlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			if (isset ($vlan_names[$cmd['arg1']]))
-				$ret .= "vlan database\nno vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan database\nno vlan ${cmd['arg1']}\nexit\n";
 			break;
 		case 'set access':
 			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
@@ -2211,7 +2221,7 @@ function jun10Read8021QConfig ($input)
 			break;
 		elseif (preg_match ('/^(\S+)(?:\s+{|;)$/', $line, $m))
 			$current_group = $m[1];
-		elseif (isset ($current_group) and preg_match ('/^\s*family ethernet-switching\b/', $line))
+		elseif (isset ($current_group) && preg_match ('/^\s*family ethernet-switching\b/', $line))
 			throw new RTGatewayError ("Config-group '$current_group' contains switchport commands, which is not supported");
 	}
 
@@ -2230,7 +2240,7 @@ function jun10Read8021QConfig ($input)
 		$line_class = 'line-other';
 		if (preg_match ('/# END OF CONFIG|^(interface-range )?(\S+)\s+{$/', $line, $m)) // line starts with interface name
 		{ // found interface section opening, or end-of-file
-			if (isset ($current['name']) and $current['is_ethernet'])
+			if (isset ($current['name']) && $current['is_ethernet'])
 			{
 				// add previous interface to the results
 				if (! isset ($current['config']['mode']))
@@ -2245,8 +2255,8 @@ function jun10Read8021QConfig ($input)
 						$current['config']['allowed'] = array();
 				}
 				if (
-					$current['config']['mode'] == 'trunk' and
-					$current['config']['native'] != 0 and
+					$current['config']['mode'] == 'trunk' &&
+					$current['config']['native'] != 0 &&
 					! in_array ($current['config']['native'], $current['config']['allowed'])
 				)
 					$current['config']['allowed'][] = $current['config']['native'];
@@ -2277,9 +2287,9 @@ function jun10Read8021QConfig ($input)
 			$current['is_ethernet'] = TRUE;
 			$current['indent'] = $m[1];
 		}
-		elseif (isset ($current['indent']) and $line == $current['indent'] . '}')
+		elseif (isset ($current['indent']) && $line == $current['indent'] . '}')
 			$current['indent'] = NULL;
-		elseif ($current['is_ethernet'] and isset ($current['indent']))
+		elseif ($current['is_ethernet'] && isset ($current['indent']))
 		{
 			$line_class = 'line-8021q';
 			if (preg_match ('/^\s+port-mode (trunk|access);/', $line, $m))
@@ -2294,7 +2304,7 @@ function jun10Read8021QConfig ($input)
 					$item = trim ($item);
 					if (preg_match ('/^(\d+)(?:-(\d+))?$/', $item, $m))
 					{
-						if (isset ($m[2]) and $m[2] > $m[1])
+						if (isset ($m[2]) && $m[2] > $m[1])
 							$members = array_merge (range ($m[1], $m[2]), $members);
 						else
 							$members[] = $m[1];
@@ -2821,14 +2831,14 @@ function dlinkReadInterfaceStatus ($text)
 		$w = preg_split ('/\s+/', strtolower($line));
 		if (count($w) != 5)
 			continue;
-		$port_name = $w[0];
+		$portname = $w[0];
 		if ($w[1] != 'enabled')
 			$result[$portname] = array ('status'=>'disabled', 'speed'=>0, 'duplex'=>'');
 		elseif ($w[3] == 'linkdown')
 			$result[$portname] = array ('status'=>'down', 'speed'=>0, 'duplex'=>'');
 		else
 		{
-			$s = split('/', $w[3]);
+			$s = explode ('/', $w[3]);
 			$result[$portname] = array ('status'=>'up', 'speed'=>$s[0], 'duplex'=>$s[1]);
 		}
 	}
@@ -2921,7 +2931,7 @@ function ftos8ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Description\s+Status\s+Speed\s+Duplex\b/', $line))
 				$table_schema = guessTableStructure ($line);
@@ -2929,7 +2939,7 @@ function ftos8ReadInterfaceStatus ($text)
 		else
 		{
 			$fields = explodeTableLine ($line, $table_schema);
-			if (! empty ($fields['Port']) and ! empty ($fields['Speed']) and ! empty ($fields['Duplex']))
+			if (! empty ($fields['Port']) && ! empty ($fields['Speed']) && ! empty ($fields['Duplex']))
 			{
 				$status = strtolower ($fields['Status']);
 				if ($status != 'up' && $status != 'down')
@@ -2951,7 +2961,7 @@ function eos4ReadInterfaceStatus ($text)
 	$result = array();
 	$table_schema = array();
 	foreach (explode ("\n", $text) as $line)
-		if (empty ($table_schema))
+		if (! count ($table_schema))
 		{
 			if (preg_match('/^Port\s+Name\s+Status\s+Vlan\s+Duplex\s+Speed\b/', $line))
 				$table_schema = guessTableStructure ($line);
@@ -2959,7 +2969,7 @@ function eos4ReadInterfaceStatus ($text)
 		else
 		{
 			$fields = explodeTableLine ($line, $table_schema);
-			if (! empty ($fields['Port']) and ! empty ($fields['Speed']) and ! empty ($fields['Duplex']))
+			if (! empty ($fields['Port']) && ! empty ($fields['Speed']) && ! empty ($fields['Duplex']))
 			{
 				$status = strtolower ($fields['Status']);
 				if ($status == 'connected')
@@ -3320,7 +3330,7 @@ function ucsReadInventory ($text)
 			$tmp = array();
 		}
 	# validate the array
-	if (count ($replies) != 2 and count ($replies) != 1)
+	if (count ($replies) != 2 && count ($replies) != 1)
 		throw new RTGatewayError ('replies count does not match commands count');
 	if ($replies[0]['code'] != 'OK')
 		throw new RTGatewayError ('UCS login failed');

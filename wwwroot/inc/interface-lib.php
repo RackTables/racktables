@@ -290,6 +290,18 @@ $page_by_realm['ipv4rspool'] = 'ipv4slb';
 $page_by_realm['file'] = 'files';
 $page_by_realm['user'] = 'userlist';
 
+function getSelectOptions ($options, $selected_id = NULL)
+{
+	$ret = '';
+	foreach ($options as $key => $value)
+	{
+		$selected = is_array ($selected_id) ? in_array ($key, $selected_id) : $key == $selected_id;
+		$ret .= "<option value='${key}'" . ($selected ? ' selected' : '') . '>';
+		$ret .= stringForOption ($value) . '</option>';
+	}
+	return $ret;
+}
+
 function printSelect ($optionList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getSelect ($optionList, $select_attrs, $selected_id);
@@ -318,20 +330,11 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	$ret .= '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
 		$ret .= " ${attr_name}=${attr_value}";
-	$ret .= '>';
-	foreach ($optionList as $dict_key => $dict_value)
-	{
-		if (is_array ($selected_id))
-			$is_selected = in_array ($dict_key, $selected_id);
-		else
-			$is_selected = $dict_key == $selected_id;
-		$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>";
-	}
-	$ret .= '</select>';
+	$ret .= '>' . getSelectOptions ($optionList, $selected_id) . '</select>';
 	return $ret;
 }
 
-function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL, $autocomplete = false)
+function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = NULL)
 {
 	echo getNiftySelect ($groupList, $select_attrs, $selected_id);
 }
@@ -342,7 +345,7 @@ function printNiftySelect ($groupList, $select_attrs = array(), $selected_id = N
 function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 {
 	// special treatment for ungrouped data
-	if (count ($groupList) == 1 and isset ($groupList['other']))
+	if (count ($groupList) == 1 && isset ($groupList['other']))
 		return getSelect ($groupList['other'], $select_attrs, $selected_id);
 	if (!array_key_exists ('name', $select_attrs))
 		return '';
@@ -408,7 +411,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 			"<input type=image name=submit class=icon " .
 			"src='${img['path']}' " .
 			"border=0 " .
-			(!strlen ($title) ? '' : " title='${title}'") . // JT: Add title to input hrefs too
+			($title == '' ? '' : " title='${title}'") . // JT: Add title to input hrefs too
 			">";
 	else
 		return
@@ -417,7 +420,7 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 			"width=${img['width']} " .
 			"height=${img['height']} " .
 			"border=0 " .
-			(!strlen ($title) ? '' : "title='${title}'") .
+			($title == '' ? '' : "title='${title}'") .
 			">";
 }
 
@@ -437,7 +440,7 @@ function transformRequestData()
 	global $sic;
 	// Magic quotes feature is deprecated, but just in case the local system
 	// still has it activated, reverse its effect.
-	$do_magic_quotes = (function_exists ('get_magic_quotes_gpc') and get_magic_quotes_gpc());
+	$do_magic_quotes = function_exists ('get_magic_quotes_gpc') && get_magic_quotes_gpc();
 	$seen_keys = array();
 
 	// Escape any globals before we ever try to use them, but keep a copy of originals.
@@ -485,7 +488,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		return $javascript;
 	}
 	// Add jquery.js and racktables.js the first time a Javascript file is added.
-	if (empty($javascript))
+	if (! count ($javascript))
 	{
 		$javascript = array
 		(
@@ -556,7 +559,7 @@ function getRenderedIPv4NetCapacity ($range)
 		$total = ip4_range_size ($range);
 
 		// compute $a_total: own range size, without subranges
-		if (! isset ($range['kidc']) or $range['kidc'] == 0)
+		if (! isset ($range['kidc']) || $range['kidc'] == 0)
 			$a_total = $total;
 		else
 		{
@@ -606,14 +609,14 @@ function getRenderedIPv4NetCapacity ($range)
 		addJS ('js/net-usage.js');
 
 		$free_text = '';
-		if (isset ($range['kidc']) and $range['kidc'] > 0)
+		if (isset ($range['kidc']) && $range['kidc'] > 0)
 		{
 			$free_masks = array_keys ($range['spare_ranges']);
 			sort ($free_masks, SORT_NUMERIC);
 			if ($mask = array_shift ($free_masks))
 			{
 				$cnt = count ($range['spare_ranges'][$mask]);
-				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}x</small>" : "") . "/$mask free";
+				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}&times;</small>" : "") . "/$mask free";
 			}
 		}
 		$text =  ip4_range_size ($range) . $free_text;
@@ -740,7 +743,7 @@ function serializeTags ($chain, $baseurl = '')
 	foreach ($chain as $taginfo)
 	{
 		$title = '';
-		if (isset ($taginfo['user']) and isset ($taginfo['time']))
+		if (isset ($taginfo['user']) && isset ($taginfo['time']))
 			$title = htmlspecialchars ($taginfo['user'] . ', ' . formatAge ($taginfo['time']), ENT_QUOTES);
 		if (isset($taginfo['parent_id']))
 		{
@@ -748,11 +751,11 @@ function serializeTags ($chain, $baseurl = '')
 			foreach ($taglist[$taginfo['id']]['trace'] as $tag_id)
 				$parent_info[] = $taglist[$tag_id]['tag'];
 			$parent_info[] = $taginfo['tag'];
-			if (strlen ($title))
+			if ($title != '')
 				$title .= "\n";
 			$title .= implode (" &rarr;  ", $parent_info);
 		}
-		if (strlen ($title))
+		if ($title != '')
 			$title = "title='$title'";
 
 		$class = '';
@@ -793,17 +796,17 @@ function getPageName ($page_code)
 
 function printTagTRs ($cell, $baseurl = '')
 {
-	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' and count ($cell['etags']))
+	if (getConfigVar ('SHOW_EXPLICIT_TAGS') == 'yes' && count ($cell['etags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Explicit tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['etags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' and count ($cell['itags']))
+	if (getConfigVar ('SHOW_IMPLICIT_TAGS') == 'yes' && count ($cell['itags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Implicit tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['itags'], $baseurl) . "</td></tr>\n";
 	}
-	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' and count ($cell['atags']))
+	if (getConfigVar ('SHOW_AUTOMATIC_TAGS') == 'yes' && count ($cell['atags']))
 	{
 		echo "<tr><th width='50%' class=tagchain>Automatic tags:</th><td class=tagchain>";
 		echo serializeTags ($cell['atags']) . "</td></tr>\n";
@@ -832,7 +835,7 @@ function renderEntitySummary ($cell, $title, $values = array())
 	echo "<table border=0 cellspacing=0 cellpadding=3 width='100%'>\n";
 	foreach ($values as $name => $value)
 	{
-		if (is_array ($value) and count ($value) == 1)
+		if (is_array ($value) && count ($value) == 1)
 		{
 			$value = array_shift ($value);
 			echo $value;
@@ -878,16 +881,16 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 		$ret = '<a href="#" onclick="return false;"';
 		$class .= ' noclick';
 	}
-	if (! empty ($comment))
+	if ($comment != '')
 		$ret .= ' title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
 	$class = trim ($class);
-	if (! empty ($class))
+	if ($class != '')
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
 	$ret .= '>';
-	if (! empty ($img_name))
+	if ($img_name != '')
 	{
 		$ret .= getImageHREF ($img_name, $comment);
-		if (! empty ($title))
+		if ($title != '')
 			$ret .= ' ';
 	}
 	if (FALSE !== strpos ($class, 'need-confirmation'))
@@ -902,17 +905,17 @@ function getPopupLink ($helper, $params, $window_name = '', $img_name = '', $tit
 	$popup_args = 'height=700, width=700, location=no, menubar=no, resizable=yes, scrollbars=yes, status=no, titlebar=no, toolbar=no';
 	$ret .= '<a href="#"';
 	$class = trim ($class);
-	if (! empty ($class))
+	if ($class != '')
 		$ret .= ' class="' . htmlspecialchars ($class, ENT_QUOTES) . '"';
-	if (! empty ($comment))
+	if ($comment != '')
 		$ret .= 'title="' . htmlspecialchars ($comment, ENT_QUOTES) . '"';
 	$href = makeHref (array ('module' => 'popup', 'helper' => $helper) + makePageParams ($params));
 	$ret .= " onclick=\"window.open('$href', '$window_name', '$popup_args'); return false\">";
 
-	if (! empty ($img_name))
+	if ($img_name != '')
 	{
 		$ret .= getImageHREF ($img_name, $comment);
-		if (! empty ($title))
+		if ($title != '')
 			$ret .= ' ';
 	}
 	$ret .= $title;
@@ -1010,6 +1013,13 @@ function serializeFileLinks ($links, $scissors = FALSE)
 	return $ret;
 }
 
+function makeFileDownloadButton ($file_id, $imgname = 'download')
+{
+	$href = makeHref (array ('module' => 'download', 'file_id' => $file_id));
+	$img = getImageHREF ($imgname, 'download file');
+	return "<a href='${href}'>${img}</a>";
+}
+
 // XXX: in new code please use one of the stringFor... functions below
 //
 // This is a dual-purpose formating function:
@@ -1018,11 +1028,11 @@ function serializeFileLinks ($links, $scissors = FALSE)
 function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1
-	if (!mb_strlen ($string))
+	if ($string == '')
 		return '&nbsp;';
 	// a tab counts for a space
 	$string = preg_replace ("/\t/", ' ', $string);
-	if (!$maxlen or mb_strlen ($string) <= $maxlen)
+	if (! $maxlen || mb_strlen ($string) <= $maxlen)
 		return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 	return
 		($usetags ? ("<span title='" . htmlspecialchars ($string, ENT_QUOTES, 'UTF-8') . "'>") : '') .
@@ -1132,7 +1142,7 @@ function enableTagsPicker ()
 
 function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
 {
-	$object_name = ! isset ($object_name) || ! strlen ($object_name) ?
+	$object_name = ! isset ($object_name) || $object_name == '' ?
 		formatEntityName (spotEntity ('object', $alloc['object_id'])) :
 		$alloc['object_name'];
 	$title = $display_ifname ?
@@ -1142,6 +1152,15 @@ function makeIPAllocLink ($ip_bin, $alloc, $display_ifname = FALSE)
 		'<a href="' . makeHref (array ('page' => 'object', 'tab' => 'default', 'object_id' => $alloc['object_id'], 'hl_ip' => ip_format ($ip_bin))) . '"' .
 		' title="' . htmlspecialchars ($title, ENT_QUOTES) . '"' .
 		">" . ($display_ifname ? $alloc['name'] . '@' : '') . $object_name . "</a>";
+}
+
+function makeHtmlTag ($tagname, $attributes = array())
+{
+	$ret = '<' . $tagname;
+	foreach ($attributes as $key => $value)
+		$ret .= " $key=\"" . htmlspecialchars($value, ENT_QUOTES) . '"';
+	$ret .= '>';
+	return $ret;
 }
 
 ?>

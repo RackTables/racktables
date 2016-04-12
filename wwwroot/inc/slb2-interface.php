@@ -37,7 +37,7 @@ function renderVS ($vsid)
 	amplifyCell ($vsinfo);
 
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	if (strlen ($vsinfo['name']))
+	if ($vsinfo['name'] != '')
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
@@ -151,9 +151,9 @@ function renderEditVS ($vs_id)
 	$triplets = getTriplets ($vsinfo);
 	echo '<span style="margin-left: 2em"></span>';
 	if (count ($triplets) > 0)
-		echo getOpLink (NULL, '', 'NODESTROY', "Could not delete: there are " . count ($triplets) . " LB links");
+		echo getOpLink (NULL, '', 'NODESTROY', "Could not delete: there are " . count ($triplets) . " LB link(s)");
 	else
-		echo getOpLink (array ('op' => 'del', 'id' => $vsinfo['id']), '', 'DESTROY', 'Delete', 'need-confirmation');
+		echo getOpLink (array ('op' => 'del'), '', 'DESTROY', 'Delete', 'need-confirmation');
 	echo '</th></tr>';
 	echo '</table></form>';
 
@@ -258,8 +258,8 @@ function groupTriplets ($tr_list)
 			}
 			else
 			{
-				foreach ($group as &$tr_ref)
-					$tr_ref['span'][$group_by] = count ($group);
+				foreach (array_keys ($group) as $key)
+					$group[$key]['span'][$group_by] = count ($group);
 				foreach ($self ($group) as $tr)
 					if (isset ($index[$tr['key']]))
 					{
@@ -341,7 +341,13 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 	{
 		$vs_cell = spotEntity ('ipvs', $slb['vs_id']);
 		amplifyCell ($vs_cell);
-		echo "<tr valign=top class='row_${order} triplet-row'>";
+		echo makeHtmlTag ('tr', array(
+			'valign' => 'top',
+			'class' => "row_${order} triplet-row",
+			'data-object_id' => $slb['object_id'],
+			'data-vs_id' => $slb['vs_id'],
+			'data-rspool_id' => $slb['rspool_id'],
+		));
 		echo '<td><a href="#" onclick="' . "slb_config_preview(event, ${slb['object_id']}, ${slb['vs_id']}, ${slb['rspool_id']}); return false" . '">' . getImageHREF ('Zoom', 'config preview') . '</a></td>';
 		foreach (array_keys ($headers) as $realm)
 		{
@@ -555,8 +561,8 @@ function renderNewTripletForm ($realm1, $realm2)
 
 function getPopupSLBConfig ($row)
 {
-	$do_vs = (isset ($row) && isset ($row['vsconfig']) && strlen ($row['vsconfig']));
-	$do_rs = (isset ($row) && isset ($row['rsconfig']) && strlen ($row['rsconfig']));
+	$do_vs = (isset ($row) && isset ($row['vsconfig']) && $row['vsconfig'] != '');
+	$do_rs = (isset ($row) && isset ($row['rsconfig']) && $row['rsconfig'] != '');
 	if (!$do_vs && !$do_rs)
 		return;
 

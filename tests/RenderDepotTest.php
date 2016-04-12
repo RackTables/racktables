@@ -22,16 +22,19 @@ class RenderDepotTest extends PHPUnit_Framework_TestCase
 		commitDeleteObject ($this->shelf_id);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testRenderDepot ()
 	{
 		try {
 			ob_start ();
 			renderDepot ();
-			ob_clean ();
+			ob_end_clean ();
 			$this->assertTrue (TRUE);
 		}
  		catch (Exception $e) {
-			ob_clean ();
+			ob_end_clean ();
 	        $this->assertTrue (FALSE);
         }
 	}

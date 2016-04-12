@@ -31,6 +31,9 @@ class ObjectLogTest extends PHPUnit_Framework_TestCase
 		commitDeleteObject (self::$object_id);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testAddRackLogEntry ()
 	{
 		global $sic;
@@ -40,6 +43,9 @@ class ObjectLogTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testAddRowLogEntry ()
 	{
 		global $sic;
@@ -49,6 +55,9 @@ class ObjectLogTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testAddLocationLogEntry ()
 	{
 		global $sic;
@@ -58,6 +67,9 @@ class ObjectLogTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testAddObjectLogEntry ()
 	{
 		global $sic;
@@ -67,16 +79,19 @@ class ObjectLogTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testRenderLogRecords ()
 	{
 		try {
 			ob_start ();
 			allObjectLogs ();
-			ob_clean ();
+			ob_end_clean ();
 			$this->assertTrue (TRUE);
 		}
  		catch (Exception $e) {
-			ob_clean ();
+			ob_end_clean ();
 	        $this->assertTrue (FALSE);
         }
 	}

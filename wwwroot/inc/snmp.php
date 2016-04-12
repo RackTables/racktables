@@ -2324,6 +2324,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-CE500-24TT: 24 RJ-45/10-100TX + 2 RJ-45/10-100-1000T(X)',
 		'processors' => array ('catalyst-any-100TX', 'catalyst-any-1000T'),
 	),
+	'9.1.726' => array
+	(
+		'dict_key' => 159,
+		'text' => 'WS-CE500-24PC: 24 RJ-45/10-100TX PoE + 2 combo',
+		'processors' => array ('catalyst-chassis-1-to-2-combo-1000T', 'catalyst-chassis-any-100TX', 'catalyst-chassis-mgmt'),
+	),
 	'9.1.727' => array
 	(
 		'dict_key' => 161,
@@ -3395,6 +3401,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'J9452A: 48 RJ-45/10-100-1000T + 2 SFP-10000+',
 		'processors' => array ('procurve-49-to-52-10000SFP+', 'procurve-chassis-1000T'),
 	),
+	'11.2.3.7.11.131' => array
+	(
+		'dict_key' => 2396,
+		'text' => 'J9625A: 24 RJ-45/10-100TX (12 PoE) + 2 1000T + 2 SFP-1000',
+		'processors' => array ('procurve-25-to-26-1000T', 'procurve-27-to-28-1000SFP', 'procurve-chassis-100TX'),
+	),
 	'11.2.3.7.11.154' => array
 	(
 		'dict_key' => 2213,
@@ -3768,6 +3780,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
 	),
+	'2636.1.1.1.2.43' => array
+	(
+		'dict_key' => 2395,
+		'text' => 'Juniper EX2200 series',
+		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
 	'3955.6.1.2024.1' => array
 	(
 		'dict_key' => 2212,
@@ -3987,8 +4005,8 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 	if
 	(
 		isset ($cell['attrs'][$attr_id])
-		and !strlen ($cell['attrs'][$attr_id]['value'])
-		and	strlen ($new_value)
+		and $cell['attrs'][$attr_id]['value'] == ''
+		and $new_value != ''
 	)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
@@ -4099,12 +4117,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			'12.2' => 252,
 			'15.0' => 1901,
 			'15.1' => 2082,
+			'15.2' => 2142,
 		);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		if (array_key_exists ($major_line, $ios_codes))
 			updateStickerForCell ($objectInfo, 4, $ios_codes[$major_line]);
 		$sysChassi = $device->snmpget ('1.3.6.1.4.1.9.3.6.3.0');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
@@ -4117,7 +4136,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
 			commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
 		}
-		elseif ($sysObjectID != '9.1.749' and $sysObjectID != '9.1.920')
+		elseif ($sysObjectID != '9.1.749' && $sysObjectID != '9.1.920')
 		{
 			// assume the rest have one AC input, but exclude blade devices
 			checkPIC ('1-16'); // AC input
@@ -4150,7 +4169,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			updateStickerForCell ($objectInfo, 4, $nxos_codes[$major_line]);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		$sysChassi = $device->snmpget ('1.3.6.1.2.1.47.1.1.1.1.11.149');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
 		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
@@ -4197,7 +4216,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		break;
-	case preg_match ('/^2636\.1\.1\.1\.2\.3(0|1)/', $sysObjectID): // Juniper EX3200/EX4200
+	case preg_match ('/^2636\.1\.1\.1\.2\.(30|31|43)/', $sysObjectID): // Juniper EX2200/EX3200/EX4200
 		$sw_version = preg_replace ('/^.*, kernel JUNOS ([^ ]+).*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)
@@ -4223,7 +4242,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		# FOUNDRY-SN-AGENT-MIB::snChasSerNum.0
 		$sysChassi = $device->snmpget ('enterprises.1991.1.1.1.1.2.0');
-		if ($sysChassi !== FALSE or $sysChassi !== NULL)
+		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 
 		# Type of uplink module installed.
@@ -4308,7 +4327,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			checkPIC ('1-16');
 			commitAddPort ($objectInfo['id'], 'PSU1', '1-16', 'PSU1', '');
 		}
-		if (strlen ($serialNo))
+		if ($serialNo != '')
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^171\.10\.63\.8/', $sysObjectID): // D-Link DES-3052
@@ -4320,7 +4339,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^3955\.6\.1\.20(24|48)\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
 	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
-	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TPLink
+	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TP-Link
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
@@ -4382,7 +4401,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
-		if (strlen ($serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1'))) # entPhysicalSerialNumber.1
+		if ('' != $serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1')) # entPhysicalSerialNumber.1
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
 	case preg_match ('/^119\.1\.203\.2\.2\./', $sysObjectID): # NEC
@@ -4464,7 +4483,7 @@ function doPDUSNMPmining ($objectInfo, $switch)
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
 	{
-		$label = mb_strlen ($port[0]) ? $port[0] : $portno;
+		$label = $port[0] != '' ? $port[0] : $portno;
 		checkPIC ('1-1322');
 		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
 		$portno++;
@@ -4669,6 +4688,8 @@ function nextMACAddress ($addr)
 {
 	if ($addr == '')
 		return '';
+	if (! preg_match ('/^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/i', $addr))
+		throw new InvalidArgException ('addr', $addr, 'invalid MAC address format');
 	$bytes = array();
 	foreach (explode (':', $addr) as $hex)
 		$bytes[] = hexdec ($hex);

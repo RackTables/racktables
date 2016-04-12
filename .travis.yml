@@ -1,0 +1,26 @@
+language: php
+
+git:
+  quiet: true
+
+php:
+ - '5.4'
+ - '5.5'
+ - '5.6'
+ - '7.0'
+
+services:
+ - mysql
+
+before_script:
+ - mysql -u root -e "CREATE DATABASE racktables_unittest CHARACTER SET utf8 COLLATE utf8_general_ci;"
+ - mysql -u root -e "GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables@localhost IDENTIFIED BY 'travistest';"
+ - mysql -u racktables -ptravistest racktables_unittest < tests/data/`php -r 'require "wwwroot/inc/config.php"; echo CODE_VERSION;'`.sql
+ - echo "<?php" > wwwroot/inc/secret.php
+ - echo "\$pdo_dsn = 'mysql:host=127.0.0.1;port=3306;dbname=racktables_unittest';" >> wwwroot/inc/secret.php
+ - echo "\$db_username = 'racktables';" >> wwwroot/inc/secret.php
+ - echo "\$db_password = 'travistest';" >> wwwroot/inc/secret.php
+ - echo "?>" >> wwwroot/inc/secret.php
+
+script:
+ - ./tests/express.sh

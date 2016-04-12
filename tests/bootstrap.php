@@ -6,6 +6,7 @@ $script_mode = TRUE;
 require_once '../wwwroot/inc/ophandlers.php';
 require_once '../wwwroot/inc/init.php';
 require_once '../wwwroot/inc/interface.php';
+require_once '../wwwroot/inc/snmp.php';
 require_once './TestHelper.php';
 
 // Sanity check DB connection

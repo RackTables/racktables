@@ -23,11 +23,14 @@ import sys
 try:
 	from UcsSdk import *
 	from UcsSdk.MoMeta.NetworkElement import NetworkElement
-        from UcsSdk.MoMeta.EquipmentChassis import EquipmentChassis
-        from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
+	from UcsSdk.MoMeta.EquipmentChassis import EquipmentChassis
+	from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
+	from UcsSdk.MoMeta.VnicFc import VnicFc
+	from UcsSdk.MoMeta.VnicEther import VnicEther
+	from UcsSdk.MoMeta.ComputeRackUnit import ComputeRackUnit
 	handle = UcsHandle()
 except Exception, err:
-	sys.stderr.write('UCS Python SDK is missing\n')
+	sys.stderr.write('UCS Python SDK is missing %s (Path: %s)\n' % (str(err), sys.path))
 	sys.exit(2)
 
 loggedin = 0
@@ -79,6 +82,13 @@ while 1:
 				print "COLUMNS type,serial,DN,model,assigned,slot"
 				for bl in handle.GetManagedObject(None, ComputeBlade.ClassId()):
 					print "ROW ComputeBlade,"     + bl.Serial + "," + bl.Dn + "," + bl.Model + "," + bl.AssignedToDn + "," + bl.SlotId
+				print "COLUMNS type,DN,name,addr"
+				for po in handle.GetManagedObject(None, VnicEther.ClassId()) + handle.GetManagedObject(None, VnicFc.ClassId()):
+					if (po.Addr != "derived"):
+						print "ROW VnicPort,"     + po.Dn + "," + po.Name + "," + po.Addr
+				print "COLUMNS type,serial,DN,model,assigned"
+				for rm in handle.GetManagedObject(None, ComputeRackUnit.ClassId()):
+					print "ROW ComputeRackUnit,"     + rm.Serial + "," + rm.Dn + "," + rm.Model + "," + rm.AssignedToDn
 				print "OK enumeration complete"
 			except Exception, err:
 				print "ERR exception occured, logging out"

@@ -26,7 +26,7 @@ $(document).ready (function() {
 				.click(onPencilClick)
 			);
 	});
-	$('body').mouseover(onBodyMouseOver);
+	$(document).mouseover(onBodyMouseOver);
 });
 
 function onSpanMouseOver (event) {
@@ -77,8 +77,10 @@ function onPencilClick (event) {
 		.keydown(
 			function (event) {
 				var code = event.keyCode ? event.keyCode : event.which;
-				if (code == 13)
+				if (code == 13) {
 					onFormSubmit();
+					return false;
+				}
 				else if (code == 27)
 					hideEditForm();
 			})
@@ -93,7 +95,7 @@ function onPencilClick (event) {
 	doSetCaretPosition (input[0], input[0].value.length);
 
 	group.click(function(event) { event.stopPropagation();	});
-	$('body').one('click',
+	$(document).one('click',
 		function (event) {
 			if (! waiting_response)
 				hideEditForm();

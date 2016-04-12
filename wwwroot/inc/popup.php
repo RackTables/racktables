@@ -117,7 +117,7 @@ INNER JOIN (
 	while (TRUE)
 	{
 		$row = $result->fetch (PDO::FETCH_ASSOC);
-		if (isset ($prev_object_id) and (! $row or $row['object_id'] != $prev_object_id))
+		if (isset ($prev_object_id) && (! $row || $row['object_id'] != $prev_object_id))
 		{
 			// handle sorted object's portlist
 			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
@@ -222,7 +222,7 @@ function handlePopupPortLink()
 	$port_info = getPortInfo ($_REQUEST['port']);
 	$remote_port_info = getPortInfo ($_REQUEST['remote_port']);
 	$POIFC = getPortOIFCompat();
-	if (isset ($_REQUEST['port_type']) and isset ($_REQUEST['remote_port_type']))
+	if (isset ($_REQUEST['port_type']) && isset ($_REQUEST['remote_port_type']))
 	{
 		$type_local = $_REQUEST['port_type'];
 		$type_remote = $_REQUEST['remote_port_type'];
@@ -421,7 +421,7 @@ function renderPopupPortSelector()
 
 	// display results
 	startPortlet ('Compatible spare ports');
-	if (empty ($spare_ports))
+	if (! count ($spare_ports))
 		echo '(nothing found)';
 	else
 	{

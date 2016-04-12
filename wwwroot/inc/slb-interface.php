@@ -53,7 +53,7 @@ function renderSLBEntityCell ($cell, $highlighted = FALSE)
 	case 'ipv4rspool':
 		echo "<tr><td>";
 		echo "<a class='$a_class' href='index.php?page=ipv4rspool&pool_id=${cell['id']}'>";
-		echo !strlen ($cell['name']) ? "ANONYMOUS pool [${cell['id']}]" : stringForTD ($cell['name']);
+		echo $cell['name'] == '' ? "ANONYMOUS pool [${cell['id']}]" : stringForTD ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
 		if ($cell['rscount'])
@@ -269,7 +269,7 @@ function renderRSPool ($pool_id)
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
 
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	if (strlen ($poolInfo['name']))
+	if ($poolInfo['name'] != '')
 		echo "<tr><td colspan=2 align=center><h1>{$poolInfo['name']}</h1></td></tr>";
 	echo "<tr><td class=pcleft>\n";
 
@@ -352,7 +352,7 @@ function prepareRealServersTable ($rs_list)
 	$not_seen = $columns;
 	foreach ($rs_list as $rs)
 		foreach ($rs as $key => $value)
-			if (! empty ($value) and isset ($not_seen[$key]))
+			if (! empty ($value) && isset ($not_seen[$key]))
 				unset ($not_seen[$key]);
 	foreach (array_keys ($not_seen) as $key)
 		if ($key != 'rsip')
@@ -437,8 +437,8 @@ function getBulkRealsFormats()
 {
 	return array
 	(
-		'ssv_1' => 'SSV: &lt;IP address&gt;',
-		'ssv_2' => 'SSV: &lt;IP address&gt; &lt;port&gt;',
+		'ssv_1' => 'SSV: <IP address>',
+		'ssv_2' => 'SSV: <IP address> <port>',
 		'ipvs_2' => 'ipvsadm -l -n (address and port)',
 		'ipvs_3' => 'ipvsadm -l -n (address, port and weight)',
 	);
@@ -466,7 +466,7 @@ function renderRealServerList ()
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
 		echo "<tr valign=top class=row_${order}><td>";
-		$dname = strlen ($pool_list[$rsinfo['rspool_id']]['name']) ? $pool_list[$rsinfo['rspool_id']]['name'] : 'ANONYMOUS';
+		$dname = $pool_list[$rsinfo['rspool_id']]['name'] != '' ? $pool_list[$rsinfo['rspool_id']]['name'] : 'ANONYMOUS';
 		echo mkA ($dname, 'ipv4rspool', $rsinfo['rspool_id']);
 		echo '</td><td align=center>';
 		if ($rsinfo['inservice'] == 'yes')
@@ -505,7 +505,7 @@ function renderVirtualService ($vsid)
 {
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	if (strlen ($vsinfo['name']))
+	if ($vsinfo['name'] != '')
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
@@ -579,15 +579,15 @@ function renderEditRSPool ($pool_id)
 
 	// clone link
 	echo '<p class="centered">';
-	echo getOpLink (array	('op' => 'cloneIPv4RSP', 'pool_id' => $poolinfo['id']), 'Clone RS pool', 'copy');
+	echo getOpLink (array ('op' => 'cloneIPv4RSP'), 'Clone RS pool', 'copy');
 	echo '</p>';
 
 	// delete link
 	echo '<p class="centered">';
 	if ($poolinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB links");
+		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB link(s)");
 	else
-		echo getOpLink (array	('op' => 'del', 'id' => $poolinfo['id']), 'Delete RS pool', 'destroy');
+		echo getOpLink (array ('op' => 'del'), 'Delete RS pool', 'destroy');
 	echo '</p>';
 }
 
@@ -616,9 +616,9 @@ function renderEditVService ($vsid)
 	// delete link
 	echo '<p class="centered">';
 	if ($vsinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB links");
+		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB link(s)");
 	else
-		echo getOpLink (array	('op' => 'del', 'id' => $vsinfo['id']), 'Delete virtual service', 'destroy');
+		echo getOpLink (array ('op' => 'del'), 'Delete virtual service', 'destroy');
 }
 
 function renderLVSConfig ($object_id)

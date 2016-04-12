@@ -8,7 +8,7 @@
 $script_mode = TRUE;
 require 'inc/init.php';
 
-function usage()
+function usage ($rc)
 {
 	echo "Usage: <this file> <options>\n";
 	echo "\t\t--vdid=<VLAN domain ID>\n";
@@ -19,7 +19,8 @@ function usage()
 	echo "\t\t[--verbose]\n";
 	echo "\t\t[--nolock]\n";
 	echo "\t\t[--stderr]\n";
-	exit (1);
+	echo "\t\t--help\n";
+	exit ($rc);
 }
 
 define ('PML_VERBOSE', 1 << 0); // display message only if --verbose option specified
@@ -35,9 +36,11 @@ function print_message_line($text, $flags = 0)
 		fwrite (STDERR, $buff);
 }
 
-$options = getopt ('', array ('vdid:', 'max::', 'mode:', 'verbose', 'nolock', 'stderr'));
+$options = getopt ('', array ('vdid:', 'max::', 'mode:', 'verbose', 'nolock', 'stderr', 'help'));
+if (array_key_exists ('help', $options))
+	usage (0);
 if (!array_key_exists ('mode', $options))
-	usage();
+	usage (1);
 
 switch ($options['mode'])
 {
@@ -51,7 +54,7 @@ case 'push':
 	$do_push = TRUE;
 	break;
 default:
-	usage();
+	usage (1);
 }
 
 $max = array_fetch ($options, 'max', 0);
@@ -150,7 +153,7 @@ foreach ($switch_queue as $object)
 		}
 		$i_am_child = (0 === $fork_res = pcntl_fork());
 	}
-	if (! $do_fork or $i_am_child)
+	if (! $do_fork || $i_am_child)
 	{
 		try
 		{

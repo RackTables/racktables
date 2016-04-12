@@ -35,6 +35,19 @@ $delayauth = array();
 $svghandler = array();
 $ajaxhandler = array();
 
+/*
+Syntax:
+// Require file.php when processing tab "tab" of the page "page":
+$interface_requires['page-tab'] = array ('file.php');
+
+// Same, different notation:
+$interface_requires['page-tab'] = 'file.php';
+
+// Require three files for every tab of the page "page":
+$interface_requires['page-*'] = array ('file1.php', 'file2.php', 'file3.php');
+*/
+$interface_requires = array();
+
 $indexlayout = array
 (
 	array ('rackspace', 'depot', 'ipv4space', 'ipv6space'),
@@ -280,6 +293,9 @@ $ophandler['object']['ucs']['cleanupUCS'] = 'cleanupUCS';
 $delayauth['object-8021qports-save8021QConfig'] = TRUE;
 $delayauth['object-8021qorder-add'] = TRUE;
 $delayauth['object-8021qorder-del'] = TRUE;
+$interface_requires['object-8021qorder'] = 'interface-8021q.php';
+$interface_requires['object-8021qports'] = 'interface-8021q.php';
+$interface_requires['object-8021qsync'] = 'interface-8021q.php';
 
 $page['ipv4space']['parent'] = 'index';
 $tab['ipv4space']['default'] = 'Browse';
@@ -328,6 +344,7 @@ $ophandler['ipv4net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv4net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv4net']['8021q']['bind'] = 'bindVLANtoIPv4';
 $ophandler['ipv4net']['8021q']['unbind'] = 'unbindVLANfromIPv4';
+$interface_requires['ipv4net-8021q'] = 'interface-8021q.php';
 
 $page['ipv6net']['parent'] = 'ipv6space';
 $page['ipv6net']['bypass'] = 'id';
@@ -352,6 +369,7 @@ $ophandler['ipv6net']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['ipv6net']['files']['unlinkFile'] = 'unlinkFile';
 $ophandler['ipv6net']['8021q']['bind'] = 'bindVLANtoIPv6';
 $ophandler['ipv6net']['8021q']['unbind'] = 'unbindVLANfromIPv6';
+$interface_requires['ipv6net-8021q'] = 'interface-8021q.php';
 
 //$page['ipaddress']['parent'] = 'ipnet'; - this is commented intentionally, there is a special hack in getPath
 $page['ipaddress']['bypass'] = 'ip';
@@ -498,6 +516,7 @@ $page['search']['bypass'] = 'q';
 $page['config']['title'] = 'Configuration';
 $page['config']['handler'] = 'renderConfigMainpage';
 $page['config']['parent'] = 'index';
+$interface_requires['config-*'] = 'interface-config.php';
 
 $page['userlist']['title'] = 'Local users';
 $page['userlist']['parent'] = 'config';
@@ -507,6 +526,7 @@ $tabhandler['userlist']['default'] = 'renderUserList';
 $tabhandler['userlist']['edit'] = 'renderUserListEditor';
 $ophandler['userlist']['edit']['updateUser'] = 'updateUser';
 $ophandler['userlist']['edit']['createUser'] = 'createUser';
+$interface_requires['userlist-*'] = 'interface-config.php';
 
 $page['user']['parent'] = 'userlist';
 $page['user']['bypass'] = 'user_id';
@@ -524,6 +544,7 @@ $ophandler['user']['tags']['saveTags'] = 'saveEntityTags';
 $ophandler['user']['files']['addFile'] = 'addFileToEntity';
 $ophandler['user']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['user']['files']['unlinkFile'] = 'unlinkFile';
+$interface_requires['user-*'] = 'interface-config.php';
 
 $page['perms']['title'] = 'Permissions';
 $page['perms']['parent'] = 'config';
@@ -532,6 +553,7 @@ $tab['perms']['edit'] = 'Edit';
 $tabhandler['perms']['default'] = 'renderRackCodeViewer';
 $tabhandler['perms']['edit'] = 'renderRackCodeEditor';
 $ophandler['perms']['edit']['saveRackCode'] = 'saveRackCode';
+$interface_requires['perms-*'] = 'interface-config.php';
 
 $page['parentmap']['title'] = 'Object container compatibility';
 $page['parentmap']['parent'] = 'config';
@@ -541,6 +563,7 @@ $tabhandler['parentmap']['default'] = 'renderObjectParentCompatViewer';
 $tabhandler['parentmap']['edit'] = 'renderObjectParentCompatEditor';
 $ophandler['parentmap']['edit']['add'] = 'tableHandler';
 $ophandler['parentmap']['edit']['del'] = 'tableHandler';
+$interface_requires['parentmap-*'] = 'interface-config.php';
 
 $page['portmap']['title'] = 'Port compatibility';
 $page['portmap']['parent'] = 'config';
@@ -552,6 +575,7 @@ $ophandler['portmap']['edit']['add'] = 'addOIFCompat';
 $ophandler['portmap']['edit']['del'] = 'delOIFCompat';
 $ophandler['portmap']['edit']['addPack'] = 'addOIFCompatPack';
 $ophandler['portmap']['edit']['delPack'] = 'delOIFCompatPack';
+$interface_requires['portmap-*'] = 'interface-config.php';
 
 $page['portifcompat']['title'] = 'Enabled port types';
 $page['portifcompat']['parent'] = 'config';
@@ -563,6 +587,7 @@ $ophandler['portifcompat']['edit']['add'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['del'] = 'tableHandler';
 $ophandler['portifcompat']['edit']['addPack'] = 'addIIFOIFCompatPack';
 $ophandler['portifcompat']['edit']['delPack'] = 'delIIFOIFCompatPack';
+$interface_requires['portifcompat-*'] = 'interface-config.php';
 
 $page['portoifs']['title'] = 'Port outer interfaces';
 $page['portoifs']['parent'] = 'config';
@@ -573,6 +598,7 @@ $tabhandler['portoifs']['edit'] = 'renderPortOIFEditor';
 $ophandler['portoifs']['edit']['add'] = 'tableHandler';
 $ophandler['portoifs']['edit']['del'] = 'tableHandler';
 $ophandler['portoifs']['edit']['upd'] = 'tableHandler';
+$interface_requires['portoifs-*'] = 'interface-config.php';
 
 $page['attrs']['title'] = 'Attributes';
 $page['attrs']['parent'] = 'config';
@@ -587,6 +613,7 @@ $ophandler['attrs']['editattrs']['del'] = 'tableHandler';
 $ophandler['attrs']['editattrs']['upd'] = 'tableHandler';
 $ophandler['attrs']['editmap']['add'] = 'supplementAttrMap';
 $ophandler['attrs']['editmap']['del'] = 'tableHandler';
+$interface_requires['attrs-*'] = 'interface-config.php';
 
 $page['dict']['title'] = 'Dictionary';
 $page['dict']['parent'] = 'config';
@@ -597,6 +624,7 @@ $tabhandler['dict']['chapters'] = 'renderChaptersEditor';
 $ophandler['dict']['chapters']['add'] = 'tableHandler';
 $ophandler['dict']['chapters']['del'] = 'tableHandler';
 $ophandler['dict']['chapters']['upd'] = 'tableHandler';
+$interface_requires['dict-*'] = 'interface-config.php';
 
 $page['chapter']['parent'] = 'dict';
 $page['chapter']['bypass'] = 'chapter_no';
@@ -608,6 +636,7 @@ $tabhandler['chapter']['edit'] = 'renderChapterEditor';
 $ophandler['chapter']['edit']['add'] = 'tableHandler';
 $ophandler['chapter']['edit']['del'] = 'tableHandler';
 $ophandler['chapter']['edit']['upd'] = 'tableHandler';
+$interface_requires['chapter-*'] = 'interface-config.php';
 
 $page['ui']['title'] = 'User interface';
 $page['ui']['parent'] = 'config';
@@ -619,16 +648,22 @@ $tabhandler['ui']['edit'] = 'renderConfigEditor';
 $tabhandler['ui']['reset'] = 'renderUIResetForm';
 $ophandler['ui']['edit']['upd'] = 'updateUI';
 $ophandler['ui']['reset']['go'] = 'resetUIConfig';
+$interface_requires['ui-*'] = 'interface-config.php';
 
 $page['tagtree']['title'] = 'Tag tree';
 $page['tagtree']['parent'] = 'config';
 $tab['tagtree']['default'] = 'View';
 $tab['tagtree']['edit'] = 'Edit';
+$tab['tagtree']['resolve'] = 'Circular references';
 $tabhandler['tagtree']['default'] = 'renderTagTree';
 $tabhandler['tagtree']['edit'] = 'renderTagTreeEditor';
+$tabhandler['tagtree']['resolve'] = 'renderGraphCycleResolver';
 $ophandler['tagtree']['edit']['createTag'] = 'tableHandler';
 $ophandler['tagtree']['edit']['destroyTag'] = 'tableHandler';
 $ophandler['tagtree']['edit']['updateTag'] = 'updateTag';
+$ophandler['tagtree']['resolve']['updateTag'] = 'updateTag';
+$trigger['tagtree']['resolve'] = 'triggerGraphCycleResolver';
+$interface_requires['tagtree-*'] = 'interface-config.php';
 
 $page['myaccount']['title'] = 'My account';
 $page['myaccount']['parent'] = 'config';
@@ -645,6 +680,7 @@ $ophandler['myaccount']['mypassword']['changeMyPassword'] = 'changeMyPassword';
 $ophandler['myaccount']['interface']['upd'] = 'saveMyPreferences';
 $ophandler['myaccount']['interface']['reset'] = 'resetMyPreference';
 $ophandler['myaccount']['qlinks']['save'] = 'saveQuickLinks';
+$interface_requires['myaccount-*'] = 'interface-config.php';
 
 $page['cacti']['title'] = 'Cacti';
 $page['cacti']['parent'] = 'config';
@@ -655,6 +691,7 @@ $tabhandler['cacti']['servers'] = 'renderCactiServersEditor';
 $ophandler['cacti']['servers']['add'] = 'tableHandler';
 $ophandler['cacti']['servers']['del'] = 'tableHandler';
 $ophandler['cacti']['servers']['upd'] = 'tableHandler';
+$interface_requires['cacti-*'] = 'interface-config.php';
 
 $page['munin']['title'] = 'Munin';
 $page['munin']['parent'] = 'config';
@@ -665,6 +702,7 @@ $tabhandler['munin']['servers'] = 'renderMuninServersEditor';
 $ophandler['munin']['servers']['add'] = 'tableHandler';
 $ophandler['munin']['servers']['del'] = 'tableHandler';
 $ophandler['munin']['servers']['upd'] = 'tableHandler';
+$interface_requires['munin-*'] = 'interface-config.php';
 
 $page['cableconf']['title'] = 'Patch cables';
 $page['cableconf']['parent'] = 'config';
@@ -688,6 +726,7 @@ $ophandler['cableconf']['conncompat']['add'] = 'tableHandler';
 $ophandler['cableconf']['conncompat']['del'] = 'tableHandler';
 $ophandler['cableconf']['oifcompat']['add'] = 'tableHandler';
 $ophandler['cableconf']['oifcompat']['del'] = 'tableHandler';
+$interface_requires['cableconf-*'] = 'interface-cables.php';
 
 $page['reports']['title'] = 'Reports';
 $page['reports']['parent'] = 'index';
@@ -710,6 +749,8 @@ $tabhandler['reports']['8021q'] = 'render8021QReport';
 $tabhandler['reports']['warranty'] = 'renderExpirations';
 $tabhandler['reports']['integrity'] = 'renderDataIntegrityReport';
 $tabhandler['reports']['local'] = 'renderLocalReports';
+$interface_requires['reports-rackcode'] = 'code.php';
+$interface_requires['reports-*'] = 'interface-reports.php';
 
 $page['files']['title'] = 'Files';
 $page['files']['parent'] = 'index';
@@ -757,6 +798,7 @@ $ophandler['8021q']['vdlist']['upd'] = 'updateVLANDomain';
 $ophandler['8021q']['vstlist']['add'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['del'] = 'tableHandler';
 $ophandler['8021q']['vstlist']['upd'] = 'tableHandler';
+$interface_requires['8021q-*'] = 'interface-8021q.php';
 
 $page['vlandomain']['parent'] = '8021q';
 $page['vlandomain']['bypass'] = 'vdom_id';
@@ -775,6 +817,7 @@ $ophandler['vlandomain']['vlanlist']['del'] = 'tableHandler';
 $ophandler['vlandomain']['vlanlist']['upd'] = 'tableHandler';
 $delayauth['vlandomain-8021qorder-add'] = TRUE;
 $delayauth['vlandomain-8021qorder-del'] = TRUE;
+$interface_requires['vlandomain-*'] = 'interface-8021q.php';
 
 $page['vlan']['parent'] = 'vlandomain';
 $page['vlan']['bypass'] = 'vlan_ck';
@@ -796,6 +839,7 @@ $ophandler['vlan']['ipv4']['bind'] = 'bindVLANtoIPv4';
 $ophandler['vlan']['ipv4']['unbind'] = 'unbindVLANfromIPv4';
 $ophandler['vlan']['ipv6']['bind'] = 'bindVLANtoIPv6';
 $ophandler['vlan']['ipv6']['unbind'] = 'unbindVLANfromIPv6';
+$interface_requires['vlan-*'] = 'interface-8021q.php';
 
 $page['vst']['parent'] = '8021q';
 $page['vst']['bypass'] = 'vst_id';
@@ -818,12 +862,14 @@ $ophandler['vst']['8021qorder']['del'] = 'del8021QOrder';
 $ophandler['vst']['tags']['saveTags'] = 'saveEntityTags';
 $delayauth['vst-8021qorder-add'] = TRUE;
 $delayauth['vst-8021qorder-del'] = TRUE;
+$interface_requires['vst-*'] = 'interface-8021q.php';
 
 $page['dqueue']['parent'] = '8021q';
 $page['dqueue']['bypass'] = 'dqcode';
 $page['dqueue']['bypass_type'] = 'enum/dqcode';
 $tab['dqueue']['default'] = 'View';
 $tabhandler['dqueue']['default'] = 'renderDeployQueue';
+$interface_requires['dqueue-*'] = 'interface-8021q.php';
 
 $page['objectlog']['title'] = 'Log records';
 $page['objectlog']['parent'] = 'index';
@@ -850,8 +896,9 @@ $ophandler['cables']['heaps']['upd'] = 'tableHandler';
 $ophandler['cables']['amount']['dec'] = 'consumePatchCable';
 $ophandler['cables']['amount']['inc'] = 'replenishPatchCable';
 $ophandler['cables']['amount']['set'] = 'setPatchCableAmount';
+$interface_requires['cables-*'] = 'interface-cables.php';
 
-$ajaxhandler['get-tag-select'] = 'getTagSelectAJAX';
+$ajaxhandler['get-parent-node-options'] = 'getParentNodeOptionsAJAX';
 $ajaxhandler['get-location-select'] = 'getLocationSelectAJAX';
 $ajaxhandler['verifyCode'] = 'verifyCodeAJAX';
 $ajaxhandler['get-port-link'] = 'getPortInfoAJAX';

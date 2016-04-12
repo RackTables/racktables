@@ -403,7 +403,7 @@ function getVSIDsByGroup ($group_id)
 
 function concatConfig (&$config, $line)
 {
-	if (strlen ($config))
+	if ($config != '')
 		$config .= "\n";
 	$config .= $line;
 }
@@ -657,7 +657,7 @@ function addSLBPortLink ($link_row)
 	// lock on port
 	$result = usePreparedSelectBlade
 	(
-		"SELECT * FROM VSPorts WHERE proto = ? AND vport = ? FOR UPDATE",
+		"SELECT vs_id, proto, vport FROM VSPorts WHERE proto = ? AND vport = ? FOR UPDATE",
 		array ($link_row['proto'], $link_row['vport'])
 	);
 	unset ($result);
@@ -712,7 +712,7 @@ function addSLBIPLink ($link_row)
 	// lock on vip
 	$result = usePreparedSelectBlade
 	(
-		"SELECT * FROM VSIPs WHERE vip = ? FOR UPDATE",
+		"SELECT vs_id, vip FROM VSIPs WHERE vip = ? FOR UPDATE",
 		array ($link_row['vip'])
 	);
 	unset ($result);

@@ -118,7 +118,7 @@ class RackTablesError extends Exception
 	{
 		if (isCLIMode())
 			return $string;
-		return stringForLabel ($string);
+		return stringForLabel ($string, 80);
 	}
 	public function dispatch()
 	{
@@ -183,14 +183,11 @@ class ERetryNeeded extends RackTablesError
 class InvalidArgException extends RackTablesError
 {
 	// derive an instance of InvalidRequestArgException
-	function newIRAE ($argname)
+	function newIRAE ($argname = NULL)
 	{
+		if ($argname === NULL)
+			return new InvalidRequestArgException ($this->name, $this->value, $this->reason);
 		return new InvalidRequestArgException ($argname, $_REQUEST[$argname], $this->reason);
-	}
-	// for backward compatibility only, remove together with convertToIRAE()
-	function newIRAESameArgument()
-	{
-		return new InvalidRequestArgException ($this->name, $this->value, $this->reason);
 	}
 	function __construct ($name, $value, $reason=NULL)
 	{
@@ -293,7 +290,7 @@ class RackCodeError extends RackTablesError
 class RTImageError extends RackTablesError
 {
 	protected $imgbin;
-	function __construct ($subject)
+	function __construct ($subject = NULL)
 	{
 		$map = array
 		(
@@ -331,7 +328,7 @@ function stringTrace($trace)
 			$ret .= $line['file'].':'.$line['line'].' ';
 		$ret .= $line['function'].'(';
 		$f = true;
-		if (isset ($line['args']) and is_array ($line['args']))
+		if (isset ($line['args']) && is_array ($line['args']))
 			foreach ($line['args'] as $arg)
 			{
 				if (! $f) $ret .= ', ';

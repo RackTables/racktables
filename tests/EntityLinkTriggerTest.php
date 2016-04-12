@@ -92,6 +92,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testLinkObjectToSelfByInsert ()
@@ -108,6 +109,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testLinkObjectToSelfByUpdate ()
@@ -129,6 +131,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testCreateLinkBetweenCompatibleObjects ()
 	{
 		usePreparedInsertBlade
@@ -143,6 +148,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testUpdateLinkBetweenCompatibleObjects ()
 	{
 		usePreparedInsertBlade
@@ -177,6 +185,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testCreateLinkBetweenIncompatibleObjects ()
@@ -193,6 +202,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkBetweenIncompatibleObjects ()
@@ -214,6 +224,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testCreateLinkBetweenLocations ()
 	{
 		usePreparedInsertBlade
@@ -229,6 +242,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testLinkLocationToMultipleLocations ()
@@ -253,6 +267,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testUpdateLinkBetweenLocations ()
 	{
 		usePreparedInsertBlade
@@ -286,6 +303,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue (TRUE);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testLinkRowToLocation ()
 	{
 		usePreparedInsertBlade
@@ -301,6 +321,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testLinkRowToMultipleLocations ()
@@ -325,6 +346,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testUpdateRowLink ()
 	{
 		usePreparedInsertBlade
@@ -346,6 +370,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testInvalidateRowLink ()
@@ -376,6 +401,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testLinkRackToRow ()
 	{
 		usePreparedInsertBlade
@@ -391,6 +419,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testLinkRackToMultipleRows ()
@@ -415,6 +444,9 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	/**
+	 * @group small
+	 */
 	public function testUpdateRackLink ()
 	{
 		usePreparedInsertBlade
@@ -436,6 +468,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @group small
 	 * @expectedException PDOException
 	 */
 	public function testInvalidateRackLink ()
