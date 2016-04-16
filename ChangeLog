@@ -3,6 +3,7 @@
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser
 	bugfix: LLDP discovery for Cisco IOS: fix the case when remote device name length is 20 chars
 	bugfix: unneeded VLANs were not removed from Arista EOS4 and Marvell devices
+	bugfix: fix a PHP warning (#1609 by Maik Ehinger)
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
 	update: Nexus 7700, Huawei S5700, Juniper QFX, Mellanox, Quanta, Ixia device models added into dictionary
 	update: Cmd+Click now inverses tag selection on OS X like Ctrl+Click does on Windows/Linix

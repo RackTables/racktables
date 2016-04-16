@@ -737,6 +737,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'row':
 		$record['racks'] = getRacks ($record['id']);
+		break;
 	case 'rack':
 		// start with default rackspace
 		for ($i = $record['height']; $i > 0; $i--)
