@@ -161,11 +161,7 @@ function trigger_rackspace ()
 		return '';
 
 	// Show tab if the object is already mounted
-	if ($object['rack_id'])
-		return 'std';
-
-	if (getEntitiesCount ('rack') > 0) return 'std';
-	return '';
+	return ($object['rack_id'] || getEntitiesCount ('rack') > 0) ? 'std' : '';
 }
 
 function trigger_ports ()
@@ -204,10 +200,7 @@ function trigger_ipv4net_vlanconfig ()
 	$netinfo = spotEntity ('ipv4net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
-		return 'attn';
-	else
-		return '';
+	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
 }
 
 // implement similar logic for IPv6 networks
@@ -218,10 +211,7 @@ function trigger_ipv6net_vlanconfig ()
 	$netinfo = spotEntity ('ipv6net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
-		return 'attn';
-	else
-		return '';
+	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
 }
 
 function trigger_vlan_ipv4net ()
