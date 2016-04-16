@@ -3290,27 +3290,60 @@ function saveQuickLinks()
 
 $ucsproductmap = array
 (
-	'N20-B6620-1' => 1736, # B200 M1
-	'N20-B6625-1' => 1737, # B200 M2
-	'N20-B6620-2' => 1741, # B250 M1
-	'N20-B6625-2' => 1742, # B250 M2
-	'B230-BASE-M2' => 1740, # B230 M2
-	'N20-B6730-1' => 1739, # B230 M1
-	'B440-BASE-M2' => 1743, # B440 M2
-	'UCSB-B200-M3' => 1738, # B200 M3
-	'N10-S6100' => 1755, # 6120 FI
-	'UCS-FI-6248UP' => 1757, # 6248 FI
+	// UCS Fabric Interconnects/switches
+  'UCS-FI-6248UP' => 1757, # 6248 FI
 	'UCS-FI-6296UP' => 1758, # 6296 FI
+	'N10-S6100' => 1755, # 6120 FI
+	'N10-S6200' => 1756, # 6140 FI
+	'UCS-FI-M-6324' => 2576, # UCS-Mini 6324 FI
+	'UCS-FI-6332-U' => 2578, # 6332 FI
+	'UCS-FI-6332-16UP-U' => 2579, # 6332-16 FI
+	// UCS Blade Chassis
 	'N20-C6508' => 1735, # 5108 chassis
 	'UCSB-5108-AC2' => 2220, # 5108-AC2 chassis
 	'UCSB-5108-DC2' => 2221, # 5108-DC2 chassis
 	'UCSB-5108-HVDC' => 2222, # 5108-HVDC chassis
-	'UCSB-B420-M3' => 1744,   # B420 M3
-	'UCSB-B22-M3'  => 1745,   # B22 M3
-	'UCSB-B260-M4' => 2223,   # B260 M4
-	'UCSB-B460-M4' => 2224,   # B460 M4
-	'UCSB-B200-M4' => 2225,   # B200 M4
-	'UCSC-C240-M3S' => 1754,  # C240 M3 Rackmount Server
+	// UCS 'B-series' Blade Servers
+	'N20-B6620-1'  => 1736,  # Cisco UCS B200 M1 2 Socket Blade Server
+	'N20-B6625-1'  => 1737,  # Cisco UCS B200 M2 2 Socket Blade Server
+	'UCSB-B200-M3' => 1738,  # Cisco UCS B200 M3 2 Socket Blade Server
+	'UCSB-B200-M3' => 1738,  # Cisco UCS B200 M3 2 Socket Blade Server
+	'N20-B6730-1'  => 1739,  # Cisco UCS B440-M2 4 Socket, Extended Memory Blade Server
+	'B230-BASE-M2' => 1740,  # Cisco UCS B420 M3 4 Socket Blade Server
+	'N20-B6620-2'  => 1741,  # Cisco UCS B420 M3 4 Socket Blade Server
+	'N20-B6625-2'  => 1742,  # Cisco UCS B22 M3 2 Socket Half Width Blade Server
+	'B440-BASE-M2' => 1743,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
+	'UCSB-B420-M3' => 1744,  # Cisco UCS B22 M3 2 Socket Half Width Blade Server
+	'UCSB-B420-M3' => 1744,  # Cisco UCS C22 M3 High-Density Rack-Mount Server
+	'UCSB-B22-M3'  => 1745,  # Cisco UCS B250 M1 2 Socket, Extended Memory Blade Server
+	'UCSB-B22-M3'  => 1745,  # Cisco UCS B250 M2 2 Socket, Extended Memory Blade Server
+	'UCSB-B200-M4' => 2225,  # Cisco UCS B230-M1 2 Socket Blade Server
+	'UCSB-B200-M4' => 2225,  # Cisco UCS B230-M2 2 Socket Blade Server
+	'UCSB-B420-M4' => 2558,  # Cisco UCS C220 M3 High-Density Rack-Mount Server
+	'N20-B6740-2'  => 2559,  # Cisco UCS C24 M3 High-Density Rack-Mount Server
+	// UCS 'C-Series' Rackmount Servers
+	'UCSC-C22-M3S'   => 1751,  # Cisco UCS B420 M4 4 Socket Blade Server
+	'UCSC-C220-M3S'  => 1752,  # Cisco UCS B440 M1 4 Socket, Extended Memory Blade Server
+	'UCSC-C24-M3S'   => 1753,  # Cisco UCS C220 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M3S'  => 1754,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
+	'R200-1120402W'  => 2560,  # Cisco UCS B200 M4 2 Socket Blade Server
+	'R210-2121605W'  => 2561,  # Cisco UCS B200 M4 2 Socket Blade Server
+	'UCSC-C22-M3L'   => 2562,  # Cisco UCS C260 M2 High-Density Rack-Mount Server
+	'UCSC-C220-M3L'  => 2563,  # Cisco UCS C200 M2 High-Density Rack-Mount Server
+	'UCSC-C24-M3L'   => 2564,  # Cisco UCS C24 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M3S2' => 2565,  # Cisco UCS C220 M4 High-Density Rack-Mount Server
+	'UCSC-C220-M4L'  => 2566,  # Cisco UCS C210 M2 General-Purpose Rack-Mount Server
+	'UCSC-C220-M4S'  => 2567,  # Cisco UCS C22 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M4SX' => 2568,  # Cisco UCS C220 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4S2' => 2569,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4L'  => 2570,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4S'  => 2571,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'R250-2480805W'  => 2572,  # Cisco UCS C240 M4S High-Density Rack-Mount Server
+	'UCSC-C420-M3'   => 2573,  # Cisco UCS C420 M3 High-Density Rack-Mount Server
+	'UCSC-BASE-M2-C460' => 2574,  # Cisco UCS C460 M2 Scalable, High-Performance Rack-Mount Server
+	'UCSC-C460-M4'   => 2575,  # Cisco UCS C460 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M3L'  => 2579,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
+	'C260-BASE-2646' => 2580,  # Cisco UCS C250 M2 Extended-Memory Rack-Mount Server
 );
 
 function autoPopulateUCS()
