@@ -827,12 +827,11 @@ function renderUIResetForm()
 	echo "</form>";
 }
 
-function renderTagRowForViewer ($taginfo, $level = 0)
+function serializeTagStats ($taginfo)
 {
-	$self = __FUNCTION__;
 	$statsdecoder = array
 	(
-		'total' => ' total records linked',
+		'total' => ' total record(s) linked',
 		'object' => ' object(s)',
 		'rack' => ' rack(s)',
 		'file' => ' file(s)',
@@ -842,7 +841,21 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		'ipv4vs' => ' IPv4 virtual service(s)',
 		'ipv4rspool' => ' IPv4 real server pool(s)',
 		'vst' => ' VLAN switch template(s)',
+		'ipvs' => ' VS group(s)',
 	);
+	$stats = array ("tag ID = ${taginfo['id']}");
+	if ($taginfo['kidc'])
+		$stats[] = "${taginfo['kidc']} sub-tag(s)";
+	if ($taginfo['refcnt']['total'])
+		foreach ($taginfo['refcnt'] as $article => $count)
+			if (array_key_exists ($article, $statsdecoder))
+				$stats[] = $count . $statsdecoder[$article];
+	return implode (', ', $stats);
+}
+
+function renderTagRowForViewer ($taginfo, $level = 0)
+{
+	$self = __FUNCTION__;
 	$trclass = '';
 	if ($level == 0)
 		$trclass .= ' separator';
@@ -853,12 +866,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	$stats = array ("tag ID = ${taginfo['id']}");
-	if ($taginfo['refcnt']['total'])
-		foreach ($taginfo['refcnt'] as $article => $count)
-			if (array_key_exists ($article, $statsdecoder))
-				$stats[] = $count . $statsdecoder[$article];
-	echo '<span title="' . implode (', ', $stats) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
+	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
 	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
@@ -882,7 +890,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
 	if ($taginfo['refcnt']['total'] > 0 || $taginfo['kidc'])
-		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . $taginfo['kidc'] . ' sub-tags');
+		printImageHREF ('nodestroy', serializeTagStats ($taginfo));
 	else
 		echo getOpLink (array ('op' => 'destroyTag', 'tag_id' => $taginfo['id']), '', 'destroy', 'Delete tag');
 	echo '</td><td>';
