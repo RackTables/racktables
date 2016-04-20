@@ -4021,20 +4021,17 @@ function checkPIC ($port_type_id)
 	{
 		$compat_array = array();
 		foreach (getPortInterfaceCompat() as $record)
-		{
-			$key = $record['iif_id'] . '-' . $record['oif_id'];
-			$compat_array[$key] = 1;
-		}
+			$compat_array[$record['iif_id'] . '-' . $record['oif_id']] = 1;
 	}
 
 	if (preg_match ('/^(?:(\d+)-)?(\d+)$/', $port_type_id, $m))
 	{
 		$iif_id = $m[1];
 		$oif_id = $m[2];
-		if (empty ($iif_id))
+		if ($iif_id == '')
 		{
 			$iif_id = 1;
-			$port_type_id = $iif_id . '-' . $port_type_id;
+			$port_type_id = '1-' . $port_type_id;
 		}
 		if (! array_key_exists ($port_type_id, $compat_array))
 		{
