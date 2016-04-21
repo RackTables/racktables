@@ -927,7 +927,7 @@ function checkObjectNameUniqueness ($name, $type_id, $object_id = 0)
 		throw new InvalidRequestArgException ('name', $name, 'An object with that name already exists');
 }
 
-function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array())
+function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $taglist = array(), $disable_autoports = FALSE)
 {
 	checkObjectNameUniqueness ($new_name, $new_type_id);
 	usePreparedInsertBlade
@@ -959,7 +959,7 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	lastCreated ($realm, $object_id);
 
 	// Do AutoPorts magic
-	if ($realm == 'object')
+	if (($realm == 'object') && !$disable_autoports)
 		executeAutoPorts ($object_id);
 	// Now tags...
 	produceTagsForNewRecord ($realm, $taglist, $object_id);
