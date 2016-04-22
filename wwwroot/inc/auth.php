@@ -624,10 +624,53 @@ function queryLDAPServer ($username, $password)
 					preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches) &&
 					validTagName ('$lgcn_' . $matches[1], TRUE)
 				)
+				{
 					$ret['memberof'][] = '$lgcn_' . $matches[1];
+					nested_groups ($ret, $matches[1], $connect);	// This function will perform nested search
+				}
 	}
 	@ldap_close ($connect);
 	return $ret;
+}
+
+// This is the newly added function, which will perform a recursive search
+//  through all the nested group memberships of the user account requested.
+// This is possible because of the recursive call at the end of this function.
+function nested_groups (&$ret, $match, $connection)
+{
+	global $LDAP_options;
+	
+	$results = @ldap_search
+	(
+		$connection,
+		$LDAP_options['search_dn'],
+		'(' . $LDAP_options['search_attr'] . "=${match})",
+		array_merge (array ($LDAP_options['group_attr']), explode (' ', $LDAP_options['displayname_attrs']))
+	);
+	if (@ldap_count_entries ($connection, $results) != 1)
+	{
+		return false;		// If the group isn't found, exit function
+	}
+	$info = @ldap_get_entries ($connection, $results);
+	ldap_free_result ($results);
+	$space = '';
+	foreach (explode (' ', $LDAP_options['displayname_attrs']) as $attr)
+	{
+		$ret['displayed_name'] .= $space . $info[0][$attr][0];
+		$space = ' ';
+	}
+	// Pull group membership, if any was returned.
+	if (isset ($info[0][$LDAP_options['group_attr']]))
+		for ($i = 0; $i < $info[0][$LDAP_options['group_attr']]['count']; $i++)
+			if
+			(
+				preg_match ($LDAP_options['group_filter'], $info[0][$LDAP_options['group_attr']][$i], $matches)
+				and validTagName ('$lgcn_' . $matches[1], TRUE)
+			)
+			{
+				$ret['memberof'][] = '$lgcn_' . $matches[1];
+				nested_groups ($ret, $matches[1], $connection);		// Recursive call
+			}
 }
 
 function authenticated_via_database ($userinfo, $password)
