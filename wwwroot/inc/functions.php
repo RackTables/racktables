@@ -2645,17 +2645,44 @@ function constructIPAddress ($ip_bin)
 	return $ret;
 }
 
-function treeApplyFunc (&$tree, $func = '', $stopfunc = '')
+function treeApplyFunc1 (&$tree, $func)
 {
-	if ($func == '')
-		return;
 	$self = __FUNCTION__;
 	foreach (array_keys ($tree) as $key)
 	{
 		$func ($tree[$key]);
-		if ($stopfunc != '' && $stopfunc ($tree[$key]))
-			continue;
 		$self ($tree[$key]['kids'], $func);
+	}
+}
+
+function treeApplyFunc2 (&$tree, $func, $stopfunc)
+{
+	$self = __FUNCTION__;
+	foreach (array_keys ($tree) as $key)
+	{
+		$func ($tree[$key]);
+		if (! $stopfunc ($tree[$key]))
+			$self ($tree[$key]['kids'], $func);
+	}
+}
+
+// Note that the stop function is called after processing a tree item, not before.
+// In other words, for a given tree node either all its sub-nodes are processed or
+// none at all.
+// XXX: Perhaps instead of a separate stop function it would be better to convey the
+// feedback through the applied function's return value. This would also leave it up
+// to the applied function whether to stop before or after modifying the current node.
+function treeApplyFunc (&$tree, $func, $stopfunc = NULL)
+{
+	if (! is_callable ($func))
+		throw new InvalidArgException ('func', $func, 'is not callable');
+	if ($stopfunc === NULL)
+		treeApplyFunc1 ($tree, $func);
+	else
+	{
+		if (! is_callable ($stopfunc))
+			throw new InvalidArgException ('stopfunc', $stopfunc, 'is not callable');
+		treeApplyFunc2 ($tree, $func, $stopfunc);
 	}
 }
 

@@ -93,6 +93,19 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		$this->assertSame ($expected_params, $actual_params);
 	}
 
+	// This test requires a custom function to pass a parameter by reference.
+
+	/**
+	 * @group small
+	 * @dataProvider providerTreeApplyFuncIAE
+	 * @expectedException InvalidArgException
+	 */
+	public function testTreeApplyFuncIAE ($func, $stopfunc)
+	{
+		$forest_byref = array();
+		treeApplyFunc ($forest_byref, $func, $stopfunc);
+	}
+
 	public function providerUnaryEquals ()
 	{
 		return array
@@ -877,6 +890,16 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array (array ('one' => 1, 'two' => 2), 'AND', 'one=? AND two=?', array (1, 2)),
 			array (array ('one' => NULL, 'two' => 2), 'AND', 'one IS NULL AND two=?', array (2)),
 			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', 'one=? OR two=? OR three=?', array (1, 2, 3)),
+		);
+	}
+
+	public function providerTreeApplyFuncIAE ()
+	{
+		return array
+		(
+			array ('treeApplyFunc', array (NULL, NULL)),
+			array ('treeApplyFunc', array ('no_such_function', NULL)),
+			array ('treeApplyFunc', array ('count', 'no_such_function')),
 		);
 	}
 }
