@@ -5823,7 +5823,7 @@ function isTransactionActive()
 function getRowsCount ($table)
 {
 	$result = usePreparedSelectBlade ("SELECT COUNT(*) FROM `$table`");
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 function getEntitiesCount ($realm)
