@@ -3325,7 +3325,6 @@ function searchByAttrValue ($attr_id, $value)
 	if (! isset ($type))
 		throw new InvalidArgException ('attr_id', $attr_id, "No such attribute");
 
-	$field = NULL;
 	switch ($type)
 	{
 		case 'string':
