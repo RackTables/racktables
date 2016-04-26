@@ -3668,7 +3668,7 @@ function getPortOIFRefc()
 function getAttrType ($attr_id)
 {
 	$result = usePreparedSelectBlade ('SELECT type FROM Attribute WHERE id = ?' , array ($attr_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 function getObjTypeAttrMap ($objtype_id)
