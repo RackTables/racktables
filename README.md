@@ -25,6 +25,7 @@ for RackTables is Apache httpd.
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
+| Ubuntu 16.04       | `apt-get install mysql-server`                                          |
 
 ### 1.2. Enable Unicode in the MySQL server
 
@@ -40,6 +41,7 @@ for RackTables is Apache httpd.
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
+| Ubuntu 16.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 
 ### 1.3. Install PHP and Apache httpd (or nginx)
 
@@ -56,6 +58,7 @@ for RackTables is Apache httpd.
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
+| Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-json php7.0-snmp`
 
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
