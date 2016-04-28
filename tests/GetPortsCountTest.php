@@ -20,9 +20,20 @@ class GetPortsCount extends PHPUnit_Framework_TestCase
 	public function testAll ()
 	{
 		$this->assertEquals (0, getPortsCount ($this->object_id));
-		commitAddPort ($this->object_id, 'port 1', '1-24', '', '');
-		commitAddPort ($this->object_id, 'port 2', '1-24', '', '');
-		$this->assertEquals (2, getPortsCount ($this->object_id));
+		$port_ids = array
+		(
+			'port 1' => array (commitAddPort ($this->object_id, 'port 1', '1-24', '', '')),
+			'port 2' => array (commitAddPort ($this->object_id, 'port 2', '1-24', '', '')),
+			'port 3' => array
+			(
+				commitAddPort ($this->object_id, 'port 3', '1-24', '', ''), # 1000Base-T
+				commitAddPort ($this->object_id, 'port 3', '3-1078', '', ''), # empty GBIC
+				commitAddPort ($this->object_id, 'port 3', '4-1204', '', ''), # SFP-1000/1000Base-LX
+			),
+		);
+		$this->assertEquals (5, getPortsCount ($this->object_id));
+		foreach ($port_ids as $port_name => $idlist)
+			$this->assertEquals ($idlist, getPortIDs ($this->object_id, $port_name));
 	}
 
 	public function tearDown ()
