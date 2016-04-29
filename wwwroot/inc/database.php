@@ -5999,7 +5999,7 @@ function setDBMutex ($name, $timeout = 5)
 {
 	$fullname = getDBName() . '.' . $name;
 	$result = usePreparedSelectBlade ('SELECT GET_LOCK(?, ?)', array ($fullname, $timeout));
-	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	$row = $result->fetchColumn();
 	if ($row === NULL)
 		throw new RTDatabaseError ("error occured when executing GET_LOCK on $fullname");
 	if ($row !== '1')
@@ -6022,7 +6022,7 @@ function tryDBMutex ($name, $timeout = 0)
 function releaseDBMutex ($name)
 {
 	$result = usePreparedSelectBlade ('SELECT RELEASE_LOCK(?)', array (getDBName() . '.' . $name));
-	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	$row = $result->fetchColumn();
 	return $row === '1';
 }
 
