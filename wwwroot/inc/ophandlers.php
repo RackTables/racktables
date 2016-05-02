@@ -1269,6 +1269,7 @@ function updateObjectAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63));
 	global $remote_username;
+	global $op;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
@@ -1295,7 +1296,7 @@ function updateObjectAllocation ()
 		}
 		else
 			$rackData = $workingRacksData[$cand_id];
-		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		$is_ro = ! rackModificationPermitted ($rackData, $op, FALSE);
 		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
 		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
 		{
@@ -1320,7 +1321,7 @@ function updateObjectAllocation ()
 	$oldMolecule = getMoleculeForObject ($object_id);
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
-		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		$is_ro = ! rackModificationPermitted ($rackData, $op, FALSE);
 		if ($is_ro || !processGridForm ($rackData, 'F', 'T', $object_id))
 			continue;
 		$changecnt++;
