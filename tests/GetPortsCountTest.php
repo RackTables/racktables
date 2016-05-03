@@ -34,6 +34,11 @@ class GetPortsCount extends PHPUnit_Framework_TestCase
 		$this->assertEquals (5, getPortsCount ($this->object_id));
 		foreach ($port_ids as $port_name => $idlist)
 			$this->assertEquals ($idlist, getPortIDs ($this->object_id, $port_name));
+		$this->assertSame (NULL, getPortReservationComment (array_first ($port_ids['port 1'])));
+		commitUpdatePortComment (array_first ($port_ids['port 1']), 'test comment');
+		$this->assertEquals ('test comment', getPortReservationComment (array_first ($port_ids['port 1'])));
+		commitUpdatePortComment (array_first ($port_ids['port 1']), ''); # empty string becomes NULL
+		$this->assertSame (NULL, getPortReservationComment (array_first ($port_ids['port 1'])));
 	}
 
 	public function tearDown ()
