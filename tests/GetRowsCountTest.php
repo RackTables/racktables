@@ -24,11 +24,16 @@ class GetRowsCount extends PHPUnit_Framework_TestCase
 	public function testAll ()
 	{
 		$this->assertEquals (0, getRowsCount ($this->table_name));
-		usePreparedInsertBlade ($this->table_name, array ('name' => 'alpha'));
-		usePreparedInsertBlade ($this->table_name, array ('name' => 'beta'));
-		usePreparedInsertBlade ($this->table_name, array ('name' => 'gamma'));
-		usePreparedInsertBlade ($this->table_name, array ('name' => 'delta'));
+		$ids = array();
+		foreach (array ('alpha', 'beta', 'gamma', 'delta') as $name)
+		{
+			usePreparedInsertBlade ($this->table_name, array ('name' => $name));
+			$ids[] = lastInsertID();
+		}
 		$this->assertEquals (4, getRowsCount ($this->table_name));
+		foreach ($ids as $id)
+			usePreparedDeleteBlade ($this->table_name, array ('id' => $id));
+		$this->assertEquals (0, getRowsCount ($this->table_name));
 	}
 
 	public function tearDown ()
