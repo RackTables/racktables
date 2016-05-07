@@ -104,6 +104,7 @@ and initialize the application.
 | Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
 | openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
 | Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
+| Ubuntu 16.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
 # How to upgrade RackTables
 
