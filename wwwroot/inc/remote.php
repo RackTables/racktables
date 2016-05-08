@@ -27,6 +27,9 @@ $breedfunc = array
 	'fdry5-get8021q-readport'  => 'fdry5PickInterfaceSubcommand',
 	'fdry5-xlatepushq-main'    => 'fdry5TranslatePushQueue',
 	'fdry5-getallconf-main'    => 'fdry5SpotConfigText',
+	'fdry5-getportstatus-main' => 'foundryReadInterfaceStatus',
+	'fdry5-getmaclist-main'    => 'fdry5ReadMacList',
+	'fdry5-getportmaclist-main'=> 'fdry5ReadMacList',
 	'vrp53-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp53-get8021q-main'      => 'vrp53ReadVLANConfig',
 	'vrp53-get8021q-top'       => 'vrp53ScanTopLevel',
@@ -149,6 +152,7 @@ $breed_by_swcode = array
 	2081 => 'vrp55', // Huawei VRP 5.12
 	2027 => 'vrp85', // Huawei VRP 8.5
 	1363 => 'fdry5', // IronWare 5
+	1364 => 'fdry5', // Brocade FastIron LS648
 	1367 => 'jun10', // JunOS 10, switch
 	1597 => 'jun10', // JunOS 10
 	1598 => 'jun10', // JunOS 11
@@ -167,6 +171,7 @@ $breed_by_swcode = array
 );
 
 $breed_by_hwcode = array (
+	1362 => 'fdry5', // Brocade FastIron CX648
 	//... dlink items added by the loop below
 );
 
@@ -440,8 +445,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'fdry5':
 			$protocol = 'netcat'; // default is netcat mode
-			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|Username|Password|Please Enter Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "skip-page-display\n" . $commands;
+			# using ssh and sshnokey we'll always receive 'Connection to $ip closed by remote host.' upon exit
+			# let's hide the warnings 
+			$tolerate_remote_errors = TRUE;
+			$hide_warnings = TRUE;
 			break;
 		case 'vrp55':
 			$commands = "terminal echo-mode line\n" . $commands;
@@ -521,7 +530,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	// call gateway
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
 
-	if ($settings['protocol'] != 'ssh' || ! $tolerate_remote_errors)
+	if (substr($settings['protocol'],0,3) != 'ssh' || ! $tolerate_remote_errors)
 	{
 		if ($errors != '')
 			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
@@ -530,7 +539,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	}
 	elseif ($errors != '') // ssh and tolerate and non-empty $errors
 		foreach (explode ("\n", $errors) as $line)
-			if ($line != '')
+			if ($line != '' && ! $hide_warnings)
 				showWarning ("${settings['protocol']} ${settings['hostname']}: $line");
 	return strtr($out, array("\r" => "")); // cut ^M symbols
 }

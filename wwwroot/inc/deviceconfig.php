@@ -1346,6 +1346,15 @@ function fdry5TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getallconf':
 			$ret .= "show running-config\n";
 			break;
+		case 'getportstatus':
+			$ret .= "show int brief\n";
+			break;
+		case 'getmaclist':
+			$ret .= "show mac-address\n";
+			break;
+		case 'getportmaclist':
+			$ret .= "show mac-address ethernet {$cmd['arg1']}\n";
+			break;
 		default:
 			throw new InvalidArgException ('opcode', $cmd['opcode']);
 		}
@@ -2728,6 +2737,45 @@ function ros11Read8021QPorts (&$work, $line)
 	}
 }
 
+function foundryReadInterfaceStatus ($text) {
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/^Port\s+Link\s+State/', $line))
+				{
+					$link_field_borders = getColumnCoordinates($line, 'Link');
+					if (isset ($link_field_borders['from']))
+						$state = 'readPort';
+				}
+				break;
+			case 'readPort':
+				$field_list = preg_split('/\s+/', $line);
+				if (count ($field_list) < 5)
+					break;
+				list ($portname, $status_raw, $stp_state, $duplex, $speed) = $field_list;
+				if ($status_raw == 'Up' || $status_raw == 'up')
+					$status = 'up';
+				elseif ($status_raw == 'Down' || $status_raw == 'down')
+					$status = 'down';
+				else
+					$status = 'disabled';
+				$result[$portname] = array
+				(
+					'status' => $status,
+					'speed' => $speed,
+					'duplex' => $duplex,
+				);
+				break;
+		}
+	}
+
+	return $result;
+}
+
 function ciscoReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -3071,6 +3119,35 @@ function maclist_sort ($a, $b)
 	if ($a['vid'] == $b['vid'])
 		return 0;
 	return ($a['vid'] < $b['vid']) ? -1 : 1;
+}
+
+function fdry5ReadMacList ($text)
+{
+	$result = array();
+	$state = 'headerSearch';
+	foreach (explode ("\n", $text) as $line)
+	{
+		switch ($state)
+		{
+			case 'headerSearch':
+				if (preg_match('/MAC-Address\s+Port\s+Type\s+Index\s+VLAN/i', $line))
+					$state = 'readPort';
+				break;
+			case 'readPort':
+				if (! preg_match ('/([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})\s+(\S+)\s+\S+\s+\d+\s+(\d+)$/', trim ($line), $matches))
+					break;
+				$portname = shortenIfName ($matches[2]);
+				$result[$portname][] = array
+				(
+					'mac' => $matches[1],
+					'vid' => $matches[3],
+				);
+				break;
+		}
+	}
+	foreach ($result as $portname => &$maclist)
+		usort ($maclist, 'maclist_sort');
+	return $result;
 }
 
 function ios12ReadMacList ($text)
