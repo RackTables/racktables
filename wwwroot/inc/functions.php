@@ -5263,11 +5263,7 @@ function getPortinfoByName (&$object, $portname, $strict_mode = TRUE)
 function withoutLocationTypes ($objtypes)
 {
 	global $location_obj_types;
-	$ret = array();
-	foreach ($objtypes as $k => $v)
-		if (! in_array ($k, $location_obj_types))
-			$ret[$k] = $v;
-	return $ret;
+	return array_diff_key ($objtypes, array_fill_keys ($location_obj_types, 0));
 }
 
 # For the given object ID return a getSelect-suitable list of object types
