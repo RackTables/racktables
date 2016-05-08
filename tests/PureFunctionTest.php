@@ -270,6 +270,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 	public function providerUnarySame ()
 	{
+		$ten_kilo = array_fill_keys (range (0, 10000), 0);
+		unset ($ten_kilo[0]);
+		$ten_kilo_less_3 = $ten_kilo;
+		unset ($ten_kilo_less_3[1560]);
+		unset ($ten_kilo_less_3[1561]);
+		unset ($ten_kilo_less_3[1562]);
 		return array
 		(
 			// coalescing functions
@@ -369,6 +375,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				"\x20\x01\x0D\xB8\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
 				'f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.8.b.d.0.1.0.0.2.ip6.arpa'
 			),
+
+			array ('withoutLocationTypes', array(), array()),
+			array ('withoutLocationTypes', array (1560 => 'rack', 1561 => 'row', 1562 => 'location'), array()),
+			array ('withoutLocationTypes', $ten_kilo, $ten_kilo_less_3),
 		);
 	}
 
