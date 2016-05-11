@@ -1944,6 +1944,10 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 
 			break;
 		case '0.20.12':
+			// NO_ZERO_DATE
+			$query[] = "ALTER TABLE LDAPCache MODIFY COLUMN last_retry timestamp NULL DEFAULT NULL";
+			$query[] = "DELETE FROM LDAPCache";
+
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
