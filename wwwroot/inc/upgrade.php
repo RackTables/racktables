@@ -273,6 +273,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.9',
 		'0.20.10',
 		'0.20.11',
+		'0.20.12',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1941,6 +1942,9 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			$query[] = "INSERT INTO Config (varname, varvalue, is_hidden, is_userdefined, description) VALUES ('IPV4_TREE_SHOW_UNALLOCATED', 'yes', 'no', 'yes', 'Show unallocated networks in IPv4 tree'); ";
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
 
+			break;
+		case '0.20.12':
+			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
