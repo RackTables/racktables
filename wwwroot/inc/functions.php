@@ -1552,12 +1552,12 @@ function tagOnChain ($taginfo, $tagchain)
 {
 	if (!isset ($taginfo['id']))
 		return FALSE;
-	return scanArrayForItem ($tagchain, 'id', $taginfo['id']) === NULL ? FALSE : TRUE;
+	return NULL !== scanArrayForItem ($tagchain, 'id', $taginfo['id']);
 }
 
 function tagNameOnChain ($tagname, $tagchain)
 {
-	return scanArrayForItem ($tagchain, 'tag', $tagname) === NULL ? FALSE : TRUE;
+	return NULL !== scanArrayForItem ($tagchain, 'tag', $tagname);
 }
 
 // Return TRUE, if two tags chains differ (order of tags doesn't matter).
