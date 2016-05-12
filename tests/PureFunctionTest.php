@@ -62,12 +62,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	 * @group small
 	 * @dataProvider providerTernarySame
 	 */
-/*
 	public function testTernarySame ($func, $input1, $input2, $input3, $output)
 	{
 		$this->assertSame ($output, $func ($input1, $input2, $input3));
 	}
-*/
 
 	// There is a separate test/provider method pair for each exception class as
 	// $this->expectException() is only available in later versions of PHPUnit.
@@ -833,8 +831,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 	public function providerTernarySame ()
 	{
+		$a = array
+		(
+			array ('id' => 10, 'name' => 'ten'), // 0
+			array ('id' => 20, 'name' => 'twenty'), // 1
+			array ('id' => 30, 'name' => 'thirty'), // 2
+		);
 		return array
 		(
+			array ('scanArrayForItem', $a, 'id', 10, 0),
+			array ('scanArrayForItem', $a, 'id', 30, 2),
+			array ('scanArrayForItem', $a, 'name', 'twenty', 1),
+			array ('scanArrayForItem', $a, 'id', 40, NULL),
 		);
 	}
 
