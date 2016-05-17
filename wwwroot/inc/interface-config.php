@@ -861,6 +861,9 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
+
+	$trclass .= getObjectClass ('tag', $taginfo);
+
 	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
@@ -907,6 +910,14 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	$sparams = array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'nodelist-popup');
 	echo getSelect ($poptions, $sparams, $taginfo['parent_id'], FALSE);
 
+	if ($taginfo['is_assignable'] == 'yes')
+	{
+		$class = getObjectClass ('tag', $taginfo);
+		echo "</td><td class='${class}'>" . getColorSelect ('colorid_'.$taginfo['id'], $taginfo['color']) . '</td>';
+	}
+	else
+		echo '<td><input type="hidden" name="color" id="colorid_' . $taginfo['id'] . '" value=""></input></td>';
+
 	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . '</form></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $taginfo['tag'], $level + 1);
@@ -929,6 +940,50 @@ END
 	);
 }
 
+function getColorSelect($id = 'color', $selected = NULL)
+{
+
+		if ($selected)
+			$class = ' class='.getObjectClass ('tag', array('id' => $selected, 'color' => $selected));
+		else
+			$class = '';
+
+		$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
+		$ret .= '<option value=""option>';
+
+		$colors = array(
+				'FFFFFF',
+				'C0C0C0',
+				'808080',
+				'000000',
+				'FF0000',
+				'800000',
+				'FF8000',
+				'FFFF00',
+				'808000',
+				'00FF00',
+				'008000',
+				'00FFFF',
+				'008080',
+				'0000FF',
+				'000080',
+				'FF00FF',
+				'800080'
+		);
+
+		if ($selected != NULL && !in_array ($selected, $colors))
+			$colors[] = $selected;
+
+		foreach ($colors as $color)
+		{
+			$class = getObjectClass ('tag', array('id' => $color, 'color' => $color));
+			$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
+		}
+
+		$ret .= '</select>';
+		return $ret;
+}
+
 function renderTagTreeEditor ()
 {
 	function printNewItemTR ($options)
@@ -939,6 +994,7 @@ function renderTagTreeEditor ()
 		echo '<td><input type=text size=48 name=tag_name></td>';
 		echo '<td class=tdleft>' . getSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable'), 'yes') . '</td>';
 		echo '<td>' . getSelect ($options, array ('name' => 'parent_id')) . '</td>';
+		echo '<td>' . getColorSelect () . '</td>';
 		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
 		echo '</tr></form>';
 	}
@@ -946,7 +1002,7 @@ function renderTagTreeEditor ()
 	addParentNodeOptionsJS ('tageditor', 'existing tag');
 	$options = getParentNodeOptionsNew ($taglist, 'tag');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>color</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($options);
 	foreach (getTagTree() as $taginfo)

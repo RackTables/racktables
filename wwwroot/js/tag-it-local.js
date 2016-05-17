@@ -165,6 +165,9 @@ function generateTagList(input, ul, taglist, preselect, value_name, tag_limit, e
 			tag_trace = [];
 		$.each(tag_trace, function (index, value) {result.push("tag-" + value);});
 		result.push("tag-level" + tag_trace.length);
+		tagclass = taglist[tags_name_to_id[tag]].tagclass;
+		if(tagclass != 'undefined')
+			result.push(tagclass);
 		return result;
 	}
 	
