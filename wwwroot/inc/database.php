@@ -495,6 +495,7 @@ function listCells ($realm, $parent_id = 0)
 				'id' => $tag_id,
 				'tag' => $taglist[$tag_id]['tag'],
 				'parent_id' => $taglist[$tag_id]['parent_id'],
+				'color' =>  $taglist[$tag_id]['color'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -607,6 +608,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 					'id' => $row['tag_id'],
 					'tag' => $taglist[$row['tag_id']]['tag'],
 					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+					'color' =>  $taglist[$row['tag_id']]['color'],
 					'user' => $row['tag_user'],
 					'time' => $row['tag_time'],
 				);
@@ -617,6 +619,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
+				'color' =>  $taglist[$row['tag_id']]['color'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -4300,7 +4303,7 @@ function generateEntityAutoTags ($cell)
 // results different from MySQL.
 function getTagList ($extra_sql = '')
 {
-	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag FROM TagTree ORDER BY tag ${extra_sql}");
+	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag, color FROM TagTree ORDER BY tag ${extra_sql}");
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
@@ -4346,7 +4349,7 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 
 // A tag's parent may not be one of its children, the tag itself or a tag
 // that does not belong to the forest of rooted trees because of a cycle.
-function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
+function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable, $color = NULL)
 {
 	global $dbxlink;
 	$dbxlink->beginTransaction();
@@ -4361,10 +4364,13 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable)
 			(
 				'tag' => $tag_name,
 				'parent_id' => nullIfZero ($parent_id),
-				'is_assignable' => $is_assignable
+				'is_assignable' => $is_assignable,
+				'color' => nullIfEmptyStr ($color)
 			),
 			array ('id' => $tag_id)
 		);
+		// remove all rack thumbnails
+		usePreparedDeleteBlade ('RackThumbnail', array ('1' => '1'));
 		$dbxlink->commit();
 	}
 	catch (PDOException $pe)
@@ -4409,6 +4415,7 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 // Return TRUE, if any changes were committed.
 function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
+	global $dbxlink;
 	// Put the current explicit sub-chain into a buffer and merge all tags from
 	// the extra chain that aren't there yet.
 	$oldchain = array();
@@ -4433,6 +4440,22 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 		addTagForEntity ($realm, $entity_id, $tag_id);
 		$result = TRUE;
 	}
+
+	// remove Rack thumnail if Rack or Object tag changes
+	if ($result && ( $realm == 'rack' || $realm == 'object'))
+	{
+		if($realm == 'rack')
+		{
+			usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $entity_id));
+		}
+		else
+		{
+			// update all rack thumbs for object
+			foreach (getResidentRacksData ($entity_id, FALSE) as $rack_id)
+				usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
+		}
+	}
+
 	return $result;
 }
 

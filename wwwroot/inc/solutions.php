@@ -17,6 +17,8 @@ require_once 'slb-interface.php';
 
 define ('RE_STATIC_URI', '#^(?:[[:alnum:]]+[[:alnum:]_.-]*/)+[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
+$color = array();
+
 function castRackImageException ($e)
 {
 	$m = array
@@ -166,13 +168,96 @@ function dispatchMiniRackThumbRequest ($rack_id)
 	}
 }
 
+function coloredObject($entity, $img, $posx, $posy, $height, $width, $vertical = TRUE)
+{
+	global $color;
+
+	if ($entity == NULL)
+		return;
+
+	$colors = $entity['colors'];
+	$count = count ($colors);
+	if ($count == 0)
+	{
+		if (isset ($entity['state']))
+			$colorcode = $entity['state'];
+		else
+			$colorcode = 'T';
+
+		imagefilledrectangle
+		(
+			$img,
+			$posx,
+			$posy,
+			$posx + $width - 1,
+			$posy + $height - 1,
+			$color[$colorcode]
+		);
+		return;
+	}
+
+	$colorsize = (($vertical ? $width : $height) - 1) / $count;
+	$diagonal = 1;
+
+	$i = 0;
+	foreach ($colors as $colorcode)
+	{
+		if (!isset ($color[$colorcode]))
+			$color[$colorcode] = colorFromHex ($img, $colorcode);
+
+		if ($vertical)
+			$points = array
+			(
+				$posx + $i * $colorsize + ($i > 0 ? $diagonal : 0),
+				$posy,
+
+				$posx + $i * $colorsize - ($i > 0 ?  $diagonal : 0),
+				$posy + $height - 1,
+
+				$posx + ($i+1) * $colorsize - ($i+1 < $count ? $diagonal : 0),
+				$posy + $height - 1,
+
+				$posx + ($i+1) * $colorsize + ($i+1 < $count ? $diagonal : 0),
+				$posy
+                        );
+		else
+			$points = array
+			(
+				$posx,
+				$posy + $i * $colorsize + ($i > 0 ? $diagonal : 0),
+
+				$posx + $width - 1,
+				$posy + $i * $colorsize - ($i > 0 ?  $diagonal : 0),
+
+				$posx + $width - 1,
+				$posy + ($i+1) * $colorsize - ($i+1 < $count ? $diagonal : 0),
+
+				$posx,
+				$posy + ($i+1) * $colorsize + ($i+1 < $count ? $diagonal : 0)
+			);
+
+		imagefilledpolygon
+		(
+			$img,
+			$points,
+			4,
+			$color[$colorcode]
+		);
+
+		$i++;
+	}
+}
+
 # Generate a binary PNG image for a rack contents.
 function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 {
+	global $color;
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	if ($object_id !== NULL)
 		highlightObject ($rackData, $object_id);
+	markAllSpans ($rackData);
+	setEntityColors ($rackData);
 	global $rtwidth;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
@@ -195,25 +280,57 @@ function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 		'black' => colorFromHex ($img, '000000'),
 		'gray' => colorFromHex ($img, 'c0c0c0'),
 	);
-	$border_color = ($rackData['has_problems'] == 'yes') ? $color['Thw'] : $color['gray'];
+
+	// keep for compatibility
+	if ($rackData['has_problems'] == 'yes')
+			$rackData['colors'][] = 'ff8080';
+
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
-	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $border_color);
+	coloredObject ($rackData, $img, 1, 1, $totalheight - 2,  $totalwidth - 2, false);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
+	imagefilledrectangle ($img, 3, 3, $totalwidth - 4, $totalheight - 4, $color['F']);
 	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
-			$colorcode = $rackData[$unit_no][$locidx]['state'];
-			if (isset ($rackData[$unit_no][$locidx]['hl']))
-				$colorcode = $colorcode . $rackData[$unit_no][$locidx]['hl'];
-			imagerectangle
-			(
-				$img,
-				$offset[$locidx],
-				3 + ($rackData['height'] - $unit_no) * 2,
-				$offset[$locidx] + $rtwidth[$locidx] - 1,
-				3 + ($rackData['height'] - $unit_no) * 2 + 1,
-				$color[$colorcode]
-			);
+			if (isset ($rackData[$unit_no][$locidx]['skipped']))
+				continue;
+
+			if (isset ($rackData[$unit_no][$locidx]['colspan']))
+			{
+				$locwidth = 0;
+				for($i = 0; $i<$rackData[$unit_no][$locidx]['colspan']; $i++)
+					$locwidth += $rtwidth[$locidx + $i];
+			}
+			else
+				$locwidth = $rtwidth[$locidx];
+
+			$locheight = 2;
+			if (isset ($rackData[$unit_no][$locidx]['rowspan']))
+			{
+				$locheight = $rackData[$unit_no][$locidx]['rowspan'] * 2;
+			}
+
+			$object_id = (isset ($rackData[$unit_no][$locidx]['object_id']) ? $rackData[$unit_no][$locidx]['object_id'] : NULL);
+			if ($object_id)
+			{
+				$object = spotEntity ('object', $object_id);
+				setEntityColors ($object);
+				coloredObject ($object, $img, $offset[$locidx], 3 + ($rackData['height'] - $unit_no) * 2, $locheight,  $locwidth);
+			}
+			else
+			{
+				$state = $rackData[$unit_no][$locidx]['state'];
+				if (isset ($rackData[$unit_no][$locidx]['hl']))
+					$state = $state . $rackData[$unit_no][$locidx]['hl'];
+
+				$entity = array(
+					'id' => $state,
+					'colors' => array(),
+					'state' => $state
+				);
+
+				coloredObject ($entity, $img, $offset[$locidx], 3 + ($rackData['height'] - $unit_no) * 2, $locheight,  $locwidth);
+			}
 		}
 	if ($scale > 1)
 	{

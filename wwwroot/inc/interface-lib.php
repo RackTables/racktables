@@ -302,6 +302,8 @@ $page_by_realm['ipv4rspool'] = 'ipv4slb';
 $page_by_realm['file'] = 'files';
 $page_by_realm['user'] = 'userlist';
 
+$objstyles_cache = array();
+
 function getSelectOptions ($options, $selected_id = NULL)
 {
 	$ret = '';
@@ -752,6 +754,8 @@ function getTagClassName ($tagid)
 		$class .= 'tag-' . $parent . ' ';
 	$class .= 'tag-' . $tagid . ' etag-' . $tagid;
 
+	$class .= getObjectClass('tag', $taglist[$tagid]);
+
 	return $class;
 }
 
@@ -1154,7 +1158,11 @@ function enableTagsPicker ()
 	{
 		$taglist_filtered = array();
 		foreach ($taglist as $key => $taginfo) # remove unused fields
+		{
 			$taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
+			if ($taginfo['color'] != NULL)
+				$taglist_filtered[$key]['tagclass'] = getObjectClass ('tag', $taginfo);
+		}
 		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
 		$taglist_inserted = TRUE;
 	}
@@ -1205,4 +1213,86 @@ function showMySQLWarnings()
 		}
 	}
 	$rtdebug_mysql_warnings = array();
+}
+
+function colorHex2Rgb($color)
+{
+	$color = trim ($color, '#');
+	$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
+	return $rgb;
+}
+
+function getObjectClass($realm, $object, $extrastyle = "")
+{
+	global $objstyles_cache;
+
+	$style = '';
+	switch ($realm)
+	{
+		case 'object':
+			if (isset ($object['colors'][0]))
+			{
+				$step = 100 / count ($object['colors']);
+				$percent = 0;
+				$gradient = '';
+				foreach ($object['colors'] as $color)
+				{
+					$rgb = colorHex2Rgb ($color);
+					$gradient .= "rgba($rgb,0.2) $percent%, rgba($rgb,0.3) ".($percent + $step)."%,";
+					$percent += $step;
+				}
+
+				$style = "${extrastyle}background-image:linear-gradient(135deg," . trim($gradient, ',') . ") !important;";
+				$class = 'objectcolor-' . $object['id'];
+			}
+			break;
+		case 'tag':
+			if (isset ($object['color']))
+			{
+				$rgb = colorHex2Rgb ($object['color']);
+				$style = "${extrastyle}background: white linear-gradient(rgba($rgb,0.3), rgba($rgb,0.3));";
+
+				$class = 'tagcolor-' . $object['id'];
+			}
+			break;
+	}
+
+	if ($style != '')
+	{
+		$cachedclass = array_search ($style, $objstyles_cache);
+
+		if ($cachedclass === FALSE)
+		{
+			addCSS (".{$class} {{$style}}", TRUE);
+			$objstyles_cache[$class] = $style;
+			return " $class";
+		}
+		else
+			return " $cachedclass";
+
+	}
+
+	return '';
+}
+
+function setEntityColors(&$entity)
+{
+	$colors = false;
+	$entity['colors'] = array();
+	foreach ($entity['etags'] as $taginfo)
+	{
+		if ($taginfo['color'] !== NULL )
+		{
+			$colors = true;
+			$color = $taginfo['color'];
+			if (!array_key_exists ($color, $entity['colors']))
+			{
+				$entity['colors'][] = $color;
+				getObjectClass ('tag', $taginfo); // set tag css class
+			}
+		}
+
+	}
+
+	return $colors;
 }

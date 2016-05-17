@@ -444,6 +444,10 @@ function genericAssertion ($argname, $argtype)
 		if (! $expr = compileExpression ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid RackCode expression');
 		return $expr;
+	case 'htmlcolor':
+		return assertHTMLColorArg ($argname);
+	case 'htmlcolor0':
+		return assertHTMLColorArg ($argname, TRUE);
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
@@ -1786,6 +1790,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 				'tag' => $taginfo['tag'],
 				'parent_id' => $taginfo['parent_id'],
 				'refcnt' => $taginfo['refcnt'],
+				'color' => $taginfo['color'],
 				'kids' => $subsearch
 			);
 		else
@@ -6663,4 +6668,29 @@ function syncObjectPorts ($object_id, $desiredPorts)
 
 	$dbxlink->exec ('UNLOCK TABLES');
 	showSuccess (sprintf ('Added ports: %u, changed: %u, deleted: %u', count ($to_add), count ($to_update), count ($to_delete)));
+}
+
+function isHTMLColor ($color, $ok_if_null = TRUE)
+{
+
+	if( $ok_if_null && $color === NULL)
+		return TRUE;
+
+	// also matches empty string
+	if (! preg_match ('/^(#?[0-9a-f]{6})?$/i', $color))
+		return FALSE;
+
+	return TRUE;
+}
+
+function assertHTMLColorArg ($argname, $ok_if_empty = FALSE)
+{
+	global $sic;
+	if (! isset ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, '', 'parameter is missing');
+	if (! $ok_if_empty && $_REQUEST[$argname] == '')
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is an empty HTML color');
+	if (! isHTMLColor ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an HTML color');
+	return $sic[$argname];
 }
