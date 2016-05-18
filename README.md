@@ -154,7 +154,7 @@ mysql> grant all on racktables_db.* to racktables_user@localhost identified by '
 mysql> quit
 ```
 
-goto http://address.to.your.server/racktables/
+goto http://address.to.your.server/racktables/index.php and follow the instructions
 
 
 ## 2. Copy the files
