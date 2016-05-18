@@ -58,7 +58,7 @@ for RackTables is Apache httpd.
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
-| Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-json php7.0-snmp`
+| Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-bcmath php7.0-json php7.0-snmp`
 
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
