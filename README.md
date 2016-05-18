@@ -145,16 +145,13 @@ Start services:
 #service mysql-server start
 ```
 
-prepare RackTables Database
-```
-# mysqladmin create racktables_db
-
-#mysql
-mysql> grant all on racktables_db.* to racktables_user@localhost identified by 'password';
-mysql> quit
-```
-
 goto http://address.to.your.server/racktables/index.php and follow the instructions
+
+Note: set secret.php permissions when prompted.
+```
+# chown www:www /usr/local/www/racktables/wwwroot/inc/secret.php
+# chmod 400 /usr/local/www/racktables/wwwroot/inc/secret.php
+```
 
 
 ## 2. Copy the files
