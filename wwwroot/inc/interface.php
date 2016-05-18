@@ -2656,7 +2656,7 @@ function renderIPSpace()
 					// ignore invalid eid error
 				}
 			}
-			echo "</h4><table class='widetable' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
+			echo "</h4><table class='widetable zebra' border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 			echo "<tr><th>prefix</th><th>name/tags</th><th>capacity</th>";
 			if (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none')
 				echo "<th>routed by</th>";
@@ -2993,7 +2993,7 @@ function renderIPv4NetworkAddresses ($range)
 	}
 
 	echo $rendered_pager;
-	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+	echo "<table class='widetable zebra' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	markupIPAddrList ($range['addrlist']);
@@ -3079,7 +3079,7 @@ function renderIPv4NetworkAddresses ($range)
 function renderIPv6NetworkAddresses ($netinfo)
 {
 	global $pageno, $tabno, $aac_left;
-	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+	echo "<table class='widetable zebra' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	$hl_ip = NULL;
@@ -6196,7 +6196,7 @@ function switchportInfoJS($object_id)
 function renderIPAddressLog ($ip_bin)
 {
 	startPortlet ('Log messages');
-	echo '<table class="widetable" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
+	echo '<table class="widetable zebra" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
 	echo '<th>Date &uarr;</th>';
 	echo '<th>User</th>';
 	echo '<th>Log message</th>';
