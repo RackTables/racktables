@@ -131,6 +131,7 @@ AddType  application/x-httpd-php         .php
 AddType  application/x-httpd-php-source  .phps
 
 <Directory /usr/local/www/racktables/wwwroot>
+	DirectoryIndex index.php
 	Require all granted
 </Directory>
 Alias /racktables /usr/local/www/racktables/wwwroot
