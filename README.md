@@ -127,9 +127,11 @@ symblink racktables dir
 Apache users should create a racktables.conf file under their apache
 Includes directory with the following contents:
 ```
+AddType  application/x-httpd-php         .php
+AddType  application/x-httpd-php-source  .phps
+
 <Directory /usr/local/www/racktables/wwwroot>
-        Order allow,deny
-        Allow from all
+	Require all granted
 </Directory>
 Alias /racktables /usr/local/www/racktables/wwwroot
 ```
