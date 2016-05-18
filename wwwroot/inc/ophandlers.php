@@ -3292,7 +3292,7 @@ function saveQuickLinks()
 $ucsproductmap = array
 (
 	// UCS Fabric Interconnects/switches
-  'UCS-FI-6248UP' => 1757, # 6248 FI
+	'UCS-FI-6248UP' => 1757, # 6248 FI
 	'UCS-FI-6296UP' => 1758, # 6296 FI
 	'N10-S6100' => 1755, # 6120 FI
 	'N10-S6200' => 1756, # 6140 FI
