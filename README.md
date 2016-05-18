@@ -26,6 +26,7 @@ for RackTables is Apache httpd.
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 16.04       | `apt-get install mysql-server`                                          |
+| FreeBSD 10         | `pkg install mysql56-server`                                            |
 
 ### 1.2. Enable Unicode in the MySQL server
 
@@ -59,6 +60,7 @@ for RackTables is Apache httpd.
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
 | Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-bcmath php7.0-json php7.0-snmp`
+| FreeBSD 10         | `pkg install nginx php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets`
 
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
