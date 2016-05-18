@@ -6197,20 +6197,17 @@ function renderIPAddressLog ($ip_bin)
 {
 	startPortlet ('Log messages');
 	echo '<table class="widetable zebra" cellspacing="0" cellpadding="5" align="center" width="50%"><tr>';
-	echo '<th>Date &uarr;</th>';
-	echo '<th>User</th>';
-	echo '<th>Log message</th>';
+	echo '<th class=tdleft>Date &uarr;</th>';
+	echo '<th class=tdleft>User</th>';
+	echo '<th class=tdleft>Log message</th>';
 	echo '</tr>';
-	$odd = FALSE;
 	foreach (array_reverse (fetchIPLogEntry ($ip_bin)) as $line)
 	{
-		$tr_class = $odd ? 'row_odd' : 'row_even';
-		echo "<tr class='$tr_class'>";
-		echo '<td>' . $line['date'] . '</td>';
-		echo '<td>' . $line['user'] . '</td>';
-		echo '<td>' . $line['message'] . '</td>';
+		echo '<tr>';
+		echo '<td class=tdleft>' . $line['date'] . '</td>';
+		echo '<td class=tdleft>' . $line['user'] . '</td>';
+		echo '<td class=tdleft>' . $line['message'] . '</td>';
 		echo '</tr>';
-		$odd = !$odd;
 	}
 	echo '</table>';
 	finishPortlet();
