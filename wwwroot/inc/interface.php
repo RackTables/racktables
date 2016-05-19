@@ -508,6 +508,7 @@ function renderRackspace ()
 				foreach ($rows as $row)
 				{
 					$rackList = $row['racks'];
+					$location_id = $row['location_id'];
 
 					if (
 						$location_id != '' && isset ($_SESSION['locationFilter']) && ! in_array ($location_id, $_SESSION['locationFilter']) ||
