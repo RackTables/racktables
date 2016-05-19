@@ -1077,7 +1077,7 @@ function stringForTextarea ($string)
 }
 
 // <OPTION>%s</OPTION>
-function stringForOption ($string, $maxlen = 30)
+function stringForOption ($string, $maxlen = 80)
 {
 	$string = preg_replace ("/\t/", ' ', $string);
 	if ($maxlen == 0 || mb_strlen ($string) <= $maxlen)
