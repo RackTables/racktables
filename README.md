@@ -21,6 +21,7 @@ for RackTables is Apache httpd.
 | Debian 7           | `aptitude install mysql-server-5.1`                                     |
 | Fedora 8-16        | `yum install mysql-server mysql`                                        |
 | Fedora 23          | `dnf install mariadb-server mariadb`                                    |
+| FreeBSD 10         | `pkg install mysql56-server`                                            |
 | openSUSE 11.0      | YaST -> Software -> software management -> Web and LAMP server -> mysql |
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
@@ -54,6 +55,7 @@ for RackTables is Apache httpd.
 | Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
 | Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
 | FreeBSD 8          | see note below                                                                       |
+| FreeBSD 10         | see note 1.3.c                                                                       | 
 | openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
@@ -88,6 +90,70 @@ content - so maximum of 60 seconds is advised, but by default it is not enabled.
 # make -C /usr/ports/net-mgmt/php5-snmp install
 # make -C /usr/ports/net/php5-ldap install
 ```
+
+#### 1.3.c. FreeBSD
+There are 3 different ways how you can install RackTables and its dependencies on FreeBSD.
+
+######A. use pkg (Binary Package Management) ( not always the newest version )
+```
+# pkg install racktables
+# pkg install mod_php56 mysql56-server
+```
+As of May 2016 this will install RackTables Version 0.20.10 and its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+
+######B. use the ports system ( possibly more recent than pkg )
+```
+# cd /usr/ports/sysutils/racktables
+# make install
+# pkg install mod_php56 mysql56-server
+```
+As of May 2016 this will install RackTables Version 0.20.11 and build and install its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+
+######C. manual ( newest version )
+Install dependencies with pkg:
+```
+# pkg install php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets
+```
+
+unpack tar.gz/zip archive to /usr/local/www
+
+symblink racktables dir
+```
+# cd /usr/local/www
+# ln -s RackTables-0.20.xx racktables
+```
+
+##### Common install steps
+Apache users should create a racktables.conf file under their apache
+Includes directory with the following contents:
+```
+AddType  application/x-httpd-php         .php
+AddType  application/x-httpd-php-source  .phps
+
+<Directory /usr/local/www/racktables/wwwroot>
+	DirectoryIndex index.php
+	Require all granted
+</Directory>
+Alias /racktables /usr/local/www/racktables/wwwroot
+```
+
+Start services:
+```
+#echo 'apache24_enable="YES"' >> /etc/rc.conf
+#service apache24 start
+
+#echo 'mysql_enable="YES"' >> /etc/rc.conf
+#service mysql-server start
+```
+
+goto http://address.to.your.server/racktables/index.php and follow the instructions
+
+Note: set secret.php permissions when prompted.
+```
+# chown www:www /usr/local/www/racktables/wwwroot/inc/secret.php
+# chmod 400 /usr/local/www/racktables/wwwroot/inc/secret.php
+```
+
 
 ## 2. Copy the files
 Unpack the tar.gz/zip archive to a directory of your choice and configure Apache
