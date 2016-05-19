@@ -123,7 +123,7 @@ symblink racktables dir
 # ln -s RackTables-0.20.xx racktables
 ```
 
-
+##### Common install steps
 Apache users should create a racktables.conf file under their apache
 Includes directory with the following contents:
 ```
