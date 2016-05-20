@@ -72,7 +72,6 @@ class RackspaceFunctions extends PHPUnit_Framework_TestCase
 	 */
 	public function testRSU ($racklist)
 	{
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
 		$created = $this->createSampleRacksAndObjects ($racklist);
 		$row_units = 0;
 		$row_data = array();
@@ -89,7 +88,6 @@ class RackspaceFunctions extends PHPUnit_Framework_TestCase
 		$row_rsu = $row_total_units == 0 ? 0 : ($row_units / $row_total_units);
 		$this->assertEquals ($row_rsu, getRSUForRow ($row_data));
 		$this->deleteSampleRacksAndObjects ($created);
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
 	}
 
 	/**
