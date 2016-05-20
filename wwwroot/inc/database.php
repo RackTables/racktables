@@ -1506,7 +1506,7 @@ SELECT COUNT(*) FROM (
 ) x
 END;
 	$result = usePreparedSelectBlade ($query, array ($row_id, $row_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 // Returns mounted devices count in specified rack
@@ -1521,7 +1521,7 @@ SELECT COUNT(*) FROM (
 ) x
 END;
 	$result = usePreparedSelectBlade ($query, array ($rack_id, $rack_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 // Used when sort order is manually changed, and when a rack is moved or deleted
