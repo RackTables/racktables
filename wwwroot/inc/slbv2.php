@@ -670,7 +670,7 @@ function addSLBPortLink ($link_row)
 			"SELECT COUNT(*) FROM VSEnabledPorts WHERE object_id = ? AND proto = ? AND vport = ?",
 			array ($link_row['object_id'], $link_row['proto'], $link_row['vport'])
 		);
-		if (0 < $result->fetch (PDO::FETCH_COLUMN, 0))
+		if (0 < $result->fetchColumn())
 		{
 			if ($do_transaction)
 				$dbxlink->rollBack();
