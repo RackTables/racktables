@@ -1666,7 +1666,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	return $ret;
 }
 
-function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, $port_l2address)
+function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	global $dbxlink;
