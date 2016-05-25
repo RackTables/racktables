@@ -2448,8 +2448,8 @@ $dictionary = array
 	2557 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE8860-4C-EI'),
 	2558 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B420 M4'),
 	2559 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B440 M1'),
-	2560 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C200 M2'),
-	2561 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C210 M2'),
+
+
 	2562 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C22  M3(LFF)'),
 	2563 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C220 M3(LFF)'),
 	2564 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C24  M3(LFF)'),
@@ -2460,15 +2460,14 @@ $dictionary = array
 	2569 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4(16 drive)'),
 	2570 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4(LFF)'),
 	2571 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4S'),
-	2572 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C250 M2'),
+
 	2573 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C420 M3'),
-	2574 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C460 M2'),
+
 	2575 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C460 M4'),
 	2576 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS-Mini 6324 Fabric Interconnect'),
 	2577 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS 6332 Fabric Interconnect'),
 	2578 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS 6332-16UP Fabric Interconnect'),
 	2579 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M3(LFF)'),
-	2580 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C260 M2'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
