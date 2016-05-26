@@ -31,7 +31,6 @@ before_script:
  - echo "?>" >> cli_install.php
  - php cli_install.php
  - echo 'INSERT INTO UserAccount (user_id, user_name, user_password_hash) VALUES (1, "admin", SHA1("travistest"));' | mysql -u racktables -ptravistest racktables_unittest
- - mysql -u racktables -ptravistest racktables_unittest < scripts/init-sample-racks.sql
 
 script:
  - ./tests/express.sh
