@@ -1993,13 +1993,9 @@ function showMessageOrError ()
 		154 => array ('code' => 'error', 'format' => "Verification error: %s"),
 		155 => array ('code' => 'error', 'format' => 'Save failed.'),
 		159 => array ('code' => 'error', 'format' => 'Permission denied moving port %s from VLAN%u to VLAN%u'),
-		161 => array ('code' => 'error', 'format' => 'Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.'),
-		162 => array ('code' => 'error', 'format' => 'More than one IP address is assigned to this object, please configure FQDN attribute.'),
 		170 => array ('code' => 'error', 'format' => 'There is no network for IP address "%s"'),
 		172 => array ('code' => 'error', 'format' => 'Malformed request'),
 		179 => array ('code' => 'error', 'format' => 'Expired form has been declined.'),
-		188 => array ('code' => 'error', 'format' => "Fatal SNMP failure"),
-		189 => array ('code' => 'error', 'format' => "Unknown OID '%s'"),
 		191 => array ('code' => 'error', 'format' => "deploy was blocked due to conflicting configuration versions"),
 
 // records 200~299 with warnings
