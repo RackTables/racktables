@@ -34,3 +34,4 @@ before_script:
 
 script:
  - ./tests/express.sh
+ - mysql -u racktables -ptravistest racktables_unittest < scripts/init-sample-racks.sql
