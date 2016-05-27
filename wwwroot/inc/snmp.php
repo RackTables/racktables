@@ -4043,18 +4043,17 @@ function checkPIC ($port_type_id)
 
 function doSNMPmining ($object_id, $snmpsetup)
 {
-	setFuncMessages (__FUNCTION__, array ('ERR1' => 161, 'ERR2' => 162));
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
 	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
 	if (count ($endpoints) == 0)
 	{
-		showFuncMessage (__FUNCTION__, 'ERR1'); // endpoint not found
+		showError ('Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.');
 		return;
 	}
 	if (count ($endpoints) > 1)
 	{
-		showFuncMessage (__FUNCTION__, 'ERR2'); // can't pick an address
+		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
 		return;
 	}
 
@@ -4073,18 +4072,17 @@ function doSNMPmining ($object_id, $snmpsetup)
 
 function doSwitchSNMPmining ($objectInfo, $device)
 {
-	setFuncMessages (__FUNCTION__, array ('ERR3' => 188, 'ERR4' => 189));
 	global $known_switches, $iftable_processors;
 
 	if (FALSE === ($sysObjectID = $device->snmpget ('sysObjectID.0')))
 	{
-		showFuncMessage (__FUNCTION__, 'ERR3'); // // fatal SNMP failure
+		showError ('Fatal SNMP failure');
 		return;
 	}
 	$sysObjectID = preg_replace ('/^.*( \.1\.3\.6\.1\.|enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
 	if (!isset ($known_switches[$sysObjectID]))
 	{
-		showFuncMessage (__FUNCTION__, 'ERR4', array ($sysObjectID)); // unknown OID
+		showError ("Unknown OID '{$sysObjectID}'");
 		return;
 	}
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
