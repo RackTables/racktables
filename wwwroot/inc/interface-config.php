@@ -1054,21 +1054,15 @@ function renderMyQuickLinks ()
 
 function renderCactiConfig()
 {
+	$columns = array
+	(
+		array ('th_text' => 'base URL', 'row_key' => 'base_url'),
+		array ('th_text' => 'username', 'row_key' => 'username'),
+		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
+	);
 	$servers = getCactiServers();
 	startPortlet ('Cacti servers (' . count ($servers) . ')');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr>' .
-		'<th>base URL</th>' .
-		'<th>username</th>' .
-		'<th>graph(s)</th>' .
-		'</tr>';
-	foreach ($servers as $server)
-		echo '<tr align=left valign=top>' .
-			'<td>' . stringForTD ($server['base_url']) . '</td>' .
-			'<td>' . stringForTD ($server['username']) . '</td>' .
-			"<td class=tdright>${server['num_graphs']}</td>" .
-			'</tr>';
-	echo '</table>';
+	renderTableViewer ($columns, $servers);
 	finishPortlet();
 }
 
@@ -1120,16 +1114,14 @@ function renderCactiServersEditor()
 
 function renderMuninConfig()
 {
+	$columns = array
+	(
+		array ('th_text' => 'base URL', 'row_key' => 'base_url', 'td_maxlen' => 150),
+		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
+	);
 	$servers = getMuninServers();
 	startPortlet ('Munin servers (' . count ($servers) . ')');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>base URL</th><th>graph(s)</th></tr>';
-	foreach ($servers as $server)
-	{
-		echo '<tr align=left valign=top><td>' . stringForTD ($server['base_url']) . '</td>';
-		echo "<td class=tdright>${server['num_graphs']}</td></tr>";
-	}
-	echo '</table>';
+	renderTableViewer ($columns, $servers);
 	finishPortlet();
 }
 

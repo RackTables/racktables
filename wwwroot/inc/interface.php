@@ -6399,4 +6399,62 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 	echo '</table>';
 }
 
+// Each table column descriptor is an array that contains at least the "row_key"
+// key, which tells where the data for that column is in each row. It may also
+// contain additional keys below:
+//
+// th_text   -- text for the TH (not HTML escaped!)
+// th_class  -- CSS class for the TH
+// td_class  -- CSS class for the TD
+// td_escape -- whether to do HTML escaping (defaults to TRUE)
+// td_maxlen -- cutoff margin for escaping (defaults to 0)
+function renderTableViewer ($columns, $rows)
+{
+	$header_row = FALSE;
+	foreach ($columns as $col)
+	{
+		if (! array_key_exists ('row_key', $col))
+			throw new InvalidArgException ('columns', '(array)', '\'row_key\' is not set for a column');
+		if (array_key_exists ('th_text', $col))
+			$header_row = TRUE;
+	}
+	$tclass = $header_row ? 'zebra' : 'zebra0';
+	echo "<table cellspacing=0 cellpadding=5 align=center class='widetable ${tclass}'>";
+	if ($header_row)
+	{
+		echo '<tr>';
+		foreach ($columns as $col)
+		if (! array_key_exists ('th_text', $col))
+			echo '<th>&nbsp;</th>';
+		else
+		{
+			echo '<th';
+			if (array_key_exists ('th_class', $col))
+				echo ' class=' . $col['th_class'];
+			echo '>' . $col['th_text'] . '</th>';
+		}
+		echo '</tr>';
+	}
+	foreach ($rows as $row)
+	{
+		echo '<tr align=left valign=top>';
+		foreach ($columns as $col)
+			if (! array_key_exists ($col['row_key'], $row))
+				echo '<td class=trerror>data error</td>';
+			else
+			{
+				echo '<td';
+				if (array_key_exists ('td_class', $col))
+					echo ' class=' . $col['td_class'];
+				echo '>';
+				$text = $row[$col['row_key']];
+				if (array_fetch ($col, 'td_escape', TRUE))
+					$text = stringForTD ($text, array_fetch ($col, 'td_maxlen', 0));
+				echo $text . '</td>';
+			}
+		echo '</tr>';
+	}
+	echo '</table>';
+}
+
 ?>
