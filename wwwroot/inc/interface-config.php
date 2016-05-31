@@ -443,14 +443,13 @@ function renderPortOIFEditor()
 
 function renderAttributes ()
 {
-	global $nextorder, $attrtypes;
+	global $attrtypes;
 	startPortlet ('Optional attributes');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>";
+	echo '<table class="cooltable zebra" border=0 cellpadding=5 cellspacing=0 align=center>';
 	echo "<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>";
-	$order = 'odd';
 	foreach (getAttrMap() as $attr)
 	{
-		echo "<tr class=row_${order}>";
+		echo '<tr>';
 		echo "<td class=tdleft>${attr['name']}</td>";
 		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td>";
 		echo '<td class=tdleft>';
@@ -463,7 +462,6 @@ function renderAttributes ()
 				else
 					echo decodeObjectType ($app['objtype_id']) . '<br>';
 		echo '</td></tr>';
-		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
 	finishPortlet();

@@ -5999,12 +5999,10 @@ function allObjectLogs ()
 
 	if (count($logs) > 0)
 	{
-		global $nextorder;
-		echo "<br><table width='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
+		echo '<br><table width="80%" align=center border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra">';
 		echo '<tr valign=top><th class=tdleft>Object</th><th class=tdleft>Date/user</th>';
 		echo '<th class=tdcenter>' . getImageHREF ('text') . '</th></tr>';
 
-		$order = 'odd';
 		foreach ($logs as $row)
 		{
 			switch ($row['objtype_id'])
@@ -6027,12 +6025,11 @@ function allObjectLogs ()
 					$entity = 'object';
 					break;
 			}
-			echo "<tr class=row_${order} valign=top>";
+			echo '<tr valign=top>';
 			echo '<td class=tdleft>' . mkA ($text, $entity, $row['object_id'], 'log') . '</td>';
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 			echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo '</table>';
 	}
@@ -6054,7 +6051,7 @@ function renderGlobalLogEditor()
 
 function renderVirtualResourcesSummary ()
 {
-	global $pageno, $nextorder;
+	global $pageno;
 
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
@@ -6063,13 +6060,12 @@ function renderVirtualResourcesSummary ()
 	startPortlet ('Clusters (' . count ($clusters) . ')');
 	if (count($clusters) > 0)
 	{
-		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Cluster</th><th>Hypervisors</th><th>Resource Pools</th><th>Cluster VMs</th><th>RP VMs</th><th>Total VMs</th></tr>\n";
-		$order = 'odd';
 		foreach ($clusters as $cluster)
 		{
 			$total_vms = $cluster['cluster_vms'] + $cluster['resource_pool_vms'];
-			echo "<tr class=row_${order} valign=top>";
+			echo '<tr valign=top>';
 			echo '<td class="tdleft">' . mkA ("<strong>${cluster['name']}</strong>", 'object', $cluster['id']) . '</td>';
 			echo "<td class='tdleft'>${cluster['hypervisors']}</td>";
 			echo "<td class='tdleft'>${cluster['resource_pools']}</td>";
@@ -6077,7 +6073,6 @@ function renderVirtualResourcesSummary ()
 			echo "<td class='tdleft'>${cluster['resource_pool_vms']}</td>";
 			echo "<td class='tdleft'>$total_vms</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 	}
@@ -6091,12 +6086,11 @@ function renderVirtualResourcesSummary ()
 	startPortlet ('Resource Pools (' . count ($pools) . ')');
 	if (count($pools) > 0)
 	{
-		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Pool</th><th>Cluster</th><th>VMs</th></tr>\n";
-		$order = 'odd';
 		foreach ($pools as $pool)
 		{
-			echo "<tr class=row_${order} valign=top>";
+			echo '<tr valign=top>';
 			echo '<td class="tdleft">' . mkA ("<strong>${pool['name']}</strong>", 'object', $pool['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($pool['cluster_id'])
@@ -6104,7 +6098,6 @@ function renderVirtualResourcesSummary ()
 			echo '</td>';
 			echo "<td class='tdleft'>${pool['VMs']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 	}
@@ -6118,12 +6111,11 @@ function renderVirtualResourcesSummary ()
 	startPortlet ('Hypervisors (' . count ($hypervisors) . ')');
 	if (count($hypervisors) > 0)
 	{
-		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Hypervisor</th><th>Cluster</th><th>VMs</th></tr>\n";
-		$order = 'odd';
 		foreach ($hypervisors as $hypervisor)
 		{
-			echo "<tr class=row_${order} valign=top>";
+			echo '<tr valign=top>';
 			echo '<td class="tdleft">' . mkA ("<strong>${hypervisor['name']}</strong>", 'object', $hypervisor['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($hypervisor['cluster_id'])
@@ -6131,7 +6123,6 @@ function renderVirtualResourcesSummary ()
 			echo '</td>';
 			echo "<td class='tdleft'>${hypervisor['VMs']}</td>";
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 	}
@@ -6145,15 +6136,13 @@ function renderVirtualResourcesSummary ()
 	startPortlet ('Virtual Switches (' . count ($switches) . ')');
 	if (count($switches) > 0)
 	{
-		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
 		echo "<tr><th>Name</th></tr>\n";
-		$order = 'odd';
 		foreach ($switches as $switch)
 		{
-			echo "<tr class=row_${order} valign=top>";
+			echo '<tr valign=top>';
 			echo '<td class="tdleft">' . mkA ("<strong>${switch['name']}</strong>", 'object', $switch['id']) . '</td>';
 			echo "</tr>\n";
-			$order = $nextorder[$order];
 		}
 		echo "</table>\n";
 	}
