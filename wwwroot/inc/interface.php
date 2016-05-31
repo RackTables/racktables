@@ -6051,8 +6051,6 @@ function renderGlobalLogEditor()
 
 function renderVirtualResourcesSummary ()
 {
-	global $pageno;
-
 	echo "<table border=0 class=objectview>\n";
 	echo "<tr><td class=pcleft>";
 
