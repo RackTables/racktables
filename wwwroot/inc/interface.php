@@ -5966,26 +5966,23 @@ END
 //
 function renderObjectLogEditor ()
 {
-	global $nextorder;
-
 	echo '<center><h2>Log records for this object (' . mkA ('complete list', 'objectlog') . ')</h2></center>';
 	printOpFormIntro ('add');
-	echo "<table with=80% align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top class=row_odd>";
+	echo '<table with="80%" align=center border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
+	echo '<tr valign=top>';
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>';
 	echo '<td><textarea name=logentry rows=10 cols=80></textarea></td>';
 	echo '<td class=tdcenter>' . getImageHREF ('CREATE', 'add record', TRUE) . '</td>' ;
 	echo '</tr></form>';
 
-	$order = 'even';
 	foreach (getLogRecordsForObject (getBypassValue()) as $row)
 	{
-		echo "<tr class=row_${order} valign=top>";
+		echo '<tr valign=top>';
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 		echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 		echo "<td class=tdleft>";
 		echo getOpLink (array('op'=>'del', 'log_id'=>$row['id']), '', 'DESTROY', 'Delete log entry');
 		echo "</td></tr>\n";
-		$order = $nextorder[$order];
 	}
 	echo '</table>';
 }
