@@ -6034,6 +6034,7 @@ function allObjectLogs ()
 		echo '<center><h2>No logs exist</h2></center>';
 }
 
+// FIXME: this function is not used
 function renderGlobalLogEditor()
 {
 	echo "<table with='80%' align=center border=0 cellpadding=5 cellspacing=0 align=center class=cooltable><tr valign=top>";
