@@ -113,6 +113,7 @@ As of May 2016 this will install RackTables Version 0.20.11 and build and instal
 Install dependencies with pkg:
 ```
 # pkg install php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets
+# pkg install mod_php70 mysql56-server
 ```
 
 unpack tar.gz/zip archive to /usr/local/www
