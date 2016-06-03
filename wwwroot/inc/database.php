@@ -1669,41 +1669,34 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	try
+	$matches = array();
+	switch (1)
 	{
-		$matches = array();
-		switch (1)
-		{
-		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $matches[1];
-			$oif_id = $matches[2];
-			break;
-		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = 1;
-			$oif_id = $matches[1];
-			break;
-		default:
-			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-		}
-		usePreparedInsertBlade
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+	}
+	usePreparedInsertBlade
+	(
+		'Port',
+		array
 		(
-			'Port',
-			array
-			(
-				'name' => $port_name,
-				'object_id' => $object_id,
-				'label' => $port_label,
-				'iif_id' => $iif_id,
-				'type' => $oif_id,
-				'l2address' => nullIfEmptyStr ($db_l2address),
-			)
-		);
-		lastCreated ('port', lastInsertID());
-	}
-	catch (Exception $e)
-	{
-		throw $e;
-	}
+			'name' => $port_name,
+			'object_id' => $object_id,
+			'label' => $port_label,
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
+			'l2address' => nullIfEmptyStr ($db_l2address),
+		)
+	);
+	lastCreated ('port', lastInsertID());
 	return lastInsertID();
 }
 
@@ -1720,45 +1713,38 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	$portinfo = getPortInfo ($port_id);
-	try
+	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
+	switch (1)
 	{
-		$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
-		switch (1)
-		{
-		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $matches[1];
-			$oif_id = $matches[2];
-			break;
-		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $portinfo['iif_id'];
-			$oif_id = $matches[1];
-			break;
-		default:
-			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-		}
-		usePreparedUpdateBlade
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $portinfo['iif_id'];
+		$oif_id = $matches[1];
+		break;
+	default:
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+	}
+	usePreparedUpdateBlade
+	(
+		'Port',
+		array
 		(
-			'Port',
-			array
-			(
-				'name' => $port_name,
-				'iif_id' => $iif_id,
-				'type' => $oif_id,
-				'label' => $port_label,
-				'reservation_comment' => $reservation_comment,
-				'l2address' => nullIfEmptyStr ($db_l2address),
-			),
-			array
-			(
-				'id' => $port_id,
-				'object_id' => $object_id
-			)
-		);
-	}
-	catch (Exception $e)
-	{
-		throw $e;
-	}
+			'name' => $port_name,
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
+			'label' => $port_label,
+			'reservation_comment' => $reservation_comment,
+			'l2address' => nullIfEmptyStr ($db_l2address),
+		),
+		array
+		(
+			'id' => $port_id,
+			'object_id' => $object_id
+		)
+	);
 	if ($portinfo['reservation_comment'] !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
 }
