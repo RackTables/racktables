@@ -1669,13 +1669,8 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	global $dbxlink;
-	if ($do_locks = $db_l2address != '')
-		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
-		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
 		$matches = array();
 		switch (1)
 		{
@@ -1704,13 +1699,9 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 			)
 		);
 		lastCreated ('port', lastInsertID());
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 	}
 	catch (Exception $e)
 	{
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 		throw $e;
 	}
 	return lastInsertID();
@@ -1728,20 +1719,9 @@ function getPortReservationComment ($port_id, $extrasql = '')
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	global $dbxlink;
 	$portinfo = getPortInfo ($port_id);
-	if ($do_locks = ($db_l2address != '' && $portinfo['l2address'] !== $port_l2address))
-		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
-		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
-		{
-			// FIXME: it is more correct to throw InvalidArgException here
-			// and convert it to InvalidRequestArgException at upper level,
-			// when there is a mean to do that.
-			throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
-		}
-		$prev_comment = getPortReservationComment ($port_id);
 		$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
 		switch (1)
 		{
@@ -1774,17 +1754,13 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 				'object_id' => $object_id
 			)
 		);
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 	}
 	catch (Exception $e)
 	{
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 		throw $e;
 	}
-	if ($prev_comment !== $reservation_comment)
-		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
+	if ($portinfo['reservation_comment'] !== $reservation_comment)
+		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
 }
 
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
@@ -4955,21 +4931,6 @@ function constructUserCell ($username)
 	);
 	$ret['atags'] = generateEntityAutoTags ($ret);
 	return $ret;
-}
-
-// Return TRUE, if the given address is assigned to a port of any object
-// except the current object. Using this function as a constraint makes
-// it possible to reuse L2 addresses within one object, yet keeping them
-// universally unique on the other hand.
-function alreadyUsedL2Address ($address, $my_object_id)
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT COUNT(*) FROM Port WHERE l2address = ? AND BINARY l2address = ? AND object_id != ?',
-		array ($address, $address, $my_object_id)
-	);
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0] != 0;
 }
 
 function getPortInterfaceCompat()
