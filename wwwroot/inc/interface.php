@@ -5992,46 +5992,48 @@ function renderObjectLogEditor ()
 //
 function allObjectLogs ()
 {
-	$logs = getLogRecords ();
-
-	if (count($logs) > 0)
+	if (0 == count ($logs = getLogRecords()))
 	{
-		echo '<br><table width="80%" align=center border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra">';
-		echo '<tr valign=top><th class=tdleft>Object</th><th class=tdleft>Date/user</th>';
-		echo '<th class=tdcenter>' . getImageHREF ('text') . '</th></tr>';
-
-		foreach ($logs as $row)
-		{
-			switch ($row['objtype_id'])
-			{
-				case 1560:
-					$text = $row['name'];
-					$entity = 'rack';
-					break;
-				case 1561:
-					$text = $row['name'];
-					$entity = 'row';
-					break;
-				case 1562:
-					$text = $row['name'];
-					$entity = 'location';
-					break;
-				default:
-					$object = spotEntity ('object', $row['object_id']);
-					$text = $object['dname'];
-					$entity = 'object';
-					break;
-			}
-			echo '<tr valign=top>';
-			echo '<td class=tdleft>' . mkA ($text, $entity, $row['object_id'], 'log') . '</td>';
-			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
-			echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
-			echo "</tr>\n";
-		}
-		echo '</table>';
-	}
-	else
 		echo '<center><h2>No logs exist</h2></center>';
+		return;
+	}
+	$columns = array
+	(
+		array ('th_text' => 'Object', 'th_class' => 'tdleft', 'row_key' => 0, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
+		array ('th_text' => 'Date/user', 'th_class' => 'tdleft', 'row_key' => 1, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
+		array ('th_text' => getImageHREF ('text'), 'th_class' => 'tdcenter', 'row_key' => 2, 'td_class' => 'logentry'),
+	);
+	$rows = array();
+	foreach ($logs as $row)
+	{
+		switch ($row['objtype_id'])
+		{
+			case 1560:
+				$text = $row['name'];
+				$entity = 'rack';
+				break;
+			case 1561:
+				$text = $row['name'];
+				$entity = 'row';
+				break;
+			case 1562:
+				$text = $row['name'];
+				$entity = 'location';
+				break;
+			default:
+				$object = spotEntity ('object', $row['object_id']);
+				$text = $object['dname'];
+				$entity = 'object';
+				break;
+		}
+		$rows[] = array
+		(
+			mkA ($text, $entity, $row['object_id'], 'log'),
+			$row['date'] . '<br>' . $row['user'],
+			string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)),
+		);
+	}
+	renderTableViewer ($columns, $rows);
 }
 
 // FIXME: this function is not used
