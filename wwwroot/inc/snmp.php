@@ -4099,6 +4099,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	updateStickerForCell ($objectInfo, 2, $known_switches[$sysObjectID]['dict_key']);
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	detectSoftwareType ($objectInfo, $sysDescr);
+	$desiredPorts = array();
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
@@ -4121,30 +4122,30 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		if (preg_match ('/Cisco IOS Software, C2600/', $sysDescr))
-			commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
+			addDesiredPort ($desiredPorts, 'aux0', '1-29', 'auxillary', ''); // RJ-45 RS-232 aux port
 		if ($sysObjectID == '9.1.956')
 		{
 			// models with two AC inputs
 			checkPIC ('1-16');
-			commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
-			commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
+			addDesiredPort ($desiredPorts, 'AC-in-1', '1-16', 'AC1', '');
+			addDesiredPort ($desiredPorts, 'AC-in-2', '1-16', 'AC2', '');
 		}
 		elseif ($sysObjectID != '9.1.749' && $sysObjectID != '9.1.920')
 		{
 			// assume the rest have one AC input, but exclude blade devices
 			checkPIC ('1-16'); // AC input
-			commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+			addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		}
 		break;
 	case preg_match ('/^9\.5\.42/', $sysObjectID): // Catalyst 2948 running CatOS
 	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SMB series switches (200, 220, 300, 500)
 	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
+		addDesiredPort ($desiredPorts, 'con0', '1-681', 'console', ''); // DB-9 RS-232 console
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^9\.12\.3\.1\.3\./', $sysObjectID): // Nexus
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
@@ -4167,10 +4168,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if ($sysChassi !== FALSE || $sysChassi !== NULL)
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($sysChassi, strlen ('STRING: '))));
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'con0', '1-29', 'console', ''); // RJ-45 RS-232 console
 		checkPIC ('1-16'); // AC input
-		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
-		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
+		addDesiredPort ($desiredPorts, 'AC-in-1', '1-16', 'AC1', '');
+		addDesiredPort ($desiredPorts, 'AC-in-2', '1-16', 'AC2', '');
 		break;
 	case preg_match ('/^11\.2\.3\.7\.11\.(\d+)$/', $sysObjectID, $matches): // ProCurve
 		$console_per_product = array
@@ -4195,7 +4196,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (array_key_exists ($matches[1], $console_per_product))
 		{
 			checkPIC ($console_per_product[$matches[1]]);
-			commitAddPort ($objectInfo['id'], 'console', $console_per_product[$matches[1]], 'console', '');
+			addDesiredPort ($desiredPorts, 'console', $console_per_product[$matches[1]], 'console', '');
 		}
 		$oom_per_product = array
 		(
@@ -4204,10 +4205,10 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (array_key_exists ($matches[1], $oom_per_product))
 		{
 			checkPIC ($oom_per_product[$matches[1]]);
-			commitAddPort ($objectInfo['id'], 'mgmt', $oom_per_product[$matches[1]], 'mgmt', '');
+			addDesiredPort ($desiredPorts, 'mgmt', $oom_per_product[$matches[1]], 'mgmt', '');
 		}
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		$exact_release = preg_replace ('/^.* revision ([^ ]+), .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $exact_release);
 		break;
@@ -4216,9 +4217,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		// one RJ-45 RS-232 and one AC port (it could be DC, but chances are it's AC)
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'con', '1-29', 'CON', ''); // RJ-45 RS-232 console
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		// Juniper uses the same sysObjectID for multiple HW models, override if necessary
 		if (preg_match ('/^Juniper Networks, Inc. ex3200-48t internet router/', $sysDescr))
 			updateStickerForCell ($objectInfo, 2, 902);
@@ -4228,7 +4229,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^1991\.1\.3\.53\.1\.2$/', $sysObjectID): // TurboIron 24X
 	case preg_match ('/^2636\.1\.1\.1\.2\./', $sysObjectID): // Juniper
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
+		addDesiredPort ($desiredPorts, 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
 	case preg_match ('/^1991\.1\.3\.45\./', $sysObjectID): // snFGSFamily
 	case preg_match ('/^1991\.1\.3\.46\./', $sysObjectID): // snFLSFamily
@@ -4270,12 +4271,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			if ($count)
 			{
 				checkPIC ('1-16');
-				commitAddPort ($objectInfo['id'], $PSU_cooked, '1-16', '', '');
+				addDesiredPort ($desiredPorts, $PSU_cooked, '1-16', '', '');
 			}
 		}
 		# fixed console port
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232 console
+		addDesiredPort ($desiredPorts, 'console', '1-681', 'console', ''); // DB-9 RS-232 console
 		break;
 	case preg_match ('/^1916\.2\./', $sysObjectID): // Extreme Networks Summit
 		$xos_release = preg_replace ('/^ExtremeXOS version ([[:digit:]]+)\..*$/', '\\1', $sysDescr);
@@ -4288,12 +4289,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if (array_key_exists ($xos_release, $xos_codes))
 			updateStickerForCell ($objectInfo, 4, $xos_codes[$xos_release]);
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', 'console', ''); // DB-9 RS-232
+		addDesiredPort ($desiredPorts, 'console', '1-681', 'console', ''); // DB-9 RS-232
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^6027\.1\./', $sysObjectID): # Force10
-		commitAddPort ($objectInfo['id'], 'aux0', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'aux0', '1-29', 'RS-232', ''); // RJ-45 RS-232 console
 		$m = array();
 		if (preg_match ('/Force10 Application Software Version: ([\d\.]+)/', $sysDescr, $m))
 		{
@@ -4314,13 +4315,13 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if ($device->snmpget ('enterprises.6027.3.10.1.2.3.1.3.1.1') == 'INTEGER: 1')
 		{
 			checkPIC ('1-16');
-			commitAddPort ($objectInfo['id'], 'PSU0', '1-16', 'PSU0', '');
+			addDesiredPort ($desiredPorts, 'PSU0', '1-16', 'PSU0', '');
 		}
 		# F10-S-SERIES-CHASSIS-MIB::chSysPowerSupplyType.1.2
 		if ($device->snmpget ('enterprises.6027.3.10.1.2.3.1.3.1.2') == 'INTEGER: 1')
 		{
 			checkPIC ('1-16');
-			commitAddPort ($objectInfo['id'], 'PSU1', '1-16', 'PSU1', '');
+			addDesiredPort ($desiredPorts, 'PSU1', '1-16', 'PSU1', '');
 		}
 		if ($serialNo != '')
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
@@ -4338,33 +4339,33 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		addDesiredPort ($desiredPorts, 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^388\.18/', $sysObjectID): // Motorola RFS 4000
 		// one RJ-45 RS-232 and one AC port
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'console', '1-29', 'console', '');
+		addDesiredPort ($desiredPorts, 'console', '1-29', 'console', '');
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^207\.1\.14\./', $sysObjectID): // Allied Telesyn
 		// one RJ-45 RS-232 and two AC ports
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'console', '1-29', 'console', '');
+		addDesiredPort ($desiredPorts, 'console', '1-29', 'console', '');
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in-1', '1-16', 'AC1', '');
-		commitAddPort ($objectInfo['id'], 'AC-in-2', '1-16', 'AC2', '');
+		addDesiredPort ($desiredPorts, 'AC-in-1', '1-16', 'AC1', '');
+		addDesiredPort ($desiredPorts, 'AC-in-2', '1-16', 'AC2', '');
 		break;
 	case preg_match ('/^674\.10895\.3000/', $sysObjectID):
 		// one DB-9 RS-232, one 100Mb OOB mgmt, and one AC port
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console', '1-681', '', ''); // DB-9 RS-232
+		addDesiredPort ($desiredPorts, 'console', '1-681', '', ''); // DB-9 RS-232
 		checkPIC ('1-19');
-		commitAddPort ($objectInfo['id'], 'mgmt', '1-19', '', '');
+		addDesiredPort ($desiredPorts, 'mgmt', '1-19', '', '');
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^43\.1\.16\.4\.3\./', $sysObjectID): // 3Com
 		$sw_version = preg_replace('/^.* Version 3Com OS ([^ ]+).*$/', '\\1', $sysDescr);
@@ -4372,9 +4373,9 @@ function doSwitchSNMPmining ($objectInfo, $device)
 
 		// one RJ-45 RS-232 and one AC port
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'console', '1-29', '', ''); // RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'console', '1-29', '', ''); // RJ-45 RS-232 console
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^10977\.11825\.11833\.97\.25451\.12800\.100\.4\.4/', $sysObjectID): // Netgear
 		$sw_version = preg_replace('/^.* V([^ ]+).*$/', '\\1', $sysDescr);
@@ -4382,18 +4383,18 @@ function doSwitchSNMPmining ($objectInfo, $device)
 
 		// one AC port, no console
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^171\.10\.76\.10/', $sysObjectID): // D-Link DGS-1210-24
 	case preg_match ('/^207\.1\.4\./', $sysObjectID): // Allied Telesyn AT-GS950/24
 	case preg_match ('/^4526\.100\.4\.(6|10)/', $sysObjectID): // NETGEAR (without console)
 		// one AC port, no console
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'AC-in', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^30065\.1\.3011\./', $sysObjectID): // Arista
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'console', '1-29', 'IOIOI', '');
+		addDesiredPort ($desiredPorts, 'console', '1-29', 'IOIOI', '');
 		$sw_version = preg_replace ('/^Arista Networks EOS version (.+) running on .*$/', '\\1', $sysDescr);
 		updateStickerForCell ($objectInfo, 5, $sw_version);
 		if ('' != $serialNo = $device->snmpget ('mib-2.47.1.1.1.1.11.1')) # entPhysicalSerialNumber.1
@@ -4401,14 +4402,14 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		break;
 	case preg_match ('/^119\.1\.203\.2\.2\./', $sysObjectID): # NEC
 		checkPIC ('1-681');
-		commitAddPort ($objectInfo['id'], 'console 0', '1-681', 'console', '');
+		addDesiredPort ($desiredPorts, 'console 0', '1-681', 'console', '');
 		checkPIC ('1-16');
-		commitAddPort ($objectInfo['id'], 'PS1', '1-16', '', '');
-		commitAddPort ($objectInfo['id'], 'PS2', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'PS1', '1-16', '', '');
+		addDesiredPort ($desiredPorts, 'PS2', '1-16', '', '');
 		break;
 	case preg_match ('/^26543\.1\.7\./', $sysObjectID): # IBM
 		checkPIC ('1-29');
-		commitAddPort ($objectInfo['id'], 'console', '1-29', '', ''); # RJ-45 RS-232 console
+		addDesiredPort ($desiredPorts, 'console', '1-29', '', ''); # RJ-45 RS-232 console
 		break;
 	default: // Nortel...
 		break;
@@ -4457,10 +4458,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue; // try next processor on current port
 			$newlabel = preg_replace ($iftable_processors[$processor_name]['pattern'], $iftable_processors[$processor_name]['label'], $iface['ifDescr'], 1, $count);
 			checkPIC ($iftable_processors[$processor_name]['dict_key']);
-			commitAddPort ($objectInfo['id'], $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
+			addDesiredPort ($desiredPorts, $newname, $iftable_processors[$processor_name]['dict_key'], $newlabel, $iface['ifPhysAddress']);
 			if (!$iftable_processors[$processor_name]['try_next_proc']) // done with this port
 				continue 2;
 		}
+	// Sync ports
+	syncObjectPorts ($objectInfo, $desiredPorts);
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
@@ -4474,15 +4477,17 @@ function doPDUSNMPmining ($objectInfo, $switch)
 	updateStickerForCell ($objectInfo, 3, $switch->getName());
 	updateStickerForCell ($objectInfo, 5, $switch->getFWRev());
 	checkPIC ('1-16');
-	commitAddPort ($objectInfo['id'], 'input', '1-16', 'input', '');
+	$desiredPorts = array();
+	addDesiredPort ($desiredPorts, 'input', '1-16', 'input', '');
 	$portno = 1;
 	foreach ($switch->getPorts() as $name => $port)
 	{
 		$label = $port[0] != '' ? $port[0] : $portno;
 		checkPIC ('1-1322');
-		commitAddPort ($objectInfo['id'], $portno, '1-1322', $port[0], '');
+		addDesiredPort ($desiredPorts, $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
+	syncObjectPorts ($objectInfo, $desiredPorts);
 	showSuccess ("Added ${portno} port(s)");
 	return buildRedirectURL (NULL, 'ports');
 }

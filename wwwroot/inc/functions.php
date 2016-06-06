@@ -6401,4 +6401,85 @@ function textareaCooked ($text)
 	return $ret;
 }
 
+// Used to fill $desiredPorts argument for syncObjectPorts.
+// Call this function just like commitAddPort except the first argument
+function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label, $port_l2address)
+{
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+	}
+	$desiredPorts["{$port_name}-{$iif_id}"] = array (
+		'name' => $port_name,
+		'iif_id' => $iif_id,
+		'oif_id' => $oif_id,
+		'label' => $port_label,
+		'l2address' => $port_l2address,
+	);
+}
+
+// synchronizes the list of the object ports to the desired list of ports
+// $desiredPorts is a list of ports in getObjectPortsAndLinks format.
+// required port fields are name, iif_id, oif_id, label and l2address.
+// $desiredPorts can be filled by addDesiredPort function using commitAddPort format
+function syncObjectPorts ($objectInfo, $desiredPorts)
+{
+	global $dbxlink;
+	$real_ports = array();
+	$dbxlink->beginTransaction();
+	$portlist = fetchPortList ("Port.object_id = ? FOR UPDATE", array ($objectInfo['id']));
+	$added = $deleted = $changed = 0;
+	foreach ($portlist as $port)
+	{
+		$key = "{$port['name']}-{$port['iif_id']}";
+		if (!isset ($desiredPorts[$key]))
+		{
+			if ($port['linked'])
+				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
+			else
+			{
+				usePreparedDeleteBlade ('Port', array ('id' => $port['id']));
+				$deleted++;
+			}
+			continue;
+		}
+		if (l2addressForDatabase ($port['l2address']) != l2addressForDatabase ($desiredPorts[$key]['l2address']) ||
+			$port['label'] != $desiredPorts[$key]['label'])
+		{
+			commitUpdatePort (
+				$objectInfo['id'],
+				$port['id'],
+				$port['name'],
+				"{$port['iif_id']}-{$port['oif_id']}",
+				$desiredPorts[$key]['label'],
+				$desiredPorts[$key]['l2address'],
+				$port['reservation_comment']
+			);
+			$changed++;
+		}
+		$real_ports[$key] = 1;
+	}
+	foreach ($desiredPorts as $key => $port)
+	{
+		if (!isset ($real_ports[$key]))
+		{
+			$type_id = "{$port['iif_id']}-{$port['oif_id']}";
+			commitAddPort ($objectInfo['id'], $port['name'], $type_id, $port['label'], $port['l2address']);
+			$added++;
+		}
+	}
+	$dbxlink->commit();
+
+	showSuccess ("Added ports: {$added}, changed: {$changed}, deleted: {$deleted}");
+}
+
 ?>
