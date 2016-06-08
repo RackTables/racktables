@@ -36,7 +36,7 @@ class PortTriggerTest extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
+	 * @expectedException InvalidRequestArgException
 	 */
 	public function testUniqueMacAdd()
 	{
@@ -45,7 +45,7 @@ class PortTriggerTest extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
+	 * @expectedException InvalidRequestArgException
 	 */
 	public function testUniqueMacUpdate()
 	{

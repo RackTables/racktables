@@ -1699,11 +1699,9 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 			)
 		);
 	}
-	catch (RTDatabaseError $e)
+	catch (L2AddressException $e)
 	{
-		if (FALSE === strpos ($e->getMessage(), 'l2 address belongs to another object'))
-			throw $e;
-		throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
 	lastCreated ('port', lastInsertID());
 	return lastInsertID();
@@ -1757,11 +1755,9 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 			)
 		);
 	}
-	catch (RTDatabaseError $e)
+	catch (L2AddressException $e)
 	{
-		if (FALSE === strpos ($e->getMessage(), 'l2 address belongs to another object'))
-			throw $e;
-		throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
 	if ($portinfo['reservation_comment'] !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
@@ -3898,7 +3894,7 @@ function convertPDOException ($e)
 		break;
 	case '42000-1305':
 		if (FALSE !== strpos ($e->errorInfo[2], 'l2address-already-exists-on-another-object'))
-			$text = 'l2 address belongs to another object';
+			return new L2AddressException ('l2 address belongs to another object');
 		else
 			return $e;
 		break;
