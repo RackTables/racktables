@@ -1683,19 +1683,26 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 	default:
 		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
 	}
-	usePreparedInsertBlade
-	(
-		'Port',
-		array
+	try
+	{
+		usePreparedInsertBlade
 		(
-			'name' => $port_name,
-			'object_id' => $object_id,
-			'label' => $port_label,
-			'iif_id' => $iif_id,
-			'type' => $oif_id,
-			'l2address' => nullIfEmptyStr ($db_l2address),
-		)
-	);
+			'Port',
+			array
+			(
+				'name' => $port_name,
+				'object_id' => $object_id,
+				'label' => $port_label,
+				'iif_id' => $iif_id,
+				'type' => $oif_id,
+				'l2address' => nullIfEmptyStr ($db_l2address),
+			)
+		);
+	}
+	catch (L2AddressException $e)
+	{
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
+	}
 	lastCreated ('port', lastInsertID());
 	return lastInsertID();
 }
@@ -1727,24 +1734,31 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	default:
 		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
 	}
-	usePreparedUpdateBlade
-	(
-		'Port',
-		array
+	try
+	{
+		usePreparedUpdateBlade
 		(
-			'name' => $port_name,
-			'iif_id' => $iif_id,
-			'type' => $oif_id,
-			'label' => $port_label,
-			'reservation_comment' => $reservation_comment,
-			'l2address' => nullIfEmptyStr ($db_l2address),
-		),
-		array
-		(
-			'id' => $port_id,
-			'object_id' => $object_id
-		)
-	);
+			'Port',
+			array
+			(
+				'name' => $port_name,
+				'iif_id' => $iif_id,
+				'type' => $oif_id,
+				'label' => $port_label,
+				'reservation_comment' => $reservation_comment,
+				'l2address' => nullIfEmptyStr ($db_l2address),
+			),
+			array
+			(
+				'id' => $port_id,
+				'object_id' => $object_id
+			)
+		);
+	}
+	catch (L2AddressException $e)
+	{
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
+	}
 	if ($portinfo['reservation_comment'] !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
 }
@@ -3877,6 +3891,12 @@ function convertPDOException ($e)
 		break;
 	case 'HY000-1205':
 		$text = 'lock wait timeout';
+		break;
+	case '42000-1305':
+		if (FALSE !== strpos ($e->errorInfo[2], 'l2address-already-exists-on-another-object'))
+			return new L2AddressException ('l2 address belongs to another object');
+		else
+			return $e;
 		break;
 	default:
 		return $e;

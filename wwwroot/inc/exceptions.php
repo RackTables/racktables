@@ -152,6 +152,15 @@ class RackTablesError extends Exception
 	}
 }
 
+class L2AddressException extends RTDatabaseError
+{
+	function __construct ($message)
+	{
+		$this->code = parent::DB_WRITE_FAILED;
+		parent::__construct ($message);
+	}
+}
+
 class EntityNotFoundException extends RackTablesError
 {
 	function __construct($entity, $id)
