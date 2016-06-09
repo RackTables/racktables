@@ -1393,7 +1393,6 @@ function updateObject ()
 // Used when updating an object, location or rack
 function updateObjectAttributes ($object_id)
 {
-	global $dbxlink;
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
 	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
