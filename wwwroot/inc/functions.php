@@ -6078,7 +6078,7 @@ function timestampFromDatetimestr ($s)
 	$format = getConfigVar ('DATETIME_FORMAT');
 	if (FALSE === $tmp = strptime ($s, $format))
 		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
-	return mktime
+	$ret = mktime
 	(
 		$tmp['tm_hour'],       # 0~23
 		$tmp['tm_min'],        # 0~59
@@ -6087,6 +6087,13 @@ function timestampFromDatetimestr ($s)
 		$tmp['tm_mday'],       # 1~31
 		$tmp['tm_year'] + 1900 # 0~n -> 1900~n
 	);
+	# PHP UNIX time has a wider (at least on 64-bit systems) range than the unsigned
+	# 32-bit integer type RackTables allocates in the database for UNIX time.
+	if ($ret < 0)
+		throw new InvalidArgException ('s', $s, 'is before 1970-01-01 00:00:00 UTC');
+	if ($ret >= 0xFFFFFFFF)
+		throw new InvalidArgException ('s', $s, 'is on or after 2106-02-07 06:28:15 UTC');
+	return $ret;
 }
 
 # Produce a human-readable clue, such as 'YYYY-MM-DD' for '%Y-%m-%d'.
