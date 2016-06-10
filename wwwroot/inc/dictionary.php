@@ -2472,10 +2472,10 @@ $dictionary = array
 	2581 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%1921 | http://www.cisco.com/c/en/us/products/routers/1921-integrated-services-router-isr/index.html]]'),
 	2582 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%1941 | http://www.cisco.com/c/en/us/products/routers/1941-integrated-services-router-isr/index.html]]'),
 	2583 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%1941W | http://www.cisco.com/c/en/us/products/routers/1941w-integrated-services-router-isr/index.html]]'),
-	2588 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925 | http://www.cisco.com/c/en/us/products/routers/3925-integrated-services-router-isr/index.html]]'),
-	2589 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925E | http://www.cisco.com/c/en/us/products/routers/3925e-integrated-services-router-isr/index.html]]'),
-	2590 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945 | http://www.cisco.com/c/en/us/products/routers/3945-integrated-services-router-isr/index.html]]'),
-	2591 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945E | http://www.cisco.com/c/en/us/products/routers/3945e-integrated-services-router-isr/index.html]]'),
+	2584 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925 | http://www.cisco.com/c/en/us/products/routers/3925-integrated-services-router-isr/index.html]]'),
+	2585 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925E | http://www.cisco.com/c/en/us/products/routers/3925e-integrated-services-router-isr/index.html]]'),
+	2596 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945 | http://www.cisco.com/c/en/us/products/routers/3945-integrated-services-router-isr/index.html]]'),
+	2597 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945E | http://www.cisco.com/c/en/us/products/routers/3945e-integrated-services-router-isr/index.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
