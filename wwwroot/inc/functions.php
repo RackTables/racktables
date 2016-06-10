@@ -340,6 +340,21 @@ function genericAssertion ($argname, $argtype)
 		if (! is_array ($_REQUEST[$argname]))
 			throw new InvalidRequestArgException ($argname, '(omitted)', 'argument is not an array');
 		return $_REQUEST[$argname];
+	case 'datetime0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'datetime':
+		$argvalue = assertStringArg ($argname);
+		try
+		{
+			timestampFromDatetimestr ($argvalue); // discard the result on success
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw $iae->newIRAE ($argname);
+		}
+		return $argvalue;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))
