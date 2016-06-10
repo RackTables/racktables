@@ -191,6 +191,14 @@ function isInteger ($arg, $allow_zero = FALSE)
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
 # (or empty string for empty input, when allowed).
+#
+# FIXME: This function should be removed for the reasons below:
+# 1. Its naming is wrong as it would accept any argument value that is valid
+#    per DATETIME_FORMAT configuration variable, which by default is set to
+#    date only but can include time if necessary.
+# 2. It converts the target value from a string to a UNIX timestamp, which is
+#    not the semantics of similar functions.
+# 3. It is not used anywhere in the code anymore.
 function assertDateArg ($argname, $ok_if_empty = FALSE)
 {
 	if ('' == $arg = assertStringArg ($argname, $ok_if_empty))

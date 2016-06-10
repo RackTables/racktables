@@ -1423,7 +1423,7 @@ function updateObjectAttributes ($object_id)
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
 		if ('date' == $oldvalues[$attr_id]['type'])
-			$value = assertDateArg ("${i}_value");
+			$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
 		else
 			assertStringArg ("${i}_value");
 
