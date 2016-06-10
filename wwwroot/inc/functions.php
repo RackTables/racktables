@@ -318,7 +318,6 @@ function genericAssertion ($argname, $argtype)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'malformed MAC/WWN address');
 		}
 		return $sic[$argname];
-		break;
 	case 'tag':
 		if (!validTagName (assertStringArg ($argname)))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Invalid tag name');
