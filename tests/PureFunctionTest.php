@@ -1065,6 +1065,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('colorHex2Rgb', '800000', TRUE, '192,128,128'),
 			array ('colorHex2Rgb', '008000', TRUE, '128,192,128'),
 			array ('colorHex2Rgb', '000080', TRUE, '128,128,192'),
+
+			array ('SQLDateFromDateStr', '11/12/13', '%d/%m/%y', '2013-12-11'),
+			array ('SQLDateFromDateStr', '2.3.4', '%d.%m.%y', '2004-03-02'),
+			array ('SQLDateFromDateStr', '08.07.1983', '%d.%m.%Y', '1983-07-08'),
 		);
 	}
 

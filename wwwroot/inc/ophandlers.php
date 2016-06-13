@@ -1590,6 +1590,7 @@ function resetUIConfig()
 		'VIRTUAL_OBJ_LISTSRC' => '1504,1505,1506,1507',
 		'DATETIME_ZONE' => 'UTC',
 		'DATETIME_FORMAT' => '%Y-%m-%d',
+		'DATEONLY_FORMAT' => '%Y-%m-%d',
 		'SEARCH_DOMAINS' => '',
 		'8021Q_EXTSYNC_LISTSRC' => 'false',
 		'8021Q_MULTILINK_LISTSRC' => 'false',

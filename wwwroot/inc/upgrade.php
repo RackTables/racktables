@@ -1269,6 +1269,11 @@ CREATE TABLE `Plugin` (
 			}
 			unset ($result);
 
+			$query[] = "UPDATE Config SET description = 'PHP strftime() format for date+time' WHERE varname = 'DATETIME_FORMAT'";
+			$query[] = "
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
+('DATEONLY_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for dates')";
+
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

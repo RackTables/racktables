@@ -382,6 +382,21 @@ function genericAssertion ($argname, $argtype)
 			throw $iae->newIRAE ($argname);
 		}
 		return $argvalue;
+	case 'dateonly0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'dateonly':
+		$argvalue = assertStringArg ($argname);
+		try
+		{
+			SQLDateFromDateStr ($argvalue); // discard the result on success
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw $iae->newIRAE ($argname);
+		}
+		return $argvalue;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
 		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))
@@ -6265,6 +6280,22 @@ function timestampFromDatetimestr ($s)
 	if ($ret >= 0xFFFFFFFF)
 		throw new InvalidArgException ('s', $s, 'is on or after 2106-02-07 06:28:15 UTC');
 	return $ret;
+}
+
+function SQLDateFromDateStr ($s, $format = NULL)
+{
+	if ($format === NULL)
+		$format = getConfigVar ('DATEONLY_FORMAT');
+	if (FALSE === $tmp = strptime ($s, $format))
+		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
+	$y = $tmp['tm_year'] + 1900;
+	$m = $tmp['tm_mon'] + 1;
+	$d = $tmp['tm_mday'];
+	if ($y < 1000 || $y > 9999)
+		throw new InvalidArgException ('s', $s, 'year out of range');
+	if (! checkdate ($m, $d, $y))
+		throw new InvalidArgException ('s', $s, 'not a Gregorian calendar date');
+	return sprintf ('%4u-%02u-%02u', $y, $m, $d);
 }
 
 # Produce a human-readable clue, such as 'YYYY-MM-DD' for '%Y-%m-%d'.
