@@ -1110,7 +1110,7 @@ function get_pseudo_file ($name)
   `user` char(64) NOT NULL,
   UNIQUE KEY `user_varname` (`user`,`varname`),
   KEY `varname` (`varname`),
-  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE
+  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `VLANDescription` (
