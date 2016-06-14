@@ -1398,11 +1398,10 @@ function updateObjectAttributes ($object_id)
 	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		genericAssertion ("${i}_attr_id", 'uint');
-		$attr_id = $_REQUEST["${i}_attr_id"];
+		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
 		if (! array_key_exists ($attr_id, $oldvalues))
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
-		$value = $_REQUEST["${i}_value"];
+		$value = genericAssertion ("${i}_value", 'string0');
 
 		// If the object is a rack, skip certain attributes as they are handled elsewhere
 		// (height, sort_order)
@@ -1424,8 +1423,6 @@ function updateObjectAttributes ($object_id)
 		// server check this and complain.
 		if ('date' == $oldvalues[$attr_id]['type'])
 			$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
-		else
-			assertStringArg ("${i}_value");
 
 		switch ($oldvalues[$attr_id]['type'])
 		{
