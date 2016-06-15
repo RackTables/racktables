@@ -2932,20 +2932,20 @@ function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL, $attrs = array(
 {
 	global $page, $tab;
 	if ($text == '')
-		throw new InvalidArgException ('text', $text);
+		throw new InvalidArgException ('text', $text, 'must not be empty');
 	if (! array_key_exists ($nextpage, $page))
-		throw new InvalidArgException ('nextpage', $nextpage, 'not found');
+		throw new InvalidArgException ('nextpage', $nextpage, 'not a valid page name');
 	$args = array ('page' => $nextpage);
 	if ($nexttab !== NULL)
 	{
 		if (! array_key_exists ($nexttab, $tab[$nextpage]))
-			throw new InvalidArgException ('nexttab', $nexttab, 'not found');
+			throw new InvalidArgException ('nexttab', $nexttab, 'not a valid tab name');
 		$args['tab'] = $nexttab;
 	}
 	if (array_key_exists ('bypass', $page[$nextpage]))
 	{
 		if ($bypass === NULL)
-			throw new InvalidArgException ('bypass', '(NULL)');
+			throw new InvalidArgException ('bypass', '(NULL)', 'must be specified for the given page name');
 		$args[$page[$nextpage]['bypass']] = $bypass;
 	}
 	$attrs['href'] = makeHref ($args);
