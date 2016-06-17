@@ -377,6 +377,27 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('withoutLocationTypes', array(), array()),
 			array ('withoutLocationTypes', array (1560 => 'rack', 1561 => 'row', 1562 => 'location'), array()),
 			array ('withoutLocationTypes', $ten_kilo, $ten_kilo_less_3),
+
+			// implicit 2nd and 3rd arguments
+			array ('reindexById', array(), array()),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				array
+				(
+					1 => array ('id' => 1, 'name' => 'one'),
+					2 => array ('id' => 2, 'name' => 'two'),
+					3 => array ('id' => 3, 'name' => 'three'),
+					4 => array ('id' => 4, 'name' => 'four'),
+				),
+			),
 		);
 	}
 
@@ -813,6 +834,46 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 3, array ('1-2', '4-5')),
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 4, array ('1-3', 5)),
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 5, array ('1-4')),
+
+			// implicit 3rd argument
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'id',
+				array
+				(
+					1 => array ('id' => 1, 'name' => 'one'),
+					2 => array ('id' => 2, 'name' => 'two'),
+					3 => array ('id' => 3, 'name' => 'three'),
+					4 => array ('id' => 4, 'name' => 'four'),
+				),
+			),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				array
+				(
+					'one' => array ('id' => 1, 'name' => 'one'),
+					'two' => array ('id' => 2, 'name' => 'two'),
+					'three' => array ('id' => 3, 'name' => 'three'),
+					'four' => array ('id' => 4, 'name' => 'four'),
+				),
+			),
 		);
 	}
 
@@ -843,6 +904,46 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('scanArrayForItem', $a, 'id', 30, 2),
 			array ('scanArrayForItem', $a, 'name', 'twenty', 1),
 			array ('scanArrayForItem', $a, 'id', 40, NULL),
+
+			// all arguments
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				FALSE,
+				array
+				(
+					'one' => array ('id' => 1, 'name' => 'one'),
+					'two' => array ('id' => 2, 'name' => 'two'),
+					'three' => array ('id' => 3, 'name' => 'three'),
+					'four' => array ('id' => 4, 'name' => 'four'),
+				),
+			),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'parity' => 'odd'),
+					array ('id' => 2, 'parity' => 'even'),
+					array ('id' => 3, 'parity' => 'odd'),
+					array ('id' => 4, 'parity' => 'even'),
+				),
+				'parity',
+				TRUE,
+				array
+				(
+					'odd' => array ('id' => 1, 'parity' => 'odd'),
+					'even' => array ('id' => 2, 'parity' => 'even'),
+				),
+			),
 		);
 	}
 
@@ -896,6 +997,20 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('goodModeForVSTRole', array ('unknown', NULL)),
 
 			array ('makeSetSQL', array (array())),
+
+			// not an array
+			array ('reindexById', array (NULL)),
+			array ('reindexById', array (FALSE)),
+			array ('reindexById', array ('')),
+			array ('reindexById', array (0)),
+			// no such key, implicit 2nd and 3rd arguments
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2, 'name' => 'two'), array ('name' => 'three')))),
+			// no such key, implicit 3rd argument
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2, 'name' => 'two'), array ('name' => 'three')), 'key')),
+			// duplicate key, implicit 3rd argument
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id')),
+			// duplicate key, all arguments
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id', FALSE)),
 		);
 	}
 
