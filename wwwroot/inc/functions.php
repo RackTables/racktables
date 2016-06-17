@@ -3514,6 +3514,8 @@ function array_values_same ($a1, $a2)
 function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 {
 	$ret = array();
+	if (! is_array ($input))
+		throw new InvalidArgException ('input', $input, 'must be an array');
 	foreach ($input as $item)
 	{
 		if (! isset ($item[$column_name])  && ! array_key_exists ($column_name, $item))
