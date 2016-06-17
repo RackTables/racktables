@@ -12,12 +12,13 @@ var input = null;
 var btn = null;
 
 $(document).ready (function() {
-	$(editable_filter).each (function (i, iSpan) {
+	$(editable_filter).not('.initdone').each (function (i, iSpan) {
 		var container = $('<div class="edit-container"/>')
 			.mouseover(onSpanMouseOver);
 		$(iSpan)
 			.after (container)
 			.detach()
+			.addClass('initdone')
 			.appendTo (container);
 		container
 			.append
