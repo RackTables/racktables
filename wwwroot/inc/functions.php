@@ -3518,7 +3518,7 @@ function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 		throw new InvalidArgException ('input', $input, 'must be an array');
 	foreach ($input as $item)
 	{
-		if (! isset ($item[$column_name])  && ! array_key_exists ($column_name, $item))
+		if (! isset ($item[$column_name]))
 			throw new InvalidArgException ('input', '(array)', 'ID column missing');
 		if (isset ($ret[$item[$column_name]]))
 		{
