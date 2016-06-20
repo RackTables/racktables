@@ -874,6 +874,46 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 					'four' => array ('id' => 4, 'name' => 'four'),
 				),
 			),
+
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					10 => array ('id' => 1, 'name' => 'one'),
+					20 => array ('id' => 2, 'name' => 'two'),
+					30 => array ('id' => 3, 'name' => 'three'),
+					40 => array ('id' => 4, 'name' => 'four'),
+				),
+				'id',
+				array (10 => 1, 20 => 2, 30 => 3, 40 => 4),
+			),
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					'a' => array ('id' => 1, 'name' => 'one'),
+					'b' => array ('id' => 2, 'name' => 'two'),
+					'c' => array ('id' => 3, 'name' => 'three'),
+					'd' => array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				array ('a' => 'one', 'b' => 'two', 'c' => 'three', 'd' => 'four'),
+			),
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					array ('id' => 1, 'name' => 'number'),
+					array ('id' => 2, 'name' => 'number'),
+					array ('id' => 3, 'name' => 'number'),
+					array ('id' => 4, 'name' => 'number'),
+				),
+				'name',
+				array ('number', 'number', 'number', 'number'),
+			),
 		);
 	}
 
@@ -1011,6 +1051,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id')),
 			// duplicate key, all arguments
 			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id', FALSE)),
+
+			array ('reduceSubarraysToColumn', array (NULL, 'name')),
+			array ('reduceSubarraysToColumn', array (FALSE, 'name')),
+			array ('reduceSubarraysToColumn', array ('', 'name')),
+			array ('reduceSubarraysToColumn', array (0, 'name')),
+			array ('reduceSubarraysToColumn', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2)), 'name')),
 		);
 	}
 
