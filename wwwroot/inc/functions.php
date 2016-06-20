@@ -3542,6 +3542,8 @@ function reindexById ($input, $column_name = 'id', $ignore_dups = FALSE)
 function reduceSubarraysToColumn ($input, $column)
 {
 	$ret = array();
+	if (! is_array ($input))
+		throw new InvalidArgException ('input', $input, 'must be an array');
 	foreach ($input as $key => $item)
 		if (array_key_exists ($column, $item))
 			$ret[$key] = $item[$column];
