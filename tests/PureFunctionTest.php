@@ -914,6 +914,120 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				'name',
 				array ('number', 'number', 'number', 'number'),
 			),
+
+			array
+			(
+				'groupBy',
+				array(),
+				'test',
+				array(),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'parity',
+				array
+				(
+					'odd' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+					),
+					'even' => array
+					(
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'value',
+				array
+				(
+					'low' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						2 => array ('value' => 'low', 'parity' => 'even'),
+					),
+					'high' => array
+					(
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'unknown',
+				array
+				(
+					'' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					150 => array ('value' => 'medium'),
+					160 => array ('parity' => 'even'),
+					170 => array(),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'parity',
+				array
+				(
+					'odd' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+					),
+					'even' => array
+					(
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						160 => array ('parity' => 'even'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+					'' => array
+					(
+						150 => array ('value' => 'medium'),
+						170 => array(),
+					),
+				),
+			),
 		);
 	}
 
@@ -1057,6 +1171,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('reduceSubarraysToColumn', array ('', 'name')),
 			array ('reduceSubarraysToColumn', array (0, 'name')),
 			array ('reduceSubarraysToColumn', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2)), 'name')),
+
+			array ('groupBy', array (NULL, 'test')),
+			array ('groupBy', array (FALSE, 'test')),
+			array ('groupBy', array ('', 'test')),
+			array ('groupBy', array (0, 'test')),
+			array ('groupBy', array (array (array ('id' => 1, 'name' => 'one'), 2), 'name')),
 		);
 	}
 
