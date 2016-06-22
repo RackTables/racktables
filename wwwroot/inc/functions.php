@@ -6301,8 +6301,12 @@ function formatPatchCableHeapAsPlainText ($heap)
 function groupBy ($list, $group_field)
 {
 	$ret = array();
+	if (! is_array ($list))
+		throw new InvalidArgException ('list', $list, 'must be an array');
 	foreach ($list as $index => $item)
 	{
+		if (! is_array ($item))
+			throw new InvalidArgException ("list[${index}]", $item, 'must be an array');
 		$key = '';
 		if (isset ($item[$group_field]))
 			$key = (string) $item[$group_field];
