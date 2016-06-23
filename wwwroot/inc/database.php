@@ -3547,23 +3547,6 @@ function getPortsCount ($object_id)
 	return $result->fetchColumn();
 }
 
-/*
-
-The following allows figuring out records in TagStorage that refer to non-existing entities:
-
-mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
-mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
-mysql> select entity_id from TagStorage left join Object on entity_id = id where entity_realm = 'object' and id is null;
-mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where entity_realm = 'ipv4vs' and id is null;
-mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
-mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
-
-Accordingly, these are the records that refer to non-existent tags:
-
-mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id is null;
-
-*/
-
 # FIXME: this function is not used any more
 function commitDeleteChapter ($chapter_no = 0)
 {
