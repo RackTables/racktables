@@ -3802,6 +3802,9 @@ function getAttrValuesSorted ($object_id)
 	return customKsort (getAttrValues ($object_id), $attr_order);
 }
 
+// FIXME: This function causes RTDatabaseError if the attribute is not
+// enabled for the given object in AttributeMap. It would be better to detect
+// the mismatch here and throw InvalidArgException instead.
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
 	global $object_attribute_cache;
@@ -3809,13 +3812,14 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		unset ($object_attribute_cache[$object_id]);
 	$result = usePreparedSelectBlade
 	(
-		"SELECT type AS attr_type, av.* FROM Attribute a " .
-		"LEFT JOIN AttributeValue av ON a.id = av.attr_id AND av.object_id = ? " .
-		"WHERE a.id = ?",
+		'SELECT A.type AS attr_type, AV.attr_id, AV.uint_value, AV.float_value, AV.string_value ' .
+		'FROM Attribute AS A ' .
+		'LEFT JOIN AttributeValue AS AV ON A.id = AV.attr_id AND AV.object_id = ? ' .
+		'WHERE A.id = ?',
 		array ($object_id, $attr_id)
 	);
 	if (! $row = $result->fetch (PDO::FETCH_ASSOC))
-		throw new InvalidArgException ('attr_id', $attr_id, 'No such attribute #'.$attr_id);
+		throw new InvalidArgException ('attr_id', $attr_id, 'No such attribute');
 	$attr_type = $row['attr_type'];
 	unset ($result);
 	switch ($attr_type)
@@ -3830,19 +3834,18 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			throw new InvalidArgException ('attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
+			throw new RackTablesError ("Unknown attribute type '${attr_type}' for object_id ${object_id} attr_id ${attr_id}", RackTablesError::INTERNAL);
 	}
 	if (isset ($row['attr_id']))
 	{
 		// AttributeValue row present in table
+		$where = array ('object_id' => $object_id, 'attr_id' => $attr_id);
 		if ($value == '')
-			usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
+			usePreparedDeleteBlade ('AttributeValue', $where);
 		elseif ($row[$column] !== $value)
-			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), array ('object_id' => $object_id, 'attr_id' => $attr_id));
+			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), $where);
 	}
 	elseif ($value != '')
-	{
-		$type_id = getObjectType ($object_id);
 		usePreparedInsertBlade
 		(
 			'AttributeValue',
@@ -3850,11 +3853,10 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			(
 				$column => $value,
 				'object_id' => $object_id,
-				'object_tid' => $type_id,
+				'object_tid' => getObjectType ($object_id),
 				'attr_id' => $attr_id,
 			)
 		);
-	}
 }
 
 function convertPDOException ($e)
