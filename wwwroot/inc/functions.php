@@ -5670,6 +5670,8 @@ function array_last ($array)
 		return $single[0];
 }
 
+// FIXME: Remove this function at some point because it is a reimplementation
+// of array_diff_key().
 // returns array of key-value pairs from array $a such that keys are not present in $b
 function array_sub ($a, $b)
 {
