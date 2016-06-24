@@ -3775,17 +3775,14 @@ function fetchAttrsForObjects ($object_set = array())
 function getAttrValues ($object_id)
 {
 	global $object_attribute_cache;
+	$ret = array();
 	if (isset ($object_attribute_cache[$object_id]))
 		return $object_attribute_cache[$object_id];
 
-	$ret = fetchAttrsForObjects(array($object_id));
-	$attrs = array();
-	if (isset ($ret[$object_id]))
-	{
-		$attrs = $ret[$object_id];
-		$object_attribute_cache[$object_id] = $attrs;
-	}
-	return $attrs;
+	$tmp = fetchAttrsForObjects (array ($object_id));
+	if (isset ($tmp[$object_id]))
+		$ret = $object_attribute_cache[$object_id] = $tmp[$object_id];
+	return $ret;
 }
 
 // returns the same data as getAttrValues, but sorts the result array
