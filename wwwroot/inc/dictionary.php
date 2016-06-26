@@ -2448,8 +2448,8 @@ $dictionary = array
 	2557 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE8860-4C-EI'),
 	2558 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B420 M4'),
 	2559 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS B440 M1'),
-
-
+	2560 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 15.10'),
+	2561 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 16.04 LTS'),
 	2562 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C22  M3(LFF)'),
 	2563 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C220 M3(LFF)'),
 	2564 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C24  M3(LFF)'),
