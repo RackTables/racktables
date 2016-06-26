@@ -17,22 +17,15 @@ function formatPortLinkHints ($object_id)
 {
 	$result = array();
 	$linkStatus = queryDevice ($object_id, 'getportstatus');
+	$statusmap = array
+	(
+		'up' => 'link up',
+		'down' => 'link down',
+		'disabled' => 'link disabled',
+	);
 	foreach ($linkStatus as $portname => $link_info)
 	{
 		$link_info = $linkStatus[$portname];
-		switch ($link_info['status'])
-		{
-			case 'up':
-				$img_filename = 'link-up.png';
-				break;
-			case 'down':
-				$img_filename = 'link-down.png';
-				break;
-			case 'disabled':
-				$img_filename = 'link-disabled.png';
-				break;
-		}
-
 		$hidden_lines = array();
 		$hidden_lines[] = $portname . ': ' . $link_info['status'];
 		if (isset ($link_info['speed']))
@@ -41,7 +34,7 @@ function formatPortLinkHints ($object_id)
 			$hidden_lines[] = 'Duplex: ' . $link_info['duplex'];
 		if (count ($hidden_lines))
 			$result[$portname]['popup'] = implode ('<br>', $hidden_lines);
-		$visible_part = "<img width=16 height=16 src='?module=chrome&uri=pix/${img_filename}'>";
+		$visible_part = getImageHREF (array_fetch ($statusmap, $link_info['status'], '16x16t'));
 		$result[$portname]['inline'] = $visible_part;
 	}
 	// put empty pictures for not-found ports
@@ -49,7 +42,7 @@ function formatPortLinkHints ($object_id)
 	amplifyCell ($object);
 	foreach ($object['ports'] as $port)
 		if (! isset ($result[$port['name']]))
-			$result[$port['name']]['inline'] = "<img width=16 height=16 src='?module=chrome&uri=pix/1x1t.gif'>";
+			$result[$port['name']]['inline'] = getImageHREF ('16x16t');
 	return $result;
 }
 
