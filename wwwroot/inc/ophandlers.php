@@ -1601,6 +1601,8 @@ function resetMyPreference ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
+// FIXME: Move the default values to dictionary.php and feed from there into
+// this function and the installer to avoid duplication.
 function resetUIConfig()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 57));
