@@ -25,7 +25,6 @@ function formatPortLinkHints ($object_id)
 	);
 	foreach ($linkStatus as $portname => $link_info)
 	{
-		$link_info = $linkStatus[$portname];
 		$hidden_lines = array();
 		$hidden_lines[] = $portname . ': ' . $link_info['status'];
 		if (isset ($link_info['speed']))
@@ -63,7 +62,6 @@ function formatPortMacHints ($object_id)
 		$macList = queryDevice ($object_id, 'getmaclist');
 	foreach ($macList as $portname => $list)
 	{
-		$list = $macList[$portname];
 		$visible_part = count ($list) . ' MACs';
 		$result[$portname]['inline'] = $visible_part;
 		if (count ($list))
