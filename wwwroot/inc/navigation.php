@@ -913,6 +913,7 @@ $ajaxhandler['upd-reservation-cable'] = 'updateCableIdAJAX';
 $ajaxhandler['net-usage'] = 'getNetUsageAJAX';
 $ajaxhandler['get-slb-form'] = 'renderSLBFormAJAX';
 $ajaxhandler['triplet-preview'] = 'getTripletConfigAJAX';
+$ajaxhandler['autocomplete'] = 'getAutocompleteListAJAX';
 
 $popuphandler['objlist'] = 'renderPopupObjectSelector';
 $popuphandler['portlist'] = 'renderPopupPortSelector';

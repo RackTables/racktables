@@ -296,4 +296,39 @@ function getNetUsageAJAX()
 	echo getRenderedIPNetCapacity ($net);
 }
 
+
+function getAutocompleteListAJAX()
+{
+	$term = genericAssertion ('term', 'string0');
+	$realm = genericAssertion ('realm', 'string');
+
+	if (! $term)
+		return;
+
+	switch ($realm)
+	{
+		case 'object':
+			$result = usePreparedSelectBlade ("SELECT name FROM Object WHERE name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'asset':
+			$result = usePreparedSelectBlade ("SELECT asset_no FROM Object WHERE asset_no LIKE ? GROUP BY asset_no ORDER BY asset_no LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'port':
+			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		default:
+			return;
+	}
+
+	if (count ($rows) > 100 )
+		$rows[] = '...';
+
+	echo json_encode ($rows);
+}
 ?>
