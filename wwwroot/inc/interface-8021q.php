@@ -1129,7 +1129,7 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
-	if (! considerConfiguredConstraint ($object, 'SYNC_802Q_LISTSRC'))
+	if (! considerConfiguredConstraint ($object, 'SYNC_8021Q_LISTSRC'))
 		$rows['auto sync'] = '<span class="trerror">disabled by operator</span>';
 	$rows['last local change'] = datetimestrFromTimestamp ($vswitch['last_change']) . ' (' . formatAge ($vswitch['last_change']) . ')';
 	$rows['device out of sync'] = $vswitch['out_of_sync'];

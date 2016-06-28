@@ -1676,7 +1676,7 @@ function resetUIConfig()
 		'PORT_EXCLUSION_LISTSRC' => '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}',
 		'FILTER_RACKLIST_BY_TAGS' => 'yes',
 		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
-		'SYNC_802Q_LISTSRC' => '',
+		'SYNC_8021Q_LISTSRC' => '',
 		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
 		'CACTI_LISTSRC' => 'false',
 		'CACTI_RRA_ID' => '1',

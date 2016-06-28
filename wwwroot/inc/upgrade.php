@@ -1962,6 +1962,7 @@ ENDOFTRIGGER;
 
 			$query[] = "ALTER TABLE UserConfig DROP FOREIGN KEY `UserConfig-FK-varname`";
 			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE";
+			$query[] = "UPDATE Config SET varname = 'SYNC_8021Q_LISTSRC' WHERE varname = 'SYNC_802Q_LISTSRC'";
 
 			// new iif_type 'QSFP28'
 			$query[] = "INSERT INTO `PortInnerInterface` (`id`, `iif_name`) VALUES (15,'QSFP28')";
