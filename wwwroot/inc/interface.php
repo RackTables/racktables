@@ -2533,6 +2533,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 {
 	$self = __FUNCTION__;
 	$knight = (getConfigVar ('IPV4_ENABLE_KNIGHT') == 'yes');
+	$display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none');
 
 	// scroll page to the highlighted item
 	if ($target && isset ($_REQUEST['hl_net']))
@@ -2540,8 +2541,6 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 
 	foreach ($tree as $item)
 	{
-		$display_routers = (getConfigVar ('IPV4_TREE_RTR_AS_CELL') != 'none');
-
 		if (isset ($item['id']))
 		{
 			$decor = array ('indent' => $level);
