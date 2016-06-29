@@ -21,7 +21,7 @@ else
 
 if ($step > count ($stepfunc))
 {
-	$root = (empty($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
+	$root = (empty ($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off') ? 'http://' : 'https://';
 	$root .= isset ($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ($_SERVER['SERVER_NAME'].($_SERVER['SERVER_PORT']=='80'?'':$_SERVER['SERVER_PORT']));
 	// "Since PHP 4.3.0, you will often get a slash or a dot back from
 	// dirname() in situations where the older functionality would have given
@@ -89,7 +89,7 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 function not_already_installed()
 {
 	global $found_secret_file, $pdo_dsn;
-	if ($found_secret_file and isset ($pdo_dsn))
+	if ($found_secret_file && isset ($pdo_dsn))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
 		return FALSE;
@@ -156,7 +156,7 @@ function init_config ()
 		print_form();
 		return FALSE;
 	}
-	if (empty ($_REQUEST['mysql_db']) or empty ($_REQUEST['mysql_username']))
+	if (empty ($_REQUEST['mysql_db']) || empty ($_REQUEST['mysql_username']))
 	{
 		print_form
 		(
@@ -171,7 +171,7 @@ function init_config ()
 		echo '<h2 class=trerror>Missing database/username parameter!</h2>';
 		return FALSE;
 	}
-	if ($_REQUEST['conn'] == 'conn_tcp' and empty ($_REQUEST['mysql_host']))
+	if ($_REQUEST['conn'] == 'conn_tcp' && empty ($_REQUEST['mysql_host']))
 	{
 		print_form
 		(
@@ -186,7 +186,7 @@ function init_config ()
 		echo '<h2 class=trerror>Missing TCP hostname parameter!</h2>';
 		return FALSE;
 	}
-	if ($_REQUEST['conn'] == 'conn_unix' and empty ($_REQUEST['mysql_socket']))
+	if ($_REQUEST['conn'] == 'conn_unix' && empty ($_REQUEST['mysql_socket']))
 	{
 		print_form
 		(
@@ -207,7 +207,7 @@ function init_config ()
 	{
 	case 'conn_tcp':
 		$pdo_dsn .= 'host=' . $_REQUEST['mysql_host'];
-		if (!empty ($_REQUEST['mysql_port']) and $_REQUEST['mysql_port'] != '3306')
+		if (! empty ($_REQUEST['mysql_port']) && $_REQUEST['mysql_port'] != '3306')
 			$pdo_dsn .= ';port=' . $_REQUEST['mysql_port'];
 		break;
 	case 'conn_unix':
@@ -312,7 +312,7 @@ ENDOFTEXT
 function get_process_owner()
 {
 	// this function requires the posix extention and returns the fallback value otherwise
-	if (is_callable('posix_getpwuid') and is_callable('posix_geteuid'))
+	if (is_callable ('posix_getpwuid') && is_callable ('posix_geteuid'))
 	{
 		$user = posix_getpwuid(posix_geteuid());
 		if (isset ($user['name']))
@@ -324,7 +324,7 @@ function get_process_owner()
 function check_config_access()
 {
 	global $path_to_secret_php;
-	if (! is_writable ($path_to_secret_php) and is_readable ($path_to_secret_php))
+	if (! is_writable ($path_to_secret_php) && is_readable ($path_to_secret_php))
 	{
 		echo 'The configuration file ownership/permissions seem to be OK.<br>';
 		return TRUE;
@@ -386,9 +386,6 @@ function init_database_static ()
 		echo "<tr><td>${part}</td>";
 		$nq = $nerrs = 0;
 		foreach (get_pseudo_file ($part) as $q)
-		{
-			if (empty ($q))
-				continue;
 			try
 			{
 				$result = $dbxlink->query ($q);
@@ -400,7 +397,6 @@ function init_database_static ()
 				$errorInfo = $dbxlink->errorInfo();
 				$failures[] = array ($q, $errorInfo[2]);
 			}
-		}
 		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
 	}
 	if (!count ($failures))
@@ -445,7 +441,7 @@ function init_database_dynamic ()
 {
 	connect_to_db_or_die();
 	global $dbxlink;
-	if (!isset ($_REQUEST['password']) or empty ($_REQUEST['password']))
+	if (! isset ($_REQUEST['password']) || empty ($_REQUEST['password']))
 	{
 		$result = $dbxlink->query ('select count(user_id) from UserAccount where user_id = 1');
 		$row = $result->fetch (PDO::FETCH_NUM);
@@ -798,7 +794,7 @@ function get_pseudo_file ($name)
   `presented_username` char(64) NOT NULL,
   `successful_hash` char(40) NOT NULL,
   `first_success` timestamp NOT NULL default CURRENT_TIMESTAMP,
-  `last_retry` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `last_retry` timestamp NULL default NULL,
   `displayed_name` char(128) default NULL,
   `memberof` text,
   UNIQUE KEY `presented_username` (`presented_username`),
@@ -1114,7 +1110,7 @@ function get_pseudo_file ($name)
   `user` char(64) NOT NULL,
   UNIQUE KEY `user_varname` (`user`,`varname`),
   KEY `varname` (`varname`),
-  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE
+  CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `VLANDescription` (
@@ -1375,6 +1371,16 @@ END;
 ENDOFTRIGGER;
 		$query[] = "CREATE TRIGGER `Link-before-insert` BEFORE INSERT ON `Link` FOR EACH ROW $link_trigger_body";
 		$query[] = "CREATE TRIGGER `Link-before-update` BEFORE UPDATE ON `Link` FOR EACH ROW $link_trigger_body";
+
+		$port_trigger_body = <<<ENDOFTRIGGER
+PortTrigger:BEGIN
+  IF (NEW.`l2address` IS NOT NULL AND (SELECT COUNT(*) FROM `Port` WHERE `l2address` = NEW.`l2address` AND `object_id` != NEW.`object_id`) > 0) THEN
+    CALL `Port-l2address-already-exists-on-another-object`;
+  END IF;
+END;
+ENDOFTRIGGER;
+		$query[] = "CREATE TRIGGER `Port-before-insert` BEFORE INSERT ON `Port` FOR EACH ROW $port_trigger_body";
+		$query[] = "CREATE TRIGGER `Port-before-update` BEFORE UPDATE ON `Port` FOR EACH ROW $port_trigger_body";
 
 		$query[] = "CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
 FROM `Object` O
@@ -1968,6 +1974,7 @@ WHERE O.objtype_id = 1562";
 (1505,1507),
 (1506,4),
 (1506,1504),
+(1787,4),
 (1787,8),
 (1787,1502)";
 

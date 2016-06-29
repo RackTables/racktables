@@ -37,7 +37,7 @@ function renderVS ($vsid)
 	amplifyCell ($vsinfo);
 
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
-	if (strlen ($vsinfo['name']))
+	if ($vsinfo['name'] != '')
 		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
@@ -561,8 +561,8 @@ function renderNewTripletForm ($realm1, $realm2)
 
 function getPopupSLBConfig ($row)
 {
-	$do_vs = (isset ($row) && isset ($row['vsconfig']) && strlen ($row['vsconfig']));
-	$do_rs = (isset ($row) && isset ($row['rsconfig']) && strlen ($row['rsconfig']));
+	$do_vs = (isset ($row) && isset ($row['vsconfig']) && $row['vsconfig'] != '');
+	$do_rs = (isset ($row) && isset ($row['rsconfig']) && $row['rsconfig'] != '');
 	if (!$do_vs && !$do_rs)
 		return;
 

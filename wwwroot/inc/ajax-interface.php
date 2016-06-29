@@ -17,22 +17,14 @@ function formatPortLinkHints ($object_id)
 {
 	$result = array();
 	$linkStatus = queryDevice ($object_id, 'getportstatus');
+	$statusmap = array
+	(
+		'up' => 'link up',
+		'down' => 'link down',
+		'disabled' => 'link disabled',
+	);
 	foreach ($linkStatus as $portname => $link_info)
 	{
-		$link_info = $linkStatus[$portname];
-		switch ($link_info['status'])
-		{
-			case 'up':
-				$img_filename = 'link-up.png';
-				break;
-			case 'down':
-				$img_filename = 'link-down.png';
-				break;
-			case 'disabled':
-				$img_filename = 'link-disabled.png';
-				break;
-		}
-
 		$hidden_lines = array();
 		$hidden_lines[] = $portname . ': ' . $link_info['status'];
 		if (isset ($link_info['speed']))
@@ -41,7 +33,7 @@ function formatPortLinkHints ($object_id)
 			$hidden_lines[] = 'Duplex: ' . $link_info['duplex'];
 		if (count ($hidden_lines))
 			$result[$portname]['popup'] = implode ('<br>', $hidden_lines);
-		$visible_part = "<img width=16 height=16 src='?module=chrome&uri=pix/${img_filename}'>";
+		$visible_part = getImageHREF (array_fetch ($statusmap, $link_info['status'], '16x16t'));
 		$result[$portname]['inline'] = $visible_part;
 	}
 	// put empty pictures for not-found ports
@@ -49,7 +41,7 @@ function formatPortLinkHints ($object_id)
 	amplifyCell ($object);
 	foreach ($object['ports'] as $port)
 		if (! isset ($result[$port['name']]))
-			$result[$port['name']]['inline'] = "<img width=16 height=16 src='?module=chrome&uri=pix/1x1t.gif'>";
+			$result[$port['name']]['inline'] = getImageHREF ('16x16t');
 	return $result;
 }
 
@@ -70,7 +62,6 @@ function formatPortMacHints ($object_id)
 		$macList = queryDevice ($object_id, 'getmaclist');
 	foreach ($macList as $portname => $list)
 	{
-		$list = $macList[$portname];
 		$visible_part = count ($list) . ' MACs';
 		$result[$portname]['inline'] = $visible_part;
 		if (count ($list))
@@ -115,8 +106,8 @@ function formatLoggedSpan ($log_item, $text, $html_class = '')
 		$title = htmlspecialchars ($log_item['user'] . ', ' . formatAge ($log_item['time']), ENT_QUOTES);
 	}
 	return "<span" .
-		(strlen ($html_class) ? " class='$html_class'" : '') .
-		(strlen ($title) ? " title='$title'" : '') .
+		($html_class != '' ? " class='$html_class'" : '') .
+		($title != '' ? " title='$title'" : '') .
 		">$text</span>";
 }
 
@@ -250,7 +241,7 @@ function updateIPNameAJAX()
 	if (isset ($net))
 		fixContext ($net);
 	assertPermission ('ipaddress', 'properties', 'editAddress');
-	$reserved = (empty ($text) ? 'no' : $addr['reserved']); // unset reservation if user clears name
+	$reserved = ($text == '' ? 'no' : $addr['reserved']); // unset reservation if user clears name
 	$comment = (empty ($addr['comment']) ? '' : $addr['comment']);
 	updateAddress ($ip_bin, $text, $reserved, $comment);
 	echo 'OK';
@@ -299,10 +290,45 @@ function getNetUsageAJAX()
 	list ($ip, $mask) = explode ('/', $_REQUEST['net_id']);
 	$ip_bin = ip_parse ($ip);
 	$net = spotNetworkByIP ($ip_bin, $mask + 1);
-	if (! isset ($net) or $net['mask'] != $mask)
+	if (! isset ($net) || $net['mask'] != $mask)
 		$net = constructIPRange ($ip_bin, $mask);
 	loadIPAddrList ($net);
 	echo getRenderedIPNetCapacity ($net);
 }
 
+
+function getAutocompleteListAJAX()
+{
+	$term = genericAssertion ('term', 'string0');
+	$realm = genericAssertion ('realm', 'string');
+
+	if (! $term)
+		return;
+
+	switch ($realm)
+	{
+		case 'object':
+			$result = usePreparedSelectBlade ("SELECT name FROM Object WHERE name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'asset':
+			$result = usePreparedSelectBlade ("SELECT asset_no FROM Object WHERE asset_no LIKE ? GROUP BY asset_no ORDER BY asset_no LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'port':
+			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ("%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		default:
+			return;
+	}
+
+	if (count ($rows) > 100 )
+		$rows[] = '...';
+
+	echo json_encode ($rows);
+}
 ?>

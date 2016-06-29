@@ -78,10 +78,10 @@ class RackCodeParser
 		$value = $this->lex_value;
 		if
 		(
-			$curr !== NULL and (
-				!isset ($sym) or
-				is_array ($sym) and in_array ($curr, $sym) or
-				! is_array ($sym) and $sym == $curr
+			$curr !== NULL && (
+				! isset ($sym) ||
+				is_array ($sym) && in_array ($curr, $sym) ||
+				! is_array ($sym) && $sym == $curr
 			)
 		)
 		{
@@ -432,7 +432,7 @@ class RackCodeParser
 			);
 		elseif ($k = $this->accept ('LEX_PREDICATE'))
 		{
-			if ($this->prog_mode and ! isset ($this->defined_preds[$k]))
+			if ($this->prog_mode && ! isset ($this->defined_preds[$k]))
 				throw new RCParserError ("Undefined predicate [$k] refered");
 			return array(
 				'type' => 'LEX_PREDICATE',
@@ -520,7 +520,7 @@ function checkAutotagName ($atag_name)
 		case (preg_match ('/^\$username_/', $atag_name)):
 			$recid = preg_replace ('/^\$username_/', '', $atag_name);
 			global $require_local_account;
-			if ($require_local_account and NULL === getUserIDByUsername ($recid))
+			if ($require_local_account && NULL === getUserIDByUsername ($recid))
 				return "Local user account '${recid}' does not exist.";
 			break;
 		case (preg_match ('/^\$page_([\p{L}0-9]+)$/u', $atag_name, $m)):
@@ -617,7 +617,7 @@ function findCtxModWarnings ($modlist)
 {
 	$ret = array();
 	foreach ($modlist as $mod)
-		if (($mod['op'] == 'insert' or $mod['op'] == 'remove') and NULL === getTagByName ($mod['tag']))
+		if (($mod['op'] == 'insert' || $mod['op'] == 'remove') && NULL === getTagByName ($mod['tag']))
 			$ret[] = array
 			(
 				'header' => refRCLineno ($mod['lineno']),

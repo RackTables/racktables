@@ -2,7 +2,18 @@
 	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser
 	bugfix: LLDP discovery for Cisco IOS: fix the case when remote device name length is 20 chars
+	bugfix: unneeded VLANs were not removed from Arista EOS4 and Marvell devices
+	bugfix: fix a PHP warning (#1609 by Maik Ehinger)
+	bugfix: location filter did not work (#1595 by Alberto Avai)
+	bugfix: decline invalid date input with a message (#1389)
+	bugfix: work around MySQL 5.7 SQL mode (#1547, #1635)
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
+	update: Nexus 7700, Huawei S5700, Juniper QFX, Mellanox, Quanta, Ixia device models added into dictionary
+	update: Cmd+Click now inverses tag selection on OS X like Ctrl+Click does on Windows/Linix
+	update: explain usage particulars for each tag on the editor tab
+	update: increase HTML SELECT maximum width (#1611)
+	update: add support for standalone UCS servers (by Brian Pothier)
+	update: add autocomplete to port link dialog object name, asset tag and port name fields
 0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)

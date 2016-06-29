@@ -107,8 +107,8 @@ function render8021QOrderForm ($some_id)
 	// in a "plus" row on the form, when there is already a "minus" one
 	if
 	(
-		getConfigVar ('ADDNEW_AT_TOP') == 'yes' and
-		($pageno != 'object' or !count ($minuslines))
+		getConfigVar ('ADDNEW_AT_TOP') == 'yes' &&
+		($pageno != 'object' || ! count ($minuslines))
 	)
 		printNewItemTR();
 	$vdomlist = getVLANDomainOptions();
@@ -150,8 +150,8 @@ function render8021QOrderForm ($some_id)
 	}
 	if
 	(
-		getConfigVar ('ADDNEW_AT_TOP') != 'yes' and
-		($pageno != 'object' or !count ($minuslines))
+		getConfigVar ('ADDNEW_AT_TOP') != 'yes' &&
+		($pageno != 'object' || ! count ($minuslines))
 	)
 		printNewItemTR();
 	echo '</table>';
@@ -267,7 +267,7 @@ function renderVLANDomainListEditor ()
 	{
 		printOpFormIntro ('upd', array ('vdom_id' => $vdom_id));
 		echo '<tr><td>';
-		if ($dominfo['switchc'] or $dominfo['vlanc'] > 1)
+		if ($dominfo['switchc'] || $dominfo['vlanc'] > 1)
 			printImageHREF ('nodestroy', 'domain used elsewhere');
 		else
 			echo getOpLink (array ('op' => 'del', 'vdom_id' => $vdom_id), '', 'destroy', 'delete domain');
@@ -392,7 +392,7 @@ function renderVLANDomainVLANList ($vdom_id)
 	{
 		printOpFormIntro ('upd', array ('vlan_id' => $vlan_id));
 		echo '<tr><td>';
-		if ($vlan_info['portc'] or $vlan_id == VLAN_DFL_ID)
+		if ($vlan_info['portc'] || $vlan_id == VLAN_DFL_ID)
 			printImageHREF ('nodestroy', $vlan_info['portc'] . ' port(s) configured');
 		else
 			echo getOpLink (array ('op' => 'del', 'vlan_id' => $vlan_id), '', 'destroy', 'delete VLAN');
@@ -452,14 +452,14 @@ function renderObject8021QPorts ($object_id)
 		$pn = shortenIfName ($port['name'], $breed);
 		if (! isset ($indexed_ports[$pn]) || ! $indexed_ports[$pn]['linked'])
 			$indexed_ports[$pn] = $port;
-		if (mb_strlen ($port['name']) and array_key_exists ($port['name'], $desired_config))
+		if ($port['name'] != '' && array_key_exists ($port['name'], $desired_config))
 		{
-			if (isset ($hl_port_id) and $hl_port_id == $port['id'])
+			if (isset ($hl_port_id) && $hl_port_id == $port['id'])
 				$hl_port_name = $port['name'];
 			$socket = array ('interface' => formatPortIIFOIF ($port), 'link' => '&nbsp;');
 			if ($port['remote_object_id'])
 				$socket['link'] = formatLoggedSpan ($port['last_log'], formatLinkedPort ($port));
-			elseif (strlen ($port['reservation_comment']))
+			elseif ($port['reservation_comment'] != '')
 				$socket['link'] = implode (' ', array(
 					formatLoggedSpan ($port['last_log'], 'Rsv:', 'strong underline'),
 					formatLoggedSpan ($port['last_log'], $port['reservation_comment'])
@@ -523,7 +523,7 @@ function renderObject8021QPorts ($object_id)
 		}
 		$anchor = '';
 		$tdclass = '';
-		if (isset ($hl_port_name) and $hl_port_name == $port_name)
+		if (isset ($hl_port_name) && $hl_port_name == $port_name)
 		{
 			$tdclass .= 'class="border_highlight"';
 			$anchor = "name='port-$hl_port_id'";
@@ -545,7 +545,7 @@ function renderObject8021QPorts ($object_id)
 			}
 	}
 	echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
-	if ($req_port_name == '' and $nports)
+	if ($req_port_name == '' && $nports)
 	{
 		echo "<input type=hidden name=nports value=${nports}>";
 		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE) . '</li>';
@@ -602,7 +602,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 		return '&nbsp;';
 	if
 	(
-		array_key_exists ($port['native'], $vdom['vlanlist']) and
+		array_key_exists ($port['native'], $vdom['vlanlist']) &&
 		$vdom['vlanlist'][$port['native']]['vlan_type'] == 'alien'
 	)
 		return formatVLANAsLabel ($vdom['vlanlist'][$port['native']]);
@@ -627,9 +627,9 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 	foreach ($vdom['vlanlist'] as $vlan_id => $vlan_info)
 		if
 		(
-			($vlan_id != $from or $port['mode'] == 'trunk') and
-			$vlan_info['vlan_type'] != 'alien' and
-			in_array ($vlan_id, $vlanpermissions[$from]) and
+			($vlan_id != $from || $port['mode'] == 'trunk') &&
+			$vlan_info['vlan_type'] != 'alien' &&
+			in_array ($vlan_id, $vlanpermissions[$from]) &&
 			matchVLANFilter ($vlan_id, $port['wrt_vlans'])
 		)
 			$options[$vlan_id] = formatVLANAsOption ($vlan_info);
@@ -754,7 +754,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			// that is explicitly protected from it.
 			if
 			(
-				$native_options[$vlanport['native']]['vlan_type'] == 'alien' or
+				$native_options[$vlanport['native']]['vlan_type'] == 'alien' ||
 				$option['vlan_type'] == 'alien'
 			)
 				$selected .= ' disabled';
@@ -797,7 +797,7 @@ function renderVLANInfo ($vlan_ck)
 	$summary = array();
 	$summary['Domain'] = stringForTD ($vlan['domain_descr'], 0);
 	$summary['VLAN ID'] = $vlan['vlan_id'];
-	if (strlen ($vlan['vlan_descr']))
+	if ($vlan['vlan_descr'] != '')
 		$summary['Description'] = stringForTD ($vlan['vlan_descr'], 0);
 	$summary['Propagation'] = $vtoptions[$vlan['vlan_prop']];
 
@@ -826,14 +826,14 @@ function renderVLANInfo ($vlan_ck)
 			);
 			if
 			(
-				$counterpart_vlan['domain_id'] == $vlan['domain_group_id'] or
+				$counterpart_vlan['domain_id'] == $vlan['domain_group_id'] ||
 				in_array($counterpart_vlan['domain_id'], $group_members)
 			)
 			{
 				$group_ck_list[$counterpart_ck] = $counterpart_vlan;
 				$group_counterparts[] = $counterpart_link;
 			}
-			elseif ($vlan['domain_group_id'] and $counterpart_vlan['domain_group_id'] == $vlan['domain_group_id'])
+			elseif ($vlan['domain_group_id'] && $counterpart_vlan['domain_group_id'] == $vlan['domain_group_id'])
 				$group_counterparts[] = $counterpart_link;
 			else
 				$counterparts[] = $counterpart_link;
@@ -902,7 +902,7 @@ function renderVLANInfo ($vlan_ck)
 				if ($portinfo['linked'] && ! isset ($confports[$portinfo['remote_object_id']]))
 					$foreign_devices[$portinfo['remote_object_id']][] = $portinfo;
 	}
-	if (! empty ($foreign_devices))
+	if (count ($foreign_devices))
 	{
 		startPortlet ("Non-switch devices");
 		echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>";
@@ -1079,9 +1079,9 @@ function renderObject8021QSync ($object_id)
 		foreach ($plan as $port)
 			if
 			(
-				$port['status'] == 'delete_conflict' or
-				$port['status'] == 'merge_conflict' or
-				$port['status'] == 'add_conflict' or
+				$port['status'] == 'delete_conflict' ||
+				$port['status'] == 'merge_conflict' ||
+				$port['status'] == 'add_conflict' ||
 				$port['status'] == 'martian_conflict'
 			)
 				$maxdecisions++;
@@ -1172,7 +1172,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 		addAutoScrollScript ("port-$hl_port_id");
 
 		foreach ($object['ports'] as $port)
-			if (mb_strlen ($port['name']) && $port['id'] == $hl_port_id)
+			if ($port['name'] != '' && $port['id'] == $hl_port_id)
 			{
 				$hl_port_name = $port['name'];
 				break;
@@ -1284,8 +1284,8 @@ END
 			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 			if
 			(
-				!acceptable8021QConfig ($item['right']) or
-				count (array_diff ($item['right']['allowed'], $domvlans)) or
+				! acceptable8021QConfig ($item['right']) ||
+				count (array_diff ($item['right']['allowed'], $domvlans)) ||
 				!goodModeForVSTRole ($item['right']['mode'], $item['vst_role'])
 			)
 				$radio_attrs['left'] = ' disabled';
@@ -1328,7 +1328,7 @@ END
 
 		$anchor = '';
 		$td_class = '';
-		if (isset ($hl_port_name) and $hl_port_name == $port_name)
+		if (isset ($hl_port_name) && $hl_port_name == $port_name)
 		{
 			$anchor = "name='port-$hl_port_id'";
 			$td_class = ' border_highlight';
@@ -1591,9 +1591,9 @@ function formatVLANPackDiff ($old, $current)
 		$removed = groupIntsToRanges (array_diff ($old['allowed'], $current['allowed']));
 		if ($old['mode'] == $current['mode'] && $current['mode'] == 'trunk')
 		{
-			if (! empty ($added))
+			if (count ($added))
 				$ret .= '<span class="vlan-diff diff-add">+ ' . implode (', ', $added) . '</span><br>';
-			if (! empty ($removed))
+			if (count ($removed))
 				$ret .= '<span class="vlan-diff diff-rem">- ' . implode (', ', $removed) . '</span><br>';
 		}
 	}
@@ -1635,11 +1635,8 @@ function renderEditVlan ($vlan_ck)
 			' this VLAN from ' . mkA ("${portc} port(s)", 'vlan', $vlan_ck);
 	}
 
-	$reason = '';
 	if ($vlan['vlan_id'] == VLAN_DFL_ID)
-		$reason = "You can not delete default VLAN";
-	if (! empty ($reason))
-		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', $reason);
+		echo getOpLink (NULL, 'delete VLAN', 'nodestroy', 'You can not delete default VLAN');
 	else
 		echo getOpLink (array ('op' => 'del', 'vlan_ck' => $vlan_ck), 'delete VLAN', 'destroy', '', 'need-confirmation');
 	echo $clear_line;

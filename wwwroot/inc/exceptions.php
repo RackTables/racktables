@@ -152,6 +152,15 @@ class RackTablesError extends Exception
 	}
 }
 
+class L2AddressException extends RTDatabaseError
+{
+	function __construct ($message)
+	{
+		$this->code = parent::DB_WRITE_FAILED;
+		parent::__construct ($message);
+	}
+}
+
 class EntityNotFoundException extends RackTablesError
 {
 	function __construct($entity, $id)
@@ -328,7 +337,7 @@ function stringTrace($trace)
 			$ret .= $line['file'].':'.$line['line'].' ';
 		$ret .= $line['function'].'(';
 		$f = true;
-		if (isset ($line['args']) and is_array ($line['args']))
+		if (isset ($line['args']) && is_array ($line['args']))
 			foreach ($line['args'] as $arg)
 			{
 				if (! $f) $ret .= ', ';

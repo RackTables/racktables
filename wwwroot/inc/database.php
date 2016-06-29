@@ -450,7 +450,7 @@ function listCells ($realm, $parent_id = 0)
 		$query .= ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}") . ', ';
 	$query = trim($query, ', ');
 	$query .= " FROM ${SQLinfo['table']}";
-	if (isset ($SQLinfo['pidcolumn']) and $parent_id)
+	if (isset ($SQLinfo['pidcolumn']) && $parent_id)
 	{
 		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
 		$qparams[] = $parent_id;
@@ -543,7 +543,7 @@ function listCells ($realm, $parent_id = 0)
 			break;
 		}
 	}
-	if ($realm == 'ipv4net' or $realm == 'ipv6net')
+	if ($realm == 'ipv4net' || $realm == 'ipv6net')
 		fillIPNetsCorrelation ($ret);
 
 	foreach (array_keys ($ret) as $entity_id)
@@ -707,7 +707,7 @@ ORDER BY ip, mask
 	unset ($result);
 
 	fillIPNetsCorrelation ($nets, 1);
-	if (is_array ($nets[0]) and $nets[0]['id'] == $net_cell['id'])
+	if (is_array ($nets[0]) && $nets[0]['id'] == $net_cell['id'])
 	{
 		$net_cell['spare_ranges'] = $nets[0]['spare_ranges'];
 		$net_cell['kidc'] = $nets[0]['kidc'];
@@ -737,6 +737,7 @@ function amplifyCell (&$record, $dummy = NULL)
 		break;
 	case 'row':
 		$record['racks'] = getRacks ($record['id']);
+		break;
 	case 'rack':
 		// start with default rackspace
 		for ($i = $record['height']; $i > 0; $i--)
@@ -761,7 +762,7 @@ function amplifyCell (&$record, $dummy = NULL)
 			$record[$row['unit_no']][$loclist[$row['atom']]]['state'] = $row['state'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['object_id'] = $row['object_id'];
 			$record[$row['unit_no']][$loclist[$row['atom']]]['hl'] = $row['has_problems'] == 'yes' ? 'w' : '';
-			if ($row['state'] == 'T' and $row['object_id'] != NULL)
+			if ($row['state'] == 'T' && $row['object_id'] != NULL)
 				$mounted_objects[$row['object_id']] = TRUE;
 		}
 
@@ -996,7 +997,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		(
 			'name' => nullIfEmptyStr ($new_name),
 			'label' => nullIfEmptyStr ($new_label),
-			'has_problems' => !mb_strlen ($new_has_problems) ? 'no' : $new_has_problems,
+			'has_problems' => $new_has_problems == '' ? 'no' : $new_has_problems,
 			'asset_no' => nullIfEmptyStr ($new_asset_no),
 			'comment' => nullIfEmptyStr ($new_comment),
 		),
@@ -1124,8 +1125,8 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 	// a location's parent may not be one of its children
 	if
 	(
-		$parent_entity_type == 'location' and
-		$child_entity_type == 'location' and
+		$parent_entity_type == 'location' &&
+		$child_entity_type == 'location' &&
 		in_array ($parent_entity_id, getLocationChildrenList ($child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for location ${parent_entity_id}", RackTablesError::INTERNAL);
@@ -1133,8 +1134,8 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 	// an object's container may not be one of its contained objects
 	if
 	(
-		$parent_entity_type == 'object' and
-		$child_entity_type == 'object' and
+		$parent_entity_type == 'object' &&
+		$child_entity_type == 'object' &&
 		in_array ($parent_entity_id, getObjectContentsList ($child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for object ${parent_entity_id}", RackTablesError::INTERNAL);
@@ -1161,8 +1162,8 @@ function commitUpdateEntityLink
 	// a location's parent may not be one of its children
 	if
 	(
-		$new_parent_entity_type == 'location' and
-		$new_child_entity_type == 'location' and
+		$new_parent_entity_type == 'location' &&
+		$new_child_entity_type == 'location' &&
 		in_array ($new_parent_entity_id, getLocationChildrenList ($new_child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for location ${new_parent_entity_id}", RackTablesError::INTERNAL);
@@ -1170,8 +1171,8 @@ function commitUpdateEntityLink
 	// an object's container may not be one of its contained objects
 	if
 	(
-		$new_parent_entity_type == 'object' and
-		$new_child_entity_type == 'object' and
+		$new_parent_entity_type == 'object' &&
+		$new_child_entity_type == 'object' &&
 		in_array ($new_parent_entity_id, getObjectContentsList ($new_child_entity_id))
 	)
 		throw new RackTablesError ("Circular reference for object ${new_parent_entity_id}", RackTablesError::INTERNAL);
@@ -1505,7 +1506,7 @@ SELECT COUNT(*) FROM (
 ) x
 END;
 	$result = usePreparedSelectBlade ($query, array ($row_id, $row_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 // Returns mounted devices count in specified rack
@@ -1520,7 +1521,7 @@ SELECT COUNT(*) FROM (
 ) x
 END;
 	$result = usePreparedSelectBlade ($query, array ($rack_id, $rack_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 // Used when sort order is manually changed, and when a rack is moved or deleted
@@ -1606,7 +1607,9 @@ function recordObjectHistory ($object_id)
 	global $remote_username;
 	usePreparedExecuteBlade
 	(
-		"INSERT INTO ObjectHistory SELECT *, CURRENT_TIMESTAMP(), ? FROM Object WHERE id=?",
+		'INSERT INTO ObjectHistory ' .
+		'SELECT id, name, label, objtype_id, asset_no, has_problems, comment, ' .
+		'CURRENT_TIMESTAMP(), ? FROM Object WHERE id=?',
 		array ($remote_username, $object_id)
 	);
 }
@@ -1663,30 +1666,25 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 	return $ret;
 }
 
-function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, $port_l2address)
+function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	global $dbxlink;
-	if ($do_locks = !empty ($db_l2address))
-		$dbxlink->exec ('LOCK TABLES Port WRITE');
+	$matches = array();
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = 1;
+		$oif_id = $matches[1];
+		break;
+	default:
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+	}
 	try
 	{
-		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
-		$matches = array();
-		switch (1)
-		{
-		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $matches[1];
-			$oif_id = $matches[2];
-			break;
-		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = 1;
-			$oif_id = $matches[1];
-			break;
-		default:
-			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-		}
 		usePreparedInsertBlade
 		(
 			'Port',
@@ -1700,16 +1698,12 @@ function commitAddPort ($object_id = 0, $port_name, $port_type_id, $port_label, 
 				'l2address' => nullIfEmptyStr ($db_l2address),
 			)
 		);
-		lastCreated ('port', lastInsertID());
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 	}
-	catch (Exception $e)
+	catch (L2AddressException $e)
 	{
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
-		throw $e;
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
+	lastCreated ('port', lastInsertID());
 	return lastInsertID();
 }
 
@@ -1725,34 +1719,23 @@ function getPortReservationComment ($port_id, $extrasql = '')
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	global $dbxlink;
 	$portinfo = getPortInfo ($port_id);
-	if ($do_locks = (! empty ($db_l2address) && $portinfo['l2address'] !== $port_l2address))
-		$dbxlink->exec ('LOCK TABLES Port WRITE');
+	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
+	switch (1)
+	{
+	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $matches[1];
+		$oif_id = $matches[2];
+		break;
+	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
+		$iif_id = $portinfo['iif_id'];
+		$oif_id = $matches[1];
+		break;
+	default:
+		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
+	}
 	try
 	{
-		if ($do_locks && alreadyUsedL2Address ($db_l2address, $object_id))
-		{
-			// FIXME: it is more correct to throw InvalidArgException here
-			// and convert it to InvalidRequestArgException at upper level,
-			// when there is a mean to do that.
-			throw new InvalidRequestArgException ('port_l2address', $db_l2address, 'address belongs to another object');
-		}
-		$prev_comment = getPortReservationComment ($port_id);
-		$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
-		switch (1)
-		{
-		case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $matches[1];
-			$oif_id = $matches[2];
-			break;
-		case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-			$iif_id = $portinfo['iif_id'];
-			$oif_id = $matches[1];
-			break;
-		default:
-			throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-		}
 		usePreparedUpdateBlade
 		(
 			'Port',
@@ -1771,17 +1754,13 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 				'object_id' => $object_id
 			)
 		);
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
 	}
-	catch (Exception $e)
+	catch (L2AddressException $e)
 	{
-		if ($do_locks)
-			$dbxlink->exec ('UNLOCK TABLES');
-		throw $e;
+		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
-	if ($prev_comment !== $reservation_comment)
-		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $prev_comment, $reservation_comment));
+	if ($portinfo['reservation_comment'] !== $reservation_comment)
+		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
 }
 
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
@@ -2626,7 +2605,7 @@ function updateAddress ($ip_bin, $name = '', $reserved = 'no', $comment)
 	// If not, retain the old value.
 	$comment = (func_num_args () == 4 ) ? $comment : $old_comment;
 	$new_row = array ('name' => $name, 'comment' => $comment, 'reserved' => $reserved);
-	$new_row_empty = !($name != '' or $comment != '' or $reserved != 'no');
+	$new_row_empty = $name == '' && $comment == '' && $reserved == 'no';
 
 	unset ($result);
 	$messages = array ();
@@ -3324,7 +3303,6 @@ function searchByAttrValue ($attr_id, $value)
 	if (! isset ($type))
 		throw new InvalidArgException ('attr_id', $attr_id, "No such attribute");
 
-	$field = NULL;
 	switch ($type)
 	{
 		case 'string':
@@ -3557,7 +3535,7 @@ function getRackspaceStats ()
 	{
 		$result = usePreparedSelectBlade ($item['q']);
 		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = !strlen ($row[0]) ? 0 : $row[0];
+		$ret[$item['txt']] = $row[0] == '' ? 0 : $row[0];
 		unset ($result);
 	}
 	return $ret;
@@ -3566,25 +3544,8 @@ function getRackspaceStats ()
 function getPortsCount ($object_id)
 {
 	$result = usePreparedSelectBlade ("SELECT COUNT(id) FROM Port WHERE object_id = ?", array($object_id));
-	return $result->fetch(PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
-
-/*
-
-The following allows figuring out records in TagStorage that refer to non-existing entities:
-
-mysql> select entity_id from TagStorage left join Files on entity_id = id where entity_realm = 'file' and id is null;
-mysql> select entity_id from TagStorage left join IPv4Network on entity_id = id where entity_realm = 'ipv4net' and id is null;
-mysql> select entity_id from TagStorage left join Object on entity_id = id where entity_realm = 'object' and id is null;
-mysql> select entity_id from TagStorage left join IPv4VS on entity_id = id where entity_realm = 'ipv4vs' and id is null;
-mysql> select entity_id from TagStorage left join IPv4RSPool on entity_id = id where entity_realm = 'ipv4rspool' and id is null;
-mysql> select entity_id from TagStorage left join UserAccount on entity_id = user_id where entity_realm = 'user' and user_id is null;
-
-Accordingly, these are the records that refer to non-existent tags:
-
-mysql> select tag_id from TagStorage left join TagTree on tag_id = id where id is null;
-
-*/
 
 # FIXME: this function is not used any more
 function commitDeleteChapter ($chapter_no = 0)
@@ -3668,7 +3629,7 @@ function getPortOIFRefc()
 function getAttrType ($attr_id)
 {
 	$result = usePreparedSelectBlade ('SELECT type FROM Attribute WHERE id = ?' , array ($attr_id));
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 function getObjTypeAttrMap ($objtype_id)
@@ -3814,17 +3775,14 @@ function fetchAttrsForObjects ($object_set = array())
 function getAttrValues ($object_id)
 {
 	global $object_attribute_cache;
+	$ret = array();
 	if (isset ($object_attribute_cache[$object_id]))
 		return $object_attribute_cache[$object_id];
 
-	$ret = fetchAttrsForObjects(array($object_id));
-	$attrs = array();
-	if (isset ($ret[$object_id]))
-	{
-		$attrs = $ret[$object_id];
-		$object_attribute_cache[$object_id] = $attrs;
-	}
-	return $attrs;
+	$tmp = fetchAttrsForObjects (array ($object_id));
+	if (isset ($tmp[$object_id]))
+		$ret = $object_attribute_cache[$object_id] = $tmp[$object_id];
+	return $ret;
 }
 
 // returns the same data as getAttrValues, but sorts the result array
@@ -3844,6 +3802,9 @@ function getAttrValuesSorted ($object_id)
 	return customKsort (getAttrValues ($object_id), $attr_order);
 }
 
+// FIXME: This function causes RTDatabaseError if the attribute is not
+// enabled for the given object in AttributeMap. It would be better to detect
+// the mismatch here and throw InvalidArgException instead.
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
 	global $object_attribute_cache;
@@ -3851,13 +3812,14 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		unset ($object_attribute_cache[$object_id]);
 	$result = usePreparedSelectBlade
 	(
-		"SELECT type AS attr_type, av.* FROM Attribute a " .
-		"LEFT JOIN AttributeValue av ON a.id = av.attr_id AND av.object_id = ? " .
-		"WHERE a.id = ?",
+		'SELECT A.type AS attr_type, AV.attr_id, AV.uint_value, AV.float_value, AV.string_value ' .
+		'FROM Attribute AS A ' .
+		'LEFT JOIN AttributeValue AS AV ON A.id = AV.attr_id AND AV.object_id = ? ' .
+		'WHERE A.id = ?',
 		array ($object_id, $attr_id)
 	);
 	if (! $row = $result->fetch (PDO::FETCH_ASSOC))
-		throw new InvalidArgException ('attr_id', $attr_id, 'No such attribute #'.$attr_id);
+		throw new InvalidArgException ('attr_id', $attr_id, 'No such attribute');
 	$attr_type = $row['attr_type'];
 	unset ($result);
 	switch ($attr_type)
@@ -3872,19 +3834,18 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			throw new InvalidArgException ('attr_type', $attr_type, 'Unknown attribute type found in object #'.$object_id.', attribute #'.$attr_id);
+			throw new RackTablesError ("Unknown attribute type '${attr_type}' for object_id ${object_id} attr_id ${attr_id}", RackTablesError::INTERNAL);
 	}
 	if (isset ($row['attr_id']))
 	{
 		// AttributeValue row present in table
+		$where = array ('object_id' => $object_id, 'attr_id' => $attr_id);
 		if ($value == '')
-			usePreparedDeleteBlade ('AttributeValue', array ('object_id' => $object_id, 'attr_id' => $attr_id));
+			usePreparedDeleteBlade ('AttributeValue', $where);
 		elseif ($row[$column] !== $value)
-			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), array ('object_id' => $object_id, 'attr_id' => $attr_id));
+			usePreparedUpdateBlade ('AttributeValue', array ($column => $value), $where);
 	}
 	elseif ($value != '')
-	{
-		$type_id = getObjectType ($object_id);
 		usePreparedInsertBlade
 		(
 			'AttributeValue',
@@ -3892,11 +3853,10 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			(
 				$column => $value,
 				'object_id' => $object_id,
-				'object_tid' => $type_id,
+				'object_tid' => getObjectType ($object_id),
 				'attr_id' => $attr_id,
 			)
 		);
-	}
 }
 
 function convertPDOException ($e)
@@ -3913,6 +3873,12 @@ function convertPDOException ($e)
 		break;
 	case 'HY000-1205':
 		$text = 'lock wait timeout';
+		break;
+	case '42000-1305':
+		if (FALSE !== strpos ($e->errorInfo[2], 'l2address-already-exists-on-another-object'))
+			return new L2AddressException ('l2 address belongs to another object');
+		else
+			return $e;
 		break;
 	default:
 		return $e;
@@ -3943,23 +3909,34 @@ function usePreparedInsertBlade ($tablename, $columns)
 	}
 }
 
+function makeSetSQL ($column_names)
+{
+	if (! count ($column_names))
+		throw new InvalidArgException ('column_names', '(empty array)', 'must not be empty');
+	$tmp = array();
+	// Same syntax works for NULL as well.
+	foreach ($column_names as $each)
+		$tmp[] = "${each}=?";
+	return implode (', ', $tmp);
+}
+
 function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 {
-	$query = '';
+	if (! in_array (strtoupper ($conjunction), array ('AND', '&&', 'OR', '||', 'XOR')))
+		throw new InvalidArgException ('conjunction', $conjunction, 'invalid operator');
+	if (! count ($where_columns))
+		throw new InvalidArgException ('where_columns', '(empty array)', 'must not be empty');
 	$params = array();
-	$conj = '';
+	$tmp = array();
 	foreach ($where_columns as $colname => $colvalue)
-	{
 		if ($colvalue === NULL)
-			$query .= " ${conj} ${colname} IS NULL";
+			$tmp[] = "${colname} IS NULL";
 		else
 		{
-			$query .= " ${conj} ${colname}=?";
+			$tmp[] = "${colname}=?";
 			$params[] = $colvalue;
 		}
-		$conj = $conjunction;
-	}
-	return $query;
+	return implode (" ${conjunction} ", $tmp);
 }
 
 // This swiss-knife blade deletes any number of records from the specified table
@@ -4006,13 +3983,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_colu
 		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
 	if (! count ($where_columns))
 		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
-	$conj = '';
-	$query = "UPDATE ${tablename} SET ";
-	foreach (array_keys ($set_columns) as $colname)
-	{
-		$query .= "${conj}${colname}=?";
-		$conj = ', ';
-	}
+	$query = "UPDATE ${tablename} SET " . makeSetSQL (array_keys ($set_columns));
 	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
 	try
 	{
@@ -4049,10 +4020,10 @@ function loadConfigCache ()
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
-function loadUserConfigCache ($username = NULL)
+function loadUserConfigCache ($username)
 {
-	if (!strlen ($username))
-		throw new InvalidArgException ('username', $username);
+	if ($username == '')
+		throw new InvalidArgException ('username', $username, 'must not be empty');
 	$result = usePreparedSelectBlade ('SELECT varname, varvalue FROM UserConfig WHERE user = ?', array ($username));
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
@@ -4076,7 +4047,7 @@ function executeAutoPorts ($object_id)
 // Return only explicitly listed tags, the rest of the chain will be
 // generated/deducted later at higher levels.
 // Result is a chain: randomly indexed taginfo list.
-function loadEntityTags ($entity_realm = '', $entity_id = 0)
+function loadEntityTags ($entity_realm, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
@@ -4139,7 +4110,7 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$nameless');
 			if (validTagName ('$cn_' . $cell['name'], TRUE))
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
-			if (!strlen ($cell['rack_id']) and !strlen ($cell['container_id']))
+			if ($cell['rack_id'] == '' && $cell['container_id'] == '')
 				$ret[] = array ('tag' => '$unmounted');
 			if (!$cell['nports'])
 				$ret[] = array ('tag' => '$portless');
@@ -4434,7 +4405,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	$network_id = lastInsertID();
 	lastCreated ('ipv4net', $network_id);
 
-	if ($is_connected and $mask < 31)
+	if ($is_connected && $mask < 31)
 	{
 		updateV4Address ($net['ip_bin'], 'network', 'yes');
 		updateV4Address (ip_last ($net), 'broadcast', 'yes');
@@ -4499,10 +4470,10 @@ function loadScript ($name)
 	return nullIfFalse ($result->fetchColumn());
 }
 
-function saveScript ($name = '', $text)
+function saveScript ($name, $text)
 {
-	if (!strlen ($name))
-		throw new InvalidArgException ('name', $name);
+	if ($name == '')
+		throw new InvalidArgException ('name', $name, 'must not be empty');
 	if (!isset ($text))
 		return deleteScript ($name);
 	return usePreparedExecuteBlade
@@ -4515,7 +4486,7 @@ function saveScript ($name = '', $text)
 
 function deleteScript ($name)
 {
-	if (!strlen ($name))
+	if ($name == '')
 		throw new InvalidArgException ('name', $name);
 	return usePreparedDeleteBlade ('Script', array ('script_name' => $name));
 }
@@ -4533,9 +4504,9 @@ function newPortForwarding ($object_id, $localip_bin, $localport, $remoteip_bin,
 	}
 	else
 	{
-		if ( $localport <= 0 or $localport >= 65536 )
+		if ($localport <= 0 || $localport >= 65536)
 			throw new InvalidArgException ('localport', $localport, 'Invaild port');
-		if ( $remoteport <= 0 or $remoteport >= 65536 )
+		if ($remoteport <= 0 || $remoteport >= 65536)
 			throw new InvalidArgException ('remoteport', $remoteport, 'Invaild port');
 	}
 
@@ -4950,21 +4921,6 @@ function constructUserCell ($username)
 	return $ret;
 }
 
-// Return TRUE, if the given address is assigned to a port of any object
-// except the current object. Using this function as a constraint makes
-// it possible to reuse L2 addresses within one object, yet keeping them
-// universally unique on the other hand.
-function alreadyUsedL2Address ($address, $my_object_id)
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT COUNT(*) FROM Port WHERE l2address = ? AND BINARY l2address = ? AND object_id != ?',
-		array ($address, $address, $my_object_id)
-	);
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0] != 0;
-}
-
 function getPortInterfaceCompat()
 {
 	$result = usePreparedSelectBlade
@@ -5064,7 +5020,7 @@ function getPortIIFStats ($iif_id)
 function getPortInfo ($port_id)
 {
 	$result = fetchPortList ('Port.id = ?', array ($port_id));
-	return empty ($result) ? NULL : $result[0];
+	return count ($result) ? $result[0] : NULL;
 }
 
 function getVLANDomainStats ()
@@ -5133,9 +5089,9 @@ function getDomainGroupMembers ($vdom_group_id)
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANs ($vdom_id, $strict = FALSE)
 {
-	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	$self = __FUNCTION__;
+	if (! $strict && $members = getDomainGroupMembers ($vdom_id))
 	{
-		$self = __FUNCTION__;
 		$ret = $self ($vdom_id, TRUE);
 		foreach ($members as $member_vdom_id)
 			foreach ($self ($member_vdom_id, TRUE) as $vid => $vlan_info)
@@ -5178,8 +5134,7 @@ ORDER BY vlan_id
 END
 		, array ($vdom_id, $vdom_id)
 	);
-	$ret = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'vlan_id');
 }
 
 // faster than getDomainVLANs, but w/o statistics.
@@ -5187,7 +5142,7 @@ END
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANList ($vdom_id, $strict = FALSE)
 {
-	if (! $strict and $members = getDomainGroupMembers ($vdom_id))
+	if (! $strict && $members = getDomainGroupMembers ($vdom_id))
 	{
 		$self = __FUNCTION__;
 		$ret = $self ($vdom_id, TRUE);
@@ -5506,10 +5461,10 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 	// This function indicates an error, but doesn't revert it, so it is
 	// assummed, that the calling function performs necessary transaction wrapping.
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
-	if ($port['mode'] != 'trunk' and !count ($port['allowed']))
+	if ($port['mode'] != 'trunk' && ! count ($port['allowed']))
 		return 0;
 	$changed = 0;
-	if (! isset ($before) or $before['mode'] != $port['mode'])
+	if (! isset ($before) || $before['mode'] != $port['mode'])
 		$changed += usePreparedUpdateBlade
 		(
 			$tablemap_8021q[$instance]['pvm'],
@@ -5550,13 +5505,13 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 			array_merge (array ($object_id, $port_name), $where[1])
 		);
 
-	if (! $port['native'] and (! isset ($before) or in_array ($before['native'], $port['allowed'])))
+	if (! $port['native'] && (! isset ($before) || in_array ($before['native'], $port['allowed'])))
 		$changed += usePreparedDeleteBlade
 		(
 			$tablemap_8021q[$instance]['pnv'],
 			array ('object_id' => $object_id, 'port_name' => $port_name)
 		);
-	elseif ($port['native'] and (! isset ($before) or $before['native'] != $port['native']))
+	elseif ($port['native'] && (! isset ($before) || $before['native'] != $port['native']))
 		$changed += usePreparedExecuteBlade
 		(
 			'REPLACE INTO ' . $tablemap_8021q[$instance]['pnv'] .
@@ -5564,7 +5519,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 			array ($object_id, $port_name, $port['native'])
 		);
 
-	if ($instance == 'desired' and $changed)
+	if ($instance == 'desired' && $changed)
 		callHook ('portConfChanged', $object_id, $port_name, $port);
 	return $changed ? 1 : 0;
 }
@@ -5648,7 +5603,7 @@ function setConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && (! is_numeric ($varvalue) || $varvalue < 0 ))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
@@ -5669,7 +5624,7 @@ function setUserConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && (!is_numeric ($varvalue) or $varvalue < 0 ))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && (! is_numeric ($varvalue) || $varvalue < 0 ))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedExecuteBlade
@@ -5699,12 +5654,9 @@ function getConfiguredQuickLinks()
 {
 	$ret = array();
 	foreach (explode (',', getConfigVar('QUICK_LINK_PAGES')) as $page_code)
-		if (! empty ($page_code))
-		{
-			$title = getPageName ($page_code);
-			if (! empty ($title))
+		if ($page_code != '')
+			if ('' != $title = getPageName ($page_code))
 				$ret[] = array ('href' => makeHref (array ('page' => $page_code)), 'title' => $title);
-		}
 	return $ret;
 }
 
@@ -5822,7 +5774,7 @@ function isTransactionActive()
 function getRowsCount ($table)
 {
 	$result = usePreparedSelectBlade ("SELECT COUNT(*) FROM `$table`");
-	return $result->fetch (PDO::FETCH_COLUMN, 0);
+	return $result->fetchColumn();
 }
 
 function getEntitiesCount ($realm)
@@ -5996,7 +5948,7 @@ function setDBMutex ($name, $timeout = 5)
 {
 	$fullname = getDBName() . '.' . $name;
 	$result = usePreparedSelectBlade ('SELECT GET_LOCK(?, ?)', array ($fullname, $timeout));
-	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	$row = $result->fetchColumn();
 	if ($row === NULL)
 		throw new RTDatabaseError ("error occured when executing GET_LOCK on $fullname");
 	if ($row !== '1')
@@ -6019,7 +5971,7 @@ function tryDBMutex ($name, $timeout = 0)
 function releaseDBMutex ($name)
 {
 	$result = usePreparedSelectBlade ('SELECT RELEASE_LOCK(?)', array (getDBName() . '.' . $name));
-	$row = $result->fetch (PDO::FETCH_COLUMN, 0);
+	$row = $result->fetchColumn();
 	return $row === '1';
 }
 

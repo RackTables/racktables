@@ -62,12 +62,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	 * @group small
 	 * @dataProvider providerTernarySame
 	 */
-/*
 	public function testTernarySame ($func, $input1, $input2, $input3, $output)
 	{
 		$this->assertSame ($output, $func ($input1, $input2, $input3));
 	}
-*/
 
 	// There is a separate test/provider method pair for each exception class as
 	// $this->expectException() is only available in later versions of PHPUnit.
@@ -80,6 +78,30 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	public function testNaryIAE ($func, $input)
 	{
 		call_user_func_array ($func, $input);
+	}
+
+	/**
+	 * @group small
+	 * @dataProvider providerMakeWhereSQL
+	 */
+	public function testMakeWhereSQL ($where_columns, $conjunction, $expected_str, $expected_params)
+	{
+		$actual_str = makeWhereSQL ($where_columns, $conjunction, $actual_params);
+		$this->assertEquals ($expected_str, $actual_str);
+		$this->assertSame ($expected_params, $actual_params);
+	}
+
+	// This test requires a custom function to pass a parameter by reference.
+
+	/**
+	 * @group small
+	 * @dataProvider providerTreeApplyFuncIAE
+	 * @expectedException InvalidArgException
+	 */
+	public function testTreeApplyFuncIAE ($func, $stopfunc)
+	{
+		$forest_byref = array();
+		treeApplyFunc ($forest_byref, $func, $stopfunc);
 	}
 
 	public function providerUnaryEquals ()
@@ -122,6 +144,10 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('questionMarks', 2, '?, ?'),
 			array ('questionMarks', 3, '?, ?, ?'),
 
+			array ('makeSetSQL', array ('one'), 'one=?'),
+			array ('makeSetSQL', array ('one', 'two'), 'one=?, two=?'),
+			array ('makeSetSQL', array ('one', 'two', 'three'), 'one=?, two=?, three=?'),
+
 			array
 			(
 				'formatPortIIFOIF',
@@ -157,6 +183,16 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 2, 'allowed' => array (3)), FALSE),
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 1, 'allowed' => array (1, 2, 3)), FALSE),
 			array ('acceptable8021QConfig', array ('mode' => 'access', 'native' => 3, 'allowed' => array()), FALSE),
+
+			// XXX: The data set below covers only two modes though the function can accept more. It is not
+			// clear whether those additional branches are dead or they need to be tested as well. Also there
+			// are no tests for invalid input as the function does not throw an exception on error and that
+			// should be fixed first.
+			array ('serializeVLANPack', array ('mode' => 'access', 'allowed' => array (290), 'native' => 290), 'A290'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (290), 'native' => 290), 'T290'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (291, 292, 293), 'native' => 0), 'T+291-293'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (294, 300, 305), 'native' => 305), 'T305+294, 300'),
+			array ('serializeVLANPack', array ('mode' => 'trunk', 'allowed' => array (2, 3, 4, 5, 6, 7, 8, 9), 'native' => 5), 'T5+2-4, 6-9'),
 
 			array ('listToRanges', array(), array()),
 			array ('listToRanges', array (7), array (array ('from' => 7, 'to' => 7))),
@@ -197,11 +233,47 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nextMACAddress', '12:34:56:78:ff:ff', '12:34:56:79:00:00'),
 			array ('nextMACAddress', '12:34:56:ff:ff:ff', '12:34:57:00:00:00'),
 			array ('nextMACAddress', '12:34:56:fe:ff:ff', '12:34:56:FF:00:00'),
+
+			// implicit 2nd argument
+			array ('validTagName', 'tag', TRUE),
+			array ('validTagName', 'another tag', TRUE),
+			array ('validTagName', 'another-tag', TRUE),
+			array ('validTagName', 'another_tag', TRUE),
+			array ('validTagName', 'abc 123 def', TRUE),
+			array ('validTagName', '100%', TRUE),
+			array ('validTagName', 'racks 20~39', TRUE),
+			array ('validTagName', 'racks 40+', TRUE),
+			array ('validTagName', 'racks 10:', TRUE),
+			array ('validTagName', '2nd tag', TRUE),
+			array ('validTagName', 'left+right', TRUE),
+			array ('validTagName', '2015', TRUE),
+			array ('validTagName', '2015-2016', TRUE),
+			array ('validTagName', '-2016', TRUE),
+			array ('validTagName', '-50%', TRUE),
+			array ('validTagName', 'size: XL', TRUE),
+			array ('validTagName', 'size: XL+', TRUE),
+			array ('validTagName', 'iqn.domain', TRUE),
+			array ('validTagName', '', FALSE),
+			array ('validTagName', ' tag ', FALSE),
+			array ('validTagName', 'tag?', FALSE),
+			array ('validTagName', 'tag!', FALSE),
+			array ('validTagName', 'tag_', FALSE),
+			array ('validTagName', 'tag~', FALSE),
+			array ('validTagName', 'tag.', FALSE),
+			array ('validTagName', '$tag', FALSE),
+			array ('validTagName', '2015-', FALSE),
+			array ('validTagName', 'iqn.domain.', FALSE),
 		);
 	}
 
 	public function providerUnarySame ()
 	{
+		$ten_kilo = array_fill_keys (range (0, 10000), 0);
+		unset ($ten_kilo[0]);
+		$ten_kilo_less_3 = $ten_kilo;
+		unset ($ten_kilo_less_3[1560]);
+		unset ($ten_kilo_less_3[1561]);
+		unset ($ten_kilo_less_3[1562]);
 		return array
 		(
 			// coalescing functions
@@ -278,6 +350,54 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('ip6_mask', 0, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"),
 			array ('ip6_mask', 80, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00\x00\x00\x00"),
 			array ('ip6_mask', 128, "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
+
+			array ('ip_get_arpa', "\x0A\x0B\x0C\x0D", '13.12.11.10.in-addr.arpa'),
+			array ('ip_get_arpa', "\xC0\x00\x02\xFF", '255.2.0.192.in-addr.arpa'),
+			array ('ip_get_arpa', "\xC0\xA8\xC0\xFF", '255.192.168.192.in-addr.arpa'),
+			array ('ip_get_arpa', "\xAC\x11\xBB\x00", '0.187.17.172.in-addr.arpa'),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01",
+				'1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C",
+				'c.0.b.0.a.0.9.0.8.0.7.0.6.0.5.0.4.0.3.0.2.0.1.0.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
+			array
+			(
+				'ip_get_arpa',
+				"\x20\x01\x0D\xB8\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
+				'f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.8.b.d.0.1.0.0.2.ip6.arpa'
+			),
+
+			array ('withoutLocationTypes', array(), array()),
+			array ('withoutLocationTypes', array (1560 => 'rack', 1561 => 'row', 1562 => 'location'), array()),
+			array ('withoutLocationTypes', $ten_kilo, $ten_kilo_less_3),
+
+			// implicit 2nd and 3rd arguments
+			array ('reindexById', array(), array()),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				array
+				(
+					1 => array ('id' => 1, 'name' => 'one'),
+					2 => array ('id' => 2, 'name' => 'two'),
+					3 => array ('id' => 3, 'name' => 'three'),
+					4 => array ('id' => 4, 'name' => 'four'),
+				),
+			),
 		);
 	}
 
@@ -567,6 +687,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('buildVLANFilter', 'none', '0-20000', array ()),
 			array ('buildVLANFilter', 'abcde', '', array ()), // this is a bug, ought to be InvalidArgException
 
+			array ('matchVLANFilter', 5, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 10, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 20, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 25, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 35, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+			array ('matchVLANFilter', 41, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), FALSE),
+			array ('matchVLANFilter', 45, array (array ('from' => 10, 'to' => 20), array ('from' => 30, 'to' => 40), array ('from' => 45, 'to' => 45)), TRUE),
+
+			array ('filterVLANList', array (5, 6, 7, 8, 16, 20, 21), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array (7, 16, 20)),
+			array ('filterVLANList', array (8, 30), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array()),
+			array ('filterVLANList', array (14, 19), array (array ('from' => 7, 'to' => 7), array ('from' => 10, 'to' => 20)), array (14, 19)),
+
 			// explicit 2nd argument
 			array ('listToRanges', array(), 0, array()),
 			array ('listToRanges', array (7), 0, array (array ('from' => 7, 'to' => 7))),
@@ -607,6 +739,77 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				array (array ('id' => 10, 'tag' => 'ten'), array ('id' => 2, 'tag' => 'two')),
 				array (1 => array ('id' => 1, 'tag' => 'one'), 2 => array ('id' => 2, 'tag' => 'two'), 10 => array ('id' => 10, 'tag' => 'ten')),
 			),
+
+			// explicit 2nd argument
+			array ('validTagName', 'tag', FALSE, TRUE),
+			array ('validTagName', 'another tag', FALSE, TRUE),
+			array ('validTagName', 'another-tag', FALSE, TRUE),
+			array ('validTagName', 'another_tag', FALSE, TRUE),
+			array ('validTagName', 'abc 123 def', FALSE, TRUE),
+			array ('validTagName', '100%', FALSE, TRUE),
+			array ('validTagName', 'racks 20~39', FALSE, TRUE),
+			array ('validTagName', 'racks 40+', FALSE, TRUE),
+			array ('validTagName', 'racks 10:', FALSE, TRUE),
+			array ('validTagName', '2nd tag', FALSE, TRUE),
+			array ('validTagName', 'left+right', FALSE, TRUE),
+			array ('validTagName', '2015', FALSE, TRUE),
+			array ('validTagName', '2015-2016', FALSE, TRUE),
+			array ('validTagName', '-2016', FALSE, TRUE),
+			array ('validTagName', '-50%', FALSE, TRUE),
+			array ('validTagName', 'size: XL', FALSE, TRUE),
+			array ('validTagName', 'size: XL+', FALSE, TRUE),
+			array ('validTagName', 'iqn.domain', FALSE, TRUE),
+			array ('validTagName', '', FALSE, FALSE),
+			array ('validTagName', ' tag ', FALSE, FALSE),
+			array ('validTagName', 'tag?', FALSE, FALSE),
+			array ('validTagName', 'tag!', FALSE, FALSE),
+			array ('validTagName', 'tag_', FALSE, FALSE),
+			array ('validTagName', 'tag~', FALSE, FALSE),
+			array ('validTagName', 'tag.', FALSE, FALSE),
+			array ('validTagName', '$tag', FALSE, FALSE),
+			array ('validTagName', '2015-', FALSE, FALSE),
+			array ('validTagName', 'iqn.domain.', FALSE, FALSE),
+
+			array ('validTagName', '$tag', TRUE, TRUE),
+			array ('validTagName', '$another tag', TRUE, TRUE),
+			array ('validTagName', '$another tag', TRUE, TRUE),
+			array ('validTagName', '$another-tag', TRUE, TRUE),
+			array ('validTagName', '$another_tag', TRUE, TRUE),
+			array ('validTagName', '$abc 123 def', TRUE, TRUE),
+			array ('validTagName', '$100%', TRUE, TRUE),
+			array ('validTagName', '$racks 20~39', TRUE, TRUE),
+			array ('validTagName', '$racks 40+', TRUE, TRUE),
+			array ('validTagName', '$racks 10:', TRUE, TRUE),
+			array ('validTagName', '$2nd tag', TRUE, TRUE),
+			array ('validTagName', '$left+right', TRUE, TRUE),
+			array ('validTagName', '$2015', TRUE, TRUE),
+			array ('validTagName', '$2015-2016', TRUE, TRUE),
+			array ('validTagName', '$-2016', TRUE, TRUE),
+			array ('validTagName', '$-50%', TRUE, TRUE),
+			array ('validTagName', '$size: XL', TRUE, TRUE),
+			array ('validTagName', '$size: XL+', TRUE, TRUE),
+			array ('validTagName', '$iqn.domain', TRUE, TRUE),
+			array ('validTagName', '', TRUE, FALSE),
+			array ('validTagName', '$ tag ', TRUE, FALSE),
+			array ('validTagName', '$tag?', TRUE, FALSE),
+			array ('validTagName', '$tag!', TRUE, FALSE),
+			array ('validTagName', '$tag_', TRUE, FALSE),
+			array ('validTagName', '$tag~', TRUE, FALSE),
+			array ('validTagName', '$tag.', TRUE, FALSE),
+			array ('validTagName', 'tag', TRUE, TRUE), // not quite expected but as far as the function goes is correct
+			array ('validTagName', '$2015-', TRUE, FALSE),
+			array ('validTagName', '$iqn.domain.', TRUE, FALSE),
+
+			array ('goodModeForVSTRole', 'access', 'access', TRUE),
+			array ('goodModeForVSTRole', 'access', 'trunk', FALSE),
+			array ('goodModeForVSTRole', 'access', 'anymode', TRUE),
+			array ('goodModeForVSTRole', 'access', 'uplink', FALSE),
+			array ('goodModeForVSTRole', 'access', 'downlink', FALSE),
+			array ('goodModeForVSTRole', 'trunk', 'access', FALSE),
+			array ('goodModeForVSTRole', 'trunk', 'trunk', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'anymode', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'uplink', TRUE),
+			array ('goodModeForVSTRole', 'trunk', 'downlink', TRUE),
 		);
 	}
 
@@ -631,6 +834,200 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 3, array ('1-2', '4-5')),
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 4, array ('1-3', 5)),
 			array ('groupIntsToRanges', array (1, 2, 3, 4, 5), 5, array ('1-4')),
+
+			// implicit 3rd argument
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'id',
+				array
+				(
+					1 => array ('id' => 1, 'name' => 'one'),
+					2 => array ('id' => 2, 'name' => 'two'),
+					3 => array ('id' => 3, 'name' => 'three'),
+					4 => array ('id' => 4, 'name' => 'four'),
+				),
+			),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				array
+				(
+					'one' => array ('id' => 1, 'name' => 'one'),
+					'two' => array ('id' => 2, 'name' => 'two'),
+					'three' => array ('id' => 3, 'name' => 'three'),
+					'four' => array ('id' => 4, 'name' => 'four'),
+				),
+			),
+
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					10 => array ('id' => 1, 'name' => 'one'),
+					20 => array ('id' => 2, 'name' => 'two'),
+					30 => array ('id' => 3, 'name' => 'three'),
+					40 => array ('id' => 4, 'name' => 'four'),
+				),
+				'id',
+				array (10 => 1, 20 => 2, 30 => 3, 40 => 4),
+			),
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					'a' => array ('id' => 1, 'name' => 'one'),
+					'b' => array ('id' => 2, 'name' => 'two'),
+					'c' => array ('id' => 3, 'name' => 'three'),
+					'd' => array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				array ('a' => 'one', 'b' => 'two', 'c' => 'three', 'd' => 'four'),
+			),
+			array
+			(
+				'reduceSubarraysToColumn',
+				array
+				(
+					array ('id' => 1, 'name' => 'number'),
+					array ('id' => 2, 'name' => 'number'),
+					array ('id' => 3, 'name' => 'number'),
+					array ('id' => 4, 'name' => 'number'),
+				),
+				'name',
+				array ('number', 'number', 'number', 'number'),
+			),
+
+			array
+			(
+				'groupBy',
+				array(),
+				'test',
+				array(),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'parity',
+				array
+				(
+					'odd' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+					),
+					'even' => array
+					(
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'value',
+				array
+				(
+					'low' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						2 => array ('value' => 'low', 'parity' => 'even'),
+					),
+					'high' => array
+					(
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'unknown',
+				array
+				(
+					'' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+				),
+			),
+			array
+			(
+				'groupBy',
+				array
+				(
+					1 => array ('value' => 'low', 'parity' => 'odd'),
+					2 => array ('value' => 'low', 'parity' => 'even'),
+					150 => array ('value' => 'medium'),
+					160 => array ('parity' => 'even'),
+					170 => array(),
+					301 => array ('value' => 'high', 'parity' => 'odd'),
+					302 => array ('value' => 'high', 'parity' => 'even'),
+				),
+				'parity',
+				array
+				(
+					'odd' => array
+					(
+						1 => array ('value' => 'low', 'parity' => 'odd'),
+						301 => array ('value' => 'high', 'parity' => 'odd'),
+					),
+					'even' => array
+					(
+						2 => array ('value' => 'low', 'parity' => 'even'),
+						160 => array ('parity' => 'even'),
+						302 => array ('value' => 'high', 'parity' => 'even'),
+					),
+					'' => array
+					(
+						150 => array ('value' => 'medium'),
+						170 => array(),
+					),
+				),
+			),
 		);
 	}
 
@@ -649,8 +1046,58 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 
 	public function providerTernarySame ()
 	{
+		$a = array
+		(
+			array ('id' => 10, 'name' => 'ten'), // 0
+			array ('id' => 20, 'name' => 'twenty'), // 1
+			array ('id' => 30, 'name' => 'thirty'), // 2
+		);
 		return array
 		(
+			array ('scanArrayForItem', $a, 'id', 10, 0),
+			array ('scanArrayForItem', $a, 'id', 30, 2),
+			array ('scanArrayForItem', $a, 'name', 'twenty', 1),
+			array ('scanArrayForItem', $a, 'id', 40, NULL),
+
+			// all arguments
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'name' => 'one'),
+					array ('id' => 2, 'name' => 'two'),
+					array ('id' => 3, 'name' => 'three'),
+					array ('id' => 4, 'name' => 'four'),
+				),
+				'name',
+				FALSE,
+				array
+				(
+					'one' => array ('id' => 1, 'name' => 'one'),
+					'two' => array ('id' => 2, 'name' => 'two'),
+					'three' => array ('id' => 3, 'name' => 'three'),
+					'four' => array ('id' => 4, 'name' => 'four'),
+				),
+			),
+			array
+			(
+				'reindexById',
+				array
+				(
+					array ('id' => 1, 'parity' => 'odd'),
+					array ('id' => 2, 'parity' => 'even'),
+					array ('id' => 3, 'parity' => 'odd'),
+					array ('id' => 4, 'parity' => 'even'),
+				),
+				'parity',
+				TRUE,
+				array
+				(
+					'odd' => array ('id' => 1, 'parity' => 'odd'),
+					'even' => array ('id' => 2, 'parity' => 'even'),
+				),
+			),
 		);
 	}
 
@@ -691,6 +1138,67 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nextMACAddress', array ('01:02:03:ab:cd:gg')),
 			array ('nextMACAddress', array ('01:02:03:ab:cd')),
 			array ('nextMACAddress', array ('1:2:3:ab:cd:ef')),
+
+			array ('makeWhereSQL', array (array ('abc' => NULL), 'NOT')),
+			array ('makeWhereSQL', array (array(), 'AND')),
+
+			array ('ip_get_arpa', array ("\xAC\x11\xBB")),
+			array ('ip_get_arpa', array ("\xAC\x11\xBB\x00\x00")),
+
+			array ('goodModeForVSTRole', array (NULL, NULL)),
+			array ('goodModeForVSTRole', array (FALSE, NULL)),
+			array ('goodModeForVSTRole', array ('', NULL)),
+			array ('goodModeForVSTRole', array ('unknown', NULL)),
+
+			array ('makeSetSQL', array (array())),
+
+			// not an array
+			array ('reindexById', array (NULL)),
+			array ('reindexById', array (FALSE)),
+			array ('reindexById', array ('')),
+			array ('reindexById', array (0)),
+			// no such key, implicit 2nd and 3rd arguments
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2, 'name' => 'two'), array ('name' => 'three')))),
+			// no such key, implicit 3rd argument
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2, 'name' => 'two'), array ('name' => 'three')), 'key')),
+			// duplicate key, implicit 3rd argument
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id')),
+			// duplicate key, all arguments
+			array ('reindexById', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 1, 'name' => 'two'), array ('name' => 'three')), 'id', FALSE)),
+
+			array ('reduceSubarraysToColumn', array (NULL, 'name')),
+			array ('reduceSubarraysToColumn', array (FALSE, 'name')),
+			array ('reduceSubarraysToColumn', array ('', 'name')),
+			array ('reduceSubarraysToColumn', array (0, 'name')),
+			array ('reduceSubarraysToColumn', array (array (array ('id' => 1, 'name' => 'one'), array ('id' => 2)), 'name')),
+
+			array ('groupBy', array (NULL, 'test')),
+			array ('groupBy', array (FALSE, 'test')),
+			array ('groupBy', array ('', 'test')),
+			array ('groupBy', array (0, 'test')),
+			array ('groupBy', array (array (array ('id' => 1, 'name' => 'one'), 2), 'name')),
+		);
+	}
+
+	public function providerMakeWhereSQL ()
+	{
+		return array
+		(
+			array (array ('one' => 1), 'AND', 'one=?', array (1)),
+			array (array ('one' => NULL), 'AND', 'one IS NULL', array()),
+			array (array ('one' => 1, 'two' => 2), 'AND', 'one=? AND two=?', array (1, 2)),
+			array (array ('one' => NULL, 'two' => 2), 'AND', 'one IS NULL AND two=?', array (2)),
+			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', 'one=? OR two=? OR three=?', array (1, 2, 3)),
+		);
+	}
+
+	public function providerTreeApplyFuncIAE ()
+	{
+		return array
+		(
+			array ('treeApplyFunc', array (NULL, NULL)),
+			array ('treeApplyFunc', array ('no_such_function', NULL)),
+			array ('treeApplyFunc', array ('count', 'no_such_function')),
 		);
 	}
 }

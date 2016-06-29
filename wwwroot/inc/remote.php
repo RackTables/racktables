@@ -27,6 +27,9 @@ $breedfunc = array
 	'fdry5-get8021q-readport'  => 'fdry5PickInterfaceSubcommand',
 	'fdry5-xlatepushq-main'    => 'fdry5TranslatePushQueue',
 	'fdry5-getallconf-main'    => 'fdry5SpotConfigText',
+	'fdry5-getportstatus-main' => 'foundryReadInterfaceStatus',
+	'fdry5-getmaclist-main'    => 'fdry5ReadMacList',
+	'fdry5-getportmaclist-main'=> 'fdry5ReadMacList',
 	'vrp53-getlldpstatus-main' => 'vrpReadLLDPStatus',
 	'vrp53-get8021q-main'      => 'vrp53ReadVLANConfig',
 	'vrp53-get8021q-top'       => 'vrp53ScanTopLevel',
@@ -149,10 +152,14 @@ $breed_by_swcode = array
 	2081 => 'vrp55', // Huawei VRP 5.12
 	2027 => 'vrp85', // Huawei VRP 8.5
 	1363 => 'fdry5', // IronWare 5
-	1367 => 'jun10', // 10S
-	1597 => 'jun10', // 10R
-	1598 => 'jun10', // 11R
-	1599 => 'jun10', // 12R
+	1364 => 'fdry5', // Brocade FastIron LS648
+	1367 => 'jun10', // JunOS 10, switch
+	1597 => 'jun10', // JunOS 10
+	1598 => 'jun10', // JunOS 11
+	1599 => 'jun10', // JunOS 12
+	2400 => 'jun10', // JunOS 13
+	2401 => 'jun10', // JunOS 14
+	2402 => 'jun10', // JunOS 15
 	1594 => 'ftos8', // Force10 FTOS 8
 	1673 => 'air12', // AIR IOS 12.3
 	1674 => 'air12', // AIR IOS 12.4
@@ -164,6 +171,7 @@ $breed_by_swcode = array
 );
 
 $breed_by_hwcode = array (
+	1362 => 'fdry5', // Brocade FastIron CX648
 	//... dlink items added by the loop below
 );
 
@@ -192,11 +200,11 @@ function detectDeviceBreed ($object_id)
 {
 	global $breed_by_swcode, $breed_by_hwcode, $breed_by_mgmtcode;
 	foreach (getAttrValues ($object_id) as $record)
-		if ($record['id'] == 4 and array_key_exists ($record['key'], $breed_by_swcode))
+		if ($record['id'] == 4 && array_key_exists ($record['key'], $breed_by_swcode))
 			return $breed_by_swcode[$record['key']];
-		elseif ($record['id'] == 2 and array_key_exists ($record['key'], $breed_by_hwcode))
+		elseif ($record['id'] == 2 && array_key_exists ($record['key'], $breed_by_hwcode))
 			return $breed_by_hwcode[$record['key']];
-		elseif ($record['id'] == 30 and array_key_exists ($record['key'], $breed_by_mgmtcode))
+		elseif ($record['id'] == 30 && array_key_exists ($record['key'], $breed_by_mgmtcode))
 			return $breed_by_mgmtcode[$record['key']];
 	return '';
 }
@@ -375,7 +383,7 @@ function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$re
 			break;
 		case 'ucssdk': # remote XML through a Python backend
 			# UCS in its current implementation besides the terminal_settings() provides
-			# an additional username/password feed through the HTML from. Whenever the
+			# an additional username/password feed through the HTML form. Whenever the
 			# user provides the credentials through the form, use these instead of the
 			# credentials [supposedly] set by terminal_settings().
 			global $script_mode;
@@ -437,8 +445,12 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			break;
 		case 'fdry5':
 			$protocol = 'netcat'; // default is netcat mode
-			$prompt = '^(Login|Username|Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|Username|Password|Please Enter Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "skip-page-display\n" . $commands;
+			# using ssh and sshnokey we'll always receive 'Connection to $ip closed by remote host.' upon exit
+			# let's hide the warnings 
+			$tolerate_remote_errors = TRUE;
+			$hide_warnings = TRUE;
 			break;
 		case 'vrp55':
 			$commands = "terminal echo-mode line\n" . $commands;
@@ -518,16 +530,16 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	// call gateway
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
 
-	if ($settings['protocol'] != 'ssh' || ! $tolerate_remote_errors)
+	if (substr($settings['protocol'],0,3) != 'ssh' || ! $tolerate_remote_errors)
 	{
-		if (! empty ($errors))
+		if ($errors != '')
 			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
 		elseif ($ret_code !== 0)
 			throw new RTGatewayError ("${settings['protocol']} error: result code $ret_code");
 	}
-	elseif (! empty ($errors)) // ssh and tolerate and non-empty $errors
+	elseif ($errors != '') // ssh and tolerate and non-empty $errors
 		foreach (explode ("\n", $errors) as $line)
-			if (strlen ($line))
+			if ($line != '' && ! $hide_warnings)
 				showWarning ("${settings['protocol']} ${settings['hostname']}: $line");
 	return strtr($out, array("\r" => "")); // cut ^M symbols
 }
@@ -612,9 +624,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			}
 		}
 		foreach ($read_fd as $fd)
-		{
-			$str = fread ($fd, $buff_size);
-			if (strlen ($str) == 0)
+			if ('' == $str = fread ($fd, $buff_size))
 			{
 				// close output fd
 				$read_left = array_diff ($read_left, array ($fd));
@@ -631,7 +641,6 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 				elseif ($fd == $pipes[2])
 					$errors .= $str;
 			}
-		}
 
 		$write_fd = $write_left;
 		$read_fd = $read_left;

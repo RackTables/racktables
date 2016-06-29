@@ -273,8 +273,9 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.9',
 		'0.20.10',
 		'0.20.11',
+		'0.20.12',
 	);
-	if (!in_array ($v1, $versionhistory) or !in_array ($v2, $versionhistory))
+	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
 	$skip = TRUE;
 	$path = NULL;
@@ -284,7 +285,7 @@ function getDBUpgradePath ($v1, $v2)
 	// Now collect all versions > $v1 and <= $v2
 	foreach ($versionhistory as $v)
 	{
-		if ($skip and $v == $v1)
+		if ($skip && $v == $v1)
 		{
 			$skip = FALSE;
 			$path = array();
@@ -1213,7 +1214,7 @@ CREATE TABLE `CactiServer` (
 			$cacti_url_row = $result->fetch (PDO::FETCH_ASSOC);
 			unset ($result);
 
-			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && strlen ($cacti_url_row['varvalue']))
+			if ($row['cnt'] != 0 || is_array ($cacti_url_row) && $cacti_url_row['varvalue'] != '')
 			{
 				$query[] = "INSERT INTO CactiServer (id) VALUES (1)";
 				$query[] = "UPDATE CactiServer SET base_url = (SELECT varvalue FROM Config WHERE varname = 'CACTI_URL') WHERE id = 1";
@@ -1942,6 +1943,28 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			$query[] = "UPDATE Config SET varvalue = '0.20.11' WHERE varname = 'DB_VERSION'";
 
 			break;
+		case '0.20.12':
+			// NO_ZERO_DATE
+			$query[] = "ALTER TABLE LDAPCache MODIFY COLUMN last_retry timestamp NULL DEFAULT NULL";
+			$query[] = "DELETE FROM LDAPCache";
+
+			$query[] = "INSERT INTO ObjectParentCompat (parent_objtype_id, child_objtype_id) VALUES (1787,4)";
+
+			$port_trigger_body = <<<ENDOFTRIGGER
+PortTrigger:BEGIN
+  IF (NEW.`l2address` IS NOT NULL AND (SELECT COUNT(*) FROM `Port` WHERE `l2address` = NEW.`l2address` AND `object_id` != NEW.`object_id`) > 0) THEN
+    CALL `Port-l2address-already-exists-on-another-object`;
+  END IF;
+END;
+ENDOFTRIGGER;
+			$query[] = "CREATE TRIGGER `Port-before-insert` BEFORE INSERT ON `Port` FOR EACH ROW $port_trigger_body";
+			$query[] = "CREATE TRIGGER `Port-before-update` BEFORE UPDATE ON `Port` FOR EACH ROW $port_trigger_body";
+
+			$query[] = "ALTER TABLE UserConfig DROP FOREIGN KEY `UserConfig-FK-varname`";
+			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE";
+
+			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
+			break;
 		case 'dictionary':
 			$query = reloadDictionary();
 			break;
@@ -2011,7 +2034,7 @@ function getDatabaseVersion ()
 		die (__FUNCTION__ . ': SQL query failed with error ' . $errorInfo[2]);
 	}
 	$rows = $prepared->fetchAll (PDO::FETCH_NUM);
-	if (count ($rows) != 1 || !strlen ($rows[0][0]))
+	if (count ($rows) != 1 || $rows[0][0] == '')
 		die (__FUNCTION__ . ': Cannot guess database version. Config table is present, but DB_VERSION is missing or invalid. Giving up.');
 	$ret = $rows[0][0];
 	return $ret;
@@ -2024,7 +2047,7 @@ function showUpgradeError ($info = '', $location = 'N/A')
 	elseif ($location != 'N/A')
 		$location = $location . '()';
 	echo "<div class=msg_error>An error has occured in [${location}]. ";
-	if (!strlen ($info))
+	if ($info == '')
 		echo 'No additional information is available.';
 	else
 		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
@@ -2065,10 +2088,10 @@ function renderUpgraderHTML()
 
 	if
 	(
-		!isset ($_SERVER['PHP_AUTH_USER']) or
-		!strlen ($_SERVER['PHP_AUTH_USER']) or
-		!isset ($_SERVER['PHP_AUTH_PW']) or
-		!strlen ($_SERVER['PHP_AUTH_PW']) or
+		! isset ($_SERVER['PHP_AUTH_USER']) ||
+		$_SERVER['PHP_AUTH_USER'] == '' ||
+		! isset ($_SERVER['PHP_AUTH_PW']) ||
+		$_SERVER['PHP_AUTH_PW'] == '' ||
 		!authenticate_admin ($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])
 	)
 	{

@@ -117,7 +117,7 @@ INNER JOIN (
 	while (TRUE)
 	{
 		$row = $result->fetch (PDO::FETCH_ASSOC);
-		if (isset ($prev_object_id) and (! $row or $row['object_id'] != $prev_object_id))
+		if (isset ($prev_object_id) && (! $row || $row['object_id'] != $prev_object_id))
 		{
 			// handle sorted object's portlist
 			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
@@ -222,7 +222,7 @@ function handlePopupPortLink()
 	$port_info = getPortInfo ($_REQUEST['port']);
 	$remote_port_info = getPortInfo ($_REQUEST['remote_port']);
 	$POIFC = getPortOIFCompat();
-	if (isset ($_REQUEST['port_type']) and isset ($_REQUEST['remote_port_type']))
+	if (isset ($_REQUEST['port_type']) && isset ($_REQUEST['remote_port_type']))
 	{
 		$type_local = $_REQUEST['port_type'];
 		$type_remote = $_REQUEST['remote_port_type'];
@@ -403,6 +403,8 @@ function renderPopupPortSelector()
 	)
 		$spare_ports = findSparePorts ($port_info, $filter);
 
+	includeJQueryUI (TRUE);
+
 	// display search form
 	echo 'Link ' . formatPort ($port_info) . ' to...';
 	echo '<form method=GET>';
@@ -411,17 +413,59 @@ function renderPopupPortSelector()
 	echo '<input type=hidden name="helper" value="portlist">';
 	echo '<input type=hidden name="port" value="' . $port_id . '">';
 	echo '<table align="center" valign="bottom"><tr>';
-	echo '<td class="tdleft"><label>Object name:<br><input type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
-	echo '<td class="tdleft"><label>Asset tag:<br><input type=text size=8 name="filter-asset_no" value="' . htmlspecialchars ($filter['asset_no'], ENT_QUOTES) . '"></label></td>';
-	echo '<td class="tdleft"><label>Port name:<br><input type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Object name:<br><input id="filter-obj" type=text size=8 name="filter-obj" value="' . htmlspecialchars ($filter['objects'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Asset tag:<br><input id="filter-asset" type=text size=8 name="filter-asset_no" value="' . htmlspecialchars ($filter['asset_no'], ENT_QUOTES) . '"></label></td>';
+	echo '<td class="tdleft"><label>Port name:<br><input id="filter-port" type=text size=6 name="filter-port" value="' . htmlspecialchars ($filter['ports'], ENT_QUOTES) . '"></label></td>';
 	echo '<td class="tdleft" valign="bottom"><label><input type=checkbox name="in_rack"' . ($in_rack ? ' checked' : '') . '>Nearest racks</label></td>';
 	echo '<td valign="bottom"><input type=submit value="show ports"></td>';
 	echo '</tr></table>';
 	finishPortlet();
 
+	addJS (<<<JSEND
+		$(document).ready( function() {
+			$("#filter-obj").autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=object",
+				minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				}
+			});
+			$("#filter-asset").autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=asset",
+				minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				}
+			});
+			$("#filter-port").autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=port",
+				minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				}
+			});
+		});
+JSEND
+	, TRUE);
+
 	// display results
 	startPortlet ('Compatible spare ports');
-	if (empty ($spare_ports))
+	if (! count ($spare_ports))
 		echo '(nothing found)';
 	else
 	{

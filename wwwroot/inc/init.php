@@ -57,7 +57,7 @@ if (!mb_internal_encoding ('UTF-8'))
 	throw new RackTablesError ('Failed setting multibyte string encoding to UTF-8', RackTablesError::INTERNAL);
 
 $rackCodeCache = loadScript ('RackCodeCache');
-if ($rackCodeCache == NULL or !strlen ($rackCodeCache))
+if ($rackCodeCache == NULL || $rackCodeCache == '')
 {
 	$rackCode = getRackCode (loadScript ('RackCode'));
 	saveScript ('RackCodeCache', base64_encode (serialize ($rackCode)));
@@ -116,7 +116,7 @@ $pageheaders = array
 );
 addCSS ('css/pi.css');
 
-if (!isset ($script_mode) or $script_mode !== TRUE)
+if (! isset ($script_mode) || $script_mode !== TRUE)
 {
 	// A successful call to authenticate() always generates autotags and somethimes
 	// even given/implicit tags. It also sets remote_username and remote_displayname.
@@ -151,7 +151,7 @@ if (FALSE !== $plugin_files = glob ("${racktables_plugins_dir}/*.php"))
 		 require_once $plugin_file;
 // display plugins output if it contains something but newlines
 $tmp = ob_get_clean();
-if ($tmp != '' and ! preg_match ("/^\n+$/D", $tmp))
+if ($tmp != '' && ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;
 unset ($tmp);
 

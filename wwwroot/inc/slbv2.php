@@ -403,7 +403,7 @@ function getVSIDsByGroup ($group_id)
 
 function concatConfig (&$config, $line)
 {
-	if (strlen ($config))
+	if ($config != '')
 		$config .= "\n";
 	$config .= $line;
 }
@@ -559,7 +559,7 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 			$added_to_triplets = array();
 			$wrong_triplets = array();
 
-			if (! array_sub ($gt['all'], $used_in_triplets))
+			if (! array_diff_key ($gt['all'], $used_in_triplets))
 			{
 				// line used in all triplets
 				concatConfig ($ret['properties'][$conf_type], $line);
@@ -568,7 +568,7 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 
 			foreach ($gt['ports'] as $port_key => $port_triplets)
 			{
-				$diff = array_sub ($port_triplets, $used_in_triplets);
+				$diff = array_diff_key ($port_triplets, $used_in_triplets);
 				if (count ($diff) < count ($port_triplets) / 2)
 				{
 					// line used in most triplets of this port
@@ -579,8 +579,8 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 			}
 
 			foreach ($gt['vips'] as $vip_key => $vip_triplets)
-				if (! array_sub ($vip_triplets, $used_in_triplets))
-					if (count ($vip_triplets) == count (array_sub ($vip_triplets, $added_to_triplets)))
+				if (! array_diff_key ($vip_triplets, $used_in_triplets))
+					if (count ($vip_triplets) == count (array_diff_key ($vip_triplets, $added_to_triplets)))
 					{
 						// if none of the $vip_triplets are in $added_to_triplets,
 						// line used in all triplets of this vip
@@ -604,8 +604,8 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 					$port_key = $triplet->vs['proto'] . '-' . implode ('', unpack ('N', $triplet->vs['vip_bin']));
 				}
 				// if all the triplets for a given port contain line, add it to the ports' config
-				if (! array_sub ($gt['port_links'][$tr_key][$port_key], $used_in_triplets))
-					if (count ($gt['port_links'][$tr_key][$port_key]) == count (array_sub ($gt['port_links'][$tr_key][$port_key], $added_to_triplets)))
+				if (! array_diff_key ($gt['port_links'][$tr_key][$port_key], $used_in_triplets))
+					if (count ($gt['port_links'][$tr_key][$port_key]) == count (array_diff_key ($gt['port_links'][$tr_key][$port_key], $added_to_triplets)))
 					{
 						$added_to_triplets += $gt['port_links'][$tr_key][$port_key];
 						concatConfig ($ret['triplets'][$tr_key]['ports'][$port_key][$conf_type], $line);
@@ -613,8 +613,8 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 
 				// if all the triplets for a given vip contain line, add it to the vips' config
 				if ($vip_key != '')
-					if (! array_sub ($gt['vip_links'][$tr_key][$vip_key], $used_in_triplets))
-						if (count ($gt['vip_links'][$tr_key][$vip_key]) == count (array_sub ($gt['vip_links'][$tr_key][$vip_key], $added_to_triplets)))
+					if (! array_diff_key ($gt['vip_links'][$tr_key][$vip_key], $used_in_triplets))
+						if (count ($gt['vip_links'][$tr_key][$vip_key]) == count (array_diff_key ($gt['vip_links'][$tr_key][$vip_key], $added_to_triplets)))
 						{
 							$added_to_triplets += $gt['vip_links'][$tr_key][$vip_key];
 							concatConfig ($ret['triplets'][$tr_key]['vips'][$vip_key][$conf_type], $line);
@@ -622,7 +622,7 @@ function buildVSMigratePlan ($new_vs_id, $vs_id_list)
 			}
 
 			// check for failed-to-insert lines
-			foreach (array_sub ($used_in_triplets, $added_to_triplets) as $old_tr_key => $unused_triplet)
+			foreach (array_diff_key ($used_in_triplets, $added_to_triplets) as $old_tr_key => $unused_triplet)
 				$ret['messages'][$old_tr_key][] = "Failed to add $conf_type line '$line'";
 			foreach ($wrong_triplets as $old_tr_key => $triplet)
 				$ret['messages'][$old_tr_key][] = "Added $conf_type line '$line'";
@@ -657,7 +657,7 @@ function addSLBPortLink ($link_row)
 	// lock on port
 	$result = usePreparedSelectBlade
 	(
-		"SELECT * FROM VSPorts WHERE proto = ? AND vport = ? FOR UPDATE",
+		"SELECT vs_id, proto, vport FROM VSPorts WHERE proto = ? AND vport = ? FOR UPDATE",
 		array ($link_row['proto'], $link_row['vport'])
 	);
 	unset ($result);
@@ -670,7 +670,7 @@ function addSLBPortLink ($link_row)
 			"SELECT COUNT(*) FROM VSEnabledPorts WHERE object_id = ? AND proto = ? AND vport = ?",
 			array ($link_row['object_id'], $link_row['proto'], $link_row['vport'])
 		);
-		if (0 < $result->fetch (PDO::FETCH_COLUMN, 0))
+		if (0 < $result->fetchColumn())
 		{
 			if ($do_transaction)
 				$dbxlink->rollBack();
@@ -712,7 +712,7 @@ function addSLBIPLink ($link_row)
 	// lock on vip
 	$result = usePreparedSelectBlade
 	(
-		"SELECT * FROM VSIPs WHERE vip = ? FOR UPDATE",
+		"SELECT vs_id, vip FROM VSIPs WHERE vip = ? FOR UPDATE",
 		array ($link_row['vip'])
 	);
 	unset ($result);

@@ -742,7 +742,7 @@ function addPortForwarding ()
 	}
 	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
-	if (!strlen ($remoteport))
+	if ($remoteport == '')
 		$remoteport = $_REQUEST['localport'];
 
 	try
@@ -904,7 +904,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
-				if (!strlen ($words[0])) // empty L2 address is OK
+				if ($words[0] == '') // empty L2 address is OK
 					continue;
 				$ports[] = array
 				(
@@ -923,15 +923,23 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 	foreach ($ports as $port)
 	{
 		$port_ids = getPortIDs ($object_id, $port['name']);
-		if (!count ($port_ids))
+		try
 		{
-			commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
-			$added_count++;
+			if (!count ($port_ids))
+			{
+				commitAddPort ($object_id, $port['name'], $port_type, $port['label'], $port['l2address']);
+				$added_count++;
+			}
+			elseif (count ($port_ids) == 1) // update only single-socket ports
+			{
+				$rsvc = getPortReservationComment (array_first ($port_ids));
+				commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address'], $rsvc);
+				$updated_count++;
+			}
 		}
-		elseif (count ($port_ids) == 1) // update only single-socket ports
+		catch (InvalidArgException $iae)
 		{
-			commitUpdatePort ($object_id, $port_ids[0], $port['name'], $port_type, $port['label'], $port['l2address']);
-			$updated_count++;
+			showError ($iae->getMessage());
 		}
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $updated_count, $error_count));
@@ -996,13 +1004,13 @@ function addIPAllocation ()
 	if(!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($alloc_type != 'shared') ) )
 		showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
 
-	if  (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
+	if (getConfigVar ('IPV4_JAYWALK') != 'yes' && NULL === getIPAddressNetworkId ($ip_bin))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
 		return;
 	}
 
-	if($address['reserved'] && strlen ($address['name']))
+	if($address['reserved'] && $address['name'] != '')
 	{
 		showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
 		//TODO ask to take reserved IP or not !
@@ -1143,7 +1151,7 @@ function updateUser ()
 	$new_password = assertStringArg ('password', TRUE);
 	$userinfo = spotEntity ('user', $user_id);
 	// Set new password only if provided.
-	$new_password = mb_strlen ($new_password) ? sha1 ($new_password) : $userinfo['user_password_hash'];
+	$new_password = $new_password != '' ? sha1 ($new_password) : $userinfo['user_password_hash'];
 	commitUpdateUserAccount ($user_id, $username, $_REQUEST['realname'], $new_password);
 	// if user account renaming is being performed, change key value in UserConfig table
 	if ($userinfo['user_name'] !== $username)
@@ -1229,7 +1237,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 			usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom));
 			if ($newstate != 'F')
 				usePreparedInsertBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom, 'state' => $newstate));
-			if ($newstate == 'T' and $object_id != 0)
+			if ($newstate == 'T' && $object_id != 0)
 			{
 				// At this point we already have a record in RackSpace.
 				usePreparedUpdateBlade
@@ -1261,6 +1269,7 @@ function updateObjectAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63));
 	global $remote_username;
+	global $op;
 	if (!isset ($_REQUEST['got_atoms']))
 	{
 		unset($_GET['page']);
@@ -1287,7 +1296,7 @@ function updateObjectAllocation ()
 		}
 		else
 			$rackData = $workingRacksData[$cand_id];
-		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		$is_ro = ! rackModificationPermitted ($rackData, $op, FALSE);
 		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
 		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
 		{
@@ -1312,7 +1321,7 @@ function updateObjectAllocation ()
 	$oldMolecule = getMoleculeForObject ($object_id);
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
-		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation', FALSE);
+		$is_ro = ! rackModificationPermitted ($rackData, $op, FALSE);
 		if ($is_ro || !processGridForm ($rackData, 'F', 'T', $object_id))
 			continue;
 		$changecnt++;
@@ -1384,21 +1393,19 @@ function updateObject ()
 // Used when updating an object, location or rack
 function updateObjectAttributes ($object_id)
 {
-	global $dbxlink;
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
 	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		genericAssertion ("${i}_attr_id", 'uint');
-		$attr_id = $_REQUEST["${i}_attr_id"];
+		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
 		if (! array_key_exists ($attr_id, $oldvalues))
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
-		$value = $_REQUEST["${i}_value"];
+		$value = genericAssertion ("${i}_value", 'string0');
 
 		// If the object is a rack, skip certain attributes as they are handled elsewhere
 		// (height, sort_order)
-		if ($type_id == 1560 and ($attr_id == 27 or $attr_id == 29))
+		if ($type_id == 1560 && ($attr_id == 27 || $attr_id == 29))
 			continue;
 
 		// Delete attribute and move on, when the field is empty or if the field
@@ -1415,9 +1422,7 @@ function updateObjectAttributes ($object_id)
 		// The value could be uint/float, but we don't know ATM. Let SQL
 		// server check this and complain.
 		if ('date' == $oldvalues[$attr_id]['type'])
-			$value = assertDateArg ("${i}_value");
-		else
-			assertStringArg ("${i}_value");
+			$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
 
 		switch ($oldvalues[$attr_id]['type'])
 		{
@@ -1444,42 +1449,32 @@ function updateObjectAttributes ($object_id)
 function addMultipleObjects()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
-	$max = getConfigVar ('MASSCOUNT');
+	$max = genericAssertion ('num_records', 'uint');
 	for ($i = 0; $i < $max; $i++)
 	{
-		if (!isset ($_REQUEST["${i}_object_type_id"]))
-		{
-			showError ('Submitted form is invalid at line ' . ($i + 1));
-			return;
-		}
-
-		assertUIntArg ("${i}_object_type_id", TRUE);
+		$tid = genericAssertion ("${i}_object_type_id", 'uint0');
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
 		assertStringArg ("${i}_object_asset_no", TRUE);
 		$name = $_REQUEST["${i}_object_name"];
 
-		// It's better to skip silently, than to print a notice.
-		if ($_REQUEST["${i}_object_type_id"] == 0)
-			continue;
+		if ($tid == 0)
+			continue; // Just skip on intact SELECT.
 		try
 		{
 			$object_id = commitAddObject
 			(
 				$name,
 				$_REQUEST["${i}_object_label"],
-				$_REQUEST["${i}_object_type_id"],
+				$tid,
 				$_REQUEST["${i}_object_asset_no"],
 				$taglist
 			);
-			$info = spotEntity ('object', $object_id);
-			amplifyCell ($info);
-			showSuccess ("added object " . formatPortLink ($info['id'], $info['dname'], NULL, NULL));
+			showSuccess ('added object ' . mkCellA (spotEntity ('object', $object_id)));
 		}
 		catch (RTDatabaseError $e)
 		{
 			showError ("Error creating object '$name': " . $e->getMessage());
-			continue;
 		}
 	}
 }
@@ -1489,7 +1484,7 @@ function addLotOfObjects()
 	$taglist = genericAssertion ('taglist', 'array0');
 	assertStringArg ('namelist', TRUE);
 	$global_type_id = genericAssertion ('global_type_id', 'uint0');
-	if ($global_type_id == 0 or !strlen ($_REQUEST['namelist']))
+	if ($global_type_id == 0 || $_REQUEST['namelist'] == '')
 	{
 		showError ('Incomplete form has been ignored. Cheers.');
 		return;
@@ -1606,6 +1601,8 @@ function resetMyPreference ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
+// FIXME: Move the default values to dictionary.php and feed from there into
+// this function and the installer to avoid duplication.
 function resetUIConfig()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 57));
@@ -1707,7 +1704,7 @@ function addRealServer ()
 	addRStoRSPool
 	(
 		getBypassValue(),
-		genericAssertion ('rsip', 'inet4'),
+		genericAssertion ('rsip', 'inet'),
 		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
 		genericAssertion ('rsconfig', 'string0'),
@@ -1725,7 +1722,7 @@ function addRealServers ()
 	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ("\n", dos2unix (genericAssertion ('rawtext', 'string'))) as $line)
 	{
-		if (!strlen ($line))
+		if ($line == '')
 			continue;
 		$match = array ();
 		switch ($format)
@@ -1770,7 +1767,7 @@ function addVService ()
 		'IPv4VS',
 		array
 		(
-			'vip' => genericAssertion ('vip', 'inet4'),
+			'vip' => genericAssertion ('vip', 'inet'),
 			'vport' => $proto == 'MARK' ? NULL : genericAssertion ('vport', 'uint'),
 			'proto' => $proto,
 			'name' => nullIfEmptyStr ($_REQUEST['name']),
@@ -1844,7 +1841,7 @@ function updateRealServer ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	commitUpdateRS (
 		genericAssertion ('rs_id', 'uint'),
-		genericAssertion ('rsip', 'inet4'),
+		genericAssertion ('rsip', 'inet'),
 		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
 		genericAssertion ('rsconfig', 'string0'),
@@ -1863,7 +1860,7 @@ function updateVService ()
 	assertStringArg ('name', TRUE);
 	commitUpdateVS (
 		$vs_id,
-		genericAssertion ('vip', 'inet4'),
+		genericAssertion ('vip', 'inet'),
 		$_REQUEST['vport'],
 		$proto,
 		$_REQUEST['name'],
@@ -2408,11 +2405,11 @@ function deleteLocation ()
 function addRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 5));
-	assertUIntArg ('location_id', TRUE);
+	$location_id = genericAssertion ('location_id', 'uint0');
 	assertStringArg ('name');
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
-	if ($_REQUEST['location_id'])
-		commitLinkEntities ('location', $_REQUEST['location_id'], 'row', $row_id);
+	if ($location_id)
+		commitLinkEntities ('location', $location_id, 'row', $row_id);
 	showSuccess ('added row ' . mkA ($_REQUEST['name'], 'row', $row_id));
 }
 
@@ -2517,9 +2514,9 @@ function addRack ()
 function updateRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	assertUIntArg ('row_id');
+	$row_id = genericAssertion ('row_id', 'uint');
 	assertStringArg ('name');
-	assertUIntArg ('height');
+	$height = genericAssertion ('height', 'uint');
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
 	$taglist = genericAssertion ('taglist', 'array0');
@@ -2528,9 +2525,9 @@ function updateRack ()
 	commitUpdateRack
 	(
 		$rack_id,
-		$_REQUEST['row_id'],
+		$row_id,
 		$_REQUEST['name'],
-		$_REQUEST['height'],
+		$height,
 		isCheckSet ('has_problems', 'yesno'),
 		$_REQUEST['asset_no'],
 		$_REQUEST['comment']
@@ -2905,7 +2902,7 @@ function save8021QPorts ()
 	global $sic;
 	$object_id = getBypassValue();
 	$form_mode = genericAssertion ('form_mode', 'string');
-	if ($form_mode != 'save' and $form_mode != 'duplicate')
+	if ($form_mode != 'save' && $form_mode != 'duplicate')
 		throw new InvalidRequestArgException ('form_mode', $form_mode);
 	$extra = array();
 
@@ -3157,13 +3154,13 @@ function updVSTRule()
 			$rule_no++;
 			if
 			(
-				! isInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field))
-				or ! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field))
-				or NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field)
-				or ! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options)
-				or NULL ===  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field)
-				or ! preg_match ('/^[ 0-9\-,]*$/',  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field))
-				or NULL ===  updVSTRule_get_named_param ('description', $rule, $last_field)
+				! isInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field)) ||
+				! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field)) ||
+				NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field) ||
+				! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options) ||
+				NULL ===  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field) ||
+				! preg_match ('/^[ 0-9\-,]*$/',  updVSTRule_get_named_param ('wrt_vlans', $rule, $last_field)) ||
+				NULL ===  updVSTRule_get_named_param ('description', $rule, $last_field)
 			)
 				throw new InvalidRequestArgException ($last_field, $rule[$last_field], "rule #$rule_no");
 		}
@@ -3172,7 +3169,7 @@ function updVSTRule()
 	catch (Exception $e)
 	{
 		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
-		if ($e instanceof InvalidRequestArgException or $e instanceof RTDatabaseError)
+		if ($e instanceof InvalidRequestArgException || $e instanceof RTDatabaseError)
 		{
 			startSession();
 			$_SESSION['vst_edited'] = $data;
@@ -3211,9 +3208,9 @@ function importDPData()
 			$portb = getPortInfo ($params['b_id']);
 			if
 			(
-				$porta['linked'] or
-				$portb['linked'] or
-				($porta['object_id'] != $object_id and $portb['object_id'] != $object_id)
+				$porta['linked'] ||
+				$portb['linked'] ||
+				($porta['object_id'] != $object_id && $portb['object_id'] != $object_id)
 			)
 			{
 				$nignored++;
@@ -3259,7 +3256,6 @@ function importDPData()
 
 function addObjectlog ()
 {
-	assertStringArg ('logentry');
 	global $remote_username, $sic;
 	if (isset ($sic['rack_id']))
 		$object_id = $sic['rack_id'];
@@ -3270,7 +3266,11 @@ function addObjectlog ()
 	else
 		$object_id = $sic['object_id'];
 
-	usePreparedExecuteBlade ('INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?', array ($object_id, $remote_username, $sic['logentry']));
+	usePreparedExecuteBlade
+	(
+		'INSERT INTO ObjectLog SET object_id=?, user=?, date=NOW(), content=?',
+		array ($object_id, $remote_username, genericAssertion ('logentry', 'string'))
+	);
 	showSuccess ('Log entry added');
 }
 
@@ -3289,27 +3289,55 @@ function saveQuickLinks()
 
 $ucsproductmap = array
 (
-	'N20-B6620-1' => 1736, # B200 M1
-	'N20-B6625-1' => 1737, # B200 M2
-	'N20-B6620-2' => 1741, # B250 M1
-	'N20-B6625-2' => 1742, # B250 M2
-	'B230-BASE-M2' => 1740, # B230 M2
-	'N20-B6730-1' => 1739, # B230 M1
-	'B440-BASE-M2' => 1743, # B440 M2
-	'UCSB-B200-M3' => 1738, # B200 M3
-	'N10-S6100' => 1755, # 6120 FI
+	// UCS Fabric Interconnects/switches
 	'UCS-FI-6248UP' => 1757, # 6248 FI
 	'UCS-FI-6296UP' => 1758, # 6296 FI
+	'N10-S6100' => 1755, # 6120 FI
+	'N10-S6200' => 1756, # 6140 FI
+	'UCS-FI-M-6324' => 2576, # UCS-Mini 6324 FI
+	'UCS-FI-6332-U' => 2578, # 6332 FI
+	'UCS-FI-6332-16UP-U' => 2579, # 6332-16 FI
+	// UCS Blade Chassis
 	'N20-C6508' => 1735, # 5108 chassis
 	'UCSB-5108-AC2' => 2220, # 5108-AC2 chassis
 	'UCSB-5108-DC2' => 2221, # 5108-DC2 chassis
 	'UCSB-5108-HVDC' => 2222, # 5108-HVDC chassis
-	'UCSB-B420-M3' => 1744,   # B420 M3
-	'UCSB-B22-M3'  => 1745,   # B22 M3
-	'UCSB-B260-M4' => 2223,   # B260 M4
-	'UCSB-B460-M4' => 2224,   # B460 M4
-	'UCSB-B200-M4' => 2225,   # B200 M4
-	'UCSC-C240-M3S' => 1754,  # C240 M3 Rackmount Server
+	// UCS 'B-series' Blade Servers
+	'N20-B6620-1'  => 1736,  # Cisco UCS B200 M1 2 Socket Blade Server
+	'N20-B6625-1'  => 1737,  # Cisco UCS B200 M2 2 Socket Blade Server
+	'UCSB-B200-M3' => 1738,  # Cisco UCS B200 M3 2 Socket Blade Server
+	'UCSB-B200-M3' => 1738,  # Cisco UCS B200 M3 2 Socket Blade Server
+	'N20-B6730-1'  => 1739,  # Cisco UCS B440-M2 4 Socket, Extended Memory Blade Server
+	'B230-BASE-M2' => 1740,  # Cisco UCS B420 M3 4 Socket Blade Server
+	'N20-B6620-2'  => 1741,  # Cisco UCS B420 M3 4 Socket Blade Server
+	'N20-B6625-2'  => 1742,  # Cisco UCS B22 M3 2 Socket Half Width Blade Server
+	'B440-BASE-M2' => 1743,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
+	'UCSB-B420-M3' => 1744,  # Cisco UCS B22 M3 2 Socket Half Width Blade Server
+	'UCSB-B420-M3' => 1744,  # Cisco UCS C22 M3 High-Density Rack-Mount Server
+	'UCSB-B22-M3'  => 1745,  # Cisco UCS B250 M1 2 Socket, Extended Memory Blade Server
+	'UCSB-B22-M3'  => 1745,  # Cisco UCS B250 M2 2 Socket, Extended Memory Blade Server
+	'UCSB-B200-M4' => 2225,  # Cisco UCS B230-M1 2 Socket Blade Server
+	'UCSB-B200-M4' => 2225,  # Cisco UCS B230-M2 2 Socket Blade Server
+	'UCSB-B420-M4' => 2558,  # Cisco UCS C220 M3 High-Density Rack-Mount Server
+	'N20-B6740-2'  => 2559,  # Cisco UCS C24 M3 High-Density Rack-Mount Server
+	// UCS 'C-Series' Rackmount Servers
+	'UCSC-C22-M3S'   => 1751,  # Cisco UCS B420 M4 4 Socket Blade Server
+	'UCSC-C220-M3S'  => 1752,  # Cisco UCS B440 M1 4 Socket, Extended Memory Blade Server
+	'UCSC-C24-M3S'   => 1753,  # Cisco UCS C220 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M3S'  => 1754,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
+	'UCSC-C22-M3L'   => 2562,  # Cisco UCS C260 M2 High-Density Rack-Mount Server
+	'UCSC-C220-M3L'  => 2563,  # Cisco UCS C200 M2 High-Density Rack-Mount Server
+	'UCSC-C24-M3L'   => 2564,  # Cisco UCS C24 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M3S2' => 2565,  # Cisco UCS C220 M4 High-Density Rack-Mount Server
+	'UCSC-C220-M4L'  => 2566,  # Cisco UCS C210 M2 General-Purpose Rack-Mount Server
+	'UCSC-C220-M4S'  => 2567,  # Cisco UCS C22 M3 High-Density Rack-Mount Server
+	'UCSC-C240-M4SX' => 2568,  # Cisco UCS C220 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4S2' => 2569,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4L'  => 2570,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M4S'  => 2571,  # Cisco UCS C240 M4 High-Density Rack-Mount Server
+	'UCSC-C420-M3'   => 2573,  # Cisco UCS C420 M3 High-Density Rack-Mount Server
+	'UCSC-C460-M4'   => 2575,  # Cisco UCS C460 M4 High-Density Rack-Mount Server
+	'UCSC-C240-M3L'  => 2579,  # Cisco UCS C240 M3 High-Density Rack-Mount Server
 );
 
 function autoPopulateUCS()
@@ -3421,7 +3449,7 @@ function cleanupUCS()
 		$o = spotEntity ('object', $item_id);
 		$attrs = getAttrValues ($item_id);
 		# use HW type to decide if the object was produced by autoPopulateUCS()
-		if (! array_key_exists (2, $attrs) or ! in_array ($attrs[2]['key'], $ucsproductmap))
+		if (! array_key_exists (2, $attrs) || ! in_array ($attrs[2]['key'], $ucsproductmap))
 		{
 			showWarning ('Contained object ' . mkA ($o['dname'], 'object', $item_id) . ' is not an automatic UCS object');
 			$clear = FALSE;
@@ -3450,8 +3478,8 @@ function getOpspec()
 	$ret = $opspec_list[$pageno . '-' . $tabno . '-' . $op];
 	if
 	(
-		!array_key_exists ('table', $ret)
-		or !array_key_exists ('action', $ret)
+		! array_key_exists ('table', $ret) ||
+		! array_key_exists ('action', $ret)
 		// add further checks here
 	)
 		throw new RackTablesError ('malformed array structure in opspec_list', RackTablesError::INTERNAL);
@@ -3586,8 +3614,8 @@ function buildOpspecColumns ($opspec, $listname)
 			}
 			elseif // FIXME: remove the old declaration style at a later point
 			(
-				($argspec['assertion'] == 'uint0' and $arg_value == 0)
-				or ($argspec['assertion'] == 'string0' and $arg_value == '')
+				($argspec['assertion'] == 'uint0' && $arg_value == 0) ||
+				($argspec['assertion'] == 'string0' && $arg_value == '')
 			)
 				switch (TRUE)
 				{

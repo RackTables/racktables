@@ -62,7 +62,7 @@ function trigger_liveports ()
 	foreach (array ('getportstatus' => 'get_link_status', 'getmaclist' => 'get_mac_list') as $command => $opname)
 		if
 		(
-			validBreedFunction ($breed, $command) and
+			validBreedFunction ($breed, $command) &&
 			permitted (NULL, 'liveports', $opname)
 		)
 			return 'std';
@@ -161,11 +161,7 @@ function trigger_rackspace ()
 		return '';
 
 	// Show tab if the object is already mounted
-	if ($object['rack_id'])
-		return 'std';
-
-	if (getEntitiesCount ('rack') > 0) return 'std';
-	return '';
+	return ($object['rack_id'] || getEntitiesCount ('rack') > 0) ? 'std' : '';
 }
 
 function trigger_ports ()
@@ -184,7 +180,7 @@ function trigger_object_8021qorder ()
 {
 	if (NULL !== getVLANSwitchInfo (getBypassValue()))
 		return 'std';
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
+	if (! count (getVLANDomainOptions()) || ! getEntitiesCount ('vst'))
 		return '';
 	if (considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'VLANSWITCH_LISTSRC'))
 		return 'attn';
@@ -193,9 +189,7 @@ function trigger_object_8021qorder ()
 
 function trigger_8021q_configured ()
 {
-	if (!count (getVLANDomainOptions()) or ! getEntitiesCount ('vst'))
-		return '';
-	return 'std';
+	return (count (getVLANDomainOptions()) && getEntitiesCount ('vst')) ? 'std' : '';
 }
 
 // implement similar logic for IPv4 networks
@@ -206,10 +200,7 @@ function trigger_ipv4net_vlanconfig ()
 	$netinfo = spotEntity ('ipv4net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
-		return 'attn';
-	else
-		return '';
+	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
 }
 
 // implement similar logic for IPv6 networks
@@ -220,10 +211,7 @@ function trigger_ipv6net_vlanconfig ()
 	$netinfo = spotEntity ('ipv6net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	elseif (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
-		return 'attn';
-	else
-		return '';
+	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
 }
 
 function trigger_vlan_ipv4net ()
@@ -266,7 +254,7 @@ function trigger_anyDP ($command, $constraint)
 {
 	if
 	(
-		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) and
+		validBreedFunction (detectDeviceBreed (getBypassValue()), $command) &&
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), $constraint)
 	)
 		return 'std';
@@ -304,7 +292,7 @@ function triggerCactiGraphs ()
 		return '';
 	if
 	(
-		count (getCactiGraphsForObject (getBypassValue())) or
+		count (getCactiGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'CACTI_LISTSRC')
 	)
 		return 'std';
@@ -318,7 +306,7 @@ function triggerMuninGraphs()
 		return '';
 	if
 	(
-		count (getMuninGraphsForObject (getBypassValue())) or
+		count (getMuninGraphsForObject (getBypassValue())) ||
 		considerConfiguredConstraint (spotEntity ('object', getBypassValue()), 'MUNIN_LISTSRC')
 	)
 		return 'std';

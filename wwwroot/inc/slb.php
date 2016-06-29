@@ -48,7 +48,7 @@ class SLBTriplet
 
 	static public function getTriplets ($cell)
 	{
-		if (isset ($cell['ip_bin']) and isset ($cell['vslist']))
+		if (isset ($cell['ip_bin']) && isset ($cell['vslist']))
 			// cell is IPAddress
 			return self::getTripletsByIP ($cell['ip_bin']);
 		$ret = array();
@@ -74,7 +74,8 @@ class SLBTriplet
 		}
 		$result = usePreparedSelectBlade
 		(
-			"SELECT * FROM IPv4LB WHERE `$db_field` = ? ORDER BY $order_fields",
+			'SELECT object_id, rspool_id, vs_id, prio, vsconfig, rsconfig FROM IPv4LB ' .
+			"WHERE `$db_field` = ? ORDER BY $order_fields",
 			array ($cell['id'])
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -301,7 +302,7 @@ class MacroParser
 				for ($i = 0; $i < strlen ($line); $i++)
 				{
 					$c = $line[$i];
-					if ($c == "'" and 0 == --$macro_deep)
+					if ($c == "'" && 0 == --$macro_deep)
 					{
 						if ($op === ':=')
 							$this->macros[$mname] = $this->expand ($mvalue);
@@ -395,7 +396,7 @@ class MacroParser
 					else
 					{
 						// trim last newline of expansion
-						if ($after_blank && strlen ($e_value) && $e_value[strlen ($e_value) - 1] == "\n")
+						if ($after_blank && $e_value != '' && $e_value[strlen ($e_value) - 1] == "\n")
 							$e_value = substr ($e_value, 0, -1);
 						// indent each line of $e_value
 						if ($indent != '')
@@ -565,7 +566,7 @@ function addRStoRSPool ($pool_id, $rsip_bin, $rsport = 0, $inservice = 'no', $rs
 		(
 			'rspool_id' => $pool_id,
 			'rsip' => $rsip_bin,
-			'rsport' => (!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			'rsport' => ($rsport == '' || $rsport === 0) ? NULL : $rsport,
 			'inservice' => $inservice == 'yes' ? 'yes' : 'no',
 			'rsconfig' => nullIfEmptyStr ($rsconfig),
 			'comment' => nullIfEmptyStr ($comment),
@@ -607,7 +608,7 @@ function commitUpdateRS ($rsid, $rsip_bin, $rsport = 0, $inservice = 'yes', $rsc
 		array
 		(
 			$rsip_bin,
-			(!strlen ($rsport) or $rsport === 0) ? NULL : $rsport,
+			($rsport == '' || $rsport === 0) ? NULL : $rsport,
 			$inservice,
 			nullIfEmptyStr ($rsconfig),
 			nullIfEmptyStr ($comment),
@@ -621,7 +622,7 @@ function commitUpdateVS ($vsid, $vip_bin, $vport = 0, $proto = '', $name = '', $
 {
 	if ($proto != 'MARK' && $vport <= 0)
 		throw new InvalidArgException ('vport', $vport);
-	if (!strlen ($proto))
+	if ($proto == '')
 		throw new InvalidArgException ('proto', $proto);
 	return usePreparedUpdateBlade
 	(
@@ -676,7 +677,7 @@ function getSLBDefaults ($do_cache_result = FALSE)
 
 	if (! $do_cache_result)
 		$ret = array();
-	elseif (! empty ($ret))
+	elseif (count ($ret))
 		return $ret;
 
 	$ret['vsconfig'] = loadScript ('DefaultVSConfig');

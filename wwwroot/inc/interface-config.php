@@ -10,7 +10,7 @@ function renderConfigMainpage ()
 	global $pageno, $page;
 	echo '<ul>';
 	foreach ($page as $cpageno => $cpage)
-		if (isset ($cpage['parent']) and $cpage['parent'] == $pageno  && permitted($cpageno))
+		if (isset ($cpage['parent']) && $cpage['parent'] == $pageno && permitted ($cpageno))
 			echo '<li>' . mkA (getTitle ($cpageno), $cpageno) . "</li>\n";
 	echo '</ul>';
 }
@@ -443,14 +443,13 @@ function renderPortOIFEditor()
 
 function renderAttributes ()
 {
-	global $nextorder, $attrtypes;
+	global $attrtypes;
 	startPortlet ('Optional attributes');
-	echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>";
+	echo '<table class="cooltable zebra" border=0 cellpadding=5 cellspacing=0 align=center>';
 	echo "<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>";
-	$order = 'odd';
 	foreach (getAttrMap() as $attr)
 	{
-		echo "<tr class=row_${order}>";
+		echo '<tr>';
 		echo "<td class=tdleft>${attr['name']}</td>";
 		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td>";
 		echo '<td class=tdleft>';
@@ -463,7 +462,6 @@ function renderAttributes ()
 				else
 					echo decodeObjectType ($app['objtype_id']) . '<br>';
 		echo '</td></tr>';
-		$order = $nextorder[$order];
 	}
 	echo "</table><br>\n";
 	finishPortlet();
@@ -827,12 +825,11 @@ function renderUIResetForm()
 	echo "</form>";
 }
 
-function renderTagRowForViewer ($taginfo, $level = 0)
+function serializeTagStats ($taginfo)
 {
-	$self = __FUNCTION__;
 	$statsdecoder = array
 	(
-		'total' => ' total records linked',
+		'total' => ' total record(s) linked',
 		'object' => ' object(s)',
 		'rack' => ' rack(s)',
 		'file' => ' file(s)',
@@ -842,7 +839,21 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 		'ipv4vs' => ' IPv4 virtual service(s)',
 		'ipv4rspool' => ' IPv4 real server pool(s)',
 		'vst' => ' VLAN switch template(s)',
+		'ipvs' => ' VS group(s)',
 	);
+	$stats = array ("tag ID = ${taginfo['id']}");
+	if ($taginfo['kidc'])
+		$stats[] = "${taginfo['kidc']} sub-tag(s)";
+	if ($taginfo['refcnt']['total'])
+		foreach ($taginfo['refcnt'] as $article => $count)
+			if (array_key_exists ($article, $statsdecoder))
+				$stats[] = $count . $statsdecoder[$article];
+	return implode (', ', $stats);
+}
+
+function renderTagRowForViewer ($taginfo, $level = 0)
+{
+	$self = __FUNCTION__;
 	$trclass = '';
 	if ($level == 0)
 		$trclass .= ' separator';
@@ -853,12 +864,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
-	$stats = array ("tag ID = ${taginfo['id']}");
-	if ($taginfo['refcnt']['total'])
-		foreach ($taginfo['refcnt'] as $article => $count)
-			if (array_key_exists ($article, $statsdecoder))
-				$stats[] = $count . $statsdecoder[$article];
-	echo '<span title="' . implode (', ', $stats) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
+	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
 	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
@@ -881,8 +887,8 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
-	if ($taginfo['refcnt']['total'] > 0 or $taginfo['kidc'])
-		printImageHREF ('nodestroy', $taginfo['refcnt']['total'] . ' references, ' . $taginfo['kidc'] . ' sub-tags');
+	if ($taginfo['refcnt']['total'] > 0 || $taginfo['kidc'])
+		printImageHREF ('nodestroy', serializeTagStats ($taginfo));
 	else
 		echo getOpLink (array ('op' => 'destroyTag', 'tag_id' => $taginfo['id']), '', 'destroy', 'Delete tag');
 	echo '</td><td>';
@@ -1048,21 +1054,15 @@ function renderMyQuickLinks ()
 
 function renderCactiConfig()
 {
+	$columns = array
+	(
+		array ('th_text' => 'base URL', 'row_key' => 'base_url'),
+		array ('th_text' => 'username', 'row_key' => 'username'),
+		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
+	);
 	$servers = getCactiServers();
 	startPortlet ('Cacti servers (' . count ($servers) . ')');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr>' .
-		'<th>base URL</th>' .
-		'<th>username</th>' .
-		'<th>graph(s)</th>' .
-		'</tr>';
-	foreach ($servers as $server)
-		echo '<tr align=left valign=top>' .
-			'<td>' . stringForTD ($server['base_url']) . '</td>' .
-			'<td>' . stringForTD ($server['username']) . '</td>' .
-			"<td class=tdright>${server['num_graphs']}</td>" .
-			'</tr>';
-	echo '</table>';
+	renderTableViewer ($columns, $servers);
 	finishPortlet();
 }
 
@@ -1114,16 +1114,14 @@ function renderCactiServersEditor()
 
 function renderMuninConfig()
 {
+	$columns = array
+	(
+		array ('th_text' => 'base URL', 'row_key' => 'base_url', 'td_maxlen' => 150),
+		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
+	);
 	$servers = getMuninServers();
 	startPortlet ('Munin servers (' . count ($servers) . ')');
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>base URL</th><th>graph(s)</th></tr>';
-	foreach ($servers as $server)
-	{
-		echo '<tr align=left valign=top><td>' . stringForTD ($server['base_url']) . '</td>';
-		echo "<td class=tdright>${server['num_graphs']}</td></tr>";
-	}
-	echo '</table>';
+	renderTableViewer ($columns, $servers);
 	finishPortlet();
 }
 
