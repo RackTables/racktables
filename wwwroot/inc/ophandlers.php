@@ -2236,7 +2236,7 @@ function updateTag ()
 	}
 	catch (InvalidArgException $iae)
 	{
-		throw $iae->newIRAE ('parent_id');
+		throw $iae->newIRAE();
 	}
 	showSuccess ('Tag updated successfully');
 }
