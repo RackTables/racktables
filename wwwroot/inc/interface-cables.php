@@ -30,26 +30,23 @@ function getPatchCableHeapCursorCode ($heap, $zoom_heap_id)
 
 function renderPatchCableHeapSummary()
 {
-	$summary = getPatchCableHeapSummary();
-	if (! count ($summary))
+	if (! count ($summary = getPatchCableHeapSummary()))
 		return;
 	startPortlet ('Heaps');
-	echo '<br><table class="cooltable zebra" align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>Amount</th><th>End 1</th><th>Cable type</th><th>End 2</th><th>Length</th><th>Description</th><th>&nbsp;</th></tr>';
+	$columns = array
+	(
+		array ('th_text' => 'Amount', 'row_key' => 'amount', 'td_class' => 'tdright'),
+		array ('th_text' => 'End 1', 'row_key' => 'end1_connector'),
+		array ('th_text' => 'Cable type', 'row_key' => 'pctype'),
+		array ('th_text' => 'End 2', 'row_key' => 'end2_connector'),
+		array ('th_text' => 'Length', 'row_key' => 'length', 'td_class' => 'tdright'),
+		array ('th_text' => 'Description', 'row_key' => 'description'),
+		array ('th_text' => '&nbsp;', 'row_key' => 'cursor_code', 'td_escape' => FALSE),
+	);
 	$zoom_heap_id = array_key_exists ('zoom_heap_id', $_REQUEST) ? genericAssertion ('zoom_heap_id', 'uint') : NULL;
-	foreach ($summary as $heap)
-	{
-		echo '<tr>';
-		echo "<td class=tdright>${heap['amount']}</td>";
-		echo "<td class=tdleft>${heap['end1_connector']}</td>";
-		echo "<td class=tdleft>${heap['pctype']}</td>";
-		echo "<td class=tdleft>${heap['end2_connector']}</td>";
-		echo "<td class=tdright>${heap['length']}</td>";
-		echo "<td class=tdleft>${heap['description']}</td>";
-		echo '<td>' . getPatchCableHeapCursorCode ($heap, $zoom_heap_id) . '</td>';
-		echo '</tr>';
-	}
-	echo '</table>';
+	foreach (array_keys ($summary) as $key)
+		$summary[$key]['cursor_code'] = getPatchCableHeapCursorCode ($summary[$key], $zoom_heap_id);
+	renderTableViewer ($columns, $summary);
 	finishPortlet();
 
 	if ($zoom_heap_id === NULL)
@@ -57,17 +54,13 @@ function renderPatchCableHeapSummary()
 	if (! count ($eventlog = getPatchCableHeapLogEntries ($zoom_heap_id)))
 		return;
 	startPortlet ('Event log');
-	echo '<br><table class="cooltable zebra" align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>Date</th><th>User</th><th>Message</th></tr>';
-	foreach ($eventlog as $event)
-	{
-		echo '<tr>';
-		echo "<td class=tdleft>${event['date']}</td>";
-		echo '<td class=tdleft>' . stringForTD ($event['user'], 255) . '</td>';
-		echo '<td class=tdleft>' . stringForTD ($event['message'], 255) . '</td>';
-		echo '</tr>';
-	}
-	echo '</table>';
+	$columns = array
+	(
+		array ('th_text' => 'Date', 'row_key' => 'date'),
+		array ('th_text' => 'User', 'row_key' => 'user', 'td_maxlen' => 255),
+		array ('th_text' => 'Message', 'row_key' => 'message', 'td_maxlen' => 255),
+	);
+	renderTableViewer ($columns, $eventlog);
 	finishPortlet();
 }
 
