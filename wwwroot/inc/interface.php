@@ -2980,7 +2980,7 @@ function renderIPv4NetworkAddresses ($range)
 	}
 
 	echo $rendered_pager;
-	echo "<table class='widetable zebra' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	markupIPAddrList ($range['addrlist']);
@@ -3066,7 +3066,7 @@ function renderIPv4NetworkAddresses ($range)
 function renderIPv6NetworkAddresses ($netinfo)
 {
 	global $pageno, $tabno, $aac_left;
-	echo "<table class='widetable zebra' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
 
 	$hl_ip = NULL;
