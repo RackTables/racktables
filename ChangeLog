@@ -14,6 +14,7 @@
 	update: increase HTML SELECT maximum width (#1611)
 	update: add support for standalone UCS servers (by Brian Pothier)
 	update: add autocomplete to port link dialog object name, asset tag and port name fields
+	update: add 1000Base-BX40 and 1000Base-BX80 port types (#1645)
 0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)
