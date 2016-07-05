@@ -1,7 +1,7 @@
 CodeMirror.defineMode('rackcode', function() {
   var allowkeywords = /^(allow)\b/i;
   var denykeywords = /^(deny)\b/i;
-  var operatorkeywords = /^(and|or|not|true|false)\b/i;
+  var operatorkeywords = /^(define|and|or|not|true|false)\b/i;
 
   return {
     token: function(stream, state) {
