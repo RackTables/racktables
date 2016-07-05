@@ -3,7 +3,8 @@
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
-  height: 300px;
+  height: 500px;
+  width: 100%;
 }
 .CodeMirror-scroll {
   /* Set scrolling behaviour here */
@@ -74,8 +75,8 @@
 .cm-s-default .cm-def {color: #00f;}
 .cm-s-default .cm-variable,
 .cm-s-default .cm-punctuation,
-.cm-s-default .cm-property,
-.cm-s-default .cm-operator {}
+.cm-s-default .cm-property {}
+.cm-s-default .cm-operator {color: blue;}
 .cm-s-default .cm-variable-2 {color: #05a;}
 .cm-s-default .cm-variable-3 {color: #085;}
 .cm-s-default .cm-comment {color: #a50;}
@@ -85,7 +86,7 @@
 .cm-s-default .cm-qualifier {color: #555;}
 .cm-s-default .cm-builtin {color: #30a;}
 .cm-s-default .cm-bracket {color: #997;}
-.cm-s-default .cm-tag {color: #170;}
+.cm-s-default .cm-tag {color: orange;}
 .cm-s-default .cm-attribute {color: #00c;}
 .cm-s-default .cm-header {color: blue;}
 .cm-s-default .cm-quote {color: #090;}
