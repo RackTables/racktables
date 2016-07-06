@@ -1,6 +1,6 @@
 <?php
 
-class DBMutex extends PHPUnit_Framework_TestCase
+class DBMutexTest extends PHPUnit_Framework_TestCase
 {
 	/**
 	 * @group small

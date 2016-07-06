@@ -1,6 +1,6 @@
 <?php
 
-class GetAttrType extends PHPUnit_Framework_TestCase
+class GetAttrTypeTest extends PHPUnit_Framework_TestCase
 {
 	private $attr;
 	public function setUp ()

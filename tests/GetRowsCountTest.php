@@ -1,6 +1,6 @@
 <?php
 
-class GetRowsCount extends PHPUnit_Framework_TestCase
+class GetRowsCountTest extends PHPUnit_Framework_TestCase
 {
 	protected $table_name;
 
