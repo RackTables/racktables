@@ -5608,6 +5608,8 @@ function setConfigVar ($varname, $varvalue)
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
 	$configCache[$varname]['varvalue'] = $varvalue;
+	$configCache[$varname]['defaultvalue'] = $varvalue;
+	alterConfigWithUserPreferences();
 }
 
 function setUserConfigVar ($varname, $varvalue)
@@ -5633,6 +5635,7 @@ function setUserConfigVar ($varname, $varvalue)
 		array ($varvalue, $varname, $remote_username)
 	);
 	$configCache[$varname]['varvalue'] = $varvalue;
+	$configCache[$varname]['is_altered'] = 'yes';
 }
 
 function resetUserConfigVar ($varname)
@@ -5646,7 +5649,11 @@ function resetUserConfigVar ($varname)
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	// Update cache only if the changes went into DB.
+	if (! array_key_exists ('is_altered', $var) || $var['is_altered'] != 'yes')
+		return;
 	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
+	$configCache[$varname]['varvalue'] = $configCache[$varname]['defaultvalue'];
+	unset ($configCache[$varname]['is_altered']);
 }
 
 // parses QUICK_LINK_PAGES config var and returns array with ('href'=>..., 'title'=>...) items

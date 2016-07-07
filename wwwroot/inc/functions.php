@@ -5210,7 +5210,8 @@ function loadConfigDefaults()
 	foreach ($ret as $varname => &$row)
 	{
 		$row['is_altered'] = 'no';
-		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
+		if ($row['vartype'] == 'uint')
+			$row['varvalue'] = 0 + $row['varvalue'];
 		$row['defaultvalue'] = $row['varvalue'];
 	}
 	return $ret;
