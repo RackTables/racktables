@@ -2890,6 +2890,8 @@ function formatRealmName ($realm)
 		'row' => 'Row',
 		'location' => 'Location',
 		'user' => 'User',
+		'file' => 'File',
+		'vst' => 'VLAN switch template',
 	);
 	return array_fetch ($realmstr, $realm, 'invalid');
 }
