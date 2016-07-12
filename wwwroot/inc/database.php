@@ -283,7 +283,7 @@ function getRowInfo ($row_id)
 		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
 		"LEFT OUTER JOIN Location ON Row.location_id = Location.id " .
 		"WHERE Row.id = ? " .
-		"GROUP BY Row.id";
+		"GROUP BY Row.id, Location.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
