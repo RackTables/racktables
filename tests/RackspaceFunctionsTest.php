@@ -70,8 +70,9 @@ class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
 	 * @group small
 	 * @dataProvider providerSampleRows
 	 */
-	public function testRSU ($racklist)
+	public function testSpecific ($racklist)
 	{
+		$this->assertEquals (0, getRowMountsCount ($this->row_id));
 		$created = $this->createSampleRacksAndObjects ($racklist);
 		$row_units = 0;
 		$row_data = array();
@@ -83,23 +84,11 @@ class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
 			$row_data[$rack_id] = $rack;
 			amplifyCell ($rack);
 			$this->assertEquals ($rack_units / self::UNITS_PER_RACK, getRSUForRack ($rack));
+			$this->assertEquals (count ($objects), getRackMountsCount ($rack_id));
 		}
 		$row_total_units = count ($created) * self::UNITS_PER_RACK;
 		$row_rsu = $row_total_units == 0 ? 0 : ($row_units / $row_total_units);
 		$this->assertEquals ($row_rsu, getRSUForRow ($row_data));
-		$this->deleteSampleRacksAndObjects ($created);
-	}
-
-	/**
-	 * @group small
-	 * @dataProvider providerSampleRows
-	 */
-	public function testMountsCount ($racklist)
-	{
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
-		$created = $this->createSampleRacksAndObjects ($racklist);
-		foreach ($created as $rack_id => $objects)
-			$this->assertEquals (count ($objects), getRackMountsCount ($rack_id));
 		$this->assertEquals (array_sum (array_map ('count', $created)), getRowMountsCount ($this->row_id));
 		$this->deleteSampleRacksAndObjects ($created);
 		$this->assertEquals (0, getRowMountsCount ($this->row_id));
