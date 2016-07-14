@@ -1948,6 +1948,18 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 			$query[] = "ALTER TABLE LDAPCache MODIFY COLUMN last_retry timestamp NULL DEFAULT NULL";
 			$query[] = "DELETE FROM LDAPCache";
 
+			$query[] = "ALTER TABLE VLANSwitch MODIFY COLUMN last_change timestamp NULL DEFAULT NULL";
+			$query[] = "UPDATE VLANSwitch set last_change = NULL WHERE last_change = '0000-00-00 00:00:00";
+
+			$query[] = "ALTER TABLE VLANSwitch MODIFY COLUMN last_push timestamp NULL DEFAULT NULL";
+			$query[] = "UPDATE VLANSwitch set last_push = NULL WHERE last_push = '0000-00-00 00:00:00";
+
+			$query[] = "ALTER TABLE VLANSwitch MODIFY COLUMN last_push_finished timestamp NULL DEFAULT NULL";
+			$query[] = "UPDATE VLANSwitch set last_push_finish = NULL WHERE last_push_finish = '0000-00-00 00:00:00";
+
+			$query[] = "ALTER TABLE VLANSwitch MODIFY COLUMN last_error_ts timestamp NULL DEFAULT NULL";
+			$query[] = "UPDATE VLANSwitch set last_error_ts = NULL WHERE last_error_ts = '0000-00-00 00:00:00";
+
 			$query[] = "INSERT INTO ObjectParentCompat (parent_objtype_id, child_objtype_id) VALUES (1787,4)";
 
 			$port_trigger_body = <<<ENDOFTRIGGER
