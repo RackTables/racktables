@@ -76,8 +76,8 @@ class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
 		$row = getRowInfo ($this->row_id);
 		$this->assertEquals ($this->row_id, $row['id']);
 		$this->assertEquals ($this->row_name, $row['name']);
-		$this->assertSame (NULL, $row['location_id']);
-		$this->assertSame (NULL, $row['location']);
+		$this->assertNull ($row['location_id']);
+		$this->assertNull ($row['location']);
 	}
 
 	/**
