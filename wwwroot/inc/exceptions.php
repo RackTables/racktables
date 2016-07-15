@@ -116,9 +116,7 @@ class RackTablesError extends Exception
 	}
 	protected static function formatString ($string)
 	{
-		if (isCLIMode())
-			return $string;
-		return stringForLabel ($string, 80);
+		return isCLIMode() ? $string : stringForLabel ($string, 80);
 	}
 	public function dispatch()
 	{
