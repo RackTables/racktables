@@ -1189,6 +1189,13 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array (array ('one' => 1, 'two' => 2), 'AND', 'one=? AND two=?', array (1, 2)),
 			array (array ('one' => NULL, 'two' => 2), 'AND', 'one IS NULL AND two=?', array (2)),
 			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', 'one=? OR two=? OR three=?', array (1, 2, 3)),
+			array
+			(
+				array ('a' => array ('a.1', 'a.2', 'a.3'), 'b' => array (0, 10, 20, 30)),
+				'OR',
+				'a IN(?, ?, ?) OR b IN(?, ?, ?, ?)',
+				array ('a.1', 'a.2', 'a.3', 0, 10, 20, 30)
+			),
 		);
 	}
 

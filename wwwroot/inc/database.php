@@ -1834,11 +1834,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 			'cable' => nullIfEmptyStr ($cable),
 		)
 	);
-	usePreparedExecuteBlade
-	(
-		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
-		array ($porta, $portb)
-	);
+	usePreparedUpdateBlade ('Port', array ('reservation_comment' => NULL), array ('id' => array ($porta, $portb)));
 
 	// log new links
 	$result = usePreparedSelectBlade
@@ -3931,6 +3927,12 @@ function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 	foreach ($where_columns as $colname => $colvalue)
 		if ($colvalue === NULL)
 			$tmp[] = "${colname} IS NULL";
+		elseif (is_array ($colvalue))
+		{
+			// Suppress any string keys to keep array_merge() from overwriting.
+			$params = array_merge ($params, array_values ($colvalue));
+			$tmp[] = sprintf ('%s IN(%s)', $colname, questionMarks (count ($colvalue)));
+		}
 		else
 		{
 			$tmp[] = "${colname}=?";
