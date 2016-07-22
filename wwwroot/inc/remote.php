@@ -431,6 +431,8 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	if (count ($endpoints) > 1)
 		throw new RTGatewayError ('cannot pick management address');
 
+	$hide_warnings = FALSE;
+
 	// telnet prompt and mode specification
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
@@ -448,7 +450,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$prompt = '^(Login|Username|Password|Please Enter Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "skip-page-display\n" . $commands;
 			# using ssh and sshnokey we'll always receive 'Connection to $ip closed by remote host.' upon exit
-			# let's hide the warnings 
+			# let's hide the warnings
 			$tolerate_remote_errors = TRUE;
 			$hide_warnings = TRUE;
 			break;
