@@ -1071,7 +1071,7 @@ CREATE TABLE `IPv6Log` (
 			{
 				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`) VALUES (?,?)');
 				$prepared->execute (array($row['name'], 1561));
-				$row_id = $dbxlink->lastInsertId();
+				$row_id = $dbxlink->lastInsertID();
 				// Turn all racks in this row into objects
 				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']} ORDER BY name");
 				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1083,7 +1083,7 @@ CREATE TABLE `IPv6Log` (
 					//   update rackspace, tags and files to reflect new rack_id, move history
 					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
-					$rack_id = $dbxlink->lastInsertId();
+					$rack_id = $dbxlink->lastInsertID();
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,27,${rack['height']})";
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,29,${sort_order})";
 					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',${row_id},'rack',${rack_id})";
