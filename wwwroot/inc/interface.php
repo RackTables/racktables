@@ -6415,7 +6415,7 @@ function renderTableViewer ($columns, $rows)
 	echo "<table cellspacing=0 cellpadding=5 align=center class='widetable ${tclass}'>";
 	if ($header_row)
 	{
-		echo '<tr>';
+		echo '<thead><tr>';
 		foreach ($columns as $col)
 		if (! array_key_exists ('th_text', $col))
 			echo '<th>&nbsp;</th>';
@@ -6426,8 +6426,9 @@ function renderTableViewer ($columns, $rows)
 				echo ' class=' . $col['th_class'];
 			echo '>' . $col['th_text'] . '</th>';
 		}
-		echo '</tr>';
+		echo '</tr></thead>';
 	}
+	echo '<tbody>';
 	foreach ($rows as $row)
 	{
 		echo '<tr align=left valign=top>';
@@ -6447,6 +6448,7 @@ function renderTableViewer ($columns, $rows)
 			}
 		echo '</tr>';
 	}
+	echo '</tbody>';
 	echo '</table>';
 }
 
