@@ -4166,6 +4166,18 @@ function renderSNMPPortFinder ($object_id)
 		echo "<div class=msg_error>The PHP SNMP extension is not loaded.  Cannot continue.</div>";
 		return;
 	}
+
+	startPortlet ('SNMP Profile');
+	renderSNMPSetProfileForm ($object_id);
+	$profile = getObjectSNMPProfile($object_id);
+	printOpFormIntro ('querySNMPData', array ('ver' => $profile['ver']));
+	echo "<input type=hidden name=id value={$profile['id']}>";
+	echo "<input type=hidden name=host value={$profile['host']}>";
+	printSNMPProfileFormFields ($profile);
+	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
+	echo "</table></form>";
+	finishPortlet();
+
 	if ('' == $snmpcomm = getConfigVar ('DEFAULT_SNMP_COMMUNITY'))
 		$snmpcomm = 'public';
 

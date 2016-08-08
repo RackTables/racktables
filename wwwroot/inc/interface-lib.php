@@ -1207,4 +1207,253 @@ function showMySQLWarnings()
 	$rtdebug_mysql_warnings = array();
 }
 
+function renderSNMPSetProfileForm ($object_id)
+{
+	$object = spotEntity ('object', $object_id);
+	global $pageno, $tabno;
+
+	echo '<form method=post action='.makeHrefProcess (array ('page' => 'SNMPProfile', 'tab' => 'edit', 'op' => 'set')).'>';
+	echo "<input type=hidden name=object_id value=$object_id>";
+	echo "<input type=hidden name=returnpage value=$pageno>";
+	echo "<input type=hidden name=returntab value=$tabno>";
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><td>';
+
+	$profile = getObjectSNMPProfile ($object_id);
+
+	$profiles = array(0 => '-- NOT SET --');
+	foreach (getSNMPProfile () as $value)
+		$profiles[$value['id']] = $value['name'];
+
+	echo "Name: ";
+	printSelect ($profiles, array('name' => 'profile_id'), $profile['id']);
+
+	echo '</td><td>';
+
+	$endpoints = array ();
+	foreach (findAllEndpoints ($object['id'], $object['name']) as $endpoint)
+		$endpoints[$endpoint] = $endpoint;
+
+	foreach( getObjectIPv4Allocations ($object['id']) as $ip => $value)
+	{
+		$ip = ip_format ($ip);
+		if (! in_array ($ip, $endpoints))
+		$endpoints[$ip] = $ip;
+	}
+
+	foreach( getObjectIPv6Allocations ($object['id']) as $value)
+	{
+		$ip = ip_format (ip_parse ($value['addrinfo']['ip']));
+		if (! in_array ($ip, $endpoints))
+		$endpoints[$ip] = $ip;
+	}
+
+	$host = $profile['host'];
+	$endpoints = array_merge (array ('FQDN' => 'FQDN'), $endpoints);
+	if (! in_array ($host, $endpoints))
+		$endpoints = array_merge (array ($host => $host), $endpoints);
+
+	echo " @Host ";
+	printSelect ($endpoints, array ('name' => 'host'), $host);
+
+	echo '</td><td colspan=2>'.getImageHREF ('save', 'Save changes', TRUE).'</td></tr>';
+	echo "</table></form>";
+}
+
+function addSNMPProfileFormJS ($disable = FALSE)
+{
+	addJS(<<<ENDJS
+		function showsnmpversion(element) {
+			var pid = '#profile-id-'+$(element).attr('pid');
+			if(element.value != "3") {
+				if('$disable' == '1')
+				{
+					$(pid+" #sec_name").addClass("invisible");
+					$(pid+" #community").removeClass("invisible");
+					$(pid+" .v1, "+pid+" .v2").removeAttr('disabled');
+					$(pid+" .v3").attr('disabled', 'disabled');
+				}
+				else
+				{
+					$(pid+" .v1, "+pid+" .v2").removeClass("invisible");
+					$(pid+" .v3").addClass("invisible");
+				}
+			} else {
+				if('$disable' == '1')
+				{
+					$(pid+" #sec_name").removeClass("invisible");
+					$(pid+" #community").addClass("invisible");
+					$(pid+" .v1, "+pid+" .v2").attr('disabled', 'disabled');
+					$(pid+" .v3").removeAttr('disabled');
+				}
+				else
+				{
+					$(pid+" .v1, "+pid+" .v2").addClass("invisible");
+					$(pid+" .v3").removeClass("invisible");
+				}
+				showsnmpv3seclevel( ($(pid+" #sec_level")[0]) );
+			}
+		};
+
+		function showsnmpv3seclevel(element) {
+			var pid = '#profile-id-'+$(element).attr('pid');
+			switch(element.value)
+			{
+				case "noAuthNoPriv":
+					if('$disable' == '1')
+						$(pid+" .auth, "+pid+" .priv").attr('disabled', 'disabled');
+					else
+						$(pid+" .auth, "+pid+" .priv").addClass("invisible");
+					break;
+				case "authNoPriv":
+					if('$disable' == '1')
+					{
+						$(pid+" .priv").attr('disabled', 'disabled');
+						$(pid+" .auth").removeAttr('disabled');
+					}
+					else
+					{
+						$(pid+" .priv").addClass("invisible");
+						$(pid+" .auth").removeClass("invisible");
+					}
+					break;
+				case "authPriv":
+					if('$disable' == '1')
+						$(pid+" .auth, "+pid+" .priv").removeAttr('disabled');
+					else
+						$(pid+" .auth, "+pid+" .priv").removeClass("invisible");
+					break;
+			}
+		};
+
+	$(document).ready(function() {
+			$('.snmpversion').each(
+				function(index, elem) {
+					showsnmpversion(elem);
+				}
+			);
+		});
+ENDJS
+	,TRUE);
+
+}
+
+function printSNMPProfileFormFields ($profile, $table = TRUE, $js = TRUE)
+{
+
+	if ($js)
+		addSNMPProfileFormJS ();
+
+	$newprofile = ($profile['id'] == 'new');
+
+	if (! $profile || $newprofile)
+		$profile = array (
+			'id' => ($newprofile ? 'new' : '0'),
+			'name' => '',
+			'ver' => 2,
+			'community' => getConfigVar ('DEFAULT_SNMP_COMMUNITY')
+		);
+
+	if (! $table)
+	{
+		echo "<tr id='profile-id-{$profile['id']}'>";
+                printOpFormIntro ('update');
+	}
+
+	echo "<input type=hidden name=id value={$profile['id']}>";
+
+        if ($table) echo '<table id=profile-id-'.$profile['id'].' cellspacing=0 cellpadding=5 align=center class=widetable>';
+
+	if (! $table)
+	{
+		if ($newprofile)
+			echo '<td>'.getImageHREF ('create','add profile', TRUE).'</td>';
+		else
+			if ($profile['refs'] == 0)
+				echo '<td>'.getOpLink (array ('op' => 'delete', 'id' => $profile['id']), '', 'destroy', 'Delete profile').'</td>';
+			else
+				echo '<td>'.getImageHREF ('nodestroy','profile used ('.$profile['refs'].')', FALSE).'</td>';
+
+		echo '<td  class=tdleft>'.($newprofile ? '' : $profile['id']).'</td>';
+		echo "<td class=tdleft><input name=name value='{$profile['name']}'></td>";
+	}
+
+	if ($table) echo '<tr><th class=tdright><label>Version:</label></th>';
+	echo '<td class=tdleft>';
+	echo getSelect (array ('1' => 'v1', '2' => 'v2c', '3' => 'v3'),
+			 array ('name' => 'ver', 'class' => 'snmpversion', 'pid' => $profile['id'], 'onchange' => 'showsnmpversion(this)'),
+			 $profile['ver'], FALSE);
+	echo '</td>';
+
+        if ($table) echo '</tr><tr>
+                <th class="tdright v1 v2"><label>Community:</label></th>
+                <th class="tdright v3 invisible"><label>Security Name:</label></th>';
+
+	echo '<td class=tdleft>
+		<input class="v1 v2" id=community type=text name=community value='.($profile['ver'] == 3 ? $profile['sec_name'] : $profile['community']).' >
+		<input class="v3 invisible" id=sec_name type=text name=sec_name value='.($profile['ver'] == 3 ? $profile['sec_name'] : $profile['community']).' >
+		</td>';
+
+	if ($table) echo '</tr><tr class="v3 invisible"><th></th></tr><tr class="v3 invisible">
+			<th class=tdright><label>Security Level:</label></th>';
+	echo '<td class=tdleft>';
+
+	if (! array_key_exists ('sec_level', $profile))
+		$profile['sec_level'] = NULL;
+
+	echo getSelect (array ('noAuthNoPriv' => 'no Auth and no Priv', 'authNoPriv'=> 'auth without Priv', 'authPriv' => 'auth with Priv'),
+			 array ('name' => 'sec_level', 'id' => 'sec_level', 'pid' => $profile['id'], 'class' => 'v3', 'onchange' => 'showsnmpv3seclevel(this);'),
+			 $profile['sec_level'], FALSE);
+
+	if (! array_key_exists ('auth_passphrase', $profile))
+		$profile['auth_passphrase'] = NULL;
+
+	if (! array_key_exists ('priv_passphrase', $profile))
+		$profile['priv_passphrase'] = NULL;
+
+	if (! isset ($profile['auth_protocol']))
+		$profile['auth_protocol'] = 'SHA';
+
+	if (! isset ($profile['priv_protocol']))
+		$profile['priv_protocol'] = 'AES';
+
+	echo '</td>';
+
+	if ($table) echo '</tr><tr class="v3 auth invisible"><th class=tdright><label>Auth Type:</label></th>';
+	echo '<td class=tdleft>';
+	if ($table) echo '<input name=auth_protocol type=radio value=MD5 '.($profile['auth_protocol'] == 'MD5' ? ' checked="checked"' : '').'/><label>MD5</label>
+                <input name=auth_protocol type=radio value=SHA '.($profile['auth_protocol'] == 'SHA' ? ' checked="checked"' : '').'/><label>SHA</label>';
+	else
+		printSelect (array ('MD5' => 'MD5', 'SHA' => 'SHA'), array ('name' => 'auth_protocol', 'class' => '"v3 auth"'), $profile['auth_protocol']);
+	echo '</td>';
+
+	if ($table) echo '</tr><tr class="v3 auth invisible"><th class=tdright><label>Auth Key:</label></th>';
+	echo  '<td class=tdleft><input type='.($table ? 'password' : 'text').' id=auth_passphrase name=auth_passphrase class="v3 auth" value="'.$profile['auth_passphrase'].'"></td>';
+
+	if ($table) echo '</tr><tr class="v3 priv invisible"><th class=tdright><label>Priv Type:</label></th>';
+	echo '<td class=tdleft>';
+	if ($table)
+                echo '<input name=priv_protocol type=radio value=DES '.($profile['priv_protocol'] == 'DES' ? ' checked="checked"' : '').'/><label>DES</label>
+                <input name=priv_protocol type=radio value=AES '.($profile['priv_protocol'] == 'AES' ? ' checked="checked"' : '').'/><label>AES</label>';
+	else
+		printSelect (array ('DES' => 'DES', 'AES' => 'AES'), array ('name' => 'priv_protocol', 'class' => '"v3 priv"'), $profile['priv_protocol']);
+	echo '</td>';
+
+
+	if ($table) echo '</tr><tr class="v3 priv invisible"><th class=tdright><label>Priv Key</label></th>';
+	echo '<td class=tdleft><input type='.($table ? 'password' : 'text').' name=priv_passphrase class="v3 priv" value="'.$profile['priv_passphrase'].'"></td>';
+	if ($table) echo '</tr>';
+
+	if (! $table)
+	{
+		if ($newprofile)
+			echo '<td>'.getImageHREF ('create','add profile', TRUE).'</td>';
+		else
+			echo '<td>'.getImageHREF ('save','save profile', TRUE).'</td>';
+		echo '</form></tr>';
+	}
+	else
+		echo '</table>';
+}
+
 ?>

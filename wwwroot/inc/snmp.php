@@ -4172,17 +4172,23 @@ function doSNMPmining ($object_id, $snmpsetup)
 {
 	$objectInfo = spotEntity ('object', $object_id);
 	$objectInfo['attrs'] = getAttrValues ($object_id);
-	$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
-	if (count ($endpoints) == 0)
+
+	if ($snmpsetup['host'] == 'FQDN' || $snmpsetup['host'] == '')
 	{
-		showError ('Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.');
-		return;
+		$endpoints = findAllEndpoints ($object_id, $objectInfo['name']);
+		if (count ($endpoints) == 0)
+		{
+			showError ('Endpoint not found. Please either set FQDN attribute or assign an IP address to the object.');
+			return;
+		}
+		if (count ($endpoints) > 1)
+		{
+			showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
+			return;
+		}
 	}
-	if (count ($endpoints) > 1)
-	{
-		showError ('More than one IP address is assigned to this object, please configure FQDN attribute.');
-		return;
-	}
+	else
+		$endpoints[0] = $snmpsetup['host'];
 
 	switch ($objectInfo['objtype_id'])
 	{

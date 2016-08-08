@@ -1262,6 +1262,30 @@ function get_pseudo_file ($name)
   CONSTRAINT `VSEnabledPorts-FK-vs_id-proto-vport` FOREIGN KEY (`vs_id`, `proto`, `vport`) REFERENCES `VSPorts` (`vs_id`, `proto`, `vport`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
 
+		$query[] = "CREATE TABLE `SNMPProfile` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(255) DEFAULT NULL,
+  `version` tinyint DEFAULT NULL,
+  `community` char(255) DEFAULT NULL,
+  `sec_name` char(255) DEFAULT NULL,
+  `sec_level` char(12) DEFAULT NULL,
+  `auth_protocol` char(3) DEFAULT NULL,
+  `auth_passphrase` char(255) DEFAULT NULL,
+  `priv_protocol` char(3) DEFAULT NULL,
+  `priv_passphrase` char(255) DEFAULT NULL,
+  `contextname` char(255) DEFAULT NULL,
+  `contextengineid` char(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `SNMPProfileMapping` (
+  `object_id` int(10) unsigned not NULL,
+  `profile_id` int(10) unsigned not NULL,
+  `host` char(255) DEFAULT NULL,
+  PRIMARY KEY (`object_id`),
+  CONSTRAINT `SNMPProfileMapping_object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB";
+
 		$query[] = "
 CREATE TRIGGER `EntityLink-before-insert` BEFORE INSERT ON `EntityLink` FOR EACH ROW
 EntityLinkTrigger:BEGIN
