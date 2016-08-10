@@ -5117,6 +5117,35 @@ function showNotice  ($message, $option = '')
 	setMessage ('neutral', $message, $option == 'inline');
 }
 
+// asks ok/cancel question
+// return string 'true' or 'false'
+// adds 'answer' to request post data and repeats request
+function showChoice ($question)
+{
+	if (isset ($_POST['answer']))
+		return $_POST['answer'];
+
+	$form = "<form id=choice method=post action='?{$_SERVER['QUERY_STRING']}'>";
+	foreach ($_POST as $name => $value)
+		$form .= "<input type=hidden name='$name' value='$value'>";
+	$form .= "<input type=hidden id=answer name=answer value='false'>";
+	$form .= '</form>';
+
+	$msg = $question;
+	$question = str_replace ('<br>', '\n', $question);
+	$question = str_replace ("'", "\'", $question);
+	$msg .= <<<ENDMSG
+		$form
+		<script type="text/javascript">
+		answer = confirm('$question');
+		$('input#answer').val(answer);
+		$('form#choice').submit();
+		</script>
+ENDMSG;
+
+	setMessage ('warning', $msg, FALSE);
+}
+
 // do not call this directly, use showError and its siblings instead
 // $type could be 'error', 'warning', 'success' or 'neutral'
 function setMessage ($type, $message, $direct_rendering)
