@@ -5118,12 +5118,13 @@ function showNotice  ($message, $option = '')
 }
 
 // asks ok/cancel question
-// return string 'true' or 'false'
+// return  TRUE/FALSE/NULL
+// NULL = waiting for choice
 // adds 'answer' to request post data and repeats request
 function showChoice ($question)
 {
 	if (isset ($_POST['answer']))
-		return $_POST['answer'];
+		return ($_POST['answer'] === 'true' ? TRUE : FALSE);
 
 	$form = "<form id=choice method=post action='?{$_SERVER['QUERY_STRING']}'>";
 	foreach ($_POST as $name => $value)
@@ -5144,6 +5145,8 @@ function showChoice ($question)
 ENDMSG;
 
 	setMessage ('warning', $msg, FALSE);
+
+	return NULL;
 }
 
 // do not call this directly, use showError and its siblings instead
