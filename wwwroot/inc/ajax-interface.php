@@ -322,6 +322,67 @@ function getAutocompleteListAJAX()
 			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
 			unset ($result);
 			break;
+		case 'bond_name':
+			$object_id = genericAssertion ('object_id', 'uint');
+			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE object_id = ? AND name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ($object_id, "%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'ip':
+			// try to list next ip byte
+			// v4 only
+			$bytes = explode ('.', $term);
+			$searchbyte = array_pop($bytes);
+			$bytecount = count($bytes);
+
+			$net = implode ('.', array_slice ($bytes, 0, $bytecount));
+
+			switch ($bytecount)
+			{
+				case 0:
+					$net = '0.0.0.0';
+					break;
+				case 1:
+					$net .= '.0';
+				case 2:
+					$net .= '.0';
+				case 3:
+					$net .= '.0';
+				case 4:
+					break;
+				default:
+					return '[]';
+			}
+
+			$bitsNet = 32 - ($bytecount * 8);
+			$bitsIP = $bitsNet - 8;
+
+			$net = ip4_bin2int(ip4_parse($net));
+
+			$result = usePreparedSelectBlade (
+					'SELECT ((ip >> ?) << ?) as result
+					 FROM IPv4Network
+					 WHERE ((ip >> ?) << ?) = ? AND ((ip >> ?) & 255) like ?
+					 GROUP BY ((ip >> ?) << ?)
+					 ORDER BY ((ip >> ?) << ?)
+					 LIMIT 101',
+				 array (
+					$bitsIP, $bitsIP, // SELECT
+					$bitsNet, $bitsNet, $net, // WHERE
+					$bitsIP, "$searchbyte%", // AND
+					$bitsIP, $bitsIP, // GROUP BY
+					$bitsIP, $bitsIP) // ORDER BY
+			);
+
+			$ret = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			$rows = array();
+			foreach ($ret as $value)
+			{
+				$ip = ip4_format (ip4_int2bin ($value));
+				$rows[] = ($bytecount >= 3 ? $ip : str_replace ('.0', '', $ip));
+			}
+			break;
 		default:
 			return;
 	}

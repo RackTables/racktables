@@ -1872,7 +1872,7 @@ function renderIPForObject ($object_id)
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td>";
 		echo "<td class=tdleft><input type='text' size='10' name='bond_name'></td>\n"; // if-name
-		echo "<td class=tdleft><input type=text name='ip'></td>\n"; // IP
+		echo "<td class=tdleft><input type=text id='filter-ip' name='ip'></td>\n"; // IP
 		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
 			echo "<td colspan=2>&nbsp;</td>"; // network, routed by
 		echo '<td>';
@@ -1882,6 +1882,38 @@ function renderIPForObject ($object_id)
 		echo "</td></tr></form>";
 	}
 	global $aat;
+
+	includeJQueryUI (TRUE);
+
+	addJS (<<<JSEND
+		$(document).ready( function() {
+			$('[name="bond_name"]').autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
+				//minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				}
+			});
+			$('#filter-ip').autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=ip",
+				//minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '...' )
+							event.preventDefault();
+				}
+			});
+		});
+JSEND
+	, TRUE);
 	startPortlet ('Allocations');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'><tr>\n";
 	echo '<th>&nbsp;</th>';
