@@ -357,7 +357,9 @@ function getAutocompleteListAJAX()
 			$bitsNet = 32 - ($bytecount * 8);
 			$bitsIP = $bitsNet - 8;
 
-			$net = ip4_bin2int(ip4_parse($net));
+			$net = ip4_parse ($net);
+			$netrow = fetchIPv4AddressNetworkRow ($net);
+			$net = ip4_bin2int ($net);
 
 			$result = usePreparedSelectBlade (
 					'SELECT ((ip >> ?) << ?) as result
@@ -379,9 +381,18 @@ function getAutocompleteListAJAX()
 			$rows = array();
 			foreach ($ret as $value)
 			{
-				$ip = ip4_format (ip4_int2bin ($value));
-				$rows[] = ($bytecount >= 3 ? $ip : str_replace ('.0', '', $ip));
+				$ipdotted = ip4_format (ip4_int2bin ($value));
+				$ipdotted = ($bytecount >= 3 ? $ipdotted : str_replace ('.0', '', $ipdotted));
+				$rows[$ipdotted] = $ipdotted;
 			}
+			// if network matches add to top of list
+			if ($netrow)
+			{
+				$netdotted = ip4_format (ip4_int2bin ($netrow['ip']));
+				unset ($rows[$netdotted]);
+				array_unshift ($rows, "$netdotted/{$netrow['mask']}");
+			}
+			$rows = array_values ($rows);
 			break;
 		default:
 			return;
