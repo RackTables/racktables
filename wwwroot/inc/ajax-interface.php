@@ -362,28 +362,28 @@ function getAutocompleteListAJAX()
 			$net = ip4_bin2int ($net);
 
 			$result = usePreparedSelectBlade (
-					'SELECT ((ip >> ?) << ?) as result
+					'SELECT ((ip >> ?) << ?) as result, COUNT(((ip >> ?) << ?)) as count
 					 FROM IPv4Network
 					 WHERE ((ip >> ?) << ?) = ? AND ((ip >> ?) & 255) like ?
-					 GROUP BY ((ip >> ?) << ?)
-					 ORDER BY ((ip >> ?) << ?)
+					 GROUP BY result
+					 ORDER BY result
 					 LIMIT 101',
 				 array (
 					$bitsIP, $bitsIP, // SELECT
+					$bitsIP, $bitsIP, // SELECT
 					$bitsNet, $bitsNet, $net, // WHERE
-					$bitsIP, "$searchbyte%", // AND
-					$bitsIP, $bitsIP, // GROUP BY
-					$bitsIP, $bitsIP) // ORDER BY
+					$bitsIP, "$searchbyte%" // AND
+					)
 			);
 
-			$ret = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			$rows = array();
 			foreach ($ret as $value)
 			{
-				$ipdotted = ip4_format (ip4_int2bin ($value));
+				$ipdotted = ip4_format (ip4_int2bin ($value['result']));
 				$ipdotted = ($bytecount >= 3 ? $ipdotted : str_replace ('.0', '', $ipdotted));
-				$rows[$ipdotted] = $ipdotted;
+				$rows[$ipdotted] = "$ipdotted ({$value['count']})";
 			}
 			// if network matches add to top of list
 			if ($netrow)
