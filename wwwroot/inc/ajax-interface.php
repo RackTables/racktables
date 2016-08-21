@@ -322,12 +322,94 @@ function getAutocompleteListAJAX()
 			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
 			unset ($result);
 			break;
+		case 'bond_name':
+			$object_id = genericAssertion ('object_id', 'uint');
+			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE object_id = ? AND name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ($object_id, "%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
+		case 'ip':
+			// try to list next ip byte
+			// v4 only
+			$bytes = explode ('.', $term);
+			$searchbyte = array_pop($bytes);
+			$bytecount = count($bytes);
+
+			$net = implode ('.', array_slice ($bytes, 0, $bytecount));
+
+			switch ($bytecount)
+			{
+				case 0:
+					$net = '0.0.0.0';
+					break;
+				case 1:
+					$net .= '.0';
+				case 2:
+					$net .= '.0';
+				case 3:
+					$net .= '.0';
+				case 4:
+					break;
+				default:
+					return '[]';
+			}
+
+			$bitsNet = 32 - ($bytecount * 8);
+			$bitsIP = $bitsNet - 8;
+
+			$net = ip4_parse ($net);
+			$prefixnetrow = fetchIPv4AddressNetworkRow ($net);
+			$net = ip4_bin2int ($net);
+
+			$prefixrows = array();
+			if ($prefixnetrow)
+			{
+					$netdotted = ip4_format (ip4_int2bin ($prefixnetrow['ip']));
+					$prefixrows[] = array ('label' => "$netdotted/{$prefixnetrow['mask']}", 'value' => '');
+			}
+
+			$result = usePreparedSelectBlade (
+					'SELECT ((ip >> ?) << ?) as result, COUNT(ip) as count
+					 FROM IPv4Network
+					 WHERE ((ip >> ?) << ?) = ? AND ((ip >> ?) & 255) like ?
+					 GROUP BY result
+					 ORDER BY result
+					 LIMIT 101',
+				 array (
+					$bitsIP, $bitsIP, // SELECT
+					$bitsNet, $bitsNet, $net, // WHERE
+					$bitsIP, "$searchbyte%" // AND
+					)
+			);
+
+			$ret = $result->fetchAll (PDO::FETCH_ASSOC);
+			unset ($result);
+
+			$rows = array();
+			foreach ($ret as $value)
+			{
+				if ($bitsIP)
+				{
+					$ipdotted = ip4_format (ip4_int2bin ($value['result'] >> $bitsIP));
+					$ipdotted = preg_replace('/^(0\.)+/', '', $ipdotted);
+					$label = $ipdotted.($bitsIP ? '.' : '');
+					$rows[] = array ('label' => "$label ({$value['count']})", 'value' => "$label");
+				}
+				else
+				{
+					$netrow = fetchIPv4AddressNetworkRow (ip4_int2bin ($value['result']));
+					$netdotted = ip4_format (ip4_int2bin ($netrow['ip']));
+					$prefixrows[] = array ('label' => "$netdotted/{$netrow['mask']}", 'value' => '');
+				}
+			}
+			$rows = array_merge ($prefixrows, $rows);
+			break;
 		default:
 			return;
 	}
 
 	if (count ($rows) > 100 )
-		$rows[] = '...';
+		$rows[] = array ('label' => '...', 'value' => '');
 
 	echo json_encode ($rows);
 }
