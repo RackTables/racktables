@@ -1891,11 +1891,11 @@ function renderIPForObject ($object_id)
 				source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
 				//minLength: 3,
 				focus: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				},
 				select: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				}
 			});
@@ -1903,12 +1903,14 @@ function renderIPForObject ($object_id)
 				source: "?module=ajax&ac=autocomplete&realm=ip",
 				//minLength: 3,
 				focus: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				},
 				select: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
+						// trigger next search
+						$(this).autocomplete('search', ui.item.value);
 				}
 			});
 		});

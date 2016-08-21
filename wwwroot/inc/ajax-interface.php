@@ -383,14 +383,14 @@ function getAutocompleteListAJAX()
 			{
 				$ipdotted = ip4_format (ip4_int2bin ($value['result']));
 				$ipdotted = ($bytecount >= 3 ? $ipdotted : str_replace ('.0', '', $ipdotted));
-				$rows[$ipdotted] = "$ipdotted ({$value['count']})";
+				$rows[$ipdotted] = array ('label' => "$ipdotted. ({$value['count']})", 'value' => "$ipdotted.");
 			}
 			// if network matches add to top of list
 			if ($netrow)
 			{
 				$netdotted = ip4_format (ip4_int2bin ($netrow['ip']));
 				unset ($rows[$netdotted]);
-				array_unshift ($rows, "$netdotted/{$netrow['mask']}");
+				array_unshift ($rows, array ('label' => "$netdotted/{$netrow['mask']}", 'value' => ''));
 			}
 			$rows = array_values ($rows);
 			break;
@@ -399,7 +399,7 @@ function getAutocompleteListAJAX()
 	}
 
 	if (count ($rows) > 100 )
-		$rows[] = '...';
+		$rows[] = array ('label' => '...', 'value' => '');
 
 	echo json_encode ($rows);
 }
