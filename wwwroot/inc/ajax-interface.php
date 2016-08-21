@@ -358,18 +358,24 @@ function getAutocompleteListAJAX()
 			$bitsIP = $bitsNet - 8;
 
 			$net = ip4_parse ($net);
-			$netrow = fetchIPv4AddressNetworkRow ($net);
+			$prefixnetrow = fetchIPv4AddressNetworkRow ($net);
 			$net = ip4_bin2int ($net);
 
+			$prefixrows = array();
+			if ($prefixnetrow)
+			{
+					$netdotted = ip4_format (ip4_int2bin ($prefixnetrow['ip']));
+					$prefixrows[] = array ('label' => "$netdotted/{$prefixnetrow['mask']}", 'value' => '');
+			}
+
 			$result = usePreparedSelectBlade (
-					'SELECT ((ip >> ?) << ?) as result, COUNT(((ip >> ?) << ?)) as count
+					'SELECT ((ip >> ?) << ?) as result, COUNT(ip) as count
 					 FROM IPv4Network
 					 WHERE ((ip >> ?) << ?) = ? AND ((ip >> ?) & 255) like ?
 					 GROUP BY result
 					 ORDER BY result
 					 LIMIT 101',
 				 array (
-					$bitsIP, $bitsIP, // SELECT
 					$bitsIP, $bitsIP, // SELECT
 					$bitsNet, $bitsNet, $net, // WHERE
 					$bitsIP, "$searchbyte%" // AND
@@ -378,21 +384,25 @@ function getAutocompleteListAJAX()
 
 			$ret = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
+
 			$rows = array();
 			foreach ($ret as $value)
 			{
-				$ipdotted = ip4_format (ip4_int2bin ($value['result']));
-				$ipdotted = ($bytecount >= 3 ? $ipdotted : str_replace ('.0', '', $ipdotted));
-				$rows[$ipdotted] = array ('label' => "$ipdotted. ({$value['count']})", 'value' => "$ipdotted.");
+				if ($bitsIP)
+				{
+					$ipdotted = ip4_format (ip4_int2bin ($value['result'] >> $bitsIP));
+					$ipdotted = preg_replace('/^(0\.)+/', '', $ipdotted);
+					$label = $ipdotted.($bitsIP ? '.' : '');
+					$rows[] = array ('label' => "$label ({$value['count']})", 'value' => "$label");
+				}
+				else
+				{
+					$netrow = fetchIPv4AddressNetworkRow (ip4_int2bin ($value['result']));
+					$netdotted = ip4_format (ip4_int2bin ($netrow['ip']));
+					$prefixrows[] = array ('label' => "$netdotted/{$netrow['mask']}", 'value' => '');
+				}
 			}
-			// if network matches add to top of list
-			if ($netrow)
-			{
-				$netdotted = ip4_format (ip4_int2bin ($netrow['ip']));
-				unset ($rows[$netdotted]);
-				array_unshift ($rows, array ('label' => "$netdotted/{$netrow['mask']}", 'value' => ''));
-			}
-			$rows = array_values ($rows);
+			$rows = array_merge ($prefixrows, $rows);
 			break;
 		default:
 			return;
