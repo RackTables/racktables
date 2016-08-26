@@ -3396,6 +3396,31 @@ function renderIPAddressAllocations ($ip_bin)
 	}
 	global $aat;
 
+	includeJQueryUI (TRUE);
+
+	addJS (<<<JSEND
+		$(document).ready( function() {
+			$('[name="bond_name"]').autocomplete({
+				//minLength: 3,
+				search: function(event, ui) {
+					var object_id = $('#object_id').val();
+					if (!object_id)
+						event.preventDefault();
+					$(this).autocomplete('option', 'source', '?module=ajax&ac=autocomplete&realm=bond_name&object_id='+object_id);
+				},
+				focus: function(event, ui) {
+						if( ui.item.value == '' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '' )
+							event.preventDefault();
+				}
+			});
+		});
+JSEND
+	, TRUE);
+
 	$address = getIPAddress ($ip_bin);
 	echo "<center><h1>${address['ip']}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
