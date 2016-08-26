@@ -1882,6 +1882,26 @@ function renderIPForObject ($object_id)
 		echo "</td></tr></form>";
 	}
 	global $aat;
+
+	includeJQueryUI (TRUE);
+
+	addJS (<<<JSEND
+		$(document).ready( function() {
+			$('[name="bond_name"]').autocomplete({
+				source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
+				//minLength: 3,
+				focus: function(event, ui) {
+						if( ui.item.value == '' )
+							event.preventDefault();
+				},
+				select: function(event, ui) {
+						if( ui.item.value == '' )
+							event.preventDefault();
+				}
+			});
+		});
+JSEND
+	, TRUE);
 	startPortlet ('Allocations');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'><tr>\n";
 	echo '<th>&nbsp;</th>';
