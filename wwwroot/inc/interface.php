@@ -1864,9 +1864,29 @@ function renderPortsForObject ($object_id)
 
 function renderIPForObject ($object_id)
 {
-	function printNewItemTR ($default_type)
+	function printNewItemTR ($default_type, $object_id)
 	{
 		global $aat;
+
+		includeJQueryUI (TRUE);
+
+		addJS (<<<JSEND
+			$(document).ready( function() {
+				$('[name="bond_name"]').autocomplete({
+					source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
+					//minLength: 3,
+					focus: function(event, ui) {
+							if( ui.item.value == '' )
+								event.preventDefault();
+					},
+					select: function(event, ui) {
+							if( ui.item.value == '' )
+								event.preventDefault();
+					}
+				});
+			});
+JSEND
+		, TRUE);
 		printOpFormIntro ('add');
 		echo "<tr><td>"; // left btn
 		printImageHREF ('add', 'allocate', TRUE);
@@ -1883,25 +1903,6 @@ function renderIPForObject ($object_id)
 	}
 	global $aat;
 
-	includeJQueryUI (TRUE);
-
-	addJS (<<<JSEND
-		$(document).ready( function() {
-			$('[name="bond_name"]').autocomplete({
-				source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
-				//minLength: 3,
-				focus: function(event, ui) {
-						if( ui.item.value == '' )
-							event.preventDefault();
-				},
-				select: function(event, ui) {
-						if( ui.item.value == '' )
-							event.preventDefault();
-				}
-			});
-		});
-JSEND
-	, TRUE);
 	startPortlet ('Allocations');
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'><tr>\n";
 	echo '<th>&nbsp;</th>';
@@ -1948,7 +1949,7 @@ JSEND
 
 	if ($list_on_top = (getConfigVar ('ADDNEW_AT_TOP') != 'yes'))
 		echo $alloc_list;
-	printNewItemTR ($most_popular_type);
+	printNewItemTR ($most_popular_type, $object_id);
 	if (! $list_on_top)
 		echo $alloc_list;
 
@@ -3383,43 +3384,44 @@ function renderIPAddressAllocations ($ip_bin)
 	function printNewItemTR ()
 	{
 		global $aat;
+
+		includeJQueryUI (TRUE);
+
+		addJS (<<<JSEND
+			$(document).ready( function() {
+				$('[name="bond_name"]').autocomplete({
+					//minLength: 3,
+					search: function(event, ui) {
+						var aid = $(this).attr('aid');
+						var object_id = $('#aid-'+aid+' [name="object_id"]').val();
+						if (!object_id)
+							event.preventDefault();
+						$(this).autocomplete('option', 'source', '?module=ajax&ac=autocomplete&realm=bond_name&object_id='+object_id);
+					},
+					focus: function(event, ui) {
+							if( ui.item.value == '' )
+								event.preventDefault();
+					},
+					select: function(event, ui) {
+							if( ui.item.value == '' )
+								event.preventDefault();
+					}
+				});
+			});
+JSEND
+		, TRUE);
 		printOpFormIntro ('add');
-		echo "<tr><td>";
+		echo "<tr id='aid-new'><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td><td>";
 		printSelect (getNarrowObjectList ('IPV4OBJ_LISTSRC'), array ('name' => 'object_id'));
-		echo "</td><td><input type=text name=bond_name size=10></td><td>";
+		echo "</td><td><input type=text name=bond_name size=10 aid='new'></td><td>";
 		printSelect ($aat, array ('name' => 'bond_type', 'regular'));
 		echo "</td><td>";
 		printImageHREF ('add', 'allocate', TRUE);
 		echo "</td></form></tr>";
 	}
 	global $aat;
-
-	includeJQueryUI (TRUE);
-
-	addJS (<<<JSEND
-		$(document).ready( function() {
-			$('[name="bond_name"]').autocomplete({
-				//minLength: 3,
-				search: function(event, ui) {
-					var object_id = $('#object_id').val();
-					if (!object_id)
-						event.preventDefault();
-					$(this).autocomplete('option', 'source', '?module=ajax&ac=autocomplete&realm=bond_name&object_id='+object_id);
-				},
-				focus: function(event, ui) {
-						if( ui.item.value == '' )
-							event.preventDefault();
-				},
-				select: function(event, ui) {
-						if( ui.item.value == '' )
-							event.preventDefault();
-				}
-			});
-		});
-JSEND
-	, TRUE);
 
 	$address = getIPAddress ($ip_bin);
 	echo "<center><h1>${address['ip']}</h1></center>\n";
@@ -3435,11 +3437,11 @@ JSEND
 			echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
 		foreach ($address['allocs'] as $bond)
 		{
-			echo "<tr class='$class'>";
+			echo "<tr class='$class' id='aid-{$bond['object_id']}'>";
 			printOpFormIntro ('upd', array ('object_id' => $bond['object_id']));
 			echo "<td>" . getOpLink (array ('op' => 'del', 'object_id' => $bond['object_id'] ), '', 'delete', 'Unallocate address') . "</td>";
 			echo "<td>" . makeIPAllocLink ($ip_bin, $bond) . "</td>";
-			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10></td><td>";
+			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10 aid='{$bond['object_id']}'></td><td>";
 			printSelect ($aat, array ('name' => 'bond_type'), $bond['type']);
 			echo "</td><td>";
 			printImageHREF ('save', 'Save changes', TRUE);
