@@ -499,7 +499,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		ksort ($javascript);
 		return $javascript;
 	}
-	// Add jquery.js and racktables.js the first time a Javascript file is added.
+	// Add jquery.js, bootstrap.js and racktables.js the first time a Javascript file is added.
 	if (! count ($javascript))
 	{
 		$javascript = array
@@ -507,6 +507,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 			'a_core' => array
 			(
 				array('type' => 'file', 'script' => 'js/jquery-1.4.4.min.js'),
+				array('type' => 'file', 'script' => 'js/bootstrap.min.js'),
 				array('type' => 'file', 'script' => 'js/racktables.js'),
 			),
 		);
@@ -698,6 +699,9 @@ function printPageHeaders ()
 		echo $s . "\n";
 	// add tabindex to all input forms
 	addJS ('js/tabindex_auto.js', FALSE);
+
+	// add bootstrap everywhere
+	addCSS('css/bootstrap.min.css');
 
 	// add CSS styles
 	foreach (addCSS (NULL) as $item)
