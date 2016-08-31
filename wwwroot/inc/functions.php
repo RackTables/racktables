@@ -2890,6 +2890,8 @@ function formatRealmName ($realm)
 		'row' => 'Row',
 		'location' => 'Location',
 		'user' => 'User',
+		'file' => 'File',
+		'vst' => 'VLAN switch template',
 	);
 	return array_fetch ($realmstr, $realm, 'invalid');
 }
@@ -5210,7 +5212,8 @@ function loadConfigDefaults()
 	foreach ($ret as $varname => &$row)
 	{
 		$row['is_altered'] = 'no';
-		if ($row['vartype'] == 'uint') $row['varvalue'] = 0 + $row['varvalue'];
+		if ($row['vartype'] == 'uint')
+			$row['varvalue'] = 0 + $row['varvalue'];
 		$row['defaultvalue'] = $row['varvalue'];
 	}
 	return $ret;
@@ -5244,19 +5247,14 @@ function isConfigVarChanged ($varname, $varvalue)
 		return $configCache[$varname]['varvalue'] !== $varvalue;
 }
 
-function getConfigVar ($varname = '')
+// This function depends on init.php to have the cache array initialized.
+function getConfigVar ($varname)
 {
 	global $configCache;
-	// We assume the only point of cache init, and it is init.php. If it
-	// has failed, we don't retry loading.
-	if (!isset ($configCache))
+	if (! isset ($configCache))
 		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
-	if
-	(
-		$varname == '' ||
-		! array_key_exists ($varname, $configCache)
-	)
-		throw new InvalidArgException ('varname', $varname);
+	if (! array_key_exists ($varname, $configCache))
+		throw new InvalidArgException ('varname', $varname, 'no such configuration variable');
 	return $configCache[$varname]['varvalue'];
 }
 

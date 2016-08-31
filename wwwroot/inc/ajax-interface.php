@@ -322,12 +322,18 @@ function getAutocompleteListAJAX()
 			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
 			unset ($result);
 			break;
+		case 'bond_name':
+			$object_id = genericAssertion ('object_id', 'uint');
+			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE object_id = ? AND name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ($object_id, "%$term%"));
+			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
+			unset ($result);
+			break;
 		default:
 			return;
 	}
 
 	if (count ($rows) > 100 )
-		$rows[] = '...';
+		$rows[] = array ('label' => '...', 'value' => '');
 
 	echo json_encode ($rows);
 }

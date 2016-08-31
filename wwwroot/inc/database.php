@@ -283,7 +283,7 @@ function getRowInfo ($row_id)
 		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
 		"LEFT OUTER JOIN Location ON Row.location_id = Location.id " .
 		"WHERE Row.id = ? " .
-		"GROUP BY Row.id";
+		"GROUP BY Row.id, Location.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
@@ -1834,11 +1834,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 			'cable' => nullIfEmptyStr ($cable),
 		)
 	);
-	usePreparedExecuteBlade
-	(
-		'UPDATE Port SET reservation_comment=NULL WHERE id IN(?, ?)',
-		array ($porta, $portb)
-	);
+	usePreparedUpdateBlade ('Port', array ('reservation_comment' => NULL), array ('id' => array ($porta, $portb)));
 
 	// log new links
 	$result = usePreparedSelectBlade
@@ -3931,6 +3927,12 @@ function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 	foreach ($where_columns as $colname => $colvalue)
 		if ($colvalue === NULL)
 			$tmp[] = "${colname} IS NULL";
+		elseif (is_array ($colvalue))
+		{
+			// Suppress any string keys to keep array_merge() from overwriting.
+			$params = array_merge ($params, array_values ($colvalue));
+			$tmp[] = sprintf ('%s IN(%s)', $colname, questionMarks (count ($colvalue)));
+		}
 		else
 		{
 			$tmp[] = "${colname}=?";
@@ -5608,6 +5610,8 @@ function setConfigVar ($varname, $varvalue)
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
 	$configCache[$varname]['varvalue'] = $varvalue;
+	$configCache[$varname]['defaultvalue'] = $varvalue;
+	alterConfigWithUserPreferences();
 }
 
 function setUserConfigVar ($varname, $varvalue)
@@ -5633,6 +5637,7 @@ function setUserConfigVar ($varname, $varvalue)
 		array ($varvalue, $varname, $remote_username)
 	);
 	$configCache[$varname]['varvalue'] = $varvalue;
+	$configCache[$varname]['is_altered'] = 'yes';
 }
 
 function resetUserConfigVar ($varname)
@@ -5646,7 +5651,11 @@ function resetUserConfigVar ($varname)
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	// Update cache only if the changes went into DB.
+	if (! array_key_exists ('is_altered', $var) || $var['is_altered'] != 'yes')
+		return;
 	usePreparedDeleteBlade ('UserConfig', array ('varname' => $varname, 'user' => $remote_username));
+	$configCache[$varname]['varvalue'] = $configCache[$varname]['defaultvalue'];
+	unset ($configCache[$varname]['is_altered']);
 }
 
 // parses QUICK_LINK_PAGES config var and returns array with ('href'=>..., 'title'=>...) items

@@ -1,6 +1,6 @@
 <?php
 
-class ScriptFunctions extends PHPUnit_Framework_TestCase
+class ScriptFunctionsTest extends PHPUnit_Framework_TestCase
 {
 	const SCRIPT_NAME = 'temp_test_script';
 	const SCRIPT_TEXT = "abc\ndef\nghi";
@@ -22,7 +22,7 @@ class ScriptFunctions extends PHPUnit_Framework_TestCase
 	{
 		saveScript (self::SCRIPT_NAME, self::SCRIPT_TEXT);
 		deleteScript (self::SCRIPT_NAME);
-		$this->assertSame (NULL, loadScript (self::SCRIPT_NAME));
+		$this->assertNull (loadScript (self::SCRIPT_NAME));
 	}
 
 	/**
@@ -32,7 +32,7 @@ class ScriptFunctions extends PHPUnit_Framework_TestCase
 	{
 		saveScript (self::SCRIPT_NAME, self::SCRIPT_TEXT);
 		saveScript (self::SCRIPT_NAME, NULL); // deletes
-		$this->assertSame (NULL, loadScript (self::SCRIPT_NAME));
+		$this->assertNull (loadScript (self::SCRIPT_NAME));
 	}
 
 	/**

@@ -56,6 +56,6 @@ Then duplicate the existing database to your new unit testing database:
 Edit the `secret.php` file and change the dbname in `$pdo_dsn` to the new
 "_unittest" database, e.g.:
 ```
-  $pdo_dsn = 'mysql:host=127.0.01;dbname=racktables_unittest';
+  $pdo_dsn = 'mysql:host=127.0.0.1;dbname=racktables_unittest';
 ```
 To switch to another database, edit the `secret.php` file.

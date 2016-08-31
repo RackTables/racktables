@@ -19,9 +19,9 @@ class ObjectAttributesTest extends PHPUnit_Framework_TestCase
 	private function assertNoValues ()
 	{
 		foreach (getAttrValues ($this->server_id) as $each)
-			$this->assertNULL ($each['value']);
+			$this->assertNull ($each['value']);
 		foreach (getAttrValues ($this->switch_id) as $each)
-			$this->assertNULL ($each['value']);
+			$this->assertNull ($each['value']);
 	}
 
 	/**

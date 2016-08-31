@@ -427,11 +427,11 @@ function renderPopupPortSelector()
 				source: "?module=ajax&ac=autocomplete&realm=object",
 				minLength: 3,
 				focus: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				},
 				select: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				}
 			});
@@ -439,11 +439,11 @@ function renderPopupPortSelector()
 				source: "?module=ajax&ac=autocomplete&realm=asset",
 				minLength: 3,
 				focus: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				},
 				select: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				}
 			});
@@ -451,11 +451,11 @@ function renderPopupPortSelector()
 				source: "?module=ajax&ac=autocomplete&realm=port",
 				minLength: 3,
 				focus: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				},
 				select: function(event, ui) {
-						if( ui.item.value == '...' )
+						if( ui.item.value == '' )
 							event.preventDefault();
 				}
 			});

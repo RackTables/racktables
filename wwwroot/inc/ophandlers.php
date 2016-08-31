@@ -2236,7 +2236,7 @@ function updateTag ()
 	}
 	catch (InvalidArgException $iae)
 	{
-		throw $iae->newIRAE ('parent_id');
+		throw $iae->newIRAE();
 	}
 	showSuccess ('Tag updated successfully');
 }
@@ -3241,7 +3241,7 @@ function importDPData()
 				}
 				else
 				{
-					$dbxlink->rollback();
+					$dbxlink->rollBack();
 					$nignored++;
 				}
 			}
@@ -3580,7 +3580,7 @@ function doVSMigrate()
 	foreach ($tag_ids as $tid)
 		if (! isset ($taglist[$tid]))
 		{
-			$dbxlink->rollback();
+			$dbxlink->rollBack();
 			showError ("Unknown tag id $tid");
 		}
 		else

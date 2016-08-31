@@ -1071,7 +1071,7 @@ CREATE TABLE `IPv6Log` (
 			{
 				$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`) VALUES (?,?)');
 				$prepared->execute (array($row['name'], 1561));
-				$row_id = $dbxlink->lastInsertId();
+				$row_id = $dbxlink->lastInsertID();
 				// Turn all racks in this row into objects
 				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']} ORDER BY name");
 				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1083,7 +1083,7 @@ CREATE TABLE `IPv6Log` (
 					//   update rackspace, tags and files to reflect new rack_id, move history
 					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
-					$rack_id = $dbxlink->lastInsertId();
+					$rack_id = $dbxlink->lastInsertID();
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,27,${rack['height']})";
 					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,29,${sort_order})";
 					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',${row_id},'rack',${rack_id})";
@@ -1962,6 +1962,21 @@ ENDOFTRIGGER;
 
 			$query[] = "ALTER TABLE UserConfig DROP FOREIGN KEY `UserConfig-FK-varname`";
 			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE";
+
+			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
+				(1088,'1000Base-BX40-D'),
+				(1089,'1000Base-BX40-U'),
+				(1090,'1000Base-BX80-D'),
+				(1091,'1000Base-BX80-U')";
+			$query[] = "INSERT INTO PortCompat (type1, type2) VALUES
+				(1088,1089),
+				(1089,1088),
+				(1090,1091),
+				(1091,1090)";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (4,1088), (4,1089), (4,1090), (4,1091)";
+			$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
+				(11,1088), (12,1088), (11,1089), (12,1089),
+				(11,1090), (12,1090), (11,1091), (12,1091)";
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;

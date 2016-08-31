@@ -1,6 +1,6 @@
 <?php
 
-class GetRowsCount extends PHPUnit_Framework_TestCase
+class GetRowsCountTest extends PHPUnit_Framework_TestCase
 {
 	protected $table_name;
 
@@ -23,14 +23,15 @@ class GetRowsCount extends PHPUnit_Framework_TestCase
 	 */
 	public function testAll ()
 	{
+		$names = array ('alpha', 'beta', 'gamma', 'delta');
 		$this->assertEquals (0, getRowsCount ($this->table_name));
 		$ids = array();
-		foreach (array ('alpha', 'beta', 'gamma', 'delta') as $name)
+		foreach ($names as $name)
 		{
 			usePreparedInsertBlade ($this->table_name, array ('name' => $name));
 			$ids[] = lastInsertID();
 		}
-		$this->assertEquals (4, getRowsCount ($this->table_name));
+		$this->assertEquals (count ($names), getRowsCount ($this->table_name));
 		foreach ($ids as $id)
 			usePreparedDeleteBlade ($this->table_name, array ('id' => $id));
 		$this->assertEquals (0, getRowsCount ($this->table_name));

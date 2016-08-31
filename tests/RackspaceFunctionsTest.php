@@ -1,14 +1,16 @@
 <?php
 
-class RackspaceFunctions extends PHPUnit_Framework_TestCase
+class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
 {
 	const UNITS_PER_RACK = 42;
 	private $row_id;
+	private $row_name;
 
 	// Add a temporary row with a few racks.
 	public function setUp ()
 	{
-		$this->row_id = commitAddObject (sprintf ('testrow-%s-%u', get_class(), getmypid()), NULL, 1561, NULL);
+		$this->row_name = sprintf ('testrow-%s-%u', get_class(), getmypid());
+		$this->row_id = commitAddObject ($this->row_name, NULL, 1561, NULL);
 	}
 
 	private function createObjectInRack ($prefix, $type_id, $rack_id, $unit_nos)
@@ -68,10 +70,23 @@ class RackspaceFunctions extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group small
+	 */
+	public function testGeneral ()
+	{
+		$row = getRowInfo ($this->row_id);
+		$this->assertEquals ($this->row_id, $row['id']);
+		$this->assertEquals ($this->row_name, $row['name']);
+		$this->assertNull ($row['location_id']);
+		$this->assertNull ($row['location']);
+	}
+
+	/**
+	 * @group small
 	 * @dataProvider providerSampleRows
 	 */
-	public function testRSU ($racklist)
+	public function testSpecific ($racklist)
 	{
+		$this->assertEquals (0, getRowMountsCount ($this->row_id));
 		$created = $this->createSampleRacksAndObjects ($racklist);
 		$row_units = 0;
 		$row_data = array();
@@ -83,24 +98,15 @@ class RackspaceFunctions extends PHPUnit_Framework_TestCase
 			$row_data[$rack_id] = $rack;
 			amplifyCell ($rack);
 			$this->assertEquals ($rack_units / self::UNITS_PER_RACK, getRSUForRack ($rack));
+			$this->assertEquals (count ($objects), getRackMountsCount ($rack_id));
 		}
 		$row_total_units = count ($created) * self::UNITS_PER_RACK;
 		$row_rsu = $row_total_units == 0 ? 0 : ($row_units / $row_total_units);
 		$this->assertEquals ($row_rsu, getRSUForRow ($row_data));
-		$this->deleteSampleRacksAndObjects ($created);
-	}
-
-	/**
-	 * @group small
-	 * @dataProvider providerSampleRows
-	 */
-	public function testMountsCount ($racklist)
-	{
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
-		$created = $this->createSampleRacksAndObjects ($racklist);
-		foreach ($created as $rack_id => $objects)
-			$this->assertEquals (count ($objects), getRackMountsCount ($rack_id));
 		$this->assertEquals (array_sum (array_map ('count', $created)), getRowMountsCount ($this->row_id));
+		$row = getRowInfo ($this->row_id);
+		$this->assertEquals (count ($created), $row['count']);
+		$this->assertEquals ($row_total_units, $row['sum']);
 		$this->deleteSampleRacksAndObjects ($created);
 		$this->assertEquals (0, getRowMountsCount ($this->row_id));
 	}
