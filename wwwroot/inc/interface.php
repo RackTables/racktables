@@ -121,7 +121,17 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 	  <img src="?module=chrome&uri=pix/rt.svg" alt="Racktables" style="height:70%"/>
 	</a>
       </div>
-    <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
+
+      <!-- Search form-->
+      <form name=search method=get class="navbar-form navbar-right">
+	<input type=hidden name=page value=search>
+	<input type=hidden name=last_page value="<?= $pageno?>">
+	<input type=hidden name=last_tab value="<?= $tabno?>">
+	<input type=text name=q size=20 value="<?php isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'],
+	ENT_QUOTES) : 'Search' ?>">
+      </form>
+
+    <div class="greeting navbar-text"><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
 <?php renderQuickLinks() ?>
     </div>
   </nav>
