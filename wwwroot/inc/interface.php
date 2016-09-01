@@ -127,12 +127,14 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 	<input type=hidden name=page value=search>
 	<input type=hidden name=last_page value="<?= $pageno?>">
 	<input type=hidden name=last_tab value="<?= $tabno?>">
-	<input type=text name=q size=20 value="<?php isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'],
-	ENT_QUOTES) : 'Search' ?>">
+        <!-- display value if "q" is set, placeholder otherwise -->
+	<input type=text name=q class="form-control" <?= (isset ($_REQUEST['q']) ? 'value="'.htmlspecialchars
+	($_REQUEST['q'], ENT_QUOTES).'"' : 'placeholder="Search"') ?>>
       </form>
 
-    <div class="greeting navbar-text"><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
 <?php renderQuickLinks() ?>
+
+    <div class="greeting navbar-text"><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
     </div>
   </nav>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
