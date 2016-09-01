@@ -114,16 +114,24 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <?php printPageHeaders(); ?>
 </head>
 <body>
-<div class="maintable">
- <div class="mainheader">
-  <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
- <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- </div>
+  <nav class="navbar navbar-static-top navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+	<a class="navbar-brand" href="index.php?page=index&tab=default">
+	  <img src="?module=chrome&uri=pix/rt.svg" alt="Racktables" style="height:70%"/>
+	</a>
+      </div>
+    <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
+<?php renderQuickLinks() ?>
+    </div>
+  </nav>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
  <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
  <div class="msgbar"><?php showMessageOrError(); ?></div>
  <div class="pagebar"><?php echo $payload; ?></div>
-</div>
+  <footer>
+    <a href="http://racktables.org" title="Visit RackTables site">RackTables <?php echo CODE_VERSION ?></a>
+  </footer>
 </body>
 </html>
 <?php
