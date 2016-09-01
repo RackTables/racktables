@@ -506,7 +506,7 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 		(
 			'a_core' => array
 			(
-				array('type' => 'file', 'script' => 'js/jquery-1.4.4.min.js'),
+				array('type' => 'file', 'script' => 'js/jquery-3.1.0.min.js'),
 				array('type' => 'file', 'script' => 'js/bootstrap.min.js'),
 				array('type' => 'file', 'script' => 'js/racktables.js'),
 			),
