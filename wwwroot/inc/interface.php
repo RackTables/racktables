@@ -140,12 +140,12 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 
     </div>
   </nav>
- <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
+<?php showPathAndSearch ($pageno, $tabno); ?>
  <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
  <div class="msgbar"><?php showMessageOrError(); ?></div>
  <div class="pagebar"><?php echo $payload; ?></div>
   <footer>
-    <a href="http://racktables.org" title="Visit RackTables site">RackTables <?php echo CODE_VERSION ?></a>
+    Racktables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a>
   </footer>
 </body>
 </html>
@@ -5367,17 +5367,13 @@ function showPathAndSearch ($pageno, $tabno)
 			break;
 		}
 	}
-	// Search form.
-	echo "<div class='searchbox' style='float:right'>";
-	echo "<form name=search method=get>";
-	echo '<input type=hidden name=page value=search>';
-	echo "<input type=hidden name=last_page value=$pageno>";
-	echo "<input type=hidden name=last_tab value=$tabno>";
-	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
 
 	// Path (breadcrumbs)
-	echo implode(' : ', array_reverse ($items));
+
+	echo "<div class=\"container\"><ol class=\"breadcrumb\">";
+	foreach (array_reverse ($items) as $i) echo "<li>".$i."</li>";
+	//echo implode(' : ', array_reverse ($items));
+	echo "</ol></div>";
 }
 
 function getTitle ($pageno)

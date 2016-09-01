@@ -949,3 +949,20 @@ div.popupbar {
 	text-align: center;
 	margin: 5px;
 }
+
+nav.navbar {
+  margin-bottom: 0;
+}
+
+ol.breadcrumb {
+    border-radius: 0px 0px 4px 4px;
+}
+
+footer {
+  background-color: rgb(34, 34, 34);
+  color: #e0e0e0;
+  padding: 10px;
+  margin-top: 30px;
+  text-align: center;
+}
+
