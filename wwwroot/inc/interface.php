@@ -122,6 +122,10 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 	</a>
       </div>
 
+<ul class="nav navbar-nav navbar-right">
+<?php renderLoginMenu() ?>
+</ul> 
+
       <!-- Search form-->
       <form name=search method=get class="navbar-form navbar-right">
 	<input type=hidden name=page value=search>
@@ -134,7 +138,6 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 
 <?php renderQuickLinks() ?>
 
-    <div class="greeting navbar-text"><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
     </div>
   </nav>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
@@ -147,6 +150,30 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 </body>
 </html>
 <?php
+}
+
+// Top-right menu
+function renderLoginMenu()
+{
+?>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+  <?php global $remote_displayname; echo $remote_displayname; ?>&nbsp;<span class="caret"></span></a>
+  <ul class="dropdown-menu">
+<?php
+
+// flatten indexlayout array and display it as menu
+global $indexlayout;
+foreach ($indexlayout as $i) foreach ($i as $j)
+    echo "<li>".mkA(getPageName($j),$j)."</li>";
+
+    echo '<li role="separator" class="divider"></li>';
+    echo "<li>".mkA("Configuration","config","default")."</li>";
+    echo '<li role="separator" class="divider"></li>';
+    echo "<li>".mkA("My account","myaccount","default")."</li>";
+    echo "<li><a href=\""; showLogoutURL(); echo "\">Logout</a></li>";
+    echo "</ul></li>";
+
 }
 
 // Main menu.
