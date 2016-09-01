@@ -381,6 +381,7 @@ function proxyStaticURI ($URI)
 		'jpg' => 'image/jpeg',
 		'jpeg' => 'image/jpeg',
 		'ico' => 'image/x-icon',
+		'svg' => 'image/svg+xml',
 	);
 	$matches = array();
 	if
