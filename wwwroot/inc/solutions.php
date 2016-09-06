@@ -446,6 +446,11 @@ function proxyCactiRequest ($server_id, $graph_id)
 		$cookie_header = implode(";", $cookies);
 		$_SESSION['CACTICOOKIE'][$cacti_url] = $cookie_header; // store for later use by this user
 
+		// CSRF security in 0.8.8h
+		$csrf = substr($ret['contents'], strpos($ret['contents'],'sid:') , 110);
+                if ($csrf)
+                        $postvars .="&__csrf_magic=$csrf";
+
 		// POST Login
 		curl_setopt ($session, CURLOPT_COOKIE, $cookie_header);
 		curl_setopt ($session, CURLOPT_HEADER, FALSE);
