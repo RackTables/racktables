@@ -6448,7 +6448,7 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 // td_class  -- CSS class for the TD
 // td_escape -- whether to do HTML escaping (defaults to TRUE)
 // td_maxlen -- cutoff margin for escaping (defaults to 0)
-function renderTableViewer ($columns, $rows)
+function renderTableViewer ($columns, $rows, $params = NULL)
 {
 	$header_row = FALSE;
 	foreach ($columns as $col)
@@ -6458,8 +6458,15 @@ function renderTableViewer ($columns, $rows)
 		if (array_key_exists ('th_text', $col))
 			$header_row = TRUE;
 	}
-	$tclass = $header_row ? 'zebra' : 'zebra0';
-	echo "<table cellspacing=0 cellpadding=5 align=center class='widetable ${tclass}'>";
+	if ($params === NULL)
+		$params = array
+		(
+			'cellspacing' => 0,
+			'cellpadding' => 5,
+			'align' => 'center',
+			'class' => $header_row ? 'widetable zebra' : 'widetable zebra0',
+		);
+	echo makeHtmlTag ('table', $params);
 	if ($header_row)
 	{
 		echo '<thead><tr>';
@@ -6478,7 +6485,10 @@ function renderTableViewer ($columns, $rows)
 	echo '<tbody>';
 	foreach ($rows as $row)
 	{
-		echo '<tr align=left valign=top>';
+		$trattr = array ('align' => 'left', 'valign' => 'top');
+		if (array_key_exists ('_tr_class', $row))
+			$trattr['class'] = $row['_tr_class'];
+		echo makeHtmlTag ('tr', $trattr);
 		foreach ($columns as $col)
 			if (! array_key_exists ($col['row_key'], $row))
 				echo '<td class=trerror>data error</td>';
