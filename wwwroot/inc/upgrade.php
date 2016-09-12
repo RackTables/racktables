@@ -158,7 +158,7 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
-        '0.20.11' => <<<ENDOFTEXT
+	'0.20.11' => <<<ENDOFTEXT
 New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
 dsplaying unallocated networks in IPv4 space tree. Setting it also disables
 the "knight" feature.
