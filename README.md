@@ -187,6 +187,13 @@ and initialize the application.
 
 ## Release notes
 
+### Upgrading to 0.20.12
+
+This release introduces a new plugin architecture.  If you experience issues
+after the upgrade, try disabling plugins.
+Refer to http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins
+for more information.
+
 ### Upgrading to 0.20.11
 
 New `IPV4_TREE_SHOW_UNALLOCATED` configuration option introduced to disable

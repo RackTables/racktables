@@ -1069,22 +1069,6 @@ function findAllEndpoints ($object_id, $fallback = '')
 	return $regular;
 }
 
-// Split object's FQDN (or the common name if FQDN is not set) into the
-// hostname and domain name in Munin convention (using the first period as the
-// separator), and return the pair. Throw an exception on error.
-function getMuninNameAndDomain ($object_id)
-{
-	$o = spotEntity ('object', $object_id);
-	$hd = $o['name'];
-	// FQDN overrides the common name for Munin purposes.
-	$attrs = getAttrValues ($object_id);
-	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
-		$hd = $attrs[3]['value'];
-	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
-		throw new InvalidArgException ('object_id', $object_id, 'the name is not in the host.do.ma.in format');
-	return $ret;
-}
-
 // Some records in the dictionary may be written as plain text or as Wiki
 // link in the following syntax:
 // 1. word
@@ -5126,7 +5110,11 @@ function setMessage ($type, $message, $direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
 	elseif (isset ($script_mode) && $script_mode)
 	{
-		if ($type == 'warning' || $type == 'error')
+		// unit tests can't capture stdout or stderr, so treat it as normal output
+		global $test_mode;
+		if (isset ($test_mode) and $test_mode)
+			printf ("%s: %s\n", strtoupper($type), strip_tags ($message));
+		elseif ($type == 'warning' or $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
 	}
 	else
@@ -6517,6 +6505,21 @@ function syncObjectPorts ($objectInfo, $desiredPorts)
 	$dbxlink->commit();
 
 	showSuccess ("Added ports: {$added}, changed: {$changed}, deleted: {$deleted}");
+}
+
+function formatPluginState ($state)
+{
+	switch ($state)
+	{
+	case 'disabled':
+		return 'Disabled';
+	case 'enabled':
+		return 'Enabled';
+	case 'not_installed':
+		return 'Not installed';
+	default:
+		return 'unknown';
+	}
 }
 
 ?>

@@ -84,7 +84,6 @@ function platform_is_ok ()
 	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'trwarning');
 	platform_function_test ('pcntl_waitpid', 'PCNTL extension', '802.1Q parallel sync is unavailable.', 'trwarning');
 	$nerrs += platform_function_test ('json_encode', 'JSON extension', 'JavaScript interface bits may fail.');
-	platform_generic_test (in_array  ('curl', get_loaded_extensions()), 'cURL extension', 'Not found, Cacti Graph integration is unavailable.', 'trwarning');
 	$nerrs += platform_function_test ('bcmul', 'BC Math extension');
 	platform_generic_test
 	(

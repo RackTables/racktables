@@ -219,10 +219,16 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
-        '0.20.11' => <<<ENDOFTEXT
+	'0.20.11' => <<<ENDOFTEXT
 New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
 dsplaying unallocated networks in IPv4 space tree. Setting it also disables
 the "knight" feature.
+ENDOFTEXT
+,
+	'0.20.12' => <<<ENDOFTEXT
+This release introduces a new plugin architecture.  If you experience issues
+after the upgrade, try disabling plugins.
+Refer to <a href="http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins">the wiki</a> for more information.
 ENDOFTEXT
 ,
 );
@@ -1977,6 +1983,38 @@ ENDOFTRIGGER;
 			$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
 				(11,1088), (12,1088), (11,1089), (12,1089),
 				(11,1090), (12,1090), (11,1091), (12,1091)";
+			$query[] = "
+CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+			// if the Cacti or Munin plugins are being used, mark them as enabled, otherwise uninstall them
+			// from now on, upgrades will be handled by the plugins themselves
+			$result = $dbxlink->query ('SELECT COUNT(*) FROM CactiServer');
+			if ($result->fetch (PDO::FETCH_COLUMN, 0) > 0)
+				$query[] = "INSERT INTO Plugin VALUES ('cacti','Cacti','1.0','http://www.racktables.org/','enabled')";
+			else
+			{
+				$query[] = "DELETE FROM Config WHERE varname IN ('CACTI_LISTSRC','CACTI_RRA_ID')";
+				$query[] = "DROP TABLE `CactiGraph`";
+				$query[] = "DROP TABLE `CactiServer`";
+			}
+			unset ($result);
+			$result = $dbxlink->query ('SELECT COUNT(*) FROM MuninServer');
+			if ($result->fetch (PDO::FETCH_COLUMN, 0) > 0)
+				$query[] = "INSERT INTO Plugin VALUES ('munin','Munin','1.0','http://www.racktables.org/','enabled')";
+			else
+			{
+				$query[] = "DELETE FROM Config WHERE varname = 'MUNIN_LISTSRC'";
+				$query[] = "DROP TABLE `MuninGraph`";
+				$query[] = "DROP TABLE `MuninServer`";
+			}
+			unset ($result);
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
