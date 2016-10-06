@@ -2069,6 +2069,34 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['brocade-vdx-QSFP+'] = array
+(
+	'pattern' => '@^FortyGigabitEthernet 0/(\d+)$@',
+	'replacement' => 'Fo /0/\\1',
+	'dict_key' => '10-1588',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-vdx-SFP+'] = array
+(
+	'pattern' => '@^TenGigabitEthernet 0/(\d+)$@',
+	'replacement' => 'Te /0/\\1',
+	'dict_key' => '9-1084', // empty SFP+
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-vdx-management'] = array
+(
+	'pattern' => '@^eth0$@',
+	'replacement' => 'management',
+	'dict_key' => '1-24',
+	'label' => 'Management',
+	'try_next_proc' => FALSE,
+);
+
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -3976,6 +4004,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2241,
 		'text' => 'IBM System Networking RackSwitch G8000',
 		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
+	),
+	'1588.3.3.1.131' => array
+	(
+		'dict_key' => 2588,
+		'text' => 'Brocade VDX 6740',
+		'processors' => array ('brocade-vdx-QSFP+','brocade-vdx-SFP+', 'brocade-vdx-management'),
+	),
+	'1991.1.3.62.2.1.1.1' => array
+	(
+		'dict_key' => 2589,
+		'text' => 'ICX7250-48 48x1000T + 8 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
 	),
 
 );

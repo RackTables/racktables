@@ -2476,6 +2476,8 @@ $dictionary = array
 	2585 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925E | http://www.cisco.com/c/en/us/products/routers/3925e-integrated-services-router-isr/index.html]]'),
 	2586 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945 | http://www.cisco.com/c/en/us/products/routers/3945-integrated-services-router-isr/index.html]]'),
 	2587 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945E | http://www.cisco.com/c/en/us/products/routers/3945e-integrated-services-router-isr/index.html]]'),
+	2588 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%VDX 6740 | http://www.brocade.com/en/products-services/switches/data-center-switches/vdx-6740-switches.html]]'),
+	2589 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-7250-48 | http://www.brocade.com/en/products-services/switches/campus-network-switches/icx-7250-switch.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
