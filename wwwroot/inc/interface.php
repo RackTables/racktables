@@ -2118,7 +2118,8 @@ function renderPortsInfo($object_id)
 	{
 		echo "<td valign='top' width='50%'>";
 		startPortlet('Link status');
-		echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
+		echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'>";
+		echo '<tr><th>Port</th><th>&nbsp;</th><th>Link status</th><th>Link info</th></tr>';
 		$statusmap = array
 		(
 			'up' => 'link up',
@@ -2130,9 +2131,9 @@ function renderPortsInfo($object_id)
 		{
 			echo "<tr class='row_$order'>";
 			$order = $nextorder[$order];
-			echo '<td>' . $pn;
-			echo '<td>' . getImageHREF (array_fetch ($statusmap, $link['status'], '16x16t'));
-			echo '<td>' . $link['status'];
+			echo '<td>' . $pn . '</td>';
+			echo '<td>' . getImageHREF (array_fetch ($statusmap, $link['status'], '16x16t')) . '</td>';
+			echo '<td>' . $link['status'] . '</td>';
 			$info = '';
 			if (isset ($link['speed']))
 				$info .= $link['speed'];
@@ -2142,7 +2143,7 @@ function renderPortsInfo($object_id)
 					$info .= ', ';
 				$info .= $link['duplex'];
 			}
-			echo '<td>' . $info;
+			echo '<td>' . $info . '</td>';
 			echo '</tr>';
 		}
 		echo "</table></td>";
@@ -2154,7 +2155,8 @@ function renderPortsInfo($object_id)
 		echo "<td valign='top' width='50%'>";
 		$rendered_macs = '';
 		$mac_count = 0;
-		$rendered_macs .=  "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>MAC<th>Vlan<th>Port</tr>";
+		$rendered_macs .= "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'>";
+		$rendered_macs .= '<tr><th>MAC address</th><th>VLAN</th><th>Port</th></tr>';
 		$order = 'even';
 		foreach ($macList as $pn => $list)
 		{
@@ -2163,9 +2165,9 @@ function renderPortsInfo($object_id)
 			{
 				++$mac_count;
 				$rendered_macs .= "<tr class='row_$order'>";
-				$rendered_macs .= '<td style="font-family: monospace">' . $item['mac'];
-				$rendered_macs .= '<td>' . $item['vid'];
-				$rendered_macs .= '<td>' . $pn;
+				$rendered_macs .= '<td style="font-family: monospace">' . $item['mac'] . '</td>';
+				$rendered_macs .= '<td>' . $item['vid'] . '</td>';
+				$rendered_macs .= '<td>' . $pn . '</td>';
 				$rendered_macs .= '</tr>';
 			}
 		}
