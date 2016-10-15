@@ -2477,6 +2477,29 @@ $dictionary = array
 	2586 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945 | http://www.cisco.com/c/en/us/products/routers/3945-integrated-services-router-isr/index.html]]'),
 	2587 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945E | http://www.cisco.com/c/en/us/products/routers/3945e-integrated-services-router-isr/index.html]]'),
 
+	2588 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE7855-32Q-EI'),
+	2589 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6870-48S6CQ-EI'),
+	2590 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6870-24S6CQ-EI'),
+	2591 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6860-48S8CQ-EI'),
+	2592 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6850U-24S2Q-HI'),
+	2593 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6850U-48S6Q-HI'),
+	2594 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6851-48S6Q-HI'),
+	2595 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6855-48T6Q-HI'),
+	2596 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6850-48T6Q-HI'),
+	2597 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6855-48S6Q-HI'),
+	2598 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6850-48S6Q-HI'),
+	2599 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-48S4Q-EI'),
+	2600 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-48S4Q-LI'),
+	2601 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-48S-LI'),
+	2602 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-24S2Q-LI'),
+	2603 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-32T16S4Q-LI'),
+	2604 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5855-24T4S2Q-EI'),
+	2605 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5855-48T4S2Q-EI'),
+
+	2606 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-30C-EI-24S'),
+	2607 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-54C-EI-48S'),
+	2608 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720S-26Q-EI-24S'),
+
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.
