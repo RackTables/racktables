@@ -13,6 +13,8 @@ services:
  - mysql
 
 before_script:
+ - echo 'Setting up a MySQL database for the tests. [...]'
+ - echo -n travis_fold:start:before_script
  - mysql -u root -e "CREATE DATABASE racktables_unittest CHARACTER SET utf8 COLLATE utf8_general_ci;"
  - mysql -u root -e "GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables@localhost IDENTIFIED BY 'travistest';"
  - echo "<?php" > wwwroot/inc/secret.php
@@ -31,6 +33,7 @@ before_script:
  - echo "?>" >> cli_install.php
  - php cli_install.php
  - echo 'INSERT INTO UserAccount (user_id, user_name, user_password_hash) VALUES (1, "admin", SHA1("travistest"));' | mysql -u racktables -ptravistest racktables_unittest
+ - echo -n travis_fold:end:before_script
 
 script:
  - ./tests/express.sh
