@@ -414,7 +414,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' .
+		'SELECT AM.objtype_id, A.name AS attr_name, C.name AS chapter_name ' .
 		'FROM AttributeMap AM ' .
 		'LEFT JOIN Attribute A ON AM.attr_id = A.id ' .
 		'LEFT JOIN Chapter C ON AM.chapter_id = C.id ' .
@@ -445,7 +445,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT O.* FROM Object O ' .
+		'SELECT O.id, O.name, O.objtype_id FROM Object O ' .
 		'LEFT JOIN Dictionary D ON O.objtype_id = D.dict_key ' .
 		'WHERE D.dict_key IS NULL'
 	);
@@ -473,7 +473,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OH.* FROM ObjectHistory OH ' .
+		'SELECT OH.id, OH.name, OH.objtype_id FROM ObjectHistory OH ' .
 		'LEFT JOIN Dictionary D ON OH.objtype_id = D.dict_key ' .
 		'WHERE D.dict_key IS NULL'
 	);
@@ -623,7 +623,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT TS.*, TT.tag FROM TagStorage TS ' .
+			'SELECT TS.entity_realm, TS.entity_id, TT.tag FROM TagStorage TS ' .
 			'LEFT JOIN TagTree TT ON TS.tag_id = TT.id ' .
 			"LEFT JOIN ${details['table']} ON TS.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE TS.entity_realm = ? AND ${details['table']}.${details['column']} IS NULL",
@@ -661,7 +661,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT FL.*, F.name FROM FileLink FL ' .
+			'SELECT FL.entity_type, FL.entity_id, F.name FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
 			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
