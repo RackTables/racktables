@@ -2699,7 +2699,7 @@ function linkFileToEntity ()
 
 function replaceFile ()
 {
-	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR2' => 201));
+	setFuncMessages (__FUNCTION__, array ('OK' => 6, 'ERR2' => 201));
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);
