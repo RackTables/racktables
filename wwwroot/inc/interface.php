@@ -5075,7 +5075,12 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
+		$title = 'created ' . $cell['ctime'];
+		if ($cell['ctime'] != $cell['mtime'])
+			$title .= "\nmodified " . $cell['mtime'];
+		echo "<span title='${title}'>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'file', $cell['id']);
+		echo '</span>';
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) && count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
