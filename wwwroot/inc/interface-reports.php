@@ -329,7 +329,8 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT EL.* FROM EntityLink EL ' .
+			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
+			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
 			"LEFT JOIN ${table} ON EL.child_entity_id = ${table}.id " .
 			"WHERE EL.child_entity_type = ? AND ${table}.id IS NULL",
 			array ($realm)
@@ -372,7 +373,8 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT EL.* FROM EntityLink EL ' .
+			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
+			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
 			"LEFT JOIN ${table} ON EL.parent_entity_id = ${table}.id " .
 			"WHERE EL.parent_entity_type = ? AND ${table}.id IS NULL",
 			array ($realm)
@@ -501,7 +503,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OPC.*, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
+		'SELECT OPC.parent_objtype_id, OPC.child_objtype_id, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
 		'FROM ObjectParentCompat OPC ' .
 		'LEFT JOIN Dictionary PD ON OPC.parent_objtype_id = PD.dict_key ' .
 		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' .
