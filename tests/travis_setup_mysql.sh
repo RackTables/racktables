@@ -3,7 +3,7 @@
 if [ $# -ne 3 ]; then
 	echo "This script creates a MySQL database for unit testing in Travis CI environment"
 	echo "Don't run it on a production system because it may cause lots of damage."
-	echo "Usage: $0 <database name>"
+	echo "Usage: $0 <MySQL database name> <MySQL user name> <MySQL user password>"
 	exit 1
 fi
 
