@@ -13,27 +13,7 @@ services:
  - mysql
 
 before_script:
- - echo 'Setting up a MySQL database for the tests. [...]'
- - echo -n travis_fold:start:before_script
- - mysql -u root -e "CREATE DATABASE racktables_unittest CHARACTER SET utf8 COLLATE utf8_general_ci;"
- - mysql -u root -e "GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables@localhost IDENTIFIED BY 'travistest';"
- - echo "<?php" > wwwroot/inc/secret.php
- - echo "\$pdo_dsn = 'mysql:host=127.0.0.1;port=3306;dbname=racktables_unittest';" >> wwwroot/inc/secret.php
- - echo "\$db_username = 'racktables';" >> wwwroot/inc/secret.php
- - echo "\$db_password = 'travistest';" >> wwwroot/inc/secret.php
- - echo "?>" >> wwwroot/inc/secret.php
- - echo "<?php" > cli_install.php
- - echo "require_once 'wwwroot/inc/pre-init.php';" >> cli_install.php
- - echo "require_once 'wwwroot/inc/dictionary.php';" >> cli_install.php
- - echo "require_once 'wwwroot/inc/config.php';" >> cli_install.php
- - echo "require_once 'wwwroot/inc/install.php';" >> cli_install.php
- - echo "ob_start();" >> cli_install.php
- - echo "init_database_static();" >> cli_install.php
- - echo "ob_end_clean();" >> cli_install.php
- - echo "?>" >> cli_install.php
- - php cli_install.php
- - echo 'INSERT INTO UserAccount (user_id, user_name, user_password_hash) VALUES (1, "admin", SHA1("travistest"));' | mysql -u racktables -ptravistest racktables_unittest
- - echo -n travis_fold:end:before_script
+ - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
 
 script:
  - ./tests/express.sh
