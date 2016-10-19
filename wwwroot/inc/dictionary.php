@@ -2508,6 +2508,13 @@ $dictionary = array
 	2614 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 6.0 | http://www.openbsd.org/60.html]]'),
 	2615 => array ('chapter_id' => 11, 'dict_value' => 'HP ProLiant%GPASS%DL980'),
 	2616 => array ('chapter_id' => 13, 'dict_value' => 'FreeBSD%GSKIP%FreeBSD 11.x'),
+	2617 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 5.6'),
+	2618 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 6.0'),
+	2619 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 6.1'),
+	2620 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 6.2'),
+	2621 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 6.5'),
+	2622 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 7.0'),
+	2623 => array ('chapter_id' => 18, 'dict_value' => 'HP StorageWorks P6300'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
