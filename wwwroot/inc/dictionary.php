@@ -2462,7 +2462,7 @@ $dictionary = array
 	2571 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4S'),
 	2572 => array ('chapter_id' => 13, 'dict_value' => 'Solaris%GSKIP%Solaris 11'),
 	2573 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C420 M3'),
-
+	# 2574, please use
 	2575 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C460 M4'),
 	2576 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS-Mini 6324 Fabric Interconnect'),
 	2577 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS 6332 Fabric Interconnect'),
@@ -2476,7 +2476,6 @@ $dictionary = array
 	2585 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3925E | http://www.cisco.com/c/en/us/products/routers/3925e-integrated-services-router-isr/index.html]]'),
 	2586 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945 | http://www.cisco.com/c/en/us/products/routers/3945-integrated-services-router-isr/index.html]]'),
 	2587 => array ('chapter_id' => 17, 'dict_value' => '[[Cisco%GPASS%3945E | http://www.cisco.com/c/en/us/products/routers/3945e-integrated-services-router-isr/index.html]]'),
-
 	2588 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE7855-32Q-EI'),
 	2589 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6870-48S6CQ-EI'),
 	2590 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6870-24S6CQ-EI'),
@@ -2495,11 +2494,9 @@ $dictionary = array
 	2603 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE6810-32T16S4Q-LI'),
 	2604 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5855-24T4S2Q-EI'),
 	2605 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE5855-48T4S2Q-EI'),
-
 	2606 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-30C-EI-24S'),
 	2607 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-54C-EI-48S'),
 	2608 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720S-26Q-EI-24S'),
-	
 	2609 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.5 | http://www.openbsd.org/55.html]]'),
 	2610 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.6 | http://www.openbsd.org/56.html]]'),
 	2611 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.7 | http://www.openbsd.org/57.html]]'),
