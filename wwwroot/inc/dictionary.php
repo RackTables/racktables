@@ -2499,6 +2499,14 @@ $dictionary = array
 	2606 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-30C-EI-24S'),
 	2607 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720-54C-EI-48S'),
 	2608 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%S6720S-26Q-EI-24S'),
+	
+	2609 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.5 | http://www.openbsd.org/55.html]]'),
+	2610 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.6 | http://www.openbsd.org/56.html]]'),
+	2611 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.7 | http://www.openbsd.org/57.html]]'),
+	2612 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.8 | http://www.openbsd.org/58.html]]'),
+	2613 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 5.9 | http://www.openbsd.org/59.html]]'),
+	2614 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 6.0 | http://www.openbsd.org/60.html]]'),
+	2615 => array ('chapter_id' => 11, 'dict_value' => 'HP ProLiant%GPASS%DL980'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
