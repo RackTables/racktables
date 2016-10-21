@@ -2793,7 +2793,9 @@ function ciscoReadInterfaceStatus ($text)
 				}
 				break;
 			case 'readPort':
-				$portname = shortenIfName (trim (substr ($line, 0, $name_field_borders['from'])));
+				$portname = trim (substr ($line, 0, $name_field_borders['from']));
+				$portname = preg_replace ('/\s+.*/', '', $portname);
+				$portname = shortenIfName ($portname);
 				$rest = trim (substr ($line, $name_field_borders['from'] + $name_field_borders['length'] + 1));
 				$field_list = preg_split('/\s+/', $rest);
 				if (count ($field_list) < 4)
