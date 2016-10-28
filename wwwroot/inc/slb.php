@@ -96,7 +96,7 @@ class SLBTriplet
 	{
 		$ret = array();
 		$result = usePreparedSelectBlade ("
-SELECT DISTINCT IPv4LB.*
+SELECT DISTINCT IPv4LB.object_id, IPv4LB.rspool_id, IPv4LB.vs_id, IPv4LB.prio, IPv4LB.vsconfig, IPv4LB.rsconfig
 FROM
 	IPv4LB INNER JOIN IPv4VS ON IPv4VS.id = IPv4LB.vs_id
 	LEFT JOIN IPv4RS USING (rspool_id)

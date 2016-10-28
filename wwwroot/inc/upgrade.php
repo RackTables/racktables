@@ -808,7 +808,7 @@ CREATE TABLE `Attribute_new` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB
 ";
-			$query[] = "INSERT INTO Attribute_new SELECT * FROM Attribute";
+			$query[] = "INSERT INTO Attribute_new SELECT id, type, name FROM Attribute";
 			$query[] = "INSERT INTO Attribute_new VALUES (9999, 'string', 'base MAC address')";
 			$query[] = "DROP TABLE Attribute";
 			$query[] = "ALTER TABLE Attribute_new RENAME TO Attribute";
@@ -1064,7 +1064,7 @@ CREATE TABLE `IPv6Log` (
 			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `child_entity_type` ENUM('file','location','object','rack','row') NOT NULL";
 
 			// Turn rows into objects
-			$result = $dbxlink->query ('SELECT * FROM RackRow');
+			$result = $dbxlink->query ('SELECT name FROM RackRow');
 			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			foreach ($rows as $row)
@@ -2229,7 +2229,7 @@ CREATE TABLE `IPv4VS_new` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 END
 	);
-	$result = $dbxlink->query ("SELECT * FROM IPv4VS");
+	$result = $dbxlink->query ("SELECT id, vip, vport, proto, name, vsconfig, rsconfig FROM IPv4VS");
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($rows as $row)
@@ -2254,7 +2254,7 @@ CREATE TABLE `IPv4RS_new` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 END
 	);
-	$result = $dbxlink->query ("SELECT * FROM IPv4RS");
+	$result = $dbxlink->query ("SELECT id, inservice, rsip, rsport, rspool_id, rsconfig FROM IPv4RS");
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($rows as $row)
