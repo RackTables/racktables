@@ -749,7 +749,7 @@ function renderChapterEditor ($tgt_chapter_no)
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR();
-	echo "</table>\n";
+	echo "</table>\n<br>";
 }
 
 // $v is a $configCache item
