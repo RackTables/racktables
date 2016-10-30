@@ -2069,6 +2069,33 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ubiquiti-chassis-any-1000T'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => 24,
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ubiquiti-chassis-any-SFP+'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (\d+) 10G - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (51|52) Gigabit - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -3977,7 +4004,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'IBM System Networking RackSwitch G8000',
 		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
 	),
-
+	'4413' => array
+	(
+		'dict_key' => 2624,
+		'text' => 'Ubiquiti EdgeSwitch ES-48-LITE',
+		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+'),
+	),
 );
 
 global $swtype_pcre;
