@@ -162,6 +162,7 @@ function vrpReadLLDPStatus ($input)
 		'Interface Alias',
 		'local',
 		'Local',
+		'Locally assigned',
 	);
 	foreach (explode ("\n", $input) as $line)
 	{
