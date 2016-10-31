@@ -158,8 +158,10 @@ function vrpReadLLDPStatus ($input)
 	(
 		'interfaceName',
 		'Interface Name',
+		'Interface name',
 		'interfaceAlias',
 		'Interface Alias',
+		'Interface alias',
 		'local',
 		'Local',
 		'Locally assigned',
