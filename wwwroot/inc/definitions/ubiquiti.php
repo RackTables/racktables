@@ -14,12 +14,12 @@ $ubiquiti_switches = array(
 "EdgeSwitch 16-Port 10G" => array(
  'dict_key' => 2625,
  'text' => 'Ubiquiti EdgeSwitch ES-16-XG',
- 'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+')
+ 'processors' => array ('ubiquiti-chassis-13-to-16-10GBASE-T','ubiquiti-chassis-any-SFP+')
 ), 
 "EdgeSwitch 48-Port Lite" => array(
  'dict_key' => 2624,
  'text' => 'Ubiquiti EdgeSwitch ES-48-LITE',
- 'processors' => array ('ubiquiti-chassis-13-to-16-10GBASE-T','ubiquiti-chassis-any-SFP+')
+ 'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+')
 ));
 
 if (!isset($switch_model_lookup))
