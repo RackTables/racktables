@@ -2513,6 +2513,7 @@ $dictionary = array
 	2622 => array ('chapter_id' => 13, 'dict_value' => 'Xen Hypervisor%GSKIP%XenServer 7.0'),
 	2623 => array ('chapter_id' => 18, 'dict_value' => 'HP StorageWorks P6300'),
 	2624 => array ('chapter_id' => 12, 'dict_value' => 'Ubiquiti EdgeSwitch ES-48-LITE'),
+	2625 => array ('chapter_id' => 12, 'dict_value' => 'Ubiquiti EdgeSwitch ES-16-XG'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
