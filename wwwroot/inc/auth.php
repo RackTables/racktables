@@ -437,7 +437,6 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 			}
 		}
 		releaseLDAPCache();
-		discardLDAPCache ($LDAP_options['cache_expiry']); // clear expired rows of other users
 	}
 
 	if ($user_data)

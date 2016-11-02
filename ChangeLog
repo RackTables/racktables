@@ -7,6 +7,7 @@
 	bugfix: location filter did not work (#1595 by Alberto Avai)
 	bugfix: decline invalid date input with a message (#1389)
 	bugfix: work around MySQL 5.7 SQL mode (#1547, #1635)
+	bugfix: DB lock on LDAP cache hit was still waiting all pending LDAP queries of other users to complete
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
 	update: Nexus 7700, Huawei S5700, Juniper QFX, Mellanox, Quanta, Ixia device models added into dictionary
 	update: Cmd+Click now inverses tag selection on OS X like Ctrl+Click does on Windows/Linix
