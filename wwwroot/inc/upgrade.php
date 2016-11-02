@@ -1064,7 +1064,7 @@ CREATE TABLE `IPv6Log` (
 			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `child_entity_type` ENUM('file','location','object','rack','row') NOT NULL";
 
 			// Turn rows into objects
-			$result = $dbxlink->query ('SELECT name FROM RackRow');
+			$result = $dbxlink->query ('SELECT id, name FROM RackRow');
 			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			foreach ($rows as $row)
