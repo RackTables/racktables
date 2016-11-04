@@ -1069,6 +1069,34 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('SQLDateFromDateStr', '11/12/13', '%d/%m/%y', '2013-12-11'),
 			array ('SQLDateFromDateStr', '2.3.4', '%d.%m.%y', '2004-03-02'),
 			array ('SQLDateFromDateStr', '08.07.1983', '%d.%m.%Y', '1983-07-08'),
+
+			array ('cmpSQLDates', '1927-05-17', '2013-09-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-09-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '2013-09-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-05-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-09-17', '2013-05-21', -1),
+			array ('cmpSQLDates', '1927-09-17', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-09-21', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-09-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-09-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '1927-09-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-05-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-05-17', 0),
+			array ('cmpSQLDates', '1927-05-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '1927-09-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '1927-09-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '1927-09-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-09-21', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-09-17', 1),
+			array ('cmpSQLDates', '2013-05-21', '1927-09-17', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-05-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-09-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '2013-09-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-09-21', '1927-05-17', 1),
 		);
 	}
 
@@ -1459,6 +1487,15 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('HTMLColorFromDatabase', array (10.5)),
 			array ('HTMLColorFromDatabase', array (0x01000000)),
 			array ('HTMLColorFromDatabase', array ('0x123456')),
+
+			array ('cmpSQLDates', array ('', '2010-04-05')),
+			array ('cmpSQLDates', array ('aaaa-bb-cc', '2010-04-05')),
+			array ('cmpSQLDates', array ('0000-00-00', '2010-04-05')),
+			array ('cmpSQLDates', array ('2010-13-32', '2010-04-05')),
+			array ('cmpSQLDates', array ('2010-04-05', '')),
+			array ('cmpSQLDates', array ('2010-04-05', 'aaaa-bb-cc')),
+			array ('cmpSQLDates', array ('2010-04-05', '0000-00-00')),
+			array ('cmpSQLDates', array ('2010-04-05', '2010-13-32')),
 		);
 	}
 

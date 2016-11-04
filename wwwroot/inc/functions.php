@@ -6298,6 +6298,28 @@ function SQLDateFromDateStr ($s, $format = NULL)
 	return sprintf ('%4u-%02u-%02u', $y, $m, $d);
 }
 
+// This function returns either -1 or 0 or 1, it can be used with usort().
+function cmpSQLDates ($date1, $date2)
+{
+	if
+	(
+		! preg_match ('/^(\d\d\d\d)-(\d\d)-(\d\d)$/', $date1, $m1) ||
+		! checkdate ($m1[2], $m1[3], $m1[1])
+	)
+		throw new InvalidArgException ('date1', $date1, 'not a valid SQL date');
+	if
+	(
+		! preg_match ('/^(\d\d\d\d)-(\d\d)-(\d\d)$/', $date2, $m2) ||
+		! checkdate ($m2[2], $m2[3], $m2[1])
+	)
+		throw new InvalidArgException ('date2', $date2, 'not a valid SQL date');
+	if (0 != $ret = numCompare ($m1[1], $m2[1]))
+		return $ret;
+	if (0 != $ret = numCompare ($m1[2], $m2[2]))
+		return $ret;
+	return numCompare ($m1[3], $m2[3]);
+}
+
 # Produce a human-readable clue, such as 'YYYY-MM-DD' for '%Y-%m-%d'.
 function datetimeFormatHint ($format)
 {
