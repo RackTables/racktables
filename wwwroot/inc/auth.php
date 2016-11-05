@@ -51,6 +51,7 @@ function authenticate ()
 			)
 				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			constructLDAPOptions();
 			break;
 		case 'httpd' == $user_auth_src:
 			if
@@ -301,10 +302,11 @@ function saml_getAttributeValues ($attributes, $name)
 	return is_array ($attributes[$name]) ? $attributes[$name] : array($attributes[$name]);
 }
 
-// a wrapper for two LDAP auth methods below
-function authenticated_via_ldap ($username, $password, &$ldap_displayname)
+function constructLDAPOptions()
 {
-	global $LDAP_options, $debug_mode;
+	global $LDAP_options;
+	if (! isset ($LDAP_options))
+		throw new RackTablesError ('$LDAP_options has not been defined (see secret.php)', RackTablesError::MISCONFIGURED);
 	$LDAP_defaults = array
 	(
 		'group_attr' => 'memberof',
@@ -316,7 +318,12 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	foreach ($LDAP_defaults as $option_name => $option_value)
 		if (! array_key_exists ($option_name, $LDAP_options))
 			$LDAP_options[$option_name] = $option_value;
+}
 
+// a wrapper for two LDAP auth methods below
+function authenticated_via_ldap ($username, $password, &$ldap_displayname)
+{
+	global $LDAP_options, $debug_mode;
 	try
 	{
 		// Destroy the cache each time config changes.
