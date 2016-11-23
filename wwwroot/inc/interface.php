@@ -6471,7 +6471,7 @@ function renderTableViewer ($columns, $rows, $params = NULL)
 			'cellspacing' => 0,
 			'cellpadding' => 5,
 			'align' => 'center',
-			'class' => $header_row ? 'widetable zebra' : 'widetable zebra0',
+			'class' => 'widetable zebra0',
 		);
 	echo makeHtmlTag ('table', $params);
 	if ($header_row)
