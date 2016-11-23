@@ -18,6 +18,18 @@ be working with only database.php file included.
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
 function authenticate ()
 {
+	function assertHTTPCredentialsReceived()
+	{
+		if
+		(
+			! isset ($_SERVER['PHP_AUTH_USER']) ||
+			$_SERVER['PHP_AUTH_USER'] == '' ||
+			! isset ($_SERVER['PHP_AUTH_PW']) ||
+			$_SERVER['PHP_AUTH_PW'] == ''
+		)
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+	}
+
 	global
 		$remote_username,
 		$remote_displayname,
@@ -41,15 +53,11 @@ function authenticate ()
 		case isset ($script_mode) && $script_mode && isset ($remote_username) && $remote_username != '':
 			break; // skip this phase
 		case 'database' == $user_auth_src:
+			assertHTTPCredentialsReceived();
+			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			break;
 		case 'ldap' == $user_auth_src:
-			if
-			(
-				! isset ($_SERVER['PHP_AUTH_USER']) ||
-				$_SERVER['PHP_AUTH_USER'] == '' ||
-				! isset ($_SERVER['PHP_AUTH_PW']) ||
-				$_SERVER['PHP_AUTH_PW'] == ''
-			)
-				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+			assertHTTPCredentialsReceived();
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
 			constructLDAPOptions();
 			break;
