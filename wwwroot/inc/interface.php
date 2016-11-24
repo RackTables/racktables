@@ -100,7 +100,7 @@ function renderQuickLinks()
 	global $quick_links;
 	if (! isset ($quick_links))
 		$quick_links = getConfiguredQuickLinks();
-	echo '<ul class="qlinks">';
+	echo '<ul class="nav navbar-nav">';
 	foreach ($quick_links as $link)
 		echo '<li><a href="' . $link['href'] . '">' . str_replace (' ', '&nbsp;', $link['title']) . '</a></li>';
 	echo '</ul>';
@@ -108,25 +108,72 @@ function renderQuickLinks()
 
 function renderInterfaceHTML ($pageno, $tabno, $payload)
 {
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+?><!DOCTYPE html>
+<html>
 <head><title><?php echo getTitle ($pageno); ?></title>
 <?php printPageHeaders(); ?>
 </head>
 <body>
-<div class="maintable">
- <div class="mainheader">
-  <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
- <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- </div>
- <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
+  <nav class="navbar navbar-static-top navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+	<a class="navbar-brand" href="index.php?page=index&tab=default">
+	  <img src="?module=chrome&uri=pix/rt.svg" alt="Racktables" style="height:70%"/>
+	</a>
+      </div>
+
+<ul class="nav navbar-nav navbar-right">
+<?php renderLoginMenu() ?>
+</ul> 
+
+      <!-- Search form-->
+      <form name=search method=get class="navbar-form navbar-right">
+	<input type=hidden name=page value=search>
+	<input type=hidden name=last_page value="<?= $pageno?>">
+	<input type=hidden name=last_tab value="<?= $tabno?>">
+        <!-- display value if "q" is set, placeholder otherwise -->
+	<input type=text name=q class="form-control" <?= (isset ($_REQUEST['q']) ? 'value="'.htmlspecialchars
+	($_REQUEST['q'], ENT_QUOTES).'"' : 'placeholder="Search"') ?>>
+      </form>
+
+<?php renderQuickLinks() ?>
+
+    </div>
+  </nav>
+<?php showPathAndSearch ($pageno, $tabno); ?>
  <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
  <div class="msgbar"><?php showMessageOrError(); ?></div>
  <div class="pagebar"><?php echo $payload; ?></div>
-</div>
+  <footer>
+    Racktables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a>
+  </footer>
 </body>
 </html>
 <?php
+}
+
+// Top-right menu
+function renderLoginMenu()
+{
+?>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+  <?php global $remote_displayname; echo $remote_displayname; ?>&nbsp;<span class="caret"></span></a>
+  <ul class="dropdown-menu">
+<?php
+
+// flatten indexlayout array and display it as menu
+global $indexlayout;
+foreach ($indexlayout as $i) foreach ($i as $j)
+    echo "<li>".mkA(getPageName($j),$j)."</li>";
+
+    echo '<li role="separator" class="divider"></li>';
+    echo "<li>".mkA("Configuration","config","default")."</li>";
+    echo '<li role="separator" class="divider"></li>';
+    echo "<li>".mkA("My account","myaccount","default")."</li>";
+    echo "<li><a href=\""; showLogoutURL(); echo "\">Logout</a></li>";
+    echo "</ul></li>";
+
 }
 
 // Main menu.
@@ -5327,17 +5374,13 @@ function showPathAndSearch ($pageno, $tabno)
 			break;
 		}
 	}
-	// Search form.
-	echo "<div class='searchbox' style='float:right'>";
-	echo "<form name=search method=get>";
-	echo '<input type=hidden name=page value=search>';
-	echo "<input type=hidden name=last_page value=$pageno>";
-	echo "<input type=hidden name=last_tab value=$tabno>";
-	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
 
 	// Path (breadcrumbs)
-	echo implode(' : ', array_reverse ($items));
+
+	echo "<div class=\"container\"><ol class=\"breadcrumb\">";
+	foreach (array_reverse ($items) as $i) echo "<li>".$i."</li>";
+	//echo implode(' : ', array_reverse ($items));
+	echo "</ol></div>";
 }
 
 function getTitle ($pageno)
