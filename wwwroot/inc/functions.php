@@ -303,6 +303,10 @@ function genericAssertion ($argname, $argtype)
 		return assertUIntArg ($argname);
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
+	case 'decimal0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
 	case 'decimal':
 		if (! preg_match ('/^\d+(\.\d+)?$/', assertStringArg ($argname)))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
