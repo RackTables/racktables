@@ -3047,7 +3047,8 @@ function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $
 	$query = 'SELECT ' . implode (', ', $retcolumns) . " FROM ${tablename} WHERE ";
 	$qparams = array();
 	$pfx = '';
-	foreach (explode (' ', $terms) as $term)
+	$pterms = $exactness == 3 ? explode (' ', $terms) : parseSearchTerms ($terms);
+	foreach ($pterms as $term)
 	{
 		switch ($exactness)
 		{

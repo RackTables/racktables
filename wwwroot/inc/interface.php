@@ -3643,6 +3643,19 @@ function searchHandler()
 		showError ('Search string cannot be empty.');
 		redirectUser (buildRedirectURL ('index', 'default'));
 	}
+
+	try
+	{
+		parseSearchTerms ($terms);
+		// Discard the return value as searchEntitiesByText() and its retriever
+		// functions expect the original string as the parameter.
+	}
+	catch (InvalidArgException $iae)
+	{
+		showError ($iae->getMessage());
+		redirectUser (buildRedirectURL ('index', 'default'));
+	}
+
 	renderSearchResults ($terms, searchEntitiesByText ($terms));
 }
 
