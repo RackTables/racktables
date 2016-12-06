@@ -5401,9 +5401,19 @@ function getObjectTypeChangeOptions ($object_id)
 
 // Gets the timestamp and returns human-friendly short message describing the time difference
 // between the current system time and the specified timestamp (like '2d 5h ago')
+function formatAgeTimestamp ($timestamp)
+{
+	return formatAgeSeconds (time() - $timestamp);
+}
+
+// For backward compatibility.
 function formatAge ($timestamp)
 {
-	$seconds = time() - $timestamp;
+	return formatAgeTimestamp ($timestamp);
+}
+
+function formatAgeSeconds ($seconds)
+{
 	switch (TRUE)
 	{
 		case $seconds < 1:
@@ -5413,7 +5423,7 @@ function formatAge ($timestamp)
 		case $seconds <= 300:
 			$mins = intval ($seconds / 60);
 			$secs = $seconds % 60;
-			return ($secs ? "{$mins}min ${secs}s" : "{$mins}m") . ' ago';
+			return ($secs ? "{$mins}min ${secs}s" : "{$mins}min") . ' ago';
 		case $seconds < 3600:
 			return round ($seconds / 60) . 'min' . ' ago';
 		case $seconds < 3 * 3600:
