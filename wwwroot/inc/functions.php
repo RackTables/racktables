@@ -5015,6 +5015,75 @@ function buildSearchRedirectURL ($result_type, $record)
 	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
 
+// This works like explode() with space as a separator with the added difference
+// that anything in double quotes is returned as a single word.
+function parseSearchTerms ($terms)
+{
+	$ret = array();
+	if (mb_substr_count ($terms, '"') % 2 != 0)
+		throw new InvalidArgException ('terms', $terms, 'contains odd number of quotes');
+	$state = 'whitespace';
+	$buffer = '';
+	$len = mb_strlen ($terms);
+	for ($i = 0; $i < $len; $i++)
+	{
+		$c = mb_substr ($terms, $i, 1);
+		switch ($state)
+		{
+		case 'whitespace':
+			switch ($c)
+			{
+			case ' ':
+				break; // nom-nom
+			case '"':
+				$buffer = '';
+				$state = 'quoted_string';
+				break;
+			default:
+				$buffer = $c;
+				$state = 'word';
+			}
+			break;
+
+		case 'word':
+			switch ($c)
+			{
+			case '"':
+				throw new InvalidArgException ('terms', $terms, 'punctuation error');
+			case ' ':
+				$ret[] = $buffer;
+				$buffer = '';
+				$state = 'whitespace';
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+
+		case 'quoted_string':
+			switch ($c)
+			{
+			case '"':
+				if (trim ($buffer) == '')
+					throw new InvalidArgException ('terms', $terms, 'punctuation error');
+				$ret[] = trim ($buffer);
+				$buffer = '';
+				$state = 'whitespace';
+				// FIXME: this does not detect missing whitespace that would be reasonable
+				// to expect between the closing quote and the next token, if any.
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+		}
+	}
+	if ($buffer != '')
+		$ret[] = $buffer;
+
+	return $ret;
+}
+
 // Take a parse tree and figure out if it is a valid payload or not.
 // Depending on that return either NULL or an array filled with the load
 // of that expression.

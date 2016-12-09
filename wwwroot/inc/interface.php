@@ -3643,6 +3643,19 @@ function searchHandler()
 		showError ('Search string cannot be empty.');
 		redirectUser (buildRedirectURL ('index', 'default'));
 	}
+
+	try
+	{
+		parseSearchTerms ($terms);
+		// Discard the return value as searchEntitiesByText() and its retriever
+		// functions expect the original string as the parameter.
+	}
+	catch (InvalidArgException $iae)
+	{
+		showError ($iae->getMessage());
+		redirectUser (buildRedirectURL ('index', 'default'));
+	}
+
 	renderSearchResults ($terms, searchEntitiesByText ($terms));
 }
 
@@ -5242,13 +5255,14 @@ function showPathAndSearch ($pageno, $tabno)
 	{
 		$self = __FUNCTION__;
 		global $page;
+		global $sic;
 		$path = array();
 		$page_name = preg_replace ('/:.*/', '', $targetno);
 		// Recursion breaks at first parentless page.
 		if ($page_name == 'ipaddress')
 		{
 			// case ipaddress is a universal v4/v6 page, it has two parents and requires special handling
-			$ip_bin = ip_parse ($_REQUEST['ip']);
+			$ip_bin = ip_parse ($sic['ip']);
 			$parent = (strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net');
 			$path = $self ($parent);
 			$path[] = $targetno;
@@ -5263,6 +5277,7 @@ function showPathAndSearch ($pageno, $tabno)
 		return $path;
 	}
 	global $page, $tab;
+	global $sic;
 	// Path.
 	$path = getPath ($pageno);
 	$items = array();
@@ -5334,7 +5349,9 @@ function showPathAndSearch ($pageno, $tabno)
 	echo "<input type=hidden name=last_page value=$pageno>";
 	echo "<input type=hidden name=last_tab value=$tabno>";
 	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
+	echo '<label>Search:<input type=text name=q size=20 value="';
+	echo array_key_exists ('q', $sic) ? stringForTextInputValue ($sic['q']) : '';
+	echo '"></label></form></div>';
 
 	// Path (breadcrumbs)
 	echo implode(' : ', array_reverse ($items));

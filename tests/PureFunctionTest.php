@@ -263,6 +263,22 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('validTagName', '$tag', FALSE),
 			array ('validTagName', '2015-', FALSE),
 			array ('validTagName', 'iqn.domain.', FALSE),
+
+			array ('parseSearchTerms', '', array ()),
+			array ('parseSearchTerms', 'sixty', array ('sixty')),
+			array ('parseSearchTerms', '"sixty "', array ('sixty')),
+			array ('parseSearchTerms', 'seventy сімдесят', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', '"seventy" сімдесят', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', 'seventy " сімдесят"', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', '"seventy" "сімдесят"', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', 'eighty вісімдесят восемьдесят', array ('eighty', 'вісімдесят', 'восемьдесят')),
+			array ('parseSearchTerms', '" seventy one "', array ('seventy one')),
+			array ('parseSearchTerms', '"seventy one" сімдесят', array ('seventy one', 'сімдесят')),
+			array ('parseSearchTerms', 'seventy "сімдесят один"', array ('seventy', 'сімдесят один')),
+			array ('parseSearchTerms', '"eighty one" вісімдесят восемьдесят', array ('eighty one', 'вісімдесят', 'восемьдесят')),
+			array ('parseSearchTerms', 'eighty "вісімдесят один" восемьдесят', array ('eighty', 'вісімдесят один', 'восемьдесят')),
+			array ('parseSearchTerms', 'eighty вісімдесят "восемьдесят один"', array ('eighty', 'вісімдесят', 'восемьдесят один')),
+			array ('parseSearchTerms', '"eighty one" "вісімдесят один" "восемьдесят один"', array ('eighty one', 'вісімдесят один', 'восемьдесят один')),
 		);
 	}
 
@@ -1177,6 +1193,12 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('groupBy', array ('', 'test')),
 			array ('groupBy', array (0, 'test')),
 			array ('groupBy', array (array (array ('id' => 1, 'name' => 'one'), 2), 'name')),
+
+			array ('parseSearchTerms', array ('one two three"')),
+			array ('parseSearchTerms', array ('"one two three')),
+			array ('parseSearchTerms', array ('one "two" "three')),
+			array ('parseSearchTerms', array ('one "" three')),
+			array ('parseSearchTerms', array ('""')),
 		);
 	}
 
