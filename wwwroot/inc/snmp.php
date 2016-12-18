@@ -2096,6 +2096,15 @@ $iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ubiquiti-chassis-13-to-16-10GBASE-T'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (13|14|15|16) 10G - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '1642',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4012,9 +4021,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'4413' => array
 	(
-		'dict_key' => 2624,
-		'text' => 'Ubiquiti EdgeSwitch ES-48-LITE',
-		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+'),
+		'model_lookup' => 'ubiquiti',
 	),
 );
 
@@ -4132,6 +4139,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
+	if (array_key_exists("model_lookup", $known_switches[$sysObjectID]))
+	{
+		if (FALSE === ($switchObject = multi_model_lookup($known_switches[$sysObjectID]['model_lookup'], $sysDescr)))
+		{
+			showError ("Unknown Model for OID '{$sysObjectID}'");
+			return;
+		}
+		$known_switches[$sysObjectID] = $switchObject;				
+	}
 	$ifDescr_tablename = array_fetch ($known_switches[$sysObjectID], 'ifDescrOID', 'ifDescr');
 	showSuccess ($known_switches[$sysObjectID]['text']);
 	foreach (array_keys ($known_switches[$sysObjectID]['processors']) as $pkey)

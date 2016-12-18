@@ -6588,4 +6588,31 @@ function syncObjectPorts ($objectInfo, $desiredPorts)
 	showSuccess ("Added ports: {$added}, changed: {$changed}, deleted: {$deleted}");
 }
 
+// searches array of model descriptions for switches from vendor that share OID
+// $manufacturer is defined in the $known_switches array
+// $description is from the sysDescr
+function multi_model_lookup($manufacturer=false, $description=false)
+{
+	if ($manufacturer === false || $description === false)
+	{
+		return false;
+	}
+	$filePath = implode(DIRECTORY_SEPARATOR, array(dirname(__FILE__),'definitions',"{$manufacturer}.php"));
+	if (!file_exists($filePath))
+	{
+		return false;
+	}
+	include $filePath;
+	
+	foreach($switch_model_lookup[$manufacturer] as $key=>$array)
+	{
+		$pos = strpos($description, $key);
+		if ($pos !== false)
+		{
+			return $array;
+		}
+	}
+	return false;
+}
+
 ?>
