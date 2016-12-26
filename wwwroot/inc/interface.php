@@ -5180,9 +5180,14 @@ function getFilePreviewCode ($file)
 		case 'image/png':
 		case 'image/gif':
 			$file = getFile ($file['id']);
-			$image = imagecreatefromstring ($file['contents']);
-			$width = imagesx ($image);
-			$height = imagesy ($image);
+			if (function_exists ('getimagesizefromstring'))
+				list ($width, $height) = getimagesizefromstring ($file['contents']);
+			else
+			{
+				$image = imagecreatefromstring ($file['contents']);
+				$width = imagesx ($image);
+				$height = imagesy ($image);
+			}
 			if ($width < getConfigVar ('PREVIEW_IMAGE_MAXPXS') && $height < getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
 				$resampled = FALSE;
 			else
