@@ -344,7 +344,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
+		echo "<tr><th>Parent</th><th>Child Type</th><th class=tdright>Child ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['parent_entity_type']);
@@ -360,7 +360,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${parent_name}</td>";
 			echo "<td>${orphan['child_entity_type']}</td>";
-			echo "<td>${orphan['child_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -388,7 +388,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>Child</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['child_entity_type']);
@@ -404,7 +404,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${child_name}</td>";
 			echo "<td>${orphan['parent_entity_type']}</td>";
-			echo "<td>${orphan['parent_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -430,13 +430,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
+		echo "<tr><th>Attribute</th><th>Chapter</th><th class=tdright>Object TypeID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
 			echo "<td>${orphan['attr_name']}</td>";
 			echo "<td>${orphan['chapter_name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -458,13 +458,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
+			echo "<td class=tdright>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -486,13 +486,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
+			echo "<td class=tdright>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -516,14 +516,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
+		echo "<tr><th>Parent</th><th class=tdright>Parent Type ID</th><th>Child</th><th class=tdright>Child Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
 			echo "<td>${orphan['parent_name']}</td>";
-			echo "<td>${orphan['parent_objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['parent_objtype_id']}</td>";
 			echo "<td>${orphan['child_name']}</td>";
-			echo "<td>${orphan['child_objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['child_objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -640,14 +640,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>Tag</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_realm']);
 			echo '<tr>';
 			echo "<td>${orphan['tag']}</td>";
 			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
+			echo "<td class=tdright>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -678,14 +678,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>File</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_type']);
 			echo '<tr>';
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
+			echo "<td class=tdright>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -856,13 +856,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Locations: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Location</th><th>Parent ID</th><th>Parent Location</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Location</th><th class=tdright>Parent ID</th><th>Parent Location</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			echo "<td>${invalid['parent_name']}</td>";
 			echo "</tr>\n";
 		}
@@ -889,13 +889,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Contained ID</th><th>Contained Object</th><th>Container ID</th><th>Container Object</th></tr>\n";
+		echo "<tr><th class=tdright>Contained ID</th><th>Contained Object</th><th class=tdright>Container ID</th><th>Container Object</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['container_id']}</td>";
+			echo "<td class=tdright>${invalid['container_id']}</td>";
 			echo "<td>${invalid['container_name']}</td>";
 			echo "</tr>\n";
 		}
@@ -911,13 +911,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Tags: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Tag</th><th>Parent ID</th><th>Parent Tag</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Tag</th><th class=tdright>Parent ID</th><th>Parent Tag</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['tag']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 		}
