@@ -5620,8 +5620,6 @@ function dynamic_title_decoder_throwing ($path_position)
 			'params' => array ('qcode' => $sic['dqcode'])
 		);
 	}
-
-	// default behaviour is throwing an exception
 	throw new RackTablesError ('dynamic_title decoding error', RackTablesError::INTERNAL);
 }
 
