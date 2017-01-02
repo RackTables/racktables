@@ -6080,11 +6080,6 @@ function inverseRackUnit ($unit_no, $rack_cell)
 	return $unit_no;
 }
 
-function isCLIMode ()
-{
-	return !isset ($_SERVER['REQUEST_METHOD']);
-}
-
 // returns true either if given domains are the same
 // or if one is a group and other is its member
 function sameDomains ($domain_id_1, $domain_id_2)
