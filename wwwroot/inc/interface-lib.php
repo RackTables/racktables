@@ -414,26 +414,33 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE)
 function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
-	if (!isset ($image[$tag]))
-		$tag = 'error';
-	$img = $image[$tag];
-	$img['path'] = '?module=chrome&uri=' . $img['path'];
-	if ($do_input == TRUE)
-		return
-			"<input type=image name=submit class=icon " .
-			"src='${img['path']}' " .
-			"border=0 " .
-			($title == '' ? '' : " title='${title}'") . // JT: Add title to input hrefs too
-			">";
+	$attrs = array
+	(
+		'src' => array_key_exists ($tag, $image) ?
+			'?module=chrome&uri=' . $image[$tag]['path'] :
+			'?module=image&img=error',
+		'border' => 0,
+	);
+	if ($title != '')
+		$attrs['title'] = $title;
+	if ($do_input)
+	{
+		$element = 'input';
+		$attrs['type'] = 'image';
+		$attrs['name'] = 'submit';
+		$attrs['class'] = 'icon';
+		// Width and height for INPUT only appear in HTML 5.
+	}
 	else
-		return
-			"<img " .
-			"src='${img['path']}' " .
-			"width=${img['width']} " .
-			"height=${img['height']} " .
-			"border=0 " .
-			($title == '' ? '' : "title='${title}'") .
-			">";
+	{
+		$element = 'img';
+		if (array_key_exists ($tag, $image))
+		{
+			$attrs['width'] = $image[$tag]['width'];
+			$attrs['height'] = $image[$tag]['height'];
+		}
+	}
+	return makeHtmlTag ($element, $attrs);
 }
 
 function escapeString ($value, $do_db_escape = FALSE)
