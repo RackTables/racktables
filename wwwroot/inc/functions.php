@@ -3239,7 +3239,7 @@ function getAllVLANOptions ($except = array())
 function dump ($var)
 {
 	echo '<div align=left><pre>';
-	print_r ($var);
+	var_dump ($var);
 	echo '</pre></div>';
 }
 
