@@ -32,6 +32,8 @@ $templateWidth[3] = 1;
 $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
+$message_buffering = FALSE;
+
 define ('CHAP_OBJTYPE', 1);
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
@@ -5121,10 +5123,10 @@ function showNotice  ($message, $option = '')
 // $type could be 'error', 'warning', 'success' or 'neutral'
 function setMessage ($type, $message, $direct_rendering)
 {
-	global $script_mode;
+	global $script_mode, $message_buffering;
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
-	elseif (isset ($script_mode) && $script_mode)
+	elseif (isset ($script_mode) && $script_mode && !$message_buffering)
 	{
 		if ($type == 'warning' || $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
@@ -5158,6 +5160,42 @@ function showOneLiner ($code, $args = array())
 	if (! empty ($args))
 		$line['a'] = $args;
 	$log_messages[] = $line;
+}
+
+// Works only in $script_mode == TRUE
+function setMessageBuffering ($state)
+{
+	global $message_buffering;
+	$message_buffering = $state;
+}
+
+function flushMessageBuffer()
+{
+	global $log_messages, $script_mode;
+
+	if (!isset ($script_mode) || !$script_mode)
+		return;
+
+	$code_str_map = array
+	(
+		100 => 'ERROR',
+		200 => 'WARNING',
+	);
+
+	foreach ($log_messages as $line)
+		if (isset ($code_str_map[$line['c']]))
+		{
+			$type = $code_str_map[$line['c']];
+			$message = strip_tags (implode ("\n", $line['a']));
+			file_put_contents ('php://stderr', $type . ': ' . $message . "\n");
+		}
+	$log_messages = array();
+}
+
+function clearMessageBuffer()
+{
+	global $log_messages;
+	$log_messages = array();
 }
 
 function showFuncMessage ($callfunc, $status, $log_args = array())
