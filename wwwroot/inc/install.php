@@ -1706,7 +1706,8 @@ WHERE O.objtype_id = 1562";
 (11,'CFP'),
 (12,'CFP2'),
 (13,'CPAK'),
-(14,'CXP')";
+(14,'CXP'),
+(15,'QSFP28')";
 
 		$query[] = "INSERT INTO `PortOuterInterface` VALUES
 (16,'AC-in'),
@@ -1898,7 +1899,7 @@ WHERE O.objtype_id = 1562";
 (1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
 (1466,'10GBase-ER-DWDM40-28.77 (ITU 61)'),
 (1469,'virtual port'),
-(1588,'empty QSFP+'),
+(1588,'empty QSFP'),
 (1589,'empty CFP2'),
 (1590,'empty CPAK'),
 (1591,'empty CXP'),
@@ -1985,20 +1986,37 @@ WHERE O.objtype_id = 1562";
 (1787,1502)";
 
 		$query[] = "INSERT INTO `PortInterfaceCompat` VALUES
+-- SFP-100: empty SFP-100, 100Base-FX, 100Base-SX, 100Base-LX10, 100Base-BX10-D, 100Base-BX10-U, 100Base-EX, 100Base-ZX
 (2,1208),(2,1195),(2,1196),(2,1197),(2,1198),(2,1199),(2,1200),(2,1201),
+-- GBIC: empty GBIC, 1000Base-T, 1000Base-ZX, 1000Base-EX, 1000Base-SX, 1000Base-SX+, 1000Base-LX, 1000Base-LX10, 1000Base-BX10-D, 1000Base-BX10-U
 (3,1078),(3,24),(3,34),(3,42),(3,1202),(3,1203),(3,1204),(3,1205),(3,1206),(3,1207),
+-- SFP-1000: empty SFP-1000, 1000Base-T, 1000Base-ZX, 1000Base-EX, 1000Base-SX, 1000Base-SX+, 1000Base-LX, 1000Base-LX10, 1000Base-BX10-D, 1000Base-BX10-U
 (4,1077),(4,24),(4,34),(4,42),(4,1202),(4,1203),(4,1204),(4,1205),(4,1206),(4,1207),
+-- SFP-1000: 1000Base-BX40-D, 1000Base-BX40-U, 1000Base-BX80-D, 1000Base-BX80-U
 (4,1088),(4,1089),(4,1090),(4,1091),
+-- XENPAK: empty XENPAK, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (5,1079),(5,30),(5,35),(5,36),(5,37),(5,38),(5,39),(5,40),
+-- X2: empty X2, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (6,1080),(6,30),(6,35),(6,36),(6,37),(6,38),(6,39),(6,40),
+-- XPAK: empty XPAK, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (7,1081),(7,30),(7,35),(7,36),(7,37),(7,38),(7,39),(7,40),
+-- XFP: empty XFP, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
+-- SFP+: empty SFP+, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
+-- QSFP+: empty QSFP, 40GBase-FR, 40GBase-ER4, 40GBase-SR4, 40GBase-LR4
 (10,1588),(10,1660),(10,1662),(10,1663),(10,1664),
+-- CFP: empty CFP, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (11,1668),(11,1669),(11,1670),(11,1671),(11,1672),(11,1673),(11,1674),(11,1675),(11,1676),
+-- CFP2: empty CFP2, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),(12,1675),(12,1676),
+-- CPAK: empty CPAK, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674),(13,1675),(13,1676),
+-- CXP: empty CXP, 100GBase-CR4, 100GBase-CR10
 (14,1591),(14,1677),(14,1678),
+-- QSFP28: empty QSFP, 40GBase-FR, 40GBase-ER4, 40GBase-SR4, 40GBase-LR4, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4
+(15,1588),(15,1660),(15,1662),(15,1663),(15,1664),(15,1670),(15,1671),(15,1672),(15,1673),(15,1674),
+-- hardwired: AC-in, 100Base-TX, 1000Base-T, RS-232 (RJ-45), virtual bridge, KVM (host), KVM (console), RS-232 (DB-9), RS-232 (DB-25), AC-out, DC, virtual port
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
 		$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
@@ -2262,7 +2280,7 @@ WHERE O.objtype_id = 1562";
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','yes','Tags quick list threshold'),
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable \"Add/update multiple ports\" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
-('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668; 12=1589; 13=1590; 14=1591','string','no','no','no','Default port outer interface IDs'),
+('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668; 12=1589; 13=1590; 14=1591; 15=1588','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),

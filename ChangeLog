@@ -20,6 +20,8 @@
 	update: upgrade CodeMirror from 3.22 to 3.24
 	update: include file timestamps in the mouse hint (#1663)
 	update: add support for double quotes in the search string
+	update: new modular port type 'QSFP28'
+	update: port type 'empty QSFP+' renamed to 'empty QSFP' to be used both by 'QSFP+' and 'QSFP28' modular ports
 0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)
