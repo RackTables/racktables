@@ -10,7 +10,7 @@
 	bugfix: DB lock on LDAP cache hit was still waiting all pending LDAP queries of other users to complete
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
 	update: Nexus 7700, Huawei S5700, Juniper QFX, Mellanox, Quanta, Ixia device models added into dictionary
-	update: SNMP sync support for Huawei CE5850-HI
+	update: SNMP sync support for Huawei CE5850-HI/CE6870
 	update: Cmd+Click now inverses tag selection on OS X like Ctrl+Click does on Windows/Linix
 	update: explain usage particulars for each tag on the editor tab
 	update: increase HTML SELECT maximum width (#1611)
