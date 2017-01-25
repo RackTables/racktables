@@ -116,7 +116,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 <body>
 <div class="maintable">
  <div class="mainheader">
-  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
+  <div style="float: right" class=greeting><a href='index.php?page=myaccount&tab=default'><?php global $remote_displayname; echo $remote_displayname ?></a> [ <a onclick="document.execCommand('ClearAuthenticationCache');" href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
  <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
  </div>
  <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
