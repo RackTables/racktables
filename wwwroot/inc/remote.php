@@ -608,17 +608,23 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	$except_fd = array();
 	$out = '';
 	$errors = '';
+	$write_cursor = 0;
 	while ((! empty ($read_fd) || ! empty ($write_fd)) && stream_select ($read_fd, $write_fd, $except_fd, NULL))
 	{
 		foreach ($write_fd as $fd)
 		{
-			$written = fwrite ($fd, $in, $buff_size);
-			// log all communication data into global var
-			if ($written != 0 && isset ($gateway_log))
-				$gateway_log .= preg_replace ('/^/m', '> ', substr ($in, 0, $written));
-			$in = substr ($in, $written);
+			if (0 != $written = fwrite ($fd, substr ($in, $write_cursor, $buff_size), $buff_size))
+			{
+				// log all communication data into global var
+				if (isset ($gateway_log))
+					$gateway_log .= preg_replace ('/^/m', '> ', substr ($in, $write_cursor, $written));
 
-			if ($written == 0 || empty ($in))
+				$write_cursor += $written;
+			}
+			else
+				$write_cursor = strlen ($in);
+
+			if ($write_cursor >= strlen ($in))
 			{
 				// close input fd
 				$write_left = array_diff ($write_left, array ($fd));
