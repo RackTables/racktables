@@ -146,7 +146,7 @@ function init_config ()
 	if (!is_writable ($path_to_secret_php))
 	{
 		echo "The $path_to_secret_php file is not writable by web-server. Make sure it is.";
-		echo "The following commands should suffice:<pre>touch '$path_to_secret_php'; chmod 666 '$path_to_secret_php'</pre>";
+		echo "The following commands should suffice:<pre>touch '$path_to_secret_php'; chmod a=rw '$path_to_secret_php'</pre>";
 		echo 'Fedora Linux with SELinux may require this file to be owned by specific user (apache) and/or executing "setenforce 0" for the time of installation. ';
 		echo 'SELinux may be turned back on with "setenforce 1" command.<br>';
 		return FALSE;
@@ -341,7 +341,7 @@ function check_config_access()
 	echo 'For example, if httpd runs as user "' . $uname . '" and group "nogroup", commands ';
 	echo 'similar to the following may work (though not guaranteed to, please consider ';
 	echo 'only as an example):';
-	echo "<pre>chown $uname:nogroup secret.php; chmod 400 secret.php</pre>";
+	echo "<pre>chown $uname:nogroup secret.php; chmod 440 secret.php</pre>";
 	return FALSE;
 }
 
