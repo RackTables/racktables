@@ -2462,7 +2462,7 @@ $dictionary = array
 	2571 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4S'),
 	2572 => array ('chapter_id' => 13, 'dict_value' => 'Solaris%GSKIP%Solaris 11'),
 	2573 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C420 M3'),
-	# 2574, please use
+	2574 => array ('chapter_id' => 24, 'dict_value' => 'Cisco%GPASS%ASR 920'),
 	2575 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C460 M4'),
 	2576 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS-Mini 6324 Fabric Interconnect'),
 	2577 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS 6332 Fabric Interconnect'),
@@ -2551,6 +2551,8 @@ $dictionary = array
 	2660 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3850-24XS'),
 	2661 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 3850-48XS'),
 	2662 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Catalyst 4510R+E'),
+	2663 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 3600X-24TS-M'),
+	2664 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 3600X-24FS-M'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
