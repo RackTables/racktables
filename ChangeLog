@@ -1,4 +1,4 @@
-0.20.12
+0.20.12 2017-02-08
 	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser
 	bugfix: LLDP discovery for Cisco IOS: fix the case when remote device name length is 20 chars
