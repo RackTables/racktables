@@ -21,7 +21,13 @@ if [ -e wwwroot/inc/secret.php ]; then
 	exit 1
 fi
 
-mysql -u root -e "CREATE DATABASE ${DBNAME} CHARACTER SET utf8 COLLATE utf8_general_ci;" || exit 2
+# The purpose of the explicit "mysql" DB below is not to fix a real bug
+# but to prevent an error on my working copy when the MySQL client
+# is configured (through ~/.my.cnf) to connect to the same database as
+# I am trying to initialize with this script. In that specific case
+# the client tries to connect to the database that doesn't yet exist
+# and this script fails, hence the override to "mysql". -- Denis
+mysql -u root mysql -e "CREATE DATABASE ${DBNAME} CHARACTER SET utf8 COLLATE utf8_general_ci;" || exit 2
 mysql -u root -e "GRANT ALL PRIVILEGES ON ${DBNAME}.* TO ${USERNAME}@localhost IDENTIFIED BY '${PASSWORD}';" || exit 2
 
 cat >wwwroot/inc/secret.php <<EOF
