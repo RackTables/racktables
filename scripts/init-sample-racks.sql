@@ -1,5 +1,10 @@
 set names 'utf8';
 
+-- This reproduces the workaround in pre-init.php, exists for the same
+-- reason and should be removed together with the latter when those are
+-- no longer required.
+SET @@SQL_MODE = REPLACE(@@SQL_MODE, 'NO_ZERO_DATE', '');
+
 INSERT INTO `Molecule` (`id`) VALUES
 (1);
 
