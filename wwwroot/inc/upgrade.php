@@ -274,6 +274,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.10',
 		'0.20.11',
 		'0.20.12',
+		'0.20.13',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1989,6 +1990,9 @@ ENDOFTRIGGER;
 
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.20.13':
+			$query[] = "UPDATE Config SET varvalue = '0.20.13' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
