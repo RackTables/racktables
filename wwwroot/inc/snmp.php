@@ -2087,10 +2087,12 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+// In the following two declarations the leading zero is a placeholder -- in
+// the CLI it may be another number but the SNMP agent does not report it.
 $iftable_processors['brocade-vdx-QSFP+'] = array
 (
 	'pattern' => '@^FortyGigabitEthernet 0/(\d+)$@',
-	'replacement' => 'Fo /0/\\1',
+	'replacement' => 'fo 0/0/\\1',
 	'dict_key' => '10-1588',
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
@@ -2099,7 +2101,7 @@ $iftable_processors['brocade-vdx-QSFP+'] = array
 $iftable_processors['brocade-vdx-SFP+'] = array
 (
 	'pattern' => '@^TenGigabitEthernet 0/(\d+)$@',
-	'replacement' => 'Te /0/\\1',
+	'replacement' => 'te 0/0/\\1',
 	'dict_key' => '9-1084', // empty SFP+
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
