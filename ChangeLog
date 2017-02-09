@@ -1,3 +1,6 @@
+0.20.13
+	update: fix performance for pages with images (GH#190 by Michael A. Mikhailov)
+	update: improve SNMP support for Brocade devices (GH#180 by Chris Jones)
 0.20.12 2017-02-08
 	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser
