@@ -546,7 +546,7 @@ function renderNewVSForm ()
 	echo "<tr><th class=tdright>Port:</th><td class=tdleft>";
 	echo "<input type=text name=vport size=5 value='${default_port}'></td></tr>";
 	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
-	printSelect ($vs_proto, array ('name' => 'proto'), array_shift (array_keys ($vs_proto)));
+	printSelect ($vs_proto, array ('name' => 'proto'), array_first (array_keys ($vs_proto)));
 	echo "</td></tr>";
 	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name></td><td>";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";

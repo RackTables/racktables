@@ -32,6 +32,8 @@ $templateWidth[3] = 1;
 $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
+$message_buffering = FALSE;
+
 define ('CHAP_OBJTYPE', 1);
 // The latter matches both SunOS and Linux-styled formats.
 define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
@@ -303,6 +305,10 @@ function genericAssertion ($argname, $argtype)
 		return assertUIntArg ($argname);
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
+	case 'decimal0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
 	case 'decimal':
 		if (! preg_match ('/^\d+(\.\d+)?$/', assertStringArg ($argname)))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
@@ -3235,7 +3241,7 @@ function getAllVLANOptions ($except = array())
 function dump ($var)
 {
 	echo '<div align=left><pre>';
-	print_r ($var);
+	var_dump ($var);
 	echo '</pre></div>';
 }
 
@@ -5015,6 +5021,75 @@ function buildSearchRedirectURL ($result_type, $record)
 	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
 
+// This works like explode() with space as a separator with the added difference
+// that anything in double quotes is returned as a single word.
+function parseSearchTerms ($terms)
+{
+	$ret = array();
+	if (mb_substr_count ($terms, '"') % 2 != 0)
+		throw new InvalidArgException ('terms', $terms, 'contains odd number of quotes');
+	$state = 'whitespace';
+	$buffer = '';
+	$len = mb_strlen ($terms);
+	for ($i = 0; $i < $len; $i++)
+	{
+		$c = mb_substr ($terms, $i, 1);
+		switch ($state)
+		{
+		case 'whitespace':
+			switch ($c)
+			{
+			case ' ':
+				break; // nom-nom
+			case '"':
+				$buffer = '';
+				$state = 'quoted_string';
+				break;
+			default:
+				$buffer = $c;
+				$state = 'word';
+			}
+			break;
+
+		case 'word':
+			switch ($c)
+			{
+			case '"':
+				throw new InvalidArgException ('terms', $terms, 'punctuation error');
+			case ' ':
+				$ret[] = $buffer;
+				$buffer = '';
+				$state = 'whitespace';
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+
+		case 'quoted_string':
+			switch ($c)
+			{
+			case '"':
+				if (trim ($buffer) == '')
+					throw new InvalidArgException ('terms', $terms, 'punctuation error');
+				$ret[] = trim ($buffer);
+				$buffer = '';
+				$state = 'whitespace';
+				// FIXME: this does not detect missing whitespace that would be reasonable
+				// to expect between the closing quote and the next token, if any.
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+		}
+	}
+	if ($buffer != '')
+		$ret[] = $buffer;
+
+	return $ret;
+}
+
 // Take a parse tree and figure out if it is a valid payload or not.
 // Depending on that return either NULL or an array filled with the load
 // of that expression.
@@ -5121,10 +5196,10 @@ function showNotice  ($message, $option = '')
 // $type could be 'error', 'warning', 'success' or 'neutral'
 function setMessage ($type, $message, $direct_rendering)
 {
-	global $script_mode;
+	global $script_mode, $message_buffering;
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
-	elseif (isset ($script_mode) && $script_mode)
+	elseif (isset ($script_mode) && $script_mode && !$message_buffering)
 	{
 		if ($type == 'warning' || $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
@@ -5158,6 +5233,42 @@ function showOneLiner ($code, $args = array())
 	if (! empty ($args))
 		$line['a'] = $args;
 	$log_messages[] = $line;
+}
+
+// Works only in $script_mode == TRUE
+function setMessageBuffering ($state)
+{
+	global $message_buffering;
+	$message_buffering = $state;
+}
+
+function flushMessageBuffer()
+{
+	global $log_messages, $script_mode;
+
+	if (!isset ($script_mode) || !$script_mode)
+		return;
+
+	$code_str_map = array
+	(
+		100 => 'ERROR',
+		200 => 'WARNING',
+	);
+
+	foreach ($log_messages as $line)
+		if (isset ($code_str_map[$line['c']]))
+		{
+			$type = $code_str_map[$line['c']];
+			$message = strip_tags (implode ("\n", $line['a']));
+			file_put_contents ('php://stderr', $type . ': ' . $message . "\n");
+		}
+	$log_messages = array();
+}
+
+function clearMessageBuffer()
+{
+	global $log_messages;
+	$log_messages = array();
 }
 
 function showFuncMessage ($callfunc, $status, $log_args = array())
@@ -5328,9 +5439,19 @@ function getObjectTypeChangeOptions ($object_id)
 
 // Gets the timestamp and returns human-friendly short message describing the time difference
 // between the current system time and the specified timestamp (like '2d 5h ago')
+function formatAgeTimestamp ($timestamp)
+{
+	return formatAgeSeconds (time() - $timestamp);
+}
+
+// For backward compatibility.
 function formatAge ($timestamp)
 {
-	$seconds = time() - $timestamp;
+	return formatAgeTimestamp ($timestamp);
+}
+
+function formatAgeSeconds ($seconds)
+{
 	switch (TRUE)
 	{
 		case $seconds < 1:
@@ -5340,7 +5461,7 @@ function formatAge ($timestamp)
 		case $seconds <= 300:
 			$mins = intval ($seconds / 60);
 			$secs = $seconds % 60;
-			return ($secs ? "{$mins}min ${secs}s" : "{$mins}m") . ' ago';
+			return ($secs ? "{$mins}min ${secs}s" : "{$mins}min") . ' ago';
 		case $seconds < 3600:
 			return round ($seconds / 60) . 'min' . ' ago';
 		case $seconds < 3 * 3600:
@@ -5995,11 +6116,6 @@ function inverseRackUnit ($unit_no, $rack_cell)
 	if (considerConfiguredConstraint ($rack_cell, 'REVERSED_RACKS_LISTSRC'))
 		$unit_no = $rack_cell['height'] - $unit_no + 1;
 	return $unit_no;
-}
-
-function isCLIMode ()
-{
-	return !isset ($_SERVER['REQUEST_METHOD']);
 }
 
 // returns true either if given domains are the same

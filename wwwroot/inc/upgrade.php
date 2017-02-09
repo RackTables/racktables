@@ -808,7 +808,7 @@ CREATE TABLE `Attribute_new` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB
 ";
-			$query[] = "INSERT INTO Attribute_new SELECT * FROM Attribute";
+			$query[] = "INSERT INTO Attribute_new SELECT id, type, name FROM Attribute";
 			$query[] = "INSERT INTO Attribute_new VALUES (9999, 'string', 'base MAC address')";
 			$query[] = "DROP TABLE Attribute";
 			$query[] = "ALTER TABLE Attribute_new RENAME TO Attribute";
@@ -1064,7 +1064,7 @@ CREATE TABLE `IPv6Log` (
 			$query[] = "ALTER TABLE `EntityLink` MODIFY COLUMN `child_entity_type` ENUM('file','location','object','rack','row') NOT NULL";
 
 			// Turn rows into objects
-			$result = $dbxlink->query ('SELECT * FROM RackRow');
+			$result = $dbxlink->query ('SELECT id, name FROM RackRow');
 			$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			foreach ($rows as $row)
@@ -1962,6 +1962,13 @@ ENDOFTRIGGER;
 
 			$query[] = "ALTER TABLE UserConfig DROP FOREIGN KEY `UserConfig-FK-varname`";
 			$query[] = "ALTER TABLE UserConfig ADD CONSTRAINT `UserConfig-FK-varname` FOREIGN KEY (`varname`) REFERENCES `Config` (`varname`) ON DELETE CASCADE ON UPDATE CASCADE";
+			$query[] = "UPDATE Config SET varname = 'SYNC_8021Q_LISTSRC' WHERE varname = 'SYNC_802Q_LISTSRC'";
+
+			// new iif_type 'QSFP28'
+			$query[] = "INSERT INTO `PortInnerInterface` (`id`, `iif_name`) VALUES (15,'QSFP28')";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 15=1588') WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '15=')";
+			// rename 'empty QSFP+' to 'empty QSFP'
+			$query[] = "UPDATE PortOuterInterface SET oif_name='empty QSFP' WHERE id=1588";
 
 			$query[] = "INSERT INTO PortOuterInterface (id, oif_name) VALUES
 				(1088,'1000Base-BX40-D'),
@@ -1973,10 +1980,13 @@ ENDOFTRIGGER;
 				(1089,1088),
 				(1090,1091),
 				(1091,1090)";
-			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES (4,1088), (4,1089), (4,1090), (4,1091)";
+			$query[] = "INSERT INTO PortInterfaceCompat (iif_id, oif_id) VALUES
+				(4,1088), (4,1089), (4,1090), (4,1091),
+				(15,1588),(15,1660),(15,1662),(15,1663),(15,1664),(15,1670),(15,1671),(15,1672),(15,1673),(15,1674)";
 			$query[] = "INSERT INTO PatchCableOIFCompat (pctype_id, oif_id) VALUES
 				(11,1088), (12,1088), (11,1089), (12,1089),
 				(11,1090), (12,1090), (11,1091), (12,1091)";
+
 
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
@@ -2229,7 +2239,7 @@ CREATE TABLE `IPv4VS_new` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 END
 	);
-	$result = $dbxlink->query ("SELECT * FROM IPv4VS");
+	$result = $dbxlink->query ("SELECT id, vip, vport, proto, name, vsconfig, rsconfig FROM IPv4VS");
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($rows as $row)
@@ -2254,7 +2264,7 @@ CREATE TABLE `IPv4RS_new` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 END
 	);
-	$result = $dbxlink->query ("SELECT * FROM IPv4RS");
+	$result = $dbxlink->query ("SELECT id, inservice, rsip, rsport, rspool_id, rsconfig FROM IPv4RS");
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
 	foreach ($rows as $row)

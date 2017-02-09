@@ -329,7 +329,8 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT EL.* FROM EntityLink EL ' .
+			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
+			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
 			"LEFT JOIN ${table} ON EL.child_entity_id = ${table}.id " .
 			"WHERE EL.child_entity_type = ? AND ${table}.id IS NULL",
 			array ($realm)
@@ -343,7 +344,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
+		echo "<tr><th>Parent</th><th>Child Type</th><th class=tdright>Child ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['parent_entity_type']);
@@ -359,7 +360,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${parent_name}</td>";
 			echo "<td>${orphan['child_entity_type']}</td>";
-			echo "<td>${orphan['child_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -372,7 +373,8 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT EL.* FROM EntityLink EL ' .
+			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
+			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
 			"LEFT JOIN ${table} ON EL.parent_entity_id = ${table}.id " .
 			"WHERE EL.parent_entity_type = ? AND ${table}.id IS NULL",
 			array ($realm)
@@ -386,7 +388,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>Child</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['child_entity_type']);
@@ -402,7 +404,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${child_name}</td>";
 			echo "<td>${orphan['parent_entity_type']}</td>";
-			echo "<td>${orphan['parent_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -414,7 +416,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT AM.*, A.name AS attr_name, C.name AS chapter_name ' .
+		'SELECT AM.objtype_id, A.name AS attr_name, C.name AS chapter_name ' .
 		'FROM AttributeMap AM ' .
 		'LEFT JOIN Attribute A ON AM.attr_id = A.id ' .
 		'LEFT JOIN Chapter C ON AM.chapter_id = C.id ' .
@@ -428,13 +430,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
+		echo "<tr><th>Attribute</th><th>Chapter</th><th class=tdright>Object TypeID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
 			echo "<td>${orphan['attr_name']}</td>";
 			echo "<td>${orphan['chapter_name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -445,7 +447,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT O.* FROM Object O ' .
+		'SELECT O.id, O.name, O.objtype_id FROM Object O ' .
 		'LEFT JOIN Dictionary D ON O.objtype_id = D.dict_key ' .
 		'WHERE D.dict_key IS NULL'
 	);
@@ -456,13 +458,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
+			echo "<td class=tdright>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -473,7 +475,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OH.* FROM ObjectHistory OH ' .
+		'SELECT OH.id, OH.name, OH.objtype_id FROM ObjectHistory OH ' .
 		'LEFT JOIN Dictionary D ON OH.objtype_id = D.dict_key ' .
 		'WHERE D.dict_key IS NULL'
 	);
@@ -484,13 +486,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
+		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
+			echo "<td class=tdright>${orphan['id']}</td>";
 			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -501,7 +503,7 @@ function renderDataIntegrityReport ()
 	$orphans = array ();
 	$result = usePreparedSelectBlade
 	(
-		'SELECT OPC.*, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
+		'SELECT OPC.parent_objtype_id, OPC.child_objtype_id, PD.dict_value AS parent_name, CD.dict_value AS child_name '.
 		'FROM ObjectParentCompat OPC ' .
 		'LEFT JOIN Dictionary PD ON OPC.parent_objtype_id = PD.dict_key ' .
 		'LEFT JOIN Dictionary CD ON OPC.child_objtype_id = CD.dict_key ' .
@@ -514,14 +516,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
+		echo "<tr><th>Parent</th><th class=tdright>Parent Type ID</th><th>Child</th><th class=tdright>Child Type ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			echo '<tr>';
 			echo "<td>${orphan['parent_name']}</td>";
-			echo "<td>${orphan['parent_objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['parent_objtype_id']}</td>";
 			echo "<td>${orphan['child_name']}</td>";
-			echo "<td>${orphan['child_objtype_id']}</td>";
+			echo "<td class=tdright>${orphan['child_objtype_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -623,7 +625,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT TS.*, TT.tag FROM TagStorage TS ' .
+			'SELECT TS.entity_realm, TS.entity_id, TT.tag FROM TagStorage TS ' .
 			'LEFT JOIN TagTree TT ON TS.tag_id = TT.id ' .
 			"LEFT JOIN ${details['table']} ON TS.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE TS.entity_realm = ? AND ${details['table']}.${details['column']} IS NULL",
@@ -638,14 +640,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>Tag</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_realm']);
 			echo '<tr>';
 			echo "<td>${orphan['tag']}</td>";
 			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
+			echo "<td class=tdright>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -661,7 +663,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT FL.*, F.name FROM FileLink FL ' .
+			'SELECT FL.entity_type, FL.entity_id, F.name FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
 			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
@@ -676,14 +678,14 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>File</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['entity_type']);
 			echo '<tr>';
 			echo "<td>${orphan['name']}</td>";
 			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
+			echo "<td class=tdright>${orphan['entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -854,13 +856,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Locations: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Location</th><th>Parent ID</th><th>Parent Location</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Location</th><th class=tdright>Parent ID</th><th>Parent Location</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			echo "<td>${invalid['parent_name']}</td>";
 			echo "</tr>\n";
 		}
@@ -887,13 +889,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Contained ID</th><th>Contained Object</th><th>Container ID</th><th>Container Object</th></tr>\n";
+		echo "<tr><th class=tdright>Contained ID</th><th>Contained Object</th><th class=tdright>Container ID</th><th>Container Object</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['container_id']}</td>";
+			echo "<td class=tdright>${invalid['container_id']}</td>";
 			echo "<td>${invalid['container_name']}</td>";
 			echo "</tr>\n";
 		}
@@ -909,13 +911,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Tags: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Tag</th><th>Parent ID</th><th>Parent Tag</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Tag</th><th class=tdright>Parent ID</th><th>Parent Tag</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['tag']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 		}

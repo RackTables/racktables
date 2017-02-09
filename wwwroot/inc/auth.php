@@ -18,6 +18,18 @@ be working with only database.php file included.
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
 function authenticate ()
 {
+	function assertHTTPCredentialsReceived()
+	{
+		if
+		(
+			! isset ($_SERVER['PHP_AUTH_USER']) ||
+			$_SERVER['PHP_AUTH_USER'] == '' ||
+			! isset ($_SERVER['PHP_AUTH_PW']) ||
+			$_SERVER['PHP_AUTH_PW'] == ''
+		)
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+	}
+
 	global
 		$remote_username,
 		$remote_displayname,
@@ -41,16 +53,13 @@ function authenticate ()
 		case isset ($script_mode) && $script_mode && isset ($remote_username) && $remote_username != '':
 			break; // skip this phase
 		case 'database' == $user_auth_src:
-		case 'ldap' == $user_auth_src:
-			if
-			(
-				! isset ($_SERVER['PHP_AUTH_USER']) ||
-				$_SERVER['PHP_AUTH_USER'] == '' ||
-				! isset ($_SERVER['PHP_AUTH_PW']) ||
-				$_SERVER['PHP_AUTH_PW'] == ''
-			)
-				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+			assertHTTPCredentialsReceived();
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			break;
+		case 'ldap' == $user_auth_src:
+			assertHTTPCredentialsReceived();
+			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			constructLDAPOptions();
 			break;
 		case 'httpd' == $user_auth_src:
 			if
@@ -301,10 +310,11 @@ function saml_getAttributeValues ($attributes, $name)
 	return is_array ($attributes[$name]) ? $attributes[$name] : array($attributes[$name]);
 }
 
-// a wrapper for two LDAP auth methods below
-function authenticated_via_ldap ($username, $password, &$ldap_displayname)
+function constructLDAPOptions()
 {
-	global $LDAP_options, $debug_mode;
+	global $LDAP_options;
+	if (! isset ($LDAP_options))
+		throw new RackTablesError ('$LDAP_options has not been defined (see secret.php)', RackTablesError::MISCONFIGURED);
 	$LDAP_defaults = array
 	(
 		'group_attr' => 'memberof',
@@ -316,7 +326,12 @@ function authenticated_via_ldap ($username, $password, &$ldap_displayname)
 	foreach ($LDAP_defaults as $option_name => $option_value)
 		if (! array_key_exists ($option_name, $LDAP_options))
 			$LDAP_options[$option_name] = $option_value;
+}
 
+// a wrapper for two LDAP auth methods below
+function authenticated_via_ldap ($username, $password, &$ldap_displayname)
+{
+	global $LDAP_options, $debug_mode;
 	try
 	{
 		// Destroy the cache each time config changes.
@@ -437,7 +452,6 @@ function authenticated_via_ldap_cache ($username, $password, &$ldap_displayname)
 			}
 		}
 		releaseLDAPCache();
-		discardLDAPCache ($LDAP_options['cache_expiry']); // clear expired rows of other users
 	}
 
 	if ($user_data)

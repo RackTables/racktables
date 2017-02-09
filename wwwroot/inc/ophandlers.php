@@ -1676,7 +1676,7 @@ function resetUIConfig()
 		'PORT_EXCLUSION_LISTSRC' => '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}',
 		'FILTER_RACKLIST_BY_TAGS' => 'yes',
 		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
-		'SYNC_802Q_LISTSRC' => '',
+		'SYNC_8021Q_LISTSRC' => '',
 		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
 		'CACTI_LISTSRC' => 'false',
 		'CACTI_RRA_ID' => '1',
@@ -2699,7 +2699,7 @@ function linkFileToEntity ()
 
 function replaceFile ()
 {
-	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR2' => 201));
+	setFuncMessages (__FUNCTION__, array ('OK' => 6, 'ERR2' => 201));
 	// Make sure the file can be uploaded
 	if (get_cfg_var('file_uploads') != 1)
 		throw new RackTablesError ('file uploads not allowed, change "file_uploads" parameter in php.ini', RackTablesError::MISCONFIGURED);

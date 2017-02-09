@@ -1419,6 +1419,24 @@ $iftable_processors['hce-any-QSFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+// FIXME: use SFP28:25GbE instead of SFP+:10GbE
+$iftable_processors['hce-any-QSFP28-split'] = array
+(
+	'pattern' => '@^100GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+):([[:digit:]]+)$@',
+	'replacement' => '100ge\\1\\2:\\3',
+	'dict_key' => '9-1084',
+	'label' => '\\2:\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['hce-any-QSFP28'] = array
+(
+	'pattern' => '@^100GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => '100ge\\1\\2',
+	'dict_key' => '15-1588',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
 $iftable_processors['quidway-XFP'] = array
 (
 	'pattern' => '@^XGigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
@@ -2096,6 +2114,32 @@ $iftable_processors['brocade-vdx-management'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['ubiquiti-chassis-any-1000T'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (\d+) Gigabit - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => 24,
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ubiquiti-chassis-any-SFP+'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (\d+) 10G - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '9-1084',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
+(
+	'pattern' => '@^Slot: (\d+) Port: (51|52) Gigabit - Level$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '4-1077',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
 
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
@@ -3777,11 +3821,23 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'CE5850-48T4S2Q-EI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
 		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
+	'2011.2.239.10' => array
+	(
+		'dict_key' => 1769,
+		'text' => 'CE5850-48T4S2Q-HI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
+		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
 	'2011.2.239.5' => array
 	(
 		'dict_key' => 1772,
-		'text' => 'CE6850-48S4Q-EI: 48 4 SFP+ slots + 4 QSFP+ slots',
-		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+		'text' => 'CE6850-48S4Q-EI: 48 SFP+ slots + 4 QSFP+ slots',
+		'processors' => array ('hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
+	'2011.2.239.32' => array
+	(
+		'dict_key' => 1772,
+		'text' => 'CE6870-48S6CQ-EI: 48 SFP+ slots + 6 QSFP28 slots',
+		'processors' => array ('hce-any-SFP', 'hce-any-QSFP28-split', 'hce-any-QSFP28', 'quidway-mgmt'),
 	),
 	'2011.2.239.11' => array
 	(
@@ -4007,17 +4063,22 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	),
 	'1588.3.3.1.131' => array
 	(
-		'dict_key' => 2588,
+		'dict_key' => 2665,
 		'text' => 'Brocade VDX 6740',
 		'processors' => array ('brocade-vdx-QSFP+','brocade-vdx-SFP+', 'brocade-vdx-management'),
 	),
 	'1991.1.3.62.2.1.1.1' => array
 	(
-		'dict_key' => 2589,
+		'dict_key' => 2666,
 		'text' => 'ICX7250-48 48x1000T + 8 SFP+/1000',
 		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
 	),
-
+	'4413' => array
+	(
+		'dict_key' => 2624,
+		'text' => 'Ubiquiti EdgeSwitch ES-48-LITE',
+		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+'),
+	),
 );
 
 global $swtype_pcre;

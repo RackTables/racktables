@@ -154,6 +154,11 @@ $breed_by_swcode = array
 	1363 => 'fdry5', // IronWare 5
 	1364 => 'fdry5', // Brocade FastIron LS648
 	1367 => 'jun10', // JunOS 10, switch
+	2151 => 'jun10', // JunOS 11, switch
+	2152 => 'jun10', // JunOS 12, switch
+	2397 => 'jun10', // JunOS 13, switch
+	2398 => 'jun10', // JunOS 14, switch
+	2399 => 'jun10', // JunOS 15, switch
 	1597 => 'jun10', // JunOS 10
 	1598 => 'jun10', // JunOS 11
 	1599 => 'jun10', // JunOS 12
@@ -442,7 +447,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'netcat'; // default is netcat mode
 			if ($breed == 'air12')
 				$protocol = 'telnet'; # Aironet IOS is broken
-			$prompt = '^(Login|[Uu]sername|Password): $|^\S+[>#]$|\[[^][]*\]\? $|\?\s+\[[^][]*\]\s*$'; // set the prompt in case user would like to specify telnet protocol
+			$prompt = '^(Login|[Uu]sername|Password): $|^\S+[>#]$|\[[^][]*\]\? $|\?\s+\[[^][]*\]\s*$|\[confirm yes\/no\]: $'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 		case 'fdry5':
@@ -608,17 +613,23 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 	$except_fd = array();
 	$out = '';
 	$errors = '';
+	$write_cursor = 0;
 	while ((! empty ($read_fd) || ! empty ($write_fd)) && stream_select ($read_fd, $write_fd, $except_fd, NULL))
 	{
 		foreach ($write_fd as $fd)
 		{
-			$written = fwrite ($fd, $in, $buff_size);
-			// log all communication data into global var
-			if ($written != 0 && isset ($gateway_log))
-				$gateway_log .= preg_replace ('/^/m', '> ', substr ($in, 0, $written));
-			$in = substr ($in, $written);
+			if (0 != $written = fwrite ($fd, substr ($in, $write_cursor, $buff_size), $buff_size))
+			{
+				// log all communication data into global var
+				if (isset ($gateway_log))
+					$gateway_log .= preg_replace ('/^/m', '> ', substr ($in, $write_cursor, $written));
 
-			if ($written == 0 || empty ($in))
+				$write_cursor += $written;
+			}
+			else
+				$write_cursor = strlen ($in);
+
+			if ($write_cursor >= strlen ($in))
 			{
 				// close input fd
 				$write_left = array_diff ($write_left, array ($fd));

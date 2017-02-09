@@ -11,6 +11,12 @@
 *
 */
 
+// required by exceptions.php
+function isCLIMode()
+{
+	return ! isset ($_SERVER['REQUEST_METHOD']);
+}
+
 require_once 'exceptions.php';
 require_once 'interface-lib.php';
 

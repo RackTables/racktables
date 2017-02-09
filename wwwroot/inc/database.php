@@ -1355,7 +1355,7 @@ function releaseFiles ($entity_realm, $entity_id)
 }
 
 // There are times when you want to delete all traces of an object
-function commitDeleteObject ($object_id = 0)
+function commitDeleteObject ($object_id)
 {
 	// Reset most of stuff
 	commitResetObject ($object_id);
@@ -1371,7 +1371,7 @@ function commitDeleteObject ($object_id = 0)
 	);
 }
 
-function commitResetObject ($object_id = 0)
+function commitResetObject ($object_id)
 {
 	releaseFiles ('object', $object_id);
 	destroyTagsForEntity ('object', $object_id);
@@ -1563,7 +1563,7 @@ function getMoleculeForObject ($object_id)
 }
 
 // This function builds a list of rack-unit-atom records for requested molecule.
-function getMolecule ($mid = 0)
+function getMolecule ($mid)
 {
 	$result = usePreparedSelectBlade ('SELECT rack_id, unit_no, atom FROM Atom WHERE molecule_id = ?', array ($mid));
 	return $result->fetchAll (PDO::FETCH_ASSOC);
@@ -1625,7 +1625,7 @@ function getRackspaceHistory ()
 }
 
 // This function is used in renderRackspaceHistory()
-function getOperationMolecules ($op_id = 0)
+function getOperationMolecules ($op_id)
 {
 	$result = usePreparedSelectBlade ('SELECT old_molecule_id, new_molecule_id FROM MountOperation WHERE id = ?', array ($op_id));
 	// We expect one row.
@@ -3047,7 +3047,8 @@ function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $
 	$query = 'SELECT ' . implode (', ', $retcolumns) . " FROM ${tablename} WHERE ";
 	$qparams = array();
 	$pfx = '';
-	foreach (explode (' ', $terms) as $term)
+	$pterms = $exactness == 3 ? explode (' ', $terms) : parseSearchTerms ($terms);
+	foreach ($pterms as $term)
 	{
 		switch ($exactness)
 		{
@@ -3544,7 +3545,7 @@ function getPortsCount ($object_id)
 }
 
 # FIXME: this function is not used any more
-function commitDeleteChapter ($chapter_no = 0)
+function commitDeleteChapter ($chapter_no)
 {
 	usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
 }
@@ -4030,7 +4031,7 @@ function loadUserConfigCache ($username)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
-function loadThumbCache ($rack_id = 0)
+function loadThumbCache ($rack_id)
 {
 	$ret = NULL;
 	$result = usePreparedSelectBlade ('SELECT thumb_data FROM RackThumbnail WHERE rack_id = ? AND thumb_data IS NOT NULL', array ($rack_id));
@@ -4625,7 +4626,7 @@ function getNATv4ForObject ($object_id)
 
 // Return a list of files that are not linked to the specified record. This list
 // will be used by printSelect().
-function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
+function getAllUnlinkedFiles ($entity_type, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
@@ -4639,7 +4640,7 @@ function getAllUnlinkedFiles ($entity_type = NULL, $entity_id = 0)
 
 // FIXME: return a standard cell list, so upper layer can iterate over
 // it conveniently.
-function getFilesOfEntity ($entity_type = NULL, $entity_id = 0)
+function getFilesOfEntity ($entity_type, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
@@ -5258,7 +5259,7 @@ function getVlanRow ($vlan_ck)
 		'(SELECT group_id FROM VLANDomain WHERE id = domain_id) AS domain_group_id ' .
 		'FROM VLANDescription WHERE domain_id = ? AND vlan_id = ?';
 	$result = usePreparedSelectBlade ($query, array ($vdom_id, $vlan_id));
-	if (NULL === $ret = $result->fetch (PDO::FETCH_ASSOC))
+	if (FALSE === $ret = $result->fetch (PDO::FETCH_ASSOC))
 		throw new EntityNotFoundException ('VLAN', $vlan_ck);
 	$ret['vlan_ck'] = $vlan_ck;
 	return $ret;

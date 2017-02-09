@@ -2118,7 +2118,8 @@ function renderPortsInfo($object_id)
 	{
 		echo "<td valign='top' width='50%'>";
 		startPortlet('Link status');
-		echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>Port<th><th>Link status<th>Link info</tr>";
+		echo "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'>";
+		echo '<tr><th>Port</th><th>&nbsp;</th><th>Link status</th><th>Link info</th></tr>';
 		$statusmap = array
 		(
 			'up' => 'link up',
@@ -2130,9 +2131,9 @@ function renderPortsInfo($object_id)
 		{
 			echo "<tr class='row_$order'>";
 			$order = $nextorder[$order];
-			echo '<td>' . $pn;
-			echo '<td>' . getImageHREF (array_fetch ($statusmap, $link['status'], '16x16t'));
-			echo '<td>' . $link['status'];
+			echo '<td>' . $pn . '</td>';
+			echo '<td>' . getImageHREF (array_fetch ($statusmap, $link['status'], '16x16t')) . '</td>';
+			echo '<td>' . $link['status'] . '</td>';
 			$info = '';
 			if (isset ($link['speed']))
 				$info .= $link['speed'];
@@ -2142,7 +2143,7 @@ function renderPortsInfo($object_id)
 					$info .= ', ';
 				$info .= $link['duplex'];
 			}
-			echo '<td>' . $info;
+			echo '<td>' . $info . '</td>';
 			echo '</tr>';
 		}
 		echo "</table></td>";
@@ -2154,7 +2155,8 @@ function renderPortsInfo($object_id)
 		echo "<td valign='top' width='50%'>";
 		$rendered_macs = '';
 		$mac_count = 0;
-		$rendered_macs .=  "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'><tr><th>MAC<th>Vlan<th>Port</tr>";
+		$rendered_macs .= "<table width='80%' class='widetable' cellspacing=0 cellpadding='5px' align='center'>";
+		$rendered_macs .= '<tr><th>MAC address</th><th>VLAN</th><th>Port</th></tr>';
 		$order = 'even';
 		foreach ($macList as $pn => $list)
 		{
@@ -2163,9 +2165,9 @@ function renderPortsInfo($object_id)
 			{
 				++$mac_count;
 				$rendered_macs .= "<tr class='row_$order'>";
-				$rendered_macs .= '<td style="font-family: monospace">' . $item['mac'];
-				$rendered_macs .= '<td>' . $item['vid'];
-				$rendered_macs .= '<td>' . $pn;
+				$rendered_macs .= '<td style="font-family: monospace">' . $item['mac'] . '</td>';
+				$rendered_macs .= '<td>' . $item['vid'] . '</td>';
+				$rendered_macs .= '<td>' . $pn . '</td>';
 				$rendered_macs .= '</tr>';
 			}
 		}
@@ -3238,7 +3240,7 @@ function renderIPNetworkProperties ($id)
 
 function renderIPAddress ($ip_bin)
 {
-	global $aat, $nextorder;
+	global $aat;
 	$address = getIPAddress ($ip_bin);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${address['ip']}</h1></td></tr>\n";
@@ -3641,6 +3643,19 @@ function searchHandler()
 		showError ('Search string cannot be empty.');
 		redirectUser (buildRedirectURL ('index', 'default'));
 	}
+
+	try
+	{
+		parseSearchTerms ($terms);
+		// Discard the return value as searchEntitiesByText() and its retriever
+		// functions expect the original string as the parameter.
+	}
+	catch (InvalidArgException $iae)
+	{
+		showError ($iae->getMessage());
+		redirectUser (buildRedirectURL ('index', 'default'));
+	}
+
 	renderSearchResults ($terms, searchEntitiesByText ($terms));
 }
 
@@ -3668,19 +3683,17 @@ function renderSearchResults ($terms, $summary)
 		if (isset ($url))
 			redirectUser ($url);
 	}
-	global $nextorder;
-	$order = 'odd';
 	echo "<center><h2>${nhits} result(s) found for '${terms}'</h2></center>";
 	foreach ($summary as $where => $what)
 		switch ($where)
 		{
 			case 'object':
 				startPortlet (mkA ('Objects', 'depot'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra">';
 				echo '<tr><th>what</th><th>why</th></tr>';
 				foreach ($what as $obj)
 				{
-					echo "<tr class=row_${order} valign=top><td>";
+					echo "<tr valign=top><td>";
 					$object = spotEntity ('object', $obj['id']);
 					renderCell ($object);
 					echo "</td><td class=tdleft>";
@@ -3747,7 +3760,6 @@ function renderSearchResults ($terms, $summary)
 						echo '</ul>';
 					}
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
@@ -3759,13 +3771,12 @@ function renderSearchResults ($terms, $summary)
 				elseif ($where == 'ipv6net')
 					startPortlet (mkA ('IPv6 networks', 'ipv6space'));
 
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order} valign=top><td>";
+					echo "<tr valign=top><td>";
 					renderCell ($cell);
 					echo "</td></tr>\n";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
@@ -3776,12 +3787,12 @@ function renderSearchResults ($terms, $summary)
 					startPortlet ('IPv4 addresses');
 				elseif ($where == 'ipv6addressbydescr')
 					startPortlet ('IPv6 addresses');
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra">';
 				// FIXME: address, parent network, routers (if extended view is enabled)
 				echo '<tr><th>Address</th><th>Description</th><th>Comment</th></tr>';
 				foreach ($what as $addr)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					$fmt = ip_format ($addr['ip']);
 					$parentnet = getIPAddressNetworkId ($addr['ip']);
 					if ($parentnet !== NULL)
@@ -3794,123 +3805,113 @@ function renderSearchResults ($terms, $summary)
 					else
 						echo mkA ($fmt, 'ipaddress', $fmt, 'default') . '</td>';
 					echo "<td class=tdleft>${addr['name']}</td><td>${addr['comment']}</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'ipv4rspool':
 				startPortlet (mkA ('RS pools', 'ipv4slb', NULL, 'rspools'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'ipvs':
 				startPortlet (mkA ('VS groups', 'ipv4slb', NULL, 'vs'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'ipv4vs':
 				startPortlet (mkA ('Virtual services', 'ipv4slb', NULL, 'default'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'user':
 				startPortlet (mkA ('Users', 'userlist'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $item)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($item);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'file':
 				startPortlet (mkA ('Files', 'files'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'rack':
 				startPortlet (mkA ('Racks', 'rackspace'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'row':
 				startPortlet (mkA ('Rack rows', 'rackspace'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					echo mkCellA ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'location':
 				startPortlet (mkA ('Locations', 'rackspace'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $cell)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					renderCell ($cell);
 					echo "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
 				break;
 			case 'vlan':
 				startPortlet (mkA ('VLANs', '8021q'));
-				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
+				echo '<table border=0 cellpadding=5 cellspacing=0 align=center class="cooltable zebra0">';
 				foreach ($what as $vlan)
 				{
-					echo "<tr class=row_${order}><td class=tdleft>";
+					echo "<tr><td class=tdleft>";
 					echo formatVLANAsHyperlink (getVlanRow ($vlan['id'])) . "</td></tr>";
-					$order = $nextorder[$order];
 				}
 				echo '</table>';
 				finishPortlet();
@@ -5073,7 +5074,12 @@ function renderCell ($cell)
 				break;
 		}
 		echo "</td><td>";
+		$title = 'created ' . $cell['ctime'];
+		if ($cell['ctime'] != $cell['mtime'])
+			$title .= "\nmodified " . $cell['mtime'];
+		echo "<span title='${title}'>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'file', $cell['id']);
+		echo '</span>';
 		echo "</td><td rowspan=3 valign=top>";
 		if (isset ($cell['links']) && count ($cell['links']))
 			printf ("<small>%s</small>", serializeFileLinks ($cell['links']));
@@ -5174,9 +5180,14 @@ function getFilePreviewCode ($file)
 		case 'image/png':
 		case 'image/gif':
 			$file = getFile ($file['id']);
-			$image = imagecreatefromstring ($file['contents']);
-			$width = imagesx ($image);
-			$height = imagesy ($image);
+			if (function_exists ('getimagesizefromstring'))
+				list ($width, $height) = getimagesizefromstring ($file['contents']);
+			else
+			{
+				$image = imagecreatefromstring ($file['contents']);
+				$width = imagesx ($image);
+				$height = imagesy ($image);
+			}
 			if ($width < getConfigVar ('PREVIEW_IMAGE_MAXPXS') && $height < getConfigVar ('PREVIEW_IMAGE_MAXPXS'))
 				$resampled = FALSE;
 			else
@@ -5235,13 +5246,14 @@ function showPathAndSearch ($pageno, $tabno)
 	{
 		$self = __FUNCTION__;
 		global $page;
+		global $sic;
 		$path = array();
 		$page_name = preg_replace ('/:.*/', '', $targetno);
 		// Recursion breaks at first parentless page.
 		if ($page_name == 'ipaddress')
 		{
 			// case ipaddress is a universal v4/v6 page, it has two parents and requires special handling
-			$ip_bin = ip_parse ($_REQUEST['ip']);
+			$ip_bin = ip_parse ($sic['ip']);
 			$parent = (strlen ($ip_bin) == 16 ? 'ipv6net' : 'ipv4net');
 			$path = $self ($parent);
 			$path[] = $targetno;
@@ -5256,6 +5268,7 @@ function showPathAndSearch ($pageno, $tabno)
 		return $path;
 	}
 	global $page, $tab;
+	global $sic;
 	// Path.
 	$path = getPath ($pageno);
 	$items = array();
@@ -5327,7 +5340,9 @@ function showPathAndSearch ($pageno, $tabno)
 	echo "<input type=hidden name=last_page value=$pageno>";
 	echo "<input type=hidden name=last_tab value=$tabno>";
 	// This input will be the first, if we don't add ports or addresses.
-	echo "<label>Search:<input type=text name=q size=20 value='".(isset ($_REQUEST['q']) ? htmlspecialchars ($_REQUEST['q'], ENT_QUOTES) : '')."'></label></form></div>";
+	echo '<label>Search:<input type=text name=q size=20 value="';
+	echo array_key_exists ('q', $sic) ? stringForTextInputValue ($sic['q']) : '';
+	echo '"></label></form></div>';
 
 	// Path (breadcrumbs)
 	echo implode(' : ', array_reverse ($items));
@@ -5596,8 +5611,6 @@ function dynamic_title_decoder_throwing ($path_position)
 			'params' => array ('qcode' => $sic['dqcode'])
 		);
 	}
-
-	// default behaviour is throwing an exception
 	throw new RackTablesError ('dynamic_title decoding error', RackTablesError::INTERNAL);
 }
 
@@ -6464,7 +6477,7 @@ function renderTableViewer ($columns, $rows, $params = NULL)
 			'cellspacing' => 0,
 			'cellpadding' => 5,
 			'align' => 'center',
-			'class' => $header_row ? 'widetable zebra' : 'widetable zebra0',
+			'class' => 'widetable zebra0',
 		);
 	echo makeHtmlTag ('table', $params);
 	if ($header_row)
