@@ -2462,7 +2462,7 @@ $dictionary = array
 	2571 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C240 M4S'),
 	2572 => array ('chapter_id' => 13, 'dict_value' => 'Solaris%GSKIP%Solaris 11'),
 	2573 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C420 M3'),
-	2574 => array ('chapter_id' => 24, 'dict_value' => 'Cisco%GPASS%ASR 920'),
+	2574 => array ('chapter_id' => 17, 'dict_value' => 'Cisco%GPASS%ASR 920'),
 	2575 => array ('chapter_id' => 11, 'dict_value' => 'Cisco%GPASS%UCS C460 M4'),
 	2576 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS-Mini 6324 Fabric Interconnect'),
 	2577 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%UCS 6332 Fabric Interconnect'),
@@ -2555,6 +2555,12 @@ $dictionary = array
 	2664 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME 3600X-24FS-M'),
 	2665 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%VDX 6740 | http://www.brocade.com/en/products-services/switches/data-center-switches/vdx-6740-switches.html]]'),
 	2666 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-7250-48 | http://www.brocade.com/en/products-services/switches/campus-network-switches/icx-7250-switch.html]]'),
+	2667 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.0'),
+	2668 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.2'),
+	2669 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.3'),
+	2670 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.4'),
+	2671 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.5'),
+
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.
