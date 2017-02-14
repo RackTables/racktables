@@ -3495,6 +3495,9 @@ function iosParseVLANString ($string)
 // with requested column set to given value (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus
 // require strict checking (=== and !===).
+// Also note that this is not a 1:1 reinvention of PHP's array_search() as
+// this function looks one level deeper (which could be done by means of
+// array_column(), which appears only in PHP 5 >= 5.5.0).
 function scanArrayForItem ($table, $scan_column, $scan_value)
 {
 	foreach ($table as $key => $row)
