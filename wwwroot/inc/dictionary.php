@@ -2580,6 +2580,18 @@ $dictionary = array
 	2689 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7504R'),
 	2690 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7508R'),
 	2691 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7512R'),
+	2692 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 21'),
+	2693 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 22'),
+	2694 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 23'),
+	2695 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 24'),
+	2696 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 25'),
+	2697 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 16.10'),
+	2698 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 5.1'),
+	2699 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 5.2'),
+	2700 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 6.0'),
+	2701 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 6.1'),
+	2702 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 7.0'),
+	2703 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE Leap 42.x'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
