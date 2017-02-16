@@ -2560,6 +2560,27 @@ $dictionary = array
 	2669 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.3'),
 	2670 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.4'),
 	2671 => array ('chapter_id' => 16, 'dict_value' => 'Cisco IOS 15.5'),
+	2672 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX-72Q'),
+	2673 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX2-72Q'),
+	2674 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050SX2-128'),
+	2675 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX-72Q'),
+	2676 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050TX2-128'),
+	2677 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7050QX2-32S'),
+	2678 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7060CX2-32S'),
+	2679 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7060CX-32S'),
+	2680 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7060QX-64'),
+	2681 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7060CX-64'),
+	2682 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR-48'),
+	2683 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280QR-C72'),
+	2684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280QR-C36'),
+	2685 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR-48C6'),
+	2686 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280TR-48C6'),
+	2687 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7324X'),
+	2688 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7328X'),
+	2689 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7504R'),
+	2690 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7508R'),
+	2691 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7512R'),
+
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less, than 50000). This is necessary to keep AUTO_INCREMENT
