@@ -147,7 +147,7 @@ Start services:
 #service mysql-server start
 ```
 
-goto http://address.to.your.server/racktables/index.php and follow the instructions
+Browse to http://address.to.your.server/racktables/index.php and follow the instructions.
 
 Note: set secret.php permissions when prompted.
 ```
