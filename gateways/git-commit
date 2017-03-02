@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
+# This script implements a simple (one file at a time) one-way feed into a git
+# repository. To make a commit it takes the following PHP code:
+#
+# $params = array
+# (
+#   'racktables_pseudo_user',
+#   '/path/to/repository',
+#   'path/to/file/within/the/repository',
+#   'commit message text',
+# );
+# $rc = callScript ('git-commit', $params, $file_contents, $stdout, $stderr);
+#
+# The meaning of $stdout and $stderr is the same as in queryTerminal().
+# The specified repository must exist and the specified pseudo-user must be
+# able to write to the repository and run "git pull", "git commit" and "git push"
+# without any user interaction (i.e. the git remote must be on a local
+# filesystem or be configured to use SSH keys).
+
+[ $# -eq 4 ] || {
+	echo "Usage: $0 <pseudo-user> <repo dir> <path to file> <commit message>" >&2
+	exit 1
+}
+
+SUDOUSER=$1
+REPODIR="$2"
+FILEPATH="$3"
+COMMITMSG="$4"
+
+[ `whoami` = "$SUDOUSER" ] || {
+	sudo --non-interactive --set-home --user=$SUDOUSER -- "$0" "$@"
+	exit $?
+}
+
+cd "$REPODIR"
+git pull --quiet || {
+	echo "Failed to run 'git pull' (rc=$?)" >&2
+	exit 2
+}
+
+# New file contents is on stdin.
+cat > "$FILEPATH" || {
+	echo "Failed to write new file contents, trying to roll back." >&2
+	git checkout --quiet -- "$FILEPATH" || {
+		echo "Failed to run 'git checkout' after a write error." >&2
+		exit 4
+	}
+	exit 3
+}
+
+git diff --quiet -- "$FILEPATH" || {
+	git add -- "$FILEPATH"
+	printf "update %s\n\n%s\n" "$FILEPATH" "$COMMITMSG" | git commit --quiet --file=- -- "$FILEPATH"
+	git push --quiet || {
+		echo "Failed to run 'git push' (rc=$?)" >&2
+		exit 5
+	}
+}
+
+exit 0
