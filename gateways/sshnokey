@@ -11,7 +11,7 @@
 # If possible, use the public key authenticated version instead. In case
 # that is not an option, consider different passwords for every system.
 # 
-# To summerise, treat this as a slighhtly-better telnet client and make
+# To summarize, treat this as a slightly better telnet client and make
 # sure the network this runs in is secure.
 
 use strict;
