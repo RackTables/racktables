@@ -959,11 +959,11 @@ function addBulkPorts ()
 	$port_numbering_count = genericAssertion ('port_numbering_count', 'uint');
 
 	$added_count = $error_count = 0;
-	if(strrpos($port_name, "%u") === false )
+	if (strrpos ($port_name, '%u') === FALSE)
 		$port_name .= '%u';
-	for ($i=0,$c=$port_numbering_start; $i<$port_numbering_count; $i++,$c++)
+	for ($i = 0, $c = $port_numbering_start; $i < $port_numbering_count; $i++, $c++)
 	{
-		commitAddPort ($object_id, @sprintf($port_name,$c), $port_type_id, @sprintf($port_label,$c), '');
+		commitAddPort ($object_id, @sprintf ($port_name, $c), $port_type_id, @sprintf ($port_label, $c), '');
 		$added_count++;
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $error_count));
