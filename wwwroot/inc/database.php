@@ -4054,10 +4054,10 @@ function loadEntityTags ($entity_realm, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		"select tt.id, tag from " .
-		"TagStorage as ts inner join TagTree as tt on ts.tag_id = tt.id " .
-		"where entity_realm = ? and entity_id = ? " .
-		"order by tt.tag",
+		"SELECT tt.id, tag FROM " .
+		"TagStorage AS ts INNER JOIN TagTree AS tt ON ts.tag_id = tt.id " .
+		"WHERE entity_realm = ? AND entity_id = ? " .
+		"ORDER BY tt.tag",
 		array ($entity_realm, $entity_id)
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
