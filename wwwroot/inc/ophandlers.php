@@ -961,6 +961,8 @@ function addBulkPorts ()
 	$added_count = $error_count = 0;
 	if (strrpos ($port_name, '%u') === FALSE)
 		$port_name .= '%u';
+	if (strrpos ($port_label, '%u') === FALSE)
+		$port_label .= '%u';
 	for ($i = 0, $c = $port_numbering_start; $i < $port_numbering_count; $i++, $c++)
 	{
 		commitAddPort ($object_id, @sprintf ($port_name, $c), $port_type_id, @sprintf ($port_label, $c), '');
