@@ -4469,7 +4469,7 @@ function destroyIPv6Prefix ($id)
 
 function loadScript ($name)
 {
-	$result = usePreparedSelectBlade ("select script_text from Script where script_name = ?", array ($name));
+	$result = usePreparedSelectBlade ("SELECT script_text FROM Script WHERE script_name = ?", array ($name));
 	return nullIfFalse ($result->fetchColumn());
 }
 
