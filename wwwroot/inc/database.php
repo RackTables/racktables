@@ -4893,11 +4893,11 @@ function deleteLDAPCacheRecord ($username)
 	usePreparedDeleteBlade ('LDAPCache', array ('presented_username' => $username));
 }
 
-// Age all records older, than cache_expiry seconds, and all records made in future.
+// Purge all records older than the threshold, as well as any records made in future.
 // Calling this function w/o argument purges the whole LDAP cache.
-function discardLDAPCache ($maxage = 0)
+function discardLDAPCache ($maxseconds = 0)
 {
-	usePreparedExecuteBlade ('DELETE from LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ? or NOW() < first_success', array ($maxage));
+	usePreparedExecuteBlade ('DELETE FROM LDAPCache WHERE TIMESTAMPDIFF(SECOND, first_success, NOW()) >= ? OR NOW() < first_success', array ($maxseconds));
 }
 
 function getUserIDByUsername ($username)
