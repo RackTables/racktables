@@ -3587,18 +3587,18 @@ function getChapterRefc ($chapter_id, $keylist)
 	{
 	case CHAP_OBJTYPE:
 		// ObjectType chapter is referenced by AttributeMap and Object tables
-		$query = 'select dict_key as uint_value, (select count(*) from AttributeMap where objtype_id = dict_key) + ' .
-			"(select count(*) from Object where objtype_id = dict_key) as refcnt from Dictionary where chapter_id = ?";
+		$query = 'SELECT dict_key AS uint_value, (SELECT COUNT(*) FROM AttributeMap WHERE objtype_id = dict_key) + ' .
+			'(SELECT COUNT(*) FROM Object WHERE objtype_id = dict_key) AS refcnt FROM Dictionary WHERE chapter_id = ?';
 		break;
 	default:
 		// Find the list of all assigned values of dictionary-addressed attributes, each with
 		// chapter/word keyed reference counters.
-		$query = "select uint_value, count(object_id) as refcnt
-			from AttributeMap am
-			inner join AttributeValue av on am.attr_id = av.attr_id
-			inner join Object o on o.id = av.object_id
-			where am.chapter_id = ? and o.objtype_id = am.objtype_id
-			group by uint_value";
+		$query = 'SELECT uint_value, count(object_id) AS refcnt
+			FROM AttributeMap am
+			INNER JOIN AttributeValue av ON am.attr_id = av.attr_id
+			INNER JOIN Object o ON o.id = av.object_id
+			WHERE am.chapter_id = ? AND o.objtype_id = am.objtype_id
+			GROUP BY uint_value';
 		break;
 	}
 	$result = usePreparedSelectBlade ($query, array ($chapter_id));
