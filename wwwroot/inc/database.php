@@ -3552,12 +3552,15 @@ function commitDeleteChapter ($chapter_no)
 
 // This is a dictionary accessor. We perform link rendering, so the user sees
 // nice <select> drop-downs.
-function readChapter ($chapter_id = 0, $style = '')
+function readChapter ($chapter_id, $style = '')
 {
+	$result = usePreparedSelectBlade ('SELECT id FROM Chapter WHERE id = ?', array ($chapter_id));
+	if (FALSE === $result->fetchColumn())
+		throw new EntityNotFoundException ('chapter', $chapter_id);
+	unset ($result);
 	$result = usePreparedSelectBlade
 	(
-		"select dict_key, dict_value as value from Dictionary " .
-		"where chapter_id = ?",
+		'SELECT dict_key, dict_value AS value FROM Dictionary WHERE chapter_id = ?',
 		array ($chapter_id)
 	);
 	$chapter = array();

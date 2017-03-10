@@ -120,6 +120,17 @@ class DictionaryAttributeTest extends PHPUnit_Framework_TestCase
 	public function testReadChapter ()
 	{
 		$this->assertEquals (array_values ($this->new_word_ids), array_keys (readChapter ($this->new_chapter_id, 'r')));
+		// The object types chapter always exists and always contains record.
+		$this->assertGreaterThan (0, count (readChapter (CHAP_OBJTYPE)));
+	}
+
+	/**
+	 * @group small
+	 * @expectedException EntityNotFoundException
+	 */
+	public function testReadChapterNE ()
+	{
+		readChapter (-1);
 	}
 
 	/**
