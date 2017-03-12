@@ -462,9 +462,14 @@ function isCheckSet ($input_name, $mode = 'bool')
 
 // Validate and return "bypass" value for the current context, if one is
 // defined for it, or NULL otherwise.
+// There is at least one bit of code that depends on the NULL return value
+// (although it does not explicitly check for it), it is the "interface" case
+// in index.php, which makes an unconditional call to here. Changing this
+// function to throw an exception instead will require changing at least
+// that code too.
 function getBypassValue()
 {
-	global $page, $pageno, $sic;
+	global $page, $pageno;
 	if (!array_key_exists ('bypass', $page[$pageno]))
 		return NULL;
 	if (!array_key_exists ('bypass_type', $page[$pageno]))
