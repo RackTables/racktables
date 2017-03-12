@@ -3686,13 +3686,14 @@ function getAttrMap ()
 	return $ret;
 }
 
-// FIXME: don't store garbage in chapter_no for non-dictionary types.
-function commitSupplementAttrMap ($attr_id = 0, $objtype_id = 0, $chapter_no = 0)
+function commitSupplementAttrMap ($attr_id, $objtype_id, $chapter_no = NULL)
 {
-	if ($attr_id <= 0)
-		throw new InvalidArgException ('attr_id', $attr_id);
 	if ($objtype_id <= 0)
 		throw new InvalidArgException ('objtype_id', $objtype_id);
+	if (getAttrType ($attr_id) != 'dict')
+		$chapter_no = NULL;
+	elseif ($chapter_no === NULL)
+		throw new InvalidArgException ('chapter_no', '(NULL)', 'must not be NULL for a [D] attribute');
 
 	usePreparedInsertBlade
 	(
