@@ -3779,7 +3779,6 @@ function editUserProperties ()
 	$user_id = getBypassValue();
 	rebuildTagChainForEntity ('user', $user_id, buildTagChainFromIds ($taglist), TRUE);
 	$user = spotEntity ('user', $user_id);
-	print_r($user);
 	showFuncMessage (__FUNCTION__, 'OK', array($user['user_name']));
 }
 
