@@ -1541,24 +1541,21 @@ function updateUI ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$num_vars = genericAssertion ('num_vars', 'uint');
-
-	for ($i = 0; $i < $num_vars; $i++)
+	try
 	{
-		assertStringArg ("${i}_varvalue", TRUE);
-		$varname = genericAssertion ("${i}_varname", 'string');
-		$varvalue = $_REQUEST["${i}_varvalue"];
-
-		// If form value = value in DB, don't bother updating DB
-		if (!isConfigVarChanged($varname, $varvalue))
-			continue;
-		try
+		for ($i = 0; $i < $num_vars; $i++)
 		{
-			setConfigVar ($varname, $varvalue);
+			assertStringArg ("${i}_varvalue", TRUE);
+			$varname = genericAssertion ("${i}_varname", 'string');
+			$varvalue = $_REQUEST["${i}_varvalue"];
+			// If form value = value in DB, don't bother updating DB.
+			if (isConfigVarChanged ($varname, $varvalue))
+				setConfigVar ($varname, $varvalue);
 		}
-		catch (InvalidArgException $iae)
-		{
-			throw $iae->newIRAE();
-		}
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
 	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
