@@ -15,14 +15,11 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                               |
 | ------------------ | ----------------------------------------------------------------------- |
-| ALTLinux 4.0       | `apt-get install MySQL-server`                                          |
-| CentOS 5           | `yum install mysql-server mysql`                                        |
 | Debian 6           | `aptitude install mysql-server-5.1`                                     |
 | Debian 7           | `aptitude install mysql-server-5.1`                                     |
 | Fedora 8-16        | `yum install mysql-server mysql`                                        |
 | Fedora 23          | `dnf install mariadb-server mariadb`                                    |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
-| openSUSE 11.0      | YaST -> Software -> software management -> Web and LAMP server -> mysql |
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
@@ -32,13 +29,10 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| ALTLinux 4.0       | add `CHSET=utf8` line to `/etc/sysconfig/mysqld` file and restart mysqld                                           |
-| CentOS 5           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Debian 6           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Debian 7           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Fedora 23          | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
-| openSUSE 11.0      | add `default-character-set=utf8` line to `[mysql]` section of `/etc/my.cnf` file and restart mysqld                |
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
@@ -48,15 +42,11 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
-| CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
 | Debian 6           | `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`                  |
 | Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
 | Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
 | Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
-| FreeBSD 8          | see note below                                                                       |
 | FreeBSD 10         | see note 1.3.c                                                                       | 
-| openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
@@ -71,52 +61,34 @@ some external addons like fping, which may take some time in certain situations.
 Please note that setting aggresive caching for php scripts may result in stale
 content - so maximum of 60 seconds is advised, but by default it is not enabled.
 
-#### 1.3.b. FreeBSD 8
-```
-# make -C /usr/ports/www/apache13-modssl install
-# make -C /usr/ports/www/php5-session install
-[X] CLI        Build CLI version
-[X] APACHE     Build Apache module
-[X] MULTIBYTE  Enable zend multibyte support
-# make -C /usr/ports/graphics/php5-gd install
-# make -C /usr/ports/databases/php5-pdo_mysql install
-# make -C /usr/ports/devel/pcre install
-!!! Enable UTF-8 support ............ : yes
-!!! Unicode properties .............. : yes
-# make -C /usr/ports/devel/php5-pcre install
-# make -C /usr/ports/converters/php5-mbstring install
-[X] REGEX  Enable multibyte regex support
+#### 1.3.b. [redacted]
 
-# make -C /usr/ports/net-mgmt/php5-snmp install
-# make -C /usr/ports/net/php5-ldap install
-```
-
-#### 1.3.c. FreeBSD
+#### 1.3.c. FreeBSD 10
 There are 3 different ways how you can install RackTables and its dependencies on FreeBSD.
 
-######A. use pkg (Binary Package Management) ( not always the newest version )
+######A. use pkg (Binary Package Management) (not always the newest version)
 ```
 # pkg install racktables
 # pkg install mod_php56 mysql56-server
 ```
-As of May 2016 this will install RackTables Version 0.20.10 and its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+As of March 2017 this will install RackTables Version 0.20.11 and its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######B. use the ports system ( possibly more recent than pkg )
+######B. use the ports system (possibly more recent than pkg)
 ```
 # cd /usr/ports/sysutils/racktables
 # make install
 # pkg install mod_php56 mysql56-server
 ```
-As of May 2016 this will install RackTables Version 0.20.11 and build and install its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+As of March 2017 this will install RackTables Version 0.20.11 and build and install its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######C. manual ( newest version )
+######C. manual (newest version)
 Install dependencies with pkg:
 ```
 # pkg install php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets
 # pkg install mod_php70 mysql56-server
 ```
 
-unpack tar.gz/zip archive to /usr/local/www
+unpack tar.gz/zip archive to `/usr/local/www`
 
 symblink racktables dir
 ```
@@ -149,7 +121,7 @@ Start services:
 
 Browse to http://address.to.your.server/racktables/index.php and follow the instructions.
 
-Note: set secret.php permissions when prompted.
+Note: set `secret.php` permissions when prompted.
 ```
 # chown www:www /usr/local/www/racktables/wwwroot/inc/secret.php
 # chmod 400 /usr/local/www/racktables/wwwroot/inc/secret.php
