@@ -1130,15 +1130,20 @@ function renderMuninServersEditor()
 	function printNewItemTR()
 	{
 		printOpFormIntro ('add');
-		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '<td><input type=text size=48 name=base_url></td>';
-		echo '<td>&nbsp;</td>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '</tr></form>';
+		echo '<tr>' .
+			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
+			'<td><input type=text size=48 name=base_url></td>' .
+			'<td>&nbsp;</td>' .
+			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
+			'</tr></form>';
 	}
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>base URL</th><th>graph(s)</th><th>&nbsp;</th></tr>';
+	echo '<tr>' .
+		'<th>&nbsp;</th>' .
+		'<th>base URL</th>' .
+		'<th>graph(s)</th>' .
+		'<th>&nbsp;</th>' .
+		'</tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR();
 	foreach (getMuninServers() as $server)
