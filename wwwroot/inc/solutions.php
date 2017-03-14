@@ -64,7 +64,7 @@ function dispatchImageRequest()
 			throw castRackImageException ($e);
 		}
 		// Scaling or highlighting implies no caching and thus no extra wrapper code around.
-		header ('Content-type: image/png');
+		header ('Content-Type: image/png');
 		printRackThumbImage (getBypassValue(), $scale, $object_id);
 		break;
 	case 'preview': // file security context
@@ -102,14 +102,14 @@ function dispatchImageRequest()
 // XXX: deprecated
 function renderErrorImage ()
 {
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	echo base64_decode (IMG_76x17_ERROR);
 }
 
 // XXX: deprecated
 function renderAccessDeniedImage()
 {
-	header ('Content-type: image/png');
+	header ('Content-Type: image/png');
 	echo base64_decode (IMG_1x1_BLACK);
 }
 
@@ -145,14 +145,14 @@ function dispatchMiniRackThumbRequest ($rack_id)
 {
 	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
 	{
-		header ('Content-type: image/png');
+		header ('Content-Type: image/png');
 		echo $thumbcache;
 		return;
 	}
 	ob_start();
 	printRackThumbImage ($rack_id);
 	$capture = ob_get_clean();
-	header ('Content-type: image/png');
+	header ('Content-Type: image/png');
 	echo $capture;
 	usePreparedExecuteBlade
 	(
@@ -249,7 +249,7 @@ function renderProgressBarImage ($done)
 		imagesetpixel ($img, $x, 8, $cc);
 		imagesetpixel ($img, $x, 9, $cc);
 	}
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
 }
@@ -310,7 +310,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 		imagesetpixel ($img, $x, 8, $colors[$cc]);
 		imagesetpixel ($img, $x, 9, $colors[$cc]);
 	}
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
 }
@@ -318,7 +318,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 // XXX: deprecated
 function renderProgressBarError()
 {
-	header ('Content-type: image/png');
+	header ('Content-Type: image/png');
 	echo base64_decode (IMG_100x10_PBAR_ERROR);
 }
 
@@ -326,7 +326,7 @@ function renderImagePreview ($file_id)
 {
 	if ($image = getFileCache ($file_id)) //Cache Hit
 	{
-		header("Content-type: image/jpeg");
+		header("Content-Type: image/jpeg");
 		echo $image;
 		return;
 	}
@@ -347,7 +347,7 @@ function renderImagePreview ($file_id)
 		$image = $resampled;
 		unset ($resampled);
 	}
-	header ('Content-type: image/jpeg');
+	header ('Content-Type: image/jpeg');
 	ob_start();
 	imagejpeg ($image);
 	imagedestroy ($image);
@@ -399,7 +399,7 @@ function proxyStaticURI ($URI)
 	if (FALSE !== $stat = fstat ($fh))
 		if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
 			exit;
-	header ('Content-type: ' . $content_type[$matches[1]]);
+	header ('Content-Type: ' . $content_type[$matches[1]]);
 	fpassthru ($fh);
 	fclose ($fh);
 }

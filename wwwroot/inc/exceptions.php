@@ -313,7 +313,7 @@ class RTImageError extends RackTablesError
 	}
 	public function dispatch()
 	{
-		header ('Content-type: image/png');
+		header ('Content-Type: image/png');
 		echo $this->imgbin;
 	}
 }
