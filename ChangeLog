@@ -3,6 +3,7 @@
 	update: improve SNMP support for Brocade devices (GH#180 by Chris Jones)
 	update: imply %u for port labels too (Mantis#1739 by Gianluca Laudano)
 	update: switch the Cisco UCS gateway to the new API (by Brian Pothier)
+	update: display port inner type when port outer type is ambiguous in Object's "Ports" tab
 0.20.12 2017-02-08
 	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser

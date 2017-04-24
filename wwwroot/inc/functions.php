@@ -3347,6 +3347,14 @@ function getUnlinkedPortTypeOptions ($port_iif_id)
 		return $cache[$port_iif_id];
 
 	$ret = array();
+	$seen_oifs = array();
+	$ambiguous_oifs = array();
+	foreach ($compat as $row)
+	{
+		if (isset ($seen_oifs[$row['oif_id']]))
+			$ambiguous_oifs[$row['oif_id']] = 1;
+		$seen_oifs[$row['oif_id']] = 1;
+	}
 	foreach ($compat as $row)
 	{
 		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
@@ -3357,7 +3365,11 @@ function getUnlinkedPortTypeOptions ($port_iif_id)
 			continue;
 		if (!array_key_exists ($optgroup, $ret))
 			$ret[$optgroup] = array();
-		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
+		if (isset ($ambiguous_oifs[$row['oif_id']]) && $optgroup == 'other')
+			$name = $row['iif_name'] . ' / ' . $row['oif_name'];
+		else
+			$name = $row['oif_name'];
+		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $name;
 	}
 
 	$cache[$port_iif_id] = $ret;
