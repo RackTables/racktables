@@ -2181,6 +2181,77 @@ function renderPortsInfo($object_id)
 	echo "</td></tr></table>";
 }
 
+function renderRackSpaceHistoryForObject ($obj_id)
+{
+	global $nextorder, $pageno, $tabno;
+	$order = 'odd';
+	$history = getRackSpaceHistoryForObject($obj_id);
+	// Show the last operation by default.
+	if (isset ($_REQUEST['op_id']))
+		$op_id = $_REQUEST['op_id'];
+	elseif (isset ($history[0]['mo_id']))
+		$op_id = $history[0]['mo_id'];
+	else $op_id = NULL;
+
+	$omid = NULL;
+	$nmid = NULL;
+	$object_id = 1;
+	if ($op_id)
+		list ($omid, $nmid) = getOperationMolecules ($op_id);
+
+	// Main layout starts.
+	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
+
+	// Left top portlet with old allocation.
+	echo "<tr><td class=pcleft>";
+	startPortlet ('Old allocation');
+	if ($omid)
+	{
+		$oldMolecule = getMolecule ($omid);
+		renderMolecule ($oldMolecule, $object_id);
+	}
+	else
+		echo "nothing";
+	finishPortlet();
+
+	echo '</td><td class=pcright>';
+
+	// Right top portlet with new allocation
+	startPortlet ('New allocation');
+	if ($nmid)
+	{
+		$newMolecule = getMolecule ($nmid);
+		renderMolecule ($newMolecule, $object_id);
+	}
+	else
+		echo "nothing";
+	finishPortlet();
+
+	echo '</td></tr><tr><td colspan=2>';
+
+	// Bottom portlet with list
+
+	startPortlet ('Rackspace allocation history');
+	echo "<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>\n";
+	echo "<tr><th>timestamp</th><th>author</th><th>object</th><th>comment</th></tr>\n";
+	foreach ($history as $row)
+	{
+		if ($row['mo_id'] == $op_id)
+			$class = 'hl';
+		else
+			$class = "row_${order}";
+		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id'], 'object_id'=>$obj_id))."'>${row['ctime']}</a></td>";
+		echo "<td>${row['user_name']}</td><td>";
+		renderCell (spotEntity ('object', $row['ro_id']));
+		echo '</td><td>' . niftyString ($row['comment'], 0) . '</td></tr>';
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n";
+	finishPortlet();
+
+	echo '</td></tr></table>';
+}
+
 /*
 The following conditions must be met:
 1. We can mount onto free atoms only. This means: if any record for an atom
