@@ -4112,6 +4112,7 @@ function generateEntityAutoTags ($cell)
 		case 'object':
 			$ret[] = array ('tag' => '$id_' . $cell['id']);
 			$ret[] = array ('tag' => '$typeid_' . $cell['objtype_id']);
+			$ret[] = array ('tag' => '$has_problems_' . $cell['has_problems']);
 			$ret[] = array ('tag' => '$any_object');
 			if ($cell['name'] == '')
 				$ret[] = array ('tag' => '$nameless');
