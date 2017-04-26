@@ -1,0 +1,4 @@
+{
+	"Server": ["Vendor-Model-MyServer-Type1","Vendor-Model-MyServer-Type2","Vendor-Model-MyServer-Type3"],
+	"Chassis": ["Vendor-Model-MyChassis-Type1","Vendor-Model-MyChassis-Type2"]
+}
