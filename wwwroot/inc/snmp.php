@@ -2260,6 +2260,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C2950SX-24 24 RJ-45/10-100TX + 2 1000Base-SX',
 		'processors' => array ('catalyst-chassis-uplinks-1000SX','catalyst-chassis-any-100TX'),
 	),
+	'9.1.516' => array
+	(
+		'dict_key' => 177,
+		'text' => 'WS-C3750-48TS: 48 RJ-45/10-100TX + 4 SFP/1000',
+		'processors' => array ('catalyst-stack-1-to-4-SFP', 'catalyst-stack-any-100TX'),
+	),
 	'9.1.527' => array
 	(
 		'dict_key' => 210,
@@ -2307,6 +2313,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2025,
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.578' => array
+	(
+		'dict_key' => 282,
+		'text' => 'Cisco 2851 ISR: 2 RJ-45/10-100TX + NM and HWIC Slots',
+		'processors' => array ('catalyst-chassis-uplinks-1000T'),
 	),
 	'9.1.614' => array
 	(
