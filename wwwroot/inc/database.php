@@ -1669,20 +1669,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	$matches = array();
-	switch (1)
-	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = 1;
-		$oif_id = $matches[1];
-		break;
-	default:
-		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-	}
+	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	try
 	{
 		usePreparedInsertBlade
@@ -1721,19 +1708,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	$portinfo = getPortInfo ($port_id);
 	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
-	switch (1)
-	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $portinfo['iif_id'];
-		$oif_id = $matches[1];
-		break;
-	default:
-		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-	}
+	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	try
 	{
 		usePreparedUpdateBlade

@@ -4711,6 +4711,16 @@ function formatPortIIFOIF ($port)
 	return $ret;
 }
 
+// Not an equivalent of the above but related.
+function parsePortIIFOIF ($port_type)
+{
+	if (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type, $matches))
+		return array ($matches[1], $matches[2]);
+	if (preg_match ('/^([[:digit:]]+)$/', $port_type, $matches))
+		return array (1, $matches[1]);
+	throw new InvalidArgException ('port_type', $port_type, 'format error');
+}
+
 // returns '<a...</a>' html string containing a link to specified port or object.
 // link title is "hostname portname" if both parts are defined
 function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
@@ -6578,19 +6588,7 @@ function textareaCooked ($text)
 // Call this function just like commitAddPort except the first argument
 function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label, $port_l2address)
 {
-	switch (1)
-	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = 1;
-		$oif_id = $matches[1];
-		break;
-	default:
-		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-	}
+	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	$desiredPorts["{$port_name}-{$iif_id}"] = array (
 		'name' => $port_name,
 		'iif_id' => $iif_id,
