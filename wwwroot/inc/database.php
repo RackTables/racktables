@@ -1672,24 +1672,29 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	try
 	{
-		usePreparedInsertBlade
-		(
-			'Port',
-			array
-			(
-				'name' => $port_name,
-				'object_id' => $object_id,
-				'label' => $port_label,
-				'iif_id' => $iif_id,
-				'type' => $oif_id,
-				'l2address' => nullIfEmptyStr ($db_l2address),
-			)
-		);
+		return commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address);
 	}
 	catch (L2AddressException $e)
 	{
 		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
+}
+
+function commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address)
+{
+	usePreparedInsertBlade
+	(
+		'Port',
+		array
+		(
+			'name' => $port_name,
+			'object_id' => $object_id,
+			'label' => $port_label,
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
+			'l2address' => nullIfEmptyStr ($db_l2address),
+		)
+	);
 	lastCreated ('port', lastInsertID());
 	return lastInsertID();
 }
@@ -1700,40 +1705,45 @@ function getPortReservationComment ($port_id, $extrasql = '')
 	return $result->fetchColumn();
 }
 
-// The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
-// string value. In case it is omitted, we just assign it its current value.
-// It would be nice to simplify this semantics later.
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
 	$db_l2address = l2addressForDatabase ($port_l2address);
-	$portinfo = getPortInfo ($port_id);
-	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
 	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	try
 	{
-		usePreparedUpdateBlade
-		(
-			'Port',
-			array
-			(
-				'name' => $port_name,
-				'iif_id' => $iif_id,
-				'type' => $oif_id,
-				'label' => $port_label,
-				'reservation_comment' => $reservation_comment,
-				'l2address' => nullIfEmptyStr ($db_l2address),
-			),
-			array
-			(
-				'id' => $port_id,
-				'object_id' => $object_id
-			)
-		);
+		commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment);
 	}
 	catch (L2AddressException $e)
 	{
 		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
 	}
+}
+
+// The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
+// string value. In case it is omitted, we just assign it its current value.
+// It would be nice to simplify this semantics later.
+function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment)
+{
+	$portinfo = getPortInfo ($port_id);
+	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
+	usePreparedUpdateBlade
+	(
+		'Port',
+		array
+		(
+			'name' => $port_name,
+			'iif_id' => $iif_id,
+			'type' => $oif_id,
+			'label' => $port_label,
+			'reservation_comment' => $reservation_comment,
+			'l2address' => nullIfEmptyStr ($db_l2address),
+		),
+		array
+		(
+			'id' => $port_id,
+			'object_id' => $object_id
+		)
+	);
 	if ($portinfo['reservation_comment'] !== $reservation_comment)
 		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
 }
