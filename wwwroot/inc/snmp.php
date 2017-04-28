@@ -4578,7 +4578,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue 2;
 		}
 	// Sync ports
-	syncObjectPorts ($objectInfo, $desiredPorts);
+	syncObjectPorts ($objectInfo['id'], $desiredPorts);
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
@@ -4602,7 +4602,7 @@ function doPDUSNMPmining ($objectInfo, $switch)
 		addDesiredPort ($desiredPorts, $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
-	syncObjectPorts ($objectInfo, $desiredPorts);
+	syncObjectPorts ($objectInfo['id'], $desiredPorts);
 	showSuccess ("Added ${portno} port(s)");
 	return buildRedirectURL (NULL, 'ports');
 }

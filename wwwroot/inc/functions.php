@@ -6602,12 +6602,12 @@ function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label,
 // $desiredPorts is a list of ports in getObjectPortsAndLinks format.
 // required port fields are name, iif_id, oif_id, label and l2address.
 // $desiredPorts can be filled by addDesiredPort function using commitAddPort format
-function syncObjectPorts ($objectInfo, $desiredPorts)
+function syncObjectPorts ($object_id, $desiredPorts)
 {
 	global $dbxlink;
 	$real_ports = array();
 	$dbxlink->beginTransaction();
-	$portlist = fetchPortList ("Port.object_id = ? FOR UPDATE", array ($objectInfo['id']));
+	$portlist = fetchPortList ("Port.object_id = ? FOR UPDATE", array ($object_id));
 	$added = $deleted = $changed = 0;
 	foreach ($portlist as $port)
 	{
@@ -6627,7 +6627,7 @@ function syncObjectPorts ($objectInfo, $desiredPorts)
 			$port['label'] != $desiredPorts[$key]['label'])
 		{
 			commitUpdatePort (
-				$objectInfo['id'],
+				$object_id,
 				$port['id'],
 				$port['name'],
 				"{$port['iif_id']}-{$port['oif_id']}",
@@ -6644,7 +6644,7 @@ function syncObjectPorts ($objectInfo, $desiredPorts)
 		if (!isset ($real_ports[$key]))
 		{
 			$type_id = "{$port['iif_id']}-{$port['oif_id']}";
-			commitAddPort ($objectInfo['id'], $port['name'], $type_id, $port['label'], $port['l2address']);
+			commitAddPort ($object_id, $port['name'], $type_id, $port['label'], $port['l2address']);
 			$added++;
 		}
 	}

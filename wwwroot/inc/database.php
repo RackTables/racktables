@@ -1724,8 +1724,8 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 // It would be nice to simplify this semantics later.
 function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment)
 {
-	$portinfo = getPortInfo ($port_id);
-	$reservation_comment = nullIfEmptyStr ($port_reservation_comment);
+	$old_reservation_comment = getPortReservationComment ($port_id);
+	$port_reservation_comment = nullIfEmptyStr ($port_reservation_comment);
 	usePreparedUpdateBlade
 	(
 		'Port',
@@ -1735,7 +1735,7 @@ function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_i
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
 			'label' => $port_label,
-			'reservation_comment' => $reservation_comment,
+			'reservation_comment' => $port_reservation_comment,
 			'l2address' => nullIfEmptyStr ($db_l2address),
 		),
 		array
@@ -1744,8 +1744,8 @@ function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_i
 			'object_id' => $object_id
 		)
 	);
-	if ($portinfo['reservation_comment'] !== $reservation_comment)
-		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $portinfo['reservation_comment'], $reservation_comment));
+	if ($old_reservation_comment !== $port_reservation_comment)
+		addPortLogEntry ($port_id, sprintf ("Reservation changed from '%s' to '%s'", $old_reservation_comment, $port_reservation_comment));
 }
 
 function commitUpdatePortComment ($port_id, $port_reservation_comment)
