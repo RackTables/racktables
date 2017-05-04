@@ -248,6 +248,12 @@ try {
 			ob_clean();
 			showError ('Operation not permitted');
 		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			printException ($e);
+			break;
+		}
 		redirectUser ($location);
 		// any other error requires no special handling and will be caught outside
 		break;
