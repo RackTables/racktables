@@ -2586,6 +2586,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-stack-any-1000T',
 		),
 	),
+	'9.1.1226' => array
+	(
+		'dict_key' => 1576,
+		'text' => 'WS-C3560X-24T: 24 RJ-45/10-100-1000T(X) + network module + OOBM',
+		'processors' => array
+		(
+			'C3KX-NM-10000',
+			'C3KX-NM-1000',
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-mgmt',
+		),
+	),
 	'9.1.1227' => array
 	(
 		'dict_key' => 1577,
