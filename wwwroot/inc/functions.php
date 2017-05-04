@@ -6605,52 +6605,73 @@ function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label,
 function syncObjectPorts ($object_id, $desiredPorts)
 {
 	global $dbxlink;
-	$real_ports = array();
-	$dbxlink->beginTransaction();
-	$portlist = fetchPortList ("Port.object_id = ? FOR UPDATE", array ($object_id));
-	$added = $deleted = $changed = 0;
-	foreach ($portlist as $port)
+	$to_delete = $to_update = $real_ports = array();
+
+	// The check that does not require access to the database goes first.
+	foreach (array_keys ($desiredPorts) as $k)
+		$desiredPorts[$k]['l2address'] = l2AddressForDatabase ($desiredPorts[$k]['l2address']);
+
+	// Further processing must be done with exclusive access to the table. Even when the
+	// only changes requested are to add ports w/o MAC addresses or to update existing
+	// ports in a way that does not introduce new MAC addresses, it is impossible to
+	// tell reliably which ports require which actions without locking the table first.
+	$dbxlink->exec ('LOCK TABLES Port WRITE, PortLog WRITE, Link READ');
+	foreach (getObjectPortsAndLinksTerse ($object_id) as $port)
 	{
 		$key = "{$port['name']}-{$port['iif_id']}";
-		if (!isset ($desiredPorts[$key]))
+		if (! array_key_exists ($key, $desiredPorts))
 		{
-			if ($port['linked'])
-				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
-			else
-			{
-				usePreparedDeleteBlade ('Port', array ('id' => $port['id']));
-				$deleted++;
-			}
+			$to_delete[] = $port;
 			continue;
 		}
-		if (l2addressForDatabase ($port['l2address']) != l2addressForDatabase ($desiredPorts[$key]['l2address']) ||
-			$port['label'] != $desiredPorts[$key]['label'])
-		{
-			commitUpdatePort (
+		if ($port['l2address'] != $desiredPorts[$key]['l2address'] || $port['label'] != $desiredPorts[$key]['label'])
+			$to_update[$key] = $port;
+		$real_ports[$key] = 1;
+	}
+	$to_add = array_diff_key ($desiredPorts, $real_ports);
+	foreach (array_merge ($to_update, $to_add) as $port)
+		if ($port['l2address'] != '' && alreadyUsedL2Address ($port['l2address'], $object_id))
+			throw new InvalidRequestArgException ('l2address', $port['l2address'], 'address belongs to another object');
+
+	// Make the actual changes.
+	try
+	{
+		foreach ($to_delete as $port)
+			if ($port['link_count'] != 0)
+				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
+			else
+				usePreparedDeleteBlade ('Port', array ('id' => $port['id']));
+		foreach ($to_update as $key => $port)
+			commitUpdatePortReal
+			(
 				$object_id,
 				$port['id'],
 				$port['name'],
-				"{$port['iif_id']}-{$port['oif_id']}",
+				$port['iif_id'],
+				$port['oif_id'],
 				$desiredPorts[$key]['label'],
 				$desiredPorts[$key]['l2address'],
 				$port['reservation_comment']
 			);
-			$changed++;
-		}
-		$real_ports[$key] = 1;
+		foreach ($to_add as $key => $port)
+			commitAddPortReal
+			(
+				$object_id,
+				$port['name'],
+				$port['iif_id'],
+				$port['oif_id'],
+				$port['label'],
+				$port['l2address']
+			);
 	}
-	foreach ($desiredPorts as $key => $port)
+	catch (Exception $e)
 	{
-		if (!isset ($real_ports[$key]))
-		{
-			$type_id = "{$port['iif_id']}-{$port['oif_id']}";
-			commitAddPort ($object_id, $port['name'], $type_id, $port['label'], $port['l2address']);
-			$added++;
-		}
+		$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
 	}
-	$dbxlink->commit();
 
-	showSuccess ("Added ports: {$added}, changed: {$changed}, deleted: {$deleted}");
+	$dbxlink->exec ('UNLOCK TABLES');
+	showSuccess (sprintf ('Added ports: %u, changed: %u, deleted: %u', count ($to_add), count ($to_update), count ($to_delete)));
 }
 
 ?>

@@ -1218,6 +1218,8 @@ ENDOFTRIGGER;
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.13':
+			$query[] = "DROP TRIGGER IF EXISTS `Port-before-insert`";
+			$query[] = "DROP TRIGGER IF EXISTS `Port-before-update`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.13' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

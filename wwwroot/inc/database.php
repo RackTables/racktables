@@ -896,6 +896,19 @@ function getObjectPortsAndLinks ($object_id, $sorted = TRUE)
 	return $ret;
 }
 
+// This function provides data for syncObjectPorts() and requires only two tables locked.
+function getObjectPortsAndLinksTerse ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name, iif_id, type AS oif_id, label, l2address, reservation_comment, ' .
+		'(SELECT COUNT(*) FROM Link WHERE porta = Port.id OR portb = Port.id) AS link_count ' .
+		'FROM Port WHERE object_id = ?',
+		array ($object_id)
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
 // Fetch the object type via SQL.
 // spotEntity cannot be used because it references RackObject, which doesn't suit Racks, Rows, or Locations.
 function getObjectType ($object_id)
@@ -1668,18 +1681,33 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 
 function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
 {
+	global $dbxlink;
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
+	// The conditional table locking is less relevant now due to syncObjectPorts().
+	if ($db_l2address != '')
+		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
-		return commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address);
+		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
+			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		$ret = commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address);
 	}
-	catch (L2AddressException $e)
+	catch (Exception $e)
 	{
-		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
+		if ($db_l2address != '')
+			$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
 	}
+	if ($db_l2address != '')
+		$dbxlink->exec ('UNLOCK TABLES');
+	return $ret;
 }
 
+// Having the call to alreadyUsedL2Address() in this function would break things because
+// if the constraint check fails for any port the whole "transaction" needs to be rolled
+// back. Thus the calling function must call alreadyUsedL2Address() for all involved ports
+// first and only then start making any calls to this function.
 function commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address)
 {
 	usePreparedInsertBlade
@@ -1707,21 +1735,32 @@ function getPortReservationComment ($port_id, $extrasql = '')
 
 function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $port_label, $port_l2address, $port_reservation_comment)
 {
+	global $dbxlink;
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
+	if ($db_l2address != '')
+		$dbxlink->exec ('LOCK TABLES Port WRITE, PortLog WRITE');
 	try
 	{
+		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
+			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
 		commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment);
 	}
-	catch (L2AddressException $e)
+	catch (Exception $e)
 	{
-		throw new InvalidRequestArgException ('port_l2address', $port_l2address, $e->getMessage());
+		if ($db_l2address != '')
+			$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
 	}
+	if ($db_l2address != '')
+		$dbxlink->exec ('UNLOCK TABLES');
 }
 
 // The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
 // string value. In case it is omitted, we just assign it its current value.
 // It would be nice to simplify this semantics later.
+//
+// The comment about commitAddPortReal() also applies here.
 function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment)
 {
 	$old_reservation_comment = getPortReservationComment ($port_id);
@@ -3860,12 +3899,6 @@ function convertPDOException ($e)
 	case 'HY000-1205':
 		$text = 'lock wait timeout';
 		break;
-	case '42000-1305':
-		if (FALSE !== strpos ($e->errorInfo[2], 'l2address-already-exists-on-another-object'))
-			return new L2AddressException ('l2 address belongs to another object');
-		else
-			return $e;
-		break;
 	default:
 		return $e;
 	}
@@ -4911,6 +4944,21 @@ function constructUserCell ($username)
 	);
 	$ret['atags'] = generateEntityAutoTags ($ret);
 	return $ret;
+}
+
+// Return TRUE, if the given address is assigned to a port of any object
+// except the current object. Using this function as a constraint makes
+// it possible to reuse L2 addresses within one object, yet keeping them
+// universally unique on the other hand.
+function alreadyUsedL2Address ($address, $my_object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT COUNT(*) FROM Port WHERE l2address = ? AND BINARY l2address = ? AND object_id != ?',
+		array ($address, $address, $my_object_id)
+	);
+	$row = $result->fetch (PDO::FETCH_NUM);
+	return $row[0] != 0;
 }
 
 function getPortInterfaceCompat()
