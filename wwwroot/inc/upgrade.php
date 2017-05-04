@@ -1406,7 +1406,7 @@ if ($path === NULL)
 {
 	echo "<tr><th>Upgrade path</th><td><font color=red>not found</font></td></tr>\n";
 	echo "<tr><th>Summary</th><td>Check README for more information. RackTables releases prior to 0.18.0 ";
-	echo "must be upgraded to 0.18.0 first.</td></tr>\n";
+	echo "must be upgraded to 0.18.0 first. RackTables releases prior to 0.20.0 must be upgraded to 0.20.0 first.</td></tr>\n";
 }
 else
 {
