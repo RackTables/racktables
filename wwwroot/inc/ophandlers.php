@@ -3346,6 +3346,7 @@ function autoPopulateUCS()
 	$oinfo = spotEntity ('object', $ucsm_id);
 	$chassis_id = array();
 	$done = 0;
+	$disable_autoports = isCheckSet('disable_autoports');
 	# There are three request parameters (use_terminal_settings, ucs_login and
 	# ucs_password) not processed here. These are asserted and used inside
 	# queryTerminal().
@@ -3364,7 +3365,7 @@ function autoPopulateUCS()
 		$mname = preg_replace ('#^sys/(.+)$#', $oinfo['name'] . '/\\1', $item['DN']);
 		if ($item['type'] == 'NetworkElement')
 		{
-			$new_object_id = commitAddObject ($mname, NULL, 8, NULL);
+			$new_object_id = commitAddObject ($mname, NULL, 8, NULL, NULL, $disable_autoports);
 			#    Set H/W Type for Network Switch
 			if (array_key_exists ($item['model'], $ucsproductmap))
 				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
@@ -3376,7 +3377,7 @@ function autoPopulateUCS()
 		}
 		elseif ($item['type'] == 'EquipmentChassis')
 		{
-			$chassis_id[$item['DN']] = $new_object_id = commitAddObject ($mname, NULL, 1502, NULL);
+			$chassis_id[$item['DN']] = $new_object_id = commitAddObject ($mname, NULL, 1502, NULL, NULL, $disable_autoports);
 			#    Set H/W Type for Server Chassis
 			if (array_key_exists ($item['model'], $ucsproductmap))
 				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
@@ -3388,7 +3389,7 @@ function autoPopulateUCS()
 		elseif ($item['type'] == 'ComputeBlade')
 		{
 			if ($item['assigned'] == '')
-				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
+				$new_object_id = commitAddObject ($mname, NULL, 4, NULL, NULL, $disable_autoports);
 			else
 			{
 				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
@@ -3417,11 +3418,11 @@ function autoPopulateUCS()
 		elseif ($item['type'] == 'ComputeRackUnit')
 		{
 			if ($item['assigned'] == '')
-				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
+				$new_object_id = commitAddObject ($mname, NULL, 4, NULL, NULL, $disable_autoports);
 			else
 			{
 				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
-				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
+				$new_object_id = commitAddObject ($spname, NULL, 4, NULL, NULL, $disable_autoports);
 			}
 			# Set H/W Type for RackmountServer
 			if (array_key_exists ($item['model'], $ucsproductmap))

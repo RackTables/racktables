@@ -6377,6 +6377,8 @@ function renderEditUCSForm()
 	echo "<td class=tdleft colspan=2><input type=password name=ucs_password id=ucs_password></td></tr>\n";
 	echo "<tr><th colspan=3><input type=checkbox name=use_terminal_settings id=use_terminal_settings>";
 	echo "<label for=use_terminal_settings>Use Credentials from terminal_settings()</label></th></tr>\n";
+	echo "<tr><th colspan=3><input type=checkbox name=disable_autoports checked id=disable_autoports>";
+	echo "<label for=disable_autoports>Disable creating default AUTOPORTS(i.e. kvm, eth0, eth1)</label></th></tr>\n";
 	echo "<tr><th class=tdright>Actions:</th><td class=tdleft>";
 	printImageHREF ('DQUEUE sync_ready', 'Auto-populate UCS', TRUE);
 	echo '</td><td class=tdright>';
