@@ -858,50 +858,6 @@ function addMultiPorts ()
 	{
 		switch ($format)
 		{
-			case 'fisxii':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
-				list ($slot, $port) = explode ('/', $words[0]);
-				$ports[] = array
-				(
-					'name' => "e ${slot}/${port}",
-					'l2address' => $words[8],
-					'label' => "slot ${slot} port ${port}"
-				);
-				break;
-			case 'c3600asy':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', trim (substr ($line, 3))));
-/*
-How Async Lines are Numbered in Cisco 3600 Series Routers
-http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a00801ca70b.shtml
-
-Understanding 16- and 32-Port Async Network Modules
-http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a00800a93f0.shtml
-*/
-				$async = $words[0];
-				$slot = floor (($async - 1) / 32);
-				$octalgroup = floor (($async - 1 - $slot * 32) / 8);
-				$cable = $async - $slot * 32 - $octalgroup * 8;
-				$og_label[0] = 'async 0-7';
-				$og_label[1] = 'async 8-15';
-				$og_label[2] = 'async 16-23';
-				$og_label[3] = 'async 24-31';
-				$ports[] = array
-				(
-					'name' => "async ${async}",
-					'l2address' => '',
-					'label' => "slot ${slot} " . $og_label[$octalgroup] . " cable ${cable}"
-				);
-				break;
-			case 'fiwg':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
-				$ifnumber = $words[0] * 1;
-				$ports[] = array
-				(
-					'name' => "e ${ifnumber}",
-					'l2address' => "${words[8]}",
-					'label' => "${ifnumber}"
-				);
-				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
 				if ($words[0] == '') // empty L2 address is OK
