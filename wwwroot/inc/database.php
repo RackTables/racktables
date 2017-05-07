@@ -1756,10 +1756,6 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		$dbxlink->exec ('UNLOCK TABLES');
 }
 
-// The fifth argument may be either explicit 'NULL' or some (already quoted by the upper layer)
-// string value. In case it is omitted, we just assign it its current value.
-// It would be nice to simplify this semantics later.
-//
 // The comment about commitAddPortReal() also applies here.
 function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment)
 {
