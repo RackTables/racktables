@@ -3318,8 +3318,9 @@ function autoPopulateUCS()
 	foreach ($contents as $item)
 	{
 		$mname = preg_replace ('#^sys/(.+)$#', $oinfo['name'] . '/\\1', $item['DN']);
-		if ($item['type'] == 'NetworkElement')
+		switch ($item['type'])
 		{
+		case 'NetworkElement':
 			$new_object_id = commitAddObject ($mname, NULL, 8, NULL);
 			#    Set H/W Type for Network Switch
 			if (array_key_exists ($item['model'], $ucsproductmap))
@@ -3329,9 +3330,8 @@ function autoPopulateUCS()
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			bindIPToObject (ip_parse ($item['OOB']), $new_object_id, 'mgmt0', 'regular');
 			$done++;
-		}
-		elseif ($item['type'] == 'EquipmentChassis')
-		{
+			break;
+		case 'EquipmentChassis':
 			$chassis_id[$item['DN']] = $new_object_id = commitAddObject ($mname, NULL, 1502, NULL);
 			#    Set H/W Type for Server Chassis
 			if (array_key_exists ($item['model'], $ucsproductmap))
@@ -3340,9 +3340,8 @@ function autoPopulateUCS()
 			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
-		}
-		elseif ($item['type'] == 'ComputeBlade')
-		{
+			break;
+		case 'ComputeBlade':
 			if ($item['assigned'] == '')
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
@@ -3361,17 +3360,15 @@ function autoPopulateUCS()
 			if (array_key_exists ($parent_name, $chassis_id))
 				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
 			$done++;
-		}
-		elseif ($item['type'] == 'VnicPort')
-		{
+			break;
+		case 'VnicPort':
 			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '${2}', $item['DN']) . "(" . $oinfo['name'] . ")";
 			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '${3}', $item['DN']);
 			#        Add "virtual"(1469) ports for associated blades only
 			if ($spid = $spname_id[$spname])
 				commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
-		}
-		elseif ($item['type'] == 'ComputeRackUnit')
-		{
+			break;
+		case 'ComputeRackUnit':
 			if ($item['assigned'] == '')
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
@@ -3387,6 +3384,7 @@ function autoPopulateUCS()
 			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
+			break;
 		}
 	} # endfor
 	showSuccess ("Auto-populated UCS Domain '${oinfo['name']}' with ${done} items");
