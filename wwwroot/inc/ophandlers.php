@@ -870,8 +870,7 @@ function addMultiPorts ()
 				);
 				break;
 			default:
-				throw new InvalidRequestArgException ('format', $format);
-				break;
+				throw new RackTablesError ("unknown data format '${format}'", RackTablesError::INTERNAL);
 		}
 	}
 	// Create ports, if they don't exist.
