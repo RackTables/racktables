@@ -1690,7 +1690,7 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 	try
 	{
 		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+			throw new InvalidArgException ('port_l2address', $port_l2address, 'address belongs to another object');
 		$ret = commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address);
 	}
 	catch (Exception $e)
@@ -1743,7 +1743,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 	try
 	{
 		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidRequestArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+			throw new InvalidArgException ('port_l2address', $port_l2address, 'address belongs to another object');
 		commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment);
 	}
 	catch (Exception $e)

@@ -815,14 +815,25 @@ function addPortForObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('port_name', 'string');
-	commitAddPort
-	(
-		getBypassValue(),
-		trim ($_REQUEST['port_name']),
-		genericAssertion ('port_type_id', 'string'),
-		trim ($_REQUEST['port_label']),
-		trim (genericAssertion ('port_l2address', 'l2address0'))
-	);
+	try
+	{
+		commitAddPort
+		(
+			getBypassValue(),
+			trim ($_REQUEST['port_name']),
+			genericAssertion ('port_type_id', 'string'),
+			trim ($_REQUEST['port_label']),
+			trim (genericAssertion ('port_l2address', 'l2address0'))
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
@@ -831,16 +842,27 @@ function editPortForObject ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
 	$port_id = assertUIntArg ('port_id');
-	commitUpdatePort
-	(
-		getBypassValue(),
-		$port_id,
-		genericAssertion ('name', 'string'),
-		assertStringArg ('port_type_id'),
-		genericAssertion ('label', 'string0'),
-		genericAssertion ('l2address', 'l2address0'),
-		assertStringArg ('reservation_comment', TRUE)
-	);
+	try
+	{
+		commitUpdatePort
+		(
+			getBypassValue(),
+			$port_id,
+			genericAssertion ('name', 'string'),
+			assertStringArg ('port_type_id'),
+			genericAssertion ('label', 'string0'),
+			genericAssertion ('l2address', 'l2address0'),
+			assertStringArg ('reservation_comment', TRUE)
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	if (array_key_exists ('cable', $_REQUEST))
 		commitUpdatePortLink ($port_id, $sic['cable']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
@@ -3363,9 +3385,17 @@ function autoPopulateUCS()
 		case 'VnicPort':
 			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '${2}', $item['DN']) . "(" . $oinfo['name'] . ")";
 			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '${3}', $item['DN']);
-			#        Add "virtual"(1469) ports for associated blades only
-			if ($spid = $spname_id[$spname])
-				commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
+			try
+			{
+				// Add "virtual" (1469) ports for associated blades only. The attempt may fail
+				// due to incorrect port type or MAC address.
+				if ($spid = $spname_id[$spname])
+					commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
+			}
+			catch (InvalidArgException $iae)
+			{
+				showError ($iae->getMessage());
+			}
 			break;
 		case 'ComputeRackUnit':
 			if ($item['assigned'] == '')
@@ -3741,8 +3771,15 @@ function renameObjectPorts()
 		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
 		if ($canon_pn != $port['name'])
 		{
-			commitUpdatePort ($object_id, $port['id'], $canon_pn, $port['oif_id'], $port['label'], $port['l2address'], $port['reservation_comment']);
-			$n++;
+			try
+			{
+				commitUpdatePort ($object_id, $port['id'], $canon_pn, $port['oif_id'], $port['label'], $port['l2address'], $port['reservation_comment']);
+				$n++;
+			}
+			catch (InvalidArgException $iae)
+			{
+				showError ($iae->getMessage());
+			}
 		}
 	}
 	if ($n)

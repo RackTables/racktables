@@ -6629,13 +6629,13 @@ function syncObjectPorts ($object_id, $desiredPorts)
 		$real_ports[$key] = 1;
 	}
 	$to_add = array_diff_key ($desiredPorts, $real_ports);
-	foreach (array_merge ($to_update, $to_add) as $port)
-		if ($port['l2address'] != '' && alreadyUsedL2Address ($port['l2address'], $object_id))
-			throw new InvalidRequestArgException ('l2address', $port['l2address'], 'address belongs to another object');
 
-	// Make the actual changes.
 	try
 	{
+		foreach (array_merge ($to_update, $to_add) as $port)
+			if ($port['l2address'] != '' && alreadyUsedL2Address ($port['l2address'], $object_id))
+				throw new InvalidRequestArgException ('l2address', $port['l2address'], 'address belongs to another object');
+		// Make the actual changes.
 		foreach ($to_delete as $port)
 			if ($port['link_count'] != 0)
 				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
