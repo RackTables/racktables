@@ -6632,9 +6632,7 @@ function syncObjectPorts ($object_id, $desiredPorts)
 
 	try
 	{
-		foreach (array_merge ($to_update, $to_add) as $port)
-			if ($port['l2address'] != '' && alreadyUsedL2Address ($port['l2address'], $object_id))
-				throw new InvalidRequestArgException ('l2address', $port['l2address'], 'address belongs to another object');
+		assertUniqueL2Addresses (reduceSubarraysToColumn (array_merge ($to_update, $to_add), 'l2address'), $object_id);
 		// Make the actual changes.
 		foreach ($to_delete as $port)
 			if ($port['link_count'] != 0)

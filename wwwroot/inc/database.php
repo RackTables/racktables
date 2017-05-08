@@ -1689,8 +1689,7 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try
 	{
-		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		assertUniqueL2Addresses (array ($db_l2address), $object_id);
 		$ret = commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address);
 	}
 	catch (Exception $e)
@@ -1704,9 +1703,9 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 	return $ret;
 }
 
-// Having the call to alreadyUsedL2Address() in this function would break things because
+// Having the call to assertUniqueL2Addresses() in this function would break things because
 // if the constraint check fails for any port the whole "transaction" needs to be rolled
-// back. Thus the calling function must call alreadyUsedL2Address() for all involved ports
+// back. Thus the calling function must call assertUniqueL2Addresses() for all involved ports
 // first and only then start making any calls to this function.
 function commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address)
 {
@@ -1742,8 +1741,7 @@ function commitUpdatePort ($object_id, $port_id, $port_name, $port_type_id, $por
 		$dbxlink->exec ('LOCK TABLES Port WRITE, PortLog WRITE');
 	try
 	{
-		if ($db_l2address != '' && alreadyUsedL2Address ($db_l2address, $object_id))
-			throw new InvalidArgException ('port_l2address', $port_l2address, 'address belongs to another object');
+		assertUniqueL2Addresses (array ($db_l2address), $object_id);
 		commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_id, $port_label, $db_l2address, $port_reservation_comment);
 	}
 	catch (Exception $e)
@@ -4942,19 +4940,40 @@ function constructUserCell ($username)
 	return $ret;
 }
 
-// Return TRUE, if the given address is assigned to a port of any object
-// except the current object. Using this function as a constraint makes
-// it possible to reuse L2 addresses within one object, yet keeping them
-// universally unique on the other hand.
+// DEPRECATED but snmpgeneric.php uses it, remove in 0.21.0.
 function alreadyUsedL2Address ($address, $my_object_id)
 {
-	$result = usePreparedSelectBlade
-	(
-		'SELECT COUNT(*) FROM Port WHERE l2address = ? AND BINARY l2address = ? AND object_id != ?',
-		array ($address, $address, $my_object_id)
-	);
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0] != 0;
+	try
+	{
+		assertUniqueL2Addresses (array ($address), $my_object_id);
+		return FALSE;
+	}
+	catch (InvalidArgException $iae)
+	{
+		return TRUE;
+	}
+}
+
+// Raise an exception if any of the given MAC/WWN addresses (less empty strings)
+// belongs to a port with an object ID other than the given. This constraint makes
+// it possible to reuse L2 addresses within one object's set of ports and to keep
+// them universally unique otherwise. Every L2 address on the input list must have
+// been conditioned with l2AddressForDatabase().
+function assertUniqueL2Addresses ($db_l2addresses, $my_object_id)
+{
+	// Reindex the array such that array_merge() below works as expected.
+	$db_l2addresses = array_values (array_unique (array_filter ($db_l2addresses, 'strlen')));
+	if (0 == count ($db_l2addresses))
+		return;
+	$qm = questionMarks (count ($db_l2addresses));
+	// BINARY in the second comparison is what the query is actually looking for but without
+	// the first (non-BINARY) comparison the table index does not work as expected.
+	$query = 'SELECT l2address, object_id, name FROM Port ' .
+		"WHERE l2address IN(${qm}) AND BINARY l2address IN(${qm}) AND object_id != ? LIMIT 1";
+	$params = array_merge ($db_l2addresses, $db_l2addresses, array ($my_object_id));
+	$result = usePreparedSelectBlade ($query, $params);
+	if ($row = $result->fetch (PDO::FETCH_ASSOC))
+		throw new InvalidArgException ('L2 address', $row['l2address'], "already used by object#{$row['object_id']} port '{$row['name']}'");
 }
 
 function getPortInterfaceCompat()

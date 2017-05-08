@@ -4590,7 +4590,14 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue 2;
 		}
 	// Sync ports
-	syncObjectPorts ($objectInfo['id'], $desiredPorts);
+	try
+	{
+		syncObjectPorts ($objectInfo['id'], $desiredPorts);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
@@ -4614,7 +4621,14 @@ function doPDUSNMPmining ($objectInfo, $switch)
 		addDesiredPort ($desiredPorts, $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
-	syncObjectPorts ($objectInfo['id'], $desiredPorts);
+	try
+	{
+		syncObjectPorts ($objectInfo['id'], $desiredPorts);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showSuccess ("Added ${portno} port(s)");
 	return buildRedirectURL (NULL, 'ports');
 }
