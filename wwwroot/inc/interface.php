@@ -1850,7 +1850,7 @@ function renderPortsForObject ($object_id)
 	(
 		'ssv1' => 'SSV:<interface name> [<MAC address>]',
 	);
-	echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1');
+	echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1') . ' ';
 	echo 'Default port type: ';
 	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
 	echo "<input type=submit value='Parse output'><br>\n";

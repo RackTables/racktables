@@ -335,7 +335,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	{
 		foreach ($optionList as $key => $value)
 			break;
-		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;
+		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" .
+			stringForLabel ($value, 64);
 	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
