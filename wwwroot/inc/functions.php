@@ -6196,10 +6196,9 @@ function checkPortRole ($vswitch, $portinfo, $port_name, $port_order)
 
 	if (! $remote_auto && ! $local_auto)
 		return TRUE;
-	elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
+	if ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
 		return TRUE; // auto-calc link ends must belong to the same domain
-	else
-		return FALSE;
+	return FALSE;
 }
 
 # Convert InvalidArgException to InvalidRequestArgException with a choice of
