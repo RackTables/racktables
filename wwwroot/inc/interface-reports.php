@@ -925,6 +925,58 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
+	// L2 addresses
+	// The section below is only required so long as Port.l2address is a char column,
+	// switching to a binary type should eliminate the need for this check.
+	$result = usePreparedSelectBlade
+	(
+		'SELECT l2address, object_id, name FROM Port ' .
+		'WHERE l2address IS NOT NULL AND l2address NOT REGEXP("^[0-9A-F]+$")'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($rows))
+	{
+		$violations = TRUE;
+		foreach (array_keys ($rows) as $key)
+			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+		$columns = array
+		(
+			array ('th_text' => 'L2 address', 'row_key' => 'l2address'),
+			array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
+			array ('th_text' => 'Port', 'row_key' => 'name'),
+		);
+		startPortlet ('L2 address format errors');
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+	unset ($result);
+	// The section below will be relevant as long as the L2 address constraint remains
+	// implemented at PHP level.
+	$result = usePreparedSelectBlade
+	(
+		'SELECT l2address, object_id, name, ' .
+		'(SELECT COUNT(*) FROM Port AS P2 WHERE P2.l2address = P1.l2address AND P2.object_id != P1.object_id) AS ocnt ' .
+		'FROM Port AS P1 WHERE P1.l2address IS NOT NULL HAVING ocnt > 0  ORDER BY l2address, object_id'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($rows))
+	{
+		$violations = TRUE;
+		foreach (array_keys ($rows) as $key)
+			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+		$columns = array
+		(
+			array ('th_text' => 'L2 address', 'row_key' => 'l2address'),
+			array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
+			array ('th_text' => 'Port', 'row_key' => 'name'),
+		);
+		startPortlet ('L2 address unique constraint errors');
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+
 	if (! $violations)
 		echo '<h2 class=centered>No integrity violations found</h2>';
 }
