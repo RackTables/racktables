@@ -42,7 +42,8 @@ Note that you should use the `$db_username` variable contained in
 ```
   mysql -u root -p
   CREATE DATABASE racktables_unittest CHARACTER SET utf8 COLLATE utf8_general_ci;
-  GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';
+  CREATE USER IF NOT EXISTS racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';
+  GRANT ALL PRIVILEGES ON racktables_unittest.* TO racktables_user@localhost;
   exit
 ```
 

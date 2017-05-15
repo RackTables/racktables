@@ -28,7 +28,8 @@ fi
 # the client tries to connect to the database that doesn't yet exist
 # and this script fails, hence the override to "mysql". -- Denis
 mysql -u root mysql -e "CREATE DATABASE ${DBNAME} CHARACTER SET utf8 COLLATE utf8_general_ci;" || exit 2
-mysql -u root -e "GRANT ALL PRIVILEGES ON ${DBNAME}.* TO ${USERNAME}@localhost IDENTIFIED BY '${PASSWORD}';" || exit 2
+mysql -u root -e "CREATE USER ${USERNAME}@localhost IDENTIFIED BY '${PASSWORD}';" || exit 2
+mysql -u root -e "GRANT ALL PRIVILEGES ON ${DBNAME}.* TO ${USERNAME}@localhost;" || exit 2
 
 cat >wwwroot/inc/secret.php <<EOF
 <?php

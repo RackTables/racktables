@@ -122,7 +122,8 @@ function init_config ()
 		echo "<input type=hidden name=save_config value=1>\n";
 		echo '<h3>Server-side MySQL setup of the database:</h3><div align=left><pre class=trok>';
 		echo "mysql&gt;\nCREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
-		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre></div>";
+		echo "CREATE USER racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n";
+		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost;\n</pre></div>";
 		echo '<table>';
 		echo '<tr><td><label for=conn_tcp>TCP connection</label></td>';
 		echo '<td><input type=radio name=conn value=conn_tcp id=conn_tcp' . ($use_tcp ? ' checked' : '') . '></td></tr>';
