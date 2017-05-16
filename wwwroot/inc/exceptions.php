@@ -159,7 +159,7 @@ class EntityNotFoundException extends RackTablesError
 	public function dispatch()
 	{
 		global $debug_mode;
-		if ($debug_mode)
+		if (isset ($debug_mode) && $debug_mode)
 		{
 			printGenericException ($this);
 			return;

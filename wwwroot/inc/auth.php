@@ -269,7 +269,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 // a wrapper for SAML auth method
 function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NULL)
 {
-	global $SAML_options, $debug_mode, $auto_tags;
+	global $SAML_options, $auto_tags;
 	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
 		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
 	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
