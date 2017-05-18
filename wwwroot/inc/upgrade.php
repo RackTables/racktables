@@ -1224,11 +1224,7 @@ ENDOFTRIGGER;
 			$query[] = "DROP TRIGGER IF EXISTS `Port-before-update`";
 			$query[] = "UPDATE Config SET varvalue = '0.20.13' WHERE varname = 'DB_VERSION'";
 			break;
-		case '0.20.14':
-			$query[] = "UPDATE Object SET has_problems = 'no' WHERE objtype_id = 1561 AND has_problems = ''";
-			$query[] = "UPDATE ObjectHistory SET ctime = ctime, has_problems = 'no' WHERE objtype_id = 1561 AND has_problems = ''";
-			$query[] = "UPDATE Config SET varvalue = '0.20.14' WHERE varname = 'DB_VERSION'";
-			break;
+		// FIXME: add remaining 0.20.x sections here after respective releases come out
 		case '0.21.0':
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
