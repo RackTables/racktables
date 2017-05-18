@@ -1290,6 +1290,7 @@ function renderRackInfoPortlet ($rackData)
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
 	$summary['Objects'] = count ($rackData['mountedObjects']);
 	$summary['tags'] = '';
+	$summary += generateISO27001SummaryLines ('rackspace', $rackData);
 	renderEntitySummary ($rackData, 'summary', $summary);
 	if ($rackData['comment'] != '')
 	{
@@ -1297,6 +1298,7 @@ function renderRackInfoPortlet ($rackData)
 		echo '<div class=commentblock>' . string_insert_hrefs ($rackData['comment']) . '</div>';
 		finishPortlet ();
 	}
+	renderObjectISO27001Portlet ($rackData);
 }
 
 // This is a universal editor of rack design/waste.
@@ -1465,6 +1467,7 @@ function renderObject ($object_id)
 			)
 		)."&"
 	));
+	$summary += generateISO27001SummaryLines ('depot', $info);
 	renderEntitySummary ($info, 'summary', $summary);
 
 	if ($info['comment'] != '')
@@ -1473,6 +1476,8 @@ function renderObject ($object_id)
 		echo '<div class=commentblock>' . string_insert_hrefs ($info['comment']) . '</div>';
 		finishPortlet ();
 	}
+
+	renderObjectISO27001Portlet ($info);
 
 	$logrecords = getLogRecordsForObject ($object_id);
 	$lr_nrows = count ($logrecords);
@@ -6366,6 +6371,41 @@ function renderEditUCSForm()
 	finishPortlet();
 }
 
+function renderSimpleTableEditor ($rows, $column)
+{
+	function printNewitemTR ($column)
+	{
+		printOpFormIntro ('add');
+		echo '<tr>';
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
+		echo "<td><input type=text size=${column['width']} maxlength=${column['width']} name=${column['value']}></td>";
+		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
+		echo '</tr></form>';
+	}
+	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
+	echo "<tr><th>&nbsp;</th><th>${column['header']}</th><th>&nbsp;</th></tr>";
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
+		printNewitemTR ($column);
+	foreach ($rows as $row)
+	{
+		echo '<tr>';
+		printOpFormIntro ('upd', array ($column['key'] => $row[$column['key']]));
+		echo '<td>';
+		if (array_key_exists ('refc', $row) && $row['refc'] > 0)
+			echo getImageHREF ('nodestroy', "referenced ${row['refc']} times");
+		else
+			echo getOpLink (array ('op' => 'del', $column['key'] => $row[$column['key']]), '', 'destroy', 'remove');
+		echo '</td>';
+		echo "<td><input type=text size=${column['width']} maxlength=${column['width']} name=${column['value']} value='" . stringForTextInputValue ($row[$column['value']], $column['width']) . "'></td>";
+		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
+		echo '</form>';
+		echo '</tr>';
+	}
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
+		printNewitemTR ($column);
+	echo '</table>';
+}
+
 function renderSimpleTableWithOriginViewer ($rows, $column)
 {
 	$columns = array
@@ -6495,4 +6535,91 @@ function renderTableViewer ($columns, $rows, $params = NULL)
 	}
 	echo '</tbody>';
 	echo '</table>';
+}
+
+function requestedISO27001Details ($cell)
+{
+	if ($cell['iso27001_incomplete'] > 0)
+		return FALSE;
+	return array_key_exists ('iso27001_details', $_REQUEST) ? isCheckSet ('iso27001_details') :
+		considerConfiguredConstraint ($cell, 'ISO27001_DETAILS_LISTSRC');
+}
+
+function generateISO27001SummaryLines ($parent_pageno, $cell)
+{
+	$ret = array();
+	if ($cell['iso27001_agroup_id'] === NULL)
+		return $ret;
+	$asset = getISO27001AssetInfo ($cell['id']);
+	$params = array ('page' => $parent_pageno, 'tab' => 'default');
+
+	$params['cfe'] = '{$iso27001_agroup_' . $asset['agroup_id'] . '}';
+	$href = makeHref ($params);
+	$ret['ISO 27001 asset group'] = "<a href='${href}'>" . stringForLabel ($asset['agroup_name']) . '</a>';
+
+	$params['cfe'] = '{$iso27001_aowner_' . $asset['aowner_id'] . '}';
+	$href = makeHref ($params);
+	$ret['ISO 27001 asset owner'] = "<a href='${href}'>" . stringForLabel ($asset['aowner_name']) . '</a>';
+
+	$params['cfe'] = '{$iso27001_amaint_' . $asset['amaint_id'] . '}';
+	$href = makeHref ($params);
+	$ret['ISO 27001 asset maintainer'] = "<a href='${href}'>" . stringForLabel ($asset['amaint_name']) . '</a>';
+
+	if ($cell['iso27001_incomplete'] > 0)
+		$ret['ISO 27001 valuation'] = '<span class=trerror>set all criteria first</span>';
+	else
+	{
+		$conf = getISO27001Configuration();
+		$cvals = getObjectISO27001CValues ($cell['id']);
+		$details = requestedISO27001Details ($cell);
+		$details_params = array ('iso27001_details' => $details ? 'off' : 'on');
+		$details_text = $details ? 'hide details' : 'show details';
+		$ret['ISO 27001 valuation'] = sprintf
+		(
+			'%.02f (%s)',
+			$asset['criticality'] * getISO27001AssetValuation ($conf, $cvals),
+			"<a href='" . buildRedirectURL (NULL, NULL, $details_params) . "'>${details_text}</a>"
+		);
+	}
+	return $ret;
+}
+
+function renderObjectISO27001Portlet ($cell)
+{
+	if (! requestedISO27001Details ($cell))
+		return;
+	$sum = 0.0;
+	$conf = getISO27001Configuration();
+	$asset = getISO27001AssetInfo ($cell['id']);
+	$cvals = getObjectISO27001CValues ($cell['id']);
+	startPortlet ('ISO 27001 valuation');
+	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>criterion</th><th>value</th><th>weight</th><th>product</th></tr>';
+	foreach ($conf as $cgroup)
+	{
+		$gsum = 0.0;
+		foreach ($cgroup['criteria'] as $criterion)
+		{
+			if ($cvals[$criterion['id']] === NULL)
+				throw new InvalidArgException ('object_id', $object_id, 'incomplete ISO 27001 data');
+			$value = $cvals[$criterion['id']];
+			$label = $cgroup['values'][$value]['label'];
+			if ($label != '')
+				$value = '<span title="' . stringForLabel ($label) . '">' . $value . '</span>';
+			echo '<tr>';
+			echo '<td class=tdleft>' . formatISO27001CriteriaAsLabel ($criterion) . '</td>';
+			echo '<td class=tdright>' . $value . '</td>';
+			echo '<td class=tdright>' . sprintf ('&times;%.2f', $criterion['weight']) . '</td>';
+			echo '<td class=tdright>' . sprintf ('%.2f', $cvals[$criterion['id']] * $criterion['weight']) . '</td>';
+			echo '</tr>';
+			$gsum += $cvals[$criterion['id']] * $criterion['weight'];
+		}
+		echo '<tr><th colspan=3 class=tdright>subtotal for ' . stringForLabel ($cgroup['name'], 64) . ':</th><th class=tdright>' . sprintf ('%.2f', $gsum) . '</th></tr>';
+		$sum += $gsum;
+	}
+	echo '<tr><th colspan=3 class=tdright>sum for all groups:</th><th class=tdright>' . sprintf ('%.2f', $sum) . '</th></tr>';
+	echo '<tr><th colspan=3 class=tdright>asset criticality:</th><th class=tdright>' . sprintf ('%.2f', $asset['criticality']) . '</th></tr>';
+	echo '<tr><th colspan=3 class=tdright>overall valuation:</th><th class=tdright>' . sprintf ('%.2f', $sum * $asset['criticality']) . '</th></tr>';
+	echo '</table>';
+	finishPortlet();
 }

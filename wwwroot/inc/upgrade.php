@@ -218,6 +218,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.21.1',
 		'0.21.2',
 		'0.21.3',
+		'0.22.0',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1356,6 +1357,97 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 		case '0.21.3':
 			$query[] = "INSERT INTO Config VALUES ('OBJECTLOG_PREVIEW_ENTRIES','5','uint','no','no','yes','Object log preview maximum entries (0 disables the preview)')";
 			$query[] = "UPDATE Config SET varvalue = '0.21.3' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.22.0':
+			$query[] = "
+CREATE TABLE `ISO27001AssetGroup` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001AssetOwner` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001AssetMaintainer` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001Asset` (
+  `object_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `agroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `aowner_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `amaint_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `criticality` float unsigned NOT NULL DEFAULT '1',
+  `asset_comment` text COLLATE utf8_unicode_ci,
+  `cvalues_comment` text COLLATE utf8_unicode_ci,
+  UNIQUE KEY `object_id` (`object_id`),
+  KEY `agroup_id` (`agroup_id`),
+  KEY `aowner_id` (`aowner_id`),
+  KEY `amaint_id` (`amaint_id`),
+  CONSTRAINT `ISO27001Asset-FK-amaint_id` FOREIGN KEY (`amaint_id`) REFERENCES `ISO27001AssetMaintainer` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-agroup_id` FOREIGN KEY (`agroup_id`) REFERENCES `ISO27001AssetGroup` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-aowner_id` FOREIGN KEY (`aowner_id`) REFERENCES `ISO27001AssetOwner` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001CriterionGroup` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001Criterion` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `weight` float unsigned NOT NULL DEFAULT '1',
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `comment` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `criterion-group` (`id`,`cgroup_id`),
+  KEY `cgroup_id` (`cgroup_id`),
+  CONSTRAINT `ISO27001Criterion-FK-cgroup_id` FOREIGN KEY (`cgroup_id`) REFERENCES `ISO27001CriterionGroup` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001CriterionGroupValueSet` (
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `value` int(10) unsigned NOT NULL DEFAULT '0',
+  `label` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`cgroup_id`,`value`),
+  CONSTRAINT `ISO27001CriterionGroupValueSet-FK-cgroup_id` FOREIGN KEY (`cgroup_id`) REFERENCES `ISO27001CriterionGroup` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+CREATE TABLE `ISO27001AssetCriterionValue` (
+  `object_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `criterion_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `value` int(10) unsigned NOT NULL DEFAULT '0',
+  UNIQUE KEY `object-criterion` (`object_id`,`criterion_id`),
+  KEY `criterion-group` (`criterion_id`,`cgroup_id`),
+  KEY `group-value` (`cgroup_id`,`value`),
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `ISO27001Asset` (`object_id`) ON DELETE CASCADE,
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-compound1` FOREIGN KEY (`criterion_id`, `cgroup_id`) REFERENCES `ISO27001Criterion` (`id`, `cgroup_id`),
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-compound2` FOREIGN KEY (`cgroup_id`, `value`) REFERENCES `ISO27001CriterionGroupValueSet` (`cgroup_id`, `value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+			$query[] = "
+INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES
+('ISO27001_ASSET_LISTSRC',  'false',  'string',  'yes',  'no',  'no',  'List source: objects that may be an ISO 27001 asset'),
+('ISO27001_DETAILS_LISTSRC',  'false',  'string',  'yes',  'no',  'no',  'List source: ISO 27001 assets with details shown by default'),
+('ISO27001_DEFAULT_AGROUP',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset group'),
+('ISO27001_DEFAULT_AOWNER',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset owner'),
+('ISO27001_DEFAULT_AMAINT',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset maintainer'),
+('ISO27001_DEFAULT_CRITICALITY',  '1.0',  'string',  'yes',  'no',  'yes',  'Default ISO 27001 asset criticality')";
+			$query[] = "UPDATE Config SET varvalue = '0.22.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

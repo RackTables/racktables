@@ -1795,3 +1795,74 @@ INSERT INTO `PatchCableHeapLog` (id, heap_id, date, user, message) VALUES
 (31,5,'2014-06-15 00:14:51','admin','amount adjusted by -1'),
 (32,5,'2014-06-15 00:14:52','admin','amount adjusted by -1'),
 (33,14,'2014-06-15 00:14:57','admin','amount adjusted by -1');
+
+-- ISO 27001 data set
+INSERT INTO `TagTree` (`id`, `parent_id`, `tag`) VALUES (24,NULL,'valuate risks');
+INSERT INTO `TagStorage` (`entity_realm`, `entity_id`, `tag_id`, `user`, `date`) VALUES
+('object',923,24,'admin','2015-12-11 20:19:00'),
+('object',924,24,'admin','2015-12-11 20:19:08'),
+('object',925,24,'admin','2015-12-11 20:19:14'),
+('object',926,24,'admin','2015-12-11 20:19:20');
+UPDATE `Config` SET varvalue = '{valuate risks}' WHERE varname = 'ISO27001_ASSET_LISTSRC';
+INSERT INTO `ISO27001AssetGroup` (`id`, `name`) VALUES
+(1,'own assets'),
+(2,'assets on loan');
+INSERT INTO `ISO27001AssetOwner` (`id`, `name`) VALUES
+(1,'technical'),
+(2,'general administration'),
+(3,'business');
+INSERT INTO `ISO27001AssetMaintainer` (`id`, `name`) VALUES
+(1,'internal (technical)'),
+(2,'external');
+INSERT INTO `ISO27001Asset` (`object_id`, `agroup_id`, `aowner_id`, `amaint_id`, `criticality`) VALUES
+(923,1,1,1,1),
+(924,2,3,2,1),
+(925,1,2,1,1),
+(926,1,1,1,1.5);
+INSERT INTO `ISO27001CriterionGroup` (`id`, `name`) VALUES
+(5,'24×7 infrastructure'),
+(6,'billing and accounts');
+INSERT INTO `ISO27001Criterion` (`id`, `cgroup_id`, `weight`, `name`, `comment`) VALUES
+(5,5,3,'cooling',NULL),
+(6,5,3,'power',NULL),
+(7,5,1,'physical access',NULL),
+(8,6,1,'power metering',NULL),
+(10,6,1,'network bandwidth metering',NULL),
+(12,6,1,'staff payroll',NULL),
+(13,6,1,'rental services',NULL);
+INSERT INTO `ISO27001CriterionGroupValueSet` (`cgroup_id`, `value`, `label`) VALUES
+(5,0,'does not affect'),
+(5,1,'affects'),
+(6,0,'does not affect'),
+(6,1,'affects monthly'),
+(6,4,'affects weekly'),
+(6,30,'affects daily');
+INSERT INTO `ISO27001AssetCriterionValue` (`object_id`, `criterion_id`, `cgroup_id`, `value`) VALUES
+(923,5,5,1),
+(923,6,5,1),
+(923,7,5,0),
+(923,8,6,4),
+(923,10,6,30),
+(923,12,6,0),
+(923,13,6,0),
+(924,5,5,0),
+(924,6,5,0),
+(924,7,5,0),
+(924,8,6,0),
+(924,10,6,0),
+(924,12,6,1),
+(924,13,6,4),
+(925,5,5,0),
+(925,6,5,0),
+(925,7,5,0),
+(925,8,6,0),
+(925,10,6,0),
+(925,12,6,0),
+(925,13,6,0),
+(926,5,5,0),
+(926,6,5,0),
+(926,7,5,0),
+(926,8,6,0),
+(926,10,6,30),
+(926,12,6,0),
+(926,13,6,0);

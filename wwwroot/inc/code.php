@@ -489,6 +489,8 @@ function checkAutotagName ($atag_name)
 		'$any_row',
 		'$any_rsp',
 		'$any_vs',
+		'$iso27001_asset',
+		'$iso27001_incomplete',
 		'$nameless',
 		'$no_asset_tag',
 		'$portless',
@@ -537,6 +539,7 @@ function checkAutotagName ($atag_name)
 		case (preg_match ('/^\$attr_\d+(_\d+)?$/', $atag_name)):
 		case (preg_match ('/^\$ip4net(-\d{1,3}){5}$/', $atag_name)):
 		case (preg_match ('/^\$(8021Q_domain|8021Q_tpl)_\d+$/', $atag_name)):
+		case (preg_match ('/^\$iso27001_(amaint|fromamaint|toamaint|agroup|fromagroup|toagroup|aowner|fromaowner|toaowner|cid|cgid)_\d+$/', $atag_name)):
 		case (preg_match ('/^\$client_([0-9a-fA-F.:]+)$/', $atag_name)):
 			break;
 		default:

@@ -1,3 +1,5 @@
+0.22.0
+	new feature: basic support for ISO 27001 risk valuation
 0.21.3
 	update: add a log entry limit to the object page (Mantis#769)
 0.21.2 2019-03-25

@@ -651,6 +651,280 @@ $opspec_list['plugins-edit-enable'] = array
 		array ('url_argname' => 'name', 'assertion' => 'string'),
 	),
 );
+$opspec_list['iso27001-agroups-add'] = array
+(
+	'table' => 'ISO27001AssetGroup',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['iso27001-agroups-del'] = array
+(
+	'table' => 'ISO27001AssetGroup',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-agroups-upd'] = array
+(
+	'table' => 'ISO27001AssetGroup',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-aowners-add'] = array
+(
+	'table' => 'ISO27001AssetOwner',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['iso27001-aowners-del'] = array
+(
+	'table' => 'ISO27001AssetOwner',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-aowners-upd'] = array
+(
+	'table' => 'ISO27001AssetOwner',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-amaints-add'] = array
+(
+	'table' => 'ISO27001AssetMaintainer',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['iso27001-amaints-del'] = array
+(
+	'table' => 'ISO27001AssetMaintainer',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-amaints-upd'] = array
+(
+	'table' => 'ISO27001AssetMaintainer',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-cgroups-add'] = array
+(
+	'table' => 'ISO27001CriterionGroup',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['iso27001-cgroups-del'] = array
+(
+	'table' => 'ISO27001CriterionGroup',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-cgroups-upd'] = array
+(
+	'table' => 'ISO27001CriterionGroup',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-cgvalsets-add'] = array
+(
+	'table' => 'ISO27001CriterionGroupValueSet',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'cgroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'value', 'assertion' => 'uint0'),
+		array ('url_argname' => 'label', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+);
+$opspec_list['iso27001-cgvalsets-del'] = array
+(
+	'table' => 'ISO27001CriterionGroupValueSet',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'cgroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'value', 'assertion' => 'uint0'),
+	),
+);
+$opspec_list['iso27001-cgvalsets-upd'] = array
+(
+	'table' => 'ISO27001CriterionGroupValueSet',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'label', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'cgroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'value', 'assertion' => 'uint0'),
+	),
+);
+$opspec_list['iso27001-criteria-add'] = array
+(
+	'table' => 'ISO27001Criterion',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'cgroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'weight', 'assertion' => 'decimal'),
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+);
+$opspec_list['iso27001-criteria-del'] = array
+(
+	'table' => 'ISO27001Criterion',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['iso27001-criteria-upd'] = array
+(
+	'table' => 'ISO27001Criterion',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'weight', 'assertion' => 'decimal'),
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+		array ('url_argname' => 'comment', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['object-iso27001asset-add'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'agroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'aowner_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'amaint_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'criticality', 'assertion' => 'decimal'),
+		array ('url_argname' => 'asset_comment', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+		array ('fix_argname' => 'cvalues_comment', 'fix_argvalue' => NULL),
+	),
+);
+$opspec_list['object-iso27001asset-del'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['object-iso27001asset-upd'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'agroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'aowner_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'amaint_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'criticality', 'assertion' => 'decimal'),
+		array ('url_argname' => 'asset_comment', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['rack-iso27001asset-add'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'INSERT',
+	'arglist' => array
+	(
+		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'agroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'aowner_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'amaint_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'criticality', 'assertion' => 'decimal'),
+	),
+);
+$opspec_list['rack-iso27001asset-del'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'DELETE',
+	'arglist' => array
+	(
+		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
+$opspec_list['rack-iso27001asset-upd'] = array
+(
+	'table' => 'ISO27001Asset',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'agroup_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'aowner_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'amaint_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'criticality', 'assertion' => 'decimal'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+	),
+);
 
 function setFuncMessages ($funcname, $messages)
 {
@@ -3769,4 +4043,147 @@ function upgradePlugin ()
 		return;
 	}
 	showSuccess ('Upgraded plugin: ' . $name);
+}
+
+function addObjectISO27001Asset()
+{
+	try
+	{
+		$moreinfo = array
+		(
+			array ('tag' => '$iso27001_toagroup_' . genericAssertion ('agroup_id', 'uint')),
+			array ('tag' => '$iso27001_agroup_' . genericAssertion ('agroup_id', 'uint')),
+			array ('tag' => '$iso27001_toaowner_' . genericAssertion ('aowner_id', 'uint')),
+			array ('tag' => '$iso27001_aowner_' . genericAssertion ('aowner_id', 'uint')),
+			array ('tag' => '$iso27001_toamaint_' . genericAssertion ('amaint_id', 'uint')),
+			array ('tag' => '$iso27001_amaint_' . genericAssertion ('amaint_id', 'uint')),
+		);
+	}
+	catch (InvalidRequestArgException $e)
+	{
+		showError ('Group, owner and maintainer must be specified for the asset.');
+		return;
+	}
+	if (NULL !== $asset = getISO27001AssetInfo (getBypassValue()))
+		throw new InvalidRequestArgException ('object_id', getBypassValue(), 'is already an ISO 27001 asset');
+	assertPermission (NULL, NULL, NULL, $moreinfo);
+	tableHandler();
+	// Proceed to the next stage of data entry for this specific use case.
+	return buildRedirectURL (NULL, 'iso27001cvalues');
+}
+
+function delObjectISO27001Asset()
+{
+	if (NULL === $asset = getISO27001AssetInfo (getBypassValue()))
+		throw new InvalidRequestArgException ('object_id', getBypassValue(), 'is not an ISO 27001 asset');
+	$moreinfo = array
+	(
+		array ('tag' => '$iso27001_fromagroup_' . $asset['agroup_id']),
+		array ('tag' => '$iso27001_agroup_' . $asset['agroup_id']),
+		array ('tag' => '$iso27001_fromaowner_' . $asset['aowner_id']),
+		array ('tag' => '$iso27001_aowner_' . $asset['aowner_id']),
+		array ('tag' => '$iso27001_fromamaint_' . $asset['amaint_id']),
+		array ('tag' => '$iso27001_amaint_' . $asset['amaint_id']),
+	);
+	assertPermission (NULL, NULL, NULL, $moreinfo);
+	tableHandler();
+}
+
+function updObjectISO27001Asset()
+{
+	$moreinfo = array
+	(
+		array ('tag' => '$iso27001_toagroup_' . genericAssertion ('agroup_id', 'uint')),
+		array ('tag' => '$iso27001_agroup_' . genericAssertion ('agroup_id', 'uint')),
+		array ('tag' => '$iso27001_toaowner_' . genericAssertion ('aowner_id', 'uint')),
+		array ('tag' => '$iso27001_aowner_' . genericAssertion ('aowner_id', 'uint')),
+		array ('tag' => '$iso27001_toamaint_' . genericAssertion ('amaint_id', 'uint')),
+		array ('tag' => '$iso27001_amaint_' . genericAssertion ('amaint_id', 'uint')),
+	);
+	if (NULL === $asset = getISO27001AssetInfo (getBypassValue()))
+		throw new InvalidRequestArgException ('object_id', getBypassValue(), 'is not an ISO 27001 asset');
+	try
+	{
+		$moreinfo[] = array ('tag' => '$iso27001_fromagroup_' . $asset['agroup_id']);
+		$moreinfo[] = array ('tag' => '$iso27001_agroup_' . $asset['agroup_id']);
+		$moreinfo[] = array ('tag' => '$iso27001_fromaowner_' . $asset['aowner_id']);
+		$moreinfo[] = array ('tag' => '$iso27001_aowner_' . $asset['aowner_id']);
+		$moreinfo[] = array ('tag' => '$iso27001_fromamaint_' . $asset['amaint_id']);
+		$moreinfo[] = array ('tag' => '$iso27001_amaint_' . $asset['amaint_id']);
+	}
+	catch (InvalidRequestArgException $e)
+	{
+		showError ('Group, owner and maintainer must be specified for the asset.');
+		return;
+	}
+	assertPermission (NULL, NULL, NULL, $moreinfo);
+	tableHandler();
+}
+
+// Validate all successful inputs, then move out of scope the criteria that are not permitted and
+// leave further filtering and actions up to the database-level function.
+function saveObjectISO27001CValues()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 26, 'ERR' => 172));
+	$cgids = reduceSubarraysToColumn (reindexById (getISO27001CriterionList()), 'cgroup_id');
+
+	$r = array();
+
+	switch (genericAssertion ('form_mode', 'string'))
+	{
+		case 'edit':
+			$n = genericAssertion ('numcrit', 'uint');
+			for ($i = 0; $i < $n; $i++)
+			{
+				if (! array_key_exists ("cval_${i}", $_REQUEST)) // <input disabled type=radio ...
+					continue;
+				$cid = genericAssertion ("cid_${i}", 'uint');
+				$value = genericAssertion ("cval_${i}", 'string') == 'unset' ? NULL :
+					genericAssertion ("cval_${i}", 'uint0');
+				$r[$cid] = $value;
+			}
+			if (count (array_diff (array_keys ($r), array_keys ($cgids))))
+			{
+				showFuncMessage (__FUNCTION__, 'ERR');
+				return;
+			}
+			$cvalues_comment = genericAssertion ('cvalues_comment', 'string0');
+			break;
+		case 'copy':
+			if (! preg_match ('/^(object|rack)-(\d+)$/', genericAssertion ('copy_from', 'string'), $m))
+				throw new InvalidRequestArgException ('copy_from', $copy_from, 'format error');
+			// The user must have a view permission for the source asset.
+			if (! isolatedPermission ($m[1], 'default', spotEntity ($m[1], $m[2])))
+				throw new RTPermissionDenied();
+			$r = getObjectISO27001CValues ($m[2]);
+			$ai = getISO27001AssetInfo ($m[2]);
+			$cvalues_comment = $ai['cvalues_comment'];
+			break;
+		default:
+			throw new InvalidRequestArgException ('form_mode', $form_mode, 'unexpected value');
+	}
+
+	$p = array();
+	foreach ($r as $cid => $value)
+	{
+		$moreinfo = array
+		(
+			array ('tag' => '$iso27001_cid_' . $cid),
+			array ('tag' => '$iso27001_cgid_' . $cgids[$cid]),
+		);
+		if (permitted (NULL, NULL, NULL, $moreinfo))
+			$p[$cid] = $value;
+	}
+	try
+	{
+		$object_id = getBypassValue();
+		showFuncMessage (__FUNCTION__, 'OK', array (commitObjectISO27001CValues ($object_id, $p)));
+		if (FALSE !== array_search (NULL, getObjectISO27001CValues ($object_id), TRUE))
+			showWarning ('At least one criterion value is not set, impossible to valuate.');
+		usePreparedUpdateBlade ('ISO27001Asset', array ('cvalues_comment' => $cvalues_comment), array ('object_id' => $object_id));
+	}
+	catch (InvalidArgException $e)
+	{
+		showFuncMessage (__FUNCTION__, 'ERR');
+	}
 }

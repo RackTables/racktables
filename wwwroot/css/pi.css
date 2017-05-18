@@ -173,6 +173,19 @@ span.tag-descr {
 	cursor: help;
 }
 
+td.criteriabox {
+	text-align: center;
+}
+td.criteriabox.selected {
+	background-color: #a0ffa0;
+}
+td.criteriabox.unset {
+	background-color: #ffa0a0;
+}
+tr.disabled {
+	color: gray;
+}
+
 td.sticker {
 	text-align: left;
 }
@@ -958,4 +971,39 @@ div.popupbar {
 	height: 100%;
 	text-align: center;
 	margin: 5px;
+}
+
+.zeropadding {
+	padding: 0px;
+}
+
+td.grid {
+	width: 50%;
+	height: 50%;
+	border-width: 1px;
+	border-style: none;
+}
+
+td.grid.top-dotted {
+	border-color: gray;
+	border-top-style: dotted;
+}
+
+td.grid.right-dotted {
+	border-color: gray;
+	border-right-style: dotted;
+}
+
+td.grid.top-solid {
+	border-color: black;
+	border-top-style: solid;
+}
+
+td.grid.right-solid {
+	border-color: black;
+	border-right-style: solid;
+}
+
+table.withcursor tr:hover {
+	background-color: lightyellow !important;
 }

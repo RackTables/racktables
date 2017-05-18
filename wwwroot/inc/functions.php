@@ -3609,6 +3609,22 @@ function formatVLANAsRichText ($vlaninfo)
 	return $ret;
 }
 
+function formatISO27001CVAsLabel ($valinfo)
+{
+	$ret = $valinfo['value'];
+	if ($valinfo['label'] != '')
+		$ret .= ' <i>(' . stringForLabel ($valinfo['label']) . ')</i>';
+	return $ret;
+}
+
+function formatISO27001CriteriaAsLabel ($critinfo)
+{
+	$ret = stringForOption ($critinfo['name'], 0);
+	if ($critinfo['comment'] != '')
+		$ret = '<span title="' . stringForOption ($critinfo['comment'], 0) . '">' . $ret . '</span>';
+	return $ret;
+}
+
 # Produce a list of integers from a string in the following format:
 # A,B,C-D,E-F,G,H,I-J,K ...
 function iosParseVLANString ($string)
@@ -6864,4 +6880,56 @@ function formatPluginState ($state)
 		'not_installed' => 'Not installed',
 	);
 	return array_fetch ($map, $state, 'unknown');
+}
+
+function getISO27001CriterionGroupOptions()
+{
+	return reduceSubarraysToColumn (reindexById (getISO27001CriterionGroupList()), 'name');
+}
+
+function getISO27001AssetGroupOptions()
+{
+	return reduceSubarraysToColumn (reindexById (getISO27001AssetGroupList()), 'name');
+}
+
+function getISO27001AssetOwnerOptions()
+{
+	return reduceSubarraysToColumn (reindexById (getISO27001AssetOwnerList()), 'name');
+}
+
+function getISO27001AssetMaintainerOptions()
+{
+	return reduceSubarraysToColumn (reindexById (getISO27001AssetMaintainerList()), 'name');
+}
+
+function getISO27001Configuration()
+{
+	$ret = array();
+	foreach (getISO27001CriterionGroupList() as $cgroup)
+		$ret[$cgroup['id']] = array
+		(
+			'id' => $cgroup['id'],
+			'name' => $cgroup['name'],
+			'refc' => $cgroup['refc'],
+			'values' => array(),
+			'criteria' => array(),
+		);
+	foreach (getISO27001CriterionGroupValueSets() as $row)
+		$ret[$row['cgroup_id']]['values'][$row['value']] = $row;
+	foreach (getISO27001CriterionList() as $row)
+		$ret[$row['cgroup_id']]['criteria'][$row['id']] = $row;
+	return $ret;
+}
+
+// Note that the result of this function does not account for the asset criticality.
+function getISO27001AssetValuation ($configuration, $cvalues)
+{
+	$ret = 0.0;
+	foreach ($configuration as $cgroup)
+		foreach ($cgroup['criteria'] as $criterion)
+			if ($cvalues[$criterion['id']] !== NULL)
+				$ret += $cvalues[$criterion['id']] * $criterion['weight'];
+			else
+				throw new InvalidArgException ('cvalues', '(array)', "criterion ${criterion['id']}/'${criterion['name']}' has no value");
+	return $ret;
 }

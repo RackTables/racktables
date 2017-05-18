@@ -32,6 +32,10 @@ $SQLSchema = array
 			'nports' => '(SELECT COUNT(*) FROM Port WHERE object_id = RackObject.id)',
 			'8021q_domain_id' => '(SELECT domain_id FROM VLANSwitch WHERE object_id = id LIMIT 1)',
 			'8021q_template_id' => '(SELECT template_id FROM VLANSwitch WHERE object_id = id LIMIT 1)',
+			'iso27001_aowner_id' => '(SELECT aowner_id FROM ISO27001Asset WHERE object_id = RackObject.id)',
+			'iso27001_amaint_id' => '(SELECT amaint_id FROM ISO27001Asset WHERE object_id = RackObject.id)',
+			'iso27001_agroup_id' => '(SELECT agroup_id FROM ISO27001Asset WHERE object_id = RackObject.id)',
+			'iso27001_incomplete' => '(SELECT COUNT(*) FROM ISO27001Criterion) - (SELECT COUNT(*) FROM ISO27001AssetCriterionValue WHERE object_id = RackObject.id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('RackObject.name'),
@@ -157,6 +161,10 @@ $SQLSchema = array
 			'row_name' => 'row_name',
 			'location_id' => 'location_id',
 			'location_name' => 'location_name',
+			'iso27001_aowner_id' => '(SELECT aowner_id FROM ISO27001Asset WHERE object_id = Rack.id)',
+			'iso27001_amaint_id' => '(SELECT amaint_id FROM ISO27001Asset WHERE object_id = Rack.id)',
+			'iso27001_agroup_id' => '(SELECT agroup_id FROM ISO27001Asset WHERE object_id = Rack.id)',
+			'iso27001_incomplete' => '(SELECT COUNT(*) FROM ISO27001Criterion) - (SELECT COUNT(*) FROM ISO27001AssetCriterionValue WHERE object_id = Rack.id)',
 		),
 		'keycolumn' => 'id',
 		'ordcolumns' => array ('location_name', 'row_name', 'sort_order', 'Rack.name'),
@@ -1435,6 +1443,9 @@ function commitResetObject ($object_id)
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
 	recordObjectHistory ($object_id);
+	// ISO 27001 rows
+	usePreparedDeleteBlade ('ISO27001AssetCriterionValue', array ('object_id' => $object_id));
+	usePreparedDeleteBlade ('ISO27001Asset', array ('object_id' => $object_id));
 	# Do an additional reset if needed
 	callHook ('resetObject_hook', $object_id);
 }
@@ -4134,6 +4145,22 @@ WHERE
 		$dict_attr_cache[$row['object_id']][$row['attr_id']] = $row['uint_value'];
 }
 
+function generateISO27001AssetAutotags ($cell)
+{
+	$ret = array();
+	if ($cell['iso27001_agroup_id'] !== NULL) // implies other FK-based fields are not NULL too
+	{
+		$ret[] = array ('tag' => '$iso27001_agroup_' . $cell['iso27001_agroup_id']);
+		$ret[] = array ('tag' => '$iso27001_aowner_' . $cell['iso27001_aowner_id']);
+		$ret[] = array ('tag' => '$iso27001_amaint_' . $cell['iso27001_amaint_id']);
+		$ret[] = array ('tag' => '$iso27001_asset');
+		// Don't yield {$iso27001_incomplete} for something that is not an asset.
+		if ($cell['iso27001_incomplete'] > 0)
+			$ret[] = array ('tag' => '$iso27001_incomplete');
+	}
+	return $ret;
+}
+
 # Universal autotags generator, a complementing function for loadEntityTags().
 # Bypass key isn't strictly typed, but interpreted depending on the realm.
 function generateEntityAutoTags ($cell)
@@ -4155,6 +4182,7 @@ function generateEntityAutoTags ($cell)
 		case 'rack':
 			$ret[] = array ('tag' => '$rackid_' . $cell['id']);
 			$ret[] = array ('tag' => '$any_rack');
+			$ret = array_merge ($ret, generateISO27001AssetAutotags ($cell));
 			break;
 		case 'object':
 			$ret[] = array ('tag' => '$id_' . $cell['id']);
@@ -4177,6 +4205,7 @@ function generateEntityAutoTags ($cell)
 				if (isset ($cell['8021q_template_id']))
 					$ret[] = array ('tag' => '$8021Q_tpl_' . $cell['8021q_template_id']);
 			}
+			$ret = array_merge ($ret, generateISO27001AssetAutotags ($cell));
 
 			# dictionary attribute autotags '$attr_X_Y'
 			$dict_attrs = array();
@@ -6196,4 +6225,162 @@ function commitInstallPlugin ($name, $longname, $version, $home_url)
 function commitUninstallPlugin ($name)
 {
 	usePreparedDeleteBlade ('Plugin', array ('name' => $name));
+}
+
+function getISO27001AssetGroupList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name, ' .
+		'(SELECT COUNT(*) FROM ISO27001Asset WHERE agroup_id = id) AS refc ' .
+		'FROM ISO27001AssetGroup ORDER BY name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001AssetOwnerList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name, ' .
+		'(SELECT COUNT(*) FROM ISO27001Asset WHERE aowner_id = id) AS refc ' .
+		'FROM ISO27001AssetOwner ORDER BY name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001AssetMaintainerList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name, ' .
+		'(SELECT COUNT(*) FROM ISO27001Asset WHERE amaint_id = id) AS refc ' .
+		'FROM ISO27001AssetMaintainer ORDER BY name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001CriterionGroupList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, name, ' .
+		'(SELECT COUNT(*) FROM ISO27001CriterionGroupValueSet WHERE cgroup_id = id) AS refc ' .
+		'FROM ISO27001CriterionGroup ORDER BY name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001CriterionGroupValueSets()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT cgroup_id, value, label, ' .
+		'(SELECT COUNT(*) FROM ISO27001AssetCriterionValue AS ACV WHERE ACV.cgroup_id = CGVS.cgroup_id AND ACV.value = CGVS.value) AS refc ' .
+		'FROM ISO27001CriterionGroupValueSet AS CGVS ' .
+		'INNER JOIN ISO27001CriterionGroup ON cgroup_id = id ' .
+		'ORDER BY name, value'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001CriterionList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT C.id, cgroup_id, weight, C.name, C.comment, ' .
+		'(SELECT COUNT(*) FROM ISO27001AssetCriterionValue WHERE criterion_id = C.id) AS refc ' .
+		'FROM ISO27001Criterion AS C INNER JOIN ISO27001CriterionGroup AS G ON C.cgroup_id = G.id ' .
+		'ORDER BY G.name, C.name'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+function getISO27001AssetInfo ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, agroup_id, aowner_id, amaint_id, criticality, asset_comment, cvalues_comment, ' .
+		'(SELECT name FROM ISO27001AssetGroup WHERE id = agroup_id) AS agroup_name, ' .
+		'(SELECT name FROM ISO27001AssetOwner WHERE id = aowner_id) AS aowner_name, ' .
+		'(SELECT name FROM ISO27001AssetMaintainer WHERE id = amaint_id) AS amaint_name, ' .
+		'(SELECT objtype_id FROM Object WHERE id = object_id) AS objtype_id, ' .
+		'(SELECT COUNT(*) FROM ISO27001AssetCriterionValue AS ACV WHERE ACV.object_id = A.object_id) AS refc ' .
+		'FROM ISO27001Asset AS A WHERE object_id = ?',
+		array ($object_id)
+	);
+	$ret = $result->fetchAll (PDO::FETCH_ASSOC);
+	return count ($ret) == 1 ? array_first ($ret) : NULL; # don't rely on current PDO fetch style
+}
+
+function getISO27001AssetList()
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT object_id, ' .
+		'(SELECT objtype_id FROM Object WHERE id = object_id) AS objtype_id, ' .
+		'((SELECT COUNT(*) FROM ISO27001Criterion) - (SELECT COUNT(*) FROM ISO27001AssetCriterionValue WHERE object_id = A.object_id)) AS incomplete ' .
+		'FROM ISO27001Asset AS A'
+	);
+	return $result->fetchAll (PDO::FETCH_ASSOC);
+}
+
+// Returns an array indexed for every criterion existing in the database regardless if
+// each particular criterion has a value set for the given object (the criterion value
+// is NULL in the latter case).
+function getObjectISO27001CValues ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, value FROM ISO27001Criterion ' .
+		'LEFT JOIN ISO27001AssetCriterionValue ON id = criterion_id AND object_id = ?',
+		array ($object_id)
+	);
+	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'value');
+}
+
+// Treat $newvals as the set of criteria values to delete (when the value is NULL) or
+// to add/replace (when it is not). Leave any criteria not in the input list intact.
+function commitObjectISO27001CValues ($object_id, $newvals)
+{
+	global $dbxlink;
+	$ret = 0;
+	$cgids = reduceSubarraysToColumn (reindexById (getISO27001CriterionList()), 'cgroup_id');
+	// Each key in the requested set must stand for an existing criterion.
+	if (count (array_diff (array_keys ($newvals), array_keys ($cgids))))
+		throw new InvalidArgException ('newval', '(array)', 'incorrect indexing');
+	$oldvals = getObjectISO27001CValues ($object_id);
+	try
+	{
+		$dbxlink->beginTransaction();
+		foreach ($newvals as $cid => $newval)
+			if ($newval !== $oldvals[$cid])
+			{
+				$columns = array ('object_id' => $object_id, 'criterion_id' => $cid);
+				if ($oldvals[$cid] === NULL) // The new value is not NULL.
+				{
+					$columns['cgroup_id'] = $cgids[$cid];
+					$columns['value'] = $newval;
+					usePreparedInsertBlade ('ISO27001AssetCriterionValue', $columns);
+					$ret++;
+				}
+				elseif ($newval === NULL) // The old value is not NULL.
+				{
+					usePreparedDeleteBlade ('ISO27001AssetCriterionValue', $columns);
+					$ret++;
+				}
+				else // Both are not NULL, yet not equal to each other.
+				{
+					usePreparedUpdateBlade ('ISO27001AssetCriterionValue', array ('value' => $newval), $columns);
+					$ret++;
+				}
+			}
+		$dbxlink->commit();
+	}
+	catch (RTDatabaseError $e)
+	{
+		$dbxlink->rollBack();
+		throw $e;
+	}
+	return $ret;
 }

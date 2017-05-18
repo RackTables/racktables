@@ -309,3 +309,34 @@ function triggerGraphCycleResolver()
 	}
 	return count (getInvalidNodes ($nodelist)) ? 'attn' : '';
 }
+
+function triggerISO27001CGroupExists()
+{
+	return count (getISO27001CriterionGroupList()) ? 'std' : '';
+}
+
+function triggerObjectISO27001Asset()
+{
+	if (NULL !== getISO27001AssetInfo (getBypassValue()))
+		return 'std';
+	return
+	(
+		considerConfiguredConstraint (spotEntity (etypeByPageno(), getBypassValue()), 'ISO27001_ASSET_LISTSRC') &&
+		count (getISO27001AssetGroupList()) &&
+		count (getISO27001AssetOwnerList()) &&
+		count (getISO27001AssetMaintainerList())
+	) ? 'std' : '';
+}
+
+function triggerObjectISO27001CValues()
+{
+	if (NULL === getISO27001AssetInfo (getBypassValue()))
+		return '';
+	foreach (getISO27001Configuration() as $cgroup)
+		if (count ($cgroup['values']) > 0 && count ($cgroup['criteria']) > 0)
+		{
+			$o = spotEntity (etypeByPageno(), getBypassValue());
+			return $o['iso27001_incomplete'] > 0 ? 'attn' : 'std';
+		}
+	return '';
+}

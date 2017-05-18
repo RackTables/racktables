@@ -765,6 +765,86 @@ function get_pseudo_file ($name)
   UNIQUE KEY `ip` (`ip`,`mask`)
 ) ENGINE=InnoDB";
 
+		$query[] = "CREATE TABLE `ISO27001AssetGroup` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001AssetOwner` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001AssetMaintainer` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001Asset` (
+  `object_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `agroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `aowner_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `amaint_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `criticality` float unsigned NOT NULL DEFAULT '1',
+  `asset_comment` text COLLATE utf8_unicode_ci,
+  `cvalues_comment` text COLLATE utf8_unicode_ci,
+  UNIQUE KEY `object_id` (`object_id`),
+  KEY `agroup_id` (`agroup_id`),
+  KEY `aowner_id` (`aowner_id`),
+  KEY `amaint_id` (`amaint_id`),
+  CONSTRAINT `ISO27001Asset-FK-amaint_id` FOREIGN KEY (`amaint_id`) REFERENCES `ISO27001AssetMaintainer` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-agroup_id` FOREIGN KEY (`agroup_id`) REFERENCES `ISO27001AssetGroup` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-aowner_id` FOREIGN KEY (`aowner_id`) REFERENCES `ISO27001AssetOwner` (`id`),
+  CONSTRAINT `ISO27001Asset-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001CriterionGroup` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001Criterion` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `weight` float unsigned NOT NULL DEFAULT '1',
+  `name` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `comment` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `criterion-group` (`id`,`cgroup_id`),
+  KEY `cgroup_id` (`cgroup_id`),
+  CONSTRAINT `ISO27001Criterion-FK-cgroup_id` FOREIGN KEY (`cgroup_id`) REFERENCES `ISO27001CriterionGroup` (`id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001CriterionGroupValueSet` (
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `value` int(10) unsigned NOT NULL DEFAULT '0',
+  `label` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`cgroup_id`,`value`),
+  CONSTRAINT `ISO27001CriterionGroupValueSet-FK-cgroup_id` FOREIGN KEY (`cgroup_id`) REFERENCES `ISO27001CriterionGroup` (`id`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `ISO27001AssetCriterionValue` (
+  `object_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `criterion_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `cgroup_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `value` int(10) unsigned NOT NULL DEFAULT '0',
+  UNIQUE KEY `object-criterion` (`object_id`,`criterion_id`),
+  KEY `criterion-group` (`criterion_id`,`cgroup_id`),
+  KEY `group-value` (`cgroup_id`,`value`),
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `ISO27001Asset` (`object_id`) ON DELETE CASCADE,
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-compound1` FOREIGN KEY (`criterion_id`, `cgroup_id`) REFERENCES `ISO27001Criterion` (`id`, `cgroup_id`),
+  CONSTRAINT `ISO27001AssetCriterionValue-FK-compound2` FOREIGN KEY (`cgroup_id`, `value`) REFERENCES `ISO27001CriterionGroupValueSet` (`cgroup_id`, `value`)
+) ENGINE=InnoDB";
+
 		$query[] = "CREATE TABLE `LDAPCache` (
   `presented_username` char(64) NOT NULL,
   `successful_hash` char(40) NOT NULL,
@@ -2300,6 +2380,12 @@ WHERE O.objtype_id = 1562";
 ('NEAREST_RACKS_CHECKBOX', 'yes', 'string', 'yes', 'no', 'yes', 'Enable nearest racks in port list filter by default'),
 ('SHOW_OBJECTTYPE', 'yes', 'string', 'no', 'no', 'yes', 'Show object type column on depot page'),
 ('OBJECTLOG_PREVIEW_ENTRIES','5','uint','no','no','yes','Object log preview maximum entries (0 disables the preview)'),
+('ISO27001_ASSET_LISTSRC',  'false',  'string',  'yes',  'no',  'no',  'List source: objects that may be an ISO 27001 asset'),
+('ISO27001_DETAILS_LISTSRC',  'false',  'string',  'yes',  'no',  'no',  'List source: ISO 27001 assets with details shown by default'),
+('ISO27001_DEFAULT_AGROUP',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset group'),
+('ISO27001_DEFAULT_AOWNER',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset owner'),
+('ISO27001_DEFAULT_AMAINT',  '',  'uint',  'yes',  'no',  'yes',  'ID of the default ISO 27001 asset maintainer'),
+('ISO27001_DEFAULT_CRITICALITY',  '1.0',  'string',  'yes',  'no',  'yes',  'Default ISO 27001 asset criticality'),
 ('DB_VERSION','${db_version}','string','no','yes','no','Database version.')";
 
 		$query[] = "INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}')";
