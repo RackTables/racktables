@@ -254,6 +254,7 @@ try {
 			printException ($e);
 			break;
 		}
+		showMySQLWarnings();
 		redirectUser ($location);
 		// any other error requires no special handling and will be caught outside
 		break;
