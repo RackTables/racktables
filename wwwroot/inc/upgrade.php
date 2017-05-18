@@ -192,6 +192,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.12',
 		'0.20.13',
 		'0.20.14',
+		'0.21.0',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1227,6 +1228,9 @@ ENDOFTRIGGER;
 			$query[] = "UPDATE Object SET has_problems = 'no' WHERE objtype_id = 1561 AND has_problems = ''";
 			$query[] = "UPDATE ObjectHistory SET ctime = ctime, has_problems = 'no' WHERE objtype_id = 1561 AND has_problems = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.20.14' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.0':
+			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
