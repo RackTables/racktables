@@ -1716,7 +1716,7 @@ function commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_labe
 		(
 			'name' => $port_name,
 			'object_id' => $object_id,
-			'label' => $port_label,
+			'label' => nullIfEmptyStr ($port_label),
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
 			'l2address' => nullIfEmptyStr ($db_l2address),
@@ -1767,7 +1767,7 @@ function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_i
 			'name' => $port_name,
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
-			'label' => $port_label,
+			'label' => nullIfEmptyStr ($port_label),
 			'reservation_comment' => $port_reservation_comment,
 			'l2address' => nullIfEmptyStr ($db_l2address),
 		),

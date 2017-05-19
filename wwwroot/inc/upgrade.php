@@ -1226,6 +1226,7 @@ ENDOFTRIGGER;
 			break;
 		// FIXME: add remaining 0.20.x sections here after respective releases come out
 		case '0.21.0':
+			$query[] = "UPDATE Port SET label = NULL WHERE label = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
