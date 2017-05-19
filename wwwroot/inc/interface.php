@@ -4206,7 +4206,7 @@ function renderSNMPPortFinder ($object_id)
 		<td class=tdleft><?php printSelect ($sloptions, array ('name' => 'sec_level'), 'noAuthNoPriv'); ?></td>
 	</tr>
 	<tr>
-		<th class=tdright><label for="auth_protocol_1">Auth Type:</label></th>
+		<th class=tdright>Auth Type:</th>
 		<td class=tdleft>
 		<input id=auth_protocol_1 name=auth_protocol type=radio value=md5 />
 		<label for=auth_protocol_1>MD5</label>
@@ -4219,7 +4219,7 @@ function renderSNMPPortFinder ($object_id)
 		<td class=tdleft><input type=text id=auth_passphrase name=auth_passphrase></td>
 	</tr>
 	<tr>
-		<th class=tdright><label for=priv_protocol_1>Priv Type:</label></th>
+		<th class=tdright>Priv Type:</th>
 		<td class=tdleft>
 		<input id=priv_protocol_1 name=priv_protocol type=radio value=DES />
 		<label for=priv_protocol_1>DES</label>
