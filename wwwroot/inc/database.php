@@ -3981,7 +3981,7 @@ function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 // This swiss-knife blade deletes any number of records from the specified table
 // using the specified key names and values.
 // returns integer - affected rows count. Throws exception on error
-function usePreparedDeleteBlade ($tablename, $columns = array(), $conjunction = 'AND')
+function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
 	if (! count ($columns))
@@ -4018,7 +4018,7 @@ function usePreparedSelectBlade ($query, $args = array())
 }
 
 // returns integer - affected rows count. Throws exception on error
-function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_columns = array(), $conjunction = 'AND')
+function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
 {
 	global $dbxlink;
 	if (! count ($set_columns))

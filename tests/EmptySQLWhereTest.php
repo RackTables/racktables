@@ -21,7 +21,7 @@ class EmptySQLWhereTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testMalformedDelete ()
 	{
-		usePreparedDeleteBlade ('TagTree');
+		usePreparedDeleteBlade ('TagTree', NULL);
 	}
 
 	/**
@@ -30,7 +30,7 @@ class EmptySQLWhereTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testMalformedUpdate1 ()
 	{
-		usePreparedUpdateBlade ('TagTree', array ('is_assignable' => 'yes'));
+		usePreparedUpdateBlade ('TagTree', array ('is_assignable' => 'yes'), NULL);
 	}
 
 	/**
@@ -39,7 +39,7 @@ class EmptySQLWhereTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testMalformedUpdate2 ()
 	{
-		usePreparedUpdateBlade ('TagTree');
+		usePreparedUpdateBlade ('TagTree', NULL, NULL);
 	}
 }
 
