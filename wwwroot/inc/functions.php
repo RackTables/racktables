@@ -4851,10 +4851,10 @@ function sortPortList ($plist, $name_in_value = FALSE)
 			'numidx' => count ($numbers),
 			'index' => $numbers,
 			'idx_parent' => $parent,
-			'iif_id' => isset($plist[$pkey]['iif_id']) ? $plist[$pkey]['iif_id'] : 0,
-			'label' => isset($plist[$pkey]['label']) ? $plist[$pkey]['label'] : '',
-			'l2address' => isset($plist[$pkey]['l2address']) ? $plist[$pkey]['l2address'] : '',
-			'id' => isset($plist[$pkey]['id']) ? $plist[$pkey]['id'] : 0,
+			'iif_id' => array_fetch ($pvalue, 'iif_id', 0),
+			'label' => array_fetch ($pvalue, 'label', ''),
+			'l2address' => array_fetch ($pvalue, 'l2address', ''),
+			'id' => array_fetch ($pvalue, 'id', 0),
 			'name' => $pn,
 		);
 	}

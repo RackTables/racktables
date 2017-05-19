@@ -1586,8 +1586,7 @@ function getMolecule ($mid)
 function lastInsertID ()
 {
 	$result = usePreparedSelectBlade ('select last_insert_id()');
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0];
+	return $result->fetchColumn();
 }
 
 // This function creates a new record in Molecule and number of linked
@@ -3512,8 +3511,7 @@ function getIPv4Stats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0];
+		$ret[$item['txt']] = $result->fetchColumn();
 		unset ($result);
 	}
 	return $ret;
@@ -3530,8 +3528,7 @@ function getIPv6Stats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0];
+		$ret[$item['txt']] = $result->fetchColumn();
 		unset ($result);
 	}
 	return $ret;
@@ -3549,8 +3546,8 @@ function getRackspaceStats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0] == '' ? 0 : $row[0];
+		$tmp = $result->fetchColumn();
+		$ret[$item['txt']] = $tmp == '' ? 0 : $tmp;
 		unset ($result);
 	}
 	return $ret;
