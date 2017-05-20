@@ -22,10 +22,10 @@ function authenticate ()
 	{
 		if
 		(
-			! isset ($_SERVER['PHP_AUTH_USER']) ||
-			$_SERVER['PHP_AUTH_USER'] == '' ||
-			! isset ($_SERVER['PHP_AUTH_PW']) ||
-			$_SERVER['PHP_AUTH_PW'] == ''
+			! isset ($_SESSION['username']) ||
+			$_SESSION['username'] == '' ||
+			! isset ($_POST['password']) ||
+			$_POST['password'] == ''
 		)
 			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
 	}
@@ -186,7 +186,7 @@ exit;
 			break; // skip this phase
 		case 'database' == $user_auth_src:
 			assertHTTPCredentialsReceived();
-			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			$remote_username = $_SESSION['username'];
 			break;
 		case 'ldap' == $user_auth_src:
 			assertHTTPCredentialsReceived();
