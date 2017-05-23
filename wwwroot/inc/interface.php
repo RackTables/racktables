@@ -1708,13 +1708,9 @@ function renderPortsForObject ($object_id)
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td></tr></form>";
 	}
-	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes' || getConfigVar('ENABLE_BULKPORT_FORM') == 'yes' )
-		startPortlet ('Ports and interfaces');
-	else
-		echo '<br>';
-	$object = spotEntity ('object', $object_id);
-	amplifyCell ($object);
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && getConfigVar('ENABLE_BULKPORT_FORM') == 'yes'){
+
+	function printBulkForm ($prefs)
+	{
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 		echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>Start Number</th>";
 		echo "<th class=tdleft>Count</th><th>&nbsp;</th></tr>\n";
@@ -1731,6 +1727,12 @@ function renderPortsForObject ($object_id)
 		echo "</td></tr></form>";
 		echo "</table><br>\n";
 	}
+
+	startPortlet ('Ports and interfaces');
+	$object = spotEntity ('object', $object_id);
+	amplifyCell ($object);
+	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && getConfigVar ('ENABLE_BULKPORT_FORM') == 'yes')
+		printBulkForm ($prefs);
 
 	echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
 	echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>L2 address</th>";
@@ -1770,7 +1772,7 @@ function renderPortsForObject ($object_id)
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
 		echo "<td class='tdleft $name_class' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=16></td>";
 		echo "<td><input type=text name=label value='${port['label']}'></td>";
-		echo '<td>';
+		echo '<td class=tdleft>';
 		if ($port['iif_id'] != 1)
 			echo '<label>' . $port['iif_name'] . ' ';
 		$port_type_opts = array();
@@ -1822,41 +1824,26 @@ function renderPortsForObject ($object_id)
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($prefs);
 	echo "</table><br>\n";
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes' && getConfigVar('ENABLE_BULKPORT_FORM') == 'yes'){
-		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		echo "<tr><th>&nbsp;</th><th class=tdleft>Local name</th><th class=tdleft>Visible label</th><th class=tdleft>Interface</th><th class=tdleft>Start Number</th>";
-		echo "<th class=tdleft>Count</th><th>&nbsp;</th></tr>\n";
-		printOpFormIntro ('addBulkPorts');
-		echo "<tr><td>";
-		printImageHREF ('add', 'add ports', TRUE);
-		echo "</td><td><input type=text size=8 name=port_name></td>\n";
-		echo "<td><input type=text name=port_label></td><td>";
-		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
-		echo "<td><input type=text name=port_numbering_start size=3 maxlength=3></td>\n";
-		echo "<td><input type=text name=port_numbering_count size=3 maxlength=3></td>\n";
-		echo "<td>&nbsp;</td><td>";
-		printImageHREF ('add', 'add ports', TRUE);
-		echo "</td></tr></form>";
-		echo "</table><br>\n";
-	}
-	if (getConfigVar('ENABLE_MULTIPORT_FORM') == 'yes')
-		finishPortlet();
-	if (getConfigVar('ENABLE_MULTIPORT_FORM') != 'yes')
-		return;
-
-	startPortlet ('Add/update multiple ports');
-	printOpFormIntro ('addMultiPorts');
-	$formats = array
-	(
-		'ssv1' => 'SSV:<interface name> [<MAC address>]',
-	);
-	echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1') . ' ';
-	echo 'Default port type: ';
-	printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
-	echo "<input type=submit value='Parse output'><br>\n";
-	echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
-	echo '</form>';
+	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes' && getConfigVar ('ENABLE_BULKPORT_FORM') == 'yes')
+		printBulkForm ($prefs);
 	finishPortlet();
+
+	if (getConfigVar ('ENABLE_MULTIPORT_FORM') == 'yes' && permitted (NULL, NULL, 'addMultiPorts'))
+	{
+		startPortlet ('Add/update multiple ports');
+		printOpFormIntro ('addMultiPorts');
+		$formats = array
+		(
+			'ssv1' => 'SSV:<interface name> [<MAC address>]',
+		);
+		echo 'Format: ' . getSelect ($formats, array ('name' => 'format'), 'ssv1') . ' ';
+		echo 'Default port type: ';
+		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type'), $prefs['selected']);
+		echo "<input type=submit value='Parse output'><br>\n";
+		echo "<textarea name=input cols=100 rows=50></textarea><br>\n";
+		echo '</form>';
+		finishPortlet();
+	}
 }
 
 function renderIPForObject ($object_id)
