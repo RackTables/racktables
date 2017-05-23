@@ -5699,7 +5699,7 @@ function setUserConfigVar ($varname, $varvalue)
 	// Update cache only if the changes went into DB.
 	usePreparedExecuteBlade
 	(
-		'REPLACE UserConfig SET varvalue=?, varname=?, user=?',
+		'REPLACE INTO UserConfig SET varvalue=?, varname=?, user=?',
 		array ($varvalue, $varname, $remote_username)
 	);
 	$configCache[$varname]['varvalue'] = $varvalue;
