@@ -1586,8 +1586,7 @@ function getMolecule ($mid)
 function lastInsertID ()
 {
 	$result = usePreparedSelectBlade ('select last_insert_id()');
-	$row = $result->fetch (PDO::FETCH_NUM);
-	return $row[0];
+	return $result->fetchColumn();
 }
 
 // This function creates a new record in Molecule and number of linked
@@ -1716,7 +1715,7 @@ function commitAddPortReal ($object_id, $port_name, $iif_id, $oif_id, $port_labe
 		(
 			'name' => $port_name,
 			'object_id' => $object_id,
-			'label' => $port_label,
+			'label' => nullIfEmptyStr ($port_label),
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
 			'l2address' => nullIfEmptyStr ($db_l2address),
@@ -1767,7 +1766,7 @@ function commitUpdatePortReal ($object_id, $port_id, $port_name, $iif_id, $oif_i
 			'name' => $port_name,
 			'iif_id' => $iif_id,
 			'type' => $oif_id,
-			'label' => $port_label,
+			'label' => nullIfEmptyStr ($port_label),
 			'reservation_comment' => $port_reservation_comment,
 			'l2address' => nullIfEmptyStr ($db_l2address),
 		),
@@ -3512,8 +3511,7 @@ function getIPv4Stats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0];
+		$ret[$item['txt']] = $result->fetchColumn();
 		unset ($result);
 	}
 	return $ret;
@@ -3530,8 +3528,7 @@ function getIPv6Stats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0];
+		$ret[$item['txt']] = $result->fetchColumn();
 		unset ($result);
 	}
 	return $ret;
@@ -3549,8 +3546,8 @@ function getRackspaceStats ()
 	foreach ($subject as $item)
 	{
 		$result = usePreparedSelectBlade ($item['q']);
-		$row = $result->fetch (PDO::FETCH_NUM);
-		$ret[$item['txt']] = $row[0] == '' ? 0 : $row[0];
+		$tmp = $result->fetchColumn();
+		$ret[$item['txt']] = $tmp == '' ? 0 : $tmp;
 		unset ($result);
 	}
 	return $ret;
@@ -3899,6 +3896,23 @@ function convertPDOException ($e)
 	return new RTDatabaseError ($text);
 }
 
+// The strict SQL mode, which is the default since MySQL 5.7 and MariaDB 10.2.4,
+// generates an error (and in this case a PDO exception) when a column value is
+// invalid or missing. When the strict SQL mode is not enabled (for whatever
+// reason), the invalid or missing values (as well as other anomalies) end up in
+// the warnings buffer and remain out of sight by default. This function saves
+// the contents of the buffer such that it can be displayed later.
+function collectMySQLWarnings()
+{
+	global $dbxlink, $debug_mode, $rtdebug_mysql_warnings;
+	if (! isset ($debug_mode) || ! $debug_mode)
+		return;
+	if (! isset ($rtdebug_mysql_warnings))
+		$rtdebug_mysql_warnings = array();
+	$result = $dbxlink->query ('SHOW WARNINGS');
+	$rtdebug_mysql_warnings = array_merge ($rtdebug_mysql_warnings, $result->fetchAll (PDO::FETCH_ASSOC));
+}
+
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
@@ -3914,7 +3928,10 @@ function usePreparedInsertBlade ($tablename, $columns)
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute (array_values ($columns));
-		return $prepared->rowCount();
+		$ret = $prepared->rowCount();
+		unset ($prepared);
+		collectMySQLWarnings();
+		return $ret;
 	}
 	catch (PDOException $e)
 	{
@@ -3961,7 +3978,7 @@ function makeWhereSQL ($where_columns, $conjunction, &$params = array())
 // This swiss-knife blade deletes any number of records from the specified table
 // using the specified key names and values.
 // returns integer - affected rows count. Throws exception on error
-function usePreparedDeleteBlade ($tablename, $columns = array(), $conjunction = 'AND')
+function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
 	if (! count ($columns))
@@ -3971,7 +3988,10 @@ function usePreparedDeleteBlade ($tablename, $columns = array(), $conjunction = 
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute ($where_values);
-		return $prepared->rowCount();
+		$ret = $prepared->rowCount();
+		unset ($prepared);
+		collectMySQLWarnings();
+		return $ret;
 	}
 	catch (PDOException $e)
 	{
@@ -3995,7 +4015,7 @@ function usePreparedSelectBlade ($query, $args = array())
 }
 
 // returns integer - affected rows count. Throws exception on error
-function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_columns = array(), $conjunction = 'AND')
+function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
 {
 	global $dbxlink;
 	if (! count ($set_columns))
@@ -4008,7 +4028,10 @@ function usePreparedUpdateBlade ($tablename, $set_columns = array(), $where_colu
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute (array_merge (array_values ($set_columns), $where_values));
-		return $prepared->rowCount();
+		$ret = $prepared->rowCount();
+		unset ($prepared);
+		collectMySQLWarnings();
+		return $ret;
 	}
 	catch (PDOException $e)
 	{

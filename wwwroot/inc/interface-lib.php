@@ -1183,4 +1183,28 @@ function makeHtmlTag ($tagname, $attributes = array())
 	return $ret;
 }
 
+function showMySQLWarnings()
+{
+	global $debug_mode, $rtdebug_mysql_warnings;
+	if (! isset ($debug_mode) || ! $debug_mode || ! isset ($rtdebug_mysql_warnings))
+		return;
+	foreach ($rtdebug_mysql_warnings as $each)
+	{
+		$text = $each['Code'] . ': ' . $each['Message'];
+		switch ($each['Level'])
+		{
+		case 'Warning':
+			showWarning ($text);
+			break;
+		case 'Note':
+			showNotice ($text);
+			break;
+		default:
+			showError ($text);
+			break;
+		}
+	}
+	$rtdebug_mysql_warnings = array();
+}
+
 ?>
