@@ -972,7 +972,7 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	lastCreated ($realm, $object_id);
 
 	// Do AutoPorts magic
-	if ($realm == 'object')
+	if (($realm == 'object') && !isCheckSet('disable_autoports'))
 		executeAutoPorts ($object_id);
 	// Now tags...
 	produceTagsForNewRecord ($realm, $taglist, $object_id);
