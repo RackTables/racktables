@@ -999,6 +999,23 @@ function commitRenameObject ($object_id, $new_name)
 	recordObjectHistory ($object_id);
 }
 
+function commitRelabelObject ($object_id, $new_label)
+{
+	usePreparedUpdateBlade
+	(
+		'Object',
+		array
+		(
+			'label' => nullIfEmptyStr ($new_label),
+		),
+		array
+		(
+			'id' => $object_id
+		)
+	);
+	recordObjectHistory ($object_id);
+}
+
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
 	$type_id = getObjectType ($object_id);
