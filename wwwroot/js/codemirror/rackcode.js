@@ -1,6 +1,7 @@
 CodeMirror.defineMode('rackcode', function() {
   var allowkeywords = /^(allow)\b/i;
   var denykeywords = /^(deny)\b/i;
+  var contextkeywords = /^(context|clear|insert|remove|on)\b/i;
   var operatorkeywords = /^(define|and|or|not|true|false)\b/i;
 
   return {
@@ -21,6 +22,8 @@ CodeMirror.defineMode('rackcode', function() {
             return 'negative';
         } else if (operatorkeywords.test(w)) {
             return 'operator';
+        } else if (contextkeywords.test(w)) {
+            return 'keyword';
         }
 
       } else if (stream.eat('#')) {
