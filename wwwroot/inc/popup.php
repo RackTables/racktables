@@ -17,6 +17,7 @@ SELECT
 	pii.iif_name,
 	poi.oif_name,
 	p.object_id,
+	o.objtype_id as object_tid,
 	o.name as object_name
 FROM Port p
 INNER JOIN Object o ON o.id = p.object_id
@@ -123,7 +124,8 @@ INNER JOIN (
 			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
 				foreach ($ports_subarray as $port_row)
 				{
-					$port_description = $port_row['object_name'] . ' --  ' . $port_row['name'];
+					$port_description = formatObjectDisplayedName ($port_row['object_name'], $port_row['object_tid']) .
+						' --  ' . $port_row['name'];
 					if (count ($ports_subarray) > 1)
 					{
 						$if_type = $port_row['iif_id'] == 1 ? $port_row['oif_name'] : $port_row['iif_name'];

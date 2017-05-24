@@ -1401,8 +1401,9 @@ function renderObjectPortRow ($port, $is_highlighted)
 	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
 	if ($port['remote_object_id'])
 	{
+		$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);
 		echo "<td class=tdleft>" .
-			formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL) .
+			formatPortLink ($port['remote_object_id'], $dname, $port['remote_id'], NULL) .
 			"</td>";
 		echo "<td class=tdleft>" . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') . "</td>";
 		$editable = permitted ('object', 'ports', 'editPort')
@@ -1791,10 +1792,11 @@ function renderPortsForObject ($object_id)
 		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
-			echo "<td>" .
-				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $port['remote_object_name'], $port['remote_id'], NULL)) .
+			$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);
+			echo "<td class=tdleft>" .
+				formatLoggedSpan ($port['last_log'], formatPortLink ($port['remote_object_id'], $dname, $port['remote_id'], NULL)) .
 				"</td>";
-			echo "<td> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
+			echo "<td class=tdleft> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
 				"<input type=hidden name=reservation_comment value=''></td>";
 			echo "<td><input type=text name=cable value='${port['cableid']}'></td>";
 			echo "<td class=tdcenter>";

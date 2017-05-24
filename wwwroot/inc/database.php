@@ -849,6 +849,7 @@ SELECT
 	IF(la.porta, pa.name, pb.name) AS remote_name,
 	IF(la.porta, pa.object_id, pb.object_id) AS remote_object_id,
 	IF(la.porta, oa.name, ob.name) AS remote_object_name,
+	IF(la.porta, oa.objtype_id, ob.objtype_id) AS remote_object_tid,
 	(SELECT COUNT(*) FROM PortLog WHERE PortLog.port_id = Port.id) AS log_count,
 	PortLog.user,
 	UNIX_TIMESTAMP(PortLog.date) as time
