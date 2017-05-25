@@ -103,7 +103,8 @@ function renderRackCodeEditor ()
 {
 	addJS ('js/codemirror/codemirror.js');
 	addJS ('js/codemirror/rackcode.js');
-	addCSS ('js/codemirror/codemirror.css');
+	addCSS ('css/codemirror/codemirror.css');
+	addCSS ('css/codemirror/rackcode.css');
 	addJS (<<<ENDJAVASCRIPT
 function verify()
 {
