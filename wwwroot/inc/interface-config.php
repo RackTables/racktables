@@ -88,15 +88,34 @@ function renderUserProperties ($user_id)
 
 function renderRackCodeViewer ()
 {
-	$text = loadScript ('RackCode');
 	echo '<table width="100%" border=0>';
-	$lineno = 1;
-	foreach (explode ("\n", $text) as $line)
+	addJS ('js/codemirror/codemirror.js');
+	addJS ('js/codemirror/rackcode.js');
+	addCSS ('css/codemirror/codemirror.css');
+	addCSS ('css/codemirror/rackcode.css');
+	if (! array_key_exists ('line', $_REQUEST))
+		$scrollcode = '';
+	else
 	{
-		echo "<tr><td class=tdright><a name=line${lineno}>${lineno}</a></td>";
-		echo "<td class=tdleft>${line}</td></tr>";
-		$lineno++;
+		// Line numbers start from 0 in CodeMirror API and from 1 elsewhere.
+		$lineno = genericAssertion ('line', 'uint') - 1;
+		$scrollcode = "rackCodeMirror.addLineClass (${lineno}, 'wrap', 'border_highlight');\n" .
+			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
 	}
+	addJS (<<<ENDJAVASCRIPT
+$(document).ready(function() {
+	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
+		mode:'rackcode',
+		theme:'rackcode',
+		readOnly:'nocursor',
+		lineNumbers:true });
+	${scrollcode}
+});
+ENDJAVASCRIPT
+	, TRUE);
+	echo "<tr><td><textarea rows=40 cols=100 id=RCTA>";
+	echo loadScript ('RackCode') . "</textarea></td></tr>\n";
+	echo '</table>';
 }
 
 function renderRackCodeEditor ()
@@ -138,6 +157,8 @@ $(document).ready(function() {
 
 	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
 		mode:'rackcode',
+		theme:'rackcode',
+		autofocus:true,
 		lineNumbers:true });
 	rackCodeMirror.on("change",function(cm,cmChangeObject){
 		$("#RCTA").text(cm.getValue());
@@ -146,12 +167,11 @@ $(document).ready(function() {
 ENDJAVASCRIPT
 	, TRUE);
 
-	$text = loadScript ('RackCode');
 	printOpFormIntro ('saveRackCode');
-	echo '<table style="width:100%;border:1px;" border=0 align=center>';
+	echo '<table width="100%" border=0>';
 	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA>";
-	echo $text . "</textarea></td></tr>\n";
-	echo "<tr><td align=center>";
+	echo loadScript ('RackCode') . "</textarea></td></tr>\n";
+	echo "<tr><td class=submit>";
 	echo '<div id="ShowMessage"></div>';
 	echo "<input type='button' value='Verify' onclick='verify();'>";
 	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges'>";

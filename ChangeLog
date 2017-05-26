@@ -1,6 +1,7 @@
 0.21.0
 	update: display MySQL warnings in debug mode
 	update: better display objects that have no common name
+	update: highlight RackCode syntax in the Permissions viewer too
 0.20.13 2017-05-12
 	update: fix performance for pages with images (GH#190 by Michael A. Mikhailov)
 	update: improve SNMP support for Brocade devices (GH#180 by Chris Jones)
