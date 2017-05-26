@@ -63,15 +63,6 @@ $vtoptions = array
 // See the $systemreport for structure.
 $localreports = array();
 
-$CodePressMap = array
-(
-	'sql' => 'sql',
-	'php' => 'php',
-	'html' => 'htmlmixed',
-	'css' => 'css',
-	'js' => 'javascript',
-);
-
 $attrtypes = array
 (
 	'uint' => '[U] unsigned integer',
@@ -5207,19 +5198,12 @@ function getFilePreviewCode ($file)
 
 function renderTextEditor ($file_id)
 {
-	global $CodePressMap;
 	$fullInfo = getFile ($file_id);
 	printOpFormIntro ('updateFileText', array ('mtime_copy' => $fullInfo['mtime']));
-	preg_match('/.+\.([^.]*)$/', $fullInfo['name'], $matches); # get file extension
-	if (isset ($matches[1]) && isset ($CodePressMap[$matches[1]]))
-		$syntax = $CodePressMap[$matches[1]];
-	else
-		$syntax = "text";
 	echo '<table border=0 align=center>';
-	addJS ('js/codepress/codepress.js');
-	echo "<tr><td><textarea rows=45 cols=180 id=file_text name=file_text class='codepress " . $syntax . "'>\n";
+	echo "<tr><td><textarea rows=45 cols=180 name=file_text>\n";
 	echo stringForTextarea ($fullInfo['contents']) . '</textarea></td></tr>';
-	echo "<tr><td class=submit><input type=submit value='Save' onclick='$(file_text).toggleEditor();'>";
+	echo "<tr><td class=submit><input type=submit value='Save'>";
 	echo "</td></tr>\n</table></form>\n";
 }
 

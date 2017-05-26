@@ -149,12 +149,12 @@ ENDJAVASCRIPT
 	$text = loadScript ('RackCode');
 	printOpFormIntro ('saveRackCode');
 	echo '<table style="width:100%;border:1px;" border=0 align=center>';
-	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
+	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA>";
 	echo $text . "</textarea></td></tr>\n";
 	echo "<tr><td align=center>";
 	echo '<div id="ShowMessage"></div>';
 	echo "<input type='button' value='Verify' onclick='verify();'>";
-	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='$(RCTA).toggleEditor();'>";
+	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges'>";
 	echo "</td></tr>";
 	echo '</table>';
 	echo "</form>";
