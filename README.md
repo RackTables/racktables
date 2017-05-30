@@ -132,7 +132,7 @@ Note: set `secret.php` permissions when prompted.
 Unpack the tar.gz/zip archive to a directory of your choice and configure Apache
 httpd to use `wwwroot` subdirectory as a new DocumentRoot. Alternatively,
 symlinks to `wwwroot` or even to `index.php` from an existing DocumentRoot are
-also possible and often adisable (see `README.Fedora`).
+also possible and often advisable (see `README.Fedora`).
 
 ## 3. Run the installer
 Open the configured RackTables URL and you will be prompted to configure
