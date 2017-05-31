@@ -2971,20 +2971,7 @@ function mkA ($text, $nextpage, $bypass = NULL, $nexttab = NULL, $attrs = array(
 // make "HREF" HTML attribute
 function makeHref ($params = array())
 {
-	$tmp = array();
-	foreach ($params as $key => $value)
-	{
-		if (is_array ($value))
-			$key .= "[]";
-		else
-			$value = array ($value);
-		if (!count ($value))
-			$tmp[] = urlencode ($key) . '=';
-		else
-			foreach ($value as $sub_value)
-				$tmp[] = urlencode ($key) . '=' . urlencode ($sub_value);
-	}
-	return 'index.php?' . implode ('&', $tmp);
+	return 'index.php?' . http_build_query ($params);
 }
 
 function makePageParams ($params = array())
