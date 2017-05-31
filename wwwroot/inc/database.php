@@ -4131,6 +4131,8 @@ function generateEntityAutoTags ($cell)
 				$ret[] = array ('tag' => '$cn_' . $cell['name']);
 			if ($cell['rack_id'] == '' && $cell['container_id'] == '')
 				$ret[] = array ('tag' => '$unmounted');
+			if($cell['has_problems'] == 'yes')
+				$ret[] = array ('tag' => '$has_problems');
 			if (!$cell['nports'])
 				$ret[] = array ('tag' => '$portless');
 			if ($cell['asset_no'] == '')
