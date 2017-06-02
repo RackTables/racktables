@@ -1114,19 +1114,19 @@ function printTagsPicker ($preselect=NULL)
 		printf ('(None exist yet, %s?)', mkA ('configure', 'tagtree', NULL, 'edit'));
 		return;
 	}
-	printTagsPickerInput ();
-	printTagsPickerUl ($preselect);
+	printTagsPickerInput ('taglist');
+	printTagsPickerUl ('taglist', $preselect);
 	enableTagsPicker ();
 }
 
-function printTagsPickerInput ($input_name="taglist")
+function printTagsPickerInput ($input_name)
 {
 	# use data-attribute as identifier for tagit
 	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
 	echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
 }
 
-function printTagsPickerUl ($preselect=NULL, $input_name="taglist")
+function printTagsPickerUl ($input_name, $preselect = NULL)
 {
 	global $target_given_tags;
 	if ($preselect === NULL)
