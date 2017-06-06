@@ -3891,6 +3891,8 @@ function convertPDOException ($e)
 	case 'HY000-1205':
 		$text = 'lock wait timeout';
 		break;
+	case '42000-1142':
+		return new RTDBTableAccessDenied ($e->getMessage());
 	default:
 		return $e;
 	}

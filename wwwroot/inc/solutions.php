@@ -139,8 +139,10 @@ function createTrueColorOrThrow ($context, $width, $height)
 	return $img;
 }
 
-# Generate a complete HTTP response for a 1:1 minirack image, use and update
-# SQL cache where appropriate.
+// Generate a complete HTTP response for a 1:1 minirack image, use and update
+// SQL cache where appropriate. Suppress SQL cache update failures caused by
+// insufficient database privileges as that likely means a connection that is
+// read-only on purpose.
 function dispatchMiniRackThumbRequest ($rack_id)
 {
 	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
@@ -154,11 +156,18 @@ function dispatchMiniRackThumbRequest ($rack_id)
 	$capture = ob_get_clean();
 	header ('Content-Type: image/png');
 	echo $capture;
-	usePreparedExecuteBlade
-	(
-		'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
-		array ($rack_id, base64_encode ($capture))
-	);
+	try
+	{
+		usePreparedExecuteBlade
+		(
+			'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
+			array ($rack_id, base64_encode ($capture))
+		);
+	}
+	catch (RTDBTableAccessDenied $e)
+	{
+		// keep going
+	}
 }
 
 # Generate a binary PNG image for a rack contents.

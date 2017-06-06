@@ -220,6 +220,19 @@ class RTDatabaseError extends RackTablesError
 	}
 }
 
+// This specifically means the error condition that happens when the database user
+// does not have the privileges to execute the query. The code that catches this
+// exception class has to interpret what it actually means based on the query it
+// was trying to execute. If not specifically expected, the exception will end up
+// in the same catch blocks as RTDatabaseError.
+class RTDBTableAccessDenied extends RTDatabaseError
+{
+	public function dispatch()
+	{
+		RackTablesError::genHTMLPage ('Database table access denied', '<h2>Database table access denied</h2><br>' . $this->message);
+	}
+};
+
 // gateway failure is a common case of a "soft" error, some functions do catch this
 class RTGatewayError extends RackTablesError
 {
