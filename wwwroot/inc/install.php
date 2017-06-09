@@ -501,7 +501,7 @@ function get_pseudo_file ($name)
 
 		$query[] = "CREATE TABLE `Attribute` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `type` enum('string','uint','float','dict','date') default NULL,
+  `type` enum('string','text','uint','float','dict','date') default NULL,
   `name` char(64) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
@@ -526,6 +526,7 @@ function get_pseudo_file ($name)
   `object_tid` int(10) unsigned NOT NULL default '0',
   `attr_id` int(10) unsigned NOT NULL,
   `string_value` char(255) default NULL,
+  `text_value` text,
   `uint_value` int(10) unsigned default NULL,
   `float_value` float default NULL,
   PRIMARY KEY (`object_id`,`attr_id`),

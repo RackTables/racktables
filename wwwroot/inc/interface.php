@@ -66,6 +66,7 @@ $localreports = array();
 $attrtypes = array
 (
 	'uint' => '[U] unsigned integer',
+        'text' => '[R] text',
 	'float' => '[F] floating point',
 	'string' => '[S] string',
 	'dict' => '[D] dictionary record',
@@ -768,6 +769,8 @@ function renderEditRowForm ($row_id)
 			case 'string':
 				echo "<input type=text name=${i}_value value='${record['value']}'>";
 				break;
+			case 'text':
+				echo "<textarea rows=5 cols=42 name=${i}_value>${record['value']}</textarea>";
 			case 'dict':
 				$chapter = readChapter ($record['chapter_id'], 'o');
 				$chapter[0] = '-- NOT SET --';
@@ -1141,6 +1144,9 @@ function renderEditObjectForm()
 				case 'string':
 					echo "<input type=text name=${i}_value value='${record['value']}'>";
 					break;
+				case 'text':
+                                        echo "<textarea rows=5 cols=42 name=${i}_value>${record['value']}</textarea>";
+                                        break;
 				case 'dict':
 					$chapter = readChapter ($record['chapter_id'], 'o');
 					$chapter[0] = '-- NOT SET --';
@@ -1230,6 +1236,9 @@ function renderEditRackForm ($rack_id)
 			case 'float':
 			case 'string':
 				echo "<input type=text name=${i}_value value='${record['value']}'>";
+				break;
+			case 'text':
+				echo "<textarea name=${i}_value rows=5 cols=42>${record['value']}</textarea>";
 				break;
 			case 'dict':
 				$chapter = readChapter ($record['chapter_id'], 'o');
@@ -4061,6 +4070,9 @@ function renderEditLocationForm ($location_id)
 			case 'float':
 			case 'string':
 				echo "<input type=text name=${i}_value value='${record['value']}'>";
+				break;
+			case 'text':
+				echo "<textarea rows=5 cols=42 name=${i}_value>${record['value']}</textarea>";
 				break;
 			case 'dict':
 				$chapter = readChapter ($record['chapter_id'], 'o');
