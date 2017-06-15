@@ -2104,7 +2104,8 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$whereexpr4 = '(';
 	$whereexpr5a = '(';
 	$whereexpr5b = '(';
-	$whereexpr6 = '(';
+	$whereexpr6a = '(';
+	$whereexpr6b = '(';
 	$qparams = array();
 	$qparams_bin = array();
 	foreach ($pairlist as $tmp)
@@ -2116,7 +2117,8 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		$whereexpr4 .= $or . "rsip between ? and ?";
 		$whereexpr5a .= $or . "remoteip between ? and ?";
 		$whereexpr5b .= $or . "localip between ? and ?";
-		$whereexpr6 .= $or . "l.ip between ? and ?";
+		$whereexpr6a .= $or . "ip between ? and ?";
+		$whereexpr6b .= $or . "l.ip between ? and ?";
 		$or = ' or ';
 		$qparams[] = ip4_bin2db ($tmp['first']);
 		$qparams[] = ip4_bin2db ($tmp['last']);
@@ -2130,7 +2132,8 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$whereexpr4 .= ')';
 	$whereexpr5a .= ')';
 	$whereexpr5b .= ')';
-	$whereexpr6 .= ')';
+	$whereexpr6a .= ')';
+	$whereexpr6b .= ')';
 
 	// 1. collect labels and reservations
 	if ($filter_flags & IPSCAN_DO_ADDR)
@@ -2279,8 +2282,8 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_LOG)
 	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv4Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv4Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
-	$result = usePreparedSelectBlade ($query, $qparams);
+		" (SELECT MAX(id) as id FROM IPv4Log WHERE ${whereexpr6a} GROUP BY ip) v USING (id) WHERE ${whereexpr6b}";
+	$result = usePreparedSelectBlade ($query, array_merge ($qparams, $qparams));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = ip4_int2bin ($row['ip']);
@@ -2318,7 +2321,8 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$whereexpr3a = '(';
 	$whereexpr3b = '(';
 	$whereexpr4 = '(';
-	$whereexpr6 = '(';
+	$whereexpr6a = '(';
+	$whereexpr6b = '(';
 	$qparams = array();
 	foreach ($pairlist as $tmp)
 	{
@@ -2327,7 +2331,8 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		$whereexpr3a .= $or . "vip between ? and ?";
 		$whereexpr3b .= $or . "vip between ? and ?";
 		$whereexpr4 .= $or . "rsip between ? and ?";
-		$whereexpr6 .= $or . "l.ip between ? and ?";
+		$whereexpr6a .= $or . "ip between ? and ?";
+		$whereexpr6b .= $or . "l.ip between ? and ?";
 		$or = ' or ';
 		$qparams[] = $tmp['first'];
 		$qparams[] = $tmp['last'];
@@ -2337,7 +2342,8 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	$whereexpr3a .= ')';
 	$whereexpr3b .= ')';
 	$whereexpr4 .= ')';
-	$whereexpr6 .= ')';
+	$whereexpr6a .= ')';
+	$whereexpr6b .= ')';
 
 	// 1. collect labels and reservations
 	if ($filter_flags & IPSCAN_DO_ADDR)
@@ -2430,8 +2436,8 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_LOG)
 	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv6Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv6Log GROUP BY ip) v USING (id) WHERE ${whereexpr6}";
-	$result = usePreparedSelectBlade ($query, $qparams);
+		" (SELECT MAX(id) as id FROM IPv6Log WHERE ${whereexpr6a} GROUP BY ip) v USING (id) WHERE ${whereexpr6b}";
+	$result = usePreparedSelectBlade ($query, array_merge ($qparams, $qparams));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
 		$ip_bin = $row['ip'];
