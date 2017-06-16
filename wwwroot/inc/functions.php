@@ -301,6 +301,10 @@ function genericAssertion ($argname, $argtype)
 		return assertStringArg ($argname);
 	case 'string0':
 		return assertStringArg ($argname, TRUE);
+	case 'text':
+		return assertStringArg ($argname);
+	case 'text0':
+		return assertStringArg ($argname, TRUE);
 	case 'uint':
 		return assertUIntArg ($argname);
 	case 'uint0':
@@ -371,7 +375,7 @@ function genericAssertion ($argname, $argtype)
 		return $argvalue;
 	case 'enum/attr_type':
 		assertStringArg ($argname);
-		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'dict','date')))
+		if (!in_array ($sic[$argname], array ('uint', 'float', 'string', 'text', 'dict','date')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
 	case 'enum/vlan_type':

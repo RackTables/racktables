@@ -1226,6 +1226,8 @@ ENDOFTRIGGER;
 			break;
 		// FIXME: add remaining 0.20.x sections here after respective releases come out
 		case '0.21.0':
+			$query[] = "ALTER TABLE Attribute CHANGE type type ENUM('string','text','uint','float','dict','date') NULL DEFAULT NULL";
+			$query[] = "ALTER TABLE AttributeValue ADD COLUMN `text_value` text AFTER `string_value`";
 			$query[] = "UPDATE Port SET label = NULL WHERE label = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
