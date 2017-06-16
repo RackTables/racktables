@@ -181,7 +181,7 @@ class ERetryNeeded extends RackTablesError
 class InvalidArgException extends RackTablesError
 {
 	// derive an instance of InvalidRequestArgException
-	function newIRAE ($argname = NULL)
+	public function newIRAE ($argname = NULL)
 	{
 		if ($argname === NULL)
 			return new InvalidRequestArgException ($this->name, $this->value, $this->reason);
