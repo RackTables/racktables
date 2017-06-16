@@ -2595,6 +2595,7 @@ $dictionary = array
 	2704 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1009-7G-1C-1S+'),
 	2705 => array ('chapter_id' => 13, 'dict_value' => '[[OpenBSD%GSKIP%OpenBSD 6.1 | http://www.openbsd.org/61.html]]'),
 	2706 => array ('chapter_id' => 12, 'dict_value' => 'Huawei%GPASS%CE8850-32CQ-EI'),
+	2707 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2016'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
