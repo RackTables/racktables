@@ -2776,26 +2776,27 @@ function getIPv4PrefixSearchResult ($terms)
 			'ip'
 		);
 		foreach ($tmp as $row)
-		{
 			$ret[$row['id']] = spotEntity ('ipv4net', $row['id']);
-		}
 	}
 	return $ret;
 }
 
 function getIPv6PrefixSearchResult ($terms)
 {
-	$byname = getSearchResultByField
-	(
-		'IPv6Network',
-		array ('id'),
-		'name',
-		$terms,
-		'ip'
-	);
 	$ret = array();
-	foreach ($byname as $row)
-		$ret[$row['id']] = spotEntity ('ipv6net', $row['id']);
+	foreach (array ('name', 'comment') as $column)
+	{
+		$tmp = getSearchResultByField
+		(
+			'IPv6Network',
+			array ('id'),
+			$column,
+			$terms,
+			'ip'
+		);
+		foreach ($tmp as $row)
+			$ret[$row['id']] = spotEntity ('ipv6net', $row['id']);
+	}
 	return $ret;
 }
 
