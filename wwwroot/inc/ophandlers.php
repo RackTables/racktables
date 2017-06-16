@@ -1398,23 +1398,40 @@ function updateObjectAttributes ($object_id)
 			continue;
 		}
 
-		// The value could be uint/float, but we don't know ATM. Let SQL
-		// server check this and complain.
-		if ('date' == $oldvalues[$attr_id]['type'])
-			$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
-
-		switch ($oldvalues[$attr_id]['type'])
+		try
 		{
+			switch ($oldvalues[$attr_id]['type'])
+			{
 			case 'uint':
+				genericAssertion ("${i}_value", 'uint0');
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'float':
+				genericAssertion ("${i}_value", 'decimal0');
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'string':
+				// already checked above
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'date':
+				$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'dict':
+				// Not 'uint0' as 0 is handled above.
+				genericAssertion ("${i}_value", 'uint');
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
+				throw new RackTablesError ('Unexpected attribute type', RackTablesError::INTERNAL);
+			}
+		}
+		catch (InvalidRequestArgException $irae)
+		{
+			// The submitted form may include a number of changes hence the error message
+			// must use same term as the form label (before the conversion it is the input name).
+			throw new InvalidRequestArgException ($oldvalues[$attr_id]['name'], $irae->getValue(), $irae->getReason());
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;

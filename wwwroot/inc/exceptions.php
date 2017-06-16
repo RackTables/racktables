@@ -198,6 +198,14 @@ class InvalidArgException extends RackTablesError
 		$this->value = $value;
 		$this->reason = $reason;
 	}
+	public function getValue()
+	{
+		return $this->value;
+	}
+	public function getReason()
+	{
+		return $this->reason;
+	}
 }
 
 // this simplifies construction and helps in catching "soft"
