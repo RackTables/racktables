@@ -1374,7 +1374,7 @@ function updateObjectAttributes ($object_id)
 {
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
-	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
+	$num_attrs = array_key_exists ('num_attrs', $_REQUEST) ? genericAssertion ('num_attrs', 'uint0') : 0;
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
 		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
