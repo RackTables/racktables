@@ -2764,17 +2764,22 @@ function unbindIPv6FromObject ($ip_bin, $object_id)
 
 function getIPv4PrefixSearchResult ($terms)
 {
-	$byname = getSearchResultByField
-	(
-		'IPv4Network',
-		array ('id'),
-		'name',
-		$terms,
-		'ip'
-	);
 	$ret = array();
-	foreach ($byname as $row)
-		$ret[$row['id']] = spotEntity ('ipv4net', $row['id']);
+	foreach (array ('name', 'comment') as $column)
+	{
+		$tmp = getSearchResultByField
+		(
+			'IPv4Network',
+			array ('id'),
+			$column,
+			$terms,
+			'ip'
+		);
+		foreach ($tmp as $row)
+		{
+			$ret[$row['id']] = spotEntity ('ipv4net', $row['id']);
+		}
+	}
 	return $ret;
 }
 
