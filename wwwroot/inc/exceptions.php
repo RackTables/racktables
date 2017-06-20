@@ -376,11 +376,11 @@ function printPDOException ($e)
 	header ('Content-Type: text/html; charset=UTF-8');
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' . "\n";
-	echo "<head><title> PDO Exception </title>\n";
+	echo "<head><title>PDOException</title>\n";
 	echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=css/pi.css' />\n";
 	echo "<link rel=icon href='?module=chrome&uri=pix/favicon.ico' type='image/x-icon' />\n";
-	echo '</head> <body>';
-	echo '<h2>Pdo exception: ' . get_class ($e) . '</h2><code>' . $e->getMessage() . '</code> (<code>' . $e->getCode() . '</code>)';
+	echo '</head><body>';
+	echo '<h2>PDOException</h2><code>' . $e->getMessage() . '</code> (<code>' . $e->getCode() . '</code>)';
 	echo '<p>at file <code>' . $e->getFile() . '</code>, line <code>' . $e->getLine() . '</code></p><pre>';
 	echo stringTrace ($e->getTrace());
 	echo '</pre>';
