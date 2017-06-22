@@ -690,7 +690,7 @@ function renderRow ($row_id)
 			$record['value'] != '' &&
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
-			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record, 1561);
 
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
@@ -1313,8 +1313,13 @@ function renderRackInfoPortlet ($rackData)
 	// Display populated attributes, but skip 'height' since it's already displayed above
 	// and skip 'sort_order' because it's modified using AJAX
 	foreach (getAttrValuesSorted ($rackData['id']) as $record)
-		if ($record['id'] != 27 && $record['id'] != 29 && $record['value'] != '')
-			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+		if
+		(
+			$record['id'] != 27 && $record['id'] != 29 &&
+			$record['value'] != '' &&
+			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
+		)
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record, 1560);
 	$summary['% used'] = getProgressBar (getRSUforRack ($rackData));
 	$summary['Objects'] = count ($rackData['mountedObjects']);
 	$summary['tags'] = '';
@@ -1467,7 +1472,7 @@ function renderObject ($object_id)
 			$record['value'] != '' &&
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
-			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record, $info['objtype_id']);
 	$summary[] = array (getOutputOf ('printTagTRs',
 		$info,
 		makeHref
@@ -3691,7 +3696,15 @@ function renderSearchResults ($terms, $summary)
 						{
 							$record = $aval[$attr_id];
 							echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
-							echo "<td class=sticker>" . formatAttributeValue ($record) . "</td></tr>";
+							if ($attr_id == 3) // FQDN
+							{
+								// Switch context for the RackCode in MGMT_PROTOS to work.
+								$saved_ctx = getContext();
+								fixContext ($object);
+							}
+							echo '<td class=sticker>' . formatAttributeValue ($record, $object['objtype_id']) . '</td></tr>';
+							if ($attr_id == 3)
+								restoreContext ($saved_ctx);
 						}
 						echo '</table>';
 					}
@@ -3989,7 +4002,7 @@ function renderLocationPage ($location_id)
 			$record['value'] != '' &&
 			permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $record['id'])))
 		)
-			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record);
+			$summary['{sticker}' . $record['name']] = formatAttributeValue ($record, 1562);
 	$summary['tags'] = '';
 	renderEntitySummary ($locationData, 'Summary', $summary);
 	if ($locationData['comment'] != '')
@@ -5928,13 +5941,21 @@ function formatIfTypeVariants ($variants, $select_name)
 	return getSelect ($sorted_select, array('name' => $select_name));
 }
 
-function formatAttributeValue ($record)
+function formatAttributeValue ($record, $objtype_id)
 {
-	if ('date' == $record['type'])
-		return datetimestrFromTimestamp ($record['value']);
-
-	if (! isset ($record['key'])) // if record is a dictionary value, generate href with autotag in cfe
+	switch ($record['type'])
 	{
+	case 'uint':
+	case 'float':
+		return $record['value'];
+	case 'date':
+		return sprintf
+		(
+			'<span title="%s">%s</span>',
+			datetimeFormatHint (getConfigVar ('DATETIME_FORMAT')),
+			datetimestrFromTimestamp ($record['value'])
+		);
+	case 'string':
 		if ($record['id'] == 3) // FQDN attribute
 			foreach (getMgmtProtosConfig() as $proto => $filter)
 				try
@@ -5948,25 +5969,48 @@ function formatAttributeValue ($record)
 				catch (RackTablesError $e)
 				{
 					// syntax error in $filter
+					// FIXME: In the current implementation the exception class is neither RackCodeError
+					// nor RCParserError, which is likely wrong. In the specific case of a syntax error
+					// it would be helpful to display its text in the warning.
+					showWarning ("could not parse '${filter}' for management protocol '${proto}' in MGMT_PROTOS");
 					continue;
 				}
-		return isset ($record['href']) ? "<a href=\"".$record['href']."\">${record['a_value']}</a>" : $record['a_value'];
-	}
-
-	$href = makeHref
-	(
-		array
+		return array_key_exists ('href', $record) ?
+			"<a href='${record['href']}'>${record['a_value']}</a>" :
+			$record['a_value'];
+	case 'dict':
+		$map = array
 		(
-			'page'=>'depot',
-			'tab'=>'default',
-			'andor' => 'and',
-			'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
-		)
-	);
-	$result = "<a href='$href'>" . $record['a_value'] . "</a>";
-	if (isset ($record['href']))
-		$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor&apos;s info page') . "</a>";
-	return $result;
+			// The rackspace view features the tag filter but a dictionary-based autotag would
+			// never match there because the current code generates {$attr_X_Y} only for objects.
+			// As soon as racks have these autotags too, changing the value below to 'rackspace'
+			// will make filtering work as expected.
+			1560 => NULL,
+			// The user interface at the moment does not implement the tag filter for rows or
+			// locations, also these object types don't have dictionary-based autotags.
+			1561 => NULL,
+			1562 => NULL,
+		);
+		if (NULL === $filter_pageno = array_fetch ($map, $objtype_id, 'depot'))
+			$result = $record['a_value'];
+		else
+		{
+			$filter_args = array
+			(
+				'page' => $filter_pageno,
+				'tab' => 'default',
+				'andor' => 'and',
+				'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
+			);
+			$filter_url = makeHref ($filter_args);
+			$result = "<a href='${filter_url}'>${record['a_value']}</a>";
+		}
+		if (array_key_exists ('href', $record))
+			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor\'s info page') . "</a>";
+		return $result;
+	default:
+		throw new InvalidArgException ('record[type]', $record['type']);
+	}
 }
 
 function addAutoScrollScript ($anchor_name)
