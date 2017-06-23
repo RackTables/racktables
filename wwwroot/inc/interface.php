@@ -1485,7 +1485,7 @@ function renderObject ($object_id)
 	{
 		startPortlet ('IP addresses');
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>\n";
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+		if ('yes' == $ext_ipv4_view = getConfigVar ('EXT_IPV4_VIEW'))
 			echo "<tr class=tdleft><th>OS interface</th><th>IP address</th><th>network</th><th>routed by</th><th>peers</th></tr>\n";
 		else
 			echo "<tr class=tdleft><th>OS interface</th><th>IP address</th><th>peers</th></tr>\n";
@@ -1513,7 +1513,7 @@ function renderObject ($object_id)
 					$is_first_row = FALSE;
 				}
 				echo $rendered_alloc['td_ip'];
-				if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+				if ($ext_ipv4_view == 'yes')
 				{
 					echo $rendered_alloc['td_network'];
 					echo $rendered_alloc['td_routed_by'];
@@ -1844,6 +1844,7 @@ JSEND
 
 	$alloc_list = ''; // most of the output is stored here
 	$used_alloc_types = array();
+	$ext_ipv4_view = getConfigVar ('EXT_IPV4_VIEW');
 	foreach (getObjectIPAllocations ($object_id) as $alloc)
 	{
 		if (! isset ($used_alloc_types[$alloc['type']]))
@@ -1857,7 +1858,7 @@ JSEND
 		$alloc_list .= "<td>" . getOpLink (array ('op' => 'del', 'ip' => $alloc['addrinfo']['ip']), '', 'delete', 'Delete this IP address') . "</td>";
 		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10>" . $rendered_alloc['td_name_suffix'] . "</td>";
 		$alloc_list .= $rendered_alloc['td_ip'];
-		if (getConfigVar ('EXT_IPV4_VIEW') == 'yes')
+		if ($ext_ipv4_view == 'yes')
 		{
 			$alloc_list .= $rendered_alloc['td_network'];
 			$alloc_list .= $rendered_alloc['td_routed_by'];
