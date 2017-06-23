@@ -4,6 +4,7 @@
 	update: highlight RackCode syntax in the Permissions viewer too
 	update: refine delivery of rack thumb images
 	bugfix: put dictionary-based attributes formatting right
+	bugfix: date attributes now can be set for racks, rows and locations
 0.20.14
 	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
 0.20.13 2017-05-12

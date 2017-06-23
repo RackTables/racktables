@@ -729,6 +729,61 @@ function renderRow ($row_id)
 	echo "</td></tr></table>";
 }
 
+function renderEditAttributeTRs ($update_op, $values, $objtype_id, $skip_ids = array())
+{
+	$datehint = ' (' . datetimeFormatHint (getConfigVar ('DATETIME_FORMAT')) . ')';
+	$i = 0;
+	foreach ($values as $record)
+	{
+		$annex = array (array ('tag' => '$attr_' . $record['id']));
+		$can_view = permitted (NULL, NULL, NULL, $annex);
+		if (in_array ($record['id'], $skip_ids) || ! $can_view)
+			continue;
+		$can_update = permitted (NULL, NULL, $update_op, $annex);
+		$can_clear = permitted (NULL, NULL, 'clearSticker', $annex);
+		// Ability to update ultimately includes ability to set to an empty value,
+		// i.e. to clear, but making the check this way in the ophandler is complicated,
+		// so let's keep it consistently imperfect for the time being and maybe
+		// fix it later.
+		$clear_html = ($record['value'] != '' && ($can_clear /* || $can_update*/)) ?
+			getOpLink (array ('op' => 'clearSticker', 'attr_id' => $record['id']), '', 'clear', 'Clear value', 'need-confirmation') :
+			'&nbsp;';
+		echo "<tr><td>${clear_html}</td>";
+		echo '<th class=sticker>' . $record['name'] . ($record['type'] == 'date' ? $datehint : '') . ':</th>';
+		echo '<td class=tdleft>';
+		switch ($record['type'])
+		{
+			case 'uint':
+			case 'float':
+			case 'string':
+				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
+				echo "<input type=text ${ro_or_rw} value='${record['value']}'>";
+				break;
+			case 'date':
+				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
+				$date_value = $record['value'] ? datetimestrFromTimestamp ($record['value']) : '';
+				echo "<input type=text ${ro_or_rw} value='${date_value}'>";
+				break;
+			case 'dict':
+				$ro_or_rw = $can_update ? array ('name' => "${i}_value") : array ('name' => "${i}_value", 'disabled' => 1);
+				$chapter = readChapter ($record['chapter_id'], 'o');
+				$chapter[0] = '-- NOT SET --';
+				$chapter = cookOptgroups ($chapter, $objtype_id, $record['key']);
+				printNiftySelect ($chapter, $ro_or_rw, $record['key']);
+				break;
+			default:
+				throw new InvalidArgException ('record[type]', $record['type']);
+		} // switch
+		if ($can_update)
+		{
+			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+			$i++;
+		}
+		echo '</td></tr>';
+	} // foreach
+	echo "<input type=hidden name=num_attrs value=${i}>";
+}
+
 function renderEditRowForm ($row_id)
 {
 	$row = getRowInfo ($row_id);
@@ -745,39 +800,7 @@ function renderEditRowForm ($row_id)
 	printSelect ($locations, array ('name' => 'location_id'), $row['location_id']);
 	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${row['name']}'></td></tr>\n";
-
-	// optional attributes
-	$values = getAttrValuesSorted ($row_id);
-	$num_attrs = count ($values);
-	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
-	$i = 0;
-	foreach ($values as $record)
-	{
-		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-		echo '<tr><td>';
-		if ($record['value'] != '')
-			echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
-        else
-			echo '&nbsp;';
-		echo '</td>';
-		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
-		switch ($record['type'])
-		{
-			case 'uint':
-			case 'float':
-			case 'string':
-				echo "<input type=text name=${i}_value value='${record['value']}'>";
-				break;
-			case 'dict':
-				$chapter = readChapter ($record['chapter_id'], 'o');
-				$chapter[0] = '-- NOT SET --';
-				$chapter = cookOptgroups ($chapter, 1562, $record['key']);
-				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
-				break;
-		}
-		echo "</td></tr>\n";
-		$i++;
-	}
+	renderEditAttributeTRs ('updateRow', getAttrValuesSorted ($row_id), 1561);
 	if ($row['count'] == 0)
 	{
 		echo '<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>';
@@ -1111,52 +1134,7 @@ function renderEditObjectForm()
 		echo getPopupLink ('objlist', array(), 'findlink', 'attach', 'Select a container');
 		echo "</td></tr>\n";
 	}
-	// optional attributes
-	$i = 0;
-	$values = getAttrValuesSorted ($object_id);
-	if (count($values) > 0)
-	{
-		foreach ($values as $record)
-		{
-			if (! permitted (NULL, NULL, NULL, array (
-				array ('tag' => '$attr_' . $record['id']),
-				array ('tag' => '$any_op'),
-			)))
-				continue;
-			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-			echo '<tr><td>';
-			if ($record['value'] != '')
-				echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
-			else
-				echo '&nbsp;';
-			echo '</td>';
-			echo "<th class=sticker>${record['name']}";
-			if ($record['type'] == 'date')
-				echo ' (' . datetimeFormatHint (getConfigVar ('DATETIME_FORMAT')) . ')';
-			echo ':</th><td class=tdleft>';
-			switch ($record['type'])
-			{
-				case 'uint':
-				case 'float':
-				case 'string':
-					echo "<input type=text name=${i}_value value='${record['value']}'>";
-					break;
-				case 'dict':
-					$chapter = readChapter ($record['chapter_id'], 'o');
-					$chapter[0] = '-- NOT SET --';
-					$chapter = cookOptgroups ($chapter, $object['objtype_id'], $record['key']);
-					printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
-					break;
-				case 'date':
-					$date_value = $record['value'] ? datetimestrFromTimestamp ($record['value']) : '';
-					echo "<input type=text name=${i}_value value='${date_value}'>";
-					break;
-			}
-			echo "</td></tr>\n";
-			$i++;
-		}
-	}
-	echo '<input type=hidden name=num_attrs value=' . $i . ">\n";
+	renderEditAttributeTRs ('update', getAttrValuesSorted ($object_id), $object['objtype_id']);
 	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
@@ -1204,43 +1182,7 @@ function renderEditRackForm ($rack_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	// optional attributes
-	$values = getAttrValuesSorted ($rack_id);
-	$num_attrs = count($values);
-	$num_attrs = $num_attrs-2; // subtract for the 'height' and 'sort_order' attributes
-	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
-	$i = 0;
-	foreach ($values as $record)
-	{
-		// Skip the 'height' attribute as it's already displayed as a required field
-		// Also skip the 'sort_order' attribute
-		if ($record['id'] == 27 || $record['id'] == 29)
-			continue;
-		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-		echo '<tr><td>';
-		if ($record['value'] != '')
-			echo getOpLink (array('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
-		else
-			echo '&nbsp;';
-		echo '</td>';
-		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
-		switch ($record['type'])
-		{
-			case 'uint':
-			case 'float':
-			case 'string':
-				echo "<input type=text name=${i}_value value='${record['value']}'>";
-				break;
-			case 'dict':
-				$chapter = readChapter ($record['chapter_id'], 'o');
-				$chapter[0] = '-- NOT SET --';
-				$chapter = cookOptgroups ($chapter, 1560, $record['key']);
-				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
-				break;
-		}
-		echo "</td></tr>\n";
-		$i++;
-	}
+	renderEditAttributeTRs ('updateRack', getAttrValuesSorted ($rack_id), 1560, array (27, 29));
 	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=has_problems";
 	if ($rack['has_problems'] == 'yes')
 		echo ' checked';
@@ -4053,38 +3995,7 @@ function renderEditLocationForm ($location_id)
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	// optional attributes
-	$values = getAttrValuesSorted ($location_id);
-	$num_attrs = count($values);
-	echo "<input type=hidden name=num_attrs value=${num_attrs}>\n";
-	$i = 0;
-	foreach ($values as $record)
-	{
-		echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
-		echo '<tr><td>';
-		if ($record['value'] != '')
-			echo getOpLink (array ('op'=>'clearSticker', 'attr_id'=>$record['id']), '', 'clear', 'Clear value', 'need-confirmation');
-		else
-			echo '&nbsp;';
-		echo '</td>';
-		echo "<th class=sticker>${record['name']}:</th><td class=tdleft>";
-		switch ($record['type'])
-		{
-			case 'uint':
-			case 'float':
-			case 'string':
-				echo "<input type=text name=${i}_value value='${record['value']}'>";
-				break;
-			case 'dict':
-				$chapter = readChapter ($record['chapter_id'], 'o');
-				$chapter[0] = '-- NOT SET --';
-				$chapter = cookOptgroups ($chapter, 1562, $record['key']);
-				printNiftySelect ($chapter, array ('name' => "${i}_value"), $record['key']);
-				break;
-		}
-		echo "</td></tr>\n";
-		$i++;
-	}
+	renderEditAttributeTRs ('updateLocation', getAttrValuesSorted ($location_id), 1562);
 	echo '<tr>' .
 		'<td>&nbsp;</td>' .
 		'<th class=tdright><label for=has_problems>Has problems:</label></th>' .

@@ -1374,7 +1374,7 @@ function updateObjectAttributes ($object_id)
 {
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
-	$num_attrs = array_key_exists ('num_attrs', $_REQUEST) ? genericAssertion ('num_attrs', 'uint0') : 0;
+	$num_attrs = genericAssertion ('num_attrs', 'uint0');
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
 		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
@@ -1382,10 +1382,10 @@ function updateObjectAttributes ($object_id)
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
 		$value = genericAssertion ("${i}_value", 'string0');
 
-		// If the object is a rack, skip certain attributes as they are handled elsewhere
-		// (height, sort_order)
+		// If the object is a rack, certain attributes (height, sort_order) never normally
+		// appear in this subset of the request arguments as they are processed elsewhere.
 		if ($type_id == 1560 && ($attr_id == 27 || $attr_id == 29))
-			continue;
+			throw new RackTablesError ('unexpected special meaning attr_id', RackTablesError::INTERNAL);
 
 		// Delete attribute and move on, when the field is empty or if the field
 		// type is a dictionary and it is the "--NOT SET--" value of 0.
