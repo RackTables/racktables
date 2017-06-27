@@ -1362,7 +1362,7 @@ function renderObject ($object_id)
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
-	// left column with uknown number of portlets
+	// A mandatory left column with varying number of portlets.
 	echo "<tr><td class=pcleft>";
 
 	// display summary portlet
@@ -1586,19 +1586,22 @@ function renderObject ($object_id)
 	renderSLBTriplets ($info);
 	echo "</td>\n";
 
-	// After left column we have (surprise!) right column with rackspace portlet only.
-	echo "<td class=pcright>";
-	if (!in_array($info['objtype_id'], $virtual_obj_types))
+	// A conditional right column with the rackspace portlet only.
+	if
+	(
+		! in_array ($info['objtype_id'], $virtual_obj_types) &&
+		count ($rack_ids = getResidentRacksData ($object_id, FALSE))
+	)
 	{
-		// rackspace portlet
+		echo '<td class=pcright>';
 		startPortlet ('rackspace allocation');
-		foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+		foreach ($rack_ids as $rack_id)
 			renderRack ($rack_id, $object_id);
 		echo '<br>';
 		finishPortlet();
+		echo '</td>';
 	}
-	echo "</td></tr>";
-	echo "</table>\n";
+	echo "<tr></table>\n";
 }
 
 function renderRackMultiSelect ($sname, $racks, $selected)
