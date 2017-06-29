@@ -32,6 +32,7 @@ try:
 	from ucsmsdk.mometa.compute.ComputeRackUnit import ComputeRackUnit
 except Exception, err:
 	sys.stderr.write('UCS Python SDK is missing %s (Path: %s)\n' % (str(err), sys.path))
+	sys.stderr.write('<P>Available at https://communities.cisco.com/docs/DOC-64378<P>\n')
 	sys.exit(2)
 
 loggedin = 0
