@@ -5834,7 +5834,7 @@ function array_sub ($a, $b)
 // returns the requested element value or the default value if not found
 function array_fetch ($array, $key, $default_value)
 {
-	return array_key_exists ($key, $array) ? $array[$key] : $default_value;
+	return isset ($array[$key]) ? $array[$key] : $default_value;
 }
 
 // Registers additional ophandler on page-tab-opname triplet.
