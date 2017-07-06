@@ -598,26 +598,20 @@ function markAllSpans (&$rackData)
 // descending) and mark the best (if any).
 function markBestSpan (&$rackData, $i)
 {
-	global $template, $templateWidth;
-	for ($j = 0; $j < 6; $j++)
+	global $templateWidth;
+	$height = array();
+	$square = array();
+	foreach ($templateWidth as $j => $width)
 	{
 		$height[$j] = rectHeight ($rackData, $i, $j);
-		$square[$j] = $height[$j] * $templateWidth[$j];
+		$square[$j] = $height[$j] * $width;
 	}
 	// find the widest rectangle of those with maximal height
-	$maxsquare = max ($square);
-	if (!$maxsquare)
+	if (0 == $maxsquare = max ($square))
 		return FALSE;
-	$best_template_index = 0;
-	for ($j = 0; $j < 6; $j++)
-		if ($square[$j] == $maxsquare)
-		{
-			$best_template_index = $j;
-			$bestheight = $height[$j];
-			break;
-		}
+	$best_template_index = array_search ($maxsquare, $square);
 	// distribute span marks
-	markSpan ($rackData, $i, $bestheight, $best_template_index);
+	markSpan ($rackData, $i, $height[$best_template_index], $best_template_index);
 	return TRUE;
 }
 
