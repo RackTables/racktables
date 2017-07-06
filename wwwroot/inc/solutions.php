@@ -184,9 +184,9 @@ function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 	$totalheight = 3 + 3 + $rackData['height'] * 2;
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
 	$img = createTrueColorOrThrow ('rack_php_gd_error', $totalwidth, $totalheight);
-	# It was measured, that caching palette in an array is faster, than
-	# calling colorFromHex() multiple times. It matters, when user's
-	# browser is trying to fetch many minirack images in parallel.
+	// It has been benchmarked that caching the palette in an array is faster than just
+	// calling colorFromHex() again and again. The diffierence is visible when user's
+	// browser is trying to fetch many minirack images in parallel.
 	$color = array
 	(
 		'F' => colorFromHex ($img, '8fbfbf'),
