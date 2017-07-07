@@ -393,6 +393,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'translator' => 'nullIfZero'),
 		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
+		array ('url_argname' => 'color', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
 	),
 );
 $opspec_list['tagtree-edit-destroyTag'] = array
@@ -2224,7 +2225,8 @@ function updateTag ()
 			genericAssertion ('tag_id', 'uint'),
 			genericAssertion ('tag_name', 'tag'),
 			genericAssertion ('parent_id', 'uint0'),
-			genericAssertion ('is_assignable', 'enum/yesno')
+			genericAssertion ('is_assignable', 'enum/yesno'),
+			genericAssertion ('color', 'htmlcolor0')
 		);
 	}
 	catch (InvalidArgException $iae)
@@ -3849,6 +3851,20 @@ function updateVLANDomain()
 
 	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
 	showSuccess ("VLAN domain updated successfully");
+}
+
+function destroyTag()
+{
+	global $taglist;
+	$tag_id = genericAssertion ('tag_id', 'uint');
+
+	if (isset ($taglist[$tag_id]) && isset ($taglist[$tag_id]['color']))
+	{
+		// remove all rack thumbnails
+		usePreparedDeleteBlade ('RackThumbnail', array ('1' => '1'));
+	}
+
+	tableHandler();
 }
 
 ?>

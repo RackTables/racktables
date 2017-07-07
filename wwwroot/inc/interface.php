@@ -871,6 +871,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 					$slotClass[$slot] .= 'h';
 				if ($childData['has_problems'] == 'yes')
 					$slotClass[$slot] .= 'w';
+
+				$child = spotEntity ('object', $childData['id']);
+				setEntityColors ($child);
+				$slotClass[$slot] .= getObjectClass ('object', $child, 'background:white;');
+
 			}
 		}
 		natsort($childNames);
@@ -944,6 +949,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	markAllSpans ($rackData);
+	setEntityColors ($rackData);
 	if ($hl_obj_id > 0)
 		highlightObject ($rackData, $hl_obj_id);
 	$neighbors = getRackNeighbors ($rackData['row_id'], $rack_id);
@@ -968,10 +974,21 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			if (isset ($rackData[$i][$locidx]['skipped']))
 				continue;
 			$state = $rackData[$i][$locidx]['state'];
-			echo "<td class='atom state_${state}";
+
+			$class = "atom state_${state}";
+
 			if (isset ($rackData[$i][$locidx]['hl']))
-				echo $rackData[$i][$locidx]['hl'];
-			echo "'";
+				$class .= $rackData[$i][$locidx]['hl'];
+
+			if($state == 'T')
+			{
+				$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
+				setEntityColors ($objectData);
+				$class .= getObjectClass ('object', $objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
+			}
+
+			echo "<td class='${class}'";
+
 			if (isset ($rackData[$i][$locidx]['colspan']))
 				echo ' colspan=' . $rackData[$i][$locidx]['colspan'];
 			if (isset ($rackData[$i][$locidx]['rowspan']))
@@ -1012,8 +1029,13 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			$state = ($zeroUObject['id'] == $hl_obj_id) ? 'Th' : 'T';
 			if ($zeroUObject['has_problems'] == 'yes')
 				$state .= 'w';
-			echo "<tr><td class='atom state_${state}'>";
-			printObjectDetailsForRenderRack($zeroUObject['id']);
+
+			$class = "atom state_${state}";
+			setEntityColors ($zeroUObject);
+			$class .= getObjectClass ('object', $zeroUObject, 'background:white;');
+
+			echo "<tr><td class='${class}'>";
+			printObjectDetailsForRenderRack ($zeroUObject['id']);
 			echo "</td></tr>\n";
 		}
 		echo "</table>\n";
@@ -2333,7 +2355,11 @@ function renderDepot ()
 			foreach ($objects as $obj)
 			{
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
-				echo "<tr class='row_${order} tdleft ${problem}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
+
+				setEntityColors ($obj);
+				$class = getObjectClass ('object', $obj, ($order == 'even' ? 'background:white;' : ''));
+
+				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo '</td>';
@@ -2501,11 +2527,22 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			elseif ($item['symbol'] == 'node-expanded')
 				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}&hl_net=1" : '');
 			$tr_class = '';
+			$extrastyle = '';
 			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
 			{
-				$decor['tdclass'] = ' highlight';
-				$tr_class = $decor['tdclass'];
+				if (isset ($item['colors'][0]))
+					$extrastyle = 'outline: 3px solid #0aff0a;';
+				else
+				{
+					$decor['tdclass'] = ' highlight';
+					$tr_class = $decor['tdclass'];
+				}
+
 			}
+
+			setEntityColors ($item);
+			$tr_class .= getObjectClass ('object', $item, $extrastyle);
+
 			echo "<tr valign=top class=\"$tr_class\">";
 			printIPNetInfoTDs ($item, $decor);
 
@@ -2732,6 +2769,7 @@ function renderIPNetwork ($id)
 	$realm = $pageno; // 'ipv4net', 'ipv6net'
 	$range = spotEntity ($realm, $id);
 	loadIPAddrList ($range);
+	setEntityColors ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
 	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
 	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
@@ -4310,6 +4348,7 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 		'input_class' => $level ? 'tag-cb' : 'tag-cb root',
 		'input_value' => $taginfo['id'],
 		'text_tagname' => $taginfo['tag'],
+		'color' => (isset($taginfo['color']) ? $taginfo['color'] : NULL),
 	);
 	$is_first_time = FALSE;
 	$prepared_inputname = $inputname;
@@ -4329,6 +4368,7 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 		$ret['input_extraattrs'] = 'disabled';
 		$ret['tr_class'] .= (array_key_exists ('kidc', $taginfo) && $taginfo['kidc'] == 0) ? ' trwarning' : ' trnull';
 	}
+
 	if ($refcnt_realm != '' && isset ($taginfo['refcnt'][$refcnt_realm]))
 		$ret['text_refcnt'] = $taginfo['refcnt'][$refcnt_realm];
 	$ret = array ($ret);

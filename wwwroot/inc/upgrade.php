@@ -1228,6 +1228,7 @@ ENDOFTRIGGER;
 		case '0.21.0':
 			$query[] = "UPDATE Port SET label = NULL WHERE label = ''";
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
+			$query[] = "ALTER TABLE TagTree ADD COLUMN color char(6) DEFAULT NULL";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

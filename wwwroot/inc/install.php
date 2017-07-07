@@ -1089,6 +1089,7 @@ function get_pseudo_file ($name)
   `parent_id` int(10) unsigned default NULL,
   `is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
   `tag` char(255) default NULL,
+  `color` char(6) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
