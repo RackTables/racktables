@@ -40,8 +40,8 @@ function checkCachedResponse ($creation_ts, $expire)
 
 function HTTPDateToUnixTime ($string)
 {
-	//Written per RFC 2616 3.3.1 - Full Date
-	//http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
+	// Written per RFC 2616 3.3.1 - Full Date
+	// http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
 	$month_number = array
 	(
 		'Jan' => 1,
@@ -59,9 +59,9 @@ function HTTPDateToUnixTime ($string)
 	);
 
 	$formats = array();
-	# RFC2616 dictates exchanged timestamps to be in GMT TZ, and RFC822
-	# (which RFC1123 relies on) explicitly defines, that "GMT" is equivalent
-	# to "-0000" and "+0000".
+	// RFC2616 dictates exchanged timestamps to be in GMT TZ, and RFC822
+	// (which RFC1123 relies on) explicitly defines that "GMT" is equivalent
+	// to "-0000" and "+0000".
 	$formats['rfc1123'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), (\d{2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
 	$formats['rfc850'] = '/^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday), (\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (?:GMT|[-+]0000)$/';
 	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}| \d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
@@ -95,7 +95,7 @@ function HTTPDateToUnixTime ($string)
 		$year = $matches[7];
 	}
 	else
-		return false;
+		return FALSE;
 	if ($hours > 23 || $minutes > 59 || $seconds > 59 || ! checkdate ($month, $day, $year))
 		return FALSE;
 	return gmmktime ($hours, $minutes, $seconds, $month, $day, $year);
