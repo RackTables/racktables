@@ -639,11 +639,11 @@ function renderRackspaceRowEditor ()
 		echo '</td><td><input type=text name=name></td><td>';
 		printImageHREF ('create', 'Add new row', TRUE);
 		echo '</td><td>&nbsp;';
-		echo '</td></tr></form>';
+		echo '</td><td>&nbsp;</td></tr></form>';
 	}
 	startPortlet ('Rows');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
-	echo "<tr><th>&nbsp;</th><th># Racks</th><th># Devices</th><th>Location</th><th>Name</th><th>&nbsp;</th><th>Row link</th></tr>\n";
+	echo "<tr><th>&nbsp;</th><th># Racks</th><th># Devices</th><th>Location</th><th>Name</th><th>&nbsp;</th><th>&nbsp;</th><th>Row link</th></tr>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ();
 	foreach (listCells ('row') as $row_id => $rowInfo)
@@ -653,16 +653,17 @@ function renderRackspaceRowEditor ()
 		$delete_racks_str = $rc ? " and $rc rack(s)" : '';
 		echo getOpLink (array ('op'=>'deleteRow', 'row_id'=>$row_id), '', 'destroy', 'Delete row'.$delete_racks_str, 'need-confirmation');
 		printOpFormIntro ('updateRow', array ('row_id' => $row_id));
-		echo '</td><td>';
+		echo '</td><td class=tdright>';
 		echo $rc;
-		echo '</td><td>';
+		echo '</td><td class=tdright>';
 		echo getRowMountsCount ($row_id);
 		echo '</td><td>';
 		renderLocationSelectTree ('location_id', $rowInfo['location_id']);
 		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td>";
-		echo "<td>" . mkCellA ($rowInfo) . "</td>";
+		echo '<td>&nbsp;</td>';
+		echo '<td class=tdleft>' . mkCellA ($rowInfo) . '</td>';
 		echo "</tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
@@ -1044,7 +1045,7 @@ JSTXT;
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
 	echo "<tr><th>Drag to change order</th></tr>\n";
-	echo "<tr><td><ul class='uflist' id='sortRacks'>\n";
+	echo "<tr><td class=tdleft><ul class='uflist' id='sortRacks'>\n";
 	foreach (getRacks($row_id) as $rack_id => $rackInfo)
 		echo "<li id=racks_${rack_id}>${rackInfo['name']}</li>\n";
 	echo "</ul></td></tr></table>\n";
