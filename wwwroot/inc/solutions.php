@@ -145,7 +145,7 @@ function createTrueColorOrThrow ($context, $width, $height)
 // read-only on purpose.
 function dispatchMiniRackThumbRequest ($rack_id)
 {
-	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
+	if (NULL !== ($thumbcache = loadRackThumbCache ($rack_id)))
 	{
 		header ('Content-Type: image/png');
 		echo $thumbcache;
@@ -158,11 +158,7 @@ function dispatchMiniRackThumbRequest ($rack_id)
 	echo $capture;
 	try
 	{
-		usePreparedExecuteBlade
-		(
-			'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
-			array ($rack_id, base64_encode ($capture))
-		);
+		saveRackThumbCache ($rack_id, $capture);
 	}
 	catch (RTDBTableAccessDenied $e)
 	{

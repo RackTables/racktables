@@ -4084,14 +4084,27 @@ function loadUserConfigCache ($username)
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'varname');
 }
 
-function loadThumbCache ($rack_id)
+function loadRackThumbCache ($rack_id)
 {
-	$ret = NULL;
 	$result = usePreparedSelectBlade ('SELECT thumb_data FROM RackThumbnail WHERE rack_id = ? AND thumb_data IS NOT NULL', array ($rack_id));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
-	if ($row)
-		$ret = base64_decode ($row['thumb_data']);
-	return $ret;
+	return $row ? $row['thumb_data'] : NULL;
+}
+
+function saveRackThumbCache ($rack_id, $thumb_data)
+{
+	global $dbxlink;
+	try
+	{
+		$query = $dbxlink->prepare ('REPLACE INTO RackThumbnail SET rack_id = ?, thumb_data = ?');
+		$query->bindParam (1, $rack_id);
+		$query->bindParam (2, $thumb_data, PDO::PARAM_LOB);
+		return $query->execute();
+	}
+	catch (PDOException $e)
+	{
+		throw convertPDOException ($e);
+	}
 }
 
 function executeAutoPorts ($object_id)
