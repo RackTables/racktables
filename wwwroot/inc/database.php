@@ -6075,4 +6075,67 @@ function releaseDBMutex ($name)
 	return $row === '1';
 }
 
+function getSNMPProfile ($id = NULL)
+{
+	$query = 'SELECT id, name, version as ver, community, sec_name,
+		 sec_level, auth_protocol, auth_passphrase,
+		 priv_protocol, priv_passphrase,
+		 contextname, contextengineid,
+		 (SELECT count(SNMPProfileMapping.profile_id) FROM SNMPProfileMapping WHERE SNMPProfileMapping.profile_id = SNMPProfile.id) as refs
+		 FROM SNMPProfile';
+
+	$params = array();
+	if ($id !== NULL)
+	{
+		$query .= ' WHERE id = ?';
+		$params[] = $id;
+	}
+
+	$result = usePreparedSelectBlade ($query, $params);
+
+	if ($id !== NULL)
+		return $result->fetch (PDO::FETCH_ASSOC);
+	else
+		return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
+}
+
+function getObjectSNMPProfile ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT profile_id as id, host
+		 FROM SNMPProfileMapping
+		 WHERE object_id = ?',
+		array ($object_id)
+	);
+	$ret = $result->fetch (PDO::FETCH_ASSOC);
+
+	if ($ret === FALSE)
+		return FALSE;
+
+	$profile = getSNMPProfile ($ret['id']);
+
+	if (! $profile)
+		return FALSE;
+
+	return array_merge ($ret, $profile);
+}
+
+function setObjectSNMPProfile ($object_id, $profile_id, $host = NULL)
+{
+	if ($profile_id == 0)
+	{
+		usePreparedDeleteBlade ('SNMPProfileMapping', array ('object_id' => $object_id));
+		return -1;
+	}
+	else
+		return usePreparedExecuteBlade
+		(
+			'INSERT INTO SNMPProfileMapping(object_id, profile_id, host)
+			 VALUES(?, ?, ?)
+			 ON DUPLICATE KEY UPDATE profile_id = ?, host = ?',
+			array ($object_id, $profile_id, $host, $profile_id, $host)
+		);
+}
+
 ?>

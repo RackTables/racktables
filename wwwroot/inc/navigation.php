@@ -919,4 +919,14 @@ $popuphandler['objlist'] = 'renderPopupObjectSelector';
 $popuphandler['portlist'] = 'renderPopupPortSelector';
 $popuphandler['inet4list'] = 'renderPopupIPv4Selector';
 
+$page['SNMPProfile']['title'] = 'SNMP Profiles';
+$page['SNMPProfile']['parent'] = 'config';
+$tab['SNMPProfile']['default'] = 'SNMP Profiles';
+$tab['SNMPProfile']['edit'] = 'Edit SNMP Profiles';
+$tabhandler['SNMPProfile']['default'] = 'renderSNMPProfiles';
+$tabhandler['SNMPProfile']['edit'] = 'renderSNMPProfilesEditor';
+$ophandler['SNMPProfile']['edit']['update'] = 'updateSNMPProfile';
+$ophandler['SNMPProfile']['edit']['delete'] = 'deleteSNMPProfile';
+$ophandler['SNMPProfile']['edit']['set'] = 'setSNMPProfile';
+$interface_requires['SNMPProfile-*'] = 'interface-config.php';
 ?>

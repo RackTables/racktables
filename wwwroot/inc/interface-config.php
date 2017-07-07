@@ -1186,4 +1186,55 @@ function renderMuninServersEditor()
 	echo '</table>';
 }
 
+function renderSNMPProfiles ()
+{
+	startPortlet ("SNMP Profiles");
+
+	$cols = array (
+			array ('row_key' => 'id', 'th_text' => 'Id'),
+			array ('row_key' => 'name', 'th_text' => 'Name'),
+			array ('row_key' => 'ver', 'th_text' => 'Version'),
+			array ('row_key' => 'community', 'th_text' => 'Community'),
+			array ('row_key' => 'sec_name', 'th_text' => 'Security Name'),
+			array ('row_key' => 'sec_level', 'th_text' => 'Security Level'),
+			array ('row_key' => 'auth_protocol', 'th_text' => 'Auth Protocol'),
+			array ('row_key' => 'priv_protocol', 'th_text' => 'Priv Protocol')
+		);
+
+	renderTableViewer ($cols, getSNMPProfile ());
+
+	finishPortlet ();
+}
+
+function renderSNMPProfilesEditor ()
+{
+	startPortlet ("SNMP Profiles");
+
+	addSNMPProfileFormJS (TRUE);
+
+	echo '<table cellspacing=0 cellpadding=5 align=center class="widetable zebra">';
+	echo '<thead><tr>
+		<th></th>
+		<th>Id</th>
+		<th>Name</th>
+		<th>Version</th>
+		<th>Community/<br>Security Name</th>
+		<th>Security Level</th>
+		<th>Auth<br>Protocol</th>
+		<th>Auth<br>Passphrase</th>
+		<th>Priv<br>Protocol</th>
+		<th>Priv<br>Passphrase</th>
+		</tr></thead>';
+
+	echo '<tbody>';
+	printSNMPProfileFormFields (array ('id' => 'new'), FALSE, FALSE);
+	foreach (getSNMPProfile () as $profile)
+	{
+		printSNMPProfileFormFields ($profile, FALSE, FALSE);
+	}
+	echo '</tbody></table>';
+
+	finishPortlet ();
+}
+
 ?>

@@ -2605,6 +2605,15 @@ function querySNMPData ()
 	default:
 		throw new InvalidRequestArgException ('ver', $ver);
 	}
+
+	if (isset ($_REQUEST['host']))
+	{
+		assertStringArg ('host', TRUE);
+		$snmpsetup['host'] = $_REQUEST['host'];
+	}
+	else
+		$snmpsetup['host'] = 'FQDN';
+
 	$snmpsetup['version'] = $ver;
 	doSNMPmining (getBypassValue(), $snmpsetup); // shows message by itself
 }
@@ -3849,6 +3858,119 @@ function updateVLANDomain()
 
 	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
 	showSuccess ("VLAN domain updated successfully");
+}
+
+function updateSNMPProfile ()
+{
+	$profile = array();
+
+	try
+	{
+
+	$profile['name'] = genericAssertion ('name', 'string');
+
+	$version = genericAssertion ('ver', 'uint');
+
+	$profile['version'] = $version;
+
+	switch ($version)
+	{
+		case 1:
+		case 2:
+			$profile['community'] = genericAssertion ('community', 'string');
+			break;
+		case 3:
+			$profile['sec_name'] = genericAssertion ('sec_name', 'string');
+			$sec_level = genericAssertion ('sec_level', 'string');
+			$profile['sec_level'] = $sec_level;
+			switch ($sec_level)
+			{
+				case 'authPriv':
+				case 'authNoPriv':
+					$profile['auth_protocol'] = genericAssertion ('auth_protocol', 'string');
+					$profile['auth_passphrase'] = genericAssertion ('auth_passphrase', 'string');
+
+					if ($sec_level == 'authNoPriv')
+						break;
+
+					$profile['priv_protocol'] = genericAssertion ('priv_protocol', 'string');
+					$profile['priv_passphrase'] = genericAssertion ('priv_passphrase', 'string');
+
+					if (isset ($_POST['contextname']))
+					{
+						$profile['contextname'] = genericAssertion ('contextname', 'string');
+						if (isset ($_POST['contextengineid']))
+							$profile['contextengineid'] = genericAssertion ('contextengineid', 'string');
+					}
+
+				case 'noAuthNoPriv':
+					break;
+			}
+			break;
+	}
+
+	if ($_POST['id'] == 'new')
+	{
+		usePreparedInsertBlade ('SNMPProfile', $profile);
+		//$id = lastInsertID ();
+		showSuccess ("Profile created successfully.");
+	}
+	else
+	{
+		$id = genericAssertion ('id', 'uint');
+		//TODO reset unneeded values
+		usePreparedUpdateBlade ('SNMPProfile', $profile, array ('id' => $id), 'AND');
+		showSuccess ("Profile update successfully");
+	}
+
+	}
+	catch (InvalidArgException $iae)
+	{
+		showError ($iae->getMessage());
+		// TODO return to edit form without losing entered values
+	}
+	return buildRedirectURL (NULL, 'edit');
+}
+
+function deleteSNMPProfile ()
+{
+	$id = genericAssertion ('id', 'uint');
+	usePreparedDeleteBlade ('SNMPProfile', array ( 'id' => $id));
+	showSuccess ("Deleted profile successfully.");
+	return buildRedirectURL (NULL, 'edit');
+}
+
+function setSNMPProfile ()
+{
+	global $pageno, $tabno;
+
+	$object_id = genericAssertion ('object_id', 'uint');
+	$profile_id = genericAssertion ('profile_id', 'uint0');
+	$host = genericAssertion ('host', 'string0');
+	$pageno = genericAssertion ('returnpage', 'string0');
+	$tabno = genericAssertion ('returntab', 'string0');
+
+	$rowcount = setObjectSNMPProfile ($object_id, $profile_id, $host);
+
+	switch ($rowcount)
+	{
+		case -1:
+			showSuccess ("unset SNMP profile successfull");
+			break;
+		case 0:
+			showWarning ("set SNMP profile no values changed");
+			break;
+		case 1:
+			showSuccess ("set SNMP profile successfull");
+			break;
+		case 2:
+			showSuccess ("update SNMP profile successfull");
+			break;
+		default:
+			showError ("set SNMP profile error!!");
+	}
+
+	return buildRedirectURL ($pageno, $tabno, array ('object_id' => $object_id));
 }
 
 ?>
