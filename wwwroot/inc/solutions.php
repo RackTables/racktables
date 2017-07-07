@@ -418,7 +418,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 	$ret = array();
 	$servers = getCactiServers();
 	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id);
+		throw new InvalidRequestArgException ('server_id', $server_id, 'there is no such server');
 	$cacti_url = $servers[$server_id]['base_url'];
 	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
 	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
@@ -499,7 +499,7 @@ function proxyMuninRequest ($server_id, $graph)
 	$ret = array();
 	$servers = getMuninServers();
 	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id);
+		throw new InvalidRequestArgException ('server_id', $server_id, 'there is no such server');
 	$munin_url = $servers[$server_id]['base_url'];
 	$url = "${munin_url}/${domain}/${host}.${domain}/${graph}-day.png";
 
