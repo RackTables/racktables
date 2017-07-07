@@ -1231,6 +1231,13 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('parseSearchTerms', array ('one "two" "three')),
 			array ('parseSearchTerms', array ('one "" three')),
 			array ('parseSearchTerms', array ('""')),
+
+			array ('array_fetch', array (-1, 0, 0)),
+			array ('array_fetch', array (0, 0, 0)),
+			array ('array_fetch', array (1, 0, 0)),
+			array ('array_fetch', array (FALSE, 0, 0)),
+			array ('array_fetch', array (NULL, 0, 0)),
+			array ('array_fetch', array ('', 0, 0)),
 		);
 	}
 

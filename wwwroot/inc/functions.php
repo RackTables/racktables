@@ -5825,6 +5825,8 @@ function array_sub ($a, $b)
 // returns the requested element value or the default value if not found
 function array_fetch ($array, $key, $default_value)
 {
+	if (! is_array ($array))
+		throw new InvalidArgException ('array', $array, 'is not an array');
 	return array_key_exists ($key, $array) ? $array[$key] : $default_value;
 }
 
