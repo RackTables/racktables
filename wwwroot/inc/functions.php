@@ -4859,12 +4859,9 @@ function sortPortList ($plist, $name_in_value = FALSE)
 }
 
 // This function works like standard php usort function and uses sortPortList.
-function usort_portlist(&$array)
+function usort_portlist (&$portnames)
 {
-	$temp_array = array();
-	foreach($array as $portname)
-		$temp_array[$portname] = 1;
-	$array = array_keys (sortPortList ($temp_array, FALSE));
+	$portnames = array_keys (sortPortList (array_fill_keys ($portnames, array())));
 }
 
 // return a "?, ?, ?, ... ?, ?" string consisting of N question marks
