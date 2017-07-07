@@ -3161,7 +3161,8 @@ function updVSTRule()
 	}
 	catch (Exception $e)
 	{
-		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
+		// Every case that is soft-processed in index.php?module=redirect will have
+		// the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException || $e instanceof RTDatabaseError)
 		{
 			startSession();

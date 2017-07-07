@@ -218,8 +218,8 @@ class InvalidRequestArgException extends InvalidArgException
 	}
 }
 
-// this wraps certain known PDO errors and is caught in process.php
-// as a "soft" error
+// This wraps certain known PDO errors and is caught in index.php?module=redirect
+// and elsewhere to be handled as a "soft" error.
 class RTDatabaseError extends RackTablesError
 {
 	public function dispatch()

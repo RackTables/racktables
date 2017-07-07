@@ -3236,7 +3236,7 @@ function getAllVLANOptions ($except = array())
 	return $ret;
 }
 
-// Let's have this debug helper here to enable debugging of process.php w/o interface.php.
+// This debugging helper does not depend on interface.php.
 function dump ($var)
 {
 	echo '<div align=left><pre>';
