@@ -198,6 +198,11 @@ class InvalidArgException extends RackTablesError
 		$this->value = $value;
 		$this->reason = $reason;
 	}
+	// Instead of the two methods below it would be better to have a single method
+	// like setArgumentName() in order not to expose unnecessary details to the
+	// users of the class. However, this is not possible because the Exception
+	// class does not allow to redefine the message string, which the constructor
+	// assigns based on the argument name.
 	public function getValue()
 	{
 		return $this->value;
