@@ -4139,6 +4139,14 @@ function filter8021QChangeRequests
 				}
 			break;
 		case 'trunk':
+			// restrict adding alien vlans into trunk
+			$before_vlans = isset ($before[$port_name]) ? $before[$port_name]['allowed'] : array();
+			$added = array_diff ($port['allowed'], $before_vlans);
+			$restricted = array_diff ($added, array_keys ($domain_vlanlist));
+			$port['allowed'] = array_diff ($port['allowed'], $restricted);
+			if (in_array ($port['native'], $restricted))
+				$port['native'] = 0;
+
 			foreach ($domain_immune_vlans as $immune)
 				if (in_array ($immune, $before[$port_name]['allowed'])) // was allowed before
 				{
