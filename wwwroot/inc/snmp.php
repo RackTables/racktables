@@ -4647,7 +4647,6 @@ class RTSNMPDevice
 		switch ($snmpsetup['version'])
 		{
 		case 1:
-		default:
 			$this->snmp = new RTSNMPv1($hostname, $snmpsetup);
 			break;
 		case 2:
@@ -4656,6 +4655,8 @@ class RTSNMPDevice
 		case 3:
 			$this->snmp = new RTSNMPv3($hostname, $snmpsetup);
 			break;
+		default:
+			throw new InvalidArgException ('snmpsetup[\'version\']', $snmpsetup['version'], 'unsupported SNMP version');
 		}
 	}
 
