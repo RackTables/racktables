@@ -11,4 +11,3 @@ require_once './TestHelper.php';
 
 // Sanity check DB connection
 TestHelper::ensureUsingUnitTestDatabase ();
-?>

@@ -182,5 +182,3 @@ class DictionaryAttributeTest extends PHPUnit_Framework_TestCase
 		usePreparedDeleteBlade ('Attribute', array ('id' => array_keys ($this->attr_types)));
 	}
 }
-
-?>

@@ -42,5 +42,3 @@ class GetRowsCountTest extends PHPUnit_Framework_TestCase
 		usePreparedExecuteBlade ('DROP TABLE `' . $this->table_name . '`');
 	}
 }
-
-?>

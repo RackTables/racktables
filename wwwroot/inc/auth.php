@@ -650,5 +650,3 @@ function authenticated_via_database ($userinfo, $password)
 		return FALSE;
 	return $userinfo['user_password_hash'] == sha1 ($password);
 }
-
-?>

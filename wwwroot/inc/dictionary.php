@@ -2605,5 +2605,3 @@ $dictionary = array
 # and dictionary updates working properly.
 	49999 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 15 | http://docs.fedoraproject.org/release-notes/f15/en-US/html/]]'),
 );
-
-?>

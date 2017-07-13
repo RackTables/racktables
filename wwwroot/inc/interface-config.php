@@ -1185,5 +1185,3 @@ function renderMuninServersEditor()
 		printNewItemTR();
 	echo '</table>';
 }
-
-?>

@@ -162,5 +162,3 @@ $impl_tags = array();
 $target_given_tags = array();
 
 callHook ('initFinished');
-
-?>

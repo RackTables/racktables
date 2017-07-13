@@ -19,5 +19,3 @@ if ($user_auth_src == 'ldap')
 	constructLDAPOptions();
 	discardLDAPCache ($LDAP_options['cache_expiry']);
 }
-
-?>

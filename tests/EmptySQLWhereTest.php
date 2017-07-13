@@ -42,5 +42,3 @@ class EmptySQLWhereTest extends PHPUnit_Framework_TestCase
 		usePreparedUpdateBlade ('TagTree', NULL, NULL);
 	}
 }
-
-?>

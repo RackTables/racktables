@@ -1548,5 +1548,3 @@ function convertMgmtConfigVars()
 	}
 	return implode (',', $ret);
 }
-
-?>

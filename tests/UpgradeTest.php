@@ -62,4 +62,3 @@ class UpgradeTest extends PHPUnit_Framework_TestCase
 		}
 	}
 }
-?>

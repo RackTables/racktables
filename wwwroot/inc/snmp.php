@@ -4856,4 +4856,3 @@ function detectSoftwareType ($objectInfo, $sysDescr)
 			return;
 		}
 }
-?>

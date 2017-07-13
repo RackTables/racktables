@@ -43,4 +43,3 @@ class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
 		commitUpdateTag ($this->taga_id, 'unit test tag a', $this->tagc_id, 'yes');
 	}
 }
-?>

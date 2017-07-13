@@ -566,5 +566,3 @@ function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rect
 	echo ">${text}</text>\n";
 	echo "</svg>\n";
 }
-
-?>

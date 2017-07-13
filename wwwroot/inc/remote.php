@@ -831,5 +831,3 @@ function ios12ShortenIfName ($ifname)
 	$ifname = preg_replace ('/^(e|fa|gi|te|po|xg|lo|ma)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
 }
-
-?>

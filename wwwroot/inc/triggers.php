@@ -344,5 +344,3 @@ function triggerGraphCycleResolver()
 	}
 	return count (getInvalidNodes ($nodelist)) ? 'attn' : '';
 }
-
-?>

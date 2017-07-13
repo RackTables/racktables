@@ -1643,5 +1643,3 @@ function renderEditVlan ($vlan_ck)
 
 	finishPortlet();
 }
-
-?>

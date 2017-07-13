@@ -100,5 +100,3 @@ function HTTPDateToUnixTime ($string)
 		return FALSE;
 	return gmmktime ($hours, $minutes, $seconds, $month, $day, $year);
 }
-
-?>

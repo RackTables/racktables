@@ -3850,5 +3850,3 @@ function updateVLANDomain()
 	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
 	showSuccess ("VLAN domain updated successfully");
 }
-
-?>

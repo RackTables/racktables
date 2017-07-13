@@ -209,5 +209,3 @@ class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
 		commitDeleteRow ($this->row_id);
 	}
 }
-
-?>

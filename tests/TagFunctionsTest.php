@@ -64,5 +64,3 @@ class TagFunctionsTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals ($this->a_tag_ids, buildTagIdsFromChain (buildTagChainFromIds ($this->a_tag_ids)));
 	}
 }
-
-?>

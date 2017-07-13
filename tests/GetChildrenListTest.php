@@ -92,4 +92,3 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 		$this->assertCount (self::$num_children, $children);
 	}
 }
-?>

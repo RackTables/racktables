@@ -6663,5 +6663,3 @@ function syncObjectPorts ($object_id, $desiredPorts)
 	$dbxlink->exec ('UNLOCK TABLES');
 	showSuccess (sprintf ('Added ports: %u, changed: %u, deleted: %u', count ($to_add), count ($to_update), count ($to_delete)));
 }
-
-?>

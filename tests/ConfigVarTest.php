@@ -153,5 +153,3 @@ class ConfigVarTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-
-?>

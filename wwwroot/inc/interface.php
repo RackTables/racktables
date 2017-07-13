@@ -6451,5 +6451,3 @@ function renderTableViewer ($columns, $rows, $params = NULL)
 	echo '</tbody>';
 	echo '</table>';
 }
-
-?>

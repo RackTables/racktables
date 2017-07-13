@@ -101,5 +101,3 @@ function fileSearchExists ($filename)
 	}
 	return file_exists ($filename);
 }
-
-?>

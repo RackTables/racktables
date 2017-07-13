@@ -192,5 +192,3 @@ class ObjectPortsTest extends PHPUnit_Framework_TestCase
 		commitDeleteObject ($this->object_id);
 	}
 }
-
-?>

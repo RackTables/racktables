@@ -1206,5 +1206,3 @@ function showMySQLWarnings()
 	}
 	$rtdebug_mysql_warnings = array();
 }
-
-?>

@@ -436,5 +436,3 @@ function printException ($e)
 	else
 		printGenericException ($e);
 }
-
-?>

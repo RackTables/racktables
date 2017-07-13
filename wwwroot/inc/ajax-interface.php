@@ -337,4 +337,3 @@ function getAutocompleteListAJAX()
 
 	echo json_encode ($rows);
 }
-?>

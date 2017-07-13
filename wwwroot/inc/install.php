@@ -2325,5 +2325,3 @@ WHERE O.objtype_id = 1562";
 	return $query;
 	}
 }
-
-?>

@@ -628,5 +628,3 @@ function renderLVSConfig ($object_id)
 	echo "</form>";
 	echo "<pre>" . buildLVSConfig ($object_id) . "</pre>";
 }
-
-?>

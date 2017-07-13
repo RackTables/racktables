@@ -980,5 +980,3 @@ function renderDataIntegrityReport ()
 	if (! $violations)
 		echo '<h2 class=centered>No integrity violations found</h2>';
 }
-
-?>

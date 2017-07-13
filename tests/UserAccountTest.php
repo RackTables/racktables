@@ -52,5 +52,3 @@ class UserAccountTest extends PHPUnit_Framework_TestCase
 		commitCreateUserAccount ($this->user_name, 'x' . self::REALNAME, sha1 (self::PSWDHASH));
 	}
 }
-
-?>

@@ -6074,5 +6074,3 @@ function releaseDBMutex ($name)
 	$row = $result->fetchColumn();
 	return $row === '1';
 }
-
-?>

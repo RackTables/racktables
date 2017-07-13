@@ -1270,4 +1270,3 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-?>

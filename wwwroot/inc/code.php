@@ -759,5 +759,3 @@ function getRackCodeWarnings ()
 	);
 	return $ret;
 }
-
-?>

@@ -518,4 +518,3 @@ function renderPopupHTML ($contents)
 </html>
 <?php
 }
-?>

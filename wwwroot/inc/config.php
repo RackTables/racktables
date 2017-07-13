@@ -14,5 +14,3 @@ committers' copies) can run into issues:
 */
 
 define ('CODE_VERSION', '0.20.13');
-
-?>

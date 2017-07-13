@@ -918,5 +918,3 @@ $ajaxhandler['autocomplete'] = 'getAutocompleteListAJAX';
 $popuphandler['objlist'] = 'renderPopupObjectSelector';
 $popuphandler['portlist'] = 'renderPopupPortSelector';
 $popuphandler['inet4list'] = 'renderPopupIPv4Selector';
-
-?>

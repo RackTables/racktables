@@ -20,5 +20,3 @@ class DBMutexTest extends PHPUnit_Framework_TestCase
 		$this->assertSame (FALSE, releaseDBMutex (get_class() . getmypid()));
 	}
 }
-
-?>
