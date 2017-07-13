@@ -1136,7 +1136,8 @@ function renderEditObjectForm()
 		echo "</td></tr>\n";
 	}
 	renderEditAttributeTRs ('update', getAttrValuesSorted ($object_id), $object['objtype_id']);
-	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=object_has_problems";
+	echo '<tr><td>&nbsp;</td><th class=tdright><label for=object_has_problems>Has problems:</label></th>';
+	echo '<td class=tdleft><input type=checkbox name=object_has_problems id=object_has_problems';
 	if ($object['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
