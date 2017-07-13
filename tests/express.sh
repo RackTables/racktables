@@ -40,7 +40,8 @@ rm -f "$TEMPFILE"
 # A side effect of syncdomain.php is testing whether init.php is functional.
 echo
 cd "$BASEDIR/wwwroot"
-../scripts/syncdomain.php --help || exit 1
+echo 'Testing syncdomain.php'; ../scripts/syncdomain.php --help || exit 1
+echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit 1
 
 # At this point it makes sense to test specific functions.
 echo
