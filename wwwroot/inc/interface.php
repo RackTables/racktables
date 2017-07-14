@@ -99,25 +99,37 @@ function renderQuickLinks()
 
 function renderInterfaceHTML ($pageno, $tabno, $payload)
 {
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head><title><?php echo getTitle ($pageno); ?></title>
-<?php printPageHeaders(); ?>
-</head>
-<body>
-<div class="maintable">
- <div class="mainheader">
-  <div style="float: right" class=greeting><?php global $remote_displayname; echo mkA ($remote_displayname, 'myaccount', NULL, 'default'); ?> [ <a href='<?php showLogoutURL(); ?>'>logout</a> ]</div>
- <?php echo getConfigVar ('enterprise') ?> RackTables <a href="http://racktables.org" title="Visit RackTables site"><?php echo CODE_VERSION ?></a><?php renderQuickLinks() ?>
- </div>
- <div class="menubar"><?php showPathAndSearch ($pageno, $tabno); ?></div>
- <div class="tabbar"><?php showTabs ($pageno, $tabno); ?></div>
- <div class="msgbar"><?php showMessageOrError(); ?></div>
- <div class="pagebar"><?php echo $payload; ?></div>
-</div>
-</body>
-</html>
-<?php
+	global $remote_displayname;
+	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
+	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">';
+	echo '<head><title>' . getTitle ($pageno) . '</title>';
+	printPageHeaders();
+	echo '</head>';
+	echo '<body>';
+	echo '<div class=maintable>';
+	echo '<div class=mainheader>';
+	echo '<div style="float: right" class=greeting>';
+	echo mkA ($remote_displayname, 'myaccount', NULL, 'default');
+	echo ' [ <a href="';
+	showLogoutURL();
+	echo '">logout</a> ]</div>'; // greeting
+	echo getConfigVar ('enterprise') . ' RackTables ';
+	echo '<a href="http://racktables.org" title="Visit RackTables site">' . CODE_VERSION . '</a>';
+	renderQuickLinks();
+	echo '</div>'; // mainheader
+	echo '<div class=menubar>';
+	showPathAndSearch ($pageno, $tabno);
+	echo '</div>';
+	echo '<div class=tabbar>';
+	showTabs ($pageno, $tabno);
+	echo '</div>';
+	echo '<div class=msgbar>';
+	showMessageOrError();
+	echo '</div>';
+	echo "<div class=pagebar>${payload}</div>";
+	echo '</div>'; // maintable
+	echo '</body>';
+	echo '</html>';
 }
 
 // Main menu.
@@ -134,30 +146,22 @@ function renderIndexItem ($ypageno)
 function renderIndex ()
 {
 	global $indexlayout;
-?>
-<table border=0 cellpadding=0 cellspacing=0 width='100%'>
-	<tr>
-		<td>
-			<div style='text-align: center; margin: 10px; '>
-			<table width='100%' cellspacing=0 cellpadding=20 class=mainmenu border=0>
-<?php
-foreach ($indexlayout as $row)
-{
-	echo '<tr>';
-	foreach ($row as $column)
-		if ($column === NULL)
-			echo '<td>&nbsp;</td>';
-		else
-			renderIndexItem ($column);
-	echo '</tr>';
-}
-?>
-			</table>
-			</div>
-		</td>
-	</tr>
-</table>
-<?php
+	echo '<table border=0 cellpadding=0 cellspacing=0 width="100%">';
+	echo '<tr><td><div style="text-align: center; margin: 10px; ">';
+	echo '<table width="100%" cellspacing=0 cellpadding=20 class=mainmenu border=0>';
+	foreach ($indexlayout as $row)
+	{
+		echo '<tr>';
+		foreach ($row as $column)
+			if ($column === NULL)
+				echo '<td>&nbsp;</td>';
+			else
+				renderIndexItem ($column);
+		echo '</tr>';
+	}
+	echo '</table>';
+	echo '</div></td></tr>';
+	echo '</table>';
 }
 
 function getRenderedAlloc ($object_id, $alloc)
@@ -4050,7 +4054,7 @@ function renderRackPage ($rack_id)
 function dragon ()
 {
 	startPortlet ('Here be dragons');
-?>
+	echo <<<ENDOFTEXT
 <div class=dragon><pre><font color="#00ff33">
                  \||/
                  |  <font color="#ff0000">@</font>___oo
@@ -4065,7 +4069,7 @@ function dragon ()
    \______(_______<font color=white>;;;</font> __<font color=white>;;;</font>
 
 </font></pre></div>
-<?php
+ENDOFTEXT;
 	finishPortlet();
 }
 
@@ -4105,15 +4109,16 @@ function renderSNMPPortFinder ($object_id)
 		'authNoPriv' => 'auth without Priv',
 		'authPriv' => 'auth with Priv',
 	);
-?>
+	$slselect = getSelect ($sloptions, array ('name' => 'sec_level'), 'noAuthNoPriv');
+	echo <<<ENDOFTEXT
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
 		<th class=tdright><label for=sec_name>Security User:</label></th>
-		<td class=tdleft><input type=text id=sec_name name=sec_name value='<?php echo $snmpcomm;?>'></td>
+		<td class=tdleft><input type=text id=sec_name name=sec_name value='${snmpcomm}'></td>
 	</tr>
 	<tr>
 		<th class=tdright><label for="sec_level">Security Level:</label></th>
-		<td class=tdleft><?php printSelect ($sloptions, array ('name' => 'sec_level'), 'noAuthNoPriv'); ?></td>
+		<td class=tdleft>${slselect}</td>
 	</tr>
 	<tr>
 		<th class=tdright>Auth Type:</th>
@@ -4143,7 +4148,7 @@ function renderSNMPPortFinder ($object_id)
 	</tr>
 	<tr><td colspan=2><input type=submit value="Try now"></td></tr>
 	</table>
-<?php
+ENDOFTEXT;
 	echo '</form>';
 	finishPortlet();
 }

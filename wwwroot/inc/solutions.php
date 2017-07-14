@@ -366,7 +366,8 @@ function renderImagePreview ($file_id)
 function printStatic404()
 {
 	header ('HTTP/1.0 404 Not Found');
-?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+	echo <<<ENDOFTEXT
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>404 Not Found</title>
 </head><body>
@@ -374,7 +375,8 @@ function printStatic404()
 <p>The requested file was not found in this instance.</p>
 <hr>
 <address>RackTables static content proxy</address>
-</body></html><?php
+</body></html>
+ENDOFTEXT;
 	exit;
 }
 

@@ -36,9 +36,10 @@ if ($step > count ($stepfunc))
 }
 $title = "RackTables installation: step ${step} of " . count ($stepfunc);
 header ('Content-Type: text/html; charset=UTF-8');
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	echo <<<ENDOFTEXT
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head><title><?php echo $title; ?></title>
+<head><title>${title}</title>
 <style type="text/css">
 .tdleft {
 	text-align: left;
@@ -59,7 +60,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 </head>
 <body>
 <center>
-<?php
+ENDOFTEXT;
 echo "<h1>${title}</h1><p>";
 
 echo "</p><form method=post>\n";
@@ -75,14 +76,10 @@ else
 	echo "<br><input type=submit value='retry'>";
 }
 echo "<input type=hidden name=step value='${next_step}'>\n";
-
-?>
-</form>
-</center>
-</body>
-</html>
-
-<?php
+	echo '</form>';
+	echo '</center>';
+	echo '</body>';
+	echo '</html>';
 }
 
 // Check if the software is already installed.

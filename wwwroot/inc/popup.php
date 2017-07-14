@@ -506,15 +506,14 @@ function renderPopupIPv4Selector()
 
 function renderPopupHTML ($contents)
 {
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
-<head>
-<title>RackTables pop-up</title>
-<?php printPageHeaders(); ?>
-</head>
-<body style="height: 100%;">
-<div class="popupbar"><?php echo $contents; ?></div>
-</body>
-</html>
-<?php
+	echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">';
+	echo '<head>';
+	echo '<title>RackTables pop-up</title>';
+	printPageHeaders();
+	echo '</head>';
+	echo '<body style="height: 100%;">';
+	echo "<div class=popupbar>${contents}</div>";
+	echo '</body>';
+	echo '</html>';
 }
