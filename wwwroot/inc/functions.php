@@ -179,6 +179,8 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
 	if (!is_numeric ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
+	if (! is_int (0 + $_REQUEST[$argname]))
+		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not an integer');
 	if ($_REQUEST[$argname] < 0)
 		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
 	if (! $allow_zero && $_REQUEST[$argname] == 0)
