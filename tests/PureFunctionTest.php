@@ -311,6 +311,27 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('formatAgeSeconds', 63115199, '1y 12m ago'),
 			array ('formatAgeSeconds', 63115200, '2y ago'),
 			array ('formatAgeSeconds', 63115201, '2y ago'),
+
+			array ('isInteger', -2, TRUE),
+			array ('isInteger', -1.5, FALSE),
+			array ('isInteger', -1, TRUE),
+			array ('isInteger', 0, FALSE), // implicit 2nd argument
+			array ('isInteger', 0.0, FALSE),
+			array ('isInteger', 1, TRUE),
+			array ('isInteger', 1.5, FALSE),
+			array ('isInteger', 2, TRUE),
+			array ('isInteger', NULL, FALSE),
+			array ('isInteger', FALSE, FALSE),
+			array ('isInteger', TRUE, FALSE),
+			array ('isInteger', '', FALSE),
+			array ('isInteger', '-2', TRUE),
+			array ('isInteger', '-1.5', FALSE),
+			array ('isInteger', '-1', TRUE),
+			array ('isInteger', '0', FALSE), // implicit 2nd argument
+			array ('isInteger', '0.0', FALSE),
+			array ('isInteger', '1', TRUE),
+			array ('isInteger', '1.5', FALSE),
+			array ('isInteger', '2', TRUE),
 		);
 	}
 
@@ -858,6 +879,47 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('goodModeForVSTRole', 'trunk', 'anymode', TRUE),
 			array ('goodModeForVSTRole', 'trunk', 'uplink', TRUE),
 			array ('goodModeForVSTRole', 'trunk', 'downlink', TRUE),
+
+			array ('isInteger', -2, FALSE, TRUE),
+			array ('isInteger', -1.5, FALSE, FALSE),
+			array ('isInteger', -1, FALSE, TRUE),
+			array ('isInteger', 0, FALSE, FALSE), // explicit 2nd argument
+			array ('isInteger', 0.0, FALSE, FALSE),
+			array ('isInteger', 1, FALSE, TRUE),
+			array ('isInteger', 1.5, FALSE, FALSE),
+			array ('isInteger', 2, FALSE, TRUE),
+			array ('isInteger', NULL, FALSE, FALSE),
+			array ('isInteger', FALSE, FALSE, FALSE),
+			array ('isInteger', TRUE, FALSE, FALSE),
+			array ('isInteger', '', FALSE, FALSE),
+			array ('isInteger', '-2', FALSE, TRUE),
+			array ('isInteger', '-1.5', FALSE, FALSE),
+			array ('isInteger', '-1', FALSE, TRUE),
+			array ('isInteger', '0', FALSE, FALSE), // explicit 2nd argument
+			array ('isInteger', '0.0', FALSE, FALSE),
+			array ('isInteger', '1', FALSE, TRUE),
+			array ('isInteger', '1.5', FALSE, FALSE),
+			array ('isInteger', '2', FALSE, TRUE),
+			array ('isInteger', -2, TRUE, TRUE),
+			array ('isInteger', -1.5, TRUE, FALSE),
+			array ('isInteger', -1, TRUE, TRUE),
+			array ('isInteger', 0, TRUE, TRUE), // explicit 2nd argument
+			array ('isInteger', 0.0, TRUE, FALSE),
+			array ('isInteger', 1, TRUE, TRUE),
+			array ('isInteger', 1.5, TRUE, FALSE),
+			array ('isInteger', 2, TRUE, TRUE),
+			array ('isInteger', NULL, TRUE, FALSE),
+			array ('isInteger', FALSE, TRUE, FALSE),
+			array ('isInteger', TRUE, TRUE, FALSE),
+			array ('isInteger', '', TRUE, FALSE),
+			array ('isInteger', '-2', TRUE, TRUE),
+			array ('isInteger', '-1.5', TRUE, FALSE),
+			array ('isInteger', '-1', TRUE, TRUE),
+			array ('isInteger', '0', TRUE, TRUE), // explicit 2nd argument
+			array ('isInteger', '0.0', TRUE, FALSE),
+			array ('isInteger', '1', TRUE, TRUE),
+			array ('isInteger', '1.5', TRUE, FALSE),
+			array ('isInteger', '2', TRUE, TRUE),
 		);
 	}
 

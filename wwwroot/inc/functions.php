@@ -188,7 +188,7 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 
 function isInteger ($arg, $allow_zero = FALSE)
 {
-	return is_numeric ($arg) && ($allow_zero || $arg != 0);
+	return is_numeric ($arg) && is_int (0 + $arg) && ($allow_zero || $arg != 0);
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
