@@ -3790,8 +3790,7 @@ function fetchAttrsForObjects ($object_set = array())
 				$record['value'] = $row['uint_value'];
 				break;
 			default:
-				$record['value'] = NULL;
-				break;
+				throw new RackTablesError ("unexpected attribute type '${row['attr_type']}'", RackTablesError::INTERNAL);
 		}
 		$ret[$object_id][$row['attr_id']] = $record;
 	}
