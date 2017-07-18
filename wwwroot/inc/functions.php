@@ -177,20 +177,19 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
-	if (!is_numeric ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
-	if (! is_int (0 + $_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not an integer');
-	if ($_REQUEST[$argname] < 0)
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
-	if (! $allow_zero && $_REQUEST[$argname] == 0)
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
+	if (! isUnsignedInteger ($_REQUEST[$argname], $allow_zero))
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an unsigned integer' . ($allow_zero ? ' (or 0)' : ''));
 	return $_REQUEST[$argname];
 }
 
 function isInteger ($arg, $allow_zero = FALSE)
 {
 	return is_numeric ($arg) && is_int (0 + $arg) && ($allow_zero || $arg != 0);
+}
+
+function isUnsignedInteger ($arg, $allow_zero = FALSE)
+{
+	return isInteger ($arg, $allow_zero) && $arg >= 0;
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent

@@ -332,6 +332,27 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('isInteger', '1', TRUE),
 			array ('isInteger', '1.5', FALSE),
 			array ('isInteger', '2', TRUE),
+
+			array ('isUnsignedInteger', -2, FALSE),
+			array ('isUnsignedInteger', -1.5, FALSE),
+			array ('isUnsignedInteger', -1, FALSE),
+			array ('isUnsignedInteger', 0, FALSE), // implicit 2nd argument
+			array ('isUnsignedInteger', 0.0, FALSE),
+			array ('isUnsignedInteger', 1, TRUE),
+			array ('isUnsignedInteger', 1.5, FALSE),
+			array ('isUnsignedInteger', 2, TRUE),
+			array ('isUnsignedInteger', NULL, FALSE),
+			array ('isUnsignedInteger', FALSE, FALSE),
+			array ('isUnsignedInteger', TRUE, FALSE),
+			array ('isUnsignedInteger', '', FALSE),
+			array ('isUnsignedInteger', '-2', FALSE),
+			array ('isUnsignedInteger', '-1.5', FALSE),
+			array ('isUnsignedInteger', '-1', FALSE),
+			array ('isUnsignedInteger', '0', FALSE), // implicit 2nd argument
+			array ('isUnsignedInteger', '0.0', FALSE),
+			array ('isUnsignedInteger', '1', TRUE),
+			array ('isUnsignedInteger', '1.5', FALSE),
+			array ('isUnsignedInteger', '2', TRUE),
 		);
 	}
 
@@ -920,6 +941,47 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('isInteger', '1', TRUE, TRUE),
 			array ('isInteger', '1.5', TRUE, FALSE),
 			array ('isInteger', '2', TRUE, TRUE),
+
+			array ('isUnsignedInteger', -2, FALSE, FALSE),
+			array ('isUnsignedInteger', -1.5, FALSE, FALSE),
+			array ('isUnsignedInteger', -1, FALSE, FALSE),
+			array ('isUnsignedInteger', 0, FALSE, FALSE), // explicit 2nd argument
+			array ('isUnsignedInteger', 0.0, FALSE, FALSE),
+			array ('isUnsignedInteger', 1, FALSE, TRUE),
+			array ('isUnsignedInteger', 1.5, FALSE, FALSE),
+			array ('isUnsignedInteger', 2, FALSE, TRUE),
+			array ('isUnsignedInteger', NULL, FALSE, FALSE),
+			array ('isUnsignedInteger', FALSE, FALSE, FALSE),
+			array ('isUnsignedInteger', TRUE, FALSE, FALSE),
+			array ('isUnsignedInteger', '', FALSE, FALSE),
+			array ('isUnsignedInteger', '-2', FALSE, FALSE),
+			array ('isUnsignedInteger', '-1.5', FALSE, FALSE),
+			array ('isUnsignedInteger', '-1', FALSE, FALSE),
+			array ('isUnsignedInteger', '0', FALSE, FALSE), // explicit 2nd argument
+			array ('isUnsignedInteger', '0.0', FALSE, FALSE),
+			array ('isUnsignedInteger', '1', FALSE, TRUE),
+			array ('isUnsignedInteger', '1.5', FALSE, FALSE),
+			array ('isUnsignedInteger', '2', FALSE, TRUE),
+			array ('isUnsignedInteger', -2, TRUE, FALSE),
+			array ('isUnsignedInteger', -1.5, TRUE, FALSE),
+			array ('isUnsignedInteger', -1, TRUE, FALSE),
+			array ('isUnsignedInteger', 0, TRUE, TRUE), // explicit 2nd argument
+			array ('isUnsignedInteger', 0.0, TRUE, FALSE),
+			array ('isUnsignedInteger', 1, TRUE, TRUE),
+			array ('isUnsignedInteger', 1.5, TRUE, FALSE),
+			array ('isUnsignedInteger', 2, TRUE, TRUE),
+			array ('isUnsignedInteger', NULL, TRUE, FALSE),
+			array ('isUnsignedInteger', FALSE, TRUE, FALSE),
+			array ('isUnsignedInteger', TRUE, TRUE, FALSE),
+			array ('isUnsignedInteger', '', TRUE, FALSE),
+			array ('isUnsignedInteger', '-2', TRUE, FALSE),
+			array ('isUnsignedInteger', '-1.5', TRUE, FALSE),
+			array ('isUnsignedInteger', '-1', TRUE, FALSE),
+			array ('isUnsignedInteger', '0', TRUE, TRUE), // explicit 2nd argument
+			array ('isUnsignedInteger', '0.0', TRUE, FALSE),
+			array ('isUnsignedInteger', '1', TRUE, TRUE),
+			array ('isUnsignedInteger', '1.5', TRUE, FALSE),
+			array ('isUnsignedInteger', '2', TRUE, TRUE),
 		);
 	}
 
