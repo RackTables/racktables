@@ -5342,12 +5342,12 @@ function loadConfigDefaults()
 	$ret = loadConfigCache();
 	if (!count ($ret))
 		throw new RackTablesError ('Failed to load configuration from the database.', RackTablesError::INTERNAL);
-	foreach ($ret as $varname => &$row)
+	foreach (array_keys ($ret) as $varname)
 	{
-		$row['is_altered'] = 'no';
-		if ($row['vartype'] == 'uint')
-			$row['varvalue'] = 0 + $row['varvalue'];
-		$row['defaultvalue'] = $row['varvalue'];
+		$ret[$varname]['is_altered'] = 'no';
+		if ($ret[$varname]['vartype'] == 'uint')
+			$ret[$varname]['varvalue'] = 0 + $ret[$varname]['varvalue'];
+		$ret[$varname]['defaultvalue'] = $ret[$varname]['varvalue'];
 	}
 	return $ret;
 }
