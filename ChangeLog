@@ -5,6 +5,7 @@
 	update: refine delivery of rack thumb images
 	bugfix: put dictionary-based attributes formatting right
 	bugfix: date attributes now can be set for racks, rows and locations
+	new feature: tag colors (GH#158 by Maik Ehinger)
 0.20.14
 	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
 	update: suppress the rackspace portlet column if it is empty
