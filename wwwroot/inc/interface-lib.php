@@ -1280,7 +1280,6 @@ function setEntityColors(&$entity)
 	$colors = false;
 	$entity['colors'] = array();
 	foreach ($entity['etags'] as $taginfo)
-	{
 		if ($taginfo['color'] !== NULL )
 		{
 			$colors = true;
@@ -1291,8 +1290,6 @@ function setEntityColors(&$entity)
 				getObjectClass ('tag', $taginfo); // set tag css class
 			}
 		}
-
-	}
 
 	return $colors;
 }

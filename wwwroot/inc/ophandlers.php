@@ -396,6 +396,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 		array ('url_argname' => 'color', 'assertion' => 'htmlcolor0', 'translator' => 'HTMLColorForDatabase'),
 	),
 );
+// Used through an intermediate ophandler function that calls tableHandler().
 $opspec_list['tagtree-edit-destroyTag'] = array
 (
 	'table' => 'TagTree',

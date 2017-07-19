@@ -179,11 +179,6 @@ function coloredObject($entity, $img, $posx, $posy, $height, $width, $vertical =
 	$count = count ($colors);
 	if ($count == 0)
 	{
-		if (isset ($entity['state']))
-			$colorcode = $entity['state'];
-		else
-			$colorcode = 'T';
-
 		imagefilledrectangle
 		(
 			$img,
@@ -191,7 +186,7 @@ function coloredObject($entity, $img, $posx, $posy, $height, $width, $vertical =
 			$posy,
 			$posx + $width - 1,
 			$posy + $height - 1,
-			$color[$colorcode]
+			$color[array_fetch ($entity, 'state', 'T')]
 		);
 		return;
 	}

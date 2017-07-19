@@ -4354,7 +4354,7 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 		'input_class' => $level ? 'tag-cb' : 'tag-cb root',
 		'input_value' => $taginfo['id'],
 		'text_tagname' => $taginfo['tag'],
-		'color' => (isset($taginfo['color']) ? $taginfo['color'] : NULL),
+		'color' => array_fetch ($taginfo, 'color', NULL),
 	);
 	$is_first_time = FALSE;
 	$prepared_inputname = $inputname;

@@ -4419,7 +4419,6 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 // Return TRUE, if any changes were committed.
 function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
-	global $dbxlink;
 	// Put the current explicit sub-chain into a buffer and merge all tags from
 	// the extra chain that aren't there yet.
 	$oldchain = array();
@@ -4445,19 +4444,11 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 		$result = TRUE;
 	}
 
-	// remove Rack thumnail if Rack or Object tag changes
+	// remove Rack thumbnail if Rack or Object tag changes
 	if ($result && ( $realm == 'rack' || $realm == 'object'))
 	{
-		if($realm == 'rack')
-		{
-			usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $entity_id));
-		}
-		else
-		{
-			// update all rack thumbs for object
-			foreach (getResidentRacksData ($entity_id, FALSE) as $rack_id)
-				usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
-		}
+		$rack_id = $realm == 'rack' ? $entity_id : getResidentRacksData ($entity_id, FALSE);
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	}
 
 	return $result;
