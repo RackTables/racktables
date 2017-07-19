@@ -353,6 +353,46 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('isUnsignedInteger', '1', TRUE),
 			array ('isUnsignedInteger', '1.5', FALSE),
 			array ('isUnsignedInteger', '2', TRUE),
+
+			array ('isHTMLColor', FALSE, FALSE),
+			array ('isHTMLColor', TRUE, FALSE),
+			array ('isHTMLColor', NULL, FALSE),
+			array ('isHTMLColor', 0, FALSE),
+			array ('isHTMLColor', '#ABCDEF', FALSE),
+			array ('isHTMLColor', '#ABC', FALSE),
+			array ('isHTMLColor', '#abc', FALSE),
+			array ('isHTMLColor', 'green', FALSE),
+			array ('isHTMLColor', '', FALSE),
+			array ('isHTMLColor', 'A', FALSE),
+			array ('isHTMLColor', 'AB', FALSE),
+			array ('isHTMLColor', 'ABC', FALSE),
+			array ('isHTMLColor', 'ABCD', FALSE),
+			array ('isHTMLColor', 'ABCDE', FALSE),
+			array ('isHTMLColor', 'ABCDEF', TRUE),
+			array ('isHTMLColor', 'a', FALSE),
+			array ('isHTMLColor', 'ab', FALSE),
+			array ('isHTMLColor', 'abc', FALSE),
+			array ('isHTMLColor', 'abcd', FALSE),
+			array ('isHTMLColor', 'abcde', FALSE),
+			array ('isHTMLColor', 'abcdef', TRUE),
+			array ('isHTMLColor', 'AABBCC', TRUE),
+			array ('isHTMLColor', 'DDEEFF', TRUE),
+			array ('isHTMLColor', '000000', TRUE),
+			array ('isHTMLColor', 'FFFFFF', TRUE),
+			array ('isHTMLColor', 'FF00FG', FALSE),
+
+			array ('HTMLColorForDatabase', '', NULL),
+			array ('HTMLColorForDatabase', NULL, NULL),
+			array ('HTMLColorForDatabase', '000000', 0),
+			array ('HTMLColorForDatabase', 'abcdef', 0xabcdef),
+			array ('HTMLColorForDatabase', 'FFFFFF', 0xffffff),
+
+			array ('HTMLColorFromDatabase', NULL, ''),
+			array ('HTMLColorFromDatabase', 0, '000000'),
+			array ('HTMLColorFromDatabase', '0', '000000'),
+			array ('HTMLColorFromDatabase', 0xffffff, 'FFFFFF'),
+			array ('HTMLColorFromDatabase', 0xabcdef, 'ABCDEF'),
+			array ('HTMLColorFromDatabase', '11259375', 'ABCDEF'),
 		);
 	}
 
@@ -1362,6 +1402,19 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('array_fetch', array (FALSE, 0, 0)),
 			array ('array_fetch', array (NULL, 0, 0)),
 			array ('array_fetch', array ('', 0, 0)),
+
+			array ('HTMLColorForDatabase', array (FALSE)),
+			array ('HTMLColorForDatabase', array (TRUE)),
+			array ('HTMLColorForDatabase', array (0)),
+
+			array ('HTMLColorFromDatabase', array ('')),
+			array ('HTMLColorFromDatabase', array (FALSE)),
+			array ('HTMLColorFromDatabase', array (TRUE)),
+			array ('HTMLColorFromDatabase', array (-1)),
+			array ('HTMLColorFromDatabase', array (1.0)),
+			array ('HTMLColorFromDatabase', array (10.5)),
+			array ('HTMLColorFromDatabase', array (0x01000000)),
+			array ('HTMLColorFromDatabase', array ('0x123456')),
 		);
 	}
 

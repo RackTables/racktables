@@ -4303,7 +4303,11 @@ function generateEntityAutoTags ($cell)
 // results different from MySQL.
 function getTagList ($extra_sql = '')
 {
-	$result = usePreparedSelectBlade ("SELECT id, parent_id, is_assignable, tag, color FROM TagTree ORDER BY tag ${extra_sql}");
+	$result = usePreparedSelectBlade
+	(
+		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color ' .
+		"FROM TagTree ORDER BY tag ${extra_sql}"
+	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
@@ -4365,7 +4369,7 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable, $color
 				'tag' => $tag_name,
 				'parent_id' => nullIfZero ($parent_id),
 				'is_assignable' => $is_assignable,
-				'color' => nullIfEmptyStr ($color)
+				'color' => HTMLColorForDatabase ($color)
 			),
 			array ('id' => $tag_id)
 		);

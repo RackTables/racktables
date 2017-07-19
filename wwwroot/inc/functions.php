@@ -192,6 +192,11 @@ function isUnsignedInteger ($arg, $allow_zero = FALSE)
 	return isInteger ($arg, $allow_zero) && $arg >= 0;
 }
 
+function isHTMLColor ($color)
+{
+	return 1 == preg_match ('/^[0-9A-F]{6}$/i', $color);
+}
+
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
 # (or empty string for empty input, when allowed).
 #
@@ -444,10 +449,15 @@ function genericAssertion ($argname, $argtype)
 		if (! $expr = compileExpression ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid RackCode expression');
 		return $expr;
-	case 'htmlcolor':
-		return assertHTMLColorArg ($argname);
 	case 'htmlcolor0':
-		return assertHTMLColorArg ($argname, TRUE);
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'htmlcolor':
+		$argvalue = assertStringArg ($argname);
+		if (! isHTMLColor ($argvalue))
+			throw new InvalidRequestArgException ($argname, $argvalue, 'not an HTML color');
+		return $argvalue;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
@@ -972,6 +982,31 @@ function l2addressFromDatabase ($string)
 		default:
 			return $string;
 	}
+}
+
+function HTMLColorForDatabase ($string)
+{
+	$ret = 0;
+	// The HTTP request coming through the opspec declaration will indicate an undefined
+	// color value with an empty string, PHP code in addition to that is likely to use
+	// NULL, which comes from the database.
+	if ($string === NULL || $string === '')
+		return NULL;
+	if (! isHTMLColor ($string) || 1 != sscanf (mb_strtoupper ($string), '%06X', $ret))
+		throw new InvalidArgException ('string', $string, 'not an HTML color');
+	return $ret;
+}
+
+// No code currently depends on this function, it is here for completeness.
+function HTMLColorFromDatabase ($u)
+{
+	if ($u === NULL)
+		return NULL;
+	if (! isUnsignedInteger ($u, TRUE))
+		throw new InvalidArgException ('u', $u, 'not an unsigned integer');
+	if ($u > 0xFFFFFF)
+		throw new InvalidArgException ('u', $u, 'value out of range');
+	return sprintf ('%06X', $u);
 }
 
 // DEPRECATED, remove in 0.21.0
@@ -6668,29 +6703,4 @@ function syncObjectPorts ($object_id, $desiredPorts)
 
 	$dbxlink->exec ('UNLOCK TABLES');
 	showSuccess (sprintf ('Added ports: %u, changed: %u, deleted: %u', count ($to_add), count ($to_update), count ($to_delete)));
-}
-
-function isHTMLColor ($color, $ok_if_null = TRUE)
-{
-
-	if( $ok_if_null && $color === NULL)
-		return TRUE;
-
-	// also matches empty string
-	if (! preg_match ('/^(#?[0-9a-f]{6})?$/i', $color))
-		return FALSE;
-
-	return TRUE;
-}
-
-function assertHTMLColorArg ($argname, $ok_if_empty = FALSE)
-{
-	global $sic;
-	if (! isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException ($argname, '', 'parameter is missing');
-	if (! $ok_if_empty && $_REQUEST[$argname] == '')
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is an empty HTML color');
-	if (! isHTMLColor ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an HTML color');
-	return $sic[$argname];
 }

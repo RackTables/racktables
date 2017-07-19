@@ -393,7 +393,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'translator' => 'nullIfZero'),
 		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
-		array ('url_argname' => 'color', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+		array ('url_argname' => 'color', 'assertion' => 'htmlcolor0', 'translator' => 'HTMLColorForDatabase'),
 	),
 );
 $opspec_list['tagtree-edit-destroyTag'] = array
