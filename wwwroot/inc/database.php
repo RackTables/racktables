@@ -900,7 +900,7 @@ function getObjectPortsAndLinks ($object_id, $sorted = TRUE)
 	return $ret;
 }
 
-// This function provides data for syncObjectPorts() and requires only two tables locked.
+// This function provides data for replaceObjectPorts() and requires only two tables locked.
 function getObjectPortsAndLinksTerse ($object_id)
 {
 	$result = usePreparedSelectBlade
@@ -1687,7 +1687,7 @@ function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $por
 	global $dbxlink;
 	$db_l2address = l2addressForDatabase ($port_l2address);
 	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
-	// The conditional table locking is less relevant now due to syncObjectPorts().
+	// The conditional table locking is less relevant now due to replaceObjectPorts().
 	if ($db_l2address != '')
 		$dbxlink->exec ('LOCK TABLES Port WRITE');
 	try

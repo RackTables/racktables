@@ -4592,7 +4592,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	// Sync ports
 	try
 	{
-		syncObjectPorts ($objectInfo['id'], $desiredPorts);
+		replaceObjectPorts ($objectInfo['id'], $desiredPorts);
 	}
 	catch (InvalidArgException $iae)
 	{
@@ -4623,7 +4623,7 @@ function doPDUSNMPmining ($objectInfo, $switch)
 	}
 	try
 	{
-		syncObjectPorts ($objectInfo['id'], $desiredPorts);
+		replaceObjectPorts ($objectInfo['id'], $desiredPorts);
 	}
 	catch (InvalidArgException $iae)
 	{

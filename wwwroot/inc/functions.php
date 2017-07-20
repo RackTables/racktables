@@ -6621,7 +6621,7 @@ function textareaCooked ($text)
 	return $ret;
 }
 
-// Used to fill $desiredPorts argument for syncObjectPorts.
+// Used to fill $desiredPorts argument for replaceObjectPorts.
 // Call this function just like commitAddPort except the first argument
 function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label, $port_l2address)
 {
@@ -6639,7 +6639,7 @@ function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label,
 // $desiredPorts is a list of ports in getObjectPortsAndLinks format.
 // required port fields are name, iif_id, oif_id, label and l2address.
 // $desiredPorts can be filled by addDesiredPort function using commitAddPort format
-function syncObjectPorts ($object_id, $desiredPorts)
+function replaceObjectPorts ($object_id, $desiredPorts)
 {
 	global $dbxlink;
 	$to_delete = $to_update = $real_ports = array();
