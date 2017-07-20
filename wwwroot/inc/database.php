@@ -1030,7 +1030,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		)
 	);
 	recordObjectHistory ($object_id);
-	callHook ('commitUpdateObjectAfter_hook', $object_id );
+	callHook ('commitUpdateObjectAfter_hook', $object_id);
 }
 
 function compare_name ($a, $b)
