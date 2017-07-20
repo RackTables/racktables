@@ -417,6 +417,13 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('HTMLColorFromDatabase', 0xffffff, 'FFFFFF'),
 			array ('HTMLColorFromDatabase', 0xabcdef, 'ABCDEF'),
 			array ('HTMLColorFromDatabase', '11259375', 'ABCDEF'),
+
+			// implicit 2nd argument
+			array ('colorHex2Rgb', '000000', '0,0,0'),
+			array ('colorHex2Rgb', 'FFFFFF', '255,255,255'),
+			array ('colorHex2Rgb', '800000', '128,0,0'),
+			array ('colorHex2Rgb', '008000', '0,128,0'),
+			array ('colorHex2Rgb', '000080', '0,0,128'),
 		);
 	}
 
@@ -1046,6 +1053,18 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('isUnsignedInteger', '1', TRUE, TRUE),
 			array ('isUnsignedInteger', '1.5', TRUE, FALSE),
 			array ('isUnsignedInteger', '2', TRUE, TRUE),
+
+			// explicit 2nd argument
+			array ('colorHex2Rgb', '000000', FALSE, '0,0,0'),
+			array ('colorHex2Rgb', 'FFFFFF', FALSE, '255,255,255'),
+			array ('colorHex2Rgb', '800000', FALSE, '128,0,0'),
+			array ('colorHex2Rgb', '008000', FALSE, '0,128,0'),
+			array ('colorHex2Rgb', '000080', FALSE, '0,0,128'),
+			array ('colorHex2Rgb', '000000', TRUE, '128,128,128'),
+			array ('colorHex2Rgb', 'FFFFFF', TRUE, '255,255,255'),
+			array ('colorHex2Rgb', '800000', TRUE, '192,128,128'),
+			array ('colorHex2Rgb', '008000', TRUE, '128,192,128'),
+			array ('colorHex2Rgb', '000080', TRUE, '128,128,192'),
 		);
 	}
 
