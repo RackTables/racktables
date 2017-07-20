@@ -1001,25 +1001,32 @@ function commitRenameObject ($object_id, $new_name)
 
 function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problems, $new_asset_no, $new_comment)
 {
+	$set_columns = array
+	(
+		'name' => nullIfEmptyStr ($new_name),
+		'label' => nullIfEmptyStr ($new_label),
+		'has_problems' => $new_has_problems == '' ? 'no' : $new_has_problems,
+		'asset_no' => nullIfEmptyStr ($new_asset_no),
+		'comment' => nullIfEmptyStr ($new_comment),
+	);
+	$override = callHook('commitUpdateObjectBefore_hook', $object_id, $set_columns);
+	if ( is_array ($override) )
+	{
+		$set_columns = $override;
+	}
 	$type_id = getObjectType ($object_id);
 	checkObjectNameUniqueness ($new_name, $type_id, $object_id);
 	usePreparedUpdateBlade
 	(
 		'Object',
-		array
-		(
-			'name' => nullIfEmptyStr ($new_name),
-			'label' => nullIfEmptyStr ($new_label),
-			'has_problems' => $new_has_problems == '' ? 'no' : $new_has_problems,
-			'asset_no' => nullIfEmptyStr ($new_asset_no),
-			'comment' => nullIfEmptyStr ($new_comment),
-		),
+		$set_columns,
 		array
 		(
 			'id' => $object_id
 		)
 	);
 	recordObjectHistory ($object_id);
+	callHook ('commitUpdateObjectAfter_hook', $object_id);
 }
 
 function compare_name ($a, $b)
