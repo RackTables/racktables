@@ -882,14 +882,11 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
-
-	$trclass .= getObjectClass ('tag', $taginfo);
-
 	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
-	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
+	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
