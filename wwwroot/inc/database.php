@@ -1018,7 +1018,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 	{
 		$set_columns = $override;
 	}
-    $type_id = getObjectType ($object_id);
+	$type_id = getObjectType ($object_id);
 	checkObjectNameUniqueness ($new_name, $type_id, $object_id);
 	usePreparedUpdateBlade
 	(
@@ -1030,7 +1030,7 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		)
 	);
 	recordObjectHistory ($object_id);
-    callHook ('commitUpdateObjectAfter_hook', $object_id );
+	callHook ('commitUpdateObjectAfter_hook', $object_id );
 }
 
 function compare_name ($a, $b)
