@@ -1821,12 +1821,9 @@ function getAllIPv4Allocations ()
 {
 	$result = usePreparedSelectBlade
 	(
-		"select object_id as object_id, ".
-		"Object.name as object_name, ".
-		"IPv4Allocation.name as name, ".
-		"IPv4Allocation.type as type, ".
-		"INET_NTOA(ip) as ip ".
-		"from IPv4Allocation join Object on id=object_id "
+		'SELECT object_id AS object_id, Object.name AS object_name, objtype_id, ' .
+		'IPv4Allocation.name AS name, IPv4Allocation.type AS type, INET_NTOA(ip) AS ip '.
+		'FROM IPv4Allocation JOIN Object ON id = object_id'
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }

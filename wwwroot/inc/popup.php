@@ -487,11 +487,16 @@ JSEND
 function renderPopupIPv4Selector()
 {
 	assertPermission('ipv4space', 'default');
-	echo '<h2>Choose a port:</h2><br><br>';
+	echo '<h2>Choose an IPv4 allocation:</h2><br><br>';
 	echo '<form action="javascript:;">';
 	echo '<input type=hidden id=ip>';
 	echo '<select size=' . getConfigVar ('MAXSELSIZE') . ' id=addresses>';
-	$addresses = getAllIPv4Allocations();
+	$addresses = array();
+	foreach (getAllIPv4Allocations() as $each)
+	{
+		$each['object_name'] = formatObjectDisplayedName ($each['object_name'], $each['objtype_id']);
+		$addresses[] = $each;
+	}
 	usort ($addresses, 'sortObjectAddressesAndNames');
 	foreach ($addresses as $address)
 		echo "<option value='${address['ip']}' onclick='getElementById(\"ip\").value=\"${address['ip']}\";'>" .

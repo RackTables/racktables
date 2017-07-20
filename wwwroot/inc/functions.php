@@ -1085,21 +1085,18 @@ function sortTokenize ($a, $b)
 
 	$ar = explode(' ', $a);
 	$br = explode(' ', $b);
-	for ($i=0; $i<count($ar) && $i<count($br); $i++)
+	$arc = count ($ar);
+	$brc = count ($br);
+	for ($i = 0; $i < $arc && $i < $brc; $i++)
 	{
-		$ret = 0;
-		if (is_numeric($ar[$i]) && is_numeric($br[$i]))
-			$ret = ($ar[$i]==$br[$i])?0:($ar[$i]<$br[$i]?-1:1);
+		if (isUnsignedInteger ($ar[$i]) && isUnsignedInteger ($br[$i]))
+			$ret = numCompare ($ar[$i], $br[$i]);
 		else
 			$ret = strcasecmp($ar[$i], $br[$i]);
 		if ($ret != 0)
 			return $ret;
 	}
-	if ($i<count($ar))
-		return 1;
-	if ($i<count($br))
-		return -1;
-	return 0;
+	return numCompare ($arc, $brc);
 }
 
 // This function returns an array of single element of object's FQDN attribute,
