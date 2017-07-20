@@ -91,6 +91,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		$this->assertSame ($expected_params, $actual_params);
 	}
 
+	/**
+	 * @group small
+	 * @dataProvider providerMakeWhereSQLIAE
+	 * @expectedException InvalidArgException
+	 */
+	public function testMakeWhereSQLIAE ($where_columns, $conjunction)
+	{
+		$dummy_params = array();
+		makeWhereSQL ($where_columns, $conjunction, $dummy_params);
+	}
+
 	// This test requires a custom function to pass a parameter by reference.
 
 	/**
@@ -1364,9 +1375,6 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nextMACAddress', array ('01:02:03:ab:cd')),
 			array ('nextMACAddress', array ('1:2:3:ab:cd:ef')),
 
-			array ('makeWhereSQL', array (array ('abc' => NULL), 'NOT')),
-			array ('makeWhereSQL', array (array(), 'AND')),
-
 			array ('ip_get_arpa', array ("\xAC\x11\xBB")),
 			array ('ip_get_arpa', array ("\xAC\x11\xBB\x00\x00")),
 
@@ -1447,6 +1455,15 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 				'a IN(?, ?, ?) OR b IN(?, ?, ?, ?)',
 				array ('a.1', 'a.2', 'a.3', 0, 10, 20, 30)
 			),
+		);
+	}
+
+	public function providerMakeWhereSQLIAE ()
+	{
+		return array
+		(
+			array (array ('abc' => NULL), 'NOT'),
+			array (array(), 'AND'),
 		);
 	}
 

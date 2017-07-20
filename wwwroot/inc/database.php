@@ -3964,7 +3964,7 @@ function makeSetSQL ($column_names)
 	return implode (', ', $tmp);
 }
 
-function makeWhereSQL ($where_columns, $conjunction, &$params = array())
+function makeWhereSQL ($where_columns, $conjunction, &$params)
 {
 	if (! in_array (strtoupper ($conjunction), array ('AND', '&&', 'OR', '||', 'XOR')))
 		throw new InvalidArgException ('conjunction', $conjunction, 'invalid operator');
