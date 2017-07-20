@@ -1215,10 +1215,19 @@ function showMySQLWarnings()
 	$rtdebug_mysql_warnings = array();
 }
 
-function colorHex2Rgb($color)
+function colorHex2Rgb($color, $pastel = FALSE)
 {
 	$color = trim ($color, '#');
-	$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
+
+	if ($pastel)
+	{
+		$rgb = (hexdec (substr ($color, 0, 2)) + 255)/2 . ',';
+		$rgb .= (hexdec (substr ($color, 2, 2)) + 255)/2 . ',';
+		$rgb .= (hexdec (substr ($color, 4, 2)) + 255)/2;
+	}
+	else
+		$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
+
 	return $rgb;
 }
 
@@ -1249,8 +1258,8 @@ function getObjectClass($realm, $object, $extrastyle = "")
 		case 'tag':
 			if (isset ($object['color']))
 			{
-				$rgb = colorHex2Rgb ($object['color']);
-				$style = "${extrastyle}background: white linear-gradient(rgba($rgb,0.3), rgba($rgb,0.3));";
+				$rgb = colorHex2Rgb ($object['color'], TRUE);
+				$style = "${extrastyle}background: rgb($rgb);";
 
 				$class = 'tagcolor-' . $object['id'];
 			}
