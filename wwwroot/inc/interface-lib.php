@@ -1221,9 +1221,9 @@ function colorHex2Rgb($color, $pastel = FALSE)
 
 	if ($pastel)
 	{
-		$rgb = (hexdec (substr ($color, 0, 2)) + 255)/2 . ',';
-		$rgb .= (hexdec (substr ($color, 2, 2)) + 255)/2 . ',';
-		$rgb .= (hexdec (substr ($color, 4, 2)) + 255)/2;
+		$rgb = round ((hexdec (substr ($color, 0, 2)) + 255)/2) . ',';
+		$rgb .= round ((hexdec (substr ($color, 2, 2)) + 255)/2) . ',';
+		$rgb .= round ((hexdec (substr ($color, 4, 2)) + 255)/2);
 	}
 	else
 		$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
