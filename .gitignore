@@ -1,5 +1,6 @@
 wwwroot/inc/secret.php
 wwwroot/inc/local.php
+/.idea
 /.project
 tags
 plugins/*
