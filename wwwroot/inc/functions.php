@@ -6649,7 +6649,7 @@ function syncObjectPorts ($object_id, $desiredPorts)
 
 	// The check that does not require access to the database goes first.
 	foreach (array_keys ($desiredPorts) as $k)
-		$desiredPorts[$k]['l2address'] = l2AddressForDatabase ($desiredPorts[$k]['l2address']);
+		$desiredPorts[$k]['l2address'] = l2addressForDatabase ($desiredPorts[$k]['l2address']);
 
 	// Further processing must be done with exclusive access to the table. Even when the
 	// only changes requested are to add ports w/o MAC addresses or to update existing

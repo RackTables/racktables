@@ -5026,7 +5026,7 @@ function alreadyUsedL2Address ($address, $my_object_id)
 // belongs to a port with an object ID other than the given. This constraint makes
 // it possible to reuse L2 addresses within one object's set of ports and to keep
 // them universally unique otherwise. Every L2 address on the input list must have
-// been conditioned with l2AddressForDatabase().
+// been conditioned with l2addressForDatabase().
 function assertUniqueL2Addresses ($db_l2addresses, $my_object_id)
 {
 	// Reindex the array such that array_merge() below works as expected.
