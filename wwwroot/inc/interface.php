@@ -1066,7 +1066,7 @@ function renderRackSortForm ($row_id)
 		}
 	);
 JSTXT;
-	addJS($js, true);
+	addJS ($js, TRUE);
 
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";

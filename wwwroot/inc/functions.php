@@ -1222,9 +1222,9 @@ function string_insert_hrefs_callback ($m)
 # (adopted from MantisBT, core/string_api.php:string_insert_hrefs).
 function string_insert_hrefs ($p_string)
 {
-	static $s_url_regex = null;
-	static $s_url_replace = null;
-	static $s_email_regex = null;
+	static $s_url_regex = NULL;
+	static $s_url_replace = NULL;
+	static $s_email_regex = NULL;
 	static $s_anchor_regex = '/(<a[^>]*>.*?<\/a>)/is';
 
 	if (getConfigVar ('DETECT_URLS') != 'yes')
@@ -1271,7 +1271,7 @@ function string_insert_hrefs ($p_string)
 	# mailto: link, making sure that we skip processing of any existing anchor
 	# tags, to avoid parts of URLs such as https://user@example.com/ or
 	# http://user:password@example.com/ to be not treated as an email.
-	$t_pieces = preg_split ($s_anchor_regex, $p_string, null, PREG_SPLIT_DELIM_CAPTURE);
+	$t_pieces = preg_split ($s_anchor_regex, $p_string, NULL, PREG_SPLIT_DELIM_CAPTURE);
 	$p_string = '';
 	foreach ($t_pieces as $piece)
 		if (preg_match ($s_anchor_regex, $piece))
@@ -1285,7 +1285,7 @@ function string_insert_hrefs ($p_string)
 # Adopted from MantisBT, core/email_api.php:email_regex_simple.
 function email_regex_simple()
 {
-	static $s_email_regex = null;
+	static $s_email_regex = NULL;
 
 	if (is_null ($s_email_regex))
 	{
