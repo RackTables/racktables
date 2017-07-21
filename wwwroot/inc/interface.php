@@ -3004,7 +3004,12 @@ function renderIPv4NetworkAddresses ($range)
 
 	echo $rendered_pager;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+
+	ob_start ();
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
+	$row_html = ob_get_clean ();
+	$override = callHook ('renderIPv4NetworkAddressesHeaderRow_hook', $row_html);
+	echo is_string ($override) ? $override : $row_html;
 
 	markupIPAddrList ($range['addrlist']);
 	for ($ip = $startip; $ip <= $endip; $ip++)
@@ -3016,12 +3021,16 @@ function renderIPv4NetworkAddresses ($range)
 			$addr = $range['addrlist'][$ip_bin];
 		else
 		{
+			ob_start ();
 			echo "<tr class='tdleft $tr_class'><td class=tdleft><a name='ip-$dottedquad' href='" . makeHref(array('page'=>'ipaddress', 'ip' => $dottedquad)) . "'>$dottedquad</a></td>";
 			$editable = permitted ('ipaddress', 'properties', 'editAddress')
 				? 'editable'
 				: '';
 			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'></span></td>";
 			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'></span></td><td></td></tr>\n";
+			$row_html = ob_get_clean ();
+			$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip);
+			echo is_string ($override) ? $override : $row_html;
 			continue;
 		}
 		// render IP change history
@@ -3033,6 +3042,7 @@ function renderIPv4NetworkAddresses ($range)
 			$history_class = 'hover-history underline';
 		}
 		$tr_class .= ' ' . $addr['class'];
+		ob_start ();
 		echo "<tr class='tdleft $tr_class'>";
 		echo "<td><a class='$history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
 		$editable =
@@ -3076,6 +3086,9 @@ function renderIPv4NetworkAddresses ($range)
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
+		$row_html = ob_get_clean ();
+		$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip, $addr);
+		echo is_string ($override) ? $override : $row_html;
 	}
 	// end of iteration
 	if (permitted (NULL, NULL, 'set_reserve_comment'))
@@ -3090,7 +3103,11 @@ function renderIPv6NetworkAddresses ($netinfo)
 {
 	global $pageno, $tabno, $aac_left;
 	echo "<table class='widetable' border=0 cellspacing=0 cellpadding=5 align='center' width='100%'>\n";
+	ob_start ();
 	echo "<tr><th>Address</th><th>Name</th><th>Comment</th><th>Allocation</th></tr>\n";
+	$row_html = ob_get_clean ();
+	$override = callHook ('renderIPv6NetworkAddressesHeaderRow_hook', $row_html);
+	echo is_string ($override) ? $override : $row_html;
 
 	$hl_ip = NULL;
 	if (isset ($_REQUEST['hl_ip']))
@@ -3151,6 +3168,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		}
 
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
+		ob_start ();
 		echo "<tr class='$tr_class'>";
 		echo "<td><a class='$history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
 		$editable =
@@ -3193,6 +3211,10 @@ function renderIPv6NetworkAddresses ($netinfo)
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
+		$row_html = ob_get_clean ();
+		$override = callHook ('renderIPv6NetworkAddressesRow_hook', $row_html, $addr['ip'], $addr);
+		echo is_string ($override) ? $override : $row_html;
+		continue;
 	}
 	if (! $interruped)
 		renderSeparator (ip_next ($prev_ip), ip_last ($netinfo), $hl_ip);
