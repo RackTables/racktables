@@ -5931,24 +5931,28 @@ function universalOpHandler()
 //   'before' puts your tabhandler in the beginning of the list (and thus before the default)
 //   'after' puts your tabhandler to the end of the list (and thus after the default)
 //   'replace': the same as 'after', but the rendered tab is replaced by your output, not appended. See also getRenderedTab
-function registerTabHandler ($page, $tab, $callback, $method = 'after')
+function registerTabHandler ($pageno, $tab, $callback, $method = 'after')
 {
 	global $tabhandlers_stack;
 	global $tabhandler;
+	global $page;
 
-	if (! isset ($tabhandlers_stack[$page][$tab]))
-		$tabhandlers_stack[$page][$tab] = array();
+	if (! isset ($page[$pageno]))
+		$page[$pageno] = array();
 
-	if (isset ($tabhandler[$page][$tab]) && $tabhandler[$page][$tab] != 'universalTabHandler')
-		array_push ($tabhandlers_stack[$page][$tab], $tabhandler[$page][$tab]);
-	$tabhandler[$page][$tab] = 'universalTabHandler';
+	if (! isset ($tabhandlers_stack[$pageno][$tab]))
+		$tabhandlers_stack[$pageno][$tab] = array();
+
+	if (isset ($tabhandler[$pageno][$tab]) && $tabhandler[$pageno][$tab] != 'universalTabHandler')
+		array_push ($tabhandlers_stack[$pageno][$tab], $tabhandler[$pageno][$tab]);
+	$tabhandler[$pageno][$tab] = 'universalTabHandler';
 
 	if ($method == 'before')
-		array_unshift ($tabhandlers_stack[$page][$tab], $callback);
+		array_unshift ($tabhandlers_stack[$pageno][$tab], $callback);
 	elseif ($method == 'after')
-		array_push ($tabhandlers_stack[$page][$tab], $callback);
+		array_push ($tabhandlers_stack[$pageno][$tab], $callback);
 	elseif ($method == 'replace')
-		array_push ($tabhandlers_stack[$page][$tab], '!' . $callback);
+		array_push ($tabhandlers_stack[$pageno][$tab], '!' . $callback);
 	else
 		throw new RacktablesError ("unknown tabhandler injection method '$method'", RackTablesError::INTERNAL);
 }
