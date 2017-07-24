@@ -3029,7 +3029,7 @@ function renderIPv4NetworkAddresses ($range)
 			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'></span></td>";
 			echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'></span></td><td></td></tr>\n";
 			$row_html = ob_get_clean ();
-			$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip);
+			$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip_bin, null);
 			echo is_string ($override) ? $override : $row_html;
 			continue;
 		}
@@ -3087,7 +3087,7 @@ function renderIPv4NetworkAddresses ($range)
 		}
 		echo "</td></tr>\n";
 		$row_html = ob_get_clean ();
-		$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip, $addr);
+		$override = callHook ('renderIPv4NetworkAddressesRow_hook', $row_html, $ip_bin, $addr);
 		echo is_string ($override) ? $override : $row_html;
 	}
 	// end of iteration
@@ -3212,7 +3212,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		}
 		echo "</td></tr>\n";
 		$row_html = ob_get_clean ();
-		$override = callHook ('renderIPv6NetworkAddressesRow_hook', $row_html, $addr['ip'], $addr);
+		$override = callHook ('renderIPv6NetworkAddressesRow_hook', $row_html, $ip_bin, $addr);
 		echo is_string ($override) ? $override : $row_html;
 		continue;
 	}
