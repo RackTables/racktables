@@ -18,7 +18,7 @@ for RackTables is Apache httpd.
 | Debian 6           | `aptitude install mysql-server-5.1`                                     |
 | Debian 7           | `aptitude install mysql-server-5.1`                                     |
 | Fedora 8-16        | `yum install mysql-server mysql`                                        |
-| Fedora 23          | `dnf install mariadb-server mariadb`                                    |
+| Fedora 23-26       | `dnf install mariadb-server mariadb`                                    |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
@@ -32,7 +32,7 @@ for RackTables is Apache httpd.
 | Debian 6           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Debian 7           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
-| Fedora 23          | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
+| Fedora 23-26       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
@@ -46,6 +46,7 @@ for RackTables is Apache httpd.
 | Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
 | Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
 | Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
+| Fedora 26          | `dnf install httpd php php-mysqlnd php-pdo php-gd php-snmp php-mbstring php-bcmath`  |
 | FreeBSD 10         | see note 1.3.c                                                                       | 
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
@@ -140,7 +141,7 @@ and initialize the application.
 
 | Distribution    | Apache httpd UID:GID    | MySQL UNIX socket path           |
 | --------------- | ----------------------- | -------------------------------- |
-| Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
+| Fedora 23-26    | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
 | openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
 | Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 | Ubuntu 16.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
