@@ -1364,7 +1364,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
 	echo "><td class='tdleft $name_class' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
 	echo "<td class=tdleft>${port['label']}</td>";
-	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class=tdleft><tt>${port['l2address']}</tt></td>";
+	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class='tdleft l2address'>${port['l2address']}</td>";
 	if ($port['remote_object_id'])
 	{
 		$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);

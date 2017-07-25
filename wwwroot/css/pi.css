@@ -731,6 +731,10 @@ div.vlan {
 	font-family: Arial,Sans-Serif,sans-serif;
 }
 
+.l2address {
+	font-family: monospace;
+}
+
 /*common rack item attributes*/
 .atom {
 	text-align: center;

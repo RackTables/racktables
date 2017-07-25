@@ -939,10 +939,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		foreach (array_keys ($rows) as $key)
+		{
 			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+			$rows[$key]['l2address'] = l2addressFromDatabase ($rows[$key]['l2address']);
+		}
 		$columns = array
 		(
-			array ('th_text' => 'L2 address', 'row_key' => 'l2address'),
+			array ('th_text' => 'L2 address', 'row_key' => 'l2address', 'td_class' => 'l2address'),
 			array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
 			array ('th_text' => 'Port', 'row_key' => 'name'),
 		);
