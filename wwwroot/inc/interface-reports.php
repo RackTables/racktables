@@ -429,17 +429,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Attribute</th><th>Chapter</th><th class=tdright>Object TypeID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['attr_name']}</td>";
-			echo "<td>${orphan['chapter_name']}</td>";
-			echo "<td class=tdright>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Attribute', 'row_key' => 'attr_name'),
+			array ('th_text' => 'Chapter', 'row_key' => 'chapter_name'),
+			array ('th_text' => 'Object TypeID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -457,17 +453,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td class=tdright>${orphan['id']}</td>";
-			echo "<td>${orphan['name']}</td>";
-			echo "<td class=tdright>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Name', 'row_key' => 'name'),
+			array ('th_text' => 'Type ID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -485,17 +477,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th class=tdright>ID</th><th>Name</th><th class=tdright>Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td class=tdright>${orphan['id']}</td>";
-			echo "<td>${orphan['name']}</td>";
-			echo "<td class=tdright>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Name', 'row_key' => 'name'),
+			array ('th_text' => 'Type ID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -515,18 +503,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th class=tdright>Parent Type ID</th><th>Child</th><th class=tdright>Child Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['parent_name']}</td>";
-			echo "<td class=tdright>${orphan['parent_objtype_id']}</td>";
-			echo "<td>${orphan['child_name']}</td>";
-			echo "<td class=tdright>${orphan['child_objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Parent', 'row_key' => 'parent_name'),
+			array ('th_text' => 'Parent Type ID', 'row_key' => 'parent_objtype_id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Child', 'row_key' => 'child_name'),
+			array ('th_text' => 'Child Type ID', 'row_key' => 'child_objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -551,18 +535,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Violate Object Container Compatibility rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Contained Obj Name</th><th>Contained Obj Type</th><th>Container Obj Name</th><th>Container Obj Type</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td>${invalid['child_name']}</td>";
-			echo "<td>${invalid['child_type']}</td>";
-			echo "<td>${invalid['parent_name']}</td>";
-			echo "<td>${invalid['parent_type']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Contained Obj Name', 'row_key' => 'child_name'),
+			array ('th_text' => 'Contained Obj Type', 'row_key' => 'child_type'),
+			array ('th_text' => 'Container Obj Name', 'row_key' => 'parent_name'),
+			array ('th_text' => 'Container Obj Type', 'row_key' => 'parent_type'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -588,20 +568,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Port Links: Violate Port Compatibility Rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Object A</th><th>Port A Name</th><th>Port A Type</th><th>Object B</th><th>Port B Name</th><th>Port B Type</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td>${invalid['obja_name']}</td>";
-			echo "<td>${invalid['porta_name']}</td>";
-			echo "<td>${invalid['porta_type']}</td>";
-			echo "<td>${invalid['objb_name']}</td>";
-			echo "<td>${invalid['portb_name']}</td>";
-			echo "<td>${invalid['portb_type']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Object A', 'row_key' => 'obja_name'),
+			array ('th_text' => 'Port A Name', 'row_key' => 'porta_name'),
+			array ('th_text' => 'Port A Type', 'row_key' => 'porta_type'),
+			array ('th_text' => 'Object B', 'row_key' => 'objb_name'),
+			array ('th_text' => 'Port B Name', 'row_key' => 'portb_name'),
+			array ('th_text' => 'Port B Type', 'row_key' => 'portb_type'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -639,18 +615,15 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Tag</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			$realm_name = formatRealmName ($orphan['entity_realm']);
-			echo '<tr>';
-			echo "<td>${orphan['tag']}</td>";
-			echo "<td>${realm_name}</td>";
-			echo "<td class=tdright>${orphan['entity_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		foreach (array_keys ($orphans) as $key)
+			$orphans[$key]['realm_name'] = formatRealmName ($orphans[$key]['entity_realm']);
+		$columns = array
+		(
+			array ('th_text' => 'Tag', 'row_key' => 'tag'),
+			array ('th_text' => 'Parent Type', 'row_key' => 'realm_name'),
+			array ('th_text' => 'Parent ID', 'row_key' => 'entity_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -663,7 +636,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT FL.entity_type, FL.entity_id, F.name FROM FileLink FL ' .
+			'SELECT FL.entity_type, FL.entity_id, F.id FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
 			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
@@ -677,18 +650,18 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>File</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
-		foreach ($orphans as $orphan)
+		foreach (array_keys ($orphans) as $key)
 		{
-			$realm_name = formatRealmName ($orphan['entity_type']);
-			echo '<tr>';
-			echo "<td>${orphan['name']}</td>";
-			echo "<td>${realm_name}</td>";
-			echo "<td class=tdright>${orphan['entity_id']}</td>";
-			echo "</tr>\n";
+			$orphans[$key]['name'] = mkCellA (spotEntity ('file', $orphans[$key]['id']));
+			$orphans[$key]['realm_name'] = formatRealmName ($orphans[$key]['entity_type']);
 		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'File', 'row_key' => 'name', 'td_escape' => FALSE),
+			array ('th_text' => 'Parent Type', 'row_key' => 'realm_name'),
+			array ('th_text' => 'Parent ID', 'row_key' => 'entity_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -888,18 +861,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th class=tdright>Contained ID</th><th>Contained Object</th><th class=tdright>Container ID</th><th>Container Object</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td class=tdright>${invalid['id']}</td>";
-			echo "<td>${invalid['name']}</td>";
-			echo "<td class=tdright>${invalid['container_id']}</td>";
-			echo "<td>${invalid['container_name']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		foreach (array_keys ($invalids) as $key)
+			$invalids[$key]['object'] = mkCellA ($invalids[$key]);
+		$columns = array
+		(
+			array ('th_text' => 'Contained ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Contained Object', 'row_key' => 'object', 'td_escape' => FALSE),
+			array ('th_text' => 'Container ID', 'row_key' => 'container_id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Container Object', 'row_key' => 'container_name'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -939,13 +910,10 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		foreach (array_keys ($rows) as $key)
-		{
 			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
-			$rows[$key]['l2address'] = l2addressFromDatabase ($rows[$key]['l2address']);
-		}
 		$columns = array
 		(
-			array ('th_text' => 'L2 address', 'row_key' => 'l2address', 'td_class' => 'l2address'),
+			array ('th_text' => 'L2 address', 'row_key' => 'l2address'),
 			array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
 			array ('th_text' => 'Port', 'row_key' => 'name'),
 		);
@@ -968,10 +936,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		foreach (array_keys ($rows) as $key)
+		{
 			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+			$rows[$key]['l2address'] = l2addressFromDatabase ($rows[$key]['l2address']);
+		}
 		$columns = array
 		(
-			array ('th_text' => 'L2 address', 'row_key' => 'l2address'),
+			array ('th_text' => 'L2 address', 'row_key' => 'l2address', 'td_class' => 'l2address'),
 			array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
 			array ('th_text' => 'Port', 'row_key' => 'name'),
 		);
