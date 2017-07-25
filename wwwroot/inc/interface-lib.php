@@ -394,7 +394,7 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 	(
 		'choose' => 'select...',
 		'empty_value' => '',
-		'indexed' => true,
+		'indexed' => TRUE,
 	);
 	addJS ('js/jquery.optionTree.js');
 	addJS ("
@@ -1286,12 +1286,12 @@ function getObjectClass($realm, $object, $extrastyle = "")
 
 function setEntityColors(&$entity)
 {
-	$colors = false;
+	$colors = FALSE;
 	$entity['colors'] = array();
 	foreach ($entity['etags'] as $taginfo)
 		if ($taginfo['color'] !== NULL )
 		{
-			$colors = true;
+			$colors = TRUE;
 			$color = $taginfo['color'];
 			if (!array_key_exists ($color, $entity['colors']))
 			{

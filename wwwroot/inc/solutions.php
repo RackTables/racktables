@@ -281,7 +281,7 @@ function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 			$rackData['colors'][] = 'ff8080';
 
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
-	coloredObject ($rackData, $img, 1, 1, $totalheight - 2,  $totalwidth - 2, false);
+	coloredObject ($rackData, $img, 1, 1, $totalheight - 2,  $totalwidth - 2, FALSE);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
 	imagefilledrectangle ($img, 3, 3, $totalwidth - 4, $totalheight - 4, $color['F']);
 	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
