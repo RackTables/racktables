@@ -1,3 +1,13 @@
+*** New Plugin Architecture ***
+
+Each plugin should reside in its own directory and contain a file named
+plugin.php housing certain mandatory functions.
+
+Refer to http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins
+for more information.
+
+*** Old Plugin Architecture ***
+
 Put your custom RackTables add-ons into this folder.
 
 Old local.php file is the sample of such add-ons and should be put here

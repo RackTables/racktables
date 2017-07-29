@@ -1433,10 +1433,6 @@ function commitResetObject ($object_id)
 	commitUpdateAttrValue ($object_id, 3, "");
 	// log history
 	recordObjectHistory ($object_id);
-	# Cacti graphs
-	usePreparedDeleteBlade ('CactiGraph', array ('object_id' => $object_id));
-	# Munin graphs
-	usePreparedDeleteBlade ('MuninGraph', array ('object_id' => $object_id));
 	# Do an additional reset if needed
 	callHook ('resetObject_hook', $object_id);
 }
@@ -5719,6 +5715,37 @@ function getLogRecords()
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
+// plugins may install their own settings
+function addConfigVar ($varname, $varvalue, $vartype, $emptyok, $is_hidden, $is_userdefined, $description)
+{
+	usePreparedInsertBlade
+	(
+		'Config',
+		array
+		(
+			'varname' => $varname,
+			'varvalue' => $varvalue,
+			'vartype' => $vartype,
+			'emptyok' => $emptyok,
+			'is_hidden' => $is_hidden,
+			'is_userdefined' => $is_userdefined,
+			'description' => $description
+		)
+	);
+	global $configCache;
+	$configCache = loadConfigDefaults ();
+}
+
+// used when uninstalling a plugin
+function deleteConfigVar ($varname)
+{
+	global $configCache;
+	if (! isset ($configCache))
+		throw new RackTablesError ('configuration cache is unavailable', RackTablesError::INTERNAL);
+	unset ($configCache[$varname]);
+	usePreparedDeleteBlade ('Config', array ('varname' => $varname));
+}
+
 function setConfigVar ($varname, $varvalue)
 {
 	global $configCache;
@@ -5794,26 +5821,6 @@ function getConfiguredQuickLinks()
 	return $ret;
 }
 
-function getCactiGraphsForObject ($object_id)
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT server_id, graph_id, caption FROM CactiGraph WHERE object_id = ? ORDER BY server_id, graph_id',
-		array ($object_id)
-	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph_id');
-}
-
-function getMuninGraphsForObject ($object_id)
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT server_id, graph, caption FROM MuninGraph WHERE object_id = ? ORDER BY server_id, graph',
-		array ($object_id)
-	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'graph');
-}
-
 function touchVLANSwitch ($switch_id)
 {
 	return usePreparedExecuteBlade
@@ -5864,26 +5871,6 @@ function scanAttrRelativeDays ($attr_id, $not_before_days, $not_after_days)
 		array ($attr_id, $not_before_days, $not_after_days)
 	);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
-}
-
-function getCactiServers()
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT id, base_url, username, password, COUNT(graph_id) AS num_graphs ' .
-		'FROM CactiServer AS CS LEFT JOIN CactiGraph AS CG ON CS.id = CG.server_id GROUP BY id'
-	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
-}
-
-function getMuninServers()
-{
-	$result = usePreparedSelectBlade
-	(
-		'SELECT id, base_url, COUNT(MG.object_id) AS num_graphs ' .
-		'FROM MuninServer AS MS LEFT JOIN MuninGraph AS MG ON MS.id = MG.server_id GROUP BY id'
-	);
-	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function isTransactionActive()
@@ -6107,4 +6094,112 @@ function releaseDBMutex ($name)
 	$result = usePreparedSelectBlade ('SELECT RELEASE_LOCK(?)', array (getDBName() . '.' . $name));
 	$row = $result->fetchColumn();
 	return $row === '1';
+}
+
+// valid states: disabled, enabled, not_installed
+// if no state is specified, return all
+function getPlugins ($state = NULL)
+{
+	// installed
+	$result = usePreparedSelectBlade ('SELECT * FROM Plugin ORDER BY name');
+	$in_db = array ();
+	foreach ($result as $row)
+		if (! $state or $state == $row['state'])
+			$in_db[$row['name']] = array
+			(
+				'longname' => $row['longname'],
+				'code_version' => 'N/A',
+				'db_version' => $row['version'],
+				'home_url' => $row['home_url'],
+				'state' => $row['state']
+			);
+
+	// available
+	global $racktables_plugins_dir;
+	$plugin_dirs = glob ("${racktables_plugins_dir}/*", GLOB_ONLYDIR);
+	$in_code = array ();
+	foreach ($plugin_dirs as $plugin_dir)
+	{
+		$plugin = basename ($plugin_dir);
+		if (! file_exists ("${plugin_dir}/plugin.php"))
+			continue;
+
+		require_once "${plugin_dir}/plugin.php";
+		if (! function_exists ("plugin_${plugin}_info"))
+			continue;
+
+		$info = call_user_func ("plugin_${plugin}_info");
+		$in_code[$info['name']] = array
+		(
+			'longname' => $info['longname'],
+			'code_version' => $info['version'],
+			'db_version' => (array_key_exists ($plugin, $in_db) ? $in_db[$info['name']]['db_version'] : 'N/A'),
+			'home_url' => $info['home_url'],
+			'state' => (array_key_exists ($plugin, $in_db) ? $in_db[$info['name']]['state'] : 'not_installed')
+		);
+	}
+
+	// merge plugin lists and filter them, if needed
+	$ret = array_replace_recursive ($in_db, $in_code);
+	if ($state)
+		foreach ($ret as $name => $info)
+			if ($info['state'] != $state)
+				unset ($ret[$name]);
+	ksort ($ret);
+	return $ret;
+}
+
+function getPlugin ($name)
+{
+	$result = usePreparedSelectBlade ('SELECT * FROM Plugin WHERE name = ?', array ($name));
+	$db_info = $result->fetch (PDO::FETCH_ASSOC);
+	$in_db = array ();
+	if (is_array ($db_info))
+	{
+		$in_db['name'] = $db_info['name'];
+		$in_db['longname'] = $db_info['longname'];
+		$in_db['code_version'] = 'N/A';
+		$in_db['db_version'] = $db_info['version'];
+		$in_db['home_url'] = $db_info['home_url'];
+		$in_db['state'] = $db_info['state'];
+	}
+
+	global $racktables_plugins_dir;
+	$in_code = array ();
+	if (file_exists ("$racktables_plugins_dir/${name}/plugin.php"))
+	{
+		require_once "${racktables_plugins_dir}/${name}/plugin.php";
+		if (! function_exists ("plugin_${name}_info"))
+			return FALSE;
+
+		$code_info = call_user_func ("plugin_${name}_info");
+		$in_code['name'] = $code_info['name'];
+		$in_code['longname'] = $code_info['longname'];
+		$in_code['code_version'] = $code_info['version'];
+		$in_code['db_version'] = (isset ($in_db['db_version']) ? $in_db['db_version'] : 'N/A');
+		$in_code['home_url'] = $code_info['home_url'];
+		$in_code['state'] = (isset ($in_db['state']) ? $in_db['state'] : 'not_installed');
+	}
+	return array_replace ($in_db, $in_code);
+}
+
+function commitInstallPlugin ($name, $longname, $version, $home_url)
+{
+	usePreparedInsertBlade
+	(
+		'Plugin',
+		array
+		(
+			'name' => $name,
+			'longname' => $longname,
+			'version' => $version,
+			'home_url' => $home_url,
+			'state' => 'enabled'
+		)
+	);
+}
+
+function commitUninstallPlugin ($name)
+{
+	usePreparedDeleteBlade ('Plugin', array ('name' => $name));
 }

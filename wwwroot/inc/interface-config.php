@@ -1097,6 +1097,77 @@ function renderMyPasswordEditor ()
 	echo '</table></form>';
 }
 
+function renderPluginConfig ()
+{
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th></tr>\n";
+	global $nextorder;
+	$order = 'odd';
+	foreach ($plugins as $name => $plugin)
+	{
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdleft>${plugin['longname']}</td>";
+		echo "<td class=tdleft>${plugin['code_version']}</td>";
+		echo "<td class=tdleft>${plugin['db_version']}</td>";
+		echo "<td class=tdleft>${plugin['home_url']}</td>";
+		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
+		echo "</tr>\n";
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n";
+}
+
+function renderPluginEditor()
+{
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
+	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
+	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th><th></th></tr>\n";
+	global $nextorder;
+	$order = 'odd';
+	foreach ($plugins as $name => $plugin)
+	{
+		echo "<tr class=row_${order}>";
+		echo "<td class=tdleft>${plugin['longname']}</td>";
+		echo "<td class=tdleft>${plugin['code_version']}</td>";
+		echo "<td class=tdleft>${plugin['db_version']}</td>";
+		echo "<td class=tdleft>${plugin['home_url']}</td>";
+		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
+		echo "<td>";
+		if ($plugin['state'] == 'disabled')
+			echo getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable');
+		if ($plugin['state'] == 'enabled')
+			echo getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable');
+		if ($plugin['state'] == 'not_installed')
+			echo getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install');
+		if ($plugin['state'] == 'disabled' or $plugin['state'] == 'enabled')
+			echo getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation');
+		if
+		(
+			$plugin['code_version'] != 'N/A' and
+			$plugin['db_version'] != 'N/A' and
+			$plugin['code_version'] != $plugin['db_version']
+		)
+			echo getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade');
+		echo "</td></tr>\n";
+		$order = $nextorder[$order];
+	}
+	echo "</table>\n";
+}
+
 function renderMyQuickLinks ()
 {
 	global $indexlayout, $page;
@@ -1124,117 +1195,4 @@ function renderMyQuickLinks ()
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo '</form></div>';
 	finishPortlet();
-}
-
-function renderCactiConfig()
-{
-	$columns = array
-	(
-		array ('th_text' => 'base URL', 'row_key' => 'base_url'),
-		array ('th_text' => 'username', 'row_key' => 'username'),
-		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
-	);
-	$servers = getCactiServers();
-	startPortlet ('Cacti servers (' . count ($servers) . ')');
-	renderTableViewer ($columns, $servers);
-	finishPortlet();
-}
-
-function renderCactiServersEditor()
-{
-	function printNewItemTR ()
-	{
-		printOpFormIntro ('add');
-		echo '<tr>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'<td><input type=text size=48 name=base_url></td>' .
-			'<td><input type=text size=24 name=username></td>' .
-			'<td><input type=password size=24 name=password></td>' .
-			'<td>&nbsp;</td>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'</tr></form>';
-	}
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr>' .
-		'<th>&nbsp;</th>' .
-		'<th>base URL</th>' .
-		'<th>username</th>' .
-		'<th>password</th>' .
-		'<th>graph(s)</th>' .
-		'<th>&nbsp;</th>' .
-		'</tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach (getCactiServers() as $server)
-	{
-		printOpFormIntro ('upd', array ('id' => $server['id']));
-		echo '<tr><td>';
-		if ($server['num_graphs'])
-			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
-		else
-			echo getOpLink (array ('op' => 'del', 'id' => $server['id']), '', 'destroy', 'delete this server');
-		echo '</td>';
-		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo '<td><input type=text size=24 name=username value="' . htmlspecialchars ($server['username'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo '<td><input type=password size=24 name=password value="' . htmlspecialchars ($server['password'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
-		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
-	echo '</table>';
-}
-
-function renderMuninConfig()
-{
-	$columns = array
-	(
-		array ('th_text' => 'base URL', 'row_key' => 'base_url', 'td_maxlen' => 150),
-		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
-	);
-	$servers = getMuninServers();
-	startPortlet ('Munin servers (' . count ($servers) . ')');
-	renderTableViewer ($columns, $servers);
-	finishPortlet();
-}
-
-function renderMuninServersEditor()
-{
-	function printNewItemTR()
-	{
-		printOpFormIntro ('add');
-		echo '<tr>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'<td><input type=text size=48 name=base_url></td>' .
-			'<td>&nbsp;</td>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'</tr></form>';
-	}
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr>' .
-		'<th>&nbsp;</th>' .
-		'<th>base URL</th>' .
-		'<th>graph(s)</th>' .
-		'<th>&nbsp;</th>' .
-		'</tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach (getMuninServers() as $server)
-	{
-		printOpFormIntro ('upd', array ('id' => $server['id']));
-		echo '<tr><td>';
-		if ($server['num_graphs'])
-			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
-		else
-			echo getOpLink (array ('op' => 'del', 'id' => $server['id']), '', 'destroy', 'delete this server');
-		echo '</td>';
-		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
-		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
-	echo '</table>';
 }

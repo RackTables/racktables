@@ -49,7 +49,7 @@ function dispatchImageRequest()
 			throw castRackImageException ($e);
 		}
 		dispatchMiniRackThumbRequest (getBypassValue());
-		break;
+		return;
 	case 'midirack': // rack security context
 		$pageno = 'rack';
 		$tabno = 'default';
@@ -68,36 +68,17 @@ function dispatchImageRequest()
 		// Scaling or highlighting implies no caching and thus no extra wrapper code around.
 		header ('Content-Type: image/png');
 		printRackThumbImage (getBypassValue(), $scale, $object_id);
-		break;
+		return;
 	case 'preview': // file security context
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
 		assertPermission();
 		renderImagePreview (getBypassValue());
-		break;
-	case 'cactigraph':
-		$pageno = 'object';
-		$tabno = 'cacti';
-		fixContext();
-		assertPermission();
-		$graph_id = genericAssertion ('graph_id', 'uint');
-		if (! array_key_exists ($graph_id, getCactiGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph_id', $graph_id);
-		proxyCactiRequest (genericAssertion ('server_id', 'uint'), $graph_id);
-		break;
-	case 'muningraph':
-		$pageno = 'object';
-		$tabno = 'munin';
-		fixContext();
-		assertPermission();
-		$graph = genericAssertion ('graph', 'string');
-		if (! array_key_exists ($graph, getMuninGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph', $graph);
-		proxyMuninRequest (genericAssertion ('server_id', 'uint'), $graph);
-		break;
+		return;
 	default:
-		throw new InvalidRequestArgException ('img', $img);
+		if (! callHook ('dispatchImageRequest_hook'))
+			throw new InvalidRequestArgException ('img', $img);
 	}
 }
 
@@ -521,122 +502,6 @@ function proxyStaticURI ($URI)
 	header ('Content-Type: ' . $content_type[$matches[1]]);
 	fpassthru ($fh);
 	fclose ($fh);
-}
-
-function proxyCactiRequest ($server_id, $graph_id)
-{
-	$ret = array();
-	$servers = getCactiServers();
-	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id, 'there is no such server');
-	$cacti_url = $servers[$server_id]['base_url'];
-	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
-	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
-	$postvars .= '&login_password=' . $servers[$server_id]['password'];
-
-	$session = curl_init();
-//	curl_setopt ($session, CURLOPT_VERBOSE, TRUE);
-
-	// Initial options up here so a specific type can override them
-	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE);
-	curl_setopt ($session, CURLOPT_TIMEOUT, 10);
-	curl_setopt ($session, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt ($session, CURLOPT_URL, $url);
-
-	if (isset($_SESSION['CACTICOOKIE'][$cacti_url]))
-		curl_setopt ($session, CURLOPT_COOKIE, $_SESSION['CACTICOOKIE'][$cacti_url]);
-
-	// Request the image
-	$ret['contents'] = curl_exec ($session);
-	$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-	$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-
-	// Not an image, probably the login page
-	if (preg_match ('/^text\/html.*/i', $ret['type']))
-	{
-		// Request to set the cookies
-		curl_setopt ($session, CURLOPT_HEADER, TRUE);
-		curl_setopt ($session, CURLOPT_COOKIE, "");	// clear the old cookie
-		$headers = curl_exec ($session);
-
-		// Get the cookies from the headers
-		preg_match('/Set-Cookie: ([^;]*)/i', $headers, $cookies);
-		array_shift($cookies);  // Remove 'Set-Cookie: ...' value
-		$cookie_header = implode(";", $cookies);
-		$_SESSION['CACTICOOKIE'][$cacti_url] = $cookie_header; // store for later use by this user
-
-		// CSRF security in 0.8.8h, regexp version
-		if (preg_match("/sid:([a-z0-9,]+)\"/", $ret['contents'], $csf_output))
-		{
-			if (array_key_exists(1, $csf_output))
-				$postvars .="&__csrf_magic=$csf_output[1]";
-		}
-		// POST Login
-		curl_setopt ($session, CURLOPT_COOKIE, $cookie_header);
-		curl_setopt ($session, CURLOPT_HEADER, FALSE);
-		curl_setopt ($session, CURLOPT_POST, TRUE);
-		curl_setopt ($session, CURLOPT_POSTFIELDS, $postvars);
-		curl_exec ($session);
-
-		// Request the image
-		curl_setopt ($session, CURLOPT_HTTPGET, TRUE);
-		$ret['contents'] = curl_exec ($session);
-		$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-		$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-	}
-
-	curl_close ($session);
-
-	if ($ret['type'] != NULL)
-		header("Content-Type: {$ret['type']}");
-	if ($ret['size'] > 0)
-		header("Content-Length: {$ret['size']}");
-
-	echo $ret['contents'];
-}
-
-function proxyMuninRequest ($server_id, $graph)
-{
-	try
-	{
-		list ($host, $domain) = getMuninNameAndDomain (getBypassValue());
-	}
-	catch (InvalidArgException $e)
-	{
-		throw new RTImageError ('munin_graph');
-	}
-
-	$ret = array();
-	$servers = getMuninServers();
-	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id, 'there is no such server');
-	$munin_url = $servers[$server_id]['base_url'];
-	$url = "${munin_url}/${domain}/${host}.${domain}/${graph}-day.png";
-
-	$session = curl_init();
-
-	// Initial options up here so a specific type can override them
-	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE);
-	curl_setopt ($session, CURLOPT_TIMEOUT, 10);
-	curl_setopt ($session, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt ($session, CURLOPT_URL, $url);
-
-	if (isset($_SESSION['MUNINCOOKIE'][$munin_url]))
-		curl_setopt ($session, CURLOPT_COOKIE, $_SESSION['MUNINCOOKIE'][$munin_url]);
-
-	// Request the image
-	$ret['contents'] = curl_exec ($session);
-	$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-	$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-
-	curl_close ($session);
-
-	if ($ret['type'] != NULL)
-		header ("Content-Type: {$ret['type']}");
-	if ($ret['size'] > 0)
-		header ("Content-Length: {$ret['size']}");
-
-	echo $ret['contents'];
 }
 
 function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rectattrs = array())

@@ -3,6 +3,7 @@
 	update: better display objects that have no common name
 	update: highlight RackCode syntax in the Permissions viewer too
 	update: refine delivery of rack thumb images
+	update: new plugin architecture
 	bugfix: put dictionary-based attributes formatting right
 	bugfix: date attributes now can be set for racks, rows and locations
 	new feature: tag colors (GH#158 by Maik Ehinger)

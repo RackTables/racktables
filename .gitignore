@@ -3,7 +3,6 @@ wwwroot/inc/local.php
 /.idea
 /.project
 tags
-plugins/*
 
 # vim
 [._]*.s[a-w][a-z]

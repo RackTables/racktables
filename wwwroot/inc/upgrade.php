@@ -164,6 +164,12 @@ dsplaying unallocated networks in IPv4 space tree. Setting it also disables
 the "knight" feature.
 ENDOFTEXT
 ,
+	'0.21.0' => <<<ENDOFTEXT
+This release introduces a new plugin architecture.  If you experience issues
+after the upgrade, try disabling plugins.
+Refer to <a href="http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins">the wiki</a> for more information.
+ENDOFTEXT
+,
 );
 
 // At the moment we assume, that for any two releases we can
@@ -1229,6 +1235,40 @@ ENDOFTRIGGER;
 			$query[] = "UPDATE Port SET label = NULL WHERE label = ''";
 			$query[] = "DELETE FROM RackThumbnail";
 			$query[] = "ALTER TABLE TagTree ADD COLUMN color mediumint unsigned DEFAULT NULL AFTER tag";
+
+			$query[] = "
+CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+			// if the Cacti or Munin plugins are being used, mark them as enabled, otherwise uninstall them
+			// from now on, upgrades will be handled by the plugins themselves
+			$result = $dbxlink->query ('SELECT COUNT(*) FROM CactiServer');
+			if ($result->fetchColumn() > 0)
+				$query[] = "INSERT INTO Plugin VALUES ('cacti','Cacti','1.0','http://www.racktables.org/','enabled')";
+			else
+			{
+				$query[] = "DELETE FROM Config WHERE varname IN ('CACTI_LISTSRC','CACTI_RRA_ID')";
+				$query[] = "DROP TABLE `CactiGraph`";
+				$query[] = "DROP TABLE `CactiServer`";
+			}
+			unset ($result);
+			$result = $dbxlink->query ('SELECT COUNT(*) FROM MuninServer');
+			if ($result->fetchColumn() > 0)
+				$query[] = "INSERT INTO Plugin VALUES ('munin','Munin','1.0','http://www.racktables.org/','enabled')";
+			else
+			{
+				$query[] = "DELETE FROM Config WHERE varname = 'MUNIN_LISTSRC'";
+				$query[] = "DROP TABLE `MuninGraph`";
+				$query[] = "DROP TABLE `MuninServer`";
+			}
+			unset ($result);
+
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
