@@ -9,14 +9,19 @@ echo "Running express tests using the base directory '$BASEDIR'"
 # produce any output when parsed by PHP (because, for instance, a plain text
 # file is a valid PHP input file).
 echo
-cd "$BASEDIR/wwwroot/inc"
+cd "$BASEDIR"
 files=0
 errors=0
 TEMPFILE=`mktemp /tmp/racktables_unittest.XXXXXX`
-FORMAT='%-25s : %s\n'
-for f in *.php; do
-	[ "$f" = "init.php" ] && continue # see below
-	php "$f" > "$TEMPFILE"
+FORMAT='%-40s : %s\n'
+for f in wwwroot/inc/*.php plugins/*/plugin.php; do
+	if [ "$f" = "wwwroot/inc/init.php" ]; then
+		printf "$FORMAT" "$f" 'not tested'
+		continue # see below
+	fi
+	fname=`basename "$f"`
+	cd `dirname "$f"`
+	php "$fname" > "$TEMPFILE"
 	rc=$?
 	if [ $rc -eq 0 -a ! -s "$TEMPFILE" ]; then
 		printf "$FORMAT" "$f" 'OK'
@@ -31,8 +36,9 @@ for f in *.php; do
 		fi
 	fi
 	files=`expr $files + 1`
+	cd "$BASEDIR"
 done
-echo '------------------------------------'
+echo '---------------------------------------------------'
 echo "Files parsed: $files, failed tests: $errors"
 rm -f "$TEMPFILE"
 [ $errors -eq 0 ] || exit 1
