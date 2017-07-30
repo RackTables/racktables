@@ -38,7 +38,6 @@ cat > "$BASEDIR/wwwroot/inc/secret.php" <<EOF
 \$pdo_dsn = 'mysql:host=localhost;port=3306;dbname=${DBNAME}';
 \$db_username = '${USERNAME}';
 \$db_password = '${PASSWORD}';
-?>
 EOF
 
 cat > "$BASEDIR/cli_install.php" <<EOF
@@ -50,7 +49,6 @@ require_once 'wwwroot/inc/install.php';
 ob_start();
 init_database_static();
 ob_end_clean();
-?>
 EOF
 
 cd "$BASEDIR"

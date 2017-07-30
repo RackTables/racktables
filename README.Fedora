@@ -53,7 +53,6 @@ wrappers will differ only in the value of $racktables_confdir setting:
 $racktables_confdir = '/etc/RackTables/example1';
 require '/usr/share/RackTables/wwwroot/index.php';
 
-?>
 EOF
 
 Once the wrapper files are installed, setup of each instance must be
