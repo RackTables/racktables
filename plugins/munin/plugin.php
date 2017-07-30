@@ -371,5 +371,3 @@ function triggerMuninGraphs()
 		return 'std';
 	return '';
 }
-
-?>

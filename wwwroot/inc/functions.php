@@ -6695,15 +6695,11 @@ function replaceObjectPorts ($object_id, $desiredPorts)
 
 function formatPluginState ($state)
 {
-	switch ($state)
-	{
-	case 'disabled':
-		return 'Disabled';
-	case 'enabled':
-		return 'Enabled';
-	case 'not_installed':
-		return 'Not installed';
-	default:
-		return 'unknown';
-	}
+	$map = array
+	(
+		'disabled' => 'Disabled',
+		'enabled' => 'Enabled',
+		'not_installed' => 'Not installed',
+	);
+	return array_fetch ($map, $state, 'unknown');
 }

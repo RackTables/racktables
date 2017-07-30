@@ -3782,15 +3782,13 @@ function destroyTag()
 
 function installPlugin ()
 {
-	global $sic;
-	assertStringArg ('name');
-
+	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${sic['name']}_install"))
-			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
-		$plugin = getPlugin ($sic['name']);
-		call_user_func ("plugin_${sic['name']}_install");
+		if (! is_callable ("plugin_${name}_install"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($name);
+		call_user_func ("plugin_${name}_install");
 		commitInstallPlugin ($plugin['name'], $plugin['longname'], $plugin['code_version'], $plugin['home_url']);
 	}
 	catch (Exception $e)
@@ -3798,47 +3796,43 @@ function installPlugin ()
 		showError ('Install failed: ' . $e->getMessage());
 		return;
 	}
-	showSuccess ('Installed plugin: ' . $sic['name']);
+	showSuccess ('Installed plugin: ' . $name);
 }
 
 function uninstallPlugin ()
 {
-	global $sic;
-	assertStringArg ('name');
-
+	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${sic['name']}_uninstall"))
-			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
-		call_user_func ("plugin_${sic['name']}_uninstall");
-		commitUninstallPlugin ($sic['name']);
+		if (! is_callable ("plugin_${name}_uninstall"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
+		call_user_func ("plugin_${name}_uninstall");
+		commitUninstallPlugin ($name);
 	}
 	catch (Exception $e)
 	{
 		showError ('Uninstall failed: ' . $e->getMessage());
 		return;
 	}
-	showSuccess ('Uninstalled plugin: ' . $sic['name']);
+	showSuccess ('Uninstalled plugin: ' . $name);
 }
 
 function upgradePlugin ()
 {
-	global $sic;
-	assertStringArg ('name');
-
+	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${sic['name']}_upgrade"))
-			throw new RackTablesError ("The ${sic['name']} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
-		$plugin = getPlugin ($sic['name']);
-		call_user_func ("plugin_${sic['name']}_upgrade");
+		if (! is_callable ("plugin_${name}_upgrade"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($name);
+		call_user_func ("plugin_${name}_upgrade");
 		// get details from the plugin code itself
-		$code_plugin = call_user_func ("plugin_${sic['name']}_info");
+		$code_plugin = call_user_func ("plugin_${name}_info");
 		usePreparedUpdateBlade
 		(
 			'Plugin',
 			array ('longname' => $code_plugin['longname'], 'version' => $code_plugin['version'], 'home_url' => $code_plugin['home_url']),
-			array ('name' => $sic['name'])
+			array ('name' => $name)
 		);
 	}
 	catch (Exception $e)
@@ -3846,5 +3840,5 @@ function upgradePlugin ()
 		showError ('Upgrade failed: ' . $e->getMessage());
 		return;
 	}
-	showSuccess ('Upgraded plugin: ' . $sic['name']);
+	showSuccess ('Upgraded plugin: ' . $name);
 }

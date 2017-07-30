@@ -6101,7 +6101,7 @@ function releaseDBMutex ($name)
 function getPlugins ($state = NULL)
 {
 	// installed
-	$result = usePreparedSelectBlade ('SELECT * FROM Plugin ORDER BY name');
+	$result = usePreparedSelectBlade ('SELECT name, longname, version, home_url, state FROM Plugin ORDER BY name');
 	$in_db = array ();
 	foreach ($result as $row)
 		if (! $state or $state == $row['state'])
@@ -6151,7 +6151,11 @@ function getPlugins ($state = NULL)
 
 function getPlugin ($name)
 {
-	$result = usePreparedSelectBlade ('SELECT * FROM Plugin WHERE name = ?', array ($name));
+	$result = usePreparedSelectBlade
+	(
+		'SELECT name, longname, version, home_url, state FROM Plugin WHERE name = ?',
+		array ($name)
+	);
 	$db_info = $result->fetch (PDO::FETCH_ASSOC);
 	$in_db = array ();
 	if (is_array ($db_info))

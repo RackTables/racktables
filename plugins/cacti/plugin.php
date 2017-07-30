@@ -389,5 +389,3 @@ function triggerCactiGraphs ()
 		return 'std';
 	return '';
 }
-
-?>

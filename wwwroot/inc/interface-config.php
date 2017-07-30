@@ -1106,22 +1106,17 @@ function renderPluginConfig ()
 		return;
 	}
 
-	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th></tr>\n";
-	global $nextorder;
-	$order = 'odd';
-	foreach ($plugins as $name => $plugin)
-	{
-		echo "<tr class=row_${order}>";
-		echo "<td class=tdleft>${plugin['longname']}</td>";
-		echo "<td class=tdleft>${plugin['code_version']}</td>";
-		echo "<td class=tdleft>${plugin['db_version']}</td>";
-		echo "<td class=tdleft>${plugin['home_url']}</td>";
-		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
-		echo "</tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table>\n";
+	foreach (array_keys ($plugins) as $name)
+		$plugins[$name]['x_state'] = formatPluginState ($plugins[$name]['state']);
+	$columns = array
+	(
+		array ('th_text' => 'Plugin', 'row_key' => 'longname'),
+		array ('th_text' => 'Code Version', 'row_key' => 'code_version'),
+		array ('th_text' => 'DB Version', 'row_key' => 'db_version'),
+		array ('th_text' => 'Home page', 'row_key' => 'home_url'),
+		array ('th_text' => 'State', 'row_key' => 'x_state'),
+	);
+	renderTableViewer ($columns, $plugins);
 }
 
 function renderPluginEditor()
@@ -1133,39 +1128,38 @@ function renderPluginEditor()
 		return;
 	}
 
-	echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
-	echo "<br><table cellspacing=0 cellpadding=5 align=center class=cooltable>\n";
-	echo "<tr><th>Plugin</th><th>Code Version</th><th>DB Version</th><th>Home page</th><th>State</th><th></th></tr>\n";
-	global $nextorder;
-	$order = 'odd';
-	foreach ($plugins as $name => $plugin)
+	foreach (array_keys ($plugins) as $name)
 	{
-		echo "<tr class=row_${order}>";
-		echo "<td class=tdleft>${plugin['longname']}</td>";
-		echo "<td class=tdleft>${plugin['code_version']}</td>";
-		echo "<td class=tdleft>${plugin['db_version']}</td>";
-		echo "<td class=tdleft>${plugin['home_url']}</td>";
-		echo '<td class=tdleft>' . formatPluginState ($plugin['state']) . '</td>';
-		echo "<td>";
-		if ($plugin['state'] == 'disabled')
-			echo getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable');
-		if ($plugin['state'] == 'enabled')
-			echo getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable');
-		if ($plugin['state'] == 'not_installed')
-			echo getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install');
-		if ($plugin['state'] == 'disabled' or $plugin['state'] == 'enabled')
-			echo getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation');
+		$links = array();
+		if ($plugins[$name]['state'] == 'disabled')
+			$links[] = getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable');
+		if ($plugins[$name]['state'] == 'enabled')
+			$links[] = getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable');
+		if ($plugins[$name]['state'] == 'not_installed')
+			$links[] = getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install');
+		if ($plugins[$name]['state'] == 'disabled' or $plugins[$name]['state'] == 'enabled')
+			$links[] = getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation');
 		if
 		(
-			$plugin['code_version'] != 'N/A' and
-			$plugin['db_version'] != 'N/A' and
-			$plugin['code_version'] != $plugin['db_version']
+			$plugins[$name]['code_version'] != 'N/A' &&
+			$plugins[$name]['db_version'] != 'N/A' &&
+			$plugins[$name]['code_version'] != $plugins[$name]['db_version']
 		)
-			echo getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade');
-		echo "</td></tr>\n";
-		$order = $nextorder[$order];
+			$links[] = getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade');
+		$plugins[$name]['links'] = implode ('', $links);
+		$plugins[$name]['x_state'] = formatPluginState ($plugins[$name]['state']);
 	}
-	echo "</table>\n";
+	$columns = array
+	(
+		array ('th_text' => 'Plugin', 'row_key' => 'longname'),
+		array ('th_text' => 'Code Version', 'row_key' => 'code_version'),
+		array ('th_text' => 'DB Version', 'row_key' => 'db_version'),
+		array ('th_text' => 'Home page', 'row_key' => 'home_url'),
+		array ('th_text' => 'State', 'row_key' => 'x_state'),
+		array ('row_key' => 'links', 'td_escape' => FALSE),
+	);
+	echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
+	renderTableViewer ($columns, $plugins);
 }
 
 function renderMyQuickLinks ()
