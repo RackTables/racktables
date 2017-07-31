@@ -665,112 +665,120 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
-	// check 8: missing triggers
-	$triggers= array
+	// check 8: triggers
+	$known_triggers= array
 	(
-		'Link-before-insert' => 'Link',
-		'Link-before-update' => 'Link'
+		array ('trigger_name' => 'Link-before-insert', 'table_name' => 'Link'),
+		array ('trigger_name' => 'Link-before-update', 'table_name' => 'Link'),
+		array ('trigger_name' => 'EntityLink-before-insert', 'table_name' => 'EntityLink'),
+		array ('trigger_name' => 'EntityLink-before-update', 'table_name' => 'EntityLink'),
 	);
+	$known_triggers = reindexById ($known_triggers, 'trigger_name');
+
 	$result = usePreparedSelectBlade
 	(
-		'SELECT TRIGGER_NAME, EVENT_OBJECT_TABLE ' .
+		'SELECT TRIGGER_NAME AS trigger_name, EVENT_OBJECT_TABLE AS table_name ' .
 		'FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA()'
 	);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	$existing_triggers = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'trigger_name');
 	unset ($result);
-	$existing_triggers = $missing_triggers = array ();
-	foreach ($rows as $row)
-		$existing_triggers[$row['TRIGGER_NAME']] = $row['EVENT_OBJECT_TABLE'];
-	foreach ($triggers as $trigger => $table)
-		if (! array_key_exists ($trigger, $existing_triggers))
-			$missing_triggers[$trigger] = $table;
+
+	$missing_triggers = array_diff_key ($known_triggers, $existing_triggers);
+	$unknown_triggers = array_diff_key ($existing_triggers, $known_triggers);
+	$columns = array
+	(
+		array ('th_text' => 'Table', 'row_key' => 'table_name'),
+		array ('th_text' => 'Trigger', 'row_key' => 'trigger_name'),
+	);
+
 	if (count ($missing_triggers))
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Triggers (' . count ($missing_triggers) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Table</th><th>Trigger</th></tr>\n";
-		foreach ($missing_triggers as $trigger => $table)
-		{
-			echo '<tr>';
-			echo "<td>${table}</td>";
-			echo "<td>${trigger}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		renderTableViewer ($columns, $missing_triggers);
 		finishPortLet ();
 	}
 
-	// check 9: missing foreign keys
-	$fkeys= array
+	if (count ($unknown_triggers))
+	{
+		$violations = TRUE;
+		startPortlet ('Unknown Triggers (' . count ($unknown_triggers) . ')');
+		renderTableViewer ($columns, $unknown_triggers);
+		finishPortLet ();
+	}
+
+	// check 9: foreign keys
+	$known_fkeys = array
 	(
-		'Atom-FK-molecule_id' => 'Atom',
-		'Atom-FK-rack_id' => 'Atom',
-		'AttributeMap-FK-chapter_id' => 'AttributeMap',
-		'AttributeMap-FK-attr_id' => 'AttributeMap',
-		'AttributeValue-FK-map' => 'AttributeValue',
-		'AttributeValue-FK-object' => 'AttributeValue',
-		'CachedPAV-FK-object-port' => 'CachedPAV',
-		'CachedPAV-FK-vlan_id' => 'CachedPAV',
-		'CachedPNV-FK-compound' => 'CachedPNV',
-		'CachedPVM-FK-object_id' => 'CachedPVM',
-		'Dictionary-FK-chapter_id' => 'Dictionary',
-		'FileLink-File_fkey' => 'FileLink',
-		'IPv4Allocation-FK-object_id' => 'IPv4Allocation',
-		'IPv4LB-FK-vs_id' => 'IPv4LB',
-		'IPv4LB-FK-object_id' => 'IPv4LB',
-		'IPv4LB-FK-rspool_id' => 'IPv4LB',
-		'IPv4NAT-FK-object_id' => 'IPv4NAT',
-		'IPv4RS-FK' => 'IPv4RS',
-		'IPv6Allocation-FK-object_id' => 'IPv6Allocation',
-		'Link-FK-a' => 'Link',
-		'Link-FK-b' => 'Link',
-		'MountOperation-FK-object_id' => 'MountOperation',
-		'MountOperation-FK-old_molecule_id' => 'MountOperation',
-		'MountOperation-FK-new_molecule_id' => 'MountOperation',
-		'ObjectHistory-FK-object_id' => 'ObjectHistory',
-		'ObjectLog-FK-object_id' => 'ObjectLog',
-		'PatchCableConnectorCompat-FK-connector_id' => 'PatchCableConnectorCompat',
-		'PatchCableConnectorCompat-FK-pctype_id' => 'PatchCableConnectorCompat',
-		'PatchCableHeap-FK-compat1' => 'PatchCableHeap',
-		'PatchCableHeap-FK-compat2' => 'PatchCableHeap',
-		'PatchCableHeapLog-FK-heap_id' => 'PatchCableHeapLog',
-		'PatchCableOIFCompat-FK-oif_id' => 'PatchCableOIFCompat',
-		'PatchCableOIFCompat-FK-pctype_id' => 'PatchCableOIFCompat',
-		'Port-FK-iif-oif' => 'Port',
-		'Port-FK-object_id' => 'Port',
-		'PortAllowedVLAN-FK-object-port' => 'PortAllowedVLAN',
-		'PortAllowedVLAN-FK-vlan_id' => 'PortAllowedVLAN',
-		'PortCompat-FK-oif_id1' => 'PortCompat',
-		'PortCompat-FK-oif_id2' => 'PortCompat',
-		'PortInterfaceCompat-FK-iif_id' => 'PortInterfaceCompat',
-		'PortInterfaceCompat-FK-oif_id' => 'PortInterfaceCompat',
-		'PortLog_ibfk_1' => 'PortLog',
-		'PortNativeVLAN-FK-compound' => 'PortNativeVLAN',
-		'PortVLANMode-FK-object-port' => 'PortVLANMode',
-		'RackSpace-FK-rack_id' => 'RackSpace',
-		'RackSpace-FK-object_id' => 'RackSpace',
-		'TagStorage-FK-TagTree' => 'TagStorage',
-		'TagTree-K-parent_id' => 'TagTree',
-		'UserConfig-FK-varname' => 'UserConfig',
-		'VLANDescription-FK-domain_id' => 'VLANDescription',
-		'VLANDescription-FK-vlan_id' => 'VLANDescription',
-		'VLANIPv4-FK-compound' => 'VLANIPv4',
-		'VLANIPv4-FK-ipv4net_id' => 'VLANIPv4',
-		'VLANIPv6-FK-compound' => 'VLANIPv6',
-		'VLANIPv6-FK-ipv6net_id' => 'VLANIPv6',
-		'VLANSTRule-FK-vst_id' => 'VLANSTRule',
-		'VLANSwitch-FK-domain_id' => 'VLANSwitch',
-		'VLANSwitch-FK-object_id' => 'VLANSwitch',
-		'VLANSwitch-FK-template_id' => 'VLANSwitch',
-		'VSEnabledIPs-FK-object_id' => 'VSEnabledIPs',
-		'VSEnabledIPs-FK-rspool_id' => 'VSEnabledIPs',
-		'VSEnabledIPs-FK-vs_id-vip' => 'VSEnabledIPs',
-		'VSEnabledPorts-FK-object_id' => 'VSEnabledPorts',
-		'VSEnabledPorts-FK-rspool_id' => 'VSEnabledPorts',
-		'VSEnabledPorts-FK-vs_id-proto-vport' => 'VSEnabledPorts',
-		'VSIPs-vs_id' => 'VSIPs',
-		'VS-vs_id' => 'VSPorts'
+		array ('fkey_name' => 'Atom-FK-molecule_id', 'table_name' => 'Atom'),
+		array ('fkey_name' => 'Atom-FK-rack_id', 'table_name' => 'Atom'),
+		array ('fkey_name' => 'AttributeMap-FK-chapter_id', 'table_name' => 'AttributeMap'),
+		array ('fkey_name' => 'AttributeMap-FK-attr_id', 'table_name' => 'AttributeMap'),
+		array ('fkey_name' => 'AttributeValue-FK-map', 'table_name' => 'AttributeValue'),
+		array ('fkey_name' => 'AttributeValue-FK-object', 'table_name' => 'AttributeValue'),
+		array ('fkey_name' => 'CachedPAV-FK-object-port', 'table_name' => 'CachedPAV'),
+		array ('fkey_name' => 'CachedPAV-FK-vlan_id', 'table_name' => 'CachedPAV'),
+		array ('fkey_name' => 'CachedPNV-FK-compound', 'table_name' => 'CachedPNV'),
+		array ('fkey_name' => 'CachedPVM-FK-object_id', 'table_name' => 'CachedPVM'),
+		array ('fkey_name' => 'Dictionary-FK-chapter_id', 'table_name' => 'Dictionary'),
+		array ('fkey_name' => 'FileLink-File_fkey', 'table_name' => 'FileLink'),
+		array ('fkey_name' => 'IPv4Allocation-FK-object_id', 'table_name' => 'IPv4Allocation'),
+		array ('fkey_name' => 'IPv4LB-FK-vs_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4LB-FK-object_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4LB-FK-rspool_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4NAT-FK-object_id', 'table_name' => 'IPv4NAT'),
+		array ('fkey_name' => 'IPv4RS-FK', 'table_name' => 'IPv4RS'),
+		array ('fkey_name' => 'IPv6Allocation-FK-object_id', 'table_name' => 'IPv6Allocation'),
+		array ('fkey_name' => 'Link-FK-a', 'table_name' => 'Link'),
+		array ('fkey_name' => 'Link-FK-b', 'table_name' => 'Link'),
+		array ('fkey_name' => 'MountOperation-FK-object_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'MountOperation-FK-old_molecule_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'MountOperation-FK-new_molecule_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'ObjectHistory-FK-object_id', 'table_name' => 'ObjectHistory'),
+		array ('fkey_name' => 'ObjectLog-FK-object_id', 'table_name' => 'ObjectLog'),
+		array ('fkey_name' => 'PatchCableConnectorCompat-FK-connector_id', 'table_name' => 'PatchCableConnectorCompat'),
+		array ('fkey_name' => 'PatchCableConnectorCompat-FK-pctype_id', 'table_name' => 'PatchCableConnectorCompat'),
+		array ('fkey_name' => 'PatchCableHeap-FK-compat1', 'table_name' => 'PatchCableHeap'),
+		array ('fkey_name' => 'PatchCableHeap-FK-compat2', 'table_name' => 'PatchCableHeap'),
+		array ('fkey_name' => 'PatchCableHeapLog-FK-heap_id', 'table_name' => 'PatchCableHeapLog'),
+		array ('fkey_name' => 'PatchCableOIFCompat-FK-oif_id', 'table_name' => 'PatchCableOIFCompat'),
+		array ('fkey_name' => 'PatchCableOIFCompat-FK-pctype_id', 'table_name' => 'PatchCableOIFCompat'),
+		array ('fkey_name' => 'Port-FK-iif-oif', 'table_name' => 'Port'),
+		array ('fkey_name' => 'Port-FK-object_id', 'table_name' => 'Port'),
+		array ('fkey_name' => 'PortAllowedVLAN-FK-object-port', 'table_name' => 'PortAllowedVLAN'),
+		array ('fkey_name' => 'PortAllowedVLAN-FK-vlan_id', 'table_name' => 'PortAllowedVLAN'),
+		array ('fkey_name' => 'PortCompat-FK-oif_id1', 'table_name' => 'PortCompat'),
+		array ('fkey_name' => 'PortCompat-FK-oif_id2', 'table_name' => 'PortCompat'),
+		array ('fkey_name' => 'PortInterfaceCompat-FK-iif_id', 'table_name' => 'PortInterfaceCompat'),
+		array ('fkey_name' => 'PortInterfaceCompat-FK-oif_id', 'table_name' => 'PortInterfaceCompat'),
+		array ('fkey_name' => 'PortLog_ibfk_1', 'table_name' => 'PortLog'),
+		array ('fkey_name' => 'PortNativeVLAN-FK-compound', 'table_name' => 'PortNativeVLAN'),
+		array ('fkey_name' => 'PortVLANMode-FK-object-port', 'table_name' => 'PortVLANMode'),
+		array ('fkey_name' => 'RackSpace-FK-rack_id', 'table_name' => 'RackSpace'),
+		array ('fkey_name' => 'RackSpace-FK-object_id', 'table_name' => 'RackSpace'),
+		array ('fkey_name' => 'RackThumbnail-FK-rack_id', 'table_name' => 'RackThumbnail'),
+		array ('fkey_name' => 'TagStorage-FK-TagTree', 'table_name' => 'TagStorage'),
+		array ('fkey_name' => 'TagTree-K-parent_id', 'table_name' => 'TagTree'),
+		array ('fkey_name' => 'UserConfig-FK-varname', 'table_name' => 'UserConfig'),
+		array ('fkey_name' => 'VLANDescription-FK-domain_id', 'table_name' => 'VLANDescription'),
+		array ('fkey_name' => 'VLANDescription-FK-vlan_id', 'table_name' => 'VLANDescription'),
+		array ('fkey_name' => 'VLANDomain-FK-group_id', 'table_name' => 'VLANDomain'),
+		array ('fkey_name' => 'VLANIPv4-FK-compound', 'table_name' => 'VLANIPv4'),
+		array ('fkey_name' => 'VLANIPv4-FK-ipv4net_id', 'table_name' => 'VLANIPv4'),
+		array ('fkey_name' => 'VLANIPv6-FK-compound', 'table_name' => 'VLANIPv6'),
+		array ('fkey_name' => 'VLANIPv6-FK-ipv6net_id', 'table_name' => 'VLANIPv6'),
+		array ('fkey_name' => 'VLANSTRule-FK-vst_id', 'table_name' => 'VLANSTRule'),
+		array ('fkey_name' => 'VLANSwitch-FK-domain_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VLANSwitch-FK-object_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VLANSwitch-FK-template_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-object_id', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-rspool_id', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-vs_id-vip', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-object_id', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-rspool_id', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-vs_id-proto-vport', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSIPs-vs_id', 'table_name' => 'VSIPs'),
+		array ('fkey_name' => 'VS-vs_id', 'table_name' => 'VSPorts'),
 	);
 
 	$plugins = getPlugins ('enabled');
@@ -778,38 +786,40 @@ function renderDataIntegrityReport ()
 	{
 		global ${"plugin_${plugin}_fkeys"};
 		if (isset (${"plugin_${plugin}_fkeys"}))
-			$fkeys = array_merge ($fkeys, ${"plugin_${plugin}_fkeys"});
+			$known_fkeys = array_merge ($known_fkeys, ${"plugin_${plugin}_fkeys"});
 	}
-	ksort ($fkeys);
+	$known_fkeys = reindexById ($known_fkeys, 'fkey_name');
+	ksort ($known_fkeys);
 
 	$result = usePreparedSelectBlade
 	(
-		'SELECT CONSTRAINT_NAME, TABLE_NAME ' .
+		'SELECT CONSTRAINT_NAME as fkey_name, TABLE_NAME AS table_name ' .
 		'FROM information_schema.TABLE_CONSTRAINTS ' .
 		"WHERE CONSTRAINT_SCHEMA = SCHEMA() AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
 	);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	$existing_fkeys = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'fkey_name');
 	unset ($result);
-	$existing_fkeys = $missing_fkeys = array ();
-	foreach ($rows as $row)
-		$existing_fkeys[$row['CONSTRAINT_NAME']] = $row['TABLE_NAME'];
-	foreach ($fkeys as $fkey => $table)
-		if (! array_key_exists ($fkey, $existing_fkeys))
-			$missing_fkeys[$fkey] = $table;
+	$missing_fkeys = array_diff_key ($known_fkeys, $existing_fkeys);
+	$unknown_fkeys = array_diff_key ($existing_fkeys, $known_fkeys);
+	$columns = array
+	(
+		array ('th_text' => 'Table', 'row_key' => 'table_name'),
+		array ('th_text' => 'Key', 'row_key' => 'fkey_name'),
+	);
+
 	if (count ($missing_fkeys))
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Foreign Keys (' . count ($missing_fkeys) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Table</th><th>Key</th></tr>\n";
-		foreach ($missing_fkeys as $fkey => $table)
-		{
-			echo '<tr>';
-			echo "<td>${table}</td>";
-			echo "<td>${fkey}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		renderTableViewer ($columns, $missing_fkeys);
+		finishPortLet ();
+	}
+
+	if (count ($unknown_fkeys))
+	{
+		$violations = TRUE;
+		startPortlet ('Unknown Foreign Keys (' . count ($unknown_fkeys) . ')');
+		renderTableViewer ($columns, $unknown_fkeys);
 		finishPortLet ();
 	}
 

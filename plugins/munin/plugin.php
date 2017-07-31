@@ -92,8 +92,8 @@ function plugin_munin_init ()
 
 	global $plugin_munin_fkeys;
 	$plugin_munin_fkeys = array (
-		'MuninGraph-FK-object_id' => 'MuninGraph',
-		'MuninGraph-FK-server_id' => 'MuninGraph'
+		array ('fkey_name' => 'MuninGraph-FK-object_id', 'table_name' => 'MuninGraph'),
+		array ('fkey_name' => 'MuninGraph-FK-server_id', 'table_name' => 'MuninGraph'),
 	);
 }
 

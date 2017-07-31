@@ -96,8 +96,8 @@ function plugin_cacti_init ()
 
 	global $plugin_cacti_fkeys;
 	$plugin_cacti_fkeys = array (
-		'CactiGraph-FK-object_id' => 'CactiGraph',
-		'CactiGraph-FK-server_id' => 'CactiGraph'
+		array ('fkey_name' => 'CactiGraph-FK-object_id', 'table_name' => 'CactiGraph'),
+		array ('fkey_name' => 'CactiGraph-FK-server_id', 'table_name' => 'CactiGraph'),
 	);
 }
 
