@@ -1121,6 +1121,11 @@ function renderPluginConfig ()
 
 function renderPluginEditor()
 {
+	function considerOpLink ($oplinks, $opcode)
+	{
+		return permitted (NULL, NULL, $opcode) ? $oplinks[$opcode] : '';
+	}
+
 	$plugins = getPlugins ();
 	if (empty ($plugins))
 	{
@@ -1130,23 +1135,39 @@ function renderPluginEditor()
 
 	foreach (array_keys ($plugins) as $name)
 	{
-		$links = array();
-		if ($plugins[$name]['state'] == 'disabled')
-			$links[] = getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable');
-		if ($plugins[$name]['state'] == 'enabled')
-			$links[] = getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable');
-		if ($plugins[$name]['state'] == 'not_installed')
-			$links[] = getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install');
-		if ($plugins[$name]['state'] == 'disabled' or $plugins[$name]['state'] == 'enabled')
-			$links[] = getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation');
+		$links = '&nbsp;';
+		$oplinks = array
+		(
+			'enable' => getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable'),
+			'disable' => getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable'),
+			'add' => getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install'),
+			'delete' => getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation'),
+			'upgrade' => getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade'),
+		);
+		switch ($plugins[$name]['state'])
+		{
+		case 'disabled':
+			$links .= considerOpLink ($oplinks, 'enable');
+			$links .= considerOpLink ($oplinks, 'delete');
+			break;
+		case 'enabled':
+			$links .= considerOpLink ($oplinks, 'disable');
+			$links .= considerOpLink ($oplinks, 'delete');
+			break;
+		case 'not_installed':
+			$links .= considerOpLink ($oplinks, 'add');
+			break;
+		default:
+			throw new RackTablesError ('invalid plugin state', RackTablesError::INTERNAL);
+		}
 		if
 		(
 			$plugins[$name]['code_version'] != 'N/A' &&
 			$plugins[$name]['db_version'] != 'N/A' &&
 			$plugins[$name]['code_version'] != $plugins[$name]['db_version']
 		)
-			$links[] = getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade');
-		$plugins[$name]['links'] = implode ('', $links);
+			$links .= considerOpLink ($oplinks, 'upgrade');
+		$plugins[$name]['links'] = $links;
 		$plugins[$name]['x_state'] = formatPluginState ($plugins[$name]['state']);
 	}
 	$columns = array
@@ -1158,7 +1179,8 @@ function renderPluginEditor()
 		array ('th_text' => 'State', 'row_key' => 'x_state'),
 		array ('row_key' => 'links', 'td_escape' => FALSE),
 	);
-	echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
+	if (permitted (NULL, NULL, 'delete'))
+		echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
 	renderTableViewer ($columns, $plugins);
 }
 
