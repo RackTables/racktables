@@ -388,19 +388,25 @@ function renderIIFOIFCompatEditor()
 
 function renderPortOIFViewer()
 {
-	echo '<br><table class="cooltable zebra" align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Outer Interface</th></tr>';
+	$rows = array();
 	$refcnt = getPortOIFRefc();
 	foreach (getPortOIFOptions() as $oif_id => $oif_name)
-	{
-		echo '<tr>';
-		echo '<td class=tdleft>' . getImageHREF ($oif_id < 2000 ? 'computer' : 'favorite') . '</td>';
-		echo "<td class=tdright>${oif_id}</td>";
-		echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
-		echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
-		echo '</tr>';
-	}
-	echo '</table>';
+		$rows[] = array
+		(
+			'origin' => $oif_id < 2000 ? getImageHREF ('computer', 'default') : getImageHREF ('favorite', 'custom'),
+			'oif_id' => $oif_id,
+			'refc' => $refcnt[$oif_id] ? $refcnt[$oif_id] : '',
+			'oif_name' => $oif_name,
+		);
+	$columns = array
+	(
+		array ('th_text' => 'Origin', 'row_key' => 'origin', 'td_escape' => FALSE),
+		array ('th_text' => 'Key', 'row_key' => 'oif_id', 'td_class' => 'tdright'),
+		array ('th_text' => 'Refcnt', 'row_key' => 'refc', 'td_class' => 'tdright'),
+		array ('th_text' => 'Outer Interface', 'row_key' => 'oif_name', 'td_maxlen' => 48),
+	);
+	renderTableViewer ($columns, $rows);
+	echo '<br>';
 }
 
 function renderPortOIFEditor()
@@ -666,43 +672,38 @@ function renderChaptersEditor ()
 
 function renderChapter ($tgt_chapter_no)
 {
-	global $nextorder;
 	$words = readChapter ($tgt_chapter_no, 'a');
 	$wc = count ($words);
-	if (!$wc)
-	{
-		echo "<center><h2>(no records)</h2></center>";
+	echo "<center><h2>${wc} record(s)</h2></center>";
+	if ($wc == 0)
 		return;
-	}
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
-	$attrs = getChapterAttributes($tgt_chapter_no);
-	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th colspan=4>${wc} record(s)</th></tr>\n";
-	echo "<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Word</th></tr>\n";
-	$order = 'odd';
+	$attrs = getChapterAttributes ($tgt_chapter_no);
+	$columns = array
+	(
+		array ('th_text' => 'Origin', 'row_key' => 'origin', 'td_escape' => FALSE),
+		array ('th_text' => 'Key', 'row_key' => 'dict_key', 'td_class' => 'tdright'),
+		array ('th_text' => 'Refcnt', 'row_key' => 'refc', 'td_class' => 'tdright', 'td_escape' => FALSE),
+		array ('th_text' => 'Word', 'row_key' => 'word'),
+	);
+	$rows = array();
 	foreach ($words as $key => $value)
 	{
-		echo "<tr class=row_${order}><td>";
-		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
-		echo "</td><td class=tdright>${key}</td><td class=tdright>";
-		if ($refcnt[$key])
+		if ($refcnt[$key] == 0)
+			$refc = '';
+		else
 		{
 			// For the ObjectType chapter the extra filter is as simple as "{\$typeid_${key}}" but
 			// the reference counter also includes the relations with AttributeMap.objtype_id hence
 			// it often is not the same as the amount of objects that match the expression. With
 			// this in mind don't display the counter as a link for this specific chapter.
-			if ($tgt_chapter_no == CHAP_OBJTYPE)
-				$cfe = '';
+			if ($tgt_chapter_no == CHAP_OBJTYPE || ! count ($attrs))
+				$refc = $refcnt[$key];
 			else
 			{
 				$tmp = array();
 				foreach ($attrs as $attr_id)
 					$tmp[] = "{\$attr_${attr_id}_${key}}";
-				$cfe = implode (' or ', $tmp);
-			}
-
-			if (! empty($cfe))
-			{
 				$href = makeHref
 				(
 					array
@@ -710,18 +711,22 @@ function renderChapter ($tgt_chapter_no)
 						'page'=>'depot',
 						'tab'=>'default',
 						'andor' => 'and',
-						'cfe' => $cfe
+						'cfe' => implode (' or ', $tmp),
 					)
 				);
-				echo '<a href="' . $href . '">' . $refcnt[$key] . '</a>';
+				$refc = '<a href="' . $href . '">' . $refcnt[$key] . '</a>';
 			}
-			else
-				echo $refcnt[$key];
-		}
-		echo "</td><td>${value}</td></tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table>\n<br>";
+		} // else
+		$rows[] = array
+		(
+			'origin' => $key < 50000 ? getImageHREF ('computer', 'default') : getImageHREF ('favorite', 'custom'),
+			'dict_key' => $key,
+			'refc' => $refc,
+			'word' => $value,
+		);
+	} // foreach
+	renderTableViewer ($columns, $rows);
+	echo '<br>';
 }
 
 function renderChapterEditor ($tgt_chapter_no)

@@ -6282,22 +6282,16 @@ function renderEditUCSForm()
 
 function renderSimpleTableWithOriginViewer ($rows, $column)
 {
-	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo "<tr><th>Origin</th><th>Key</th><th>${column['header']}</th></tr>";
-	foreach ($rows as $row)
-	{
-		echo '<tr>';
-		echo '<td>';
-		if ($row['origin'] == 'default')
-			echo getImageHREF ('computer', 'default');
-		else
-			echo getImageHREF ('favorite', 'custom');
-		echo '</td>';
-		echo "<td class=tdright>${row[$column['key']]}</td>";
-		echo '<td class=tdleft>' . stringForTD ($row[$column['value']], $column['width']) . '</td>';
-		echo '</tr>';
-	}
-	echo '</table>';
+	$columns = array
+	(
+		array ('th_text' => 'Origin', 'row_key' => 'img', 'td_escape' => FALSE),
+		array ('th_text' => 'Key', 'row_key' => $column['key']),
+		array ('th_text' => $column['header'], 'row_key' => $column['value'], 'td_maxlen' => $column['width']),
+	);
+	foreach (array_keys ($rows) as $key)
+		$rows[$key]['img'] = $rows[$key]['origin'] == 'default' ? getImageHREF ('computer', 'default') :
+			getImageHREF ('favorite', 'custom');
+	renderTableViewer ($columns, $rows);
 }
 
 function renderSimpleTableWithOriginEditor ($rows, $column)
