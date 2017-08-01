@@ -4089,7 +4089,7 @@ function loadUserConfigCache ($username)
 
 function loadRackThumbCache ($rack_id)
 {
-	$result = usePreparedSelectBlade ('SELECT thumb_data FROM RackThumbnail WHERE rack_id = ? AND thumb_data IS NOT NULL', array ($rack_id));
+	$result = usePreparedSelectBlade ('SELECT thumb_data FROM RackThumbnail WHERE rack_id = ?', array ($rack_id));
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	return $row ? $row['thumb_data'] : NULL;
 }
