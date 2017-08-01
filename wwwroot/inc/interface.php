@@ -1211,7 +1211,8 @@ function renderEditRackForm ($rack_id)
 	printTagsPicker ();
 	echo "</td></tr>\n";
 	renderEditAttributeTRs ('updateRack', getAttrValuesSorted ($rack_id), 1560, array (27, 29));
-	echo "<tr><td>&nbsp;</td><th class=tdright>Has problems:</th><td class=tdleft><input type=checkbox name=has_problems";
+	echo '<tr><td>&nbsp;</td><th class=tdright><label for=has_problems>Has problems:</label></th>';
+	echo '<td class=tdleft><input type=checkbox name=has_problems id=has_problems';
 	if ($rack['has_problems'] == 'yes')
 		echo ' checked';
 	echo "></td></tr>\n";
