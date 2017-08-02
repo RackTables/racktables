@@ -1295,19 +1295,11 @@ function getObjectClass($realm, $object, $extrastyle = "")
 
 function setEntityColors(&$entity)
 {
-	$colors = FALSE;
 	$entity['colors'] = array();
 	foreach ($entity['etags'] as $taginfo)
-		if ($taginfo['color'] !== NULL )
+		if ($taginfo['color'] !== NULL && ! in_array ($taginfo['color'], $entity['colors']))
 		{
-			$colors = TRUE;
-			$color = $taginfo['color'];
-			if (!array_key_exists ($color, $entity['colors']))
-			{
-				$entity['colors'][] = $color;
-				getObjectClass ('tag', $taginfo); // set tag css class
-			}
+			$entity['colors'][] = $taginfo['color'];
+			getObjectClass ('tag', $taginfo); // set tag CSS class
 		}
-
-	return $colors;
 }
