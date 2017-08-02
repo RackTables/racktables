@@ -975,11 +975,11 @@ function commitAddObject ($new_name, $new_label, $new_type_id, $new_asset_no, $t
 	}
 	lastCreated ($realm, $object_id);
 
+	// Store any tags before executeAutoPorts() calls spotEntity() and populates the cache.
+	produceTagsForNewRecord ($realm, $taglist, $object_id);
 	// Do AutoPorts magic
 	if ($realm == 'object')
 		executeAutoPorts ($object_id);
-	// Now tags...
-	produceTagsForNewRecord ($realm, $taglist, $object_id);
 	recordObjectHistory ($object_id);
 	return $object_id;
 }
