@@ -2,7 +2,7 @@
 
 // Create logs associated with various entities, make sure the report still works
 // Inspired by ticket #1443
-class ObjectLogTest extends PHPUnit_Framework_TestCase
+class ObjectLogTest extends RTTestCase
 {
 	protected static $rack_id, $row_id, $location_id, $object_id;
 	protected $rack_log_id = NULL;

@@ -3,7 +3,20 @@
 THISDIR=`dirname $0`
 BASEDIR=`readlink -f "$THISDIR/.."`
 
+case `phpunit --version` in
+	'PHPUnit 4.'*|'PHPUnit 5.'*)
+		BOOTSTRAP_FILE=bootstrap_v4v5.php
+		;;
+	'PHPUnit 6.'*)
+		BOOTSTRAP_FILE=bootstrap_v6.php
+		;;
+	*)
+		echo 'ERROR: failed to find a known version of PHPUnit'
+		exit 5
+esac
+
 echo "Running express tests using the base directory '$BASEDIR'"
+echo "and PHPUnit bootstrap file '$BOOTSTRAP_FILE'."
 
 # Every file in wwwroot/inc/ must be a valid PHP input file and must not
 # produce any output when parsed by PHP (because, for instance, a plain text
@@ -52,4 +65,4 @@ echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit
 # At this point it makes sense to test specific functions.
 echo
 cd "$BASEDIR/tests"
-phpunit --group small || exit 1
+phpunit --group small --bootstrap $BOOTSTRAP_FILE || exit 1

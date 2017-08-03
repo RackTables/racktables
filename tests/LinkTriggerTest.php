@@ -4,7 +4,7 @@
 //   - porta != portb
 //   - porta < portb
 //   - porta is compatibile with portb
-class LinkTriggerTest extends PHPUnit_Framework_TestCase
+class LinkTriggerTest extends RTTestCase
 {
 	protected static $autoports_config_var;
 	protected static $object_id;

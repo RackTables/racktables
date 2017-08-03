@@ -1,6 +1,6 @@
 <?php
 
-class EmptySQLWhereTest extends PHPUnit_Framework_TestCase
+class EmptySQLWhereTest extends RTTestCase
 {
 	protected $tag_id;
 

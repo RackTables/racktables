@@ -1,6 +1,6 @@
 <?php
 
-class ConfigVarTest extends PHPUnit_Framework_TestCase
+class ConfigVarTest extends RTTestCase
 {
 	private $varname;
 

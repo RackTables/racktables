@@ -2,7 +2,7 @@
 
 // a tag's parent may not be one of its children
 // commitUpdateTag should detect this and raise an exception
-class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
+class TagTreeCircularReferenceTest extends RTTestCase
 {
 	protected $taga_id, $tagb_id, $tagc_id;
 

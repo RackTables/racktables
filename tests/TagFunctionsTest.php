@@ -1,6 +1,6 @@
 <?php
 
-class TagFunctionsTest extends PHPUnit_Framework_TestCase
+class TagFunctionsTest extends RTTestCase
 {
 	protected $a_obj_id, $b_obj_id, $ab_obj_id;
 	protected $a_tag_ids, $b_tag_ids;

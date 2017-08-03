@@ -11,7 +11,7 @@ return value test that the actual return value is equal (assertEquals) or
 identical (assertSame) to the expected return value.
 */
 
-class PureFunctionTest extends PHPUnit_Framework_TestCase
+class PureFunctionTest extends RTTestCase
 {
 	/**
 	 * @group small

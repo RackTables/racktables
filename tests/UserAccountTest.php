@@ -1,6 +1,6 @@
 <?php
 
-class UserAccountTest extends PHPUnit_Framework_TestCase
+class UserAccountTest extends RTTestCase
 {
 	const PSWDHASH = 'f7563fd105b011264532ef2d405082015bed948e';
 	const REALNAME = 'Test User Account';

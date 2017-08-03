@@ -2,7 +2,7 @@
 
 // This covers the unary form of the function, which depends on a configuration
 // variable. The binary form is pure and is covered by PureFunctionTest.
-class SQLDateFromDateStrTest extends PHPUnit_Framework_TestCase
+class SQLDateFromDateStrTest extends RTTestCase
 {
 	protected static $old_format;
 

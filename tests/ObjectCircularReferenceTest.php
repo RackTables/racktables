@@ -3,7 +3,7 @@
 // An object's parent may not be one of its children.
 // The same principle applies to locations, which are stored in the DB as objects.
 // commitLinkEntities and commitUpdateEntityLink should each detect this and raise an exception
-class ObjectCircularReferenceTest extends PHPUnit_Framework_TestCase
+class ObjectCircularReferenceTest extends RTTestCase
 {
 	protected static $objtype_id;
 	protected static $objecta_id, $objectb_id, $objectc_id;

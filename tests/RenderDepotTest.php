@@ -1,7 +1,7 @@
 <?php
 
 // Make sure renderDepot does not throw any exceptions
-class RenderDepotTest extends PHPUnit_Framework_TestCase
+class RenderDepotTest extends RTTestCase
 {
 	protected $shelf_id = NULL;
 	protected $modem_id = NULL;

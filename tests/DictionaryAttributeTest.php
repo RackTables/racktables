@@ -1,6 +1,6 @@
 <?php
 
-class DictionaryAttributeTest extends PHPUnit_Framework_TestCase
+class DictionaryAttributeTest extends RTTestCase
 {
 	protected
 		$attr_types,

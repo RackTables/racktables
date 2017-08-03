@@ -1,6 +1,6 @@
 <?php
 
-class StringInsertHrefsTest extends PHPUnit_Framework_TestCase
+class StringInsertHrefsTest extends RTTestCase
 {
 	protected static $detect_urls_var;
 

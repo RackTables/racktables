@@ -1,6 +1,6 @@
 <?php
 
-class ScriptFunctionsTest extends PHPUnit_Framework_TestCase
+class ScriptFunctionsTest extends RTTestCase
 {
 	const SCRIPT_NAME = 'temp_test_script';
 	const SCRIPT_TEXT = "abc\ndef\nghi";

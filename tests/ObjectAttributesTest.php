@@ -1,6 +1,6 @@
 <?php
 
-class ObjectAttributesTest extends PHPUnit_Framework_TestCase
+class ObjectAttributesTest extends RTTestCase
 {
 	private $server_id, $switch_id;
 

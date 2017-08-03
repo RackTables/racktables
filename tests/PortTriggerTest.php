@@ -1,7 +1,7 @@
 <?php
 
 // We should prohibit reusing an l2address on different objects
-class PortTriggerTest extends PHPUnit_Framework_TestCase
+class PortTriggerTest extends RTTestCase
 {
 	public function setUp ()
 	{

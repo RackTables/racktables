@@ -1,6 +1,6 @@
 <?php
 
-class RackspaceFunctionsTest extends PHPUnit_Framework_TestCase
+class RackspaceFunctionsTest extends RTTestCase
 {
 	const UNITS_PER_RACK = 42;
 	private $row_id;

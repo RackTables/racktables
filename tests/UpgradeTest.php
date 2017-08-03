@@ -5,7 +5,7 @@ require_once '../wwwroot/inc/upgrade.php';
 // The 'data' directory contains an SQL dump file for each version, including both schema and sample data.
 // Developers should generate a dump file as part of the release process.  Instructions are in the wiki.
 // For each version, this test will drop & re-create the database, then attempt to upgrade to the current version.
-class UpgradeTest extends PHPUnit_Framework_TestCase
+class UpgradeTest extends RTTestCase
 {
 	protected static $versions = NULL;
 

@@ -4,7 +4,7 @@
 //   - if parent and child entities are the same, parent_id != child_id
 //   - if both parent and child are objects, an ObjectParentCompat rule must exist
 //   - in some scenarios, only one-to-one links are allowed
-class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
+class EntityLinkTriggerTest extends RTTestCase
 {
 	protected static $objtypea_id, $objtypeb_id, $objtypec_id, $objtyped_id;
 	protected static $objecta_id, $objectb_id, $objectc_id, $objectd_id;

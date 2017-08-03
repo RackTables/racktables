@@ -1,6 +1,6 @@
 <?php
 
-class ObjectPortsTest extends PHPUnit_Framework_TestCase
+class ObjectPortsTest extends RTTestCase
 {
 	private $object_id;
 
