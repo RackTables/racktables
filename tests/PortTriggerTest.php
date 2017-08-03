@@ -1,6 +1,8 @@
 <?php
 
-// We should prohibit reusing an l2address on different objects
+// This class tests that a non-empty L2 address may be assigned to more than one
+// port only so long as all such ports belong to the same object.
+
 class PortTriggerTest extends RTTestCase
 {
 	public function setUp ()
@@ -23,7 +25,7 @@ class PortTriggerTest extends RTTestCase
 	 */
 	public function testUniqueMacAddSame()
 	{
-		$port1_3_id = commitAddPort ($this->object1_id, 'port 3', '1-24', 'label 3', 'aabbccddee01');
+		$this->assertGreaterThan (0, commitAddPort ($this->object1_id, 'port 3', '1-24', 'label 3', 'aabbccddee01'));
 	}
 
 	/**
@@ -31,7 +33,7 @@ class PortTriggerTest extends RTTestCase
 	 */
 	public function testUniqueMacUpdateSame()
 	{
-		commitUpdatePort ($this->object1_id, $this->port1_2_id, 'port 2', '1-24', 'label 1', 'aabbccddee01', '');
+		$this->assertNull (commitUpdatePort ($this->object1_id, $this->port1_2_id, 'port 2', '1-24', 'label 1', 'aabbccddee01', ''));
 	}
 
 	/**
