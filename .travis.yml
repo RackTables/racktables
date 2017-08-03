@@ -8,14 +8,14 @@ php:
  - 5.4
  - 5.5
  - 5.6
- # In Travis CI PHP 7.0.15 comes with PHPUnit 5.7.6, which is compatible with
- # earlier versions of itself hence RackTables tests can work on older PHP
- # versions too (a major advantage of the test matrix). Later PHP versions come
- # with PHPUnit 6, which is compatible with itself only due to namespaces.
- - 7.0.15
+ - 7.0.15 # PHPUnit 5
+ - 7.0    # PHPUnit 6
+ - 7.1
 
 matrix:
   fast_finish: true
+  allow_failures:
+   - php: 7.1
 
 services:
  - mysql
