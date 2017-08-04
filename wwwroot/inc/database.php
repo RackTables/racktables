@@ -4356,11 +4356,14 @@ function deleteTagForEntity ($entity_realm, $entity_id, $tag_id)
 function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable, $color = NULL)
 {
 	global $dbxlink;
+	global $taglist;
 	$dbxlink->beginTransaction();
 	try
 	{
 		// Use the copy from within the transaction.
-		assertValidParentId (addTraceToNodes (getTagList ('FOR UPDATE')), $tag_id, $parent_id);
+		$local_taglist = addTraceToNodes (getTagList ('FOR UPDATE'));
+		assertValidParentId ($local_taglist, $tag_id, $parent_id);
+		$db_color = HTMLColorForDatabase ($color);
 		usePreparedUpdateBlade
 		(
 			'TagTree',
@@ -4369,12 +4372,23 @@ function commitUpdateTag ($tag_id, $tag_name, $parent_id, $is_assignable, $color
 				'tag' => $tag_name,
 				'parent_id' => nullIfZero ($parent_id),
 				'is_assignable' => $is_assignable,
-				'color' => HTMLColorForDatabase ($color)
+				'color' => $db_color
 			),
 			array ('id' => $tag_id)
 		);
-		// remove all rack thumbnails
-		usePreparedDeleteBlade ('RackThumbnail', array ('1' => '1'));
+		if ($db_color !== HTMLColorForDatabase ($local_taglist[$tag_id]['color']))
+			// Remove only those rack thumbnails that include any objects tagged with
+			// the current tag (this does not include zero-U associations) or that
+			// represent racks tagged with the current tag.
+			usePreparedExecuteBlade
+			(
+				'DELETE FROM RackThumbnail WHERE ' .
+				'rack_id IN(SELECT DISTINCT rack_id FROM TagStorage INNER JOIN RackSpace ON entity_id = object_id ' .
+				'  WHERE entity_realm = "object" AND tag_id = ?)' .
+				'OR rack_id IN(SELECT entity_id FROM TagStorage WHERE entity_realm = "rack" AND tag_id = ?)',
+				array ($tag_id, $tag_id)
+			);
+		$taglist = addTraceToNodes (getTagList());
 		$dbxlink->commit();
 	}
 	catch (PDOException $pe)
