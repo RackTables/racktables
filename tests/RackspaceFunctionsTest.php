@@ -1,16 +1,18 @@
 <?php
 
+require_once '../wwwroot/inc/solutions.php';
+
 class RackspaceFunctionsTest extends RTTestCase
 {
 	const UNITS_PER_RACK = 42;
-	private $row_id;
-	private $row_name;
+	private static $row_id;
+	private static $row_name;
 
 	// Add a temporary row with a few racks.
-	public function setUp ()
+	public static function setUpBeforeClass ()
 	{
-		$this->row_name = sprintf ('testrow-%s-%u', get_class(), getmypid());
-		$this->row_id = commitAddObject ($this->row_name, NULL, 1561, NULL);
+		self::$row_name = sprintf ('testrow-%s-%u', get_class(), getmypid());
+		self::$row_id = commitAddObject (self::$row_name, NULL, 1561, NULL);
 	}
 
 	private function createObjectInRack ($prefix, $type_id, $rack_id, $unit_nos)
@@ -40,12 +42,12 @@ class RackspaceFunctionsTest extends RTTestCase
 	{
 		$ret = array();
 		$i = 0;
-		foreach ($racklist as $rack_id => $objectlist)
+		foreach ($racklist as $objectlist)
 		{
 			$rack_name = sprintf ('rack%u-%s-%s', $i, get_class(), getmypid());
 			$rack_id = commitAddObject ($rack_name, NULL, 1560, NULL);
 			commitUpdateAttrValue ($rack_id, 27, self::UNITS_PER_RACK);
-			commitLinkEntities ('row', $this->row_id, 'rack', $rack_id);
+			commitLinkEntities ('row', self::$row_id, 'rack', $rack_id);
 			$ret[$rack_id] = array();
 			foreach ($objectlist as $each)
 			{
@@ -73,11 +75,34 @@ class RackspaceFunctionsTest extends RTTestCase
 	 */
 	public function testGeneral ()
 	{
-		$row = getRowInfo ($this->row_id);
-		$this->assertEquals ($this->row_id, $row['id']);
-		$this->assertEquals ($this->row_name, $row['name']);
+		$row = getRowInfo (self::$row_id);
+		$this->assertEquals (self::$row_id, $row['id']);
+		$this->assertEquals (self::$row_name, $row['name']);
 		$this->assertNull ($row['location_id']);
 		$this->assertNull ($row['location']);
+	}
+
+	/**
+	 * @group small
+	 */
+	public function testThumbnails ()
+	{
+		$racklist = array // one rack
+		(
+			array // one 4U object
+			(
+				array ('server1', 4, array (8, 11)),
+			),
+		);
+		$created = $this->createSampleRacksAndObjects ($racklist);
+		$rack_id = key ($created);
+		$this->assertNull (loadRackThumbCache ($rack_id));
+		// The call below should populate the cache.
+		$this->assertNotEquals ('', getCachedMiniRackThumbImage ($rack_id));
+		$this->assertNotNull (loadRackThumbCache ($rack_id));
+		$this->deleteSampleRacksAndObjects ($created);
+		// ON DELETE CASCADE
+		$this->assertNull (loadRackThumbCache ($rack_id));
 	}
 
 	/**
@@ -86,7 +111,7 @@ class RackspaceFunctionsTest extends RTTestCase
 	 */
 	public function testSpecific ($racklist)
 	{
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
+		$this->assertEquals (0, getRowMountsCount (self::$row_id));
 		$created = $this->createSampleRacksAndObjects ($racklist);
 		$row_units = 0;
 		$row_data = array();
@@ -103,12 +128,12 @@ class RackspaceFunctionsTest extends RTTestCase
 		$row_total_units = count ($created) * self::UNITS_PER_RACK;
 		$row_rsu = $row_total_units == 0 ? 0 : ($row_units / $row_total_units);
 		$this->assertEquals ($row_rsu, getRSUForRow ($row_data));
-		$this->assertEquals (array_sum (array_map ('count', $created)), getRowMountsCount ($this->row_id));
-		$row = getRowInfo ($this->row_id);
+		$this->assertEquals (array_sum (array_map ('count', $created)), getRowMountsCount (self::$row_id));
+		$row = getRowInfo (self::$row_id);
 		$this->assertEquals (count ($created), $row['count']);
 		$this->assertEquals ($row_total_units, $row['sum']);
 		$this->deleteSampleRacksAndObjects ($created);
-		$this->assertEquals (0, getRowMountsCount ($this->row_id));
+		$this->assertEquals (0, getRowMountsCount (self::$row_id));
 	}
 
 	public function providerSampleRows()
@@ -204,8 +229,8 @@ class RackspaceFunctionsTest extends RTTestCase
 		);
 	}
 
-	public function tearDown ()
+	public static function tearDownAfterClass ()
 	{
-		commitDeleteRow ($this->row_id);
+		commitDeleteRow (self::$row_id);
 	}
 }
