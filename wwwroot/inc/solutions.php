@@ -122,23 +122,22 @@ function createTrueColorOrThrow ($context, $width, $height)
 	return $img;
 }
 
+function dispatchMiniRackThumbRequest ($rack_id)
+{
+	$content = getCachedMiniRackThumbImage ($rack_id); // may throw
+	header ('Content-Type: image/png');
+	echo $content;
+}
+
 // Generate a complete HTTP response for a 1:1 minirack image, use and update
 // SQL cache where appropriate. Suppress SQL cache update failures caused by
 // insufficient database privileges as that likely means a connection that is
 // read-only on purpose.
-function dispatchMiniRackThumbRequest ($rack_id)
+function getCachedMiniRackThumbImage ($rack_id)
 {
 	if (NULL !== ($thumbcache = loadRackThumbCache ($rack_id)))
-	{
-		header ('Content-Type: image/png');
-		echo $thumbcache;
-		return;
-	}
-	ob_start();
-	printRackThumbImage ($rack_id);
-	$capture = ob_get_clean();
-	header ('Content-Type: image/png');
-	echo $capture;
+		return $thumbcache;
+	$capture = getOutputOf ('printRackThumbImage', $rack_id);
 	try
 	{
 		saveRackThumbCache ($rack_id, $capture);
@@ -147,6 +146,7 @@ function dispatchMiniRackThumbRequest ($rack_id)
 	{
 		// keep going
 	}
+	return $capture;
 }
 
 function coloredObject ($state, $colors, $img, $posx, $posy, $height, $width, $vertical = TRUE)
