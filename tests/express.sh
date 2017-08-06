@@ -2,8 +2,9 @@
 
 THISDIR=`dirname $0`
 BASEDIR=`readlink -f "$THISDIR/.."`
+: ${PHPUNIT:=phpunit}
 
-case `phpunit --version` in
+case `"$PHPUNIT" --version` in
 	'PHPUnit 4.'*|'PHPUnit 5.'*)
 		BOOTSTRAP_FILE=bootstrap_v4v5.php
 		;;
@@ -65,4 +66,4 @@ echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit
 # At this point it makes sense to test specific functions.
 echo
 cd "$BASEDIR/tests"
-phpunit --group small --bootstrap $BOOTSTRAP_FILE || exit 1
+"$PHPUNIT" --group small --bootstrap $BOOTSTRAP_FILE || exit 1
