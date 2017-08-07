@@ -98,8 +98,9 @@ class RackspaceFunctionsTest extends RTTestCase
 		$rack_id = key ($created);
 		$this->assertNull (loadRackThumbCache ($rack_id));
 		// The call below should populate the cache.
-		$this->assertNotEquals ('', getCachedMiniRackThumbImage ($rack_id));
-		$this->assertNotNull (loadRackThumbCache ($rack_id));
+		$thumbnail = getCachedMiniRackThumbImage ($rack_id);
+		$this->assertNotEquals ('', $thumbnail);
+		$this->assertSame ($thumbnail, loadRackThumbCache ($rack_id));
 		$this->deleteSampleRacksAndObjects ($created);
 		// ON DELETE CASCADE
 		$this->assertNull (loadRackThumbCache ($rack_id));
