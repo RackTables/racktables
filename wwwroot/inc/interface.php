@@ -3187,7 +3187,6 @@ function renderIPv6NetworkAddresses ($netinfo)
 		$row_html = ob_get_clean ();
 		$override = callHook ('renderIPv6NetworkAddressesRow_hook', $row_html, $ip_bin, $addr);
 		echo is_string ($override) ? $override : $row_html;
-		continue;
 	}
 	if (! $interruped)
 		renderSeparator (ip_next ($prev_ip), ip_last ($netinfo), $hl_ip);
