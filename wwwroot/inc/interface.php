@@ -435,6 +435,7 @@ function getRackThumbLink ($rack, $scale = 1, $object_id = NULL)
 
 function renderRackspace ()
 {
+	global $pageno;
 	// Handle the location filter
 	startSession();
 	if (isset ($_REQUEST['changeLocationFilter']))
@@ -541,7 +542,7 @@ function renderRackspace ()
 			}
 		}
 	}
-	echo '</td><td class=pcright width="25%">';
+	echo "</td><td class='pcright ${pageno}' width='25%'>";
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo "<br>\n";
 	renderLocationFilterPortlet ();
@@ -2430,7 +2431,7 @@ function renderDepot ()
 		}
 	}
 
-	echo "</td><td class=pcright width='25%'>";
+	echo "</td><td class='pcright ${pageno}' width='25%'>";
 
 	renderCellFilterPortlet ($cellfilter, 'object', $objects);
 	echo "</td></tr></table>\n";
@@ -2678,7 +2679,7 @@ function renderIPSpace()
 		}
 	}
 
-	echo '</td><td class=pcright>';
+	echo "</td><td class='pcright ${pageno}'>";
 	renderCellFilterPortlet ($cellfilter, $realm, $netlist);
 	echo "</td></tr></table>\n";
 }
@@ -3981,6 +3982,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 	if ($realm === NULL)
 		$realm = etypeByPageno();
 	global $nextorder;
+	global $pageno;
 	$order = 'odd';
 	$cellfilter = getCellFilter();
 	if (! isset ($celllist))
@@ -4007,7 +4009,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 		echo '</table>';
 		finishPortlet();
 	}
-	echo '</td><td class=pcright>';
+	echo "</td><td class='pcright ${pageno}'>";
 	renderCellFilterPortlet ($cellfilter, $realm, $celllist);
 	echo "</td></tr></table>\n";
 }
