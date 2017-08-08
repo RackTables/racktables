@@ -155,9 +155,9 @@ class PureFunctionTest extends RTTestCase
 			array ('questionMarks', 2, '?, ?'),
 			array ('questionMarks', 3, '?, ?, ?'),
 
-			array ('makeSetSQL', array ('one'), 'one=?'),
-			array ('makeSetSQL', array ('one', 'two'), 'one=?, two=?'),
-			array ('makeSetSQL', array ('one', 'two', 'three'), 'one=?, two=?, three=?'),
+			array ('makeSetSQL', array ('one'), '`one` = ?'),
+			array ('makeSetSQL', array ('one', 'two'), '`one` = ?, `two` = ?'),
+			array ('makeSetSQL', array ('one', 'two', 'three'), '`one` = ?, `two` = ?, `three` = ?'),
 
 			array
 			(
@@ -1436,6 +1436,17 @@ class PureFunctionTest extends RTTestCase
 
 			array ('makeSetSQL', array (array())),
 
+			array ('assertListOfColumnNames', array (NULL)),
+			array ('assertListOfColumnNames', array (FALSE)),
+			array ('assertListOfColumnNames', array (TRUE)),
+			array ('assertListOfColumnNames', array (0)),
+			array ('assertListOfColumnNames', array ('')),
+			array ('assertListOfColumnNames', array (array())),
+			array ('assertListOfColumnNames', array (1)),
+			array ('assertListOfColumnNames', array ('one', 2)),
+			array ('assertListOfColumnNames', array ('a', 'b', '')),
+			array ('assertListOfColumnNames', array ('z', 1.2)),
+
 			// not an array
 			array ('reindexById', array (NULL)),
 			array ('reindexById', array (FALSE)),
@@ -1503,16 +1514,16 @@ class PureFunctionTest extends RTTestCase
 	{
 		return array
 		(
-			array (array ('one' => 1), 'AND', 'one=?', array (1)),
-			array (array ('one' => NULL), 'AND', 'one IS NULL', array()),
-			array (array ('one' => 1, 'two' => 2), 'AND', 'one=? AND two=?', array (1, 2)),
-			array (array ('one' => NULL, 'two' => 2), 'AND', 'one IS NULL AND two=?', array (2)),
-			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', 'one=? OR two=? OR three=?', array (1, 2, 3)),
+			array (array ('one' => 1), 'AND', '`one` = ?', array (1)),
+			array (array ('one' => NULL), 'AND', '`one` IS NULL', array()),
+			array (array ('one' => 1, 'two' => 2), 'AND', '`one` = ? AND `two` = ?', array (1, 2)),
+			array (array ('one' => NULL, 'two' => 2), 'AND', '`one` IS NULL AND `two` = ?', array (2)),
+			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', '`one` = ? OR `two` = ? OR `three` = ?', array (1, 2, 3)),
 			array
 			(
 				array ('a' => array ('a.1', 'a.2', 'a.3'), 'b' => array (0, 10, 20, 30)),
 				'OR',
-				'a IN(?, ?, ?) OR b IN(?, ?, ?, ?)',
+				'`a` IN(?, ?, ?) OR `b` IN(?, ?, ?, ?)',
 				array ('a.1', 'a.2', 'a.3', 0, 10, 20, 30)
 			),
 		);

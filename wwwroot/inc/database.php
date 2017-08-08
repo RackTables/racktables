@@ -3930,6 +3930,19 @@ function collectMySQLWarnings()
 	$rtdebug_mysql_warnings = array_merge ($rtdebug_mysql_warnings, $result->fetchAll (PDO::FETCH_ASSOC));
 }
 
+function assertListOfColumnNames ($column_names)
+{
+	if (! is_array ($column_names))
+		throw new InvalidArgException ('column_names', $column_names, 'is not an array');
+	if (! count ($column_names))
+		throw new InvalidArgException ('column_names', '(empty array)', 'must not be empty');
+	foreach ($column_names as $each)
+		if (! is_string ($each))
+			throw new InvalidArgException ('column_names', '(array)', 'contains an item that is not a string');
+		elseif ($each == '')
+			throw new InvalidArgException ('column_names', '(array)', 'contains an empty string');
+}
+
 // This is a swiss-knife blade to insert a record into a table.
 // The first argument is table name.
 // The second argument is an array of "name" => "value" pairs.
@@ -3937,10 +3950,8 @@ function collectMySQLWarnings()
 function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
-	$query = "INSERT INTO ${tablename} (" . implode (', ', array_keys ($columns));
-	$query .= ') VALUES (' . questionMarks (count ($columns)) . ')';
-	// Now the query should be as follows:
-	// INSERT INTO table (c1, c2, c3) VALUES (?, ?, ?)
+	$query = "INSERT INTO `${tablename}` SET " . makeSetSQL (array_keys ($columns));
+	// INSERT INTO `table` SET `c1` = ?, `c2` = ?, `c3` = ?
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
@@ -3958,12 +3969,11 @@ function usePreparedInsertBlade ($tablename, $columns)
 
 function makeSetSQL ($column_names)
 {
-	if (! count ($column_names))
-		throw new InvalidArgException ('column_names', '(empty array)', 'must not be empty');
+	assertListOfColumnNames ($column_names);
 	$tmp = array();
 	// Same syntax works for NULL as well.
 	foreach ($column_names as $each)
-		$tmp[] = "${each}=?";
+		$tmp[] = "`${each}` = ?";
 	return implode (', ', $tmp);
 }
 
@@ -3971,22 +3981,21 @@ function makeWhereSQL ($where_columns, $conjunction, &$params)
 {
 	if (! in_array (strtoupper ($conjunction), array ('AND', '&&', 'OR', '||', 'XOR')))
 		throw new InvalidArgException ('conjunction', $conjunction, 'invalid operator');
-	if (! count ($where_columns))
-		throw new InvalidArgException ('where_columns', '(empty array)', 'must not be empty');
+	assertListOfColumnNames (array_keys ($where_columns));
 	$params = array();
 	$tmp = array();
 	foreach ($where_columns as $colname => $colvalue)
 		if ($colvalue === NULL)
-			$tmp[] = "${colname} IS NULL";
+			$tmp[] = "`${colname}` IS NULL";
 		elseif (is_array ($colvalue))
 		{
 			// Suppress any string keys to keep array_merge() from overwriting.
 			$params = array_merge ($params, array_values ($colvalue));
-			$tmp[] = sprintf ('%s IN(%s)', $colname, questionMarks (count ($colvalue)));
+			$tmp[] = sprintf ('`%s` IN(%s)', $colname, questionMarks (count ($colvalue)));
 		}
 		else
 		{
-			$tmp[] = "${colname}=?";
+			$tmp[] = "`${colname}` = ?";
 			$params[] = $colvalue;
 		}
 	return implode (" ${conjunction} ", $tmp);
@@ -4000,7 +4009,7 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 	global $dbxlink;
 	if (! count ($columns))
 		throw new InvalidArgException ('columns', '(empty array)', 'in this function DELETE must have WHERE');
-	$query = "DELETE FROM ${tablename} WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
+	$query = "DELETE FROM `${tablename}` WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
@@ -4039,7 +4048,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
 	if (! count ($where_columns))
 		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
-	$query = "UPDATE ${tablename} SET " . makeSetSQL (array_keys ($set_columns));
+	$query = "UPDATE `${tablename}` SET " . makeSetSQL (array_keys ($set_columns));
 	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
 	try
 	{
