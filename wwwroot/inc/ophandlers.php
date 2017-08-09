@@ -350,7 +350,6 @@ $opspec_list['tagtree-edit-createTag'] = array
 		array ('url_argname' => 'color', 'assertion' => 'htmlcolor0', 'translator' => 'HTMLColorForDatabase'),
 	),
 );
-// Used through an intermediate ophandler function that calls tableHandler().
 $opspec_list['tagtree-edit-destroyTag'] = array
 (
 	'table' => 'TagTree',
@@ -3765,20 +3764,6 @@ function updateVLANDomain()
 
 	usePreparedUpdateBlade ('VLANDomain', array ('group_id' => $group_id, 'description' => $description), array ('id' => $domain_id));
 	showSuccess ("VLAN domain updated successfully");
-}
-
-function destroyTag()
-{
-	global $taglist;
-	$tag_id = genericAssertion ('tag_id', 'uint');
-
-	if (isset ($taglist[$tag_id]) && isset ($taglist[$tag_id]['color']))
-	{
-		// remove all rack thumbnails
-		usePreparedDeleteBlade ('RackThumbnail', array ('1' => '1'));
-	}
-
-	tableHandler();
 }
 
 function installPlugin ()
