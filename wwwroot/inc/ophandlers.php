@@ -973,6 +973,49 @@ function delIPAllocation ()
 
 function addIPAllocation ()
 {
+	if (preg_match("/(\d+\.\d+\.\d+\.)(\d+)-(\d+)/", $_REQUEST['ip'], $matches))
+	{
+		$ip_first = $matches[1].$matches[2];
+		$ip_last  = $matches[1].$matches[3];
+
+		$ip_first_bin = ip2long($ip_first);
+		$ip_last_bin = ip2long($ip_last);
+		for ($i = $ip_first_bin; $i <= $ip_last_bin; $i++)
+		{
+			setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
+			$ip_bin = pack ('N', $i);
+			$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
+
+			// check if address is alread allocated
+			$address = getIPAddress ($ip_bin);
+
+			if (!empty($address['allocs']) && ( ($address['allocs'][0]['type'] != 'shared') || ($alloc_type != 'shared') ) )
+				showWarning("IP ".ip_format($ip_bin)." already in use by ".$address['allocs'][0]['object_name']." - ".$address['allocs'][0]['name']);
+
+			if (getConfigVar ('IPV4_JAYWALK') != 'yes' and NULL === getIPAddressNetworkId ($ip_bin))
+			{
+				showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
+				return;
+			}
+
+			if($address['reserved'] && strlen ($address['name']))
+			{
+				showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
+				//TODO ask to take reserved IP or not !
+			}
+
+			bindIPToObject
+			(
+				$ip_bin,
+				genericAssertion ('object_id', 'uint'),
+				genericAssertion ('bond_name', 'string0'),
+				$alloc_type
+			);
+
+			showFuncMessage (__FUNCTION__, 'OK');
+		}
+		return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
+	}
 	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
 	$ip_bin = assertIPArg ('ip');
 	$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
