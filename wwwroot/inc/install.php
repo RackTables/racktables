@@ -1071,7 +1071,7 @@ function get_pseudo_file ($name)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `TagStorage` (
-  `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','user','vst') NOT NULL default 'object',
+  `entity_realm` enum('file','ipv4net','ipv4rspool','ipv4vs','ipvs','ipv6net','location','object','rack','row','user','vst') NOT NULL default 'object',
   `entity_id` int(10) unsigned NOT NULL,
   `tag_id` int(10) unsigned NOT NULL default '0',
   `tag_is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
