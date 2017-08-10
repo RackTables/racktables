@@ -1,6 +1,9 @@
-0.20.14
+0.20.14 2017-08-10
 	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
 	update: suppress the rackspace portlet column if it is empty
+	update: refine items in the dictionary (e.g. SuperMicro and EMC)
+	update: adjust some code for easier customization
+	update: improve some error messages
 0.20.13 2017-05-12
 	update: fix performance for pages with images (GH#190 by Michael A. Mikhailov)
 	update: improve SNMP support for Brocade devices (GH#180 by Chris Jones)
