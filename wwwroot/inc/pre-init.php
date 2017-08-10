@@ -64,11 +64,7 @@ function connectDB()
 	$drvoptions = array
 	(
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		// Cancel one specific SQL mode option that RackTables has been non-compliant
-		// with but which used to be off by default until MySQL 5.7. As soon as
-		// respective SQL queries and table columns become compliant with those options
-		// stop changing @@SQL_MODE but still keep SET NAMES in place.
-		PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8", @@SQL_MODE = REPLACE(@@SQL_MODE, "NO_ZERO_DATE", "")',
+		PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8"',
 	);
 	if (isset ($pdo_bufsize))
 		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
