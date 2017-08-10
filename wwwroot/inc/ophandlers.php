@@ -989,11 +989,42 @@ function addIPAllocation ()
 		return;
 	}
 
-	if($address['reserved'] && $address['name'] != '')
+	$autorelease = getConfigVar ('IPV4_AUTO_RELEASE');
+	if ($autorelease > 0)
 	{
-		showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
-		//TODO ask to take reserved IP or not !
+		$reserved = $ipname = FALSE;
+		if ($autorelease >= 1 && $address['reserved'] == 'yes')
+			$reserved = TRUE;
+		if ($autorelease >= 2 && $address['name'] != '')
+			$ipname = TRUE;
+
+		if ($reserved || $ipname)
+		{
+			$choice = showChoice ('Assign IP '.ip_format ($ip_bin).' Name: "'.$address['name'].'"?<br>'.
+                                ($reserved ? 'IP reservation will be removed!<br>' : '').
+                                ($ipname ? 'IP name "'.$address['name'].'" and comment will be removed!' : '')
+                                );
+
+			if ($choice === NULL) // waiting for choice
+				return;
+
+			if($choice !== TRUE)
+			{
+				showWarning ('IP '.ip_format ($ip_bin).' Name: "'.$address['name'].'" NOT assigned<br>'.
+					($reserved ? 'IP is still reserved!<br>' : '').
+					($ipname ? 'IP name "'.$address['name'].'" and comment unchanged' : ''));
+
+				return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
+			}
+
+			showWarning ('IP '.ip_format ($ip_bin).' Name: "'.$address['name'].'" assigned<br>'.
+				($reserved ? 'IP is NO longer reserved!<br>' : '').
+				($ipname ? 'IP name "'.$address['name'].'" and comment removed!' : ''));
+		}
 	}
+	else
+		if ($address['reserved'] == 'yes' && $address['name'] != '')
+			showWarning ('IP '.ip_format ($ip_bin).' Name: "'.$address['name'].'" is already reserved!');
 
 	bindIPToObject
 	(
