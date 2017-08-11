@@ -834,7 +834,8 @@ function processIPNetVlans (&$cell)
 
 function fetchPortList ($sql_where_clause, $query_params = array())
 {
-	$query = <<<END
+	// Heredoc, not nowdoc!
+	$query = <<<"END"
 SELECT
 	Port.id,
 	Port.name,
@@ -1248,7 +1249,7 @@ function commitUnlinkEntitiesByLinkID ($link_id)
 //	- number of VMs whose parent is one of the resource pools in the cluster
 function getVMClusterSummary ()
 {
-	$query = <<<END
+	$query = <<<'END'
 SELECT
 	O.id,
 	O.name,
@@ -1512,7 +1513,7 @@ function commitDeleteRow ($row_id)
 // Returns mounted devices count in all racks inside the specified row
 function getRowMountsCount ($row_id)
 {
-	$query =<<<END
+	$query =<<<'END'
 SELECT COUNT(*) FROM (
 	SELECT object_id FROM RackSpace rs LEFT JOIN EntityLink el ON (rs.rack_id = el.child_entity_id)
 	WHERE
@@ -1532,7 +1533,7 @@ END;
 // Returns mounted devices count in specified rack
 function getRackMountsCount ($rack_id)
 {
-	$query =<<<END
+	$query =<<<'END'
 SELECT COUNT(*) FROM (
 	SELECT object_id FROM RackSpace WHERE object_id IS NOT NULL AND rack_id = ?
 	UNION
@@ -5253,7 +5254,7 @@ function getDomainVLANs ($vdom_id, $strict = FALSE)
 	}
 
 	$result = usePreparedSelectBlade
-	(<<<END
+	(<<<'END'
 SELECT
 	vlan_id,
 	vlan_type,
@@ -5298,7 +5299,7 @@ function getDomainVLANList ($vdom_id, $strict = FALSE)
 	}
 
 	$result = usePreparedSelectBlade
-	(<<<END
+	(<<<'END'
 SELECT
 	vlan_id,
 	vlan_type,

@@ -314,7 +314,7 @@ function renderLocationFilterPortlet ()
 		}
 	}
 
-	addJS(<<<END
+	addJS(<<<'END'
 function checkAll(bx) {
 	for (var tbls=document.getElementsByTagName("table"), i=tbls.length; i--;)
 		if (tbls[i].id == "locationFilter") {
@@ -371,7 +371,7 @@ function expand(id) {
 END
 	,TRUE);
 	startPortlet ('Location filter');
-	echo <<<END
+	echo <<<'END'
 <table border=0 align=center cellspacing=0 class="tagtree" id="locationFilter">
     <form method=post>
     <input type=hidden name=page value=rackspace>
@@ -592,7 +592,7 @@ function renderLocationSelectTree ($select_name, $selected_id = NULL)
 
 function renderRackspaceLocationEditor ()
 {
-	$js = <<<JSTXT
+	$js = <<<'JSTXT'
 	function locationeditor_showselectbox(e) {
 		$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
 		$(this).unbind('mousedown', locationeditor_showselectbox);
@@ -1051,7 +1051,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 function renderRackSortForm ($row_id)
 {
 	includeJQueryUI (false);
-	$js = <<<JSTXT
+	// Heredoc, not nowdoc!
+	$js = <<<"JSTXT"
 	$(document).ready(
 		function () {
 			$("#sortRacks").sortable({
@@ -1827,7 +1828,8 @@ function renderIPForObject ($object_id)
 
 		includeJQueryUI (TRUE);
 
-		addJS (<<<JSEND
+		// Heredoc, not nowdoc!
+		addJS (<<<"JSEND"
 			$(document).ready( function() {
 				$('[name="bond_name"]').autocomplete({
 					source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
@@ -2413,7 +2415,8 @@ function renderEmptyResults($cellfilter, $entities_name, $count = NULL)
 	$href_show_all = trim($_SERVER['REQUEST_URI'], '&');
 	$href_show_all .= htmlspecialchars('&show_all_objects=1');
 	$suffix = isset ($count) ? " ($count)" : '';
-	echo <<<END
+	// Heredoc, not nowdoc!
+	echo <<<"END"
 <p>Please set a filter to display the corresponging $entities_name.
 <br><a href="$href_show_all">Show all $entities_name$suffix</a>
 END;
@@ -2703,7 +2706,8 @@ function renderIPNewNetForm ()
 	// IP prefix validator
 	addJS ('js/live_validation.js');
 	$regexp = addslashes ($regexp);
-	addJS (<<<END
+	// Heredoc, not nowdoc!
+	addJS (<<<"END"
 $(document).ready(function () {
 	$('form#add input[name="range"]').attr('match', '$regexp');
 	Validate.init();
@@ -3384,7 +3388,7 @@ function renderIPAddressAllocations ($ip_bin)
 
 		includeJQueryUI (TRUE);
 
-		addJS (<<<JSEND
+		addJS (<<<'JSEND'
 			$(document).ready( function() {
 				$('[name="bond_name"]').autocomplete({
 					//minLength: 3,
@@ -4116,7 +4120,7 @@ function renderRackPage ($rack_id)
 function dragon ()
 {
 	startPortlet ('Here be dragons');
-	echo <<<ENDOFTEXT
+	echo <<<'ENDOFTEXT'
 <div class=dragon><pre><font color="#00ff33">
                  \||/
                  |  <font color="#ff0000">@</font>___oo
@@ -4172,7 +4176,8 @@ function renderSNMPPortFinder ($object_id)
 		'authPriv' => 'auth with Priv',
 	);
 	$slselect = getSelect ($sloptions, array ('name' => 'sec_level'), 'noAuthNoPriv');
-	echo <<<ENDOFTEXT
+	// Heredoc, not nowdoc!
+	echo <<<"ENDOFTEXT"
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
 		<th class=tdright><label for=sec_name>Security User:</label></th>
@@ -4618,7 +4623,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			echo " <a href=\"#\" onclick=\"textifyCellFilter(this, '$text'); return false\">";
 			printImageHREF ('COPY', 'Make text expression from current filter');
 			echo '</a>';
-			addJS (<<<END
+			addJS (<<<'END'
 function textifyCellFilter(target, text)
 {
 	var portlet = $(target).closest ('.portlet');
@@ -5839,7 +5844,7 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	echo '</table></form>';
 
-	addJS (<<<END
+	addJS (<<<'END'
 $(document).ready(function () {
 	$('#cb-toggle').click(function (event) {
 		var list = $('.cb-makelink');
@@ -6001,7 +6006,8 @@ function formatAttributeValue ($record, $objtype_id)
 
 function addAutoScrollScript ($anchor_name)
 {
-	addJS (<<<END
+	// Heredoc, not nowdoc!
+	addJS (<<<"END"
 $(document).ready(function() {
 	var anchor = document.getElementsByName('$anchor_name')[0];
 	if (anchor)

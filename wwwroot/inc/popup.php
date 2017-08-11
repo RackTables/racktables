@@ -274,7 +274,7 @@ function handlePopupPortLink()
 				formatPort ($remote_port_info),
 			)
 		);
-		addJS (<<<END
+		addJS (<<<'END'
 window.opener.location.reload(true);
 window.close();
 END
@@ -284,7 +284,8 @@ END
 	else
 	{
 		// JS code to display port compatibility hint
-		addJS (<<<END
+		// Heredoc, not nowdoc!
+		addJS (<<<"END"
 POIFC = {};
 $js_table
 $(document).ready(function () {
@@ -306,7 +307,7 @@ function onPortTypeChange() {
 }
 END
 		, TRUE);
-		addCSS (<<<END
+		addCSS (<<<'END'
 .compat-hint {
 	display: none;
 	font-size: 125%;
@@ -423,7 +424,7 @@ function renderPopupPortSelector()
 	echo '</tr></table>';
 	finishPortlet();
 
-	addJS (<<<JSEND
+	addJS (<<<'JSEND'
 		$(document).ready( function() {
 			$("#filter-obj").autocomplete({
 				source: "?module=ajax&ac=autocomplete&realm=object",

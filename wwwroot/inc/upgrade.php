@@ -6,7 +6,7 @@
 
 $relnotes = array
 (
-	'0.20.0' => <<<ENDOFTEXT
+	'0.20.0' => <<<'ENDOFTEXT'
 WARNING: This release have too many internal changes, some of them were waiting more than a year
 to be released. So this release is considered "BETA" and is recommended only to curiuos users,
 who agree to sacrifice the stability to the progress.
@@ -19,17 +19,17 @@ New plugins engine instead of local.php file. To make your own code stored in lo
 you must move the local.php file into the plugins/ directory. The name of this file does not
 matter any more. You also can store multiple files in that dir, separate your plugins by features,
 share them and try the plugins from other people just placing them into plugins/ dir, no more merging.
-\$path_to_local_php variable has no special meaning any more.
-\$racktables_confdir variable is now used only to search for secret.php file.
-\$racktables_plugins_dir is a new overridable special variable pointing to plugins/ directory.
+$path_to_local_php variable has no special meaning any more.
+$racktables_confdir variable is now used only to search for secret.php file.
+$racktables_plugins_dir is a new overridable special variable pointing to plugins/ directory.
 
 Beginning with this version it is possible to delete IP prefixes, VLANs, Virtual services
 and RS pools from within theirs properties tab. So please inspect your permissions rules
 to assure there are no undesired allows for deletion of these objects. To ensure this, you could
 try this code in the beginning of permissions script:
 
-	allow {userid_1} and {\$op_del}
-	deny {\$op_del} and ({\$tab_edit} or {\$tab_properties})
+	allow {userid_1} and {$op_del}
+	deny {$op_del} and ({$tab_edit} or {$tab_properties})
 
 Hardware gateways engine was rewritten in this version of RackTables. This means that
 the file gateways/deviceconfig/switch.secrets.php is not used any more. To get information
@@ -55,7 +55,7 @@ This could be inconvenient, but it is the most effective way to encourage users 
 If this behavior is not what you want, simply revert these variables' values:
   - SHOW_LAST_TAB               no => yes
   - IPV4_TREE_SHOW_USAGE        yes =>no (networks' usage is still available by click)
-  - IPV4LB_LISTSRC              {\$typeid_4} => false
+  - IPV4LB_LISTSRC              {$typeid_4} => false
   - FILTER_DEFAULT_ANDOR        or => and (this implicitly enables the feature of dynamic tree shrinking)
   - FILTER_SUGGEST_EXTRA        no => yes (yes, we have extra logical filters!)
   - IPV4_TREE_RTR_AS_CELL       yes => no (display routers as simple text, not cell)
@@ -69,18 +69,18 @@ IP tree at all.
 ENDOFTEXT
 ,
 
-	'0.20.1' => <<<ENDOFTEXT
+	'0.20.1' => <<<'ENDOFTEXT'
 The 0.20.0 release includes bug which breaks IP networks' capacity displaying on 32-bit architecture machines. To fix this, this release makes use of PHP's BC Math module. It is a new reqiurement. Most PHP distributions have this module already enabled, but if yours does not - you need yo recompile PHP.
 
 Security context of 'ipaddress' page now includes tags from the network containing an IP address. This means that you should audit your permission rules to check there is no unintended allows of changing IPs based on network's tagset. Example:
 	allow {client network} and {New York}
 This rule now not only allows any operation on NY client networks, but also any operation with IP addresses included in those networks. To fix this, you should change the rule this way:
-	allow {client network} and {New York} and not {\$page_ipaddress}
+	allow {client network} and {New York} and not {$page_ipaddress}
 
 ENDOFTEXT
 ,
 
-	'0.20.4' => <<<ENDOFTEXT
+	'0.20.4' => <<<'ENDOFTEXT'
 Please note that some dictionary items of Cisco Catalyst 2960 series switches
 were renamed to meet official Cisco classification:
 	2960-48TT   => 2960-48TT-L
@@ -104,7 +104,7 @@ REVERSED_RACKS_LISTSRC and NEAREST_RACKS_CHECKBOX.
 ENDOFTEXT
 ,
 
-	'0.20.5' => <<<ENDOFTEXT
+	'0.20.5' => <<<'ENDOFTEXT'
 This release introduces the VS groups feature. VS groups is a new way to store
 and display virtual services configuration. There is a new "ipvs" (VS group)
 realm. All previously existing VS configuration remains functional and user
@@ -121,17 +121,17 @@ new format.
 ENDOFTEXT
 ,
 
-	'0.20.6' => <<<ENDOFTEXT
+	'0.20.6' => <<<'ENDOFTEXT'
 New MGMT_PROTOS configuration option replaces the TELNET_OBJS_LISTSRC,
 SSH_OBJS_LISTSRC and RDP_OBJS_LISTSRC options (converting existing settings as
 necessary). MGMT_PROTOS allows to specify any management protocol for a
 particular device list using a RackCode filter. The default value
-("ssh: {\$typeid_4}, telnet: {\$typeid_8}") produces "ssh://server.fqdn" for
+("ssh: {$typeid_4}, telnet: {$typeid_8}") produces "ssh://server.fqdn" for
 servers and "telnet://switch.fqdn" for network switches.
 ENDOFTEXT
 ,
 
-	'0.20.7' => <<<ENDOFTEXT
+	'0.20.7' => <<<'ENDOFTEXT'
 From now on the minimum (oldest) release of PHP that can run RackTables is
 5.2.10. In particular, to continue running RackTables on CentOS 5 it is
 necessary to replace its php* RPM packages with respective php53* packages
@@ -148,7 +148,7 @@ Tags could now be assigned on the Edit/Properties tab using a text input with
 auto-completion. Type a star '*' to view full tag tree in auto-complete menu.
 It is worth to add the following line to the permissions script if the
 old-fashioned 'Tags' tab is not needed any more:
-  deny {\$tab_tags} # this hides 'Tags' tab
+  deny {$tab_tags} # this hides 'Tags' tab
 
 This release converts collation of all DB fields to the utf8_unicode_ci. This
 procedure may take some time, and could fail if there are rows that differ only
@@ -158,13 +158,13 @@ installation. If desired so, you could eliminate the case-duplicating rows
 and re-apply the failed query.
 ENDOFTEXT
 ,
-	'0.20.11' => <<<ENDOFTEXT
+	'0.20.11' => <<<'ENDOFTEXT'
 New IPV4_TREE_SHOW_UNALLOCATED configuration option introduced to disable
 dsplaying unallocated networks in IPv4 space tree. Setting it also disables
 the "knight" feature.
 ENDOFTEXT
 ,
-	'0.21.0' => <<<ENDOFTEXT
+	'0.21.0' => <<<'ENDOFTEXT'
 From now on the minimum (oldest) release of PHP that can run RackTables is
 5.5.0.
 
@@ -736,7 +736,7 @@ EntityLinkTrigger:BEGIN
   END IF;
 END;
 ";
-			$link_trigger_body = <<<ENDOFTRIGGER
+			$link_trigger_body = <<<'ENDOFTRIGGER'
 LinkTrigger:BEGIN
   DECLARE tmp, porta_type, portb_type, count INTEGER;
 
@@ -1188,7 +1188,7 @@ VALUES ('SHOW_OBJECTTYPE',  'no',  'string',  'no',  'no',  'yes',  'Show object
 
 			$query[] = "INSERT INTO ObjectParentCompat (parent_objtype_id, child_objtype_id) VALUES (1787,4)";
 
-			$port_trigger_body = <<<ENDOFTRIGGER
+			$port_trigger_body = <<<'ENDOFTRIGGER'
 PortTrigger:BEGIN
   IF (NEW.`l2address` IS NOT NULL AND (SELECT COUNT(*) FROM `Port` WHERE `l2address` = NEW.`l2address` AND `object_id` != NEW.`object_id`) > 0) THEN
     CALL `Port-l2address-already-exists-on-another-object`;
@@ -1415,7 +1415,7 @@ function renderUpgraderHTML()
 	{
 		header ('WWW-Authenticate: Basic realm="RackTables upgrade"');
 		header ('HTTP/1.0 401 Unauthorized');
-		echo <<<ENDOFTEXT
+		echo <<<'ENDOFTEXT'
 <h1>Trouble logging in?</h1>
 You are trying to authenticate for the RackTables upgrade screen. This means that
 you must authenticate with the username and password of the main RackTables
@@ -1425,7 +1425,7 @@ ENDOFTEXT;
 		die;
 	}
 
-		echo <<<ENDOFTEXT
+		echo <<<'ENDOFTEXT'
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head><title>RackTables upgrade script</title>
@@ -1519,7 +1519,7 @@ function convertSLBTablesToBinIPs()
 
 	$dbxlink->query ("DROP TABLE IF EXISTS `IPv4VS_new`, `IPv4RS_new`, `IPv4VS_old`, `IPv4RS_old`");
 
-	$dbxlink->query (<<<END
+	$dbxlink->query (<<<'END'
 CREATE TABLE `IPv4VS_new` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `vip` varbinary(16) NOT NULL,
@@ -1542,7 +1542,7 @@ END
 		usePreparedInsertBlade ('IPv4VS_new', $row);
 	}
 
-	$dbxlink->query (<<<END
+	$dbxlink->query (<<<'END'
 CREATE TABLE `IPv4RS_new` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `inservice` enum('yes','no') NOT NULL default 'no',
@@ -1567,7 +1567,7 @@ END
 		usePreparedInsertBlade ('IPv4RS_new', $row);
 	}
 
-	$dbxlink->query (<<<END
+	$dbxlink->query (<<<'END'
 RENAME TABLE
 	`IPv4VS` TO `IPv4VS_old`,
 	`IPv4VS_new` TO `IPv4VS`,

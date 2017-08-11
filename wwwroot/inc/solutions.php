@@ -437,7 +437,7 @@ function renderImagePreview ($file_id)
 function printStatic404()
 {
 	header ('HTTP/1.0 404 Not Found');
-	echo <<<ENDOFTEXT
+	echo <<<'ENDOFTEXT'
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>404 Not Found</title>

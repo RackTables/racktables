@@ -102,7 +102,8 @@ function renderRackCodeViewer ()
 		$scrollcode = "rackCodeMirror.addLineClass (${lineno}, 'wrap', 'border_highlight');\n" .
 			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
 	}
-	addJS (<<<ENDJAVASCRIPT
+	// Heredoc, not nowdoc!
+	addJS (<<<"ENDJAVASCRIPT"
 $(document).ready(function() {
 	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
 		mode:'rackcode',
@@ -124,7 +125,7 @@ function renderRackCodeEditor ()
 	addJS ('js/codemirror/rackcode.js');
 	addCSS ('css/codemirror/codemirror.css');
 	addCSS ('css/codemirror/rackcode.css');
-	addJS (<<<ENDJAVASCRIPT
+	addJS (<<<'ENDJAVASCRIPT'
 function verify()
 {
 	$.ajax({
@@ -133,7 +134,7 @@ function verify()
 		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': $("#RCTA").text()},
 		success: function (data)
 		{
-			arr = data.split("\\n");
+			arr = data.split("\n");
 			if (arr[0] == "ACK")
 			{
 				$("#SaveChanges")[0].disabled = "";
@@ -950,7 +951,8 @@ function addParentNodeOptionsJS ($prefix, $nodetype)
 {
 	addJS
 	(
-<<<END
+// Heredoc, not nowdoc!
+<<<"END"
 function ${prefix}_showselectbox(e) {
 	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: '${nodetype}', node_id: this.id});
 	$(this).unbind('mousedown', ${prefix}_showselectbox);

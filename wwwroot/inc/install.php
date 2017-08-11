@@ -36,7 +36,8 @@ if ($step > count ($stepfunc))
 }
 $title = "RackTables installation: step ${step} of " . count ($stepfunc);
 header ('Content-Type: text/html; charset=UTF-8');
-	echo <<<ENDOFTEXT
+	// Heredoc, not nowdoc!
+	echo <<<"ENDOFTEXT"
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head><title>${title}</title>
@@ -248,27 +249,27 @@ function init_config ()
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
-	fwrite ($conf, <<<ENDOFTEXT
+	fwrite ($conf, <<<'ENDOFTEXT'
 # Set this if you need to override the default plugins directory.
-#\$racktables_plugins_dir = '/path/to/plugins';
+#$racktables_plugins_dir = '/path/to/plugins';
 
 # Setting MySQL client buffer size may be required to make downloading work for
 # larger files, but it does not work with mysqlnd.
-# \$pdo_bufsize = 50 * 1024 * 1024;
+# $pdo_bufsize = 50 * 1024 * 1024;
 # Setting PDO SSL key, cert, and CA will allow a SSL/TLS connection to the MySQL
 # DB. Make sure the files are readable by the web server
-# \$pdo_ssl_key = '/path/to/ssl/key'
-# \$pdo_ssl_cert = '/path/to/ssl/cert'
-# \$pdo_ssl_ca = '/path/to/ssl/ca'
+# $pdo_ssl_key = '/path/to/ssl/key'
+# $pdo_ssl_cert = '/path/to/ssl/cert'
+# $pdo_ssl_ca = '/path/to/ssl/ca'
 
-\$user_auth_src = 'database';
-\$require_local_account = TRUE;
+$user_auth_src = 'database';
+$require_local_account = TRUE;
 # Default setting is to authenticate users locally, but it is possible to
 # employ existing LDAP or Apache user accounts. Check RackTables wiki for
 # more information, in particular, this page for LDAP configuration details:
 # http://wiki.racktables.org/index.php?title=LDAP
 
-#\$LDAP_options = array
+#$LDAP_options = array
 #(
 #	'server' => 'localhost',
 #	'domain' => 'example.com',
@@ -285,7 +286,7 @@ function init_config ()
 # For SAML configuration details:
 # http://wiki.racktables.org/index.php?title=SAML
 
-#\$SAML_options = array
+#$SAML_options = array
 #(
 #	'simplesamlphp_basedir' => '../simplesaml',
 #	'sp_profile' => 'default-sp',
@@ -299,7 +300,7 @@ function init_config ()
 # be appended to assorted error messages visible in user's browser (including
 # "not authenticated" message). Beware of placing any sensitive information
 # here, it will be readable by unauthorized visitors.
-#\$helpdesk_banner = '<B>This RackTables instance is supported by Example Inc. IT helpdesk, dial ext. 1234 to report a problem.</B>';
+#$helpdesk_banner = '<B>This RackTables instance is supported by Example Inc. IT helpdesk, dial ext. 1234 to report a problem.</B>';
 
 ENDOFTEXT
 );
@@ -1314,7 +1315,7 @@ EntityLinkTrigger:BEGIN
   END IF;
 END;
 ";
-		$link_trigger_body = <<<ENDOFTRIGGER
+		$link_trigger_body = <<<'ENDOFTRIGGER'
 LinkTrigger:BEGIN
   DECLARE tmp, porta_type, portb_type, count INTEGER;
 
