@@ -165,6 +165,9 @@ the "knight" feature.
 ENDOFTEXT
 ,
 	'0.21.0' => <<<ENDOFTEXT
+From now on the minimum (oldest) release of PHP that can run RackTables is
+5.5.0.
+
 This release introduces a new plugin architecture.  If you experience issues
 after the upgrade, try disabling plugins.
 Refer to <a href="http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins">the wiki</a> for more information.

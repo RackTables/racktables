@@ -73,7 +73,7 @@ function platform_is_ok ()
 {
 	$nerrs = 0;
 	echo "<table border=1 cellpadding=5>\n";
-	$nerrs += platform_generic_test (version_compare (PHP_VERSION, '5.2.10', '>='), 'PHP version >= 5.2.10');
+	$nerrs += platform_generic_test (version_compare (PHP_VERSION, '5.5.0', '>='), 'PHP version >= 5.5.0');
 	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
 	$nerrs += platform_generic_test (in_array  ('pdo_mysql', get_loaded_extensions()), 'PDO-MySQL extension');
 	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
