@@ -152,8 +152,7 @@ class ObjectPortsTest extends RTTestCase
 		$this->assertEquals (4, $ports[$key2]['iif_id']);
 		$this->assertEquals (1202, $ports[$key2]['oif_id']);
 
-		usePreparedDeleteBlade ('Port', array ('id' => $port1_id));
-		usePreparedDeleteBlade ('Port', array ('id' => $port2_id));
+		usePreparedDeleteBlade ('Port', array ('id' => array ($port1_id, $port2_id)));
 	}
 
 	public function providerAddAndVerify ()

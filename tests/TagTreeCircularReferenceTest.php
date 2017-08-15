@@ -20,14 +20,9 @@ class TagTreeCircularReferenceTest extends RTTestCase
 	public function tearDown ()
 	{
 		// remove sample data
-		usePreparedExecuteBlade
-		(
-			'UPDATE TagTree SET parent_id = NULL WHERE id IN (?,?,?)',
-			array ($this->taga_id, $this->tagb_id, $this->tagc_id)
-		);
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->taga_id));
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->tagb_id));
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->tagc_id));
+		$ids = array ($this->taga_id, $this->tagb_id, $this->tagc_id);
+		usePreparedUpdateBlade ('TagTree', array ('parent_id' => NULL), array ('id' => $ids));
+		usePreparedDeleteBlade ('TagTree', array ('id' => $ids));
 	}
 
 	/**

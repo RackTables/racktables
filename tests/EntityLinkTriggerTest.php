@@ -55,10 +55,7 @@ class EntityLinkTriggerTest extends RTTestCase
 		commitReduceOPC (self::$objtypeb_id, self::$objtypec_id);
 		commitReduceOPC (self::$objtypec_id, self::$objtypea_id);
 		commitReduceOPC (self::$objtypec_id, self::$objtypeb_id);
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypea_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypeb_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypec_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtyped_id));
+		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => array (self::$objtypea_id, self::$objtypeb_id, self::$objtypec_id, self::$objtyped_id)));
 		commitDeleteObject (self::$locationa_id);
 		commitDeleteObject (self::$locationb_id);
 		commitDeleteObject (self::$locationc_id);
