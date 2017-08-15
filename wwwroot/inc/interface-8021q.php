@@ -1191,6 +1191,32 @@ $(document).ready(function(){
 	menuItem.addClass($.contextMenu.disabledItemClassName);
 	setItemIcon(menuItem[0], 'ok');
 });
+
+function checkColumnOfRadios8021Q (prefix, numRows, suffix)
+{
+	var elemId;
+	for (var i=0; i < numRows; i++)
+	{
+		elemId = prefix + i + suffix;
+		if (document.getElementById(elemId) == null) // no radios on this row
+			continue;
+		// Not all radios are present on each form. Hence each time
+		// we are requested to switch from left to right (or vice versa)
+		// it is better to half-complete the request by setting to the
+		// middle position, than to fail completely due to missing
+		// target input.
+		if (document.getElementById(elemId).disabled == true)
+			switch (suffix)
+			{
+			case '_asis':
+				continue;
+			case '_left':
+			case '_right':
+				elemId = prefix + i + '_asis';
+			}
+		document.getElementById(elemId).checked = true;
+	}
+}
 END
 	, TRUE);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
