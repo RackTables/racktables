@@ -1400,18 +1400,18 @@ function renderObject8021QSyncPorts ($object, $D)
 {
 	$allethports = array();
 	foreach (array_filter ($object['ports'], 'isEthernetPort') as $port)
-		$allethports[$port['name']] = formatPortIIFOIF ($port);
+		$allethports[$port['name']] = array ('iifoif' => formatPortIIFOIF ($port));
 	$enabled = array();
 	# OPTIONSs for existing 802.1Q ports
 	foreach (sortPortList ($D) as $portname => $portconfig)
 		$enabled["disable ${portname}"] = "${portname} ("
-			. array_fetch ($allethports, $portname, 'N/A')
+			. (array_key_exists ($portname, $allethports) ? $allethports[$portname]['iifoif']: 'N/A')
 			. ') ' . serializeVLANPack ($portconfig);
 	# OPTIONs for potential 802.1Q ports
 	$disabled = array();
-	foreach (sortPortList ($allethports) as $portname => $iifoif)
+	foreach (sortPortList ($allethports) as $portname => $each)
 		if (! array_key_exists ("disable ${portname}", $enabled))
-			$disabled["enable ${portname}"] = "${portname} (${iifoif})";
+			$disabled["enable ${portname}"] = "${portname} (${each['iifoif']})";
 	printOpFormIntro ('updPortList');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><td>';
