@@ -3538,6 +3538,18 @@ $dictionary = array
 	3648 => array ('chapter_id' => 18, 'dict_value' => 'EMC VNXe 3300'),
 	3649 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 5596UP | http://www.cisco.com/c/en/us/products/switches/nexus-5596up-switch/index.html]]'),
 	3650 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Nexus 93180YC-EX'),
+	3651 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CSS326-24G-2S+RM'),
+	3652 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS326-24G-2S+RM'),
+	3653 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS317-1G-16S+RM'),
+	3654 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 26'),
+	3655 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.04'),
+	3656 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 7.1'),
+	3657 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7020TR-48'),
+	3658 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7020TRA-48'),
+	3659 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7160-32CQ'),
+	3660 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7160-48YC6'),
+	3661 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7160-48TC6'),
+	3662 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7516R'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
