@@ -26,10 +26,10 @@ Authentication code can use call_auth_method_op() for doing fallback logic as we
 
 // load auth methods
 $auth_methods = array();
-if (FALSE !== $auth_files = glob ("${racktables_rootdir}/inc/auth-methods/*.php"))
+if (isset ($racktables_rootdir) && (FALSE !== $auth_files = glob ("${racktables_rootdir}/inc/auth-methods/*.php")))
 	foreach ($auth_files as $auth_file)
 		 require_once $auth_file;
-if (FALSE !== $auth_files = glob ("${racktables_plugins_dir}/auth-methods/*.php"))
+if (isset ($racktables_plugins_dir) && (FALSE !== $auth_files = glob ("${racktables_plugins_dir}/auth-methods/*.php")))
 	foreach ($auth_files as $auth_file)
 		 require_once $auth_file;
 
