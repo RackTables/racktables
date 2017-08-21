@@ -1676,7 +1676,7 @@ function renderPortsForObject ($object_id)
 		echo "</td><td class='tdleft'><input type=text size=16 name=port_name></td>\n";
 		echo "<td><input type=text name=port_label></td><td>";
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
-		echo "<td><input type=text name=port_l2address size=18 maxlength=24></td>\n";
+		echo "<td><input type=text name=port_l2address size=17 maxlength=59></td>\n";
 		echo "<td colspan=4>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td></tr></form>";
@@ -1759,9 +1759,8 @@ function renderPortsForObject ($object_id)
 			echo '</label>';
 		echo '</td>';
 
-		// 18 is enough to fit 6-byte MAC address in its longest form,
-		// while 24 should be Ok for WWN
-		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
+		// 17 is the full notation length of a MAC address, 23 -- of a WWN address and 59 -- of an IPoIB address.
+		echo "<td><input type=text name=l2address value='${port['l2address']}' size=17 maxlength=59></td>\n";
 		if ($port['remote_object_id'])
 		{
 			$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);

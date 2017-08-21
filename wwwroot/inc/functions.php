@@ -35,15 +35,18 @@ $templateWidth[5] = 1;
 $message_buffering = FALSE;
 
 define ('CHAP_OBJTYPE', 1);
-// The latter matches both SunOS and Linux-styled formats.
-define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
-define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
-define ('RE_L2_HUAWEI', '/^[0-9a-f]{4}(-[0-9a-f]{4}){2}$/i');
-define ('RE_L2_SOLID', '/^[0-9a-f]{12}$/i');
-define ('RE_L2_IPCFG', '/^[0-9a-f]{2}(-[0-9a-f]{2}){5}$/i');
-define ('RE_L2_WWN_COLON', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){7}$/i');
-define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
-define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
+define ('RE_L2_IFCFG', '/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/'); // most ifconfigs
+define ('RE_L2_IFCFG_SUNOS', '/^[0-9A-F]{1,2}(:[0-9A-F]{1,2}){5}$/'); // SunOS ifconfig
+define ('RE_L2_CISCO', '/^[0-9A-F]{4}(\.[0-9A-F]{4}){2}$/');
+define ('RE_L2_HUAWEI', '/^[0-9A-F]{4}(-[0-9A-F]{4}){2}$/');
+define ('RE_L2_SOLID', '/^[0-9A-F]{12}$/i');
+define ('RE_L2_IPCFG', '/^[0-9A-F]{2}(-[0-9A-F]{2}){5}$/');
+define ('RE_L2_WWN_COLON', '/^[0-9A-F]{2}(:[0-9A-F]{2}){7}$/');
+define ('RE_L2_WWN_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){7}$/');
+define ('RE_L2_WWN_SOLID', '/^[0-9A-F]{16}$/');
+define ('RE_L2_IPOIB_COLON', '/^[0-9A-F]{2}(:[0-9A-F]{2}){19}$/');
+define ('RE_L2_IPOIB_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){19}$/');
+define ('RE_L2_IPOIB_SOLID', '/^[0-9A-F]{40}$/');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}$#');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$#');
 define ('E_8021Q_NOERROR', 0);
@@ -958,51 +961,70 @@ function ip6_mask ($prefix_len)
 	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
 
-// Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
-// in the provided string, an empty string for an empty string or raise an exception.
+// Return a uniformly (010203040506 or 0102030405060708 or likewise) formatted
+// L2 address for a string in one of the recognized formats, an empty string for
+// an empty string or raise an exception on invalid input.
 function l2addressForDatabase ($string)
 {
 	$string = strtoupper (trim ($string));
 	$ret = '';
 	switch (TRUE)
 	{
-		case ($string == '' || preg_match (RE_L2_SOLID, $string) || preg_match (RE_L2_WWN_SOLID, $string)):
+		case $string == '':
+		case preg_match (RE_L2_SOLID, $string):
+		case preg_match (RE_L2_WWN_SOLID, $string):
+		case preg_match (RE_L2_IPOIB_SOLID, $string):
 			$ret = $string;
 			break;
-		case (preg_match (RE_L2_IFCFG, $string) || preg_match (RE_L2_WWN_COLON, $string)):
-			// reformat output of SunOS ifconfig
-			$ret = '';
+		case preg_match (RE_L2_IFCFG, $string):
+		case preg_match (RE_L2_WWN_COLON, $string):
+		case preg_match (RE_L2_IPOIB_COLON, $string):
+			$ret = str_replace (':', '', $string);
+			break;
+		// SunOS notation regexp will also match other ifconfigs notations hence should
+		// be matched and conditioned after the others, not before.
+		case preg_match (RE_L2_IFCFG_SUNOS, $string):
 			foreach (explode (':', $string) as $byte)
 				$ret .= (strlen ($byte) == 1 ? '0' : '') . $byte;
-			$ret = $ret;
 			break;
-		case (preg_match (RE_L2_CISCO, $string)):
+		case preg_match (RE_L2_CISCO, $string):
 			$ret = str_replace ('.', '', $string);
 			break;
-		case (preg_match (RE_L2_HUAWEI, $string)):
+		case preg_match (RE_L2_HUAWEI, $string):
 			$ret = str_replace ('-', '', $string);
 			break;
-		case (preg_match (RE_L2_IPCFG, $string) || preg_match (RE_L2_WWN_HYPHEN, $string)):
+		case preg_match (RE_L2_IPCFG, $string):
+		case preg_match (RE_L2_WWN_HYPHEN, $string):
+		case preg_match (RE_L2_IPOIB_HYPHEN, $string):
 			$ret = str_replace ('-', '', $string);
 			break;
 		default:
-			throw new InvalidArgException ('string', $string, 'malformed MAC/WWN address');
+			throw new InvalidArgException ('string', $string, 'malformed MAC/WWN/IPoIB address');
 	}
-	// some switches provide this fake address through SNMP. Store it as NULL to allow multiple copies
+	// Some switches return this invalid address through SNMP. Disregard the malformed data
+	// and return an empty string, which will translate to NULL when (if) the address goes
+	// into the database. This suppresses unnecessary violations of the L2 address constraint.
 	if ($ret === '000000000000')
 		$ret = '';
 	return $ret;
 }
 
+// The input to this function is valid iff it is an output of l2addressForDatabase() or a NULL.
 function l2addressFromDatabase ($string)
 {
-	switch (strlen ($string))
+	// $string normally comes from the database in uppercase, test it with
+	// the regexps, which are now uppercase.
+	switch (TRUE)
 	{
-		case 12: // Ethernet
-		case 16: // FireWire/Fibre Channel
+		case $string === NULL:
+		case $string === '':
+			return '';
+		case preg_match (RE_L2_SOLID, $string):
+		case preg_match (RE_L2_WWN_SOLID, $string):
+		case preg_match (RE_L2_IPOIB_SOLID, $string):
 			return implode (':', str_split ($string, 2));
 		default:
-			return $string;
+			throw new InvalidArgException ('string', $string, 'invalid format');
 	}
 }
 

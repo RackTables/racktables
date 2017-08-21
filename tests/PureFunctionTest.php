@@ -229,14 +229,41 @@ class PureFunctionTest extends RTTestCase
 			array ('l2addressForDatabase', '', ''),
 			array ('l2addressForDatabase', ' ', ''),
 			array ('l2addressForDatabase', ' 010203abcdef ', '010203ABCDEF'), // RE_L2_SOLID
-			array ('l2addressForDatabase', '1:2:3:ab:cd:ef ', '010203ABCDEF'), // RE_L2_IFCFG
+			array ('l2addressForDatabase', '1:2:3:ab:cd:ef ', '010203ABCDEF'), // RE_L2_IFCFG_SUNOS
 			array ('l2addressForDatabase', ' 0102.03ab.cdef', '010203ABCDEF'), // RE_L2_CISCO
 			array ('l2addressForDatabase', '0102-03ab-cdef', '010203ABCDEF'), // RE_L2_HUAWEI
 			array ('l2addressForDatabase', '01-02-03-ab-cd-ef', '010203ABCDEF'), // RE_L2_IPCFG
 			array ('l2addressForDatabase', '000000000000', ''), // a special case
 			array ('l2addressForDatabase', '0102030405abcdef  ', '0102030405ABCDEF'), // RE_L2_WWN_SOLID
 			array ('l2addressForDatabase', ' 01-02-03-04-05-ab-cd-ef', '0102030405ABCDEF'), // RE_L2_WWN_HYPHEN
-			array ('l2addressForDatabase', ' 1:2:3:4:5:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
+			array ('l2addressForDatabase', ' 01:02:03:04:05:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
+			array
+			(
+				'l2addressForDatabase',
+				' 00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12:13 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_COLON
+			array
+			(
+				'l2addressForDatabase',
+				' 00-01-02-03-04-05-06-07-08-09-0a-0b-0c-0d-0e-0f-10-11-12-13 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_HYPHEN
+			array
+			(
+				'l2addressForDatabase',
+				' 000102030405060708090a0b0c0d0e0f10111213 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_SOLID
+
+			array ('l2addressFromDatabase', '001122334455', '00:11:22:33:44:55'), // RE_L2_SOLID
+			array ('l2addressFromDatabase', '0011223344556677', '00:11:22:33:44:55:66:77'), // RE_L2_WWN_SOLID
+			array
+			(
+				'l2addressFromDatabase',
+				'000102030405060708090A0B0C0D0E0F10111213',
+				'00:01:02:03:04:05:06:07:08:09:0A:0B:0C:0D:0E:0F:10:11:12:13'
+			), // RE_L2_IPOIB_SOLID
 
 			array ('nextMACAddress', '', ''),
 			array ('nextMACAddress', '12:34:56:78:90:ab', '12:34:56:78:90:AC'),
@@ -1413,10 +1440,34 @@ class PureFunctionTest extends RTTestCase
 			array ('l2addressForDatabase', array ('010203abcd')), // invalid length
 			array ('l2addressForDatabase', array ('010203abcdefff')), // invalid length
 			array ('l2addressForDatabase', array ('010203abcdeh')), // length OK but not hexadecimal
+			array ('l2addressForDatabase', array ('010203abcdehffff')), // idem
+			array ('l2addressForDatabase', array ('0102030405060708090a0b0c0d0e0f10111213zz')), // idem
+			array ('l2addressForDatabase', array ('00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12:zz')), // idem
+			array ('l2addressForDatabase', array ('00-01-02-03-04-05-06-07-08-09-0a-0b-0c-0d-0e-0f-10-11-12-zz')), // idem
 			array ('l2addressForDatabase', array ('0102:03ab:cdef')), // not a known format
 			array ('l2addressForDatabase', array ('01.02.03.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array (' 1. 2. 3.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array ('01.02.03-ab-cd:ef')), // not a known format
+			array ('l2addressForDatabase', array ('3-4-5-ab-cd-ef')), // SunOS notation uses colons, not hyphens.
+			array ('l2addressForDatabase', array ('1:2:3:4:5:ab:cd:ef')), // SunOS notation is for MAC addresses only.
+			array ('l2addressForDatabase', array ('0:1:2:3:4:5:6:7:8:9:a:b:c:d:e:f:10:11:12:13:14')), // idem
+			array ('l2addressForDatabase', array ('0-1-2-3-4-5-6-7-8-9-a-b-c-d-e-f-10-11-12-13-14')), // idem
+
+			array ('l2addressFromDatabase', array (' ')),
+			array ('l2addressFromDatabase', array (FALSE)),
+			array ('l2addressFromDatabase', array (TRUE)),
+			array ('l2addressFromDatabase', array (0)),
+			array ('l2addressFromDatabase', array (-1)),
+			array ('l2addressFromDatabase', array (1)),
+			array ('l2addressFromDatabase', array ('1')),
+			array ('l2addressFromDatabase', array ('001122')),
+			array ('l2addressFromDatabase', array ('00112233')),
+			array ('l2addressFromDatabase', array ('0011223344')),
+			array ('l2addressFromDatabase', array ('001122334455zz')), // not hex
+			array ('l2addressFromDatabase', array ('00112233445566')),
+			array ('l2addressFromDatabase', array ('00112233445566zz')), // not hex
+			array ('l2addressFromDatabase', array ('001122334455667788')),
+			array ('l2addressFromDatabase', array ('000102030405060708090A0B0C0D0E0F101112zz')), // not hex
 
 			array ('nextMACAddress', array ('010203abcdef')),
 			array ('nextMACAddress', array ('0102.03ab.cdef')),
