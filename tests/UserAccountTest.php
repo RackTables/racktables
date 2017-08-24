@@ -9,7 +9,7 @@ class UserAccountTest extends RTTestCase
 
 	public function setUp ()
 	{
-		$this->user_name = sprintf ('testuser-%s-%u', get_class(), getmypid());
+		$this->user_name = $this->myString ('testuser');
 		$this->user_id = commitCreateUserAccount ($this->user_name, self::REALNAME, self::PSWDHASH);
 	}
 

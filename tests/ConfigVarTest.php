@@ -6,7 +6,7 @@ class ConfigVarTest extends RTTestCase
 
 	public function setUp ()
 	{
-		$this->varname = sprintf ('testvar-%s-%u', get_class(), getmypid());
+		$this->varname = $this->myString ('testvar');
 		usePreparedInsertBlade
 		(
 			'Config',

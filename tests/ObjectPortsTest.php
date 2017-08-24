@@ -7,7 +7,7 @@ class ObjectPortsTest extends RTTestCase
 	public function setUp ()
 	{
 		// Let it be a server as AutoPorts rows shall not get in the way of the test.
-		$this->object_id = commitAddObject (sprintf ('testobject-%s-%u', get_class(), getmypid()), '', 4, '');
+		$this->object_id = commitAddObject ($this->myString ('testobject'), '', 4, '');
 	}
 
 	/**

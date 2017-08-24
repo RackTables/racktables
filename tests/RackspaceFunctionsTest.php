@@ -11,13 +11,14 @@ class RackspaceFunctionsTest extends RTTestCase
 	// Add a temporary row with a few racks.
 	public static function setUpBeforeClass ()
 	{
+		// This method is static and thus cannot call myString(), which uses $this.
 		self::$row_name = sprintf ('testrow-%s-%u', get_class(), getmypid());
 		self::$row_id = commitAddObject (self::$row_name, NULL, 1561, NULL);
 	}
 
 	private function createObjectInRack ($prefix, $type_id, $rack_id, $unit_nos)
 	{
-		$object_id = commitAddObject (sprintf ('%s-%s-%u', $prefix, get_class(), getmypid()), NULL, $type_id, NULL);
+		$object_id = commitAddObject ($this->myString ($prefix), NULL, $type_id, NULL);
 		if (! count ($unit_nos))
 			commitLinkEntities ('rack', $rack_id, 'object', $object_id);
 		else
@@ -44,7 +45,7 @@ class RackspaceFunctionsTest extends RTTestCase
 		$i = 0;
 		foreach ($racklist as $objectlist)
 		{
-			$rack_name = sprintf ('rack%u-%s-%s', $i, get_class(), getmypid());
+			$rack_name = $this->myString ('rack');
 			$rack_id = commitAddObject ($rack_name, NULL, 1560, NULL);
 			commitUpdateAttrValue ($rack_id, 27, self::UNITS_PER_RACK);
 			commitLinkEntities ('row', self::$row_id, 'rack', $rack_id);

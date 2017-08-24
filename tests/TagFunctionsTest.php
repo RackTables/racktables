@@ -20,22 +20,21 @@ class TagFunctionsTest extends RTTestCase
 	public function setUp()
 	{
 		global $taglist;
-		$sfx = get_class() . '-' . getmypid();
 
 		$this->a_tag_ids = array();
 		$this->b_tag_ids = array();
 		for ($i = 0; $i < self::NUM_TAGS; $i++)
 		{
-			usePreparedInsertBlade ('TagTree', array ('tag' => "tag a${i} ${sfx}", 'color' => self::COLOR_A + $i));
+			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag a${i}"), 'color' => self::COLOR_A + $i));
 			$this->a_tag_ids[] = lastInsertID();
-			usePreparedInsertBlade ('TagTree', array ('tag' => "tag b${i} ${sfx}", 'color' => self::COLOR_B));
+			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag b${i}"), 'color' => self::COLOR_B));
 			$this->b_tag_ids[] = lastInsertID();
 		}
 		$taglist = addTraceToNodes (getTagList());
 
-		$this->a_obj_id = commitAddObject ("server a ${sfx}", NULL, 4, NULL, $this->a_tag_ids);
-		$this->b_obj_id = commitAddObject ("server b ${sfx}", NULL, 4, NULL, $this->b_tag_ids);
-		$this->ab_obj_id = commitAddObject ("server ab ${sfx}", NULL, 4, NULL, array_merge ($this->a_tag_ids, $this->b_tag_ids));
+		$this->a_obj_id = commitAddObject ($this->myString ('server a'), NULL, 4, NULL, $this->a_tag_ids);
+		$this->b_obj_id = commitAddObject ($this->myString ('server b'), NULL, 4, NULL, $this->b_tag_ids);
+		$this->ab_obj_id = commitAddObject ($this->myString ('server ab'), NULL, 4, NULL, array_merge ($this->a_tag_ids, $this->b_tag_ids));
 	}
 
 	public function tearDown()

@@ -6,7 +6,7 @@ class GetRowsCountTest extends RTTestCase
 
 	public function setUp ()
 	{
-		$this->table_name = sprintf ('tmptest_%s_%u', get_class(), getmypid());
+		$this->table_name = $this->myString ('tmptest');
 		usePreparedExecuteBlade
 		(
 			'CREATE TABLE `' . $this->table_name . '` (' .

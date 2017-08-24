@@ -12,41 +12,39 @@ class DictionaryAttributeTest extends RTTestCase
 
 	public function setUp ()
 	{
-		$sig = sprintf ('%s_%s', get_class(), getmypid());
-
 		$this->attr_types = array();
 		foreach (array ('string', 'uint', 'float', 'dict', 'date') as $attr_type)
 		{
-			usePreparedInsertBlade ('Attribute', array ('type' => $attr_type, 'name' => "${attr_type}_${sig}"));
+			usePreparedInsertBlade ('Attribute', array ('type' => $attr_type, 'name' => $this->myString ($attr_type)));
 			$this->attr_types[lastInsertID()] = $attr_type;
 		}
 
-		usePreparedInsertBlade ('Chapter', array ('name' => $sig));
+		usePreparedInsertBlade ('Chapter', array ('name' => $this->myString ('chapter')));
 		$this->new_chapter_id = lastInsertId();
 
 		$this->new_word_ids = array();
 		foreach (array ('A', 'B', 'C', 'D', 'E') as $word)
 		{
-			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => $this->new_chapter_id, 'dict_value' => "${word} ${sig}"));
+			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => $this->new_chapter_id, 'dict_value' => $this->myString ($word)));
 			$this->new_word_ids[$word] = lastInsertId();
 		}
 
 		$this->new_object_types = array();
 		foreach (array ('none', 'obj', 'map', 'obj_map', 'obj_map_val') as $code)
 		{
-			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => CHAP_OBJTYPE, 'dict_value' => "${code} ${sig}"));
+			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => CHAP_OBJTYPE, 'dict_value' => $this->myString ($code)));
 			$this->new_object_types[$code] = lastInsertId();
 		}
 
 		$this->new_object_ids = array();
 		foreach ($this->new_object_types as $code => $type_id)
 			if ($code != 'none' && $code != 'map')
-				$this->new_object_ids[$code] = commitAddObject ("${code} ${sig}", NULL, $type_id, NULL);
+				$this->new_object_ids[$code] = commitAddObject ($this->myString ($code), NULL, $type_id, NULL);
 
 		$this->new_attr_ids = array();
 		foreach (array ('F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O') as $each)
 		{
-			usePreparedInsertBlade ('Attribute', array ('type' => 'dict', 'name' => "${each} ${sig}"));
+			usePreparedInsertBlade ('Attribute', array ('type' => 'dict', 'name' => $this->myString ($each)));
 			$this->new_attr_ids[$each] = lastInsertId();
 		}
 
