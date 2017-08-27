@@ -21,6 +21,10 @@
 # able to write to the repository and run "git pull", "git commit" and "git push"
 # without any user interaction (i.e. the git remote must be on a local
 # filesystem or be configured to use SSH keys).
+#
+# This script uses sudo to switch between the pseudo-users and requires an
+# entry in sudoers along the following lines:
+# httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
 [ $# -eq 4 ] || {
 	echo "Usage: $0 <pseudo-user> <repo dir> <path to file> <commit message>" >&2
