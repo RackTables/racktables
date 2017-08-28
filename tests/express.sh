@@ -66,4 +66,4 @@ echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit
 # At this point it makes sense to test specific functions.
 echo
 cd "$BASEDIR/tests"
-"$PHPUNIT" --group small --bootstrap $BOOTSTRAP_FILE || exit 1
+"$PHPUNIT" --group small --bootstrap $BOOTSTRAP_FILE --stderr || exit 1
