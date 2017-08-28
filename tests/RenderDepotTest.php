@@ -27,17 +27,6 @@ class RenderDepotTest extends RTTestCase
 	 */
 	public function testRenderDepot ()
 	{
-		try
-		{
-			ob_start ();
-			renderDepot ();
-			ob_end_clean ();
-			$this->assertTrue (TRUE);
-		}
-		catch (Exception $e)
-		{
-			ob_end_clean ();
-			$this->assertTrue (FALSE, 'calling renderDepot() had caused an exception');
-		}
+		$this->assertNotEquals ('', getOutputOf ('renderDepot'));
 	}
 }
