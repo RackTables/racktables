@@ -879,7 +879,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 
 				$child = spotEntity ('object', $childData['id']);
 				setEntityColors ($child);
-				$slotClass[$slot] .= getObjectClass ('object', $child, 'background:white;');
+				$slotClass[$slot] .= getObjectClass ($child, 'background:white;');
 
 			}
 		}
@@ -989,7 +989,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			{
 				$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 				setEntityColors ($objectData);
-				$class .= getObjectClass ('object', $objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
+				$class .= getObjectClass ($objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
 			}
 
 			echo "<td class='${class}'";
@@ -1037,7 +1037,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 			$class = "atom state_${state}";
 			setEntityColors ($zeroUObject);
-			$class .= getObjectClass ('object', $zeroUObject, 'background:white;');
+			$class .= getObjectClass ($zeroUObject, 'background:white;');
 
 			echo "<tr><td class='${class}'>";
 			printObjectDetailsForRenderRack ($zeroUObject['id']);
@@ -2365,7 +2365,7 @@ function renderDepot ()
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
 
 				setEntityColors ($obj);
-				$class = getObjectClass ('object', $obj, ($order == 'even' ? 'background:white;' : ''));
+				$class = getObjectClass ($obj, ($order == 'even' ? 'background:white;' : ''));
 
 				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
@@ -2550,7 +2550,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			}
 
 			setEntityColors ($item);
-			$tr_class .= getObjectClass ('object', $item, $extrastyle);
+			$tr_class .= getObjectClass ($item, $extrastyle);
 
 			echo "<tr valign=top class=\"$tr_class\">";
 			printIPNetInfoTDs ($item, $decor);

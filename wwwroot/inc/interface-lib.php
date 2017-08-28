@@ -311,8 +311,6 @@ $page_by_realm['ipv4rspool'] = 'ipv4slb';
 $page_by_realm['file'] = 'files';
 $page_by_realm['user'] = 'userlist';
 
-$objstyles_cache = array();
-
 function getSelectOptions ($options, $selected_id = NULL)
 {
 	$ret = '';
@@ -763,7 +761,7 @@ function getTagClassName ($tagid)
 		$class .= 'tag-' . $parent . ' ';
 	$class .= 'tag-' . $tagid . ' etag-' . $tagid;
 
-	$class .= getObjectClass('tag', $taglist[$tagid]);
+	$class .= getTagClass ($taglist[$tagid]);
 
 	return $class;
 }
@@ -1170,7 +1168,7 @@ function enableTagsPicker ()
 		{
 			$taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
 			if ($taginfo['color'] != NULL)
-				$taglist_filtered[$key]['tagclass'] = getObjectClass ('tag', $taginfo);
+				$taglist_filtered[$key]['tagclass'] = getTagClass ($taginfo);
 		}
 		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
 		$taglist_inserted = TRUE;
@@ -1224,6 +1222,43 @@ function showMySQLWarnings()
 	$rtdebug_mysql_warnings = array();
 }
 
+function getObjectClass ($object, $extrastyle = '')
+{
+	if (! array_key_exists ('colors', $object) || ! count ($object['colors']))
+		return '';
+	$step = 100 / count ($object['colors']);
+	$percent = 0;
+	$gradient = '';
+	foreach ($object['colors'] as $color)
+	{
+		$rgb = colorHex2Rgb ($color);
+		$gradient .= "rgba($rgb,0.2) $percent%, rgba($rgb,0.3) " . round ($percent + $step) . "%,";
+		$percent += $step;
+	}
+	$style = "${extrastyle}background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
+	return getCachedCSSClassForStyle ("objectcolor-${object['id']}", $style);
+}
+
+function getTagClass ($taginfo)
+{
+	if (! array_key_exists ('color', $taginfo) || $taginfo['color'] === NULL)
+		return '';
+	$rgb = colorHex2Rgb ($taginfo['color'], TRUE);
+	return getCachedCSSClassForStyle ("tagcolor-${taginfo['id']}", "background: rgb($rgb);");
+}
+
+// This function has a side effect: it adds inline CSS.
+function getCachedCSSClassForStyle ($class, $style)
+{
+	static $cache = array();
+	$cachedclass = array_search ($style, $cache);
+	if ($cachedclass !== FALSE)
+		return " $cachedclass";
+	addCSS (".{$class} {{$style}}", TRUE);
+	$cache[$class] = $style;
+	return " $class";
+}
+
 function colorHex2Rgb($color, $pastel = FALSE)
 {
 	$color = trim ($color, '#');
@@ -1240,59 +1275,6 @@ function colorHex2Rgb($color, $pastel = FALSE)
 	return $rgb;
 }
 
-function getObjectClass($realm, $object, $extrastyle = "")
-{
-	global $objstyles_cache;
-
-	$style = '';
-	switch ($realm)
-	{
-		case 'object':
-			if (isset ($object['colors'][0]))
-			{
-				$step = 100 / count ($object['colors']);
-				$percent = 0;
-				$gradient = '';
-				foreach ($object['colors'] as $color)
-				{
-					$rgb = colorHex2Rgb ($color);
-					$gradient .= "rgba($rgb,0.2) $percent%, rgba($rgb,0.3) ".($percent + $step)."%,";
-					$percent += $step;
-				}
-
-				$style = "${extrastyle}background-image:linear-gradient(135deg," . trim($gradient, ',') . ") !important;";
-				$class = 'objectcolor-' . $object['id'];
-			}
-			break;
-		case 'tag':
-			if (isset ($object['color']))
-			{
-				$rgb = colorHex2Rgb ($object['color'], TRUE);
-				$style = "${extrastyle}background: rgb($rgb);";
-
-				$class = 'tagcolor-' . $object['id'];
-			}
-			break;
-	}
-
-	if ($style != '')
-	{
-		$cachedclass = array_search ($style, $objstyles_cache);
-
-		if ($cachedclass === FALSE)
-		{
-			addCSS (".{$class} {{$style}}", TRUE);
-			$objstyles_cache[$class] = $style;
-			return " $class";
-		}
-		else
-			return " $cachedclass";
-
-	}
-
-	return '';
-}
-
 function setEntityColors(&$entity)
 {
 	$entity['colors'] = array();
@@ -1300,6 +1282,6 @@ function setEntityColors(&$entity)
 		if ($taginfo['color'] !== NULL && ! in_array ($taginfo['color'], $entity['colors']))
 		{
 			$entity['colors'][] = $taginfo['color'];
-			getObjectClass ('tag', $taginfo); // set tag CSS class
+			getTagClass ($taginfo); // set tag CSS class
 		}
 }

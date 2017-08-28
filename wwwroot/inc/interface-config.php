@@ -936,7 +936,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 
 	if ($taginfo['is_assignable'] == 'yes')
 	{
-		$class = getObjectClass ('tag', $taginfo);
+		$class = getTagClass ($taginfo);
 		echo "</td><td class='${class}'>" . getColorSelect ('colorid_'.$taginfo['id'], $taginfo['color']) . '</td>';
 	}
 	else
@@ -969,7 +969,7 @@ function getColorSelect($id = 'color', $selected = NULL)
 {
 
 		if ($selected)
-			$class = ' class='.getObjectClass ('tag', array('id' => $selected, 'color' => $selected));
+			$class = ' class=' . getTagClass (array ('id' => $selected, 'color' => $selected));
 		else
 			$class = '';
 
@@ -1001,7 +1001,7 @@ function getColorSelect($id = 'color', $selected = NULL)
 
 		foreach ($colors as $color)
 		{
-			$class = getObjectClass ('tag', array('id' => $color, 'color' => $color));
+			$class = getTagClass (array ('id' => $color, 'color' => $color));
 			$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
 		}
 
