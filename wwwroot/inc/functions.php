@@ -5591,7 +5591,7 @@ function getOutputOf ($func_name)
 	}
 	catch (Exception $e)
 	{
-		ob_clean();
+		ob_end_clean();
 		throw $e;
 	}
 }
