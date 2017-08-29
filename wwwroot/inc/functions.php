@@ -6389,6 +6389,11 @@ function nullIfZero ($x)
 	return $x == 0 ? NULL : $x;
 }
 
+function emptyStrIfZero ($x)
+{
+	return ($x === 0 || $x === '0') ? '' : $x;
+}
+
 function printLocationChildrenSelectOptions ($location, $parent_id, $location_id = NULL, $level = 0)
 {
 	$self = __FUNCTION__;

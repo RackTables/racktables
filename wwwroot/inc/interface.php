@@ -1082,9 +1082,7 @@ JSTXT;
 
 function renderNewRackForm()
 {
-	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
-	if ($default_height == 0)
-		$default_height = '';
+	$default_height = emptyStrIfZero (getConfigVar ('DEFAULT_RACK_HEIGHT'));
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('mode' => 'one'));
 	echo '<table border=0 align=center>';

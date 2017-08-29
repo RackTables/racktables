@@ -487,6 +487,19 @@ class PureFunctionTest extends RTTestCase
 			array ('nullIfZero', NULL, NULL), // type conversion: NULL == 0
 			array ('nullIfZero', FALSE, NULL), // type conversion: FALSE == 0
 
+			array ('emptyStrIfZero', 0, ''),
+			array ('emptyStrIfZero', '0', ''),
+			array ('emptyStrIfZero', '', ''),
+			array ('emptyStrIfZero', FALSE, FALSE),
+			array ('emptyStrIfZero', TRUE, TRUE),
+			array ('emptyStrIfZero', NULL, NULL),
+			array ('emptyStrIfZero', 1, 1),
+			array ('emptyStrIfZero', -1, -1),
+			array ('emptyStrIfZero', ' 0', ' 0'),
+			array ('emptyStrIfZero', '0 ', '0 '),
+			array ('emptyStrIfZero', ' 0 ', ' 0 '),
+			array ('emptyStrIfZero', 0.0, 0.0),
+
 			array ('array_first', array (1, 2, 3), 1),
 			array ('array_first', array (FALSE, NULL, 0), FALSE),
 			array ('array_first', array (-1, 0, 1), -1),
