@@ -84,15 +84,6 @@ class ObjectLogTest extends RTTestCase
 	 */
 	public function testRenderLogRecords ()
 	{
-		try {
-			ob_start ();
-			allObjectLogs ();
-			ob_end_clean ();
-			$this->assertTrue (TRUE);
-		}
- 		catch (Exception $e) {
-			ob_end_clean ();
-	        $this->assertTrue (FALSE);
-        }
+		$this->assertNotEquals ('', getOutputOf ('allObjectLogs'));
 	}
 }
