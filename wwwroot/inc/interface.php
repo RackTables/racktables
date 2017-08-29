@@ -2405,7 +2405,7 @@ function renderEmptyResults($cellfilter, $entities_name, $count = NULL)
 		return FALSE;
 	if (isset ($_REQUEST['show_all_objects']))
 		return FALSE;
-	$max = intval(getConfigVar('MAX_UNFILTERED_ENTITIES'));
+	$max = getConfigVar('MAX_UNFILTERED_ENTITIES');
 	if (0 == $max || $count <= $max)
 		return FALSE;
 
@@ -2866,7 +2866,7 @@ function renderSeparator ($first, $last, $hl_ip)
 // calculates page number that contains given $ip (used by renderIPv6NetworkAddresses)
 function getPageNumOfIPv6 ($list, $ip_bin, $maxperpage)
 {
-	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
+	if ($maxperpage <= 0 || count ($list) <= $maxperpage)
 		return 0;
 	$keys = array_keys ($list);
 	for ($i = 1; $i <= count ($keys); $i++)

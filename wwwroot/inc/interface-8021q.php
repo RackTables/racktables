@@ -277,7 +277,7 @@ function renderVLANDomainListEditor ()
 		if ($dominfo['subdomc'])
 			printSelect (array (0 => 'a domain group'), array ('name' => 'group_id'));
 		else
-			printNiftySelect ($group_opts, array ('name' => 'group_id'), intval($dominfo['group_id']));
+			printNiftySelect ($group_opts, array ('name' => 'group_id'), $dominfo['group_id']);
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
