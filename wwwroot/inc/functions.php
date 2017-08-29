@@ -5411,7 +5411,7 @@ function loadConfigDefaults()
 	{
 		$ret[$varname]['is_altered'] = 'no';
 		if ($ret[$varname]['vartype'] == 'uint')
-			$ret[$varname]['varvalue'] = 0 + $ret[$varname]['varvalue'];
+			$ret[$varname]['varvalue'] = intval ($ret[$varname]['varvalue']);
 		$ret[$varname]['defaultvalue'] = $ret[$varname]['varvalue'];
 	}
 	return $ret;
