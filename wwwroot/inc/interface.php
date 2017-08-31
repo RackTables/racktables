@@ -1912,6 +1912,21 @@ JSEND
 
 	echo "</table><br>\n";
 	finishPortlet();
+
+	startPortlet ('Same OS interface, same type');
+	printOpFormIntro ('addLotOf');
+	echo "<table border='0' align='center'><tr><th>IP address</th><th>OS interface</th></tr>";
+	echo "<tr><td rowspan='3'><textarea name='iplist' cols='40' rows='25'>\n";
+	echo "</textarea></td><td valign='top'>";
+	echo "<input type='text' size='10' name='bond_name'>";
+	echo "</td></tr>";
+	echo "<tr><th>type</th></tr>";
+	echo "<tr><td valign='top'>";
+	printSelect ($aat, array ('name' => 'bond_type'), $most_popular_type); // type
+	echo "</td></tr>";
+	echo "<tr><td colspan=2><input type='submit' name='got_very_fast_data' value='Go!'></td></tr></table>\n";
+	echo "</form>\n";
+	finishPortlet();
 }
 
 // This function is deprecated. Do not rely on its internals,

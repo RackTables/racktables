@@ -245,6 +245,7 @@ $ophandler['object']['ports']['renameAll'] = 'renameObjectPorts';
 $ophandler['object']['ports']['unlinkPort'] = 'unlinkPort';
 $ophandler['object']['ip']['upd'] = 'updIPAllocation';
 $ophandler['object']['ip']['add'] = 'addIPAllocation';
+$ophandler['object']['ip']['addLotOf'] = 'addLotOfIPAllocation';
 $ophandler['object']['ip']['del'] = 'delIPAllocation';
 $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
