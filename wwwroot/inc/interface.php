@@ -879,7 +879,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 
 				$child = spotEntity ('object', $childData['id']);
 				setEntityColors ($child);
-				$slotClass[$slot] .= getObjectClass ($child, 'background:white;');
+				$slotClass[$slot] .= getObjectClass ('object', $child, 'background:white;');
 
 			}
 		}
@@ -989,7 +989,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			{
 				$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 				setEntityColors ($objectData);
-				$class .= getObjectClass ($objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
+				$class .= getObjectClass ('object', $objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
 			}
 
 			echo "<td class='${class}'";
@@ -1037,7 +1037,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 			$class = "atom state_${state}";
 			setEntityColors ($zeroUObject);
-			$class .= getObjectClass ($zeroUObject, 'background:white;');
+			$class .= getObjectClass ('object', $zeroUObject, 'background:white;');
 
 			echo "<tr><td class='${class}'>";
 			printObjectDetailsForRenderRack ($zeroUObject['id']);
@@ -1082,7 +1082,9 @@ JSTXT;
 
 function renderNewRackForm()
 {
-	$default_height = emptyStrIfZero (getConfigVar ('DEFAULT_RACK_HEIGHT'));
+	$default_height = getConfigVar ('DEFAULT_RACK_HEIGHT');
+	if ($default_height == 0)
+		$default_height = '';
 	startPortlet ('Add one');
 	printOpFormIntro ('addRack', array ('mode' => 'one'));
 	echo '<table border=0 align=center>';
@@ -1674,7 +1676,7 @@ function renderPortsForObject ($object_id)
 		echo "</td><td class='tdleft'><input type=text size=16 name=port_name></td>\n";
 		echo "<td><input type=text name=port_label></td><td>";
 		printNiftySelect (getNewPortTypeOptions(), array ('name' => 'port_type_id'), $prefs['selected']);
-		echo "<td><input type=text name=port_l2address size=17 maxlength=59></td>\n";
+		echo "<td><input type=text name=port_l2address size=18 maxlength=24></td>\n";
 		echo "<td colspan=4>&nbsp;</td><td>";
 		printImageHREF ('add', 'add a port', TRUE);
 		echo "</td></tr></form>";
@@ -1757,8 +1759,9 @@ function renderPortsForObject ($object_id)
 			echo '</label>';
 		echo '</td>';
 
-		// 17 is the full notation length of a MAC address, 23 -- of a WWN address and 59 -- of an IPoIB address.
-		echo "<td><input type=text name=l2address value='${port['l2address']}' size=17 maxlength=59></td>\n";
+		// 18 is enough to fit 6-byte MAC address in its longest form,
+		// while 24 should be Ok for WWN
+		echo "<td><input type=text name=l2address value='${port['l2address']}' size=18 maxlength=24></td>\n";
 		if ($port['remote_object_id'])
 		{
 			$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);
@@ -2340,6 +2343,15 @@ function renderMolecule ($mdata, $object_id)
 	}
 }
 
+function getAttrValue ($attr_array, $value_name) {
+        foreach($attr_array as $attr) {
+                if($attr['name'] === $value_name) {
+                        return $attr['value'];
+                }
+        }
+        return false;
+}
+
 function renderDepot ()
 {
 	global $pageno, $nextorder;
@@ -2365,7 +2377,7 @@ function renderDepot ()
 			echo '<tr><th>Common name</th>';
 			if ($showobjecttype)
 				echo '<th>Type</th>';
-			echo '<th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th></tr>';
+			echo '<th>Visible label</th><th>Asset tag</th><th>Row/Rack or Container</th><th>Power consumption</th></tr>';
 			$order = 'odd';
 			# gather IDs of all objects and fetch rackspace info in one pass
 			$idlist = array();
@@ -2373,12 +2385,17 @@ function renderDepot ()
 				$idlist[] = $obj['id'];
 			$mountinfo = getMountInfo ($idlist);
 			$containerinfo = getContainerInfo ($idlist);
+			
+			$attrs = fetchAttrsForObjects($idlist);
+			
 			foreach ($objects as $obj)
 			{
+                                $wattage = getAttrValue($attrs[$obj['id']], 'Wattage consumption');
+                                $total_wattage += $wattage;
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
 
 				setEntityColors ($obj);
-				$class = getObjectClass ($obj, ($order == 'even' ? 'background:white;' : ''));
+				$class = getObjectClass ('object', $obj, ($order == 'even' ? 'background:white;' : ''));
 
 				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
@@ -2398,10 +2415,12 @@ function renderDepot ()
 				if (! count ($places))
 					$places[] = 'Unmounted';
 				echo "<td>" . implode (', ', $places) . '</td>';
+				echo "<td>" . intval($wattage) .' W</td>';
 				echo '</tr>';
 				$order = $nextorder[$order];
 			}
 			echo '</table>';
+			echo 'Total power consumption: '. $total_wattage .' W';
 			finishPortlet();
 		}
 	}
@@ -2420,7 +2439,7 @@ function renderEmptyResults($cellfilter, $entities_name, $count = NULL)
 		return FALSE;
 	if (isset ($_REQUEST['show_all_objects']))
 		return FALSE;
-	$max = getConfigVar('MAX_UNFILTERED_ENTITIES');
+	$max = intval(getConfigVar('MAX_UNFILTERED_ENTITIES'));
 	if (0 == $max || $count <= $max)
 		return FALSE;
 
@@ -2563,7 +2582,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 			}
 
 			setEntityColors ($item);
-			$tr_class .= getObjectClass ($item, $extrastyle);
+			$tr_class .= getObjectClass ('object', $item, $extrastyle);
 
 			echo "<tr valign=top class=\"$tr_class\">";
 			printIPNetInfoTDs ($item, $decor);
@@ -2881,7 +2900,7 @@ function renderSeparator ($first, $last, $hl_ip)
 // calculates page number that contains given $ip (used by renderIPv6NetworkAddresses)
 function getPageNumOfIPv6 ($list, $ip_bin, $maxperpage)
 {
-	if ($maxperpage <= 0 || count ($list) <= $maxperpage)
+	if (intval ($maxperpage) <= 0 || count ($list) <= $maxperpage)
 		return 0;
 	$keys = array_keys ($list);
 	for ($i = 1; $i <= count ($keys); $i++)
