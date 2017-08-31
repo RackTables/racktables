@@ -47,13 +47,12 @@ The configuration directories could be:
 The "wwwroot" directories will require a short PHP wrapper file each. The
 wrappers will differ only in the value of $racktables_confdir setting:
 
-# cat > /var/www/vhosts/racktables.example1.com/index.php <<<EOF
+# cat > /var/www/vhosts/racktables.example1.com/index.php <<EOF
 <?php
 
 $racktables_confdir = '/etc/RackTables/example1';
 require '/usr/share/RackTables/wwwroot/index.php';
 
-?>
 EOF
 
 Once the wrapper files are installed, setup of each instance must be

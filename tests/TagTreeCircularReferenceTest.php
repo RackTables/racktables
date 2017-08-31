@@ -2,7 +2,7 @@
 
 // a tag's parent may not be one of its children
 // commitUpdateTag should detect this and raise an exception
-class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
+class TagTreeCircularReferenceTest extends RTTestCase
 {
 	protected $taga_id, $tagb_id, $tagc_id;
 
@@ -20,14 +20,9 @@ class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
 	public function tearDown ()
 	{
 		// remove sample data
-		usePreparedExecuteBlade
-		(
-			'UPDATE TagTree SET parent_id = NULL WHERE id IN (?,?,?)',
-			array ($this->taga_id, $this->tagb_id, $this->tagc_id)
-		);
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->taga_id));
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->tagb_id));
-		usePreparedDeleteBlade ('TagTree', array ('id' => $this->tagc_id));
+		$ids = array ($this->taga_id, $this->tagb_id, $this->tagc_id);
+		usePreparedUpdateBlade ('TagTree', array ('parent_id' => NULL), array ('id' => $ids));
+		usePreparedDeleteBlade ('TagTree', array ('id' => $ids));
 	}
 
 	/**
@@ -43,4 +38,3 @@ class TagTreeCircularReferenceTest extends PHPUnit_Framework_TestCase
 		commitUpdateTag ($this->taga_id, 'unit test tag a', $this->tagc_id, 'yes');
 	}
 }
-?>

@@ -452,7 +452,7 @@ class RackCodeParser
 
 function refRCLineno ($ln)
 {
-	return "<a href='index.php?page=perms&tab=default#line${ln}'>line ${ln}</a>";
+	return "<a href='index.php?page=perms&tab=default&line=${ln}'>line ${ln}</a>";
 }
 
 // returns warning message or NULL
@@ -759,5 +759,3 @@ function getRackCodeWarnings ()
 	);
 	return $ret;
 }
-
-?>

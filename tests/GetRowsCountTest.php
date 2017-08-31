@@ -1,12 +1,12 @@
 <?php
 
-class GetRowsCountTest extends PHPUnit_Framework_TestCase
+class GetRowsCountTest extends RTTestCase
 {
 	protected $table_name;
 
 	public function setUp ()
 	{
-		$this->table_name = sprintf ('tmptest_%s_%u', get_class(), getmypid());
+		$this->table_name = $this->myString ('tmptest');
 		usePreparedExecuteBlade
 		(
 			'CREATE TABLE `' . $this->table_name . '` (' .
@@ -42,5 +42,3 @@ class GetRowsCountTest extends PHPUnit_Framework_TestCase
 		usePreparedExecuteBlade ('DROP TABLE `' . $this->table_name . '`');
 	}
 }
-
-?>

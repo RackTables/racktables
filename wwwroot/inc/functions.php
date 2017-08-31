@@ -32,16 +32,21 @@ $templateWidth[3] = 1;
 $templateWidth[4] = 1;
 $templateWidth[5] = 1;
 
+$message_buffering = FALSE;
+
 define ('CHAP_OBJTYPE', 1);
-// The latter matches both SunOS and Linux-styled formats.
-define ('RE_L2_IFCFG', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}$/i');
-define ('RE_L2_CISCO', '/^[0-9a-f]{4}(\.[0-9a-f]{4}){2}$/i');
-define ('RE_L2_HUAWEI', '/^[0-9a-f]{4}(-[0-9a-f]{4}){2}$/i');
-define ('RE_L2_SOLID', '/^[0-9a-f]{12}$/i');
-define ('RE_L2_IPCFG', '/^[0-9a-f]{2}(-[0-9a-f]{2}){5}$/i');
-define ('RE_L2_WWN_COLON', '/^[0-9a-f]{1,2}(:[0-9a-f]{1,2}){7}$/i');
-define ('RE_L2_WWN_HYPHEN', '/^[0-9a-f]{2}(-[0-9a-f]{2}){7}$/i');
-define ('RE_L2_WWN_SOLID', '/^[0-9a-f]{16}$/i');
+define ('RE_L2_IFCFG', '/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/'); // most ifconfigs
+define ('RE_L2_IFCFG_SUNOS', '/^[0-9A-F]{1,2}(:[0-9A-F]{1,2}){5}$/'); // SunOS ifconfig
+define ('RE_L2_CISCO', '/^[0-9A-F]{4}(\.[0-9A-F]{4}){2}$/');
+define ('RE_L2_HUAWEI', '/^[0-9A-F]{4}(-[0-9A-F]{4}){2}$/');
+define ('RE_L2_SOLID', '/^[0-9A-F]{12}$/i');
+define ('RE_L2_IPCFG', '/^[0-9A-F]{2}(-[0-9A-F]{2}){5}$/');
+define ('RE_L2_WWN_COLON', '/^[0-9A-F]{2}(:[0-9A-F]{2}){7}$/');
+define ('RE_L2_WWN_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){7}$/');
+define ('RE_L2_WWN_SOLID', '/^[0-9A-F]{16}$/');
+define ('RE_L2_IPOIB_COLON', '/^[0-9A-F]{2}(:[0-9A-F]{2}){19}$/');
+define ('RE_L2_IPOIB_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){19}$/');
+define ('RE_L2_IPOIB_SOLID', '/^[0-9A-F]{40}$/');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}$#');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$#');
 define ('E_8021Q_NOERROR', 0);
@@ -175,18 +180,31 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 {
 	if (!isset ($_REQUEST[$argname]))
 		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
-	if (!is_numeric ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is not a number');
-	if ($_REQUEST[$argname] < 0)
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is less than zero');
-	if (! $allow_zero && $_REQUEST[$argname] == 0)
-		throw new InvalidRequestArgException($argname, $_REQUEST[$argname], 'parameter is zero');
+	if (! isUnsignedInteger ($_REQUEST[$argname], $allow_zero))
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an unsigned integer' . ($allow_zero ? ' (or 0)' : ''));
 	return $_REQUEST[$argname];
 }
 
+// Tell whether the argument is a decimal integer (or, alternatively, a numeric
+// string with a decimal integer).
 function isInteger ($arg, $allow_zero = FALSE)
 {
-	return is_numeric ($arg) && ($allow_zero || $arg != 0);
+	// In PHP 7.0.0 and later is_numeric() rejects a string that contains
+	// a hexadecimal number, help PHP 5 achieve the same result here.
+	return is_numeric ($arg) &&
+		(! is_string ($arg) || FALSE === mb_strstr ($arg, '0x')) &&
+		is_int (0 + $arg) &&
+		($allow_zero || $arg != 0);
+}
+
+function isUnsignedInteger ($arg, $allow_zero = FALSE)
+{
+	return isInteger ($arg, $allow_zero) && $arg >= 0;
+}
+
+function isHTMLColor ($color)
+{
+	return 1 == preg_match ('/^[0-9A-F]{6}$/i', $color);
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
@@ -303,6 +321,10 @@ function genericAssertion ($argname, $argtype)
 		return assertUIntArg ($argname);
 	case 'uint0':
 		return assertUIntArg ($argname, TRUE);
+	case 'decimal0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
 	case 'decimal':
 		if (! preg_match ('/^\d+(\.\d+)?$/', assertStringArg ($argname)))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
@@ -357,6 +379,21 @@ function genericAssertion ($argname, $argtype)
 		try
 		{
 			timestampFromDatetimestr ($argvalue); // discard the result on success
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw $iae->newIRAE ($argname);
+		}
+		return $argvalue;
+	case 'dateonly0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'dateonly':
+		$argvalue = assertStringArg ($argname);
+		try
+		{
+			SQLDateFromDateStr ($argvalue); // discard the result on success
 		}
 		catch (InvalidArgException $iae)
 		{
@@ -437,6 +474,15 @@ function genericAssertion ($argname, $argtype)
 		if (! $expr = compileExpression ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid RackCode expression');
 		return $expr;
+	case 'htmlcolor0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'htmlcolor':
+		$argvalue = assertStringArg ($argname);
+		if (! isHTMLColor ($argvalue))
+			throw new InvalidRequestArgException ($argname, $argvalue, 'not an HTML color');
+		return $argvalue;
 	default:
 		throw new InvalidArgException ('argtype', $argtype); // comes not from user's input
 	}
@@ -456,9 +502,14 @@ function isCheckSet ($input_name, $mode = 'bool')
 
 // Validate and return "bypass" value for the current context, if one is
 // defined for it, or NULL otherwise.
+// There is at least one bit of code that depends on the NULL return value
+// (although it does not explicitly check for it), it is the "interface" case
+// in index.php, which makes an unconditional call to here. Changing this
+// function to throw an exception instead will require changing at least
+// that code too.
 function getBypassValue()
 {
-	global $page, $pageno, $sic;
+	global $page, $pageno;
 	if (!array_key_exists ('bypass', $page[$pageno]))
 		return NULL;
 	if (!array_key_exists ('bypass_type', $page[$pageno]))
@@ -587,26 +638,20 @@ function markAllSpans (&$rackData)
 // descending) and mark the best (if any).
 function markBestSpan (&$rackData, $i)
 {
-	global $template, $templateWidth;
-	for ($j = 0; $j < 6; $j++)
+	global $templateWidth;
+	$height = array();
+	$square = array();
+	foreach ($templateWidth as $j => $width)
 	{
 		$height[$j] = rectHeight ($rackData, $i, $j);
-		$square[$j] = $height[$j] * $templateWidth[$j];
+		$square[$j] = $height[$j] * $width;
 	}
 	// find the widest rectangle of those with maximal height
-	$maxsquare = max ($square);
-	if (!$maxsquare)
+	if (0 == $maxsquare = max ($square))
 		return FALSE;
-	$best_template_index = 0;
-	for ($j = 0; $j < 6; $j++)
-		if ($square[$j] == $maxsquare)
-		{
-			$best_template_index = $j;
-			$bestheight = $height[$j];
-			break;
-		}
+	$best_template_index = array_search ($maxsquare, $square);
 	// distribute span marks
-	markSpan ($rackData, $i, $bestheight, $best_template_index);
+	markSpan ($rackData, $i, $height[$best_template_index], $best_template_index);
 	return TRUE;
 }
 
@@ -631,10 +676,10 @@ function applyObjectMountMask (&$rackData, $object_id)
 // check permissions for rack modification
 function rackModificationPermitted ($rackData, $op, $with_context=TRUE)
 {
-	$op_annex = array (array ('tag' => '$op_'.$op), array ('tag' => '$any_op'));
-	$rack_op_annex = array_merge ($rackData['etags'], $rackData['itags'], $rackData['atags'], $op_annex);
-	$context = !$with_context || permitted (NULL, NULL, NULL, $op_annex);
-	return $context && permitted (NULL, NULL, NULL, $rack_op_annex);
+	if ($with_context && ! permitted (NULL, NULL, $op))
+		return FALSE;
+	$rack_op_annex = array_merge ($rackData['etags'], $rackData['itags'], $rackData['atags']);
+	return permitted (NULL, NULL, $op, $rack_op_annex);
 }
 
 // Design change means transition between 'F' and 'A' and back.
@@ -916,52 +961,96 @@ function ip6_mask ($prefix_len)
 	throw new InvalidArgException ('prefix_len', $prefix_len);
 }
 
-// Return a uniformly (010203040506 or 0102030405060708) formatted address, if it is present
-// in the provided string, an empty string for an empty string or raise an exception.
+// Return a uniformly (010203040506 or 0102030405060708 or likewise) formatted
+// L2 address for a string in one of the recognized formats, an empty string for
+// an empty string or raise an exception on invalid input.
 function l2addressForDatabase ($string)
 {
 	$string = strtoupper (trim ($string));
 	$ret = '';
 	switch (TRUE)
 	{
-		case ($string == '' || preg_match (RE_L2_SOLID, $string) || preg_match (RE_L2_WWN_SOLID, $string)):
+		case $string == '':
+		case preg_match (RE_L2_SOLID, $string):
+		case preg_match (RE_L2_WWN_SOLID, $string):
+		case preg_match (RE_L2_IPOIB_SOLID, $string):
 			$ret = $string;
 			break;
-		case (preg_match (RE_L2_IFCFG, $string) || preg_match (RE_L2_WWN_COLON, $string)):
-			// reformat output of SunOS ifconfig
-			$ret = '';
+		case preg_match (RE_L2_IFCFG, $string):
+		case preg_match (RE_L2_WWN_COLON, $string):
+		case preg_match (RE_L2_IPOIB_COLON, $string):
+			$ret = str_replace (':', '', $string);
+			break;
+		// SunOS notation regexp will also match other ifconfigs notations hence should
+		// be matched and conditioned after the others, not before.
+		case preg_match (RE_L2_IFCFG_SUNOS, $string):
 			foreach (explode (':', $string) as $byte)
 				$ret .= (strlen ($byte) == 1 ? '0' : '') . $byte;
-			$ret = $ret;
 			break;
-		case (preg_match (RE_L2_CISCO, $string)):
+		case preg_match (RE_L2_CISCO, $string):
 			$ret = str_replace ('.', '', $string);
 			break;
-		case (preg_match (RE_L2_HUAWEI, $string)):
+		case preg_match (RE_L2_HUAWEI, $string):
 			$ret = str_replace ('-', '', $string);
 			break;
-		case (preg_match (RE_L2_IPCFG, $string) || preg_match (RE_L2_WWN_HYPHEN, $string)):
+		case preg_match (RE_L2_IPCFG, $string):
+		case preg_match (RE_L2_WWN_HYPHEN, $string):
+		case preg_match (RE_L2_IPOIB_HYPHEN, $string):
 			$ret = str_replace ('-', '', $string);
 			break;
 		default:
-			throw new InvalidArgException ('string', $string, 'malformed MAC/WWN address');
+			throw new InvalidArgException ('string', $string, 'malformed MAC/WWN/IPoIB address');
 	}
-	// some switches provide this fake address through SNMP. Store it as NULL to allow multiple copies
+	// Some switches return this invalid address through SNMP. Disregard the malformed data
+	// and return an empty string, which will translate to NULL when (if) the address goes
+	// into the database. This suppresses unnecessary violations of the L2 address constraint.
 	if ($ret === '000000000000')
 		$ret = '';
 	return $ret;
 }
 
+// The input to this function is valid iff it is an output of l2addressForDatabase() or a NULL.
 function l2addressFromDatabase ($string)
 {
-	switch (strlen ($string))
+	// $string normally comes from the database in uppercase, test it with
+	// the regexps, which are now uppercase.
+	switch (TRUE)
 	{
-		case 12: // Ethernet
-		case 16: // FireWire/Fibre Channel
+		case $string === NULL:
+		case $string === '':
+			return '';
+		case preg_match (RE_L2_SOLID, $string):
+		case preg_match (RE_L2_WWN_SOLID, $string):
+		case preg_match (RE_L2_IPOIB_SOLID, $string):
 			return implode (':', str_split ($string, 2));
 		default:
-			return $string;
+			throw new InvalidArgException ('string', $string, 'invalid format');
 	}
+}
+
+function HTMLColorForDatabase ($string)
+{
+	$ret = 0;
+	// The HTTP request coming through the opspec declaration will indicate an undefined
+	// color value with an empty string, PHP code in addition to that is likely to use
+	// NULL, which comes from the database.
+	if ($string === NULL || $string === '')
+		return NULL;
+	if (! isHTMLColor ($string) || 1 != sscanf (mb_strtoupper ($string), '%06X', $ret))
+		throw new InvalidArgException ('string', $string, 'not an HTML color');
+	return $ret;
+}
+
+// No code currently depends on this function, it is here for completeness.
+function HTMLColorFromDatabase ($u)
+{
+	if ($u === NULL)
+		return NULL;
+	if (! isUnsignedInteger ($u, TRUE))
+		throw new InvalidArgException ('u', $u, 'not an unsigned integer');
+	if ($u > 0xFFFFFF)
+		throw new InvalidArgException ('u', $u, 'value out of range');
+	return sprintf ('%06X', $u);
 }
 
 // DEPRECATED, remove in 0.21.0
@@ -1033,21 +1122,18 @@ function sortTokenize ($a, $b)
 
 	$ar = explode(' ', $a);
 	$br = explode(' ', $b);
-	for ($i=0; $i<count($ar) && $i<count($br); $i++)
+	$arc = count ($ar);
+	$brc = count ($br);
+	for ($i = 0; $i < $arc && $i < $brc; $i++)
 	{
-		$ret = 0;
-		if (is_numeric($ar[$i]) && is_numeric($br[$i]))
-			$ret = ($ar[$i]==$br[$i])?0:($ar[$i]<$br[$i]?-1:1);
+		if (isUnsignedInteger ($ar[$i]) && isUnsignedInteger ($br[$i]))
+			$ret = numCompare ($ar[$i], $br[$i]);
 		else
 			$ret = strcasecmp($ar[$i], $br[$i]);
 		if ($ret != 0)
 			return $ret;
 	}
-	if ($i<count($ar))
-		return 1;
-	if ($i<count($br))
-		return -1;
-	return 0;
+	return numCompare ($arc, $brc);
 }
 
 // This function returns an array of single element of object's FQDN attribute,
@@ -1067,22 +1153,6 @@ function findAllEndpoints ($object_id, $fallback = '')
 	if (!count ($regular) && $fallback != '')
 		return array ($fallback);
 	return $regular;
-}
-
-// Split object's FQDN (or the common name if FQDN is not set) into the
-// hostname and domain name in Munin convention (using the first period as the
-// separator), and return the pair. Throw an exception on error.
-function getMuninNameAndDomain ($object_id)
-{
-	$o = spotEntity ('object', $object_id);
-	$hd = $o['name'];
-	// FQDN overrides the common name for Munin purposes.
-	$attrs = getAttrValues ($object_id);
-	if (array_key_exists (3, $attrs) && $attrs[3]['value'] != '')
-		$hd = $attrs[3]['value'];
-	if (2 != count ($ret = preg_split ('/\./', $hd, 2)))
-		throw new InvalidArgException ('object_id', $object_id, 'the name is not in the host.do.ma.in format');
-	return $ret;
 }
 
 // Some records in the dictionary may be written as plain text or as Wiki
@@ -1173,9 +1243,9 @@ function string_insert_hrefs_callback ($m)
 # (adopted from MantisBT, core/string_api.php:string_insert_hrefs).
 function string_insert_hrefs ($p_string)
 {
-	static $s_url_regex = null;
-	static $s_url_replace = null;
-	static $s_email_regex = null;
+	static $s_url_regex = NULL;
+	static $s_url_replace = NULL;
+	static $s_email_regex = NULL;
 	static $s_anchor_regex = '/(<a[^>]*>.*?<\/a>)/is';
 
 	if (getConfigVar ('DETECT_URLS') != 'yes')
@@ -1222,7 +1292,7 @@ function string_insert_hrefs ($p_string)
 	# mailto: link, making sure that we skip processing of any existing anchor
 	# tags, to avoid parts of URLs such as https://user@example.com/ or
 	# http://user:password@example.com/ to be not treated as an email.
-	$t_pieces = preg_split ($s_anchor_regex, $p_string, null, PREG_SPLIT_DELIM_CAPTURE);
+	$t_pieces = preg_split ($s_anchor_regex, $p_string, NULL, PREG_SPLIT_DELIM_CAPTURE);
 	$p_string = '';
 	foreach ($t_pieces as $piece)
 		if (preg_match ($s_anchor_regex, $piece))
@@ -1236,7 +1306,7 @@ function string_insert_hrefs ($p_string)
 # Adopted from MantisBT, core/email_api.php:email_regex_simple.
 function email_regex_simple()
 {
-	static $s_email_regex = null;
+	static $s_email_regex = NULL;
 
 	if (is_null ($s_email_regex))
 	{
@@ -1780,6 +1850,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 				'tag' => $taginfo['tag'],
 				'parent_id' => $taginfo['parent_id'],
 				'refcnt' => $taginfo['refcnt'],
+				'color' => $taginfo['color'],
 				'kids' => $subsearch
 			);
 		else
@@ -3231,11 +3302,11 @@ function getAllVLANOptions ($except = array())
 	return $ret;
 }
 
-// Let's have this debug helper here to enable debugging of process.php w/o interface.php.
+// This debugging helper does not depend on interface.php.
 function dump ($var)
 {
 	echo '<div align=left><pre>';
-	print_r ($var);
+	var_dump ($var);
 	echo '</pre></div>';
 }
 
@@ -3336,6 +3407,14 @@ function getUnlinkedPortTypeOptions ($port_iif_id)
 		return $cache[$port_iif_id];
 
 	$ret = array();
+	$seen_oifs = array();
+	$ambiguous_oifs = array();
+	foreach ($compat as $row)
+	{
+		if (isset ($seen_oifs[$row['oif_id']]))
+			$ambiguous_oifs[$row['oif_id']] = 1;
+		$seen_oifs[$row['oif_id']] = 1;
+	}
 	foreach ($compat as $row)
 	{
 		if ($row['iif_id'] == $prefs['iif_pick'] || $row['iif_id'] == $port_iif_id)
@@ -3346,7 +3425,11 @@ function getUnlinkedPortTypeOptions ($port_iif_id)
 			continue;
 		if (!array_key_exists ($optgroup, $ret))
 			$ret[$optgroup] = array();
-		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $row['oif_name'];
+		if (isset ($ambiguous_oifs[$row['oif_id']]) && $optgroup == 'other')
+			$name = $row['iif_name'] . ' / ' . $row['oif_name'];
+		else
+			$name = $row['oif_name'];
+		$ret[$optgroup][$row['iif_id'] . '-' . $row['oif_id']] = $name;
 	}
 
 	$cache[$port_iif_id] = $ret;
@@ -3489,6 +3572,9 @@ function iosParseVLANString ($string)
 // with requested column set to given value (or NULL if there is none such).
 // Note that 0 and NULL mean completely different things and thus
 // require strict checking (=== and !===).
+// Also note that this is not a 1:1 reinvention of PHP's array_search() as
+// this function looks one level deeper (which could be done by means of
+// array_column(), which appears only in PHP 5 >= 5.5.0).
 function scanArrayForItem ($table, $scan_column, $scan_value)
 {
 	foreach ($table as $key => $row)
@@ -4685,6 +4771,16 @@ function formatPortIIFOIF ($port)
 	return $ret;
 }
 
+// Not an equivalent of the above but related.
+function parsePortIIFOIF ($port_type)
+{
+	if (preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type, $matches))
+		return array ($matches[1], $matches[2]);
+	if (preg_match ('/^([[:digit:]]+)$/', $port_type, $matches))
+		return array (1, $matches[1]);
+	throw new InvalidArgException ('port_type', $port_type, 'format error');
+}
+
 // returns '<a...</a>' html string containing a link to specified port or object.
 // link title is "hostname portname" if both parts are defined
 function formatPortLink($host_id, $hostname, $port_id, $portname, $a_class = '')
@@ -4815,10 +4911,10 @@ function sortPortList ($plist, $name_in_value = FALSE)
 			'numidx' => count ($numbers),
 			'index' => $numbers,
 			'idx_parent' => $parent,
-			'iif_id' => isset($plist[$pkey]['iif_id']) ? $plist[$pkey]['iif_id'] : 0,
-			'label' => isset($plist[$pkey]['label']) ? $plist[$pkey]['label'] : '',
-			'l2address' => isset($plist[$pkey]['l2address']) ? $plist[$pkey]['l2address'] : '',
-			'id' => isset($plist[$pkey]['id']) ? $plist[$pkey]['id'] : 0,
+			'iif_id' => array_fetch ($pvalue, 'iif_id', 0),
+			'label' => array_fetch ($pvalue, 'label', ''),
+			'l2address' => array_fetch ($pvalue, 'l2address', ''),
+			'id' => array_fetch ($pvalue, 'id', 0),
 			'name' => $pn,
 		);
 	}
@@ -4829,12 +4925,9 @@ function sortPortList ($plist, $name_in_value = FALSE)
 }
 
 // This function works like standard php usort function and uses sortPortList.
-function usort_portlist(&$array)
+function usort_portlist (&$portnames)
 {
-	$temp_array = array();
-	foreach($array as $portname)
-		$temp_array[$portname] = 1;
-	$array = array_keys (sortPortList ($temp_array, FALSE));
+	$portnames = array_keys (sortPortList (array_fill_keys ($portnames, array())));
 }
 
 // return a "?, ?, ?, ... ?, ?" string consisting of N question marks
@@ -5015,6 +5108,75 @@ function buildSearchRedirectURL ($result_type, $record)
 	return buildRedirectURL ($next_page, isset ($next_tab) ? $next_tab : 'default', $params);
 }
 
+// This works like explode() with space as a separator with the added difference
+// that anything in double quotes is returned as a single word.
+function parseSearchTerms ($terms)
+{
+	$ret = array();
+	if (mb_substr_count ($terms, '"') % 2 != 0)
+		throw new InvalidArgException ('terms', $terms, 'contains odd number of quotes');
+	$state = 'whitespace';
+	$buffer = '';
+	$len = mb_strlen ($terms);
+	for ($i = 0; $i < $len; $i++)
+	{
+		$c = mb_substr ($terms, $i, 1);
+		switch ($state)
+		{
+		case 'whitespace':
+			switch ($c)
+			{
+			case ' ':
+				break; // nom-nom
+			case '"':
+				$buffer = '';
+				$state = 'quoted_string';
+				break;
+			default:
+				$buffer = $c;
+				$state = 'word';
+			}
+			break;
+
+		case 'word':
+			switch ($c)
+			{
+			case '"':
+				throw new InvalidArgException ('terms', $terms, 'punctuation error');
+			case ' ':
+				$ret[] = $buffer;
+				$buffer = '';
+				$state = 'whitespace';
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+
+		case 'quoted_string':
+			switch ($c)
+			{
+			case '"':
+				if (trim ($buffer) == '')
+					throw new InvalidArgException ('terms', $terms, 'punctuation error');
+				$ret[] = trim ($buffer);
+				$buffer = '';
+				$state = 'whitespace';
+				// FIXME: this does not detect missing whitespace that would be reasonable
+				// to expect between the closing quote and the next token, if any.
+				break;
+			default:
+				$buffer .= $c;
+			}
+			break;
+		}
+	}
+	if ($buffer != '')
+		$ret[] = $buffer;
+
+	return $ret;
+}
+
 // Take a parse tree and figure out if it is a valid payload or not.
 // Depending on that return either NULL or an array filled with the load
 // of that expression.
@@ -5121,10 +5283,10 @@ function showNotice  ($message, $option = '')
 // $type could be 'error', 'warning', 'success' or 'neutral'
 function setMessage ($type, $message, $direct_rendering)
 {
-	global $script_mode;
+	global $script_mode, $message_buffering;
 	if ($direct_rendering)
 		echo '<div class="msg_' . $type . '">' . $message . '</div>';
-	elseif (isset ($script_mode) && $script_mode)
+	elseif (isset ($script_mode) && $script_mode && !$message_buffering)
 	{
 		if ($type == 'warning' || $type == 'error')
 			file_put_contents ('php://stderr', strtoupper ($type) . ': ' . strip_tags ($message) . "\n");
@@ -5158,6 +5320,42 @@ function showOneLiner ($code, $args = array())
 	if (! empty ($args))
 		$line['a'] = $args;
 	$log_messages[] = $line;
+}
+
+// Works only in $script_mode == TRUE
+function setMessageBuffering ($state)
+{
+	global $message_buffering;
+	$message_buffering = $state;
+}
+
+function flushMessageBuffer()
+{
+	global $log_messages, $script_mode;
+
+	if (!isset ($script_mode) || !$script_mode)
+		return;
+
+	$code_str_map = array
+	(
+		100 => 'ERROR',
+		200 => 'WARNING',
+	);
+
+	foreach ($log_messages as $line)
+		if (isset ($code_str_map[$line['c']]))
+		{
+			$type = $code_str_map[$line['c']];
+			$message = strip_tags (implode ("\n", $line['a']));
+			file_put_contents ('php://stderr', $type . ': ' . $message . "\n");
+		}
+	$log_messages = array();
+}
+
+function clearMessageBuffer()
+{
+	global $log_messages;
+	$log_messages = array();
 }
 
 function showFuncMessage ($callfunc, $status, $log_args = array())
@@ -5209,12 +5407,12 @@ function loadConfigDefaults()
 	$ret = loadConfigCache();
 	if (!count ($ret))
 		throw new RackTablesError ('Failed to load configuration from the database.', RackTablesError::INTERNAL);
-	foreach ($ret as $varname => &$row)
+	foreach (array_keys ($ret) as $varname)
 	{
-		$row['is_altered'] = 'no';
-		if ($row['vartype'] == 'uint')
-			$row['varvalue'] = 0 + $row['varvalue'];
-		$row['defaultvalue'] = $row['varvalue'];
+		$ret[$varname]['is_altered'] = 'no';
+		if ($ret[$varname]['vartype'] == 'uint')
+			$ret[$varname]['varvalue'] = intval ($ret[$varname]['varvalue']);
+		$ret[$varname]['defaultvalue'] = $ret[$varname]['varvalue'];
 	}
 	return $ret;
 }
@@ -5328,9 +5526,19 @@ function getObjectTypeChangeOptions ($object_id)
 
 // Gets the timestamp and returns human-friendly short message describing the time difference
 // between the current system time and the specified timestamp (like '2d 5h ago')
+function formatAgeTimestamp ($timestamp)
+{
+	return formatAgeSeconds (time() - $timestamp);
+}
+
+// For backward compatibility.
 function formatAge ($timestamp)
 {
-	$seconds = time() - $timestamp;
+	return formatAgeTimestamp ($timestamp);
+}
+
+function formatAgeSeconds ($seconds)
+{
 	switch (TRUE)
 	{
 		case $seconds < 1:
@@ -5340,7 +5548,7 @@ function formatAge ($timestamp)
 		case $seconds <= 300:
 			$mins = intval ($seconds / 60);
 			$secs = $seconds % 60;
-			return ($secs ? "{$mins}min ${secs}s" : "{$mins}m") . ' ago';
+			return ($secs ? "{$mins}min ${secs}s" : "{$mins}min") . ' ago';
 		case $seconds < 3600:
 			return round ($seconds / 60) . 'min' . ' ago';
 		case $seconds < 3 * 3600:
@@ -5383,7 +5591,7 @@ function getOutputOf ($func_name)
 	}
 	catch (Exception $e)
 	{
-		ob_clean();
+		ob_end_clean();
 		throw $e;
 	}
 }
@@ -5683,6 +5891,8 @@ function array_sub ($a, $b)
 // returns the requested element value or the default value if not found
 function array_fetch ($array, $key, $default_value)
 {
+	if (! is_array ($array))
+		throw new InvalidArgException ('array', $array, 'is not an array');
 	return array_key_exists ($key, $array) ? $array[$key] : $default_value;
 }
 
@@ -5997,11 +6207,6 @@ function inverseRackUnit ($unit_no, $rack_cell)
 	return $unit_no;
 }
 
-function isCLIMode ()
-{
-	return !isset ($_SERVER['REQUEST_METHOD']);
-}
-
 // returns true either if given domains are the same
 // or if one is a group and other is its member
 function sameDomains ($domain_id_1, $domain_id_2)
@@ -6050,10 +6255,9 @@ function checkPortRole ($vswitch, $portinfo, $port_name, $port_order)
 
 	if (! $remote_auto && ! $local_auto)
 		return TRUE;
-	elseif ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
+	if ($remote_auto && $local_auto && $local_auto != $remote_auto && sameDomains ($vswitch['domain_id'], $remote_vswitch['domain_id']))
 		return TRUE; // auto-calc link ends must belong to the same domain
-	else
-		return FALSE;
+	return FALSE;
 }
 
 # Convert InvalidArgException to InvalidRequestArgException with a choice of
@@ -6098,6 +6302,44 @@ function timestampFromDatetimestr ($s)
 	if ($ret >= 0xFFFFFFFF)
 		throw new InvalidArgException ('s', $s, 'is on or after 2106-02-07 06:28:15 UTC');
 	return $ret;
+}
+
+function SQLDateFromDateStr ($s, $format = NULL)
+{
+	if ($format === NULL)
+		$format = getConfigVar ('DATEONLY_FORMAT');
+	if (FALSE === $tmp = strptime ($s, $format))
+		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
+	$y = $tmp['tm_year'] + 1900;
+	$m = $tmp['tm_mon'] + 1;
+	$d = $tmp['tm_mday'];
+	if ($y < 1000 || $y > 9999)
+		throw new InvalidArgException ('s', $s, 'year out of range');
+	if (! checkdate ($m, $d, $y))
+		throw new InvalidArgException ('s', $s, 'not a Gregorian calendar date');
+	return sprintf ('%4u-%02u-%02u', $y, $m, $d);
+}
+
+// This function returns either -1 or 0 or 1, it can be used with usort().
+function cmpSQLDates ($date1, $date2)
+{
+	if
+	(
+		! preg_match ('/^(\d\d\d\d)-(\d\d)-(\d\d)$/', $date1, $m1) ||
+		! checkdate ($m1[2], $m1[3], $m1[1])
+	)
+		throw new InvalidArgException ('date1', $date1, 'not a valid SQL date');
+	if
+	(
+		! preg_match ('/^(\d\d\d\d)-(\d\d)-(\d\d)$/', $date2, $m2) ||
+		! checkdate ($m2[2], $m2[3], $m2[1])
+	)
+		throw new InvalidArgException ('date2', $date2, 'not a valid SQL date');
+	if (0 != $ret = numCompare ($m1[1], $m2[1]))
+		return $ret;
+	if (0 != $ret = numCompare ($m1[2], $m2[2]))
+		return $ret;
+	return numCompare ($m1[3], $m2[3]);
 }
 
 # Produce a human-readable clue, such as 'YYYY-MM-DD' for '%Y-%m-%d'.
@@ -6145,6 +6387,11 @@ function nullIfFalse ($x)
 function nullIfZero ($x)
 {
 	return $x == 0 ? NULL : $x;
+}
+
+function emptyStrIfZero ($x)
+{
+	return ($x === 0 || $x === '0') ? '' : $x;
 }
 
 function printLocationChildrenSelectOptions ($location, $parent_id, $location_id = NULL, $level = 0)
@@ -6438,23 +6685,11 @@ function textareaCooked ($text)
 	return $ret;
 }
 
-// Used to fill $desiredPorts argument for syncObjectPorts.
+// Used to fill $desiredPorts argument for replaceObjectPorts.
 // Call this function just like commitAddPort except the first argument
 function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label, $port_l2address)
 {
-	switch (1)
-	{
-	case preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = $matches[1];
-		$oif_id = $matches[2];
-		break;
-	case preg_match ('/^([[:digit:]]+)$/', $port_type_id, $matches):
-		$iif_id = 1;
-		$oif_id = $matches[1];
-		break;
-	default:
-		throw new InvalidArgException ('port_type_id', $port_type_id, 'format error');
-	}
+	list ($iif_id, $oif_id) = parsePortIIFOIF ($port_type_id);
 	$desiredPorts["{$port_name}-{$iif_id}"] = array (
 		'name' => $port_name,
 		'iif_id' => $iif_id,
@@ -6468,55 +6703,83 @@ function addDesiredPort (&$desiredPorts, $port_name, $port_type_id, $port_label,
 // $desiredPorts is a list of ports in getObjectPortsAndLinks format.
 // required port fields are name, iif_id, oif_id, label and l2address.
 // $desiredPorts can be filled by addDesiredPort function using commitAddPort format
-function syncObjectPorts ($objectInfo, $desiredPorts)
+function replaceObjectPorts ($object_id, $desiredPorts)
 {
 	global $dbxlink;
-	$real_ports = array();
-	$dbxlink->beginTransaction();
-	$portlist = fetchPortList ("Port.object_id = ? FOR UPDATE", array ($objectInfo['id']));
-	$added = $deleted = $changed = 0;
-	foreach ($portlist as $port)
+	$to_delete = $to_update = $real_ports = array();
+
+	// The check that does not require access to the database goes first.
+	foreach (array_keys ($desiredPorts) as $k)
+		$desiredPorts[$k]['l2address'] = l2addressForDatabase ($desiredPorts[$k]['l2address']);
+
+	// Further processing must be done with exclusive access to the table. Even when the
+	// only changes requested are to add ports w/o MAC addresses or to update existing
+	// ports in a way that does not introduce new MAC addresses, it is impossible to
+	// tell reliably which ports require which actions without locking the table first.
+	$dbxlink->exec ('LOCK TABLES Port WRITE, PortLog WRITE, Link READ');
+	foreach (getObjectPortsAndLinksTerse ($object_id) as $port)
 	{
 		$key = "{$port['name']}-{$port['iif_id']}";
-		if (!isset ($desiredPorts[$key]))
+		if (! array_key_exists ($key, $desiredPorts))
 		{
-			if ($port['linked'])
-				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
-			else
-			{
-				usePreparedDeleteBlade ('Port', array ('id' => $port['id']));
-				$deleted++;
-			}
+			$to_delete[] = $port;
 			continue;
 		}
-		if (l2addressForDatabase ($port['l2address']) != l2addressForDatabase ($desiredPorts[$key]['l2address']) ||
-			$port['label'] != $desiredPorts[$key]['label'])
-		{
-			commitUpdatePort (
-				$objectInfo['id'],
+		if ($port['l2address'] != $desiredPorts[$key]['l2address'] || $port['label'] != $desiredPorts[$key]['label'])
+			$to_update[$key] = $port;
+		$real_ports[$key] = 1;
+	}
+	$to_add = array_diff_key ($desiredPorts, $real_ports);
+
+	try
+	{
+		assertUniqueL2Addresses (reduceSubarraysToColumn (array_merge ($to_update, $to_add), 'l2address'), $object_id);
+		// Make the actual changes.
+		foreach ($to_delete as $port)
+			if ($port['link_count'] != 0)
+				showWarning (sprintf ("Port %s should be deleted, but it's used", formatPort ($port)));
+			else
+				usePreparedDeleteBlade ('Port', array ('id' => $port['id']));
+		foreach ($to_update as $key => $port)
+			commitUpdatePortReal
+			(
+				$object_id,
 				$port['id'],
 				$port['name'],
-				"{$port['iif_id']}-{$port['oif_id']}",
+				$port['iif_id'],
+				$port['oif_id'],
 				$desiredPorts[$key]['label'],
 				$desiredPorts[$key]['l2address'],
 				$port['reservation_comment']
 			);
-			$changed++;
-		}
-		$real_ports[$key] = 1;
+		foreach ($to_add as $key => $port)
+			commitAddPortReal
+			(
+				$object_id,
+				$port['name'],
+				$port['iif_id'],
+				$port['oif_id'],
+				$port['label'],
+				$port['l2address']
+			);
 	}
-	foreach ($desiredPorts as $key => $port)
+	catch (Exception $e)
 	{
-		if (!isset ($real_ports[$key]))
-		{
-			$type_id = "{$port['iif_id']}-{$port['oif_id']}";
-			commitAddPort ($objectInfo['id'], $port['name'], $type_id, $port['label'], $port['l2address']);
-			$added++;
-		}
+		$dbxlink->exec ('UNLOCK TABLES');
+		throw $e;
 	}
-	$dbxlink->commit();
 
-	showSuccess ("Added ports: {$added}, changed: {$changed}, deleted: {$deleted}");
+	$dbxlink->exec ('UNLOCK TABLES');
+	showSuccess (sprintf ('Added ports: %u, changed: %u, deleted: %u', count ($to_add), count ($to_update), count ($to_delete)));
 }
 
-?>
+function formatPluginState ($state)
+{
+	$map = array
+	(
+		'disabled' => 'Disabled',
+		'enabled' => 'Enabled',
+		'not_installed' => 'Not installed',
+	);
+	return array_fetch ($map, $state, 'unknown');
+}

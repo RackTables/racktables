@@ -7,7 +7,7 @@ look for the respective links at [project's web-site](http://racktables.org).
 
 ## 1. Prepare the server
 
-RackTables uses a web-server with PHP (5.2.10 or newer) for front-end and a
+RackTables uses a web-server with PHP (5.5.0 or newer) for front-end and a
 MySQL/MariaDB server version 5 for back-end. The most commonly used web-server
 for RackTables is Apache httpd.
 
@@ -15,14 +15,11 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                               |
 | ------------------ | ----------------------------------------------------------------------- |
-| ALTLinux 4.0       | `apt-get install MySQL-server`                                          |
-| CentOS 5           | `yum install mysql-server mysql`                                        |
 | Debian 6           | `aptitude install mysql-server-5.1`                                     |
 | Debian 7           | `aptitude install mysql-server-5.1`                                     |
 | Fedora 8-16        | `yum install mysql-server mysql`                                        |
-| Fedora 23          | `dnf install mariadb-server mariadb`                                    |
+| Fedora 23-26       | `dnf install mariadb-server mariadb`                                    |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
-| openSUSE 11.0      | YaST -> Software -> software management -> Web and LAMP server -> mysql |
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
 | Scientific Linux 6 | `yum install mysql-server mysql`                                        |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
@@ -32,13 +29,10 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| ALTLinux 4.0       | add `CHSET=utf8` line to `/etc/sysconfig/mysqld` file and restart mysqld                                           |
-| CentOS 5           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Debian 6           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Debian 7           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
 | Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
-| Fedora 23          | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
-| openSUSE 11.0      | add `default-character-set=utf8` line to `[mysql]` section of `/etc/my.cnf` file and restart mysqld                |
+| Fedora 23-26       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
@@ -48,15 +42,12 @@ for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| ALTLinux 4.0       | `apt-get install apache2-httpd-prefork php5-gd2 php5-pdo_mysql php5-pdo apache2-mod_php5 php5-mbstring`
-| CentOS 5           | `yum install httpd php53 php53-mysql php53-pdo php53-gd php53-mbstring php53-bcmath` |
 | Debian 6           | `aptitude install libapache2-mod-php5 php5-gd php5-mysql php5-snmp`                  |
 | Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
 | Fedora 8-16        | `yum install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
 | Fedora 23          | `dnf install httpd php php-mysql php-pdo php-gd php-snmp php-mbstring php-bcmath`    |
-| FreeBSD 8          | see note below                                                                       |
+| Fedora 26          | `dnf install httpd php php-mysqlnd php-pdo php-gd php-snmp php-mbstring php-bcmath`  |
 | FreeBSD 10         | see note 1.3.c                                                                       | 
-| openSUSE 11.0      | use YaST to install apache2-mod_php5, php5-gd, php5-mbstring, php5-mysql, php5-bcmath, php5-snmp and php5-ldap
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
@@ -71,52 +62,34 @@ some external addons like fping, which may take some time in certain situations.
 Please note that setting aggresive caching for php scripts may result in stale
 content - so maximum of 60 seconds is advised, but by default it is not enabled.
 
-#### 1.3.b. FreeBSD 8
-```
-# make -C /usr/ports/www/apache13-modssl install
-# make -C /usr/ports/www/php5-session install
-[X] CLI        Build CLI version
-[X] APACHE     Build Apache module
-[X] MULTIBYTE  Enable zend multibyte support
-# make -C /usr/ports/graphics/php5-gd install
-# make -C /usr/ports/databases/php5-pdo_mysql install
-# make -C /usr/ports/devel/pcre install
-!!! Enable UTF-8 support ............ : yes
-!!! Unicode properties .............. : yes
-# make -C /usr/ports/devel/php5-pcre install
-# make -C /usr/ports/converters/php5-mbstring install
-[X] REGEX  Enable multibyte regex support
+#### 1.3.b. [redacted]
 
-# make -C /usr/ports/net-mgmt/php5-snmp install
-# make -C /usr/ports/net/php5-ldap install
-```
-
-#### 1.3.c. FreeBSD
+#### 1.3.c. FreeBSD 10
 There are 3 different ways how you can install RackTables and its dependencies on FreeBSD.
 
-######A. use pkg (Binary Package Management) ( not always the newest version )
+######A. use pkg (Binary Package Management) (not always the newest version)
 ```
 # pkg install racktables
 # pkg install mod_php56 mysql56-server
 ```
-As of May 2016 this will install RackTables Version 0.20.10 and its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+As of March 2017 this will install RackTables Version 0.20.11 and its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######B. use the ports system ( possibly more recent than pkg )
+######B. use the ports system (possibly more recent than pkg)
 ```
 # cd /usr/ports/sysutils/racktables
 # make install
 # pkg install mod_php56 mysql56-server
 ```
-As of May 2016 this will install RackTables Version 0.20.11 and build and install its dependencies ( php 5.6, mysql-server 5.6 and apache 2.4)
+As of March 2017 this will install RackTables Version 0.20.11 and build and install its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######C. manual ( newest version )
+######C. manual (newest version)
 Install dependencies with pkg:
 ```
 # pkg install php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets
 # pkg install mod_php70 mysql56-server
 ```
 
-unpack tar.gz/zip archive to /usr/local/www
+unpack tar.gz/zip archive to `/usr/local/www`
 
 symblink racktables dir
 ```
@@ -147,9 +120,9 @@ Start services:
 #service mysql-server start
 ```
 
-goto http://address.to.your.server/racktables/index.php and follow the instructions
+Browse to http://address.to.your.server/racktables/index.php and follow the instructions.
 
-Note: set secret.php permissions when prompted.
+Note: set `secret.php` permissions when prompted.
 ```
 # chown www:www /usr/local/www/racktables/wwwroot/inc/secret.php
 # chmod 400 /usr/local/www/racktables/wwwroot/inc/secret.php
@@ -160,7 +133,7 @@ Note: set secret.php permissions when prompted.
 Unpack the tar.gz/zip archive to a directory of your choice and configure Apache
 httpd to use `wwwroot` subdirectory as a new DocumentRoot. Alternatively,
 symlinks to `wwwroot` or even to `index.php` from an existing DocumentRoot are
-also possible and often adisable (see `README.Fedora`).
+also possible and often advisable (see `README.Fedora`).
 
 ## 3. Run the installer
 Open the configured RackTables URL and you will be prompted to configure
@@ -168,7 +141,7 @@ and initialize the application.
 
 | Distribution    | Apache httpd UID:GID    | MySQL UNIX socket path           |
 | --------------- | ----------------------- | -------------------------------- |
-| Fedora 23       | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
+| Fedora 23-26    | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
 | openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
 | Ubuntu 14.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 | Ubuntu 16.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
@@ -186,6 +159,16 @@ and initialize the application.
 4. Do that and report any errors to the bug tracker or the mailing list.
 
 ## Release notes
+
+### Upgrading to 0.21.0
+
+From now on the minimum (oldest) release of PHP that can run RackTables is
+5.5.0.
+
+This release introduces a new plugin architecture.  If you experience issues
+after the upgrade, try disabling plugins.
+Refer to http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins
+for more information.
 
 ### Upgrading to 0.20.11
 
@@ -364,62 +347,3 @@ besides 'yes' and 'no': 'none'. Use 'none' value if you are experiencing low
 performance on IP tree page. It will completely disable IP ranges scan for
 used/spare IPs and the speed of IP tree will increase radically. The price is
 you will not see the routers in IP tree at all.
-
-### Upgrading to 0.19.13
-A new "date" attribute type has been added. Existing date based fields ("HW
-warranty expiration", "support contract expiration" and "SW warranty
-expiration") will be converted to this new type but must be in the format
-"mm/dd/yyyy" otherwise the conversion will fail.
-
-### Upgrading to 0.19.2
-
-This release is different in filesystem layout. The "gateways" directory has
-been moved from `wwwroot` directory. This improves security a bit. You can also
-separate your local settings and add-ons from the core RackTables code. To do
-that, put a single `index.php` file into the DocumentRoot of your http server:
-
-```php
-<?php
-$racktables_confdir='/directory/with/secret.php/and/local.php/';
-require '/directory_where_you_extracted_racktables_distro/wwwroot/index.php';
-?>
-```
-
-No more files are needed to be available directly over the HTTP. Full list of
-filesystem paths which could be specified in custom `index.php` or `secret.php`:
-* `$racktables_gwdir`: path to the gateways directory;
-* `$racktables_staticdir`: path to the directory containing `pix`, `js`, `css` directories;
-* `$racktables_confdir`: path where secret.php and local.php are located. It is not recommended to define it in `secret.php`, cause only the path to `local.php` will be affected;
-* `$path_to_secret_php`: Ignore `$racktables_confdir` when locating `secret.php` and use the specified path;
-* `$path_to_local_php`: idem for `local.php`.
-
-### Upgrading to 0.19.0
-
-The files, which are intended for the httpd (web-server) directory, are now in
-the `wwwroot` directory of the tar.gz archive. Files outside of that directory
-are not directly intended for httpd environment and should not be copied to the
-server.
-
-This release incorporates ObjectLog functionality, which used to be available as
-a separate plugin. For the best results it is advised to disable (through
-`local.php`) external ObjectLog plugin permanently before the new version is
-installed. All previously accumulated ObjectLog records will be available
-through the updated standard interface.
-
-RackTables is now using PHP JSON extension which is included in the PHP core
-since 5.2.0.
-
-The barcode attribute was removed. The upgrade script attempts to preserve the
-data by moving it to either the 'OEM S/N 1' attribute or to a Log entry. You
-should backup your database beforehand anyway.
-
-### Upgrading to 0.18.x
-
-RackTables from its version 0.18.0 and later is not compatible with RHEL/CentOS
-(at least with versions up to 5.5) Linux distributions in their default
-installation. There are yet options to work around that:
-
-1. Install RackTables on a server with a different distribution/OS.
-2. Request Linux distribution vendor to fix the bug with PCRE.
-3. Repair your RHEL/CentOS installation yourself by fixing its PCRE
-   RPM as explained [here](http://bugs.centos.org/view.php?id=3252)

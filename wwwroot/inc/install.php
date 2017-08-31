@@ -36,9 +36,11 @@ if ($step > count ($stepfunc))
 }
 $title = "RackTables installation: step ${step} of " . count ($stepfunc);
 header ('Content-Type: text/html; charset=UTF-8');
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	// Heredoc, not nowdoc!
+	echo <<<"ENDOFTEXT"
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head><title><?php echo $title; ?></title>
+<head><title>${title}</title>
 <style type="text/css">
 .tdleft {
 	text-align: left;
@@ -59,7 +61,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 </head>
 <body>
 <center>
-<?php
+ENDOFTEXT;
 echo "<h1>${title}</h1><p>";
 
 echo "</p><form method=post>\n";
@@ -75,14 +77,10 @@ else
 	echo "<br><input type=submit value='retry'>";
 }
 echo "<input type=hidden name=step value='${next_step}'>\n";
-
-?>
-</form>
-</center>
-</body>
-</html>
-
-<?php
+	echo '</form>';
+	echo '</center>';
+	echo '</body>';
+	echo '</html>';
 }
 
 // Check if the software is already installed.
@@ -122,7 +120,8 @@ function init_config ()
 		echo "<input type=hidden name=save_config value=1>\n";
 		echo '<h3>Server-side MySQL setup of the database:</h3><div align=left><pre class=trok>';
 		echo "mysql&gt;\nCREATE DATABASE racktables_db CHARACTER SET utf8 COLLATE utf8_general_ci;\n";
-		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n</pre></div>";
+		echo "CREATE USER racktables_user@localhost IDENTIFIED BY 'MY_SECRET_PASSWORD';\n";
+		echo "GRANT ALL PRIVILEGES ON racktables_db.* TO racktables_user@localhost;\n</pre></div>";
 		echo '<table>';
 		echo '<tr><td><label for=conn_tcp>TCP connection</label></td>';
 		echo '<td><input type=radio name=conn value=conn_tcp id=conn_tcp' . ($use_tcp ? ' checked' : '') . '></td></tr>';
@@ -146,7 +145,7 @@ function init_config ()
 	if (!is_writable ($path_to_secret_php))
 	{
 		echo "The $path_to_secret_php file is not writable by web-server. Make sure it is.";
-		echo "The following commands should suffice:<pre>touch '$path_to_secret_php'; chmod 666 '$path_to_secret_php'</pre>";
+		echo "The following commands should suffice:<pre>touch '$path_to_secret_php'; chmod a=rw '$path_to_secret_php'</pre>";
 		echo 'Fedora Linux with SELinux may require this file to be owned by specific user (apache) and/or executing "setenforce 0" for the time of installation. ';
 		echo 'SELinux may be turned back on with "setenforce 1" command.<br>';
 		return FALSE;
@@ -250,24 +249,27 @@ function init_config ()
 	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
-	fwrite ($conf, <<<ENDOFTEXT
+	fwrite ($conf, <<<'ENDOFTEXT'
+# Set this if you need to override the default plugins directory.
+#$racktables_plugins_dir = '/path/to/plugins';
+
 # Setting MySQL client buffer size may be required to make downloading work for
 # larger files, but it does not work with mysqlnd.
-# \$pdo_bufsize = 50 * 1024 * 1024;
+# $pdo_bufsize = 50 * 1024 * 1024;
 # Setting PDO SSL key, cert, and CA will allow a SSL/TLS connection to the MySQL
 # DB. Make sure the files are readable by the web server
-# \$pdo_ssl_key = '/path/to/ssl/key'
-# \$pdo_ssl_cert = '/path/to/ssl/cert'
-# \$pdo_ssl_ca = '/path/to/ssl/ca'
+# $pdo_ssl_key = '/path/to/ssl/key'
+# $pdo_ssl_cert = '/path/to/ssl/cert'
+# $pdo_ssl_ca = '/path/to/ssl/ca'
 
-\$user_auth_src = 'database';
-\$require_local_account = TRUE;
+$user_auth_src = 'database';
+$require_local_account = TRUE;
 # Default setting is to authenticate users locally, but it is possible to
 # employ existing LDAP or Apache user accounts. Check RackTables wiki for
 # more information, in particular, this page for LDAP configuration details:
 # http://wiki.racktables.org/index.php?title=LDAP
 
-#\$LDAP_options = array
+#$LDAP_options = array
 #(
 #	'server' => 'localhost',
 #	'domain' => 'example.com',
@@ -284,7 +286,7 @@ function init_config ()
 # For SAML configuration details:
 # http://wiki.racktables.org/index.php?title=SAML
 
-#\$SAML_options = array
+#$SAML_options = array
 #(
 #	'simplesamlphp_basedir' => '../simplesaml',
 #	'sp_profile' => 'default-sp',
@@ -298,12 +300,10 @@ function init_config ()
 # be appended to assorted error messages visible in user's browser (including
 # "not authenticated" message). Beware of placing any sensitive information
 # here, it will be readable by unauthorized visitors.
-#\$helpdesk_banner = '<B>This RackTables instance is supported by Example Inc. IT helpdesk, dial ext. 1234 to report a problem.</B>';
-
+#$helpdesk_banner = '<B>This RackTables instance is supported by Example Inc. IT helpdesk, dial ext. 1234 to report a problem.</B>';
 
 ENDOFTEXT
 );
-	fwrite ($conf, "?>\n");
 	fclose ($conf);
 	echo "The configuration file has been written successfully.<br>";
 	return TRUE;
@@ -341,7 +341,7 @@ function check_config_access()
 	echo 'For example, if httpd runs as user "' . $uname . '" and group "nogroup", commands ';
 	echo 'similar to the following may work (though not guaranteed to, please consider ';
 	echo 'only as an example):';
-	echo "<pre>chown $uname:nogroup secret.php; chmod 400 secret.php</pre>";
+	echo "<pre>chown $uname:nogroup secret.php; chmod 440 secret.php</pre>";
 	return FALSE;
 }
 
@@ -561,26 +561,6 @@ function get_pseudo_file ($name)
   `vlan_mode` enum('access','trunk') NOT NULL default 'access',
   PRIMARY KEY  (`object_id`,`port_name`),
   CONSTRAINT `CachedPVM-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
-
-		$query[] = "CREATE TABLE `CactiGraph` (
-  `object_id` int(10) unsigned NOT NULL,
-  `server_id` int(10) unsigned NOT NULL,
-  `graph_id` int(10) unsigned NOT NULL,
-  `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`object_id`,`server_id`,`graph_id`),
-  KEY `graph_id` (`graph_id`),
-  KEY `server_id` (`server_id`),
-  CONSTRAINT `CactiGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `CactiServer` (`id`),
-  CONSTRAINT `CactiGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
-
-		$query[] = "CREATE TABLE `CactiServer` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `base_url` char(255) DEFAULT NULL,
-  `username` char(64) DEFAULT NULL,
-  `password` char(64) DEFAULT NULL,
-  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `Chapter` (
@@ -832,24 +812,6 @@ function get_pseudo_file ($name)
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
 
-		$query[] = "CREATE TABLE `MuninGraph` (
-  `object_id` int(10) unsigned NOT NULL,
-  `server_id` int(10) unsigned NOT NULL,
-  `graph` char(255) NOT NULL,
-  `caption`  char(255) DEFAULT NULL,
-  PRIMARY KEY (`object_id`,`server_id`,`graph`),
-  KEY `server_id` (`server_id`),
-  KEY `graph` (`graph`),
-  CONSTRAINT `MuninGraph-FK-server_id` FOREIGN KEY (`server_id`) REFERENCES `MuninServer` (`id`),
-  CONSTRAINT `MuninGraph-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB";
-
-		$query[] = "CREATE TABLE `MuninServer` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `base_url` char(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB";
-
 		$query[] = "CREATE TABLE `ObjectLog` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int(10) unsigned NOT NULL,
@@ -926,6 +888,15 @@ function get_pseudo_file ($name)
   `pctype` char(64) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pctype_per_origin` (`pctype`,`origin`)
+) ENGINE=InnoDB";
+
+		$query[] = "CREATE TABLE `Plugin` (
+  `name` char(255) NOT NULL,
+  `longname` char(255) NOT NULL,
+  `version` char(64) NOT NULL,
+  `home_url` char(255) NOT NULL,
+  `state` enum('disabled','enabled') NOT NULL default 'disabled',
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `Port` (
@@ -1088,6 +1059,7 @@ function get_pseudo_file ($name)
   `parent_id` int(10) unsigned default NULL,
   `is_assignable` enum('yes','no') NOT NULL DEFAULT 'yes',
   `tag` char(255) default NULL,
+  `color` mediumint(8) unsigned DEFAULT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
@@ -1343,7 +1315,7 @@ EntityLinkTrigger:BEGIN
   END IF;
 END;
 ";
-		$link_trigger_body = <<<ENDOFTRIGGER
+		$link_trigger_body = <<<'ENDOFTRIGGER'
 LinkTrigger:BEGIN
   DECLARE tmp, porta_type, portb_type, count INTEGER;
 
@@ -1371,16 +1343,6 @@ END;
 ENDOFTRIGGER;
 		$query[] = "CREATE TRIGGER `Link-before-insert` BEFORE INSERT ON `Link` FOR EACH ROW $link_trigger_body";
 		$query[] = "CREATE TRIGGER `Link-before-update` BEFORE UPDATE ON `Link` FOR EACH ROW $link_trigger_body";
-
-		$port_trigger_body = <<<ENDOFTRIGGER
-PortTrigger:BEGIN
-  IF (NEW.`l2address` IS NOT NULL AND (SELECT COUNT(*) FROM `Port` WHERE `l2address` = NEW.`l2address` AND `object_id` != NEW.`object_id`) > 0) THEN
-    CALL `Port-l2address-already-exists-on-another-object`;
-  END IF;
-END;
-ENDOFTRIGGER;
-		$query[] = "CREATE TRIGGER `Port-before-insert` BEFORE INSERT ON `Port` FOR EACH ROW $port_trigger_body";
-		$query[] = "CREATE TRIGGER `Port-before-update` BEFORE UPDATE ON `Port` FOR EACH ROW $port_trigger_body";
 
 		$query[] = "CREATE VIEW `Location` AS SELECT O.id, O.name, O.has_problems, O.comment, P.id AS parent_id, P.name AS parent_name
 FROM `Object` O
@@ -1706,7 +1668,8 @@ WHERE O.objtype_id = 1562";
 (11,'CFP'),
 (12,'CFP2'),
 (13,'CPAK'),
-(14,'CXP')";
+(14,'CXP'),
+(15,'QSFP28')";
 
 		$query[] = "INSERT INTO `PortOuterInterface` VALUES
 (16,'AC-in'),
@@ -1898,7 +1861,7 @@ WHERE O.objtype_id = 1562";
 (1465,'10GBase-ER-DWDM40-29.55 (ITU 60)'),
 (1466,'10GBase-ER-DWDM40-28.77 (ITU 61)'),
 (1469,'virtual port'),
-(1588,'empty QSFP+'),
+(1588,'empty QSFP'),
 (1589,'empty CFP2'),
 (1590,'empty CPAK'),
 (1591,'empty CXP'),
@@ -1985,20 +1948,37 @@ WHERE O.objtype_id = 1562";
 (1787,1502)";
 
 		$query[] = "INSERT INTO `PortInterfaceCompat` VALUES
+-- SFP-100: empty SFP-100, 100Base-FX, 100Base-SX, 100Base-LX10, 100Base-BX10-D, 100Base-BX10-U, 100Base-EX, 100Base-ZX
 (2,1208),(2,1195),(2,1196),(2,1197),(2,1198),(2,1199),(2,1200),(2,1201),
+-- GBIC: empty GBIC, 1000Base-T, 1000Base-ZX, 1000Base-EX, 1000Base-SX, 1000Base-SX+, 1000Base-LX, 1000Base-LX10, 1000Base-BX10-D, 1000Base-BX10-U
 (3,1078),(3,24),(3,34),(3,42),(3,1202),(3,1203),(3,1204),(3,1205),(3,1206),(3,1207),
+-- SFP-1000: empty SFP-1000, 1000Base-T, 1000Base-ZX, 1000Base-EX, 1000Base-SX, 1000Base-SX+, 1000Base-LX, 1000Base-LX10, 1000Base-BX10-D, 1000Base-BX10-U
 (4,1077),(4,24),(4,34),(4,42),(4,1202),(4,1203),(4,1204),(4,1205),(4,1206),(4,1207),
+-- SFP-1000: 1000Base-BX40-D, 1000Base-BX40-U, 1000Base-BX80-D, 1000Base-BX80-U
 (4,1088),(4,1089),(4,1090),(4,1091),
+-- XENPAK: empty XENPAK, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (5,1079),(5,30),(5,35),(5,36),(5,37),(5,38),(5,39),(5,40),
+-- X2: empty X2, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (6,1080),(6,30),(6,35),(6,36),(6,37),(6,38),(6,39),(6,40),
+-- XPAK: empty XPAK, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (7,1081),(7,30),(7,35),(7,36),(7,37),(7,38),(7,39),(7,40),
+-- XFP: empty XFP, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (8,1082),(8,30),(8,35),(8,36),(8,37),(8,38),(8,39),(8,40),
+-- SFP+: empty SFP+, 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (9,1084),(9,30),(9,35),(9,36),(9,37),(9,38),(9,39),(9,40),
+-- QSFP+: empty QSFP, 40GBase-FR, 40GBase-ER4, 40GBase-SR4, 40GBase-LR4
 (10,1588),(10,1660),(10,1662),(10,1663),(10,1664),
+-- CFP: empty CFP, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (11,1668),(11,1669),(11,1670),(11,1671),(11,1672),(11,1673),(11,1674),(11,1675),(11,1676),
+-- CFP2: empty CFP2, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (12,1589),(12,1669),(12,1670),(12,1671),(12,1672),(12,1673),(12,1674),(12,1675),(12,1676),
+-- CPAK: empty CPAK, 100GBase-SR10, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4, 100GBase-LR10, 100GBase-ER10
 (13,1590),(13,1669),(13,1670),(13,1671),(13,1672),(13,1673),(13,1674),(13,1675),(13,1676),
+-- CXP: empty CXP, 100GBase-CR4, 100GBase-CR10
 (14,1591),(14,1677),(14,1678),
+-- QSFP28: empty QSFP, 40GBase-FR, 40GBase-ER4, 40GBase-SR4, 40GBase-LR4, 100GBase-LR4, 100GBase-ER4, 100GBase-SR4, 100GBase-KR4, 100GBase-KP4
+(15,1588),(15,1660),(15,1662),(15,1663),(15,1664),(15,1670),(15,1671),(15,1672),(15,1673),(15,1674),
+-- hardwired: AC-in, 100Base-TX, 1000Base-T, RS-232 (RJ-45), virtual bridge, KVM (host), KVM (console), RS-232 (DB-9), RS-232 (DB-25), AC-out, DC, virtual port
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
 		$query[] = "INSERT INTO `PortCompat` (`type1`, `type2`) VALUES
@@ -2262,7 +2242,7 @@ WHERE O.objtype_id = 1562";
 ('TAGS_QUICKLIST_THRESHOLD','50','uint','yes','no','yes','Tags quick list threshold'),
 ('ENABLE_MULTIPORT_FORM','no','string','no','no','yes','Enable \"Add/update multiple ports\" form'),
 ('DEFAULT_PORT_IIF_ID','1','uint','no','no','no','Default port inner interface ID'),
-('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668; 12=1589; 13=1590; 14=1591','string','no','no','no','Default port outer interface IDs'),
+('DEFAULT_PORT_OIF_IDS','1=24; 3=1078; 4=1077; 5=1079; 6=1080; 8=1082; 9=1084; 10=1588; 11=1668; 12=1589; 13=1590; 14=1591; 15=1588','string','no','no','no','Default port outer interface IDs'),
 ('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),
@@ -2285,14 +2265,12 @@ WHERE O.objtype_id = 1562";
 ('PORT_EXCLUSION_LISTSRC','{\$typeid_3} or {\$typeid_10} or {\$typeid_11} or {\$typeid_1505} or {\$typeid_1506}','string','yes','no','no','List source: objects without ports'),
 ('FILTER_RACKLIST_BY_TAGS','yes','string','yes','no','yes','Rackspace: show only racks matching the current object\'s tags'),
 ('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices'),
-('SYNC_802Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
+('SYNC_8021Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to display in quick links'),
-('CACTI_LISTSRC','false','string','yes','no','no','List of object with Cacti graphs'),
-('CACTI_RRA_ID','1','uint','no','no','yes','RRA ID for Cacti graphs displayed in RackTables'),
-('MUNIN_LISTSRC','false','string','yes','no','no','List of object with Munin graphs'),
 ('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
-('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format to use for date output'),
+('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for date+time'),
+('DATEONLY_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for dates'),
 ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes'),
 ('8021Q_EXTSYNC_LISTSRC','false','string','yes','no','no','List source: objects with extended 802.1Q sync'),
 ('8021Q_MULTILINK_LISTSRC','false','string','yes','no','no','List source: IPv4/IPv6 networks allowing multiple VLANs from same domain'),
@@ -2318,5 +2296,3 @@ WHERE O.objtype_id = 1562";
 	return $query;
 	}
 }
-
-?>

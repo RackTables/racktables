@@ -88,23 +88,44 @@ function renderUserProperties ($user_id)
 
 function renderRackCodeViewer ()
 {
-	$text = loadScript ('RackCode');
 	echo '<table width="100%" border=0>';
-	$lineno = 1;
-	foreach (explode ("\n", $text) as $line)
+	addJS ('js/codemirror/codemirror.js');
+	addJS ('js/codemirror/rackcode.js');
+	addCSS ('css/codemirror/codemirror.css');
+	addCSS ('css/codemirror/rackcode.css');
+	if (! array_key_exists ('line', $_REQUEST))
+		$scrollcode = '';
+	else
 	{
-		echo "<tr><td class=tdright><a name=line${lineno}>${lineno}</a></td>";
-		echo "<td class=tdleft>${line}</td></tr>";
-		$lineno++;
+		// Line numbers start from 0 in CodeMirror API and from 1 elsewhere.
+		$lineno = genericAssertion ('line', 'uint') - 1;
+		$scrollcode = "rackCodeMirror.addLineClass (${lineno}, 'wrap', 'border_highlight');\n" .
+			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
 	}
+	// Heredoc, not nowdoc!
+	addJS (<<<"ENDJAVASCRIPT"
+$(document).ready(function() {
+	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
+		mode:'rackcode',
+		theme:'rackcode',
+		readOnly:'nocursor',
+		lineNumbers:true });
+	${scrollcode}
+});
+ENDJAVASCRIPT
+	, TRUE);
+	echo "<tr><td><textarea rows=40 cols=100 id=RCTA>";
+	echo loadScript ('RackCode') . "</textarea></td></tr>\n";
+	echo '</table>';
 }
 
 function renderRackCodeEditor ()
 {
 	addJS ('js/codemirror/codemirror.js');
 	addJS ('js/codemirror/rackcode.js');
-	addCSS ('js/codemirror/codemirror.css');
-	addJS (<<<ENDJAVASCRIPT
+	addCSS ('css/codemirror/codemirror.css');
+	addCSS ('css/codemirror/rackcode.css');
+	addJS (<<<'ENDJAVASCRIPT'
 function verify()
 {
 	$.ajax({
@@ -113,7 +134,7 @@ function verify()
 		data: {'module': 'ajax', 'ac': 'verifyCode', 'code': $("#RCTA").text()},
 		success: function (data)
 		{
-			arr = data.split("\\n");
+			arr = data.split("\n");
 			if (arr[0] == "ACK")
 			{
 				$("#SaveChanges")[0].disabled = "";
@@ -137,6 +158,8 @@ $(document).ready(function() {
 
 	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
 		mode:'rackcode',
+		theme:'rackcode',
+		autofocus:true,
 		lineNumbers:true });
 	rackCodeMirror.on("change",function(cm,cmChangeObject){
 		$("#RCTA").text(cm.getValue());
@@ -145,15 +168,14 @@ $(document).ready(function() {
 ENDJAVASCRIPT
 	, TRUE);
 
-	$text = loadScript ('RackCode');
 	printOpFormIntro ('saveRackCode');
-	echo '<table style="width:100%;border:1px;" border=0 align=center>';
-	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA class='codepress rackcode'>";
-	echo $text . "</textarea></td></tr>\n";
-	echo "<tr><td align=center>";
+	echo '<table width="100%" border=0>';
+	echo "<tr><td><textarea rows=40 cols=100 name=rackcode id=RCTA>";
+	echo loadScript ('RackCode') . "</textarea></td></tr>\n";
+	echo "<tr><td class=submit>";
 	echo '<div id="ShowMessage"></div>';
 	echo "<input type='button' value='Verify' onclick='verify();'>";
-	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges' onclick='$(RCTA).toggleEditor();'>";
+	echo "<input type='submit' value='Save' disabled='disabled' id='SaveChanges'>";
 	echo "</td></tr>";
 	echo '</table>';
 	echo "</form>";
@@ -367,19 +389,25 @@ function renderIIFOIFCompatEditor()
 
 function renderPortOIFViewer()
 {
-	echo '<br><table class="cooltable zebra" align=center border=0 cellpadding=5 cellspacing=0>';
-	echo '<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Outer Interface</th></tr>';
+	$rows = array();
 	$refcnt = getPortOIFRefc();
 	foreach (getPortOIFOptions() as $oif_id => $oif_name)
-	{
-		echo '<tr>';
-		echo '<td class=tdleft>' . getImageHREF ($oif_id < 2000 ? 'computer' : 'favorite') . '</td>';
-		echo "<td class=tdright>${oif_id}</td>";
-		echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
-		echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
-		echo '</tr>';
-	}
-	echo '</table>';
+		$rows[] = array
+		(
+			'origin' => $oif_id < 2000 ? getImageHREF ('computer', 'default') : getImageHREF ('favorite', 'custom'),
+			'oif_id' => $oif_id,
+			'refc' => $refcnt[$oif_id] ? $refcnt[$oif_id] : '',
+			'oif_name' => $oif_name,
+		);
+	$columns = array
+	(
+		array ('th_text' => 'Origin', 'row_key' => 'origin', 'td_escape' => FALSE),
+		array ('th_text' => 'Key', 'row_key' => 'oif_id', 'td_class' => 'tdright'),
+		array ('th_text' => 'Refcnt', 'row_key' => 'refc', 'td_class' => 'tdright'),
+		array ('th_text' => 'Outer Interface', 'row_key' => 'oif_name', 'td_maxlen' => 48),
+	);
+	renderTableViewer ($columns, $rows);
+	echo '<br>';
 }
 
 function renderPortOIFEditor()
@@ -645,43 +673,38 @@ function renderChaptersEditor ()
 
 function renderChapter ($tgt_chapter_no)
 {
-	global $nextorder;
 	$words = readChapter ($tgt_chapter_no, 'a');
 	$wc = count ($words);
-	if (!$wc)
-	{
-		echo "<center><h2>(no records)</h2></center>";
+	echo "<center><h2>${wc} record(s)</h2></center>";
+	if ($wc == 0)
 		return;
-	}
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
-	$attrs = getChapterAttributes($tgt_chapter_no);
-	echo "<br><table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-	echo "<tr><th colspan=4>${wc} record(s)</th></tr>\n";
-	echo "<tr><th>Origin</th><th>Key</th><th>Refcnt</th><th>Word</th></tr>\n";
-	$order = 'odd';
+	$attrs = getChapterAttributes ($tgt_chapter_no);
+	$columns = array
+	(
+		array ('th_text' => 'Origin', 'row_key' => 'origin', 'td_escape' => FALSE),
+		array ('th_text' => 'Key', 'row_key' => 'dict_key', 'td_class' => 'tdright'),
+		array ('th_text' => 'Refcnt', 'row_key' => 'refc', 'td_class' => 'tdright', 'td_escape' => FALSE),
+		array ('th_text' => 'Word', 'row_key' => 'word'),
+	);
+	$rows = array();
 	foreach ($words as $key => $value)
 	{
-		echo "<tr class=row_${order}><td>";
-		printImageHREF ($key < 50000 ? 'computer' : 'favorite');
-		echo "</td><td class=tdright>${key}</td><td class=tdright>";
-		if ($refcnt[$key])
+		if ($refcnt[$key] == 0)
+			$refc = '';
+		else
 		{
 			// For the ObjectType chapter the extra filter is as simple as "{\$typeid_${key}}" but
 			// the reference counter also includes the relations with AttributeMap.objtype_id hence
 			// it often is not the same as the amount of objects that match the expression. With
 			// this in mind don't display the counter as a link for this specific chapter.
-			if ($tgt_chapter_no == CHAP_OBJTYPE)
-				$cfe = '';
+			if ($tgt_chapter_no == CHAP_OBJTYPE || ! count ($attrs))
+				$refc = $refcnt[$key];
 			else
 			{
 				$tmp = array();
 				foreach ($attrs as $attr_id)
 					$tmp[] = "{\$attr_${attr_id}_${key}}";
-				$cfe = implode (' or ', $tmp);
-			}
-
-			if (! empty($cfe))
-			{
 				$href = makeHref
 				(
 					array
@@ -689,18 +712,22 @@ function renderChapter ($tgt_chapter_no)
 						'page'=>'depot',
 						'tab'=>'default',
 						'andor' => 'and',
-						'cfe' => $cfe
+						'cfe' => implode (' or ', $tmp),
 					)
 				);
-				echo '<a href="' . $href . '">' . $refcnt[$key] . '</a>';
+				$refc = '<a href="' . $href . '">' . $refcnt[$key] . '</a>';
 			}
-			else
-				echo $refcnt[$key];
-		}
-		echo "</td><td>${value}</td></tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table>\n<br>";
+		} // else
+		$rows[] = array
+		(
+			'origin' => $key < 50000 ? getImageHREF ('computer', 'default') : getImageHREF ('favorite', 'custom'),
+			'dict_key' => $key,
+			'refc' => $refc,
+			'word' => $value,
+		);
+	} // foreach
+	renderTableViewer ($columns, $rows);
+	echo '<br>';
 }
 
 function renderChapterEditor ($tgt_chapter_no)
@@ -865,7 +892,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
-	echo ($refc ? " <i>(${refc})</i>" : '') . '</span></td></tr>';
+	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . "</td></tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
@@ -907,6 +934,14 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	$sparams = array ('name' => 'parent_id', 'id' => 'nodeid_' . $taginfo['id'], 'class' => 'nodelist-popup');
 	echo getSelect ($poptions, $sparams, $taginfo['parent_id'], FALSE);
 
+	if ($taginfo['is_assignable'] == 'yes')
+	{
+		$class = getTagClass ($taginfo);
+		echo "</td><td class='${class}'>" . getColorSelect ('colorid_'.$taginfo['id'], $taginfo['color']) . '</td>';
+	}
+	else
+		echo '<td><input type="hidden" name="color" id="colorid_' . $taginfo['id'] . '" value=""></input></td>';
+
 	echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . '</form></td></tr>';
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $taginfo['tag'], $level + 1);
@@ -916,7 +951,8 @@ function addParentNodeOptionsJS ($prefix, $nodetype)
 {
 	addJS
 	(
-<<<END
+// Heredoc, not nowdoc!
+<<<"END"
 function ${prefix}_showselectbox(e) {
 	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: '${nodetype}', node_id: this.id});
 	$(this).unbind('mousedown', ${prefix}_showselectbox);
@@ -929,6 +965,50 @@ END
 	);
 }
 
+function getColorSelect($id = 'color', $selected = NULL)
+{
+
+		if ($selected)
+			$class = ' class=' . getTagClass (array ('id' => $selected, 'color' => $selected));
+		else
+			$class = '';
+
+		$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
+		$ret .= '<option value=""option>';
+
+		$colors = array(
+				'FFFFFF',
+				'C0C0C0',
+				'808080',
+				'000000',
+				'FF0000',
+				'800000',
+				'FF8000',
+				'FFFF00',
+				'808000',
+				'00FF00',
+				'008000',
+				'00FFFF',
+				'008080',
+				'0000FF',
+				'000080',
+				'FF00FF',
+				'800080'
+		);
+
+		if ($selected != NULL && !in_array ($selected, $colors))
+			$colors[] = $selected;
+
+		foreach ($colors as $color)
+		{
+			$class = getTagClass (array ('id' => $color, 'color' => $color));
+			$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
+		}
+
+		$ret .= '</select>';
+		return $ret;
+}
+
 function renderTagTreeEditor ()
 {
 	function printNewItemTR ($options)
@@ -939,6 +1019,7 @@ function renderTagTreeEditor ()
 		echo '<td><input type=text size=48 name=tag_name></td>';
 		echo '<td class=tdleft>' . getSelect (array ('yes' => 'yes', 'no' => 'no'), array ('name' => 'is_assignable'), 'yes') . '</td>';
 		echo '<td>' . getSelect ($options, array ('name' => 'parent_id')) . '</td>';
+		echo '<td>' . getColorSelect () . '</td>';
 		echo '<td>' . getImageHREF ('create', 'Create tag', TRUE, 120) . '</td>';
 		echo '</tr></form>';
 	}
@@ -946,7 +1027,7 @@ function renderTagTreeEditor ()
 	addParentNodeOptionsJS ('tageditor', 'existing tag');
 	$options = getParentNodeOptionsNew ($taglist, 'tag');
 	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>&nbsp;</th></tr>';
+	echo '<tr><th>&nbsp;</th><th>tag name</th><th>assignable</th><th>parent tag</th><th>color</th><th>&nbsp;</th></tr>';
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewItemTR ($options);
 	foreach (getTagTree() as $taginfo)
@@ -1023,6 +1104,93 @@ function renderMyPasswordEditor ()
 	echo '</table></form>';
 }
 
+function renderPluginConfig ()
+{
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	foreach (array_keys ($plugins) as $name)
+		$plugins[$name]['x_state'] = formatPluginState ($plugins[$name]['state']);
+	$columns = array
+	(
+		array ('th_text' => 'Plugin', 'row_key' => 'longname'),
+		array ('th_text' => 'Code Version', 'row_key' => 'code_version'),
+		array ('th_text' => 'DB Version', 'row_key' => 'db_version'),
+		array ('th_text' => 'Home page', 'row_key' => 'home_url'),
+		array ('th_text' => 'State', 'row_key' => 'x_state'),
+	);
+	renderTableViewer ($columns, $plugins);
+}
+
+function renderPluginEditor()
+{
+	function considerOpLink ($oplinks, $opcode)
+	{
+		return permitted (NULL, NULL, $opcode) ? $oplinks[$opcode] : '';
+	}
+
+	$plugins = getPlugins ();
+	if (empty ($plugins))
+	{
+		echo '<b>No plugins exist</b>';
+		return;
+	}
+
+	foreach (array_keys ($plugins) as $name)
+	{
+		$links = '&nbsp;';
+		$oplinks = array
+		(
+			'enable' => getOpLink (array ('op' => 'enable', 'name' => $name), '', 'enable', 'Enable'),
+			'disable' => getOpLink (array ('op' => 'disable', 'name' => $name), '', 'disable', 'Disable'),
+			'add' => getOpLink (array ('op' => 'install', 'name' => $name), '', 'add', 'Install'),
+			'delete' => getOpLink (array ('op' => 'uninstall', 'name' => $name), '', 'delete', 'Uninstall', 'need-confirmation'),
+			'upgrade' => getOpLink (array ('op' => 'upgrade', 'name' => $name), '', 'upgrade', 'Upgrade'),
+		);
+		switch ($plugins[$name]['state'])
+		{
+		case 'disabled':
+			$links .= considerOpLink ($oplinks, 'enable');
+			$links .= considerOpLink ($oplinks, 'delete');
+			break;
+		case 'enabled':
+			$links .= considerOpLink ($oplinks, 'disable');
+			$links .= considerOpLink ($oplinks, 'delete');
+			break;
+		case 'not_installed':
+			$links .= considerOpLink ($oplinks, 'add');
+			break;
+		default:
+			throw new RackTablesError ('invalid plugin state', RackTablesError::INTERNAL);
+		}
+		if
+		(
+			$plugins[$name]['code_version'] != 'N/A' &&
+			$plugins[$name]['db_version'] != 'N/A' &&
+			$plugins[$name]['code_version'] != $plugins[$name]['db_version']
+		)
+			$links .= considerOpLink ($oplinks, 'upgrade');
+		$plugins[$name]['links'] = $links;
+		$plugins[$name]['x_state'] = formatPluginState ($plugins[$name]['state']);
+	}
+	$columns = array
+	(
+		array ('th_text' => 'Plugin', 'row_key' => 'longname'),
+		array ('th_text' => 'Code Version', 'row_key' => 'code_version'),
+		array ('th_text' => 'DB Version', 'row_key' => 'db_version'),
+		array ('th_text' => 'Home page', 'row_key' => 'home_url'),
+		array ('th_text' => 'State', 'row_key' => 'x_state'),
+		array ('row_key' => 'links', 'td_escape' => FALSE),
+	);
+	if (permitted (NULL, NULL, 'delete'))
+		echo "<br><div class=msg_error>Warning: Uninstalling a plugin permanently deletes all related data.</div>\n";
+	renderTableViewer ($columns, $plugins);
+}
+
 function renderMyQuickLinks ()
 {
 	global $indexlayout, $page;
@@ -1051,113 +1219,3 @@ function renderMyQuickLinks ()
 	echo '</form></div>';
 	finishPortlet();
 }
-
-function renderCactiConfig()
-{
-	$columns = array
-	(
-		array ('th_text' => 'base URL', 'row_key' => 'base_url'),
-		array ('th_text' => 'username', 'row_key' => 'username'),
-		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
-	);
-	$servers = getCactiServers();
-	startPortlet ('Cacti servers (' . count ($servers) . ')');
-	renderTableViewer ($columns, $servers);
-	finishPortlet();
-}
-
-function renderCactiServersEditor()
-{
-	function printNewItemTR ()
-	{
-		printOpFormIntro ('add');
-		echo '<tr>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'<td><input type=text size=48 name=base_url></td>' .
-			'<td><input type=text size=24 name=username></td>' .
-			'<td><input type=password size=24 name=password></td>' .
-			'<td>&nbsp;</td>' .
-			'<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>' .
-			'</tr></form>';
-	}
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr>' .
-		'<th>&nbsp;</th>' .
-		'<th>base URL</th>' .
-		'<th>username</th>' .
-		'<th>password</th>' .
-		'<th>graph(s)</th>' .
-		'<th>&nbsp;</th>' .
-		'</tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach (getCactiServers() as $server)
-	{
-		printOpFormIntro ('upd', array ('id' => $server['id']));
-		echo '<tr><td>';
-		if ($server['num_graphs'])
-			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
-		else
-			echo getOpLink (array ('op' => 'del', 'id' => $server['id']), '', 'destroy', 'delete this server');
-		echo '</td>';
-		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo '<td><input type=text size=24 name=username value="' . htmlspecialchars ($server['username'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo '<td><input type=password size=24 name=password value="' . htmlspecialchars ($server['password'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
-		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
-	echo '</table>';
-}
-
-function renderMuninConfig()
-{
-	$columns = array
-	(
-		array ('th_text' => 'base URL', 'row_key' => 'base_url', 'td_maxlen' => 150),
-		array ('th_text' => 'graph(s)', 'row_key' => 'num_graphs', 'td_class' => 'tdright'),
-	);
-	$servers = getMuninServers();
-	startPortlet ('Munin servers (' . count ($servers) . ')');
-	renderTableViewer ($columns, $servers);
-	finishPortlet();
-}
-
-function renderMuninServersEditor()
-{
-	function printNewItemTR()
-	{
-		printOpFormIntro ('add');
-		echo '<tr>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '<td><input type=text size=48 name=base_url></td>';
-		echo '<td>&nbsp;</td>';
-		echo '<td>' . getImageHREF ('create', 'add a new server', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
-	echo '<tr><th>&nbsp;</th><th>base URL</th><th>graph(s)</th><th>&nbsp;</th></tr>';
-	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItemTR();
-	foreach (getMuninServers() as $server)
-	{
-		printOpFormIntro ('upd', array ('id' => $server['id']));
-		echo '<tr><td>';
-		if ($server['num_graphs'])
-			printImageHREF ('nodestroy', 'cannot delete, graphs exist');
-		else
-			echo getOpLink (array ('op' => 'del', 'id' => $server['id']), '', 'destroy', 'delete this server');
-		echo '</td>';
-		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
-		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
-		echo '</tr></form>';
-	}
-	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItemTR();
-	echo '</table>';
-}
-
-?>

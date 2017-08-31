@@ -1,46 +1,44 @@
-CodeMirror.defineMode('rackcode', function() {
-  var allowkeywords = /^(allow)\b/i;
-  var denykeywords = /^(deny)\b/i;
-  var operatorkeywords = /^(define|and|or|not|true|false)\b/i;
-
-  return {
-    token: function(stream, state) {
-
-      if (stream.eatSpace())
-        return null;
-
-      var w;
-
-      if (stream.eatWhile(/\w/)) {
-        w = stream.current();
-
-
-		if (allowkeywords.test(w)) {
-            return 'positive';
-		} else if (denykeywords.test(w)) {
-            return 'negative';
-        } else if (operatorkeywords.test(w)) {
-            return 'operator';
-        }
-
-      } else if (stream.eat('#')) {
-        stream.skipToEnd();
-        return 'comment';
-      } else if (stream.eat('{')) {
-        while (w = stream.next()) {
-          if (w == '}')
-            break;
-
-          if (w == '\\')
-            stream.next();
-        }
-        return 'tag';
-      }  else {
-        stream.next();
-      }
-      return null;
-    }
-  };
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+CodeMirror.defineMode('rackcode', function()
+{
+	return {
+		token: function (stream)
+		{
+			const WORDS =
+			{
+				'allow':   'keyword positive',
+				'deny':    'keyword negative',
+				'define':  'keyword',
+				'context': 'keyword',
+				'clear':   'keyword',
+				'insert':  'keyword',
+				'remove':  'keyword',
+				'on':      'keyword',
+				'true':    'atom',
+				'false':   'atom',
+				'and':     'operator',
+				'or':      'operator',
+				'not':     'operator',
+			};
+			return stream.eatSpace() ? null :
+				stream.eat ('(') ? 'bracket' :
+				stream.eat (')') ? 'bracket' :
+				stream.match (/^#.*$/) ? 'comment' :
+				stream.match (/^{[^{}]+}/) ? 'variable' : // a tag
+				stream.match (/^\[[^\[\]]+\]/) ? 'def' : // a predicate
+				stream.eatWhile (/\S/) ? WORDS[stream.current()] :
+				null;
+		}
+	};
 });
 
 CodeMirror.defineMIME("text/x-rackcode", "rackcode");
+});

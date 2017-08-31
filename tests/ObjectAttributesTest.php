@@ -1,13 +1,13 @@
 <?php
 
-class ObjectAttributesTest extends PHPUnit_Framework_TestCase
+class ObjectAttributesTest extends RTTestCase
 {
 	private $server_id, $switch_id;
 
 	public function setUp ()
 	{
-		$this->server_id = commitAddObject (sprintf ('server-%s-%u', get_class(), getmypid()), NULL, 4, NULL);
-		$this->switch_id = commitAddObject (sprintf ('switch-%s-%u', get_class(), getmypid()), NULL, 8, NULL);
+		$this->server_id = commitAddObject ($this->myString ('server'), NULL, 4, NULL);
+		$this->switch_id = commitAddObject ($this->myString ('switch'), NULL, 8, NULL);
 	}
 
 	public function tearDown ()
@@ -84,5 +84,3 @@ class ObjectAttributesTest extends PHPUnit_Framework_TestCase
 	}
 
 }
-
-?>

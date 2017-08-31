@@ -109,7 +109,7 @@ $vswitch_filter = array();
 if (isset ($options['vdid']))
 	$vswitch_filter['domain_id'] = $options['vdid'];
 $switch_list = getVLANSwitchInfoRows ($vswitch_filter);
-$enabled_switches = listConstraint ('object', 'SYNC_802Q_LISTSRC');
+$enabled_switches = listConstraint ('object', 'SYNC_8021Q_LISTSRC');
 
 $switch_queue = array();
 foreach ($switch_list as $vswitch)
@@ -200,4 +200,3 @@ if (! $nolock)
 	}
 }
 exit (0);
-?>

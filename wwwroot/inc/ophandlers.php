@@ -167,52 +167,6 @@ $opspec_list['object-editrspvs-updLB'] = array
 		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
 	),
 );
-$opspec_list['object-cacti-add'] = array
-(
-	'table' => 'CactiGraph',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'caption', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['object-cacti-del'] = array
-(
-	'table' => 'CactiGraph',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph_id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['object-munin-add'] = array
-(
-	'table' => 'MuninGraph',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph', 'assertion' => 'string'),
-		array ('url_argname' => 'caption', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['object-munin-del'] = array
-(
-	'table' => 'MuninGraph',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'server_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'graph', 'assertion' => 'string'),
-	),
-);
 $opspec_list['ipv4rspool-editrslist-delRS'] = array
 (
 	'table' => 'IPv4RS',
@@ -393,6 +347,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
 		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'translator' => 'nullIfZero'),
 		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
+		array ('url_argname' => 'color', 'assertion' => 'htmlcolor0', 'translator' => 'HTMLColorForDatabase'),
 	),
 );
 $opspec_list['tagtree-edit-destroyTag'] = array
@@ -507,72 +462,6 @@ $opspec_list['dict-chapters-del'] = array
 	(
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
 		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
-	),
-);
-$opspec_list['cacti-servers-add'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-		array ('url_argname' => 'username', 'assertion' => 'string0'),
-		array ('url_argname' => 'password', 'assertion' => 'string0'),
-	),
-);
-$opspec_list['cacti-servers-del'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['cacti-servers-upd'] = array
-(
-	'table' => 'CactiServer',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-		array ('url_argname' => 'username', 'assertion' => 'string0'),
-		array ('url_argname' => 'password', 'assertion' => 'string0'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['munin-servers-add'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'INSERT',
-	'arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string')
-	),
-);
-$opspec_list['munin-servers-del'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'DELETE',
-	'arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
-	),
-);
-$opspec_list['munin-servers-upd'] = array
-(
-	'table' => 'MuninServer',
-	'action' => 'UPDATE',
-	'set_arglist' => array
-	(
-		array ('url_argname' => 'base_url', 'assertion' => 'string'),
-	),
-	'where_arglist' => array
-	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
 	),
 );
 $opspec_list['cables-heaps-add'] = array
@@ -723,6 +612,32 @@ $opspec_list['cableconf-oifcompat-del'] = array
 		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
 	),
 );
+$opspec_list['plugins-edit-disable'] = array
+(
+	'table' => 'Plugin',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('fix_argname' => 'state', 'fix_argvalue' => 'disabled'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
+$opspec_list['plugins-edit-enable'] = array
+(
+	'table' => 'Plugin',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('fix_argname' => 'state', 'fix_argvalue' => 'enabled'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'name', 'assertion' => 'string'),
+	),
+);
 
 function setFuncMessages ($funcname, $messages)
 {
@@ -815,14 +730,25 @@ function addPortForObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	genericAssertion ('port_name', 'string');
-	commitAddPort
-	(
-		getBypassValue(),
-		trim ($_REQUEST['port_name']),
-		genericAssertion ('port_type_id', 'string'),
-		trim ($_REQUEST['port_label']),
-		trim (genericAssertion ('port_l2address', 'l2address0'))
-	);
+	try
+	{
+		commitAddPort
+		(
+			getBypassValue(),
+			trim ($_REQUEST['port_name']),
+			genericAssertion ('port_type_id', 'string'),
+			trim ($_REQUEST['port_label']),
+			trim (genericAssertion ('port_l2address', 'l2address0'))
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['port_name']));
 }
 
@@ -831,16 +757,27 @@ function editPortForObject ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
 	$port_id = assertUIntArg ('port_id');
-	commitUpdatePort
-	(
-		getBypassValue(),
-		$port_id,
-		genericAssertion ('name', 'string'),
-		assertStringArg ('port_type_id'),
-		genericAssertion ('label', 'string0'),
-		genericAssertion ('l2address', 'l2address0'),
-		assertStringArg ('reservation_comment', TRUE)
-	);
+	try
+	{
+		commitUpdatePort
+		(
+			getBypassValue(),
+			$port_id,
+			genericAssertion ('name', 'string'),
+			assertStringArg ('port_type_id'),
+			genericAssertion ('label', 'string0'),
+			genericAssertion ('l2address', 'l2address0'),
+			assertStringArg ('reservation_comment', TRUE)
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	if (array_key_exists ('cable', $_REQUEST))
 		commitUpdatePortLink ($port_id, $sic['cable']);
 	showFuncMessage (__FUNCTION__, 'OK', array ($_REQUEST['name']));
@@ -858,50 +795,6 @@ function addMultiPorts ()
 	{
 		switch ($format)
 		{
-			case 'fisxii':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
-				list ($slot, $port) = explode ('/', $words[0]);
-				$ports[] = array
-				(
-					'name' => "e ${slot}/${port}",
-					'l2address' => $words[8],
-					'label' => "slot ${slot} port ${port}"
-				);
-				break;
-			case 'c3600asy':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', trim (substr ($line, 3))));
-/*
-How Async Lines are Numbered in Cisco 3600 Series Routers
-http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a00801ca70b.shtml
-
-Understanding 16- and 32-Port Async Network Modules
-http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a00800a93f0.shtml
-*/
-				$async = $words[0];
-				$slot = floor (($async - 1) / 32);
-				$octalgroup = floor (($async - 1 - $slot * 32) / 8);
-				$cable = $async - $slot * 32 - $octalgroup * 8;
-				$og_label[0] = 'async 0-7';
-				$og_label[1] = 'async 8-15';
-				$og_label[2] = 'async 16-23';
-				$og_label[3] = 'async 24-31';
-				$ports[] = array
-				(
-					'name' => "async ${async}",
-					'l2address' => '',
-					'label' => "slot ${slot} " . $og_label[$octalgroup] . " cable ${cable}"
-				);
-				break;
-			case 'fiwg':
-				$words = explode (' ', preg_replace ('/[[:space:]]+/', ' ', $line));
-				$ifnumber = $words[0] * 1;
-				$ports[] = array
-				(
-					'name' => "e ${ifnumber}",
-					'l2address' => "${words[8]}",
-					'label' => "${ifnumber}"
-				);
-				break;
 			case 'ssv1':
 				$words = explode (' ', $line);
 				if ($words[0] == '') // empty L2 address is OK
@@ -914,8 +807,7 @@ http://www.cisco.com/en/US/products/hw/routers/ps274/products_tech_note09186a008
 				);
 				break;
 			default:
-				throw new InvalidRequestArgException ('format', $format);
-				break;
+				throw new RackTablesError ("unknown data format '${format}'", RackTablesError::INTERNAL);
 		}
 	}
 	// Create ports, if they don't exist.
@@ -959,11 +851,13 @@ function addBulkPorts ()
 	$port_numbering_count = genericAssertion ('port_numbering_count', 'uint');
 
 	$added_count = $error_count = 0;
-	if(strrpos($port_name, "%u") === false )
+	if (strrpos ($port_name, '%u') === FALSE)
 		$port_name .= '%u';
-	for ($i=0,$c=$port_numbering_start; $i<$port_numbering_count; $i++,$c++)
+	if (strrpos ($port_label, '%u') === FALSE)
+		$port_label .= '%u';
+	for ($i = 0, $c = $port_numbering_start; $i < $port_numbering_count; $i++, $c++)
 	{
-		commitAddPort ($object_id, @sprintf($port_name,$c), $port_type_id, @sprintf($port_label,$c), '');
+		commitAddPort ($object_id, @sprintf ($port_name, $c), $port_type_id, @sprintf ($port_label, $c), '');
 		$added_count++;
 	}
 	showFuncMessage (__FUNCTION__, 'OK', array ($added_count, $error_count));
@@ -1438,7 +1332,7 @@ function updateObjectAttributes ($object_id)
 {
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
-	$num_attrs = isset ($_REQUEST['num_attrs']) ? $_REQUEST['num_attrs'] : 0;
+	$num_attrs = genericAssertion ('num_attrs', 'uint0');
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
 		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
@@ -1446,10 +1340,10 @@ function updateObjectAttributes ($object_id)
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
 		$value = genericAssertion ("${i}_value", 'string0');
 
-		// If the object is a rack, skip certain attributes as they are handled elsewhere
-		// (height, sort_order)
+		// If the object is a rack, certain attributes (height, sort_order) never normally
+		// appear in this subset of the request arguments as they are processed elsewhere.
 		if ($type_id == 1560 && ($attr_id == 27 || $attr_id == 29))
-			continue;
+			throw new RackTablesError ('unexpected special meaning attr_id', RackTablesError::INTERNAL);
 
 		// Delete attribute and move on, when the field is empty or if the field
 		// type is a dictionary and it is the "--NOT SET--" value of 0.
@@ -1462,23 +1356,40 @@ function updateObjectAttributes ($object_id)
 			continue;
 		}
 
-		// The value could be uint/float, but we don't know ATM. Let SQL
-		// server check this and complain.
-		if ('date' == $oldvalues[$attr_id]['type'])
-			$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
-
-		switch ($oldvalues[$attr_id]['type'])
+		try
 		{
+			switch ($oldvalues[$attr_id]['type'])
+			{
 			case 'uint':
+				genericAssertion ("${i}_value", 'uint0');
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'float':
+				genericAssertion ("${i}_value", 'decimal0');
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'string':
+				// already checked above
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'date':
+				$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'dict':
+				// Not 'uint0' as 0 is handled above.
+				genericAssertion ("${i}_value", 'uint');
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
+				throw new RackTablesError ('Unexpected attribute type', RackTablesError::INTERNAL);
+			}
+		}
+		catch (InvalidRequestArgException $irae)
+		{
+			// The submitted form may include a number of changes hence the error message
+			// must use same term as the form label (before the conversion it is the input name).
+			throw new InvalidRequestArgException ($oldvalues[$attr_id]['name'], $irae->getValue(), $irae->getReason());
 		}
 		if ($value === $oldvalue) // ('' == 0), but ('' !== 0)
 			continue;
@@ -1582,24 +1493,21 @@ function updateUI ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$num_vars = genericAssertion ('num_vars', 'uint');
-
-	for ($i = 0; $i < $num_vars; $i++)
+	try
 	{
-		assertStringArg ("${i}_varvalue", TRUE);
-		$varname = genericAssertion ("${i}_varname", 'string');
-		$varvalue = $_REQUEST["${i}_varvalue"];
-
-		// If form value = value in DB, don't bother updating DB
-		if (!isConfigVarChanged($varname, $varvalue))
-			continue;
-		try
+		for ($i = 0; $i < $num_vars; $i++)
 		{
-			setConfigVar ($varname, $varvalue);
+			assertStringArg ("${i}_varvalue", TRUE);
+			$varname = genericAssertion ("${i}_varname", 'string');
+			$varvalue = $_REQUEST["${i}_varvalue"];
+			// If form value = value in DB, don't bother updating DB.
+			if (isConfigVarChanged ($varname, $varvalue))
+				setConfigVar ($varname, $varvalue);
 		}
-		catch (InvalidArgException $iae)
-		{
-			throw $iae->newIRAE();
-		}
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
 	}
 	showFuncMessage (__FUNCTION__, 'OK');
 }
@@ -1719,14 +1627,12 @@ function resetUIConfig()
 		'PORT_EXCLUSION_LISTSRC' => '{$typeid_3} or {$typeid_10} or {$typeid_11} or {$typeid_1505} or {$typeid_1506}',
 		'FILTER_RACKLIST_BY_TAGS' => 'yes',
 		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
-		'SYNC_802Q_LISTSRC' => '',
+		'SYNC_8021Q_LISTSRC' => '',
 		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
-		'CACTI_LISTSRC' => 'false',
-		'CACTI_RRA_ID' => '1',
-		'MUNIN_LISTSRC' => 'false',
 		'VIRTUAL_OBJ_LISTSRC' => '1504,1505,1506,1507',
 		'DATETIME_ZONE' => 'UTC',
 		'DATETIME_FORMAT' => '%Y-%m-%d',
+		'DATEONLY_FORMAT' => '%Y-%m-%d',
 		'SEARCH_DOMAINS' => '',
 		'8021Q_EXTSYNC_LISTSRC' => 'false',
 		'8021Q_MULTILINK_LISTSRC' => 'false',
@@ -1737,6 +1643,7 @@ function resetUIConfig()
 	);
 	foreach ($defaults as $name => $value)
 		setConfigVar ($name, $value);
+	callHook ('resetUIConfig_hook');
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -2274,7 +2181,8 @@ function updateTag ()
 			genericAssertion ('tag_id', 'uint'),
 			genericAssertion ('tag_name', 'tag'),
 			genericAssertion ('parent_id', 'uint0'),
-			genericAssertion ('is_assignable', 'enum/yesno')
+			genericAssertion ('is_assignable', 'enum/yesno'),
+			genericAssertion ('color', 'htmlcolor0')
 		);
 	}
 	catch (InvalidArgException $iae)
@@ -3211,7 +3119,8 @@ function updVSTRule()
 	}
 	catch (Exception $e)
 	{
-		// Every case that is soft-processed in process.php, will have the working copy available for a retry.
+		// Every case that is soft-processed in index.php?module=redirect will have
+		// the working copy available for a retry.
 		if ($e instanceof InvalidRequestArgException || $e instanceof RTDatabaseError)
 		{
 			startSession();
@@ -3406,8 +3315,9 @@ function autoPopulateUCS()
 	foreach ($contents as $item)
 	{
 		$mname = preg_replace ('#^sys/(.+)$#', $oinfo['name'] . '/\\1', $item['DN']);
-		if ($item['type'] == 'NetworkElement')
+		switch ($item['type'])
 		{
+		case 'NetworkElement':
 			$new_object_id = commitAddObject ($mname, NULL, 8, NULL);
 			#    Set H/W Type for Network Switch
 			if (array_key_exists ($item['model'], $ucsproductmap))
@@ -3417,9 +3327,8 @@ function autoPopulateUCS()
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			bindIPToObject (ip_parse ($item['OOB']), $new_object_id, 'mgmt0', 'regular');
 			$done++;
-		}
-		elseif ($item['type'] == 'EquipmentChassis')
-		{
+			break;
+		case 'EquipmentChassis':
 			$chassis_id[$item['DN']] = $new_object_id = commitAddObject ($mname, NULL, 1502, NULL);
 			#    Set H/W Type for Server Chassis
 			if (array_key_exists ($item['model'], $ucsproductmap))
@@ -3428,9 +3337,8 @@ function autoPopulateUCS()
 			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
-		}
-		elseif ($item['type'] == 'ComputeBlade')
-		{
+			break;
+		case 'ComputeBlade':
 			if ($item['assigned'] == '')
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
@@ -3449,17 +3357,23 @@ function autoPopulateUCS()
 			if (array_key_exists ($parent_name, $chassis_id))
 				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
 			$done++;
-		}
-		elseif ($item['type'] == 'VnicPort')
-		{
+			break;
+		case 'VnicPort':
 			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '${2}', $item['DN']) . "(" . $oinfo['name'] . ")";
 			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '${3}', $item['DN']);
-			#        Add "virtual"(1469) ports for associated blades only
-			if ($spid = $spname_id[$spname])
-				commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
-		}
-		elseif ($item['type'] == 'ComputeRackUnit')
-		{
+			try
+			{
+				// Add "virtual" (1469) ports for associated blades only. The attempt may fail
+				// due to incorrect port type or MAC address.
+				if ($spid = $spname_id[$spname])
+					commitAddPort ($spid, $item['name'], 1469, $porttype, $item['addr']);
+			}
+			catch (InvalidArgException $iae)
+			{
+				showError ($iae->getMessage());
+			}
+			break;
+		case 'ComputeRackUnit':
 			if ($item['assigned'] == '')
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
@@ -3475,6 +3389,7 @@ function autoPopulateUCS()
 			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
+			break;
 		}
 	} # endfor
 	showSuccess ("Auto-populated UCS Domain '${oinfo['name']}' with ${done} items");
@@ -3820,7 +3735,6 @@ function editUserProperties ()
 	$user_id = getBypassValue();
 	rebuildTagChainForEntity ('user', $user_id, buildTagChainFromIds ($taglist), TRUE);
 	$user = spotEntity ('user', $user_id);
-	print_r($user);
 	showFuncMessage (__FUNCTION__, 'OK', array($user['user_name']));
 }
 
@@ -3833,8 +3747,15 @@ function renameObjectPorts()
 		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
 		if ($canon_pn != $port['name'])
 		{
-			commitUpdatePort ($object_id, $port['id'], $canon_pn, $port['oif_id'], $port['label'], $port['l2address'], $port['reservation_comment']);
-			$n++;
+			try
+			{
+				commitUpdatePort ($object_id, $port['id'], $canon_pn, $port['oif_id'], $port['label'], $port['l2address'], $port['reservation_comment']);
+				$n++;
+			}
+			catch (InvalidArgException $iae)
+			{
+				showError ($iae->getMessage());
+			}
 		}
 	}
 	if ($n)
@@ -3888,4 +3809,65 @@ function updateVLANDomain()
 	showSuccess ("VLAN domain updated successfully");
 }
 
-?>
+function installPlugin ()
+{
+	$name = assertStringArg ('name');
+	try
+	{
+		if (! is_callable ("plugin_${name}_install"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($name);
+		call_user_func ("plugin_${name}_install");
+		commitInstallPlugin ($plugin['name'], $plugin['longname'], $plugin['code_version'], $plugin['home_url']);
+	}
+	catch (Exception $e)
+	{
+		showError ('Install failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Installed plugin: ' . $name);
+}
+
+function uninstallPlugin ()
+{
+	$name = assertStringArg ('name');
+	try
+	{
+		if (! is_callable ("plugin_${name}_uninstall"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
+		call_user_func ("plugin_${name}_uninstall");
+		commitUninstallPlugin ($name);
+	}
+	catch (Exception $e)
+	{
+		showError ('Uninstall failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Uninstalled plugin: ' . $name);
+}
+
+function upgradePlugin ()
+{
+	$name = assertStringArg ('name');
+	try
+	{
+		if (! is_callable ("plugin_${name}_upgrade"))
+			throw new RackTablesError ("The ${name} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
+		$plugin = getPlugin ($name);
+		call_user_func ("plugin_${name}_upgrade");
+		// get details from the plugin code itself
+		$code_plugin = call_user_func ("plugin_${name}_info");
+		usePreparedUpdateBlade
+		(
+			'Plugin',
+			array ('longname' => $code_plugin['longname'], 'version' => $code_plugin['version'], 'home_url' => $code_plugin['home_url']),
+			array ('name' => $name)
+		);
+	}
+	catch (Exception $e)
+	{
+		showError ('Upgrade failed: ' . $e->getMessage());
+		return;
+	}
+	showSuccess ('Upgraded plugin: ' . $name);
+}

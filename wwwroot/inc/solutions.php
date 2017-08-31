@@ -17,6 +17,8 @@ require_once 'slb-interface.php';
 
 define ('RE_STATIC_URI', '#^(?:[[:alnum:]]+[[:alnum:]_.-]*/)+[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 
+$color = array();
+
 function castRackImageException ($e)
 {
 	$m = array
@@ -47,7 +49,7 @@ function dispatchImageRequest()
 			throw castRackImageException ($e);
 		}
 		dispatchMiniRackThumbRequest (getBypassValue());
-		break;
+		return;
 	case 'midirack': // rack security context
 		$pageno = 'rack';
 		$tabno = 'default';
@@ -64,52 +66,33 @@ function dispatchImageRequest()
 			throw castRackImageException ($e);
 		}
 		// Scaling or highlighting implies no caching and thus no extra wrapper code around.
-		header ('Content-type: image/png');
+		header ('Content-Type: image/png');
 		printRackThumbImage (getBypassValue(), $scale, $object_id);
-		break;
+		return;
 	case 'preview': // file security context
 		$pageno = 'file';
 		$tabno = 'download';
 		fixContext();
 		assertPermission();
 		renderImagePreview (getBypassValue());
-		break;
-	case 'cactigraph':
-		$pageno = 'object';
-		$tabno = 'cacti';
-		fixContext();
-		assertPermission();
-		$graph_id = genericAssertion ('graph_id', 'uint');
-		if (! array_key_exists ($graph_id, getCactiGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph_id', $graph_id);
-		proxyCactiRequest (genericAssertion ('server_id', 'uint'), $graph_id);
-		break;
-	case 'muningraph':
-		$pageno = 'object';
-		$tabno = 'munin';
-		fixContext();
-		assertPermission();
-		$graph = genericAssertion ('graph', 'string');
-		if (! array_key_exists ($graph, getMuninGraphsForObject (getBypassValue())))
-			throw new InvalidRequestArgException ('graph', $graph);
-		proxyMuninRequest (genericAssertion ('server_id', 'uint'), $graph);
-		break;
+		return;
 	default:
-		throw new InvalidRequestArgException ('img', $img);
+		if (! callHook ('dispatchImageRequest_hook'))
+			throw new InvalidRequestArgException ('img', $img);
 	}
 }
 
 // XXX: deprecated
 function renderErrorImage ()
 {
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	echo base64_decode (IMG_76x17_ERROR);
 }
 
 // XXX: deprecated
 function renderAccessDeniedImage()
 {
-	header ('Content-type: image/png');
+	header ('Content-Type: image/png');
 	echo base64_decode (IMG_1x1_BLACK);
 }
 
@@ -139,35 +122,113 @@ function createTrueColorOrThrow ($context, $width, $height)
 	return $img;
 }
 
-# Generate a complete HTTP response for a 1:1 minirack image, use and update
-# SQL cache where appropriate.
 function dispatchMiniRackThumbRequest ($rack_id)
 {
-	if (NULL !== ($thumbcache = loadThumbCache ($rack_id)))
+	$content = getCachedMiniRackThumbImage ($rack_id); // may throw
+	header ('Content-Type: image/png');
+	echo $content;
+}
+
+// Generate a complete HTTP response for a 1:1 minirack image, use and update
+// SQL cache where appropriate. Suppress SQL cache update failures caused by
+// insufficient database privileges as that likely means a connection that is
+// read-only on purpose.
+function getCachedMiniRackThumbImage ($rack_id)
+{
+	if (NULL !== ($thumbcache = loadRackThumbCache ($rack_id)))
+		return $thumbcache;
+	$capture = getOutputOf ('printRackThumbImage', $rack_id);
+	try
 	{
-		header ('Content-type: image/png');
-		echo $thumbcache;
+		saveRackThumbCache ($rack_id, $capture);
+	}
+	catch (RTDBTableAccessDenied $e)
+	{
+		// keep going
+	}
+	return $capture;
+}
+
+function coloredObject ($state, $colors, $img, $posx, $posy, $height, $width, $vertical = TRUE)
+{
+	global $color;
+	$count = count ($colors);
+	if ($count == 0)
+	{
+		imagefilledrectangle
+		(
+			$img,
+			$posx,
+			$posy,
+			$posx + $width - 1,
+			$posy + $height - 1,
+			$color[$state]
+		);
 		return;
 	}
-	ob_start();
-	printRackThumbImage ($rack_id);
-	$capture = ob_get_clean();
-	header ('Content-type: image/png');
-	echo $capture;
-	usePreparedExecuteBlade
-	(
-		'REPLACE INTO RackThumbnail SET rack_id=?, thumb_data=?',
-		array ($rack_id, base64_encode ($capture))
-	);
+
+	$colorsize = (($vertical ? $width : $height) - 1) / $count;
+	$diagonal = 1;
+
+	$i = 0;
+	foreach ($colors as $colorcode)
+	{
+		if (!isset ($color[$colorcode]))
+			$color[$colorcode] = colorFromHex ($img, $colorcode);
+
+		if ($vertical)
+			$points = array
+			(
+				$posx + $i * $colorsize + ($i > 0 ? $diagonal : 0),
+				$posy,
+
+				$posx + $i * $colorsize - ($i > 0 ?  $diagonal : 0),
+				$posy + $height - 1,
+
+				$posx + ($i+1) * $colorsize - ($i+1 < $count ? $diagonal : 0),
+				$posy + $height - 1,
+
+				$posx + ($i+1) * $colorsize + ($i+1 < $count ? $diagonal : 0),
+				$posy
+                        );
+		else
+			$points = array
+			(
+				$posx,
+				$posy + $i * $colorsize + ($i > 0 ? $diagonal : 0),
+
+				$posx + $width - 1,
+				$posy + $i * $colorsize - ($i > 0 ?  $diagonal : 0),
+
+				$posx + $width - 1,
+				$posy + ($i+1) * $colorsize - ($i+1 < $count ? $diagonal : 0),
+
+				$posx,
+				$posy + ($i+1) * $colorsize + ($i+1 < $count ? $diagonal : 0)
+			);
+
+		imagefilledpolygon
+		(
+			$img,
+			$points,
+			4,
+			$color[$colorcode]
+		);
+
+		$i++;
+	}
 }
 
 # Generate a binary PNG image for a rack contents.
 function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 {
+	global $color;
 	$rackData = spotEntity ('rack', $rack_id);
 	amplifyCell ($rackData);
 	if ($object_id !== NULL)
 		highlightObject ($rackData, $object_id);
+	markAllSpans ($rackData);
+	setEntityColors ($rackData);
 	global $rtwidth;
 	$offset[0] = 3;
 	$offset[1] = 3 + $rtwidth[0];
@@ -175,9 +236,9 @@ function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 	$totalheight = 3 + 3 + $rackData['height'] * 2;
 	$totalwidth = $offset[2] + $rtwidth[2] + 3;
 	$img = createTrueColorOrThrow ('rack_php_gd_error', $totalwidth, $totalheight);
-	# It was measured, that caching palette in an array is faster, than
-	# calling colorFromHex() multiple times. It matters, when user's
-	# browser is trying to fetch many minirack images in parallel.
+	// It has been benchmarked that caching the palette in an array is faster than just
+	// calling colorFromHex() again and again. The diffierence is visible when user's
+	// browser is trying to fetch many minirack images in parallel.
 	$color = array
 	(
 		'F' => colorFromHex ($img, '8fbfbf'),
@@ -188,27 +249,46 @@ function printRackThumbImage ($rack_id, $scale = 1, $object_id = NULL)
 		'Tw' => colorFromHex ($img, '804040'),
 		'Thw' => colorFromHex ($img, 'ff8080'),
 		'black' => colorFromHex ($img, '000000'),
-		'gray' => colorFromHex ($img, 'c0c0c0'),
 	);
-	$border_color = ($rackData['has_problems'] == 'yes') ? $color['Thw'] : $color['gray'];
+
 	imagerectangle ($img, 0, 0, $totalwidth - 1, $totalheight - 1, $color['black']);
-	imagerectangle ($img, 1, 1, $totalwidth - 2, $totalheight - 2, $border_color);
+	$rackcolorcode = $rackData['has_problems'] == 'yes' ? 'Tw' : 'T';
+	coloredObject ($rackcolorcode, $rackData['colors'], $img, 1, 1, $totalheight - 2,  $totalwidth - 2, FALSE);
 	imagerectangle ($img, 2, 2, $totalwidth - 3, $totalheight - 3, $color['black']);
+	imagefilledrectangle ($img, 3, 3, $totalwidth - 4, $totalheight - 4, $color['F']);
 	for ($unit_no = 1; $unit_no <= $rackData['height']; $unit_no++)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
-			$colorcode = $rackData[$unit_no][$locidx]['state'];
+			if (isset ($rackData[$unit_no][$locidx]['skipped']))
+				continue;
+
+			if (isset ($rackData[$unit_no][$locidx]['colspan']))
+			{
+				$locwidth = 0;
+				for($i = 0; $i<$rackData[$unit_no][$locidx]['colspan']; $i++)
+					$locwidth += $rtwidth[$locidx + $i];
+			}
+			else
+				$locwidth = $rtwidth[$locidx];
+
+			$locheight = 2;
+			if (isset ($rackData[$unit_no][$locidx]['rowspan']))
+				$locheight = $rackData[$unit_no][$locidx]['rowspan'] * 2;
+
+			$state = $rackData[$unit_no][$locidx]['state'];
 			if (isset ($rackData[$unit_no][$locidx]['hl']))
-				$colorcode = $colorcode . $rackData[$unit_no][$locidx]['hl'];
-			imagerectangle
-			(
-				$img,
-				$offset[$locidx],
-				3 + ($rackData['height'] - $unit_no) * 2,
-				$offset[$locidx] + $rtwidth[$locidx] - 1,
-				3 + ($rackData['height'] - $unit_no) * 2 + 1,
-				$color[$colorcode]
-			);
+				$state .= $rackData[$unit_no][$locidx]['hl'];
+
+			if (! isset ($rackData[$unit_no][$locidx]['object_id']))
+				$colors = array();
+			else
+			{
+				$object = spotEntity ('object', $rackData[$unit_no][$locidx]['object_id']);
+				setEntityColors ($object);
+				$colors = $object['colors'];
+			}
+
+			coloredObject ($state, $colors, $img, $offset[$locidx], 3 + ($rackData['height'] - $unit_no) * 2, $locheight,  $locwidth);
 		}
 	if ($scale > 1)
 	{
@@ -249,7 +329,7 @@ function renderProgressBarImage ($done)
 		imagesetpixel ($img, $x, 8, $cc);
 		imagesetpixel ($img, $x, 9, $cc);
 	}
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
 }
@@ -310,7 +390,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 		imagesetpixel ($img, $x, 8, $colors[$cc]);
 		imagesetpixel ($img, $x, 9, $colors[$cc]);
 	}
-	header("Content-type: image/png");
+	header("Content-Type: image/png");
 	imagepng ($img);
 	imagedestroy ($img);
 }
@@ -318,7 +398,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 // XXX: deprecated
 function renderProgressBarError()
 {
-	header ('Content-type: image/png');
+	header ('Content-Type: image/png');
 	echo base64_decode (IMG_100x10_PBAR_ERROR);
 }
 
@@ -326,7 +406,7 @@ function renderImagePreview ($file_id)
 {
 	if ($image = getFileCache ($file_id)) //Cache Hit
 	{
-		header("Content-type: image/jpeg");
+		header("Content-Type: image/jpeg");
 		echo $image;
 		return;
 	}
@@ -347,7 +427,7 @@ function renderImagePreview ($file_id)
 		$image = $resampled;
 		unset ($resampled);
 	}
-	header ('Content-type: image/jpeg');
+	header ('Content-Type: image/jpeg');
 	ob_start();
 	imagejpeg ($image);
 	imagedestroy ($image);
@@ -357,7 +437,8 @@ function renderImagePreview ($file_id)
 function printStatic404()
 {
 	header ('HTTP/1.0 404 Not Found');
-?><!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+	echo <<<'ENDOFTEXT'
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>404 Not Found</title>
 </head><body>
@@ -365,7 +446,8 @@ function printStatic404()
 <p>The requested file was not found in this instance.</p>
 <hr>
 <address>RackTables static content proxy</address>
-</body></html><?php
+</body></html>
+ENDOFTEXT;
 	exit;
 }
 
@@ -399,125 +481,9 @@ function proxyStaticURI ($URI)
 	if (FALSE !== $stat = fstat ($fh))
 		if (checkCachedResponse (max ($stat['mtime'], $stat['ctime']), 0))
 			exit;
-	header ('Content-type: ' . $content_type[$matches[1]]);
+	header ('Content-Type: ' . $content_type[$matches[1]]);
 	fpassthru ($fh);
 	fclose ($fh);
-}
-
-function proxyCactiRequest ($server_id, $graph_id)
-{
-	$ret = array();
-	$servers = getCactiServers();
-	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id);
-	$cacti_url = $servers[$server_id]['base_url'];
-	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
-	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
-	$postvars .= '&login_password=' . $servers[$server_id]['password'];
-
-	$session = curl_init();
-//	curl_setopt ($session, CURLOPT_VERBOSE, TRUE);
-
-	// Initial options up here so a specific type can override them
-	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE);
-	curl_setopt ($session, CURLOPT_TIMEOUT, 10);
-	curl_setopt ($session, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt ($session, CURLOPT_URL, $url);
-
-	if (isset($_SESSION['CACTICOOKIE'][$cacti_url]))
-		curl_setopt ($session, CURLOPT_COOKIE, $_SESSION['CACTICOOKIE'][$cacti_url]);
-
-	// Request the image
-	$ret['contents'] = curl_exec ($session);
-	$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-	$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-
-	// Not an image, probably the login page
-	if (preg_match ('/^text\/html.*/i', $ret['type']))
-	{
-		// Request to set the cookies
-		curl_setopt ($session, CURLOPT_HEADER, TRUE);
-		curl_setopt ($session, CURLOPT_COOKIE, "");	// clear the old cookie
-		$headers = curl_exec ($session);
-
-		// Get the cookies from the headers
-		preg_match('/Set-Cookie: ([^;]*)/i', $headers, $cookies);
-		array_shift($cookies);  // Remove 'Set-Cookie: ...' value
-		$cookie_header = implode(";", $cookies);
-		$_SESSION['CACTICOOKIE'][$cacti_url] = $cookie_header; // store for later use by this user
-
-		// CSRF security in 0.8.8h, regexp version
-		if (preg_match("/sid:([a-z0-9,]+)\"/", $ret['contents'], $csf_output))
-		{
-			if (array_key_exists(1, $csf_output))
-				$postvars .="&__csrf_magic=$csf_output[1]";
-		}
-		// POST Login
-		curl_setopt ($session, CURLOPT_COOKIE, $cookie_header);
-		curl_setopt ($session, CURLOPT_HEADER, FALSE);
-		curl_setopt ($session, CURLOPT_POST, TRUE);
-		curl_setopt ($session, CURLOPT_POSTFIELDS, $postvars);
-		curl_exec ($session);
-
-		// Request the image
-		curl_setopt ($session, CURLOPT_HTTPGET, TRUE);
-		$ret['contents'] = curl_exec ($session);
-		$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-		$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-	}
-
-	curl_close ($session);
-
-	if ($ret['type'] != NULL)
-		header("Content-Type: {$ret['type']}");
-	if ($ret['size'] > 0)
-		header("Content-Length: {$ret['size']}");
-
-	echo $ret['contents'];
-}
-
-function proxyMuninRequest ($server_id, $graph)
-{
-	try
-	{
-		list ($host, $domain) = getMuninNameAndDomain (getBypassValue());
-	}
-	catch (InvalidArgException $e)
-	{
-		throw new RTImageError ('munin_graph');
-	}
-
-	$ret = array();
-	$servers = getMuninServers();
-	if (! array_key_exists ($server_id, $servers))
-		throw new InvalidRequestArgException ('server_id', $server_id);
-	$munin_url = $servers[$server_id]['base_url'];
-	$url = "${munin_url}/${domain}/${host}.${domain}/${graph}-day.png";
-
-	$session = curl_init();
-
-	// Initial options up here so a specific type can override them
-	curl_setopt ($session, CURLOPT_FOLLOWLOCATION, FALSE);
-	curl_setopt ($session, CURLOPT_TIMEOUT, 10);
-	curl_setopt ($session, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt ($session, CURLOPT_URL, $url);
-
-	if (isset($_SESSION['MUNINCOOKIE'][$munin_url]))
-		curl_setopt ($session, CURLOPT_COOKIE, $_SESSION['MUNINCOOKIE'][$munin_url]);
-
-	// Request the image
-	$ret['contents'] = curl_exec ($session);
-	$ret['type'] = curl_getinfo ($session, CURLINFO_CONTENT_TYPE);
-	$ret['size'] = curl_getinfo ($session, CURLINFO_SIZE_DOWNLOAD);
-
-	curl_close ($session);
-
-	if ($ret['type'] != NULL)
-		header ("Content-Type: {$ret['type']}");
-	if ($ret['size'] > 0)
-		header ("Content-Length: {$ret['size']}");
-
-	echo $ret['contents'];
 }
 
 function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rectattrs = array())
@@ -557,5 +523,3 @@ function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rect
 	echo ">${text}</text>\n";
 	echo "</svg>\n";
 }
-
-?>

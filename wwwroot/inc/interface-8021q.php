@@ -277,7 +277,7 @@ function renderVLANDomainListEditor ()
 		if ($dominfo['subdomc'])
 			printSelect (array (0 => 'a domain group'), array ('name' => 'group_id'));
 		else
-			printNiftySelect ($group_opts, array ('name' => 'group_id'), intval($dominfo['group_id']));
+			printNiftySelect ($group_opts, array ('name' => 'group_id'), $dominfo['group_id']);
 		echo '</td><td>';
 		printImageHREF ('save', 'update description', TRUE);
 		echo '</td></tr></form>';
@@ -1129,7 +1129,7 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center>';
 	// FIXME: sort rows newest event last
 	$rows = array();
-	if (! considerConfiguredConstraint ($object, 'SYNC_802Q_LISTSRC'))
+	if (! considerConfiguredConstraint ($object, 'SYNC_8021Q_LISTSRC'))
 		$rows['auto sync'] = '<span class="trerror">disabled by operator</span>';
 	$rows['last local change'] = datetimestrFromTimestamp ($vswitch['last_change']) . ' (' . formatAge ($vswitch['last_change']) . ')';
 	$rows['device out of sync'] = $vswitch['out_of_sync'];
@@ -1183,7 +1183,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 	switchportInfoJS ($vswitch['object_id']); // load JS code to make portnames interactive
 	// initialize one of three popups: we've got data already
 	$port_config = addslashes (json_encode (formatPortConfigHints ($vswitch['object_id'], $R)));
-	addJS (<<<END
+	addJS (<<<'END'
 $(document).ready(function(){
 	var confData = $.parseJSON('$port_config');
 	applyConfData(confData);
@@ -1191,6 +1191,32 @@ $(document).ready(function(){
 	menuItem.addClass($.contextMenu.disabledItemClassName);
 	setItemIcon(menuItem[0], 'ok');
 });
+
+function checkColumnOfRadios8021Q (prefix, numRows, suffix)
+{
+	var elemId;
+	for (var i=0; i < numRows; i++)
+	{
+		elemId = prefix + i + suffix;
+		if (document.getElementById(elemId) == null) // no radios on this row
+			continue;
+		// Not all radios are present on each form. Hence each time
+		// we are requested to switch from left to right (or vice versa)
+		// it is better to half-complete the request by setting to the
+		// middle position, than to fail completely due to missing
+		// target input.
+		if (document.getElementById(elemId).disabled == true)
+			switch (suffix)
+			{
+			case '_asis':
+				continue;
+			case '_left':
+			case '_right':
+				elemId = prefix + i + '_asis';
+			}
+		document.getElementById(elemId).checked = true;
+	}
+}
 END
 	, TRUE);
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
@@ -1374,18 +1400,18 @@ function renderObject8021QSyncPorts ($object, $D)
 {
 	$allethports = array();
 	foreach (array_filter ($object['ports'], 'isEthernetPort') as $port)
-		$allethports[$port['name']] = formatPortIIFOIF ($port);
+		$allethports[$port['name']] = array ('iifoif' => formatPortIIFOIF ($port));
 	$enabled = array();
 	# OPTIONSs for existing 802.1Q ports
 	foreach (sortPortList ($D) as $portname => $portconfig)
 		$enabled["disable ${portname}"] = "${portname} ("
-			. array_fetch ($allethports, $portname, 'N/A')
+			. (array_key_exists ($portname, $allethports) ? $allethports[$portname]['iifoif']: 'N/A')
 			. ') ' . serializeVLANPack ($portconfig);
 	# OPTIONs for potential 802.1Q ports
 	$disabled = array();
-	foreach (sortPortList ($allethports) as $portname => $iifoif)
+	foreach (sortPortList ($allethports) as $portname => $each)
 		if (! array_key_exists ("disable ${portname}", $enabled))
-			$disabled["enable ${portname}"] = "${portname} (${iifoif})";
+			$disabled["enable ${portname}"] = "${portname} (${each['iifoif']})";
 	printOpFormIntro ('updPortList');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><td>';
@@ -1643,5 +1669,3 @@ function renderEditVlan ($vlan_ck)
 
 	finishPortlet();
 }
-
-?>

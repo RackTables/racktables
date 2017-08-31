@@ -214,26 +214,26 @@ tr.has_problems_odd {
  * style and are exempt from the zebra pattern. In this sense the 2nd TR
  * where the TDs start is considered "odd" and the 3rd -- "even" and so on.
  */
-table.zebra tr:nth-child(2n+3):not(.highlight) {
+table.zebra tbody tr:nth-child(2n+3):not(.highlight) {
 	background: #d0d0d0;
 }
-table.zebra tr:nth-child(2n):not(.highlight) {
+table.zebra tbody tr:nth-child(2n):not(.highlight) {
 	background: #e8e8e8;
 }
-table.zebra table:not(.zebra) tr {
+table.zebra tbody table:not(.zebra) tr {
 	background: inherit !important;
 }
 
 /* This variant results in the same pattern for a table that has no TH row
  * at the top.
  */
-table.zebra0 tr:nth-child(2n+1):not(.highlight) {
+table.zebra0 tbody tr:nth-child(2n+1):not(.highlight) {
 	background: #e8e8e8;
 }
-table.zebra0 tr:nth-child(2n):not(.highlight) {
+table.zebra0 tbody tr:nth-child(2n):not(.highlight) {
 	background: #d0d0d0;
 }
-table.zebra0 table:not(.zebra0) tr {
+table.zebra0 tbody table:not(.zebra0) tr {
 	background: inherit !important;
 }
 
@@ -729,6 +729,10 @@ div.vlan {
 .port-popup {
 	margin-left: 3px;
 	font-family: Arial,Sans-Serif,sans-serif;
+}
+
+.l2address {
+	font-family: monospace;
 }
 
 /*common rack item attributes*/

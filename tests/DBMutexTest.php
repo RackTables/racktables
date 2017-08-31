@@ -1,13 +1,13 @@
 <?php
 
-class DBMutexTest extends PHPUnit_Framework_TestCase
+class DBMutexTest extends RTTestCase
 {
 	/**
 	 * @group small
 	 */
 	public function testExisting ()
 	{
-		$name = sprintf ('mutex-%s-%u', get_class(), getmypid());
+		$name = $this->myString ('mutex1');
 		$this->assertSame (TRUE, setDBMutex ($name));
 		$this->assertSame (TRUE, releaseDBMutex ($name));
 	}
@@ -17,8 +17,6 @@ class DBMutexTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testNonExisting ()
 	{
-		$this->assertSame (FALSE, releaseDBMutex (get_class() . getmypid()));
+		$this->assertSame (FALSE, releaseDBMutex ($this->myString ('mutex2')));
 	}
 }
-
-?>

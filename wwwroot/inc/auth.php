@@ -18,6 +18,18 @@ be working with only database.php file included.
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
 function authenticate ()
 {
+	function assertHTTPCredentialsReceived()
+	{
+		if
+		(
+			! isset ($_SERVER['PHP_AUTH_USER']) ||
+			$_SERVER['PHP_AUTH_USER'] == '' ||
+			! isset ($_SERVER['PHP_AUTH_PW']) ||
+			$_SERVER['PHP_AUTH_PW'] == ''
+		)
+			throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+	}
+
 	global
 		$remote_username,
 		$remote_displayname,
@@ -41,15 +53,11 @@ function authenticate ()
 		case isset ($script_mode) && $script_mode && isset ($remote_username) && $remote_username != '':
 			break; // skip this phase
 		case 'database' == $user_auth_src:
+			assertHTTPCredentialsReceived();
+			$remote_username = $_SERVER['PHP_AUTH_USER'];
+			break;
 		case 'ldap' == $user_auth_src:
-			if
-			(
-				! isset ($_SERVER['PHP_AUTH_USER']) ||
-				$_SERVER['PHP_AUTH_USER'] == '' ||
-				! isset ($_SERVER['PHP_AUTH_PW']) ||
-				$_SERVER['PHP_AUTH_PW'] == ''
-			)
-				throw new RackTablesError ('', RackTablesError::NOT_AUTHENTICATED);
+			assertHTTPCredentialsReceived();
 			$remote_username = $_SERVER['PHP_AUTH_USER'];
 			constructLDAPOptions();
 			break;
@@ -261,7 +269,7 @@ function processAdjustmentSentence ($modlist, &$chain)
 // a wrapper for SAML auth method
 function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NULL)
 {
-	global $SAML_options, $debug_mode, $auto_tags;
+	global $SAML_options, $auto_tags;
 	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
 		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
 	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
@@ -642,5 +650,3 @@ function authenticated_via_database ($userinfo, $password)
 		return FALSE;
 	return $userinfo['user_password_hash'] == sha1 ($password);
 }
-
-?>

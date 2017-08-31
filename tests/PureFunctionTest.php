@@ -11,7 +11,7 @@ return value test that the actual return value is equal (assertEquals) or
 identical (assertSame) to the expected return value.
 */
 
-class PureFunctionTest extends PHPUnit_Framework_TestCase
+class PureFunctionTest extends RTTestCase
 {
 	/**
 	 * @group small
@@ -91,6 +91,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		$this->assertSame ($expected_params, $actual_params);
 	}
 
+	/**
+	 * @group small
+	 * @dataProvider providerMakeWhereSQLIAE
+	 * @expectedException InvalidArgException
+	 */
+	public function testMakeWhereSQLIAE ($where_columns, $conjunction)
+	{
+		$dummy_params = array();
+		makeWhereSQL ($where_columns, $conjunction, $dummy_params);
+	}
+
 	// This test requires a custom function to pass a parameter by reference.
 
 	/**
@@ -144,9 +155,9 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('questionMarks', 2, '?, ?'),
 			array ('questionMarks', 3, '?, ?, ?'),
 
-			array ('makeSetSQL', array ('one'), 'one=?'),
-			array ('makeSetSQL', array ('one', 'two'), 'one=?, two=?'),
-			array ('makeSetSQL', array ('one', 'two', 'three'), 'one=?, two=?, three=?'),
+			array ('makeSetSQL', array ('one'), '`one` = ?'),
+			array ('makeSetSQL', array ('one', 'two'), '`one` = ?, `two` = ?'),
+			array ('makeSetSQL', array ('one', 'two', 'three'), '`one` = ?, `two` = ?, `three` = ?'),
 
 			array
 			(
@@ -218,14 +229,41 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('l2addressForDatabase', '', ''),
 			array ('l2addressForDatabase', ' ', ''),
 			array ('l2addressForDatabase', ' 010203abcdef ', '010203ABCDEF'), // RE_L2_SOLID
-			array ('l2addressForDatabase', '1:2:3:ab:cd:ef ', '010203ABCDEF'), // RE_L2_IFCFG
+			array ('l2addressForDatabase', '1:2:3:ab:cd:ef ', '010203ABCDEF'), // RE_L2_IFCFG_SUNOS
 			array ('l2addressForDatabase', ' 0102.03ab.cdef', '010203ABCDEF'), // RE_L2_CISCO
 			array ('l2addressForDatabase', '0102-03ab-cdef', '010203ABCDEF'), // RE_L2_HUAWEI
 			array ('l2addressForDatabase', '01-02-03-ab-cd-ef', '010203ABCDEF'), // RE_L2_IPCFG
 			array ('l2addressForDatabase', '000000000000', ''), // a special case
 			array ('l2addressForDatabase', '0102030405abcdef  ', '0102030405ABCDEF'), // RE_L2_WWN_SOLID
 			array ('l2addressForDatabase', ' 01-02-03-04-05-ab-cd-ef', '0102030405ABCDEF'), // RE_L2_WWN_HYPHEN
-			array ('l2addressForDatabase', ' 1:2:3:4:5:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
+			array ('l2addressForDatabase', ' 01:02:03:04:05:ab:cd:ef ', '0102030405ABCDEF'), // RE_L2_WWN_COLON
+			array
+			(
+				'l2addressForDatabase',
+				' 00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12:13 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_COLON
+			array
+			(
+				'l2addressForDatabase',
+				' 00-01-02-03-04-05-06-07-08-09-0a-0b-0c-0d-0e-0f-10-11-12-13 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_HYPHEN
+			array
+			(
+				'l2addressForDatabase',
+				' 000102030405060708090a0b0c0d0e0f10111213 ',
+				'000102030405060708090A0B0C0D0E0F10111213'
+			), // RE_L2_IPOIB_SOLID
+
+			array ('l2addressFromDatabase', '001122334455', '00:11:22:33:44:55'), // RE_L2_SOLID
+			array ('l2addressFromDatabase', '0011223344556677', '00:11:22:33:44:55:66:77'), // RE_L2_WWN_SOLID
+			array
+			(
+				'l2addressFromDatabase',
+				'000102030405060708090A0B0C0D0E0F10111213',
+				'00:01:02:03:04:05:06:07:08:09:0A:0B:0C:0D:0E:0F:10:11:12:13'
+			), // RE_L2_IPOIB_SOLID
 
 			array ('nextMACAddress', '', ''),
 			array ('nextMACAddress', '12:34:56:78:90:ab', '12:34:56:78:90:AC'),
@@ -263,6 +301,156 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('validTagName', '$tag', FALSE),
 			array ('validTagName', '2015-', FALSE),
 			array ('validTagName', 'iqn.domain.', FALSE),
+
+			array ('parseSearchTerms', '', array ()),
+			array ('parseSearchTerms', 'sixty', array ('sixty')),
+			array ('parseSearchTerms', '"sixty "', array ('sixty')),
+			array ('parseSearchTerms', 'seventy сімдесят', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', '"seventy" сімдесят', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', 'seventy " сімдесят"', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', '"seventy" "сімдесят"', array ('seventy', 'сімдесят')),
+			array ('parseSearchTerms', 'eighty вісімдесят восемьдесят', array ('eighty', 'вісімдесят', 'восемьдесят')),
+			array ('parseSearchTerms', '" seventy one "', array ('seventy one')),
+			array ('parseSearchTerms', '"seventy one" сімдесят', array ('seventy one', 'сімдесят')),
+			array ('parseSearchTerms', 'seventy "сімдесят один"', array ('seventy', 'сімдесят один')),
+			array ('parseSearchTerms', '"eighty one" вісімдесят восемьдесят', array ('eighty one', 'вісімдесят', 'восемьдесят')),
+			array ('parseSearchTerms', 'eighty "вісімдесят один" восемьдесят', array ('eighty', 'вісімдесят один', 'восемьдесят')),
+			array ('parseSearchTerms', 'eighty вісімдесят "восемьдесят один"', array ('eighty', 'вісімдесят', 'восемьдесят один')),
+			array ('parseSearchTerms', '"eighty one" "вісімдесят один" "восемьдесят один"', array ('eighty one', 'вісімдесят один', 'восемьдесят один')),
+
+			array ('formatAgeSeconds', 0, 'just now'),
+			array ('formatAgeSeconds', 1, '1s ago'),
+			array ('formatAgeSeconds', 2, '2s ago'),
+			array ('formatAgeSeconds', 3, '3s ago'),
+			array ('formatAgeSeconds', 59, '59s ago'),
+			array ('formatAgeSeconds', 60, '1min ago'),
+			array ('formatAgeSeconds', 61, '1min 1s ago'),
+			array ('formatAgeSeconds', 299, '4min 59s ago'),
+			array ('formatAgeSeconds', 300, '5min ago'),
+			array ('formatAgeSeconds', 301, '5min ago'),
+			array ('formatAgeSeconds', 3599, '60min ago'),
+			array ('formatAgeSeconds', 3600, '1h ago'),
+			array ('formatAgeSeconds', 3601, '1h ago'),
+			array ('formatAgeSeconds', 86399, '24h ago'),
+			array ('formatAgeSeconds', 86400, '1d ago'),
+			array ('formatAgeSeconds', 86401, '1d ago'),
+			array ('formatAgeSeconds', 259199, '2d 24h ago'),
+			array ('formatAgeSeconds', 259200, '3d ago'),
+			array ('formatAgeSeconds', 259201, '3d ago'),
+			array ('formatAgeSeconds', 2629799, '30d ago'),
+			array ('formatAgeSeconds', 2629800, '1m ago'),
+			array ('formatAgeSeconds', 2629801, '1m ago'),
+			array ('formatAgeSeconds', 10519199, '3m 30d ago'),
+			array ('formatAgeSeconds', 10519200, '4m ago'),
+			array ('formatAgeSeconds', 10519201, '4m ago'),
+			array ('formatAgeSeconds', 31557599, '12m ago'),
+			array ('formatAgeSeconds', 31557600, '1y ago'),
+			array ('formatAgeSeconds', 31557601, '1y ago'),
+			array ('formatAgeSeconds', 63115199, '1y 12m ago'),
+			array ('formatAgeSeconds', 63115200, '2y ago'),
+			array ('formatAgeSeconds', 63115201, '2y ago'),
+
+			array ('isInteger', -2, TRUE),
+			array ('isInteger', -1.5, FALSE),
+			array ('isInteger', -1, TRUE),
+			array ('isInteger', 0, FALSE), // implicit 2nd argument
+			array ('isInteger', 0.0, FALSE),
+			array ('isInteger', 1, TRUE),
+			array ('isInteger', 1.5, FALSE),
+			array ('isInteger', 2, TRUE),
+			array ('isInteger', NULL, FALSE),
+			array ('isInteger', FALSE, FALSE),
+			array ('isInteger', TRUE, FALSE),
+			array ('isInteger', '', FALSE),
+			array ('isInteger', '-2', TRUE),
+			array ('isInteger', '-1.5', FALSE),
+			array ('isInteger', '-1', TRUE),
+			array ('isInteger', '0', FALSE), // implicit 2nd argument
+			array ('isInteger', '0.0', FALSE),
+			array ('isInteger', '1', TRUE),
+			array ('isInteger', '1.5', FALSE),
+			array ('isInteger', '2', TRUE),
+			array ('isInteger', '0x1234', FALSE),
+			array ('isInteger', '+123e4', FALSE),
+			array ('isInteger', '+123e-4', FALSE),
+			array ('isInteger', '123e4', FALSE),
+			array ('isInteger', '123e-4', FALSE),
+			array ('isInteger', '-123e4', FALSE),
+			array ('isInteger', '-123e-4', FALSE),
+			array ('isInteger', '+123.1e4', FALSE),
+			array ('isInteger', '+123.1e-4', FALSE),
+			array ('isInteger', '123.1e4', FALSE),
+			array ('isInteger', '123.1e-4', FALSE),
+			array ('isInteger', '-123.1e4', FALSE),
+			array ('isInteger', '-123.1e-4', FALSE),
+
+			array ('isUnsignedInteger', -2, FALSE),
+			array ('isUnsignedInteger', -1.5, FALSE),
+			array ('isUnsignedInteger', -1, FALSE),
+			array ('isUnsignedInteger', 0, FALSE), // implicit 2nd argument
+			array ('isUnsignedInteger', 0.0, FALSE),
+			array ('isUnsignedInteger', 1, TRUE),
+			array ('isUnsignedInteger', 1.5, FALSE),
+			array ('isUnsignedInteger', 2, TRUE),
+			array ('isUnsignedInteger', NULL, FALSE),
+			array ('isUnsignedInteger', FALSE, FALSE),
+			array ('isUnsignedInteger', TRUE, FALSE),
+			array ('isUnsignedInteger', '', FALSE),
+			array ('isUnsignedInteger', '-2', FALSE),
+			array ('isUnsignedInteger', '-1.5', FALSE),
+			array ('isUnsignedInteger', '-1', FALSE),
+			array ('isUnsignedInteger', '0', FALSE), // implicit 2nd argument
+			array ('isUnsignedInteger', '0.0', FALSE),
+			array ('isUnsignedInteger', '1', TRUE),
+			array ('isUnsignedInteger', '1.5', FALSE),
+			array ('isUnsignedInteger', '2', TRUE),
+
+			array ('isHTMLColor', FALSE, FALSE),
+			array ('isHTMLColor', TRUE, FALSE),
+			array ('isHTMLColor', NULL, FALSE),
+			array ('isHTMLColor', 0, FALSE),
+			array ('isHTMLColor', '#ABCDEF', FALSE),
+			array ('isHTMLColor', '#ABC', FALSE),
+			array ('isHTMLColor', '#abc', FALSE),
+			array ('isHTMLColor', 'green', FALSE),
+			array ('isHTMLColor', '', FALSE),
+			array ('isHTMLColor', 'A', FALSE),
+			array ('isHTMLColor', 'AB', FALSE),
+			array ('isHTMLColor', 'ABC', FALSE),
+			array ('isHTMLColor', 'ABCD', FALSE),
+			array ('isHTMLColor', 'ABCDE', FALSE),
+			array ('isHTMLColor', 'ABCDEF', TRUE),
+			array ('isHTMLColor', 'a', FALSE),
+			array ('isHTMLColor', 'ab', FALSE),
+			array ('isHTMLColor', 'abc', FALSE),
+			array ('isHTMLColor', 'abcd', FALSE),
+			array ('isHTMLColor', 'abcde', FALSE),
+			array ('isHTMLColor', 'abcdef', TRUE),
+			array ('isHTMLColor', 'AABBCC', TRUE),
+			array ('isHTMLColor', 'DDEEFF', TRUE),
+			array ('isHTMLColor', '000000', TRUE),
+			array ('isHTMLColor', 'FFFFFF', TRUE),
+			array ('isHTMLColor', 'FF00FG', FALSE),
+
+			array ('HTMLColorForDatabase', '', NULL),
+			array ('HTMLColorForDatabase', NULL, NULL),
+			array ('HTMLColorForDatabase', '000000', 0),
+			array ('HTMLColorForDatabase', 'abcdef', 0xabcdef),
+			array ('HTMLColorForDatabase', 'FFFFFF', 0xffffff),
+
+			array ('HTMLColorFromDatabase', NULL, ''),
+			array ('HTMLColorFromDatabase', 0, '000000'),
+			array ('HTMLColorFromDatabase', '0', '000000'),
+			array ('HTMLColorFromDatabase', 0xffffff, 'FFFFFF'),
+			array ('HTMLColorFromDatabase', 0xabcdef, 'ABCDEF'),
+			array ('HTMLColorFromDatabase', '11259375', 'ABCDEF'),
+
+			// implicit 2nd argument
+			array ('colorHex2Rgb', '000000', '0,0,0'),
+			array ('colorHex2Rgb', 'FFFFFF', '255,255,255'),
+			array ('colorHex2Rgb', '800000', '128,0,0'),
+			array ('colorHex2Rgb', '008000', '0,128,0'),
+			array ('colorHex2Rgb', '000080', '0,0,128'),
 		);
 	}
 
@@ -298,6 +486,19 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nullIfZero', 1, 1),
 			array ('nullIfZero', NULL, NULL), // type conversion: NULL == 0
 			array ('nullIfZero', FALSE, NULL), // type conversion: FALSE == 0
+
+			array ('emptyStrIfZero', 0, ''),
+			array ('emptyStrIfZero', '0', ''),
+			array ('emptyStrIfZero', '', ''),
+			array ('emptyStrIfZero', FALSE, FALSE),
+			array ('emptyStrIfZero', TRUE, TRUE),
+			array ('emptyStrIfZero', NULL, NULL),
+			array ('emptyStrIfZero', 1, 1),
+			array ('emptyStrIfZero', -1, -1),
+			array ('emptyStrIfZero', ' 0', ' 0'),
+			array ('emptyStrIfZero', '0 ', '0 '),
+			array ('emptyStrIfZero', ' 0 ', ' 0 '),
+			array ('emptyStrIfZero', 0.0, 0.0),
 
 			array ('array_first', array (1, 2, 3), 1),
 			array ('array_first', array (FALSE, NULL, 0), FALSE),
@@ -810,6 +1011,132 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('goodModeForVSTRole', 'trunk', 'anymode', TRUE),
 			array ('goodModeForVSTRole', 'trunk', 'uplink', TRUE),
 			array ('goodModeForVSTRole', 'trunk', 'downlink', TRUE),
+
+			array ('isInteger', -2, FALSE, TRUE),
+			array ('isInteger', -1.5, FALSE, FALSE),
+			array ('isInteger', -1, FALSE, TRUE),
+			array ('isInteger', 0, FALSE, FALSE), // explicit 2nd argument
+			array ('isInteger', 0.0, FALSE, FALSE),
+			array ('isInteger', 1, FALSE, TRUE),
+			array ('isInteger', 1.5, FALSE, FALSE),
+			array ('isInteger', 2, FALSE, TRUE),
+			array ('isInteger', NULL, FALSE, FALSE),
+			array ('isInteger', FALSE, FALSE, FALSE),
+			array ('isInteger', TRUE, FALSE, FALSE),
+			array ('isInteger', '', FALSE, FALSE),
+			array ('isInteger', '-2', FALSE, TRUE),
+			array ('isInteger', '-1.5', FALSE, FALSE),
+			array ('isInteger', '-1', FALSE, TRUE),
+			array ('isInteger', '0', FALSE, FALSE), // explicit 2nd argument
+			array ('isInteger', '0.0', FALSE, FALSE),
+			array ('isInteger', '1', FALSE, TRUE),
+			array ('isInteger', '1.5', FALSE, FALSE),
+			array ('isInteger', '2', FALSE, TRUE),
+			array ('isInteger', -2, TRUE, TRUE),
+			array ('isInteger', -1.5, TRUE, FALSE),
+			array ('isInteger', -1, TRUE, TRUE),
+			array ('isInteger', 0, TRUE, TRUE), // explicit 2nd argument
+			array ('isInteger', 0.0, TRUE, FALSE),
+			array ('isInteger', 1, TRUE, TRUE),
+			array ('isInteger', 1.5, TRUE, FALSE),
+			array ('isInteger', 2, TRUE, TRUE),
+			array ('isInteger', NULL, TRUE, FALSE),
+			array ('isInteger', FALSE, TRUE, FALSE),
+			array ('isInteger', TRUE, TRUE, FALSE),
+			array ('isInteger', '', TRUE, FALSE),
+			array ('isInteger', '-2', TRUE, TRUE),
+			array ('isInteger', '-1.5', TRUE, FALSE),
+			array ('isInteger', '-1', TRUE, TRUE),
+			array ('isInteger', '0', TRUE, TRUE), // explicit 2nd argument
+			array ('isInteger', '0.0', TRUE, FALSE),
+			array ('isInteger', '1', TRUE, TRUE),
+			array ('isInteger', '1.5', TRUE, FALSE),
+			array ('isInteger', '2', TRUE, TRUE),
+
+			array ('isUnsignedInteger', -2, FALSE, FALSE),
+			array ('isUnsignedInteger', -1.5, FALSE, FALSE),
+			array ('isUnsignedInteger', -1, FALSE, FALSE),
+			array ('isUnsignedInteger', 0, FALSE, FALSE), // explicit 2nd argument
+			array ('isUnsignedInteger', 0.0, FALSE, FALSE),
+			array ('isUnsignedInteger', 1, FALSE, TRUE),
+			array ('isUnsignedInteger', 1.5, FALSE, FALSE),
+			array ('isUnsignedInteger', 2, FALSE, TRUE),
+			array ('isUnsignedInteger', NULL, FALSE, FALSE),
+			array ('isUnsignedInteger', FALSE, FALSE, FALSE),
+			array ('isUnsignedInteger', TRUE, FALSE, FALSE),
+			array ('isUnsignedInteger', '', FALSE, FALSE),
+			array ('isUnsignedInteger', '-2', FALSE, FALSE),
+			array ('isUnsignedInteger', '-1.5', FALSE, FALSE),
+			array ('isUnsignedInteger', '-1', FALSE, FALSE),
+			array ('isUnsignedInteger', '0', FALSE, FALSE), // explicit 2nd argument
+			array ('isUnsignedInteger', '0.0', FALSE, FALSE),
+			array ('isUnsignedInteger', '1', FALSE, TRUE),
+			array ('isUnsignedInteger', '1.5', FALSE, FALSE),
+			array ('isUnsignedInteger', '2', FALSE, TRUE),
+			array ('isUnsignedInteger', -2, TRUE, FALSE),
+			array ('isUnsignedInteger', -1.5, TRUE, FALSE),
+			array ('isUnsignedInteger', -1, TRUE, FALSE),
+			array ('isUnsignedInteger', 0, TRUE, TRUE), // explicit 2nd argument
+			array ('isUnsignedInteger', 0.0, TRUE, FALSE),
+			array ('isUnsignedInteger', 1, TRUE, TRUE),
+			array ('isUnsignedInteger', 1.5, TRUE, FALSE),
+			array ('isUnsignedInteger', 2, TRUE, TRUE),
+			array ('isUnsignedInteger', NULL, TRUE, FALSE),
+			array ('isUnsignedInteger', FALSE, TRUE, FALSE),
+			array ('isUnsignedInteger', TRUE, TRUE, FALSE),
+			array ('isUnsignedInteger', '', TRUE, FALSE),
+			array ('isUnsignedInteger', '-2', TRUE, FALSE),
+			array ('isUnsignedInteger', '-1.5', TRUE, FALSE),
+			array ('isUnsignedInteger', '-1', TRUE, FALSE),
+			array ('isUnsignedInteger', '0', TRUE, TRUE), // explicit 2nd argument
+			array ('isUnsignedInteger', '0.0', TRUE, FALSE),
+			array ('isUnsignedInteger', '1', TRUE, TRUE),
+			array ('isUnsignedInteger', '1.5', TRUE, FALSE),
+			array ('isUnsignedInteger', '2', TRUE, TRUE),
+
+			// explicit 2nd argument
+			array ('colorHex2Rgb', '000000', FALSE, '0,0,0'),
+			array ('colorHex2Rgb', 'FFFFFF', FALSE, '255,255,255'),
+			array ('colorHex2Rgb', '800000', FALSE, '128,0,0'),
+			array ('colorHex2Rgb', '008000', FALSE, '0,128,0'),
+			array ('colorHex2Rgb', '000080', FALSE, '0,0,128'),
+			array ('colorHex2Rgb', '000000', TRUE, '128,128,128'),
+			array ('colorHex2Rgb', 'FFFFFF', TRUE, '255,255,255'),
+			array ('colorHex2Rgb', '800000', TRUE, '192,128,128'),
+			array ('colorHex2Rgb', '008000', TRUE, '128,192,128'),
+			array ('colorHex2Rgb', '000080', TRUE, '128,128,192'),
+
+			array ('SQLDateFromDateStr', '11/12/13', '%d/%m/%y', '2013-12-11'),
+			array ('SQLDateFromDateStr', '2.3.4', '%d.%m.%y', '2004-03-02'),
+			array ('SQLDateFromDateStr', '08.07.1983', '%d.%m.%Y', '1983-07-08'),
+
+			array ('cmpSQLDates', '1927-05-17', '2013-09-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-09-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '2013-09-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-05-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-09-17', '2013-05-21', -1),
+			array ('cmpSQLDates', '1927-09-17', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-09-21', '2013-05-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-09-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-09-17', -1),
+			array ('cmpSQLDates', '1927-05-21', '1927-09-17', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-05-21', -1),
+			array ('cmpSQLDates', '1927-05-17', '1927-05-17', 0),
+			array ('cmpSQLDates', '1927-05-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '1927-09-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '1927-09-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '1927-09-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-09-21', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-09-17', 1),
+			array ('cmpSQLDates', '2013-05-21', '1927-09-17', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '2013-05-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-05-21', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-09-17', '1927-05-21', 1),
+			array ('cmpSQLDates', '2013-09-17', '1927-05-17', 1),
+			array ('cmpSQLDates', '2013-09-21', '1927-05-17', 1),
 		);
 	}
 
@@ -1126,10 +1453,34 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('l2addressForDatabase', array ('010203abcd')), // invalid length
 			array ('l2addressForDatabase', array ('010203abcdefff')), // invalid length
 			array ('l2addressForDatabase', array ('010203abcdeh')), // length OK but not hexadecimal
+			array ('l2addressForDatabase', array ('010203abcdehffff')), // idem
+			array ('l2addressForDatabase', array ('0102030405060708090a0b0c0d0e0f10111213zz')), // idem
+			array ('l2addressForDatabase', array ('00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12:zz')), // idem
+			array ('l2addressForDatabase', array ('00-01-02-03-04-05-06-07-08-09-0a-0b-0c-0d-0e-0f-10-11-12-zz')), // idem
 			array ('l2addressForDatabase', array ('0102:03ab:cdef')), // not a known format
 			array ('l2addressForDatabase', array ('01.02.03.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array (' 1. 2. 3.ab.cd.ef')), // not a known format
 			array ('l2addressForDatabase', array ('01.02.03-ab-cd:ef')), // not a known format
+			array ('l2addressForDatabase', array ('3-4-5-ab-cd-ef')), // SunOS notation uses colons, not hyphens.
+			array ('l2addressForDatabase', array ('1:2:3:4:5:ab:cd:ef')), // SunOS notation is for MAC addresses only.
+			array ('l2addressForDatabase', array ('0:1:2:3:4:5:6:7:8:9:a:b:c:d:e:f:10:11:12:13:14')), // idem
+			array ('l2addressForDatabase', array ('0-1-2-3-4-5-6-7-8-9-a-b-c-d-e-f-10-11-12-13-14')), // idem
+
+			array ('l2addressFromDatabase', array (' ')),
+			array ('l2addressFromDatabase', array (FALSE)),
+			array ('l2addressFromDatabase', array (TRUE)),
+			array ('l2addressFromDatabase', array (0)),
+			array ('l2addressFromDatabase', array (-1)),
+			array ('l2addressFromDatabase', array (1)),
+			array ('l2addressFromDatabase', array ('1')),
+			array ('l2addressFromDatabase', array ('001122')),
+			array ('l2addressFromDatabase', array ('00112233')),
+			array ('l2addressFromDatabase', array ('0011223344')),
+			array ('l2addressFromDatabase', array ('001122334455zz')), // not hex
+			array ('l2addressFromDatabase', array ('00112233445566')),
+			array ('l2addressFromDatabase', array ('00112233445566zz')), // not hex
+			array ('l2addressFromDatabase', array ('001122334455667788')),
+			array ('l2addressFromDatabase', array ('000102030405060708090A0B0C0D0E0F101112zz')), // not hex
 
 			array ('nextMACAddress', array ('010203abcdef')),
 			array ('nextMACAddress', array ('0102.03ab.cdef')),
@@ -1138,9 +1489,6 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('nextMACAddress', array ('01:02:03:ab:cd:gg')),
 			array ('nextMACAddress', array ('01:02:03:ab:cd')),
 			array ('nextMACAddress', array ('1:2:3:ab:cd:ef')),
-
-			array ('makeWhereSQL', array (array ('abc' => NULL), 'NOT')),
-			array ('makeWhereSQL', array (array(), 'AND')),
 
 			array ('ip_get_arpa', array ("\xAC\x11\xBB")),
 			array ('ip_get_arpa', array ("\xAC\x11\xBB\x00\x00")),
@@ -1151,6 +1499,17 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('goodModeForVSTRole', array ('unknown', NULL)),
 
 			array ('makeSetSQL', array (array())),
+
+			array ('assertListOfColumnNames', array (NULL)),
+			array ('assertListOfColumnNames', array (FALSE)),
+			array ('assertListOfColumnNames', array (TRUE)),
+			array ('assertListOfColumnNames', array (0)),
+			array ('assertListOfColumnNames', array ('')),
+			array ('assertListOfColumnNames', array (array())),
+			array ('assertListOfColumnNames', array (1)),
+			array ('assertListOfColumnNames', array ('one', 2)),
+			array ('assertListOfColumnNames', array ('a', 'b', '')),
+			array ('assertListOfColumnNames', array ('z', 1.2)),
 
 			// not an array
 			array ('reindexById', array (NULL)),
@@ -1177,6 +1536,41 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 			array ('groupBy', array ('', 'test')),
 			array ('groupBy', array (0, 'test')),
 			array ('groupBy', array (array (array ('id' => 1, 'name' => 'one'), 2), 'name')),
+
+			array ('parseSearchTerms', array ('one two three"')),
+			array ('parseSearchTerms', array ('"one two three')),
+			array ('parseSearchTerms', array ('one "two" "three')),
+			array ('parseSearchTerms', array ('one "" three')),
+			array ('parseSearchTerms', array ('""')),
+
+			array ('array_fetch', array (-1, 0, 0)),
+			array ('array_fetch', array (0, 0, 0)),
+			array ('array_fetch', array (1, 0, 0)),
+			array ('array_fetch', array (FALSE, 0, 0)),
+			array ('array_fetch', array (NULL, 0, 0)),
+			array ('array_fetch', array ('', 0, 0)),
+
+			array ('HTMLColorForDatabase', array (FALSE)),
+			array ('HTMLColorForDatabase', array (TRUE)),
+			array ('HTMLColorForDatabase', array (0)),
+
+			array ('HTMLColorFromDatabase', array ('')),
+			array ('HTMLColorFromDatabase', array (FALSE)),
+			array ('HTMLColorFromDatabase', array (TRUE)),
+			array ('HTMLColorFromDatabase', array (-1)),
+			array ('HTMLColorFromDatabase', array (1.0)),
+			array ('HTMLColorFromDatabase', array (10.5)),
+			array ('HTMLColorFromDatabase', array (0x01000000)),
+			array ('HTMLColorFromDatabase', array ('0x123456')),
+
+			array ('cmpSQLDates', array ('', '2010-04-05')),
+			array ('cmpSQLDates', array ('aaaa-bb-cc', '2010-04-05')),
+			array ('cmpSQLDates', array ('0000-00-00', '2010-04-05')),
+			array ('cmpSQLDates', array ('2010-13-32', '2010-04-05')),
+			array ('cmpSQLDates', array ('2010-04-05', '')),
+			array ('cmpSQLDates', array ('2010-04-05', 'aaaa-bb-cc')),
+			array ('cmpSQLDates', array ('2010-04-05', '0000-00-00')),
+			array ('cmpSQLDates', array ('2010-04-05', '2010-13-32')),
 		);
 	}
 
@@ -1184,18 +1578,27 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 	{
 		return array
 		(
-			array (array ('one' => 1), 'AND', 'one=?', array (1)),
-			array (array ('one' => NULL), 'AND', 'one IS NULL', array()),
-			array (array ('one' => 1, 'two' => 2), 'AND', 'one=? AND two=?', array (1, 2)),
-			array (array ('one' => NULL, 'two' => 2), 'AND', 'one IS NULL AND two=?', array (2)),
-			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', 'one=? OR two=? OR three=?', array (1, 2, 3)),
+			array (array ('one' => 1), 'AND', '`one` = ?', array (1)),
+			array (array ('one' => NULL), 'AND', '`one` IS NULL', array()),
+			array (array ('one' => 1, 'two' => 2), 'AND', '`one` = ? AND `two` = ?', array (1, 2)),
+			array (array ('one' => NULL, 'two' => 2), 'AND', '`one` IS NULL AND `two` = ?', array (2)),
+			array (array ('one' => 1, 'two' => 2, 'three' => 3), 'OR', '`one` = ? OR `two` = ? OR `three` = ?', array (1, 2, 3)),
 			array
 			(
 				array ('a' => array ('a.1', 'a.2', 'a.3'), 'b' => array (0, 10, 20, 30)),
 				'OR',
-				'a IN(?, ?, ?) OR b IN(?, ?, ?, ?)',
+				'`a` IN(?, ?, ?) OR `b` IN(?, ?, ?, ?)',
 				array ('a.1', 'a.2', 'a.3', 0, 10, 20, 30)
 			),
+		);
+	}
+
+	public function providerMakeWhereSQLIAE ()
+	{
+		return array
+		(
+			array (array ('abc' => NULL), 'NOT'),
+			array (array(), 'AND'),
 		);
 	}
 
@@ -1209,4 +1612,3 @@ class PureFunctionTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-?>

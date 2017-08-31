@@ -1,12 +1,12 @@
 <?php
 
-class ConfigVarTest extends PHPUnit_Framework_TestCase
+class ConfigVarTest extends RTTestCase
 {
 	private $varname;
 
 	public function setUp ()
 	{
-		$this->varname = sprintf ('testvar-%s-%u', get_class(), getmypid());
+		$this->varname = $this->myString ('testvar');
 		usePreparedInsertBlade
 		(
 			'Config',
@@ -153,5 +153,3 @@ class ConfigVarTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-
-?>

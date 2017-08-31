@@ -1,7 +1,7 @@
 <?php
 
 // Verify that some recursive functions return the correct data set 
-class GetChildrenListTest extends PHPUnit_Framework_TestCase
+class GetChildrenListTest extends RTTestCase
 {
 	protected static $num_children = 10;
 	protected static $objtype_id;
@@ -92,4 +92,3 @@ class GetChildrenListTest extends PHPUnit_Framework_TestCase
 		$this->assertCount (self::$num_children, $children);
 	}
 }
-?>

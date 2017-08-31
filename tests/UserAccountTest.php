@@ -1,6 +1,6 @@
 <?php
 
-class UserAccountTest extends PHPUnit_Framework_TestCase
+class UserAccountTest extends RTTestCase
 {
 	const PSWDHASH = 'f7563fd105b011264532ef2d405082015bed948e';
 	const REALNAME = 'Test User Account';
@@ -9,7 +9,7 @@ class UserAccountTest extends PHPUnit_Framework_TestCase
 
 	public function setUp ()
 	{
-		$this->user_name = sprintf ('testuser-%s-%u', get_class(), getmypid());
+		$this->user_name = $this->myString ('testuser');
 		$this->user_id = commitCreateUserAccount ($this->user_name, self::REALNAME, self::PSWDHASH);
 	}
 
@@ -52,5 +52,3 @@ class UserAccountTest extends PHPUnit_Framework_TestCase
 		commitCreateUserAccount ($this->user_name, 'x' . self::REALNAME, sha1 (self::PSWDHASH));
 	}
 }
-
-?>

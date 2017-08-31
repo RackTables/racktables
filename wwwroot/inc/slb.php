@@ -730,5 +730,3 @@ function getRSListInPool ($rspool_id)
 	}
 	return $ret;
 }
-
-?>

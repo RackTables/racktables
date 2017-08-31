@@ -585,7 +585,7 @@ function getPopupSLBConfig ($row)
 	if (! $js_added)
 	{
 		addJS ('js/jquery.thumbhover.js');
-		addJS (<<<END
+		addJS (<<<'END'
 $(document).ready (function () {
 	$('.slbconf-btn').each (function () {
 		$(this).thumbPopup($(this).siblings('.slbconf.popup-box'), { showFreezeHint: false });

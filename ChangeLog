@@ -1,4 +1,27 @@
-0.20.12
+0.21.0
+	update: display MySQL warnings in debug mode
+	update: better display objects that have no common name
+	update: highlight RackCode syntax in the Permissions viewer too
+	update: refine delivery of rack thumb images
+	update: new plugin architecture
+	update: add support for IP-over-InfiniBand L2 addresses
+	bugfix: put dictionary-based attributes formatting right
+	bugfix: date attributes now can be set for racks, rows and locations
+	new feature: tag colors (GH#158 by Maik Ehinger)
+0.20.14 2017-08-10
+	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
+	update: suppress the rackspace portlet column if it is empty
+	update: refine items in the dictionary (e.g. SuperMicro and EMC)
+	update: adjust some code for easier customization
+	update: improve some error messages
+0.20.13 2017-05-12
+	update: fix performance for pages with images (GH#190 by Michael A. Mikhailov)
+	update: improve SNMP support for Brocade devices (GH#180 by Chris Jones)
+	update: imply %u for port labels too (Mantis#1739 by Gianluca Laudano)
+	update: switch the Cisco UCS gateway to the new API (by Brian Pothier)
+	update: display port inner type when port outer type is ambiguous in Object's "Ports" tab
+	bugfix: address an upgrade failure related to triggers (Mantis#1733)
+0.20.12 2017-02-08
 	bugfix: common name for blade server(utf-8) was shown incorrectly in racks (by Artem Yankovskiy)
 	bugfix: throwing a undeclared 'ParseError' exception from RackCode parser
 	bugfix: LLDP discovery for Cisco IOS: fix the case when remote device name length is 20 chars
@@ -10,6 +33,7 @@
 	bugfix: DB lock on LDAP cache hit was still waiting all pending LDAP queries of other users to complete
 	update: Huawei telnet gateway uses the 'terminal echo-mode line' command
 	update: Nexus 7700, Huawei S5700, Juniper QFX, Mellanox, Quanta, Ixia device models added into dictionary
+	update: SNMP sync support for Huawei CE5850-HI/CE6870
 	update: Cmd+Click now inverses tag selection on OS X like Ctrl+Click does on Windows/Linix
 	update: explain usage particulars for each tag on the editor tab
 	update: increase HTML SELECT maximum width (#1611)
@@ -18,6 +42,9 @@
 	update: add 1000Base-BX40 and 1000Base-BX80 port types (#1645)
 	update: upgrade CodeMirror from 3.22 to 3.24
 	update: include file timestamps in the mouse hint (#1663)
+	update: add support for double quotes in the search string
+	update: new modular port type 'QSFP28'
+	update: port type 'empty QSFP+' renamed to 'empty QSFP' to be used both by 'QSFP+' and 'QSFP28' modular ports
 0.20.11 2016-02-07
 	bugfix: Tag Picker does not display the full tag list as a tree (#1403)
 	bugfix: race conditions in 802.Q deploy (switch remained synced after recalc)

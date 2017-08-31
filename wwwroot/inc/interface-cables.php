@@ -295,5 +295,3 @@ function renderPatchCableOIFCompatEditor()
 	);
 	echo '<br>';
 }
-
-?>

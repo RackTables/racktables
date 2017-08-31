@@ -291,6 +291,15 @@ $image['link disabled']['height'] = 16;
 $image['16x16t']['path'] = 'pix/1x1t.gif';
 $image['16x16t']['width'] = 16;
 $image['16x16t']['height'] = 16;
+$image['disable']['path'] = 'pix/link-disabled.png';
+$image['disable']['width'] = 16;
+$image['disable']['height'] = 16;
+$image['enable']['path'] = 'pix/link-up.png';
+$image['enable']['width'] = 16;
+$image['enable']['height'] = 16;
+$image['upgrade']['path'] = 'pix/tango-go-up.png';
+$image['upgrade']['width'] = 16;
+$image['upgrade']['height'] = 16;
 
 $page_by_realm = array();
 $page_by_realm['object'] = 'depot';
@@ -335,7 +344,8 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	{
 		foreach ($optionList as $key => $value)
 			break;
-		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" . $value;
+		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" .
+			stringForLabel ($value, 64);
 	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
@@ -391,7 +401,7 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 	(
 		'choose' => 'select...',
 		'empty_value' => '',
-		'indexed' => true,
+		'indexed' => TRUE,
 	);
 	addJS ('js/jquery.optionTree.js');
 	addJS ("
@@ -414,26 +424,33 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE)
 function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
-	if (!isset ($image[$tag]))
-		$tag = 'error';
-	$img = $image[$tag];
-	$img['path'] = '?module=chrome&uri=' . $img['path'];
-	if ($do_input == TRUE)
-		return
-			"<input type=image name=submit class=icon " .
-			"src='${img['path']}' " .
-			"border=0 " .
-			($title == '' ? '' : " title='${title}'") . // JT: Add title to input hrefs too
-			">";
+	$attrs = array
+	(
+		'src' => array_key_exists ($tag, $image) ?
+			'?module=chrome&uri=' . $image[$tag]['path'] :
+			'?module=image&img=error',
+		'border' => 0,
+	);
+	if ($title != '')
+		$attrs['title'] = $title;
+	if ($do_input)
+	{
+		$element = 'input';
+		$attrs['type'] = 'image';
+		$attrs['name'] = 'submit';
+		$attrs['class'] = 'icon';
+		// Width and height for INPUT only appear in HTML 5.
+	}
 	else
-		return
-			"<img " .
-			"src='${img['path']}' " .
-			"width=${img['width']} " .
-			"height=${img['height']} " .
-			"border=0 " .
-			($title == '' ? '' : "title='${title}'") .
-			">";
+	{
+		$element = 'img';
+		if (array_key_exists ($tag, $image))
+		{
+			$attrs['width'] = $image[$tag]['width'];
+			$attrs['height'] = $image[$tag]['height'];
+		}
+	}
+	return makeHtmlTag ($element, $attrs);
 }
 
 function escapeString ($value, $do_db_escape = FALSE)
@@ -743,6 +760,8 @@ function getTagClassName ($tagid)
 	foreach ($taglist[$tagid]['trace'] as $parent)
 		$class .= 'tag-' . $parent . ' ';
 	$class .= 'tag-' . $tagid . ' etag-' . $tagid;
+
+	$class .= getTagClass ($taglist[$tagid]);
 
 	return $class;
 }
@@ -1106,25 +1125,25 @@ function printTagsPicker ($preselect=NULL)
 		printf ('(None exist yet, %s?)', mkA ('configure', 'tagtree', NULL, 'edit'));
 		return;
 	}
-	printTagsPickerInput ();
-	printTagsPickerUl ($preselect);
+	printTagsPickerInput ('taglist');
+	printTagsPickerUl ('taglist', $preselect);
 	enableTagsPicker ();
 }
 
-function printTagsPickerInput ($input_name="taglist")
+function printTagsPickerInput ($input_name)
 {
 	# use data-attribute as identifier for tagit
 	echo "<input type='text' data-tagit-valuename='" . $input_name . "' data-tagit='yes' placeholder='new tags here...' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true'>";
 	echo "<span title='show tag tree' class='icon-folder-open tagit_input_" . $input_name . "'></span>";
 }
 
-function printTagsPickerUl ($preselect=NULL, $input_name="taglist")
+function printTagsPickerUl ($input_name, $preselect = NULL)
 {
 	global $target_given_tags;
 	if ($preselect === NULL)
 		$preselect = $target_given_tags;
-	foreach ($preselect as $key => $value) # readable time format
-		$preselect[$key]['time_parsed'] = formatAge ($value['time']);
+	foreach (array_keys ($preselect) as $key)
+		$preselect[$key]['time_parsed'] = formatAge ($preselect[$key]['time']); # readable time format
 	usort ($preselect, 'cmpTags');
 	$preselect_hidden = "";
 	foreach ($preselect as $value){
@@ -1146,7 +1165,11 @@ function enableTagsPicker ()
 	{
 		$taglist_filtered = array();
 		foreach ($taglist as $key => $taginfo) # remove unused fields
+		{
 			$taglist_filtered[$key] = array_sub ($taginfo, array("tag", "is_assignable", "trace"));
+			if ($taginfo['color'] != NULL)
+				$taglist_filtered[$key]['tagclass'] = getTagClass ($taginfo);
+		}
 		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
 		$taglist_inserted = TRUE;
 	}
@@ -1175,4 +1198,90 @@ function makeHtmlTag ($tagname, $attributes = array())
 	return $ret;
 }
 
-?>
+function showMySQLWarnings()
+{
+	global $debug_mode, $rtdebug_mysql_warnings;
+	if (! isset ($debug_mode) || ! $debug_mode || ! isset ($rtdebug_mysql_warnings))
+		return;
+	foreach ($rtdebug_mysql_warnings as $each)
+	{
+		$text = $each['Code'] . ': ' . $each['Message'];
+		switch ($each['Level'])
+		{
+		case 'Warning':
+			showWarning ($text);
+			break;
+		case 'Note':
+			showNotice ($text);
+			break;
+		default:
+			showError ($text);
+			break;
+		}
+	}
+	$rtdebug_mysql_warnings = array();
+}
+
+function getObjectClass ($object, $extrastyle = '')
+{
+	if (! array_key_exists ('colors', $object) || ! count ($object['colors']))
+		return '';
+	$step = 100 / count ($object['colors']);
+	$percent = 0;
+	$gradient = '';
+	foreach ($object['colors'] as $color)
+	{
+		$rgb = colorHex2Rgb ($color);
+		$gradient .= "rgba($rgb,0.2) $percent%, rgba($rgb,0.3) " . round ($percent + $step) . "%,";
+		$percent += $step;
+	}
+	$style = "${extrastyle}background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
+	return getCachedCSSClassForStyle ("objectcolor-${object['id']}", $style);
+}
+
+function getTagClass ($taginfo)
+{
+	if (! array_key_exists ('color', $taginfo) || $taginfo['color'] === NULL)
+		return '';
+	$rgb = colorHex2Rgb ($taginfo['color'], TRUE);
+	return getCachedCSSClassForStyle ("tagcolor-${taginfo['id']}", "background: rgb($rgb);");
+}
+
+// This function has a side effect: it adds inline CSS.
+function getCachedCSSClassForStyle ($class, $style)
+{
+	static $cache = array();
+	$cachedclass = array_search ($style, $cache);
+	if ($cachedclass !== FALSE)
+		return " $cachedclass";
+	addCSS (".{$class} {{$style}}", TRUE);
+	$cache[$class] = $style;
+	return " $class";
+}
+
+function colorHex2Rgb($color, $pastel = FALSE)
+{
+	$color = trim ($color, '#');
+
+	if ($pastel)
+	{
+		$rgb = round ((hexdec (substr ($color, 0, 2)) + 255) / 2) . ',';
+		$rgb .= round ((hexdec (substr ($color, 2, 2)) + 255) / 2) . ',';
+		$rgb .= round ((hexdec (substr ($color, 4, 2)) + 255) / 2);
+	}
+	else
+		$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
+
+	return $rgb;
+}
+
+function setEntityColors(&$entity)
+{
+	$entity['colors'] = array();
+	foreach ($entity['etags'] as $taginfo)
+		if ($taginfo['color'] !== NULL && ! in_array ($taginfo['color'], $entity['colors']))
+		{
+			$entity['colors'][] = $taginfo['color'];
+			getTagClass ($taginfo); // set tag CSS class
+		}
+}

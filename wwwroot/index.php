@@ -73,7 +73,7 @@ try {
 		# The difference between "image" and "download" ways to serve the same
 		# picture file is that the former is used in <IMG SRC=...> construct,
 		# and the latter is accessed as a standalone URL and can reply with any
-		# Content-type. Hence "image" module indicates failures with internally
+		# Content-Type. Hence "image" module indicates failures with internally
 		# built images, and "download" can return a full-fledged "permission
 		# denied" or "exception" HTML page instead of the file requested.
 		require_once 'inc/init.php'; // for authentication check
@@ -248,6 +248,13 @@ try {
 			ob_clean();
 			showError ('Operation not permitted');
 		}
+		catch (Exception $e)
+		{
+			ob_clean();
+			printException ($e);
+			break;
+		}
+		showMySQLWarnings();
 		redirectUser ($location);
 		// any other error requires no special handling and will be caught outside
 		break;
@@ -297,4 +304,3 @@ catch (Exception $e)
 	ob_end_clean();
 	printException ($e);
 }
-?>

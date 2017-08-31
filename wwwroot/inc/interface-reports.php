@@ -344,7 +344,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Children (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Child Type</th><th>Child ID</th></tr>\n";
+		echo "<tr><th>Parent</th><th>Child Type</th><th class=tdright>Child ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['parent_entity_type']);
@@ -360,7 +360,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${parent_name}</td>";
 			echo "<td>${orphan['child_entity_type']}</td>";
-			echo "<td>${orphan['child_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -388,7 +388,7 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('EntityLink: Missing Parents (' . count ($orphans) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
+		echo "<tr><th>Child</th><th>Parent Type</th><th class=tdright>Parent ID</th></tr>\n";
 		foreach ($orphans as $orphan)
 		{
 			$realm_name = formatRealmName ($orphan['child_entity_type']);
@@ -404,7 +404,7 @@ function renderDataIntegrityReport ()
 			echo '<tr>';
 			echo "<td>${realm_name}: ${child_name}</td>";
 			echo "<td>${orphan['parent_entity_type']}</td>";
-			echo "<td>${orphan['parent_entity_id']}</td>";
+			echo "<td class=tdright>${orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -429,17 +429,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('AttributeMap: Invalid Mappings (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Attribute</th><th>Chapter</th><th>Object TypeID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['attr_name']}</td>";
-			echo "<td>${orphan['chapter_name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Attribute', 'row_key' => 'attr_name'),
+			array ('th_text' => 'Chapter', 'row_key' => 'chapter_name'),
+			array ('th_text' => 'Object TypeID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -457,17 +453,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
-			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Name', 'row_key' => 'name'),
+			array ('th_text' => 'Type ID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -485,17 +477,13 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('ObjectHistory: Invalid Types (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>ID</th><th>Name</th><th>Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['id']}</td>";
-			echo "<td>${orphan['name']}</td>";
-			echo "<td>${orphan['objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Name', 'row_key' => 'name'),
+			array ('th_text' => 'Type ID', 'row_key' => 'objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -515,18 +503,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Object Container Compatibility rules: Invalid Parent or Child Type (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Parent</th><th>Parent Type ID</th><th>Child</th><th>Child Type ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			echo '<tr>';
-			echo "<td>${orphan['parent_name']}</td>";
-			echo "<td>${orphan['parent_objtype_id']}</td>";
-			echo "<td>${orphan['child_name']}</td>";
-			echo "<td>${orphan['child_objtype_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Parent', 'row_key' => 'parent_name'),
+			array ('th_text' => 'Parent Type ID', 'row_key' => 'parent_objtype_id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Child', 'row_key' => 'child_name'),
+			array ('th_text' => 'Child Type ID', 'row_key' => 'child_objtype_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -551,18 +535,14 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Violate Object Container Compatibility rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Contained Obj Name</th><th>Contained Obj Type</th><th>Container Obj Name</th><th>Container Obj Type</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td>${invalid['child_name']}</td>";
-			echo "<td>${invalid['child_type']}</td>";
-			echo "<td>${invalid['parent_name']}</td>";
-			echo "<td>${invalid['parent_type']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Contained Obj Name', 'row_key' => 'child_name'),
+			array ('th_text' => 'Contained Obj Type', 'row_key' => 'child_type'),
+			array ('th_text' => 'Container Obj Name', 'row_key' => 'parent_name'),
+			array ('th_text' => 'Container Obj Type', 'row_key' => 'parent_type'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -588,20 +568,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Port Links: Violate Port Compatibility Rules (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Object A</th><th>Port A Name</th><th>Port A Type</th><th>Object B</th><th>Port B Name</th><th>Port B Type</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td>${invalid['obja_name']}</td>";
-			echo "<td>${invalid['porta_name']}</td>";
-			echo "<td>${invalid['porta_type']}</td>";
-			echo "<td>${invalid['objb_name']}</td>";
-			echo "<td>${invalid['portb_name']}</td>";
-			echo "<td>${invalid['portb_type']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'Object A', 'row_key' => 'obja_name'),
+			array ('th_text' => 'Port A Name', 'row_key' => 'porta_name'),
+			array ('th_text' => 'Port A Type', 'row_key' => 'porta_type'),
+			array ('th_text' => 'Object B', 'row_key' => 'objb_name'),
+			array ('th_text' => 'Port B Name', 'row_key' => 'portb_name'),
+			array ('th_text' => 'Port B Type', 'row_key' => 'portb_type'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -639,18 +615,15 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('TagStorage: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Tag</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
-		foreach ($orphans as $orphan)
-		{
-			$realm_name = formatRealmName ($orphan['entity_realm']);
-			echo '<tr>';
-			echo "<td>${orphan['tag']}</td>";
-			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		foreach (array_keys ($orphans) as $key)
+			$orphans[$key]['realm_name'] = formatRealmName ($orphans[$key]['entity_realm']);
+		$columns = array
+		(
+			array ('th_text' => 'Tag', 'row_key' => 'tag'),
+			array ('th_text' => 'Parent Type', 'row_key' => 'realm_name'),
+			array ('th_text' => 'Parent ID', 'row_key' => 'entity_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
@@ -663,7 +636,7 @@ function renderDataIntegrityReport ()
 	{
 		$result = usePreparedSelectBlade
 		(
-			'SELECT FL.entity_type, FL.entity_id, F.name FROM FileLink FL ' .
+			'SELECT FL.entity_type, FL.entity_id, F.id FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
 			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
 			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
@@ -677,160 +650,176 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('FileLink: Missing Parents (' . count ($orphans) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>File</th><th>Parent Type</th><th>Parent ID</th></tr>\n";
-		foreach ($orphans as $orphan)
+		foreach (array_keys ($orphans) as $key)
 		{
-			$realm_name = formatRealmName ($orphan['entity_type']);
-			echo '<tr>';
-			echo "<td>${orphan['name']}</td>";
-			echo "<td>${realm_name}</td>";
-			echo "<td>${orphan['entity_id']}</td>";
-			echo "</tr>\n";
+			$orphans[$key]['name'] = mkCellA (spotEntity ('file', $orphans[$key]['id']));
+			$orphans[$key]['realm_name'] = formatRealmName ($orphans[$key]['entity_type']);
 		}
-		echo "</table>\n";
+		$columns = array
+		(
+			array ('th_text' => 'File', 'row_key' => 'name', 'td_escape' => FALSE),
+			array ('th_text' => 'Parent Type', 'row_key' => 'realm_name'),
+			array ('th_text' => 'Parent ID', 'row_key' => 'entity_id', 'td_class' => 'tdright'),
+		);
+		renderTableViewer ($columns, $orphans);
 		finishPortLet ();
 	}
 
-	// check 8: missing triggers
-	$triggers= array
+	// check 8: triggers
+	$known_triggers= array
 	(
-		'Link-before-insert' => 'Link',
-		'Link-before-update' => 'Link'
+		array ('trigger_name' => 'Link-before-insert', 'table_name' => 'Link'),
+		array ('trigger_name' => 'Link-before-update', 'table_name' => 'Link'),
+		array ('trigger_name' => 'EntityLink-before-insert', 'table_name' => 'EntityLink'),
+		array ('trigger_name' => 'EntityLink-before-update', 'table_name' => 'EntityLink'),
 	);
+	$known_triggers = reindexById ($known_triggers, 'trigger_name');
+
 	$result = usePreparedSelectBlade
 	(
-		'SELECT TRIGGER_NAME, EVENT_OBJECT_TABLE ' .
+		'SELECT TRIGGER_NAME AS trigger_name, EVENT_OBJECT_TABLE AS table_name ' .
 		'FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = SCHEMA()'
 	);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	$existing_triggers = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'trigger_name');
 	unset ($result);
-	$existing_triggers = $missing_triggers = array ();
-	foreach ($rows as $row)
-		$existing_triggers[$row['TRIGGER_NAME']] = $row['EVENT_OBJECT_TABLE'];
-	foreach ($triggers as $trigger => $table)
-		if (! array_key_exists ($trigger, $existing_triggers))
-			$missing_triggers[$trigger] = $table;
+
+	$missing_triggers = array_diff_key ($known_triggers, $existing_triggers);
+	$unknown_triggers = array_diff_key ($existing_triggers, $known_triggers);
+	$columns = array
+	(
+		array ('th_text' => 'Table', 'row_key' => 'table_name'),
+		array ('th_text' => 'Trigger', 'row_key' => 'trigger_name'),
+	);
+
 	if (count ($missing_triggers))
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Triggers (' . count ($missing_triggers) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Table</th><th>Trigger</th></tr>\n";
-		foreach ($missing_triggers as $trigger => $table)
-		{
-			echo '<tr>';
-			echo "<td>${table}</td>";
-			echo "<td>${trigger}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		renderTableViewer ($columns, $missing_triggers);
 		finishPortLet ();
 	}
 
-	// check 9: missing foreign keys
-	$fkeys= array
+	if (count ($unknown_triggers))
+	{
+		$violations = TRUE;
+		startPortlet ('Unknown Triggers (' . count ($unknown_triggers) . ')');
+		renderTableViewer ($columns, $unknown_triggers);
+		finishPortLet ();
+	}
+
+	// check 9: foreign keys
+	$known_fkeys = array
 	(
-		'Atom-FK-molecule_id' => 'Atom',
-		'Atom-FK-rack_id' => 'Atom',
-		'AttributeMap-FK-chapter_id' => 'AttributeMap',
-		'AttributeMap-FK-attr_id' => 'AttributeMap',
-		'AttributeValue-FK-map' => 'AttributeValue',
-		'AttributeValue-FK-object' => 'AttributeValue',
-		'CachedPAV-FK-object-port' => 'CachedPAV',
-		'CachedPAV-FK-vlan_id' => 'CachedPAV',
-		'CachedPNV-FK-compound' => 'CachedPNV',
-		'CachedPVM-FK-object_id' => 'CachedPVM',
-		'CactiGraph-FK-server_id' => 'CactiGraph',
-		'CactiGraph-FK-server_id' => 'CactiGraph',
-		'Dictionary-FK-chapter_id' => 'Dictionary',
-		'FileLink-File_fkey' => 'FileLink',
-		'IPv4Allocation-FK-object_id' => 'IPv4Allocation',
-		'IPv4LB-FK-vs_id' => 'IPv4LB',
-		'IPv4LB-FK-object_id' => 'IPv4LB',
-		'IPv4LB-FK-rspool_id' => 'IPv4LB',
-		'IPv4NAT-FK-object_id' => 'IPv4NAT',
-		'IPv4RS-FK' => 'IPv4RS',
-		'IPv6Allocation-FK-object_id' => 'IPv6Allocation',
-		'Link-FK-a' => 'Link',
-		'Link-FK-b' => 'Link',
-		'MountOperation-FK-object_id' => 'MountOperation',
-		'MountOperation-FK-old_molecule_id' => 'MountOperation',
-		'MountOperation-FK-new_molecule_id' => 'MountOperation',
-		'MuninGraph-FK-server_id' => 'MuninGraph',
-		'MuninGraph-FK-server_id' => 'MuninGraph',
-		'ObjectHistory-FK-object_id' => 'ObjectHistory',
-		'ObjectLog-FK-object_id' => 'ObjectLog',
-		'PatchCableConnectorCompat-FK-connector_id' => 'PatchCableConnectorCompat',
-		'PatchCableConnectorCompat-FK-pctype_id' => 'PatchCableConnectorCompat',
-		'PatchCableHeap-FK-compat1' => 'PatchCableHeap',
-		'PatchCableHeap-FK-compat2' => 'PatchCableHeap',
-		'PatchCableHeapLog-FK-heap_id' => 'PatchCableHeapLog',
-		'PatchCableOIFCompat-FK-oif_id' => 'PatchCableOIFCompat',
-		'PatchCableOIFCompat-FK-pctype_id' => 'PatchCableOIFCompat',
-		'Port-FK-iif-oif' => 'Port',
-		'Port-FK-object_id' => 'Port',
-		'PortAllowedVLAN-FK-object-port' => 'PortAllowedVLAN',
-		'PortAllowedVLAN-FK-vlan_id' => 'PortAllowedVLAN',
-		'PortCompat-FK-oif_id1' => 'PortCompat',
-		'PortCompat-FK-oif_id2' => 'PortCompat',
-		'PortInterfaceCompat-FK-iif_id' => 'PortInterfaceCompat',
-		'PortInterfaceCompat-FK-oif_id' => 'PortInterfaceCompat',
-		'PortLog_ibfk_1' => 'PortLog',
-		'PortNativeVLAN-FK-compound' => 'PortNativeVLAN',
-		'PortVLANMode-FK-object-port' => 'PortVLANMode',
-		'RackSpace-FK-rack_id' => 'RackSpace',
-		'RackSpace-FK-object_id' => 'RackSpace',
-		'TagStorage-FK-TagTree' => 'TagStorage',
-		'TagTree-K-parent_id' => 'TagTree',
-		'UserConfig-FK-varname' => 'UserConfig',
-		'VLANDescription-FK-domain_id' => 'VLANDescription',
-		'VLANDescription-FK-vlan_id' => 'VLANDescription',
-		'VLANIPv4-FK-compound' => 'VLANIPv4',
-		'VLANIPv4-FK-ipv4net_id' => 'VLANIPv4',
-		'VLANIPv6-FK-compound' => 'VLANIPv6',
-		'VLANIPv6-FK-ipv6net_id' => 'VLANIPv6',
-		'VLANSTRule-FK-vst_id' => 'VLANSTRule',
-		'VLANSwitch-FK-domain_id' => 'VLANSwitch',
-		'VLANSwitch-FK-object_id' => 'VLANSwitch',
-		'VLANSwitch-FK-template_id' => 'VLANSwitch',
-		'VSEnabledIPs-FK-object_id' => 'VSEnabledIPs',
-		'VSEnabledIPs-FK-rspool_id' => 'VSEnabledIPs',
-		'VSEnabledIPs-FK-vs_id-vip' => 'VSEnabledIPs',
-		'VSEnabledPorts-FK-object_id' => 'VSEnabledPorts',
-		'VSEnabledPorts-FK-rspool_id' => 'VSEnabledPorts',
-		'VSEnabledPorts-FK-vs_id-proto-vport' => 'VSEnabledPorts',
-		'VSIPs-vs_id' => 'VSIPs',
-		'VS-vs_id' => 'VSPorts'
+		array ('fkey_name' => 'Atom-FK-molecule_id', 'table_name' => 'Atom'),
+		array ('fkey_name' => 'Atom-FK-rack_id', 'table_name' => 'Atom'),
+		array ('fkey_name' => 'AttributeMap-FK-chapter_id', 'table_name' => 'AttributeMap'),
+		array ('fkey_name' => 'AttributeMap-FK-attr_id', 'table_name' => 'AttributeMap'),
+		array ('fkey_name' => 'AttributeValue-FK-map', 'table_name' => 'AttributeValue'),
+		array ('fkey_name' => 'AttributeValue-FK-object', 'table_name' => 'AttributeValue'),
+		array ('fkey_name' => 'CachedPAV-FK-object-port', 'table_name' => 'CachedPAV'),
+		array ('fkey_name' => 'CachedPAV-FK-vlan_id', 'table_name' => 'CachedPAV'),
+		array ('fkey_name' => 'CachedPNV-FK-compound', 'table_name' => 'CachedPNV'),
+		array ('fkey_name' => 'CachedPVM-FK-object_id', 'table_name' => 'CachedPVM'),
+		array ('fkey_name' => 'Dictionary-FK-chapter_id', 'table_name' => 'Dictionary'),
+		array ('fkey_name' => 'FileLink-File_fkey', 'table_name' => 'FileLink'),
+		array ('fkey_name' => 'IPv4Allocation-FK-object_id', 'table_name' => 'IPv4Allocation'),
+		array ('fkey_name' => 'IPv4LB-FK-vs_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4LB-FK-object_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4LB-FK-rspool_id', 'table_name' => 'IPv4LB'),
+		array ('fkey_name' => 'IPv4NAT-FK-object_id', 'table_name' => 'IPv4NAT'),
+		array ('fkey_name' => 'IPv4RS-FK', 'table_name' => 'IPv4RS'),
+		array ('fkey_name' => 'IPv6Allocation-FK-object_id', 'table_name' => 'IPv6Allocation'),
+		array ('fkey_name' => 'Link-FK-a', 'table_name' => 'Link'),
+		array ('fkey_name' => 'Link-FK-b', 'table_name' => 'Link'),
+		array ('fkey_name' => 'MountOperation-FK-object_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'MountOperation-FK-old_molecule_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'MountOperation-FK-new_molecule_id', 'table_name' => 'MountOperation'),
+		array ('fkey_name' => 'ObjectHistory-FK-object_id', 'table_name' => 'ObjectHistory'),
+		array ('fkey_name' => 'ObjectLog-FK-object_id', 'table_name' => 'ObjectLog'),
+		array ('fkey_name' => 'PatchCableConnectorCompat-FK-connector_id', 'table_name' => 'PatchCableConnectorCompat'),
+		array ('fkey_name' => 'PatchCableConnectorCompat-FK-pctype_id', 'table_name' => 'PatchCableConnectorCompat'),
+		array ('fkey_name' => 'PatchCableHeap-FK-compat1', 'table_name' => 'PatchCableHeap'),
+		array ('fkey_name' => 'PatchCableHeap-FK-compat2', 'table_name' => 'PatchCableHeap'),
+		array ('fkey_name' => 'PatchCableHeapLog-FK-heap_id', 'table_name' => 'PatchCableHeapLog'),
+		array ('fkey_name' => 'PatchCableOIFCompat-FK-oif_id', 'table_name' => 'PatchCableOIFCompat'),
+		array ('fkey_name' => 'PatchCableOIFCompat-FK-pctype_id', 'table_name' => 'PatchCableOIFCompat'),
+		array ('fkey_name' => 'Port-FK-iif-oif', 'table_name' => 'Port'),
+		array ('fkey_name' => 'Port-FK-object_id', 'table_name' => 'Port'),
+		array ('fkey_name' => 'PortAllowedVLAN-FK-object-port', 'table_name' => 'PortAllowedVLAN'),
+		array ('fkey_name' => 'PortAllowedVLAN-FK-vlan_id', 'table_name' => 'PortAllowedVLAN'),
+		array ('fkey_name' => 'PortCompat-FK-oif_id1', 'table_name' => 'PortCompat'),
+		array ('fkey_name' => 'PortCompat-FK-oif_id2', 'table_name' => 'PortCompat'),
+		array ('fkey_name' => 'PortInterfaceCompat-FK-iif_id', 'table_name' => 'PortInterfaceCompat'),
+		array ('fkey_name' => 'PortInterfaceCompat-FK-oif_id', 'table_name' => 'PortInterfaceCompat'),
+		array ('fkey_name' => 'PortLog_ibfk_1', 'table_name' => 'PortLog'),
+		array ('fkey_name' => 'PortNativeVLAN-FK-compound', 'table_name' => 'PortNativeVLAN'),
+		array ('fkey_name' => 'PortVLANMode-FK-object-port', 'table_name' => 'PortVLANMode'),
+		array ('fkey_name' => 'RackSpace-FK-rack_id', 'table_name' => 'RackSpace'),
+		array ('fkey_name' => 'RackSpace-FK-object_id', 'table_name' => 'RackSpace'),
+		array ('fkey_name' => 'RackThumbnail-FK-rack_id', 'table_name' => 'RackThumbnail'),
+		array ('fkey_name' => 'TagStorage-FK-TagTree', 'table_name' => 'TagStorage'),
+		array ('fkey_name' => 'TagTree-K-parent_id', 'table_name' => 'TagTree'),
+		array ('fkey_name' => 'UserConfig-FK-varname', 'table_name' => 'UserConfig'),
+		array ('fkey_name' => 'VLANDescription-FK-domain_id', 'table_name' => 'VLANDescription'),
+		array ('fkey_name' => 'VLANDescription-FK-vlan_id', 'table_name' => 'VLANDescription'),
+		array ('fkey_name' => 'VLANDomain-FK-group_id', 'table_name' => 'VLANDomain'),
+		array ('fkey_name' => 'VLANIPv4-FK-compound', 'table_name' => 'VLANIPv4'),
+		array ('fkey_name' => 'VLANIPv4-FK-ipv4net_id', 'table_name' => 'VLANIPv4'),
+		array ('fkey_name' => 'VLANIPv6-FK-compound', 'table_name' => 'VLANIPv6'),
+		array ('fkey_name' => 'VLANIPv6-FK-ipv6net_id', 'table_name' => 'VLANIPv6'),
+		array ('fkey_name' => 'VLANSTRule-FK-vst_id', 'table_name' => 'VLANSTRule'),
+		array ('fkey_name' => 'VLANSwitch-FK-domain_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VLANSwitch-FK-object_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VLANSwitch-FK-template_id', 'table_name' => 'VLANSwitch'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-object_id', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-rspool_id', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledIPs-FK-vs_id-vip', 'table_name' => 'VSEnabledIPs'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-object_id', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-rspool_id', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSEnabledPorts-FK-vs_id-proto-vport', 'table_name' => 'VSEnabledPorts'),
+		array ('fkey_name' => 'VSIPs-vs_id', 'table_name' => 'VSIPs'),
+		array ('fkey_name' => 'VS-vs_id', 'table_name' => 'VSPorts'),
 	);
+
+	$plugins = getPlugins ('enabled');
+	foreach (array_keys ($plugins) as $plugin)
+	{
+		global ${"plugin_${plugin}_fkeys"};
+		if (isset (${"plugin_${plugin}_fkeys"}))
+			$known_fkeys = array_merge ($known_fkeys, ${"plugin_${plugin}_fkeys"});
+	}
+	$known_fkeys = reindexById ($known_fkeys, 'fkey_name');
+	ksort ($known_fkeys);
+
 	$result = usePreparedSelectBlade
 	(
-		'SELECT CONSTRAINT_NAME, TABLE_NAME ' .
+		'SELECT CONSTRAINT_NAME as fkey_name, TABLE_NAME AS table_name ' .
 		'FROM information_schema.TABLE_CONSTRAINTS ' .
 		"WHERE CONSTRAINT_SCHEMA = SCHEMA() AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
 	);
-	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	$existing_fkeys = reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'fkey_name');
 	unset ($result);
-	$existing_fkeys = $missing_fkeys = array ();
-	foreach ($rows as $row)
-		$existing_fkeys[$row['CONSTRAINT_NAME']] = $row['TABLE_NAME'];
-	foreach ($fkeys as $fkey => $table)
-		if (! array_key_exists ($fkey, $existing_fkeys))
-			$missing_fkeys[$fkey] = $table;
+	$missing_fkeys = array_diff_key ($known_fkeys, $existing_fkeys);
+	$unknown_fkeys = array_diff_key ($existing_fkeys, $known_fkeys);
+	$columns = array
+	(
+		array ('th_text' => 'Table', 'row_key' => 'table_name'),
+		array ('th_text' => 'Key', 'row_key' => 'fkey_name'),
+	);
+
 	if (count ($missing_fkeys))
 	{
 		$violations = TRUE;
 		startPortlet ('Missing Foreign Keys (' . count ($missing_fkeys) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Table</th><th>Key</th></tr>\n";
-		foreach ($missing_fkeys as $fkey => $table)
-		{
-			echo '<tr>';
-			echo "<td>${table}</td>";
-			echo "<td>${fkey}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		renderTableViewer ($columns, $missing_fkeys);
+		finishPortLet ();
+	}
+
+	if (count ($unknown_fkeys))
+	{
+		$violations = TRUE;
+		startPortlet ('Unknown Foreign Keys (' . count ($unknown_fkeys) . ')');
+		renderTableViewer ($columns, $unknown_fkeys);
 		finishPortLet ();
 	}
 
@@ -856,13 +845,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Locations: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Location</th><th>Parent ID</th><th>Parent Location</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Location</th><th class=tdright>Parent ID</th><th>Parent Location</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			echo "<td>${invalid['parent_name']}</td>";
 			echo "</tr>\n";
 		}
@@ -888,18 +877,16 @@ function renderDataIntegrityReport ()
 	{
 		$violations = TRUE;
 		startPortlet ('Objects: Tree Contains Circular References (' . count ($invalids) . ')');
-		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Contained ID</th><th>Contained Object</th><th>Container ID</th><th>Container Object</th></tr>\n";
-		foreach ($invalids as $invalid)
-		{
-			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
-			echo "<td>${invalid['name']}</td>";
-			echo "<td>${invalid['container_id']}</td>";
-			echo "<td>${invalid['container_name']}</td>";
-			echo "</tr>\n";
-		}
-		echo "</table>\n";
+		foreach (array_keys ($invalids) as $key)
+			$invalids[$key]['object'] = mkCellA ($invalids[$key]);
+		$columns = array
+		(
+			array ('th_text' => 'Contained ID', 'row_key' => 'id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Contained Object', 'row_key' => 'object', 'td_escape' => FALSE),
+			array ('th_text' => 'Container ID', 'row_key' => 'container_id', 'td_class' => 'tdright'),
+			array ('th_text' => 'Container Object', 'row_key' => 'container_name'),
+		);
+		renderTableViewer ($columns, $invalids);
 		finishPortLet ();
 	}
 
@@ -911,13 +898,13 @@ function renderDataIntegrityReport ()
 		$violations = TRUE;
 		startPortlet ('Tags: Tree Contains Circular References (' . count ($invalids) . ')');
 		echo "<table cellpadding=5 cellspacing=0 align=center class='cooltable zebra'>\n";
-		echo "<tr><th>Child ID</th><th>Child Tag</th><th>Parent ID</th><th>Parent Tag</th></tr>\n";
+		echo "<tr><th class=tdright>Child ID</th><th>Child Tag</th><th class=tdright>Parent ID</th><th>Parent Tag</th></tr>\n";
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td>${invalid['id']}</td>";
+			echo "<td class=tdright>${invalid['id']}</td>";
 			echo "<td>${invalid['tag']}</td>";
-			echo "<td>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>${invalid['parent_id']}</td>";
 			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 		}
@@ -925,8 +912,74 @@ function renderDataIntegrityReport ()
 		finishPortLet ();
 	}
 
+	// L2 addresses
+	$columns = array
+	(
+		array ('th_text' => 'L2 address', 'row_key' => 'l2address', 'td_class' => 'l2address'),
+		array ('th_text' => 'Object', 'row_key' => 'object', 'td_escape' => FALSE),
+		array ('th_text' => 'Port', 'row_key' => 'name'),
+	);
+
+	// The section below is only required so long as Port.l2address is a char column,
+	// switching to a binary type should eliminate the need for this check.
+	$result = usePreparedSelectBlade
+	(
+		'SELECT l2address, object_id, name FROM Port ' .
+		'WHERE l2address IS NOT NULL AND l2address NOT REGEXP("^[0-9A-F]+$")'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($rows))
+	{
+		$violations = TRUE;
+		foreach (array_keys ($rows) as $key)
+			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+		startPortlet ('L2 address invalid characters');
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+
+	// The section below will be relevant as long as the L2 address constraint remains
+	// implemented at PHP level.
+	$result = usePreparedSelectBlade
+	(
+		'SELECT l2address, object_id, name, ' .
+		'(SELECT COUNT(*) FROM Port AS P2 WHERE P2.l2address = P1.l2address AND P2.object_id != P1.object_id) AS ocnt ' .
+		'FROM Port AS P1 WHERE P1.l2address IS NOT NULL HAVING ocnt > 0  ORDER BY l2address, object_id'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($rows))
+	{
+		$violations = TRUE;
+		foreach (array_keys ($rows) as $key)
+		{
+			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+			$rows[$key]['l2address'] = l2addressFromDatabase ($rows[$key]['l2address']);
+		}
+		startPortlet ('L2 address unique constraint errors');
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+
+	$result = usePreparedSelectBlade
+	(
+		'SELECT l2address, object_id, name ' .
+		'FROM Port WHERE LENGTH(l2address) NOT IN(12, 16, 40)'
+	);
+	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
+	unset ($result);
+	if (count ($rows))
+	{
+		$violations = TRUE;
+		// Do not try to call l2addressFromDatabase() as it will normally throw an exception.
+		foreach (array_keys ($rows) as $key)
+			$rows[$key]['object'] = mkCellA (spotEntity ('object', $rows[$key]['object_id']));
+		startPortlet ('L2 address invalid length');
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+
 	if (! $violations)
 		echo '<h2 class=centered>No integrity violations found</h2>';
 }
-
-?>

@@ -4,7 +4,7 @@
 //   - if parent and child entities are the same, parent_id != child_id
 //   - if both parent and child are objects, an ObjectParentCompat rule must exist
 //   - in some scenarios, only one-to-one links are allowed
-class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
+class EntityLinkTriggerTest extends RTTestCase
 {
 	protected static $objtypea_id, $objtypeb_id, $objtypec_id, $objtyped_id;
 	protected static $objecta_id, $objectb_id, $objectc_id, $objectd_id;
@@ -55,10 +55,7 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		commitReduceOPC (self::$objtypeb_id, self::$objtypec_id);
 		commitReduceOPC (self::$objtypec_id, self::$objtypea_id);
 		commitReduceOPC (self::$objtypec_id, self::$objtypeb_id);
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypea_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypeb_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtypec_id));
-		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => self::$objtyped_id));
+		usePreparedDeleteBlade ('Dictionary', array ('dict_key' => array (self::$objtypea_id, self::$objtypeb_id, self::$objtypec_id, self::$objtyped_id)));
 		commitDeleteObject (self::$locationa_id);
 		commitDeleteObject (self::$locationb_id);
 		commitDeleteObject (self::$locationc_id);
@@ -499,4 +496,3 @@ class EntityLinkTriggerTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-?>

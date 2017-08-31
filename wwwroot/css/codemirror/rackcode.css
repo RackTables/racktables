@@ -1,0 +1,7 @@
+.CodeMirror { height: 500px; }
+.cm-s-rackcode span.cm-comment { font-style: italic; color: gray; }
+.cm-s-rackcode span.cm-operator { color: blue; }
+.cm-s-rackcode span.cm-variable { color: orange; }
+.cm-s-rackcode span.cm-def { color: magenta; }
+.cm-s-rackcode span.cm-keyword { font-weight: bold; }
+.cm-s-rackcode span.cm-atom { font-weight: normal; color: brown; }

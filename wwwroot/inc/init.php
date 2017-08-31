@@ -144,7 +144,7 @@ $virtual_obj_types = explode (',', getConfigVar ('VIRTUAL_OBJ_LISTSRC'));
 alterConfigWithUserPreferences();
 $op = '';
 
-// load additional plugins
+// load v1 plugins
 ob_start();
 if (FALSE !== $plugin_files = glob ("${racktables_plugins_dir}/*.php"))
 	foreach ($plugin_files as $plugin_file)
@@ -155,6 +155,12 @@ if ($tmp != '' && ! preg_match ("/^\n+$/D", $tmp))
 	echo $tmp;
 unset ($tmp);
 
+// load v2 plugins that are enabled
+$plugins = getPlugins ('enabled');
+foreach (array_keys ($plugins) as $plugin)
+	if (function_exists ("plugin_${plugin}_init"))
+		call_user_func ("plugin_${plugin}_init");
+
 // These will be filled in by fixContext()
 $expl_tags = array();
 $impl_tags = array();
@@ -162,5 +168,3 @@ $impl_tags = array();
 $target_given_tags = array();
 
 callHook ('initFinished');
-
-?>

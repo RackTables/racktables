@@ -17,6 +17,7 @@ SELECT
 	pii.iif_name,
 	poi.oif_name,
 	p.object_id,
+	o.objtype_id as object_tid,
 	o.name as object_name
 FROM Port p
 INNER JOIN Object o ON o.id = p.object_id
@@ -123,7 +124,8 @@ INNER JOIN (
 			foreach (sortPortList ($rows_by_pn) as $ports_subarray)
 				foreach ($ports_subarray as $port_row)
 				{
-					$port_description = $port_row['object_name'] . ' --  ' . $port_row['name'];
+					$port_description = formatObjectDisplayedName ($port_row['object_name'], $port_row['object_tid']) .
+						' --  ' . $port_row['name'];
 					if (count ($ports_subarray) > 1)
 					{
 						$if_type = $port_row['iif_id'] == 1 ? $port_row['oif_name'] : $port_row['iif_name'];
@@ -272,7 +274,7 @@ function handlePopupPortLink()
 				formatPort ($remote_port_info),
 			)
 		);
-		addJS (<<<END
+		addJS (<<<'END'
 window.opener.location.reload(true);
 window.close();
 END
@@ -282,7 +284,8 @@ END
 	else
 	{
 		// JS code to display port compatibility hint
-		addJS (<<<END
+		// Heredoc, not nowdoc!
+		addJS (<<<"END"
 POIFC = {};
 $js_table
 $(document).ready(function () {
@@ -304,7 +307,7 @@ function onPortTypeChange() {
 }
 END
 		, TRUE);
-		addCSS (<<<END
+		addCSS (<<<'END'
 .compat-hint {
 	display: none;
 	font-size: 125%;
@@ -421,7 +424,7 @@ function renderPopupPortSelector()
 	echo '</tr></table>';
 	finishPortlet();
 
-	addJS (<<<JSEND
+	addJS (<<<'JSEND'
 		$(document).ready( function() {
 			$("#filter-obj").autocomplete({
 				source: "?module=ajax&ac=autocomplete&realm=object",
@@ -485,11 +488,16 @@ JSEND
 function renderPopupIPv4Selector()
 {
 	assertPermission('ipv4space', 'default');
-	echo '<h2>Choose a port:</h2><br><br>';
+	echo '<h2>Choose an IPv4 allocation:</h2><br><br>';
 	echo '<form action="javascript:;">';
 	echo '<input type=hidden id=ip>';
 	echo '<select size=' . getConfigVar ('MAXSELSIZE') . ' id=addresses>';
-	$addresses = getAllIPv4Allocations();
+	$addresses = array();
+	foreach (getAllIPv4Allocations() as $each)
+	{
+		$each['object_name'] = formatObjectDisplayedName ($each['object_name'], $each['objtype_id']);
+		$addresses[] = $each;
+	}
 	usort ($addresses, 'sortObjectAddressesAndNames');
 	foreach ($addresses as $address)
 		echo "<option value='${address['ip']}' onclick='getElementById(\"ip\").value=\"${address['ip']}\";'>" .
@@ -504,16 +512,14 @@ function renderPopupIPv4Selector()
 
 function renderPopupHTML ($contents)
 {
-?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">
-<head>
-<title>RackTables pop-up</title>
-<?php printPageHeaders(); ?>
-</head>
-<body style="height: 100%;">
-<div class="popupbar"><?php echo $contents; ?></div>
-</body>
-</html>
-<?php
+	echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="height: 100%;">';
+	echo '<head>';
+	echo '<title>RackTables pop-up</title>';
+	printPageHeaders();
+	echo '</head>';
+	echo '<body style="height: 100%;">';
+	echo "<div class=popupbar>${contents}</div>";
+	echo '</body>';
+	echo '</html>';
 }
-?>

@@ -375,9 +375,7 @@ function renderEditRSList ($rs_list)
 	echo "<tr class=row_odd valign=top><td>";
 	printImageHREF ('add', 'Add new real server');
 	echo "</td><td><input type=text name=rsip></td>";
-	$default_port = getConfigVar ('DEFAULT_SLB_RS_PORT');
-	if ($default_port == 0)
-		$default_port = '';
+	$default_port = emptyStrIfZero (getConfigVar ('DEFAULT_SLB_RS_PORT'));
 	echo "<td><input type=text name=rsport size=5 value='$default_port'></td>";
 	echo "<td><input type=text name=comment size=15></td>";
 	$checked = (getConfigVar ('DEFAULT_IPV4_RS_INSERVICE') == 'yes') ? 'checked' : '';
@@ -537,10 +535,8 @@ function renderNewVSForm ()
 {
 	startPortlet ('Add new virtual service');
 	printOpFormIntro ('add');
-	$default_port = getConfigVar ('DEFAULT_SLB_VS_PORT');
+	$default_port = emptyStrIfZero (getConfigVar ('DEFAULT_SLB_VS_PORT'));
 	global $vs_proto;
-	if ($default_port == 0)
-		$default_port = '';
 	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip></td>";
 	echo "<tr><th class=tdright>Port:</th><td class=tdleft>";
@@ -628,5 +624,3 @@ function renderLVSConfig ($object_id)
 	echo "</form>";
 	echo "<pre>" . buildLVSConfig ($object_id) . "</pre>";
 }
-
-?>

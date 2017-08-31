@@ -3573,5 +3573,3 @@ function iosxr4ReadInterfaceStatus ($input)
 	}
 	return $result;
 }
-
-?>

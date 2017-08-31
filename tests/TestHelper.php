@@ -13,4 +13,3 @@ class TestHelper
 			throw new Exception ('Test must connect to unit testing database (see tests/README).');
 	}
 }
-?>

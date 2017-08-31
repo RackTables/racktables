@@ -1419,6 +1419,24 @@ $iftable_processors['hce-any-QSFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+// FIXME: use SFP28:25GbE instead of SFP+:10GbE
+$iftable_processors['hce-any-QSFP28-split'] = array
+(
+	'pattern' => '@^100GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+):([[:digit:]]+)$@',
+	'replacement' => '100ge\\1\\2:\\3',
+	'dict_key' => '9-1084',
+	'label' => '\\2:\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['hce-any-QSFP28'] = array
+(
+	'pattern' => '@^100GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => '100ge\\1\\2',
+	'dict_key' => '15-1588',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
 $iftable_processors['quidway-XFP'] = array
 (
 	'pattern' => '@^XGigabitEthernet([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
@@ -2069,6 +2087,35 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+// In the following two declarations the leading zero is a placeholder -- in
+// the CLI it may be another number but the SNMP agent does not report it.
+$iftable_processors['brocade-vdx-QSFP+'] = array
+(
+	'pattern' => '@^FortyGigabitEthernet 0/(\d+)$@',
+	'replacement' => 'fo 0/0/\\1',
+	'dict_key' => '10-1588',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-vdx-SFP+'] = array
+(
+	'pattern' => '@^TenGigabitEthernet 0/(\d+)$@',
+	'replacement' => 'te 0/0/\\1',
+	'dict_key' => '9-1084', // empty SFP+
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['brocade-vdx-management'] = array
+(
+	'pattern' => '@^eth0$@',
+	'replacement' => 'management',
+	'dict_key' => '1-24',
+	'label' => 'Management',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['ubiquiti-chassis-any-1000T'] = array
 (
 	'pattern' => '@^Slot: (\d+) Port: (\d+) Gigabit - Level$@',
@@ -2537,6 +2584,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 			'catalyst-chassis-mgmt',
 			'catalyst-stack-25-to-28-SFP',
 			'catalyst-stack-any-1000T',
+		),
+	),
+	'9.1.1226' => array
+	(
+		'dict_key' => 1576,
+		'text' => 'WS-C3560X-24T: 24 RJ-45/10-100-1000T(X) + network module + OOBM',
+		'processors' => array
+		(
+			'C3KX-NM-10000',
+			'C3KX-NM-1000',
+			'catalyst-chassis-any-1000T',
+			'catalyst-chassis-mgmt',
 		),
 	),
 	'9.1.1227' => array
@@ -3776,17 +3835,35 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'CE5850-48T4S2Q-EI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
 		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
+	'2011.2.239.10' => array
+	(
+		'dict_key' => 1769,
+		'text' => 'CE5850-48T4S2Q-HI: 48 RJ-45/10-100-1000T(X) + 4 SFP+ slots + 2 QSFP+ slots',
+		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
 	'2011.2.239.5' => array
 	(
 		'dict_key' => 1772,
-		'text' => 'CE6850-48S4Q-EI: 48 4 SFP+ slots + 4 QSFP+ slots',
-		'processors' => array ('hce-any-1000T', 'hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+		'text' => 'CE6850-48S4Q-EI: 48 SFP+ slots + 4 QSFP+ slots',
+		'processors' => array ('hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
+	'2011.2.239.32' => array
+	(
+		'dict_key' => 1772,
+		'text' => 'CE6870-48S6CQ-EI: 48 SFP+ slots + 6 QSFP28 slots',
+		'processors' => array ('hce-any-SFP', 'hce-any-QSFP28-split', 'hce-any-QSFP28', 'quidway-mgmt'),
 	),
 	'2011.2.239.11' => array
 	(
 		'dict_key' => 2226,
 		'text' => 'CE7850-32Q-EI: 32 QSFP+ slots',
 		'processors' => array ('hce-any-QSFP-split', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
+	'2011.2.239.42' => array
+	(
+		'dict_key' => 2706,
+		'text' => 'CE8850-32CQ-EI: 32 QSFP28 slots',
+		'processors' => array ('hce-any-SFP', 'hce-any-QSFP28-split', 'hce-any-QSFP28', 'quidway-mgmt'),
 	),
 	'2636.1.1.1.2.29' => array
 	(
@@ -4004,6 +4081,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'IBM System Networking RackSwitch G8000',
 		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
 	),
+	'1588.3.3.1.131' => array
+	(
+		'dict_key' => 2665,
+		'text' => 'Brocade VDX 6740',
+		'processors' => array ('brocade-vdx-QSFP+','brocade-vdx-SFP+', 'brocade-vdx-management'),
+	),
+	'1991.1.3.62.2.1.1.1' => array
+	(
+		'dict_key' => 2666,
+		'text' => 'ICX7250-48 48x1000T + 8 SFP+/1000',
+		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+	),
 	'4413' => array
 	(
 		'dict_key' => 2624,
@@ -4022,7 +4111,7 @@ $swtype_pcre = array
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5\.120 /is' => 2081,
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 5\.\d{3,} /is' => 2081, // fallback for all 5.120+
 	'/Huawei Versatile Routing Platform Software.+VRP.+Software,\s*Version 8\./is' => 2027, // fallback for all 8.x
-	// FIXME: get sysDescr for IronWare 5 and add a pattern
+	'/^Foundry Networks.+, IronWare Version 05\./' => 1363, // Not an exact format, just a guess.
 	'/^Brocade Communications Systems.+, IronWare Version 07\./' => 1364,
 	'/^Juniper Networks,.+JUNOS 9\./' => 1366,
 	'/^Juniper Networks,.+JUNOS 10\./' => 1367,
@@ -4501,7 +4590,14 @@ function doSwitchSNMPmining ($objectInfo, $device)
 				continue 2;
 		}
 	// Sync ports
-	syncObjectPorts ($objectInfo, $desiredPorts);
+	try
+	{
+		replaceObjectPorts ($objectInfo['id'], $desiredPorts);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	// No failure up to this point, thus leave current tab for the "Ports" one.
 	return buildRedirectURL (NULL, 'ports');
 }
@@ -4525,7 +4621,14 @@ function doPDUSNMPmining ($objectInfo, $switch)
 		addDesiredPort ($desiredPorts, $portno, '1-1322', $port[0], '');
 		$portno++;
 	}
-	syncObjectPorts ($objectInfo, $desiredPorts);
+	try
+	{
+		replaceObjectPorts ($objectInfo['id'], $desiredPorts);
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	showSuccess ("Added ${portno} port(s)");
 	return buildRedirectURL (NULL, 'ports');
 }
@@ -4544,7 +4647,6 @@ class RTSNMPDevice
 		switch ($snmpsetup['version'])
 		{
 		case 1:
-		default:
 			$this->snmp = new RTSNMPv1($hostname, $snmpsetup);
 			break;
 		case 2:
@@ -4553,6 +4655,8 @@ class RTSNMPDevice
 		case 3:
 			$this->snmp = new RTSNMPv3($hostname, $snmpsetup);
 			break;
+		default:
+			throw new InvalidArgException ('snmpsetup[\'version\']', $snmpsetup['version'], 'unsupported SNMP version');
 		}
 	}
 
@@ -4743,88 +4847,6 @@ function nextMACAddress ($addr)
 	return implode (':', $bytes);
 }
 
-function generatePortsForCatModule ($object_id, $slotno = 1, $mtype = 'X6748', $mac_address = '')
-{
-	global $dbxlink;
-	$mac_address = l2addressFromDatabase (l2addressForDatabase ($mac_address));
-	switch ($mtype)
-	{
-	case 'WS-X6748-GE-TX':
-		$dbxlink->beginTransaction();
-		for ($i = 1; $i <= 48; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		$dbxlink->commit();
-		break;
-	case 'WS-X6708-10GE':
-		for ($i = 1; $i <= 8; $i++)
-		{
-			commitAddPort ($object_id, "te${slotno}/${i}", '6-1080', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case 'WS-X6704-10GE':
-		for ($i = 1; $i <= 4; $i++)
-		{
-			commitAddPort ($object_id, "te${slotno}/${i}", '5-1079', "slot ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case 'VS-S720-10G':
-		commitAddPort ($object_id, "gi${slotno}/1", '4-1077', "slot ${slotno} port 1", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "gi${slotno}/2", '4-1077', "slot ${slotno} port 2", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "gi${slotno}/3", '1-24',   "slot ${slotno} port 3", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "te${slotno}/4", '6-1080', "slot ${slotno} port 4", $mac_address);
-		$mac_address = nextMACAddress ($mac_address);
-		commitAddPort ($object_id, "te${slotno}/5", '6-1080', "slot ${slotno} port 5", $mac_address);
-		break;
-	case '3750G-24TS':
-		// MAC address of 1st port is the next one after switch's address
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 24; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		for ($i = 25; $i <= 28; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '4-1077', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case '3750G-24T':
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 24; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		break;
-	case '3750G-16TD':
-		$mac_address = nextMACAddress ($mac_address);
-		for ($i = 1; $i <= 16; $i++)
-		{
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "unit ${slotno} port ${i}", $mac_address);
-			$mac_address = nextMACAddress ($mac_address);
-		}
-		commitAddPort ($object_id, "te${slotno}/0/1", '5-1079', "unit ${slotno} port ${i}", $mac_address);
-		break;
-	case 'LE02G48TA':
-		for ($i = 0; $i <= 47; $i++)
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '1-24', "slot ${slotno} port ${i}", $mac_address);
-		break;
-	case 'LE02X12SA':
-		for ($i = 0; $i <= 11; $i++)
-			commitAddPort ($object_id, "gi${slotno}/0/${i}", '9-1084', "slot ${slotno} port ${i}", $mac_address);
-		break;
-	}
-}
-
 function detectSoftwareType ($objectInfo, $sysDescr)
 {
 	global $swtype_pcre;
@@ -4835,4 +4857,3 @@ function detectSoftwareType ($objectInfo, $sysDescr)
 			return;
 		}
 }
-?>
