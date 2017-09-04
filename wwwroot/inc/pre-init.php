@@ -68,7 +68,9 @@ function connectDB()
 		// with but which used to be off by default until MySQL 5.7. As soon as
 		// respective SQL queries and table columns become compliant with those options
 		// stop changing @@SQL_MODE but still keep SET NAMES in place.
-		PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8", @@SQL_MODE = REPLACE(@@SQL_MODE, "NO_ZERO_DATE", "")',
+		// RackTables requires the strict SQL mode, which is not enabled by default
+		// in MariaDB <= 10.2.3.
+		PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8", @@SQL_MODE = CONCAT("STRICT_ALL_TABLES,", REPLACE(@@SQL_MODE, "NO_ZERO_DATE", ""))',
 	);
 	if (isset ($pdo_bufsize))
 		$drvoptions[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = $pdo_bufsize;
