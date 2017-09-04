@@ -5,8 +5,10 @@
 	update: refine delivery of rack thumb images
 	update: new plugin architecture
 	update: add support for IP-over-InfiniBand L2 addresses
+	update: improve MariaDB support
 	bugfix: put dictionary-based attributes formatting right
 	bugfix: date attributes now can be set for racks, rows and locations
+	bugfix: add support for PHP 7.1 (Mantis #1771)
 	new feature: tag colors (GH#158 by Maik Ehinger)
 0.20.14 2017-08-10
 	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
