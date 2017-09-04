@@ -1226,13 +1226,13 @@ function getObjectClass ($object, $extrastyle = '')
 {
 	if (! array_key_exists ('colors', $object) || ! count ($object['colors']))
 		return '';
-	$step = 100 / count ($object['colors']);
+	$step = intval (round (100 / count ($object['colors'])));
 	$percent = 0;
 	$gradient = '';
 	foreach ($object['colors'] as $color)
 	{
 		$rgb = colorHex2Rgb ($color);
-		$gradient .= "rgba($rgb,0.2) $percent%, rgba($rgb,0.3) " . round ($percent + $step) . "%,";
+		$gradient .= "rgba(${rgb},0.2) ${percent}%, rgba(${rgb},0.3) " . ($percent + $step) . "%,";
 		$percent += $step;
 	}
 	$style = "${extrastyle}background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
@@ -1265,9 +1265,9 @@ function colorHex2Rgb($color, $pastel = FALSE)
 
 	if ($pastel)
 	{
-		$rgb = round ((hexdec (substr ($color, 0, 2)) + 255) / 2) . ',';
-		$rgb .= round ((hexdec (substr ($color, 2, 2)) + 255) / 2) . ',';
-		$rgb .= round ((hexdec (substr ($color, 4, 2)) + 255) / 2);
+		$rgb = intval (round ((hexdec (substr ($color, 0, 2)) + 255) / 2)) . ',';
+		$rgb .= intval (round ((hexdec (substr ($color, 2, 2)) + 255) / 2)) . ',';
+		$rgb .= intval (round ((hexdec (substr ($color, 4, 2)) + 255) / 2));
 	}
 	else
 		$rgb = hexdec (substr ($color, 0, 2)) . ',' . hexdec (substr ($color, 2, 2)) . ',' . hexdec (substr ($color, 4, 2));
