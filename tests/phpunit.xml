@@ -1,5 +1,6 @@
 <phpunit backupGlobals="false"
          backupStaticAttributes="false"
+         stderr="true"
          bootstrap="bootstrap.php">
   <testsuites>
     <testsuite name="all">
