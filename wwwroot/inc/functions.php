@@ -6583,18 +6583,8 @@ function customKsort ($array, $order)
 // You should call session_commit after each call of this function.
 function startSession()
 {
-	if (is_callable ('session_status'))
-	{
-		if (session_status() != PHP_SESSION_ACTIVE)
-			session_start();
-	}
-	else
-	{
-		// compatibility mode for PHP prior to 5.4.0
-		$old_errorlevel = error_reporting (E_ALL & ~E_NOTICE);
+	if (session_status() != PHP_SESSION_ACTIVE)
 		session_start();
-		error_reporting ($old_errorlevel);
-	}
 }
 
 // loads session data. Use if you need to only read from _SESSION.
