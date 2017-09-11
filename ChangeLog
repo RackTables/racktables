@@ -9,6 +9,7 @@
 	bugfix: put dictionary-based attributes formatting right
 	bugfix: date attributes now can be set for racks, rows and locations
 	bugfix: add support for PHP 7.1 (Mantis #1771)
+	bugfix: fix logging out (Mantis #496 and duplicates)
 	new feature: tag colors (GH#158 by Maik Ehinger)
 0.20.14 2017-08-10
 	update: cover comments too in IPv4 & IPv6 search (Mantis#1773 by Fred Stuck)
