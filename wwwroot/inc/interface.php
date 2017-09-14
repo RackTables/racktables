@@ -1428,7 +1428,7 @@ function renderObject ($object_id)
 		$fmt_children = array();
 		foreach ($children_group as $child)
 			$fmt_children[] = mkCellA ($child);
-		$summary["Contains " . strtolower(decodeObjectType ($objtype_id))] = implode ('<br>', $fmt_children);
+		$summary["Contains " . mb_strtolower(decodeObjectType ($objtype_id))] = implode ('<br>', $fmt_children);
 	}
 	if ($info['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');

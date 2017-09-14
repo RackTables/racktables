@@ -4999,14 +4999,14 @@ function searchEntitiesByText ($terms)
 	{
 		// search by FQDN has special treatment - if single object found, do not search by other fields
 		$object_id_by_fqdn = NULL;
-		$domains = preg_split ('/\s*,\s*/', strtolower (getConfigVar ('SEARCH_DOMAINS')));
+		$domains = preg_split ('/\s*,\s*/', mb_strtolower (getConfigVar ('SEARCH_DOMAINS')));
 		if (! empty ($domains) && $object_id = searchByMgmtHostname ($terms))
 		{
 			// get FQDN
 			$attrs = getAttrValues ($object_id);
 			$fqdn = '';
 			if (isset ($attrs[3]['value']))
-				$fqdn = strtolower (trim ($attrs[3]['value']));
+				$fqdn = mb_strtolower (trim ($attrs[3]['value']));
 			foreach ($domains as $domain)
 				if ('.' . $domain === substr ($fqdn, -strlen ($domain) - 1))
 				{
