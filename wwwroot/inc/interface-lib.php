@@ -336,7 +336,7 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 {
 	$ret = '';
 	if (!array_key_exists ('name', $select_attrs))
-		return '';
+		throw new InvalidArgException ('select_attrs[\'name\']', '(not set)', 'must be set');
 	// handle two corner cases in a specific way
 	if (count ($optionList) == 0)
 		return '(none)';
@@ -370,7 +370,7 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 	if (count ($groupList) == 1 && isset ($groupList['other']))
 		return getSelect ($groupList['other'], $select_attrs, $selected_id);
 	if (!array_key_exists ('name', $select_attrs))
-		return '';
+		throw new InvalidArgException ('select_attrs[\'name\']', '(not set)', 'must be set');
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
 
