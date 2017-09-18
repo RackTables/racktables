@@ -4314,7 +4314,7 @@ function getTagList ($extra_sql = '')
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color ' .
+		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color ' . // But there is no column 'color' in the TagTree table...
 		"FROM TagTree ORDER BY tag ${extra_sql}"
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
@@ -6124,7 +6124,7 @@ function releaseDBMutex ($name)
 function getPlugins ($state = NULL)
 {
 	// installed
-	$result = usePreparedSelectBlade ('SELECT name, longname, version, home_url, state FROM Plugin ORDER BY name');
+	$result = usePreparedSelectBlade ('SELECT name, longname, version, home_url, state FROM Plugin ORDER BY name'); // But Plugin table does not exist at all...
 	$in_db = array ();
 	foreach ($result as $row)
 		if (! $state or $state == $row['state'])
