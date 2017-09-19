@@ -936,7 +936,7 @@ function addIPv4Prefix ()
 	$net_cell = spotEntity ('ipv4net', $net_id);
 	if (isset ($vlan_ck))
 	{
-		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+		if (considerConfiguredConstraint ($net_cell, 'VLANNET_LISTSRC'))
 			commitSupplementVLANIPv4 ($vlan_ck, $net_id);
 		else
 			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
@@ -958,7 +958,7 @@ function addIPv6Prefix ()
 	$net_cell = spotEntity ('ipv6net', $net_id);
 	if (isset ($vlan_ck))
 	{
-		if (considerConfiguredConstraint ($net_cell, 'VLANIPV4NET_LISTSRC'))
+		if (considerConfiguredConstraint ($net_cell, 'VLANNET_LISTSRC'))
 			commitSupplementVLANIPv6 ($vlan_ck, $net_id);
 		else
 			showError ("VLAN binding to network " . mkCellA ($net_cell) . " is restricted in config");
@@ -1567,7 +1567,7 @@ function resetUIConfig()
 		'PROXIMITY_RANGE' => '0',
 		'IPV4_TREE_SHOW_VLAN' => 'yes',
 		'VLANSWITCH_LISTSRC' => '',
-		'VLANIPV4NET_LISTSRC' => '',
+		'VLANNET_LISTSRC' => '',
 		'DEFAULT_VDOM_ID' => '',
 		'DEFAULT_VST_ID' => '',
 		'STATIC_FILTER' => 'yes',

@@ -200,7 +200,7 @@ function trigger_ipv4net_vlanconfig ()
 	$netinfo = spotEntity ('ipv4net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
+	return considerConfiguredConstraint ($netinfo, 'VLANNET_LISTSRC') ? 'attn' : '';
 }
 
 // implement similar logic for IPv6 networks
@@ -211,7 +211,7 @@ function trigger_ipv6net_vlanconfig ()
 	$netinfo = spotEntity ('ipv6net', getBypassValue());
 	if ($netinfo['vlanc'])
 		return 'std';
-	return considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC') ? 'attn' : '';
+	return considerConfiguredConstraint ($netinfo, 'VLANNET_LISTSRC') ? 'attn' : '';
 }
 
 function trigger_vlan_ipv4net ()

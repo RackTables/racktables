@@ -1261,6 +1261,7 @@ CREATE TABLE `Plugin` (
 			else
 			{
 				$query[] = "DELETE FROM Config WHERE varname IN ('CACTI_LISTSRC','CACTI_RRA_ID')";
+				$query[] = "UPDATE Config SET varname = 'VLANNET_LISTSRC' WHERE varname = 'VLANIPV4NET_LISTSRC'";
 				$query[] = "DROP TABLE `CactiGraph`";
 				$query[] = "DROP TABLE `CactiServer`";
 			}

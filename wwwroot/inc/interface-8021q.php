@@ -1000,7 +1000,7 @@ function renderVLANIPLinks ($some_id)
 		foreach ($netlist_func ($vlan['domain_id']) as $net_id)
 		{
 			$netinfo = spotEntity ($ip_ver . 'net', $net_id);
-			if (considerConfiguredConstraint ($netinfo, 'VLANIPV4NET_LISTSRC'))
+			if (considerConfiguredConstraint ($netinfo, 'VLANNET_LISTSRC'))
 				$plusoptions['other'][$net_id] =
 					$netinfo['ip'] . '/' . $netinfo['mask'] . ' ' . $netinfo['name'];
 		}

@@ -6,6 +6,7 @@
 	update: new plugin architecture
 	update: add support for IP-over-InfiniBand L2 addresses
 	update: improve MariaDB support
+	update: rename VLANIPV4NET_LISTSRC to VLANNET_LISTSRC
 	bugfix: put dictionary-based attributes formatting right
 	bugfix: date attributes now can be set for racks, rows and locations
 	bugfix: add support for PHP 7.1 (Mantis #1771)
