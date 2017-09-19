@@ -1614,7 +1614,7 @@ function renderObject ($object_id)
 	if
 	(
 		! in_array ($info['objtype_id'], $virtual_obj_types) &&
-		count ($rack_ids = getResidentRacksData ($object_id, FALSE))
+		count ($rack_ids = getResidentRackIDs ($object_id))
 	)
 	{
 		echo '<td class=pcright>';
@@ -2144,7 +2144,13 @@ function renderRackSpaceForObject ($object_id)
 {
 	// Always process occupied racks plus racks chosen by user. First get racks with
 	// already allocated rackspace...
-	$workingRacksData = getResidentRacksData ($object_id);
+	$workingRacksData = array();
+	foreach (getResidentRackIDs ($object_id) as $rack_id)
+	{
+		$rackData = spotEntity ('rack', $rack_id);
+		amplifyCell ($rackData);
+		$workingRacksData[$rack_id] = $rackData;
+	}
 	// ...and then add those chosen by user (if any).
 	if (isset($_REQUEST['rackmulti']))
 		foreach ($_REQUEST['rackmulti'] as $cand_id)

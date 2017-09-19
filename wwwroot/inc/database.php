@@ -1653,7 +1653,7 @@ function getOperationMolecules ($op_id)
 	return array ($row['old_molecule_id'], $row['new_molecule_id']);
 }
 
-function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
+function getResidentRackIDs ($object_id)
 {
 	$result = usePreparedSelectBlade
 	(
@@ -1667,23 +1667,7 @@ function getResidentRacksData ($object_id = 0, $fetch_rackdata = TRUE)
 		"SELECT parent_entity_id AS rack_id FROM EntityLink WHERE parent_entity_type = 'rack' AND child_entity_type = 'object' AND child_entity_id = ? " .
 		'ORDER BY rack_id', array ($object_id, $object_id, $object_id)
 	);
-	$rows = $result->fetchAll (PDO::FETCH_NUM);
-	unset ($result);
-
-	$ret = array();
-	foreach ($rows as $row)
-		if (! isset ($ret[$row[0]]))
-		{
-			if (!$fetch_rackdata)
-				$rackData = $row[0];
-			else
-			{
-				$rackData = spotEntity ('rack', $row[0]);
-				amplifyCell ($rackData);
-			}
-			$ret[$row[0]] = $rackData;
-		}
-	return $ret;
+	return $result->fetchAll (PDO::FETCH_COLUMN);
 }
 
 function commitAddPort ($object_id, $port_name, $port_type_id, $port_label, $port_l2address)
@@ -4470,7 +4454,7 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 	// remove Rack thumbnail if Rack or Object tag changes
 	if ($result && ( $realm == 'rack' || $realm == 'object'))
 	{
-		$rack_id = $realm == 'rack' ? $entity_id : getResidentRacksData ($entity_id, FALSE);
+		$rack_id = $realm == 'rack' ? $entity_id : getResidentRackIDs ($entity_id);
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	}
 

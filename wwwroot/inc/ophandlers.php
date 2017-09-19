@@ -1277,7 +1277,7 @@ function updateObject ()
 		usePreparedUpdateBlade ('Object', array ('objtype_id' => $object_type_id), array ('id' => $object_id));
 	}
 	// Invalidate thumb cache of all racks objects could occupy.
-	foreach (getResidentRacksData ($object_id, FALSE) as $rack_id)
+	foreach (getResidentRackIDs ($object_id) as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	$dbxlink->commit();
 	rebuildTagChainForEntity ('object', $object_id, buildTagChainFromIds ($taglist), TRUE);
@@ -1429,7 +1429,7 @@ function deleteObject ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 7));
 	$oinfo = spotEntity ('object', genericAssertion ('object_id', 'uint'));
 
-	$racklist = getResidentRacksData ($oinfo['id'], FALSE);
+	$racklist = getResidentRackIDs ($oinfo['id']);
 	commitDeleteObject ($oinfo['id']);
 	foreach ($racklist as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
@@ -1439,7 +1439,7 @@ function deleteObject ()
 function resetObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 57));
-	$racklist = getResidentRacksData (getBypassValue(), FALSE);
+	$racklist = getResidentRackIDs (getBypassValue());
 	commitResetObject (getBypassValue());
 	foreach ($racklist as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
