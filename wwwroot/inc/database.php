@@ -4416,12 +4416,18 @@ function addTagForEntity ($realm, $entity_id, $tag_id)
 	);
 }
 
-// Add records into TagStorage, if this makes sense (IOW, they don't appear
+// When $replace == FALSE:
+// Add records into TagStorage if this makes sense (IOW, they don't appear
 // on the implicit list already). Then remove any other records that
-// appear on the "implicit" side of the chain. This will make sure,
+// appear on the "implicit" side of the chain. This will make sure
 // that both the tag base is still minimal and all requested tags appear on
 // the resulting tag chain.
-// Return TRUE, if any changes were committed.
+//
+// When $replace == TRUE:
+// Replace the current tag chain with the given tag chain (same implicit tag
+// suppression applies as above).
+//
+// Return TRUE if any changes were committed.
 function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $replace = FALSE)
 {
 	// Put the current explicit sub-chain into a buffer and merge all tags from
@@ -4437,26 +4443,20 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 	foreach (getExplicitTagsOnly ($tmpchain) as $taginfo)
 		$newchain[$taginfo['id']] = $taginfo;
 
-	$result = FALSE;
+	if (array_values_same (array_keys ($oldchain), array_keys ($newchain)))
+		return FALSE;
 	foreach (array_diff (array_keys($oldchain), array_keys ($newchain)) as $tag_id)
-	{
 		deleteTagForEntity ($realm, $entity_id, $tag_id);
-		$result = TRUE;
-	}
 	foreach (array_diff (array_keys($newchain), array_keys ($oldchain)) as $tag_id)
-	{
 		addTagForEntity ($realm, $entity_id, $tag_id);
-		$result = TRUE;
-	}
 
 	// remove Rack thumbnail if Rack or Object tag changes
-	if ($result && ( $realm == 'rack' || $realm == 'object'))
-	{
-		$rack_id = $realm == 'rack' ? $entity_id : getResidentRackIDs ($entity_id);
+	if ($realm == 'rack')
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
-	}
+	elseif ($realm == 'object' && count ($rack_ids = getResidentRackIDs ($entity_id)))
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_ids));
 
-	return $result;
+	return TRUE;
 }
 
 // Presume, that the target record has no tags attached.
