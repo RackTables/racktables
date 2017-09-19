@@ -4930,10 +4930,11 @@ function usort_portlist (&$portnames)
 	$portnames = array_keys (sortPortList (array_fill_keys ($portnames, array())));
 }
 
-// return a "?, ?, ?, ... ?, ?" string consisting of N question marks
-function questionMarks ($count = 0)
+// Return a "?, ?, ?, ... ?, ?" string consisting of N question marks. N > 0 because
+// the string will be a part of an SQL query.
+function questionMarks ($count)
 {
-	if ($count <= 0)
+	if (! isUnsignedInteger ($count))
 		throw new InvalidArgException ('count', $count, 'must be greater than zero');
 	return implode (', ', array_fill (0, $count, '?'));
 }
