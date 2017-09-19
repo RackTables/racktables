@@ -1015,10 +1015,8 @@ function commitUpdateObject ($object_id, $new_name, $new_label, $new_has_problem
 		'comment' => nullIfEmptyStr ($new_comment),
 	);
 	$override = callHook('commitUpdateObjectBefore_hook', $object_id, $set_columns);
-	if ( is_array ($override) )
-	{
+	if (is_array ($override))
 		$set_columns = $override;
-	}
 	$type_id = getObjectType ($object_id);
 	checkObjectNameUniqueness ($new_name, $type_id, $object_id);
 	usePreparedUpdateBlade
