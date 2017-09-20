@@ -4452,7 +4452,7 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 
 	// remove Rack thumbnail if Rack or Object tag changes
 	if ($realm == 'rack')
-		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $entity_id));
 	elseif ($realm == 'object' && count ($rack_ids = getResidentRackIDs ($entity_id)))
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_ids));
 
