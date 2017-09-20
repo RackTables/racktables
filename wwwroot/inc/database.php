@@ -4332,6 +4332,10 @@ function getTagUsage ($ignore_cache = FALSE)
 function destroyTagsForEntity ($entity_realm, $entity_id)
 {
 	usePreparedDeleteBlade ('TagStorage', array ('entity_realm' => $entity_realm, 'entity_id' => $entity_id));
+	if ($entity_realm == 'rack')
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $entity_id));
+	elseif ($entity_realm == 'object' && count ($rack_ids = getResidentRackIDs ($entity_id)))
+		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_ids));
 }
 
 // Drop only one record. This operation doesn't involve retossing other tags, unlike when adding.
