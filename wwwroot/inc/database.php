@@ -4459,11 +4459,10 @@ function rebuildTagChainForEntity ($realm, $entity_id, $extrachain = array(), $r
 	return TRUE;
 }
 
-// Presume, that the target record has no tags attached.
+// Replace any tags already assigned to the target entity.
 function produceTagsForNewRecord ($realm, $tagidlist, $record_id)
 {
-	foreach (getExplicitTagsOnly (buildTagChainFromIds ($tagidlist)) as $taginfo)
-		addTagForEntity ($realm, $record_id, $taginfo['id']);
+	rebuildTagChainForEntity ($realm, $record_id, buildTagChainFromIds ($tagidlist), TRUE);
 }
 
 function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $taglist = array(), $vlan_ck = NULL)
