@@ -339,7 +339,7 @@ function dumpArray ($arr)
 {
 	echo '<table class="exceptionParametersDump">';
 	foreach ($arr as $key => $value)
-		echo '<tr><th>' . stringForTD ($key) . '</th><td>' . stringForTD ($value, 100) . '</td></tr>';
+		echo '<tr><th class=tdright>' . stringForTD ($key) . '</th><td>' . stringForTD ($value, 100) . '</td></tr>';
 	echo '</table>';
 }
 
