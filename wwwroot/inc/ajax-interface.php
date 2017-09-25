@@ -12,7 +12,7 @@
 */
 
 // retrieves ports link status from switch and formats results to dynamic-HTML
-// returns array which could be packed into json and passed to client's browser
+// Returns an array to be encoded in JSON and passed to client's browser.
 function formatPortLinkHints ($object_id)
 {
 	$result = array();
@@ -46,7 +46,7 @@ function formatPortLinkHints ($object_id)
 }
 
 // retrieves MAC address list from switch and formats results to dynamic-HTML
-// returns array which could be packed into json and passed to client's browser
+// Returns an array to be encoded in JSON and passed to client's browser.
 function formatPortMacHints ($object_id)
 {
 	$result = array();
@@ -76,7 +76,7 @@ function formatPortMacHints ($object_id)
 }
 
 // retrieves port configs from switch and formats results to dynamic-HTML
-// returns array which could be packed into json and passed to client's browser
+// Returns an array to be encoded in JSON and passed to client's browser.
 function formatPortConfigHints ($object_id, $R = NULL)
 {
 	$result = array();

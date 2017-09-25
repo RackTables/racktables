@@ -41,9 +41,9 @@ gateway support contributed by Ilya Evseev) are not working any more and waiting
 forward-ported to new gateways API. Sorry for that.
 
 Two new config variables appeared in this version:
-  - SEARCH_DOMAINS. Comma-separated list of DNS domains which are considered "base" for your
+  - SEARCH_DOMAINS. Comma-separated list of DNS domains that are considered "base" for your
     network. If RackTables search engine finds multiple objects based on your search input, but
-    there is only one which FQDN consists of your input and one of these search domains, you will
+    there is only one that has FQDN consisting of your input and one of these search domains, you will
     be redirected to this object and other results will be discarded. Such behavior was unconditional
     since 0.19.3, which caused many objections from users. So welcome this config var.
   - QUICK_LINK_PAGES. Comma-separated list of RackTables pages to display links to them on top.
@@ -70,7 +70,7 @@ ENDOFTEXT
 ,
 
 	'0.20.1' => <<<'ENDOFTEXT'
-The 0.20.0 release includes bug which breaks IP networks' capacity displaying on 32-bit architecture machines. To fix this, this release makes use of PHP's BC Math module. It is a new reqiurement. Most PHP distributions have this module already enabled, but if yours does not - you need yo recompile PHP.
+The 0.20.0 release includes a bug that breaks IP networks' capacity displaying on 32-bit architecture machines. To fix this, this release makes use of PHP's BC Math module. It is a new reqiurement. Most PHP distributions have this module already enabled, but if yours does not - you need yo recompile PHP.
 
 Security context of 'ipaddress' page now includes tags from the network containing an IP address. This means that you should audit your permission rules to check there is no unintended allows of changing IPs based on network's tagset. Example:
 	allow {client network} and {New York}
@@ -141,7 +141,7 @@ Database triggers are used for some data consistency measures.  The database
 user account must have the 'TRIGGER' privilege, which was introduced in
 MySQL 5.1.7.
 
-The IPV4OBJ_LISTSRC configuration option is reset to an expression which enables
+The IPV4OBJ_LISTSRC configuration option is reset to an expression that enables
 the IP addressing feature for all object types except those listed.
 
 Tags could now be assigned on the Edit/Properties tab using a text input with
@@ -175,8 +175,8 @@ ENDOFTEXT
 ,
 );
 
-// At the moment we assume, that for any two releases we can
-// sequentally execute all batches, that separate them, and
+// At the moment we assume that for any two releases we can
+// sequentally execute all batches that separate them, and
 // nothing will break. If this changes one day, the function
 // below will have to generate smarter upgrade paths, while
 // the upper layer will remain the same.
@@ -400,7 +400,7 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes')";
 
-			// update some config variables which changed their defaults in this verison
+			// update some config variables that changed their defaults in this verison
 			replaceConfigVarValue ('SHOW_LAST_TAB', 'yes');
 			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE','no');
 			replaceConfigVarValue ('IPV4LB_LISTSRC', 'false', '{$typeid_4}');

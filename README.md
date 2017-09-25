@@ -56,7 +56,7 @@ for RackTables is Apache httpd.
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
 will point to localhost (and thus fail).
-Notice, that fpm.sock is advised, keep the rest on default configuration, or
+Notice that fpm.sock is advised, keep the rest on default configuration, or
 tweak to your needs. You may need to set `fastcgi_read_timeout 600;` if you use
 some external addons like fping, which may take some time in certain situations.
 Please note that setting aggresive caching for php scripts may result in stale
@@ -187,7 +187,7 @@ Database triggers are used for some data consistency measures.  The database
 user account must have the 'TRIGGER' privilege, which was introduced in
 MySQL 5.1.7.
 
-The `IPV4OBJ_LISTSRC` configuration option is reset to an expression which enables
+The `IPV4OBJ_LISTSRC` configuration option is reset to an expression that enables
 the IP addressing feature for all object types except those listed.
 
 Tags could now be assigned on the Edit/Properties tab using a text input with
@@ -257,7 +257,7 @@ This release intoduces two new configuration options:
 
 ### Upgrading to 0.20.1
 
-The 0.20.0 release includes bug which breaks IP networks' capacity displaying on
+The 0.20.0 release includes a bug that breaks IP networks' capacity displaying on
 32-bit architecture machines. To fix this, this release makes use of PHP's BC
 Math module. It is a new reqiurement. Most PHP distributions have this module
 already enabled, but if yours does not - you need yo recompile PHP.
@@ -317,9 +317,9 @@ and Linux gateway support contributed by Ilya Evseev) are not working any more
 and waiting to be forward-ported to new gateways API. Sorry for that.
 
 Two new config variables appeared in this version:
-  - `SEARCH_DOMAINS`. Comma-separated list of DNS domains which are considered
+  - `SEARCH_DOMAINS`. Comma-separated list of DNS domains that are considered
     "base" for your network. If RackTables search engine finds multiple objects
-    based on your search input, but there is only one which FQDN consists of
+    based on your search input, but there is only one that has FQDN consisting of
     your input and one of these search domains, you will be redirected to this
     object and other results will be discarded. Such behavior was unconditional
     since 0.19.3, which caused many objections from users. So welcome this

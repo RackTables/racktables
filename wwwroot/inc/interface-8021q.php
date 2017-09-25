@@ -1305,7 +1305,7 @@ END
 			$right_text = serializeVLANPack ($item['right']);
 			// enable, but consider each option independently
 			// Don't accept running VLANs not in domain, and
-			// don't offer anything, that VST will deny.
+			// don't offer anything that VST will deny.
 			// Consider domain and template constraints.
 			$radio_attrs = array ('left' => '', 'asis' => ' checked', 'right' => '');
 			if

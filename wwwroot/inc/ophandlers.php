@@ -11,12 +11,12 @@ that handles execution of "operation" (in the meaning explained in
 navigation.php). Most of the ophandlers are meant to perform one specific
 action, for example, to set a name of an object. Each such action often
 requires a set of parameters (e. g. ID of the object and the new name),
-and it is responsibility of each ophandler function to verify, that all
+and it is responsibility of each ophandler function to verify that all
 necessary parameters are provided by the user and have proper values. There
 is a number of helper functions to make such verification simpler.
 
 Errors occuring in ophandlers are typically indicated with exceptions of
-assorted classes. Namely, an "InvalidRequestArgException" class means, that
+assorted classes. Namely, an "InvalidRequestArgException" class means that
 at least one of the parameters provided by the user is not acceptable. This
 is a "soft" error, which gets displayed in the standard message area of
 otherwise usual interface. A different case is "InvalidArgException", which
@@ -33,7 +33,7 @@ may queue up messages (often referred to as "green" and "red" bars) by
 means of showError() and showSuccess() functions. The messages are not
 displayed immediately, because successfull ophandlers are expected to
 return only the new URL, where the user will be immediately redirected to
-(it is also possible to return an empty string to mean, that the current
+(it is also possible to return an empty string to mean that the current
 logical location remains the same). The page at the "next" location is
 supposed to translate message buffer into the standard message area.
 
@@ -315,7 +315,7 @@ $opspec_list['chapter-edit-del'] = array
 	'arglist' => array
 	(
 		// Technically dict_key is enough to delete, but including chapter_id into
-		// WHERE clause makes sure, that the action actually happends for the same
+		// WHERE clause makes sure that the action actually happends for the same
 		// chapter that authorization was granted for.
 		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
 		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
@@ -1177,7 +1177,7 @@ function updateObjectAllocation ()
 	$object_id = getBypassValue();
 	$object = spotEntity ('object', $object_id);
 	$changecnt = 0;
-	// Get a list of rack ids which are parents of the object
+	// Get a list of rack ids that are parents of the object
 	$parentRacks = reduceSubarraysToColumn (getParents ($object, 'rack'), 'id');
 	$workingRacksData = array();
 	foreach ($_REQUEST['rackmulti'] as $cand_id)
@@ -1626,7 +1626,7 @@ function addRealServers ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 37, 'ERR1' => 131));
 	$format = genericAssertion ('format', 'string');
 	$ngood = 0;
-	// Keep in mind, that the text will have HTML entities (namely '>') escaped.
+	// Keep in mind that the text will have HTML entities (namely '>') escaped.
 	foreach (explode ("\n", dos2unix (genericAssertion ('rawtext', 'string'))) as $line)
 	{
 		if ($line == '')
@@ -2168,7 +2168,7 @@ function rollTags ()
 		return;
 	}
 	// Even if the user requested an empty tag list, don't bail out, but process existing
-	// tag chains with "zero" extra. This will make sure, that the stuff processed will
+	// tag chains with "zero" extra. This will make sure that the stuff processed will
 	// have its chains refined to "normal" form.
 	$extratags = isset ($_REQUEST['taglist']) ? $_REQUEST['taglist'] : array();
 	$n_ok = 0;

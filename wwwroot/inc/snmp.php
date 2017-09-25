@@ -4138,7 +4138,7 @@ function updateStickerForCell ($cell, $attr_id, $new_value)
 		commitUpdateAttrValue ($cell['id'], $attr_id, $new_value);
 }
 
-// Accept "X-Y" on input and make sure, that PortInterfaceCompat contains
+// Accept "X-Y" on input and make sure that PortInterfaceCompat contains
 // a record with IIF id = X and OIF id = Y.
 function checkPIC ($port_type_id)
 {
@@ -4378,7 +4378,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		# 1991.1.1.2.2.1.1.2.1 = STRING: "FLS-24G 24-port Management Module"
 		# 1991.1.1.2.2.1.1.2.3 = STRING: "FLS-1XG 1-port 10G Module (1-XFP)"
 		# 1991.1.1.2.2.1.1.2.4 = STRING: "FLS-1XG 1-port 10G Module (1-XFP)"
-		# (assuming, that the device has 2 XFP modules in slots 3 and 4).
+		# (assuming that the device has 2 XFP modules in slots 3 and 4).
 
 		foreach ($device->snmpwalkoid ('enterprises.1991.1.1.2.2.1.1.2') as $module_raw)
 			if (preg_match ('/^STRING: "(FGS-1XG1XGC|FGS-2XGC) /i', $module_raw))

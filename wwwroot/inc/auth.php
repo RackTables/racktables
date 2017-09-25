@@ -13,7 +13,7 @@ be working with only database.php file included.
 */
 
 // This function ensures that we don't continue without a legitimate
-// username and password (also make sure, that both are present, this
+// username and password (also make sure that both are present, this
 // is especially useful for LDAP auth code to not deceive itself with
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
 function authenticate ()
@@ -159,7 +159,7 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	// There are several levels of context for the target entity, at least one for entities
 	// belonging directly to the tree root. Each level's context is a union of given
 	// container's tags and the tags of the contained entities.
-	// The universal problem originates from the fact, that certain rules may change
+	// The universal problem originates from the fact that certain rules may change
 	// their product as context level changes, thus forcing some final decision (but not
 	// adding a lack of it). With rule code being principles and context cascade being
 	// circumstances, there are two uttermost approaches or moralities.
@@ -172,9 +172,9 @@ function permitted ($p = NULL, $t = NULL, $o = NULL, $annex = array())
 	// same rule, trying to evaluate it against the next level (and next, and next...),
 	// until all levels are tried. Only then go on to the next rule.
 	//
-	// With the above being simple discrete algorythms, I believe, that they very reliably
+	// With the above being simple discrete algorythms, I believe that they very reliably
 	// replicate human behavior. This gives a vast ground for further research, so I would
-	// only note, that the morale used in RackTables is "principles first".
+	// only note that the morale used in RackTables is "principles first".
 	return gotClearanceForTagChain ($subject);
 }
 

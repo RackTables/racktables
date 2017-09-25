@@ -1653,7 +1653,7 @@ function tagNameOnChain ($tagname, $tagchain)
 }
 
 // Return TRUE, if two tags chains differ (order of tags doesn't matter).
-// Assume, that neither of the lists contains duplicates.
+// Assume that neither of the lists contains duplicates.
 // FIXME: a faster, than O(x^2) method is possible for this calculation.
 function tagChainCmp ($chain1, $chain2)
 {
@@ -3327,7 +3327,7 @@ function getTagChart ($limit = 0, $realm = 'total', $special_tags = array())
 		if (++$done == $limit)
 			break;
 	}
-	// ...then make sure, that every item of the special list is shown
+	// ...then make sure that every item of the special list is shown
 	// (using the same sort order)
 	$extra = array();
 	foreach ($special_tags as $taginfo)
@@ -3500,7 +3500,7 @@ function decodeVLANCK ($string)
 	return array ($matches[1], $matches[2]);
 }
 
-// Return VLAN name formatted for HTML output (note, that input
+// Return VLAN name formatted for HTML output (note that input
 // argument comes from database unescaped).
 function formatVLANAsOption ($vlaninfo)
 {
@@ -3877,7 +3877,7 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	{
 		// Before removing each old VLAN as such it is necessary to unassign
 		// ports from it (to remove VLAN from each ports' list of "allowed"
-		// VLANs). This change in turn requires, that a port's "native"
+		// VLANs). This change in turn requires that a port's "native"
 		// VLAN isn't set to the one being removed from its "allowed" list.
 		switch ($port['old_mode'] . '->' . $port['new_mode'])
 		{
@@ -5597,7 +5597,8 @@ function getOutputOf ($func_name)
 	}
 }
 
-// calls function which can be overriden in $hook array. Takes any number of additional parameters
+// Calls a function taking into account the overrides specified in the
+// $hook array. Takes any number of additional parameters.
 function callHook ($hook_name)
 {
 	global $hook;

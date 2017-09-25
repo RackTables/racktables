@@ -255,7 +255,7 @@ class RTGatewayError extends RackTablesError
 	}
 }
 
-# "Permission denied" is a very common case, which in some situations is
+# "Permission denied" is a very common case that in some situations is
 # treated as a "soft" error.
 class RTPermissionDenied extends RackTablesError
 {

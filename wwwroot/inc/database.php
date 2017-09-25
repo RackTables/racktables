@@ -5590,7 +5590,7 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 	// native VLAN ID doesn't belong to the allowed list, don't issue
 	// INSERT query, which would always trigger an FK exception.
 	// This function indicates an error, but doesn't revert it, so it is
-	// assummed, that the calling function performs necessary transaction wrapping.
+	// assummed that the calling function performs necessary transaction wrapping.
 	// A record on a port with none VLANs allowed makes no sense regardless of port mode.
 	if ($port['mode'] != 'trunk' && ! count ($port['allowed']))
 		return 0;

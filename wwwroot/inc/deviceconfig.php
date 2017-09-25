@@ -1200,7 +1200,7 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 }
 
 // Get a list of VLAN management pseudo-commands and return a text
-// of real vendor-specific commands, which implement the work.
+// of real vendor-specific commands that implement the work.
 // This work is done in two rounds:
 // 1. For "add allowed" and "rem allowed" commands detect continuous
 //    sequences of VLAN IDs and replace them with ranges of form "A-B",
@@ -2550,8 +2550,8 @@ function eos4Read8021QConfig ($input)
 # In IOS there is one "interface" section for each port with all 802.1Q configuration
 # maintained as text lines in the first place. These lines are eventually translated
 # into effective configuration of the port. E.g. access and trunk VLAN settings can
-# co-exist in IOS, it is switchport mode (set either statically or dynamically)
-# defining, which settings are used by the port. Likewise, it is possible to "assign"
+# co-exist in IOS, it is switchport mode (set either statically or dynamically) that
+# defines which settings are used by the port. Likewise, it is possible to "assign"
 # any VLAN to any port regardless if the VLAN itself exists.
 #
 # In ROS the configuration is maintained in port's effective switchport state in the

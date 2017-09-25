@@ -1403,7 +1403,7 @@ WHERE O.objtype_id = 1562";
 (29,'uint','Sort order'),
 (30,'dict','Mgmt type'),
 -- ^^^^^ Any new 'default' attributes must go above this line! ^^^^^
--- Primary key value 9999 makes sure, that AUTO_INCREMENT on server restart
+-- Primary key value 9999 makes sure that AUTO_INCREMENT on server restart
 -- doesn't drop below 10000 (other code relies on this, site-specific
 -- attributes are assigned IDs starting from 10000).
 (9999,'string','base MAC address')";

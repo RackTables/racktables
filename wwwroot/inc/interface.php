@@ -4459,7 +4459,7 @@ function renderEntityTags ($entity_id)
 	if (count ($taglist) > getConfigVar ('TAGS_QUICKLIST_THRESHOLD'))
 	{
 		$minilist = getTagChart (getConfigVar ('TAGS_QUICKLIST_SIZE'), etypeByPageno(), $target_given_tags);
-		// It could happen, that none of existing tags have been used in the current realm.
+		// It could happen that none of existing tags have been used in the current realm.
 		if (count ($minilist))
 		{
 			$js_code = "tag_cb.setTagShortList ({";

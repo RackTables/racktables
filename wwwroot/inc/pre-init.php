@@ -65,7 +65,7 @@ function connectDB()
 	(
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		// Cancel one specific SQL mode option that RackTables has been non-compliant
-		// with but which used to be off by default until MySQL 5.7. As soon as
+		// with, but which used to be off by default until MySQL 5.7. As soon as
 		// respective SQL queries and table columns become compliant with those options
 		// stop changing @@SQL_MODE but still keep SET NAMES in place.
 		// RackTables requires the strict SQL mode, which is not enabled by default
