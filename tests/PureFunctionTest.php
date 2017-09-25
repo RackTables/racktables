@@ -115,6 +115,12 @@ class PureFunctionTest extends RTTestCase
 		treeApplyFunc ($forest_byref, $func, $stopfunc);
 	}
 
+	// For getOutputOf() tests.
+	static function doubleEcho ($str)
+	{
+		echo $str . $str;
+	}
+
 	public function providerUnaryEquals ()
 	{
 		return array
@@ -1355,6 +1361,13 @@ class PureFunctionTest extends RTTestCase
 					),
 				),
 			),
+
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', '', ''),
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', ' ', '  '),
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', 0, '00'),
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', 'abcdefg', 'abcdefgabcdefg'),
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', "abc\ndefg\n", "abc\ndefg\nabc\ndefg\n"),
+			array ('getOutputOf', __CLASS__ . '::doubleEcho', "\n", "\n\n"),
 		);
 	}
 
@@ -1425,6 +1438,8 @@ class PureFunctionTest extends RTTestCase
 					'even' => array ('id' => 2, 'parity' => 'even'),
 				),
 			),
+
+			array ('getOutputOf', 'printf', '%07.2f', 123.45678, '0123.46'),
 		);
 	}
 
