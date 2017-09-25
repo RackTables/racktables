@@ -3895,23 +3895,6 @@ function convertPDOException ($e)
 	return new RTDatabaseError ($text);
 }
 
-// The strict SQL mode, which is the default since MySQL 5.7 and MariaDB 10.2.4,
-// generates an error (and in this case a PDO exception) when a column value is
-// invalid or missing. When the strict SQL mode is not enabled (for whatever
-// reason), the invalid or missing values (as well as other anomalies) end up in
-// the warnings buffer and remain out of sight by default. This function saves
-// the contents of the buffer such that it can be displayed later.
-function collectMySQLWarnings()
-{
-	global $dbxlink, $debug_mode, $rtdebug_mysql_warnings;
-	if (! isset ($debug_mode) || ! $debug_mode)
-		return;
-	if (! isset ($rtdebug_mysql_warnings))
-		$rtdebug_mysql_warnings = array();
-	$result = $dbxlink->query ('SHOW WARNINGS');
-	$rtdebug_mysql_warnings = array_merge ($rtdebug_mysql_warnings, $result->fetchAll (PDO::FETCH_ASSOC));
-}
-
 function assertListOfColumnNames ($column_names)
 {
 	if (! is_array ($column_names))
@@ -3938,10 +3921,7 @@ function usePreparedInsertBlade ($tablename, $columns)
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute (array_values ($columns));
-		$ret = $prepared->rowCount();
-		unset ($prepared);
-		collectMySQLWarnings();
-		return $ret;
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
@@ -3996,10 +3976,7 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute ($where_values);
-		$ret = $prepared->rowCount();
-		unset ($prepared);
-		collectMySQLWarnings();
-		return $ret;
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
@@ -4036,10 +4013,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 	{
 		$prepared = $dbxlink->prepare ($query);
 		$prepared->execute (array_merge (array_values ($set_columns), $where_values));
-		$ret = $prepared->rowCount();
-		unset ($prepared);
-		collectMySQLWarnings();
-		return $ret;
+		return $prepared->rowCount();
 	}
 	catch (PDOException $e)
 	{
