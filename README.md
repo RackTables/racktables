@@ -91,7 +91,7 @@ Install dependencies with pkg:
 
 unpack tar.gz/zip archive to `/usr/local/www`
 
-symblink racktables dir
+symlink racktables dir
 ```
 # cd /usr/local/www
 # ln -s RackTables-0.20.xx racktables
