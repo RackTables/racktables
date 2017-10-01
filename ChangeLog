@@ -1,4 +1,4 @@
-0.21.0
+0.21.0 2017-10-01
 	update: better display objects that have no common name
 	update: highlight RackCode syntax in the Permissions viewer too
 	update: refine delivery of rack thumb images
