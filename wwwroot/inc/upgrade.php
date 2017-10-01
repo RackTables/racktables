@@ -170,7 +170,7 @@ From now on the minimum (oldest) release of PHP that can run RackTables is
 
 This release introduces a new plugin architecture.  If you experience issues
 after the upgrade, try disabling plugins.
-Refer to <a href="http://wiki.racktables.org/index.php/RackTablesAdminGuide#Plugins">the wiki</a> for more information.
+Refer to <a href="http://wiki.racktables.org/index.php/Plugins">the wiki</a> for more information.
 ENDOFTEXT
 ,
 );
