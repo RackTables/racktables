@@ -457,6 +457,13 @@ class PureFunctionTest extends RTTestCase
 			array ('colorHex2Rgb', '800000', '128,0,0'),
 			array ('colorHex2Rgb', '008000', '0,128,0'),
 			array ('colorHex2Rgb', '000080', '0,0,128'),
+
+			// decodeVLANCK() returns an array of strings, when that changes to an array of
+			// integers the block below will be ready to move to providerUnarySame() as it is.
+			array ('decodeVLANCK', '1-2', array (1, 2)),
+			array ('decodeVLANCK', '01-02', array (1, 2)),
+			array ('decodeVLANCK', '10-20', array (10, 20)),
+			array ('decodeVLANCK', '123-456', array (123, 456)),
 		);
 	}
 
@@ -1599,6 +1606,14 @@ class PureFunctionTest extends RTTestCase
 			array ('cmpSQLDates', array ('2010-04-05', 'aaaa-bb-cc')),
 			array ('cmpSQLDates', array ('2010-04-05', '0000-00-00')),
 			array ('cmpSQLDates', array ('2010-04-05', '2010-13-32')),
+
+			array ('decodeVLANCK', array ('0-0')),
+			array ('decodeVLANCK', array ('0-1')),
+			array ('decodeVLANCK', array ('1-0')),
+			array ('decodeVLANCK', array ('x-y')),
+			array ('decodeVLANCK', array ('x-1')),
+			array ('decodeVLANCK', array ('1-y')),
+			array ('decodeVLANCK', array ('1-4096')),
 		);
 	}
 

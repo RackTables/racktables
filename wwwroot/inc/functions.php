@@ -3501,7 +3501,11 @@ function decodeVLANCK ($string)
 {
 	$matches = array();
 	if (1 != preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $string, $matches))
-		throw new InvalidArgException ('VLAN compound key', $string);
+		throw new InvalidArgException ('VLAN compound key', $string, 'format error');
+	if (! isUnsignedInteger ($matches[1]))
+		throw new InvalidArgException ('VLAN compound key', $string, 'domain ID cannot be 0');
+	if (! isValidVLANID ($matches[2]))
+		throw new InvalidArgException ('VLAN compound key', $string, 'invalid VLAN ID');
 	return array ($matches[1], $matches[2]);
 }
 
