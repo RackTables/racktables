@@ -605,6 +605,19 @@ class PureFunctionTest extends RTTestCase
 					4 => array ('id' => 4, 'name' => 'four'),
 				),
 			),
+
+			array ('isValidVLANID', -2, FALSE),
+			array ('isValidVLANID', -1, FALSE),
+			array ('isValidVLANID', 0, FALSE),
+			array ('isValidVLANID', 0.5, FALSE),
+			array ('isValidVLANID', 1, TRUE),
+			array ('isValidVLANID', 2, TRUE),
+			array ('isValidVLANID', 3, TRUE),
+			array ('isValidVLANID', 1024, TRUE),
+			array ('isValidVLANID', 4094, TRUE),
+			array ('isValidVLANID', 4095, FALSE),
+			array ('isValidVLANID', 4096, FALSE),
+			array ('isValidVLANID', 4097, FALSE),
 		);
 	}
 

@@ -207,6 +207,11 @@ function isHTMLColor ($color)
 	return 1 == preg_match ('/^[0-9A-F]{6}$/i', $color);
 }
 
+function isValidVLANID ($x)
+{
+	return isUnsignedInteger ($x) && $x >= VLAN_MIN_ID && $x <= VLAN_MAX_ID;
+}
+
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
 # (or empty string for empty input, when allowed).
 #
@@ -456,7 +461,7 @@ function genericAssertion ($argname, $argtype)
 		assertUIntArg ($argname);
 		if ($argtype == 'vlan' && $sic[$argname] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		if ($sic[$argname] > VLAN_MAX_ID || $sic[$argname] < VLAN_MIN_ID)
+		if (! isValidVLANID ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'uint-vlan':
@@ -465,7 +470,7 @@ function genericAssertion ($argname, $argtype)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
 		if ($argtype == 'uint-vlan' && $m[2] == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		if ($m[2] > VLAN_MAX_ID || $m[2] < VLAN_MIN_ID)
+		if (! isValidVLANID ($m[2]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'rackcode/expr':
