@@ -459,19 +459,23 @@ function genericAssertion ($argname, $argtype)
 	case 'vlan':
 	case 'vlan1':
 		assertUIntArg ($argname);
-		if ($argtype == 'vlan' && $sic[$argname] == VLAN_DFL_ID)
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
 		if (! isValidVLANID ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
+		if ($argtype == 'vlan' && $sic[$argname] == VLAN_DFL_ID)
+			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
 		return $sic[$argname];
 	case 'uint-vlan':
 	case 'uint-vlan1':
-		if (! preg_match ('/^([1-9][0-9]*)-([1-9][0-9]*)$/', assertStringArg ($argname), $m))
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'format error');
-		if ($argtype == 'uint-vlan' && $m[2] == VLAN_DFL_ID)
+		try
+		{
+			list ($vdom_id, $vlan_id) = decodeVLANCK (assertStringArg ($argname));
+		}
+		catch (InvalidArgException $iae)
+		{
+			throw new InvalidRequestArgException ($argname, $sic[$argname], $iae->getMessage());
+		}
+		if ($argtype == 'uint-vlan' && $vlan_id == VLAN_DFL_ID)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		if (! isValidVLANID ($m[2]))
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		return $sic[$argname];
 	case 'rackcode/expr':
 		if ('' == assertStringArg ($argname, TRUE))
