@@ -464,6 +464,10 @@ class PureFunctionTest extends RTTestCase
 			array ('decodeVLANCK', '01-02', array (1, 2)),
 			array ('decodeVLANCK', '10-20', array (10, 20)),
 			array ('decodeVLANCK', '123-456', array (123, 456)),
+
+			array ('datetimeFormatHint', '%Y-%m-%d', 'YYYY-MM-DD'),
+			array ('datetimeFormatHint', '%d/%m/%y', 'DD/MM/YY'),
+			array ('datetimeFormatHint', '%d.%m.%Y', 'DD.MM.YYYY'),
 		);
 	}
 
