@@ -1287,6 +1287,15 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			break;
 		case '0.21.1':
 			$query[] = "UPDATE Config SET description = 'List of VLAN-related IPv4/IPv6 networks' WHERE varname = 'VLANNET_LISTSRC'";
+			$query[] = "ALTER TABLE ObjectHistory ADD COLUMN event_id int(10) unsigned NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (event_id)";
+			$query[] = "DELETE FROM Atom WHERE molecule_id IS NULL OR rack_id IS NULL OR unit_no IS NULL OR atom IS NULL";
+			// Modify the columns explicitly before the primary key addition does it implicitly.
+			$query[] = "ALTER TABLE Atom MODIFY COLUMN molecule_id int(10) unsigned NOT NULL";
+			$query[] = "ALTER TABLE Atom MODIFY COLUMN rack_id int(10) unsigned NOT NULL";
+			$query[] = "ALTER TABLE Atom MODIFY COLUMN unit_no int(10) unsigned NOT NULL";
+			$query[] = "ALTER TABLE Atom MODIFY COLUMN atom enum('front','interior','rear') NOT NULL";
+			$query[] = "ALTER TABLE Atom ADD PRIMARY KEY (molecule_id, rack_id, unit_no, atom)";
+			$query[] = "ALTER TABLE Atom DROP KEY `Atom-FK-molecule_id`";
 			$query[] = "UPDATE Config SET varvalue = '0.21.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

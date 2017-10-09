@@ -481,11 +481,11 @@ function get_pseudo_file ($name)
 		$query[] = "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0";
 
 		$query[] = "CREATE TABLE `Atom` (
-  `molecule_id` int(10) unsigned default NULL,
-  `rack_id` int(10) unsigned default NULL,
-  `unit_no` int(10) unsigned default NULL,
-  `atom` enum('front','interior','rear') default NULL,
-  KEY `Atom-FK-molecule_id` (`molecule_id`),
+  `molecule_id` int(10) unsigned NOT NULL,
+  `rack_id` int(10) unsigned NOT NULL,
+  `unit_no` int(10) unsigned NOT NULL,
+  `atom` enum('front','interior','rear') NOT NULL,
+  PRIMARY KEY (`molecule_id`,`rack_id`,`unit_no`,`atom`),
   KEY `Atom-FK-rack_id` (`rack_id`),
   CONSTRAINT `Atom-FK-molecule_id` FOREIGN KEY (`molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
@@ -995,6 +995,7 @@ function get_pseudo_file ($name)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `ObjectHistory` (
+  `event_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `id` int(10) unsigned default NULL,
   `name` char(255) default NULL,
   `label` char(255) default NULL,
@@ -1004,6 +1005,7 @@ function get_pseudo_file ($name)
   `comment` text,
   `ctime` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `user_name` char(64) default NULL,
+  PRIMARY KEY (`event_id`),
   KEY `id` (`id`),
   CONSTRAINT `ObjectHistory-FK-object_id` FOREIGN KEY (`id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";

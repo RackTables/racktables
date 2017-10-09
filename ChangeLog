@@ -1,3 +1,5 @@
+0.21.1
+	update: improve Percona server support (Mantis#1793)
 0.21.0 2017-10-01
 	update: better display objects that have no common name
 	update: highlight RackCode syntax in the Permissions viewer too
