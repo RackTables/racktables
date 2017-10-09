@@ -485,6 +485,8 @@ function get_pseudo_file ($name)
   `rack_id` int(10) unsigned default NULL,
   `unit_no` int(10) unsigned default NULL,
   `atom` enum('front','interior','rear') default NULL,
+  KEY `Atom-FK-molecule_id` (`molecule_id`),
+  KEY `Atom-FK-rack_id` (`rack_id`),
   CONSTRAINT `Atom-FK-molecule_id` FOREIGN KEY (`molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `Atom-FK-rack_id` FOREIGN KEY (`rack_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB";
