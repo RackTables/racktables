@@ -202,6 +202,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.20.13',
 		'0.20.14',
 		'0.21.0',
+		'0.21.1',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1283,6 +1284,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 ('DATEONLY_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for dates')";
 
 			$query[] = "UPDATE Config SET varvalue = '0.21.0' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.1':
+			$query[] = "UPDATE Config SET description = 'List of VLAN-related IPv4/IPv6 networks' WHERE varname = 'VLANNET_LISTSRC'";
+			$query[] = "UPDATE Config SET varvalue = '0.21.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

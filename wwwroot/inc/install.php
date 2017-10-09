@@ -2237,7 +2237,7 @@ WHERE O.objtype_id = 1562";
 ('IPV4_TREE_RTR_AS_CELL','no','string','no','no','yes','Show full router info for each network in IPv4 tree view'),
 ('PROXIMITY_RANGE','0','uint','yes','no','yes','Proximity range (0 is current rack only)'),
 ('VLANSWITCH_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN running switches'),
-('VLANNET_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN-based IPv4 networks'),
+('VLANNET_LISTSRC', '', 'string', 'yes', 'no', 'yes', 'List of VLAN-related IPv4/IPv6 networks'),
 ('IPV4_TREE_SHOW_VLAN','yes','string','no','no','yes','Show VLAN for each network in IPv4 tree'),
 ('DEFAULT_VDOM_ID','','uint','yes','no','yes','Default VLAN domain ID'),
 ('DEFAULT_VST_ID','','uint','yes','no','yes','Default VLAN switch template ID'),
