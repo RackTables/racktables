@@ -3241,11 +3241,13 @@ function judgeContext ($expression)
 // An undefined $cell means current context.
 function considerConfiguredConstraint ($cell, $varname)
 {
+	// Do not mask any exceptions thrown in getConfigVar().
+	$text = getConfigVar ($varname);
 	try
 	{
-		return considerGivenConstraint ($cell, getConfigVar ($varname));
+		return considerGivenConstraint ($cell, $text);
 	}
-	catch (RackTablesError $e)
+	catch (InvalidArgException $e)
 	{
 		return FALSE; // constraint set, but cannot be used due to compilation error
 	}
