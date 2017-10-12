@@ -3207,7 +3207,6 @@ function eval_expression ($expr, $tagchain, $silent = FALSE)
 			if (!$silent)
 				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'");
 			return NULL;
-			break;
 	}
 }
 
