@@ -2787,7 +2787,7 @@ function renderIPNetwork ($id)
 
 	// render summary portlet
 	$summary = array();
-	$summary['%% used'] = getRenderedIPNetCapacity ($range);
+	$summary['% used'] = getRenderedIPNetCapacity ($range);
 	$summary = getRenderedIPNetBacktrace ($range) + $summary;
 	if ($realm == 'ipv4net')
 	{
@@ -4809,7 +4809,7 @@ function renderFileManager ()
 		echo '<tr><th class=tdright>Tags:</td><td class=tdleft>';
 		printTagsPicker ();
 		echo '</td></tr>';
-		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file'></td></td>";
+		echo "<tr><th class=tdright>File:</th><td class=tdleft><input type='file' size='10' name='file'></td></tr>";
 		echo "<tr><td colspan=2>";
 		printImageHREF ('CREATE', 'Upload file', TRUE);
 		echo '</td></tr>';
