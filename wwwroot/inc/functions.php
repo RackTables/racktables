@@ -4771,15 +4771,35 @@ function authorize8021QChangeRequests ($before, $changes, $op = NULL)
 	if (isset ($script_mode) && $script_mode)
 		return $changes;
 	$ret = array();
-	foreach ($changes as $pn => $change)
+	foreach ($changes as $pn => $new)
 	{
-		foreach (array_diff ($before[$pn]['allowed'], $change['allowed']) as $removed_id)
-			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$fromvlan_' . $removed_id), array ('tag' => '$vlan_' . $removed_id))))
+		if (! array_key_exists($pn, $before))
+		{
+			$removed = [];
+			$added = $new['allowed'];
+		}
+		else
+		{
+			$old = $before[$pn];
+			$removed = array_diff ($old['allowed'], $new['allowed']);
+			$added = array_diff ($new['allowed'], $old['allowed']);
+			// treat native vlan replacement as removing/adding of old/new vlans,
+			// even if they persist in both $old and $new allowed list
+			if ($new['native'] != $old['native'])
+			{
+				if ($old['native'] && ! in_array($old['native'], $removed))
+					$removed[] = $old['native'];
+				if ($new['native'] && ! in_array($new['native'], $added))
+					$added[] = $new['native'];
+			}
+		}
+		foreach ($removed as $vid)
+			if (!permitted (NULL, NULL, $op, [['tag' => "\$fromvlan_{$vid}"], ['tag' => "\$vlan_{$vid}"]]))
 				continue 2; // next port
-		foreach (array_diff ($change['allowed'], $before[$pn]['allowed']) as $added_id)
-			if (!permitted (NULL, NULL, $op, array (array ('tag' => '$tovlan_' . $added_id), array ('tag' => '$vlan_' . $added_id))))
+		foreach ($added as $vid)
+			if (!permitted (NULL, NULL, $op, [['tag' => "\$tovlan_{$vid}"], ['tag' => "\$vlan_{$vid}"]]))
 				continue 2; // next port
-		$ret[$pn] = $change;
+		$ret[$pn] = $new;
 	}
 	return $ret;
 }
