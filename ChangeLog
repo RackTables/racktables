@@ -1,4 +1,4 @@
-0.21.1
+0.21.1 2017-10-22
 	update: improve Percona server support (Mantis#1793)
 	bugfix: fix an upgrade bug introduced in 0.21.0 (found by Chris James)
 0.21.0 2017-10-01
