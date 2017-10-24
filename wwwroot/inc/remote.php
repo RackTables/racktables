@@ -180,6 +180,15 @@ $breed_by_swcode = array
 	//... linux items added by the loop below
 );
 
+$shorten_by_breed = array (
+	'ios12' => 'ios12ShortenIfName_real',
+	'nxos4' => 'nxos4ShortenIfName',
+	'vrp53' => 'vrp5xShortenIfName',
+	'vrp55' => 'vrp5xShortenIfName',
+	'vrp85' => 'vrp85ShortenIfName',
+	'iosxr4' => 'iosxr4ShortenIfName',
+);
+
 $breed_by_hwcode = array (
 	1362 => 'fdry5', // Brocade FastIron CX648
 	//... dlink items added by the loop below
@@ -728,6 +737,7 @@ function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 		return $if_name;
 
 	global $current_query_breed;
+	global $shorten_by_breed;
 	if (! isset ($breed))
 	{
 		if (isset ($object_id))
@@ -736,22 +746,10 @@ function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 			$breed = $current_query_breed;
 	}
 
-	switch ($breed)
-	{
-		case 'ios12':
-			return ios12ShortenIfName_real ($if_name);
-		case 'nxos4':
-			return nxos4ShortenIfName ($if_name);
-		case 'vrp53':
-		case 'vrp55':
-			return vrp5xShortenIfName ($if_name);
-		case 'vrp85':
-			return vrp85ShortenIfName ($if_name);
-		case 'iosxr4':
-			return iosxr4ShortenIfName ($if_name);
-	}
-	// default case is outside of switch()
-	return ios12ShortenIfName ($if_name);
+	if (isset ($breed) and isset ($shorten_by_breed[$breed]))
+		return call_user_func ($shorten_by_breed[$breed], $if_name);
+	else
+		return ios12ShortenIfName ($if_name);
 }
 
 function ios12ShortenIfName_real ($ifname)
