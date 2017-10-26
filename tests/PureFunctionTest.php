@@ -629,6 +629,47 @@ class PureFunctionTest extends RTTestCase
 			array ('isValidVLANID', 4095, FALSE),
 			array ('isValidVLANID', 4096, FALSE),
 			array ('isValidVLANID', 4097, FALSE),
+
+			// implicit 2nd argument
+			array
+			(
+				'constructIPRange',
+				"\x00\x00\x00\x00",
+				array
+				(
+					'mask_bin' => "\xFF\xFF\xFF\xFF",
+					'mask' => 32,
+					'ip_bin' => "\x00\x00\x00\x00",
+					'ip' => '0.0.0.0',
+				),
+			),
+			array
+			(
+				'constructIPRange',
+				"\xFF\xFF\xF0\x0A",
+				array
+				(
+					'mask_bin' => "\xFF\xFF\xFF\xFF",
+					'mask' => 32,
+					'ip_bin' => "\xFF\xFF\xF0\x0A",
+					'ip' => '255.255.240.10',
+				),
+			),
+			array
+			(
+				'constructIPRange',
+				"\xFF\xFF\xFF\xFF",
+				array
+				(
+					'mask_bin' => "\xFF\xFF\xFF\xFF",
+					'mask' => 32,
+					'ip_bin' => "\xFF\xFF\xFF\xFF",
+					'ip' => '255.255.255.255',
+				),
+			),
+			// For some reason the result constructIPRange() returns for IPv6
+			// does not use a binary string for mask_bin and hence is difficult
+			// to record in a test case.
 		);
 	}
 
@@ -1392,6 +1433,60 @@ class PureFunctionTest extends RTTestCase
 			array ('getOutputOf', __CLASS__ . '::doubleEcho', 'abcdefg', 'abcdefgabcdefg'),
 			array ('getOutputOf', __CLASS__ . '::doubleEcho', "abc\ndefg\n", "abc\ndefg\nabc\ndefg\n"),
 			array ('getOutputOf', __CLASS__ . '::doubleEcho', "\n", "\n\n"),
+
+			// explicit 2nd argument
+			array
+			(
+				'constructIPRange',
+				"\xFF\xFF\xF0\x0A",
+				24,
+				array
+				(
+					'mask_bin' => "\xFF\xFF\xFF\x00",
+					'mask' => 24,
+					'ip_bin' => "\xFF\xFF\xF0\x00",
+					'ip' => '255.255.240.0',
+				),
+			),
+			array
+			(
+				'constructIPRange',
+				"\xFF\xFF\xF0\x0A",
+				16,
+				array
+				(
+					'mask_bin' => "\xFF\xFF\x00\x00",
+					'mask' => 16,
+					'ip_bin' => "\xFF\xFF\x00\x00",
+					'ip' => '255.255.0.0',
+				),
+			),
+			array
+			(
+				'constructIPRange',
+				"\xAC\x11\x12\x0A",
+				24,
+				array
+				(
+					'mask_bin' => "\xFF\xFF\xFF\x00",
+					'mask' => 24,
+					'ip_bin' => "\xAC\x11\x12\x00",
+					'ip' => '172.17.18.0',
+				),
+			),
+			array
+			(
+				'constructIPRange',
+				"\xAC\x11\x12\x0A",
+				0,
+				array
+				(
+					'mask_bin' => "\x00\x00\x00\x00",
+					'mask' => 0,
+					'ip_bin' => "\x00\x00\x00\x00",
+					'ip' => '0.0.0.0',
+				),
+			),
 		);
 	}
 
@@ -1618,6 +1713,14 @@ class PureFunctionTest extends RTTestCase
 			array ('decodeVLANCK', array ('x-1')),
 			array ('decodeVLANCK', array ('1-y')),
 			array ('decodeVLANCK', array ('1-4096')),
+
+			array ('constructIPRange', array ("\x00")),
+			array ('constructIPRange', array ("\x00\x00\x00\x00\x00")),
+			array ('constructIPRange', array ("\xAC\x11\x12\x0A", FALSE)),
+			array ('constructIPRange', array ("\xAC\x11\x12\x0A", TRUE)),
+			// NULL is the same as implicit 2nd argument
+			array ('constructIPRange', array ("\xAC\x11\x12\x0A", -1)),
+			array ('constructIPRange', array ("\xAC\x11\x12\x0A", 33)),
 		);
 	}
 
