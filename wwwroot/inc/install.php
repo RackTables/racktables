@@ -800,6 +800,8 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   KEY `object_id` (`object_id`),
+  KEY `MountOperation-FK-old_molecule_id` (`old_molecule_id`),
+  KEY `MountOperation-FK-new_molecule_id` (`new_molecule_id`),
   CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE
