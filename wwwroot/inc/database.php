@@ -329,7 +329,7 @@ function getMountInfo ($object_ids)
 {
 	if (! count ($object_ids))
 		return array();
-	# In theory number of involved racks can be equal or even greater, than the
+	# In theory number of involved racks can be equal or even greater than the
 	# number of objects, but in practice it will often be tens times less. Hence
 	# the scope of the 1st pass is to tell IDs of all involved racks without
 	# fetching lots of duplicate data.
@@ -5660,7 +5660,7 @@ function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 }
 
 // Return entity ID, if its 'name' column equals to provided string, or NULL otherwise (nothing
-// found or more, than one row returned by query due to some odd reason).
+// found or more than one row returned by query due to some odd reason).
 function lookupEntityByString ($realm, $value, $column = 'name')
 {
 	global $SQLSchema;

@@ -1663,7 +1663,7 @@ function tagNameOnChain ($tagname, $tagchain)
 
 // Return TRUE, if two tags chains differ (order of tags doesn't matter).
 // Assume that neither of the lists contains duplicates.
-// FIXME: a faster, than O(x^2) method is possible for this calculation.
+// FIXME: a faster than O(x^2) method is possible for this calculation.
 function tagChainCmp ($chain1, $chain2)
 {
 	if (count ($chain1) != count ($chain2))
@@ -4581,7 +4581,7 @@ function saveDownlinksReverb ($object_id, $requested_changes)
 function initiateUplinksReverb ($object_id, $uplink_ports)
 {
 	// Filter and regroup all requests (regardless of how many will succeed)
-	// to end up with no more, than one execution per remote object.
+	// to end up with no more than one execution per remote object.
 	$upstream_config = array();
 	foreach (getObjectPortsAndLinks ($object_id, FALSE) as $portinfo)
 		if
@@ -4901,7 +4901,7 @@ function compareDecomposedPortNames ($porta, $portb)
 // switches can have ports:
 // * fa0/1~48, gi0/1~4 (in this case 'gi' should come after 'fa'
 // * fa1, gi0/1~48, te1/49~50 (type matters, then index)
-// * gi5/1~3, te5/4~5 (here index matters more, than type)
+// * gi5/1~3, te5/4~5 (here index matters more than type)
 // This implementation makes port type (prefix) matter for all
 // interfaces that have less than 2 indices, but for other ports
 // their indices matter more than type (unless there is a clash
