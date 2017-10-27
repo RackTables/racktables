@@ -799,9 +799,9 @@ function get_pseudo_file ($name)
   `new_molecule_id` int(10) unsigned default NULL,
   `comment` text,
   PRIMARY KEY  (`id`),
+  UNIQUE KEY `old_molecule_id` (`old_molecule_id`),
+  UNIQUE KEY `new_molecule_id` (`new_molecule_id`),
   KEY `object_id` (`object_id`),
-  KEY `MountOperation-FK-old_molecule_id` (`old_molecule_id`),
-  KEY `MountOperation-FK-new_molecule_id` (`new_molecule_id`),
   CONSTRAINT `MountOperation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-old_molecule_id` FOREIGN KEY (`old_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE,
   CONSTRAINT `MountOperation-FK-new_molecule_id` FOREIGN KEY (`new_molecule_id`) REFERENCES `Molecule` (`id`) ON DELETE CASCADE

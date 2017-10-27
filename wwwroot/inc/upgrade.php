@@ -1302,6 +1302,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = '0.21.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.21.2':
+			$query[] = "ALTER TABLE MountOperation ADD UNIQUE KEY `old_molecule_id` (old_molecule_id)";
+			$query[] = "ALTER TABLE MountOperation ADD UNIQUE KEY `new_molecule_id` (new_molecule_id)";
+			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-old_molecule_id`";
+			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-new_molecule_id`";
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
