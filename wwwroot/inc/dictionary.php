@@ -3553,6 +3553,10 @@ $dictionary = array
 	3663 => array ('chapter_id' => 31, 'dict_value' => 'HPE%GPASS%BladeSystem c3000%L4,2H%'),
 	3664 => array ('chapter_id' => 31, 'dict_value' => 'HPE%GPASS%BladeSystem c7000%L2,8V%'),
 	3665 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%RB1100AHx4'),
+	3666 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5459-48XT-4Q'),
+	3667 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5468-32QP'),
+	3668 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5340-48XP-6Q'),
+	3669 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5340-32QP'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
