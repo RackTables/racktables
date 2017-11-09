@@ -327,7 +327,7 @@ function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 // returns an array of command-line parameters to $ref_settings[0]['protocol']
 // this function is called by callHook, so you can override/chain it
 // to customize command-line options to particular gateways.
-function makeGatewayParams ($object_id, $tolerate_remote_errors, /*array(&)*/$ref_settings, /*array(&)*/$ref_commands)
+function makeGatewayParams ($object_id, /*array(&)*/$ref_settings, /*array(&)*/$ref_commands)
 {
 	$ret = array();
 	$settings = &$ref_settings[0];
@@ -541,17 +541,18 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		'prompt_delay' => 0.001, # 1ms
 		'sudo_user' => NULL,
 		'identity_file' => NULL,
+		'tolerate_remote_errors' => $tolerate_remote_errors,
 	);
 
 	// override default settings
 	if (is_callable ('terminal_settings'))
 		call_user_func ('terminal_settings', $objectInfo, array (&$settings));
 	// make gateway-specific CLI params out of settings
-	$params = callHook ('makeGatewayParams', $object_id, $tolerate_remote_errors, array (&$settings), array (&$commands));
+	$params = callHook ('makeGatewayParams', $object_id, array (&$settings), array (&$commands));
 	// call gateway
 	$ret_code = callScript ($settings['protocol'], $params, $commands, $out, $errors);
 
-	if (substr($settings['protocol'],0,3) != 'ssh' || ! $tolerate_remote_errors)
+	if (substr($settings['protocol'],0,3) != 'ssh' || ! $settings['tolerate_remote_errors'])
 	{
 		if ($errors != '')
 			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
