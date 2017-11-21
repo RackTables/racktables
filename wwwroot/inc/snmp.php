@@ -1889,9 +1889,18 @@ $iftable_processors['tplink-any-100T'] = array
 	'try_next_proc' => FALSE,
 ); 
 
-$iftable_processors['tplink-any-1000T'] = array
+$iftable_processors['tplink-sg-stackable-any-1000T'] = array
 (
 	'pattern' => '@^.+ Port on unit .+ port ([[:digit:]]+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['tplink-sg-1000T'] = array
+(
+	'pattern' => '@^port ([[:digit:]]+): Gigabit Copper$@',
 	'replacement' => 'g\\1',
 	'dict_key' => 24,
 	'label' => '\\1',
@@ -4031,19 +4040,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 1793,
 		'text' => 'TL-SG5426: 22 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
+		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-sg-stackable-any-1000T'),
 	),
 	'11863.1.1.12' => array
 	(
 		'dict_key' => 3671,
 		'text' => 'TL-SG2216: 16 RJ-45/10-100-1000T(X) + 2 combo ports',
-		'processors' => array ('tplink-15-to-16-combo-1000SFP', 'tplink-any-1000T'),
+		'processors' => array ('tplink-15-to-16-combo-1000SFP', 'tplink-sg-1000T'),
 	),
 	'11863.1.1.3' => array
 	(
 		'dict_key' => 3672,
 		'text' => 'TL-SG3424: 24 RJ-45/10-100-1000T(X) + 4 combo ports',
-		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
+		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-sg-1000T'),
 	),
 	'11863.5.31' => array
 	(
@@ -4498,7 +4507,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^3955\.6\.1\.20(24|48)\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
 	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
-	case preg_match ('/^11863\.1\.1\.1/', $sysObjectID): // TP-Link
+	case preg_match ('/^11863\.1\.1\.1$/', $sysObjectID): // TP-Link
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
