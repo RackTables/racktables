@@ -4508,6 +4508,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
 	case preg_match ('/^4526\.100\./', $sysObjectID): // NETGEAR (with console)
 	case preg_match ('/^11863\.1\.1\.1$/', $sysObjectID): // TP-Link
+	case preg_match ('/^11863\.1\.1\.3$/', $sysObjectID): // TP-Link TL-SG3424
 	case preg_match ('/^11863\.6\.10\.58/', $sysObjectID):
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
