@@ -1898,6 +1898,24 @@ $iftable_processors['tplink-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['tplink-jetstream-any-1000T'] = array
+(
+	'pattern' => '@^Gi(\d+)/(\d+)/(\d+) : copper$@',
+	'replacement' => 'gi\\1/\\2/\\3',
+	'dict_key' => 24,
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['tplink-jetstream-any-10000SFP+'] = array
+(
+	'pattern' => '@^Te(\d+)/(\d+)/(\d+) : fiber$@',
+	'replacement' => 'te\\1/\\2/\\3',
+	'dict_key' => '9-1084',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['motorola-rfs-any-1000T'] = array
 (
 	'pattern' => '@^ge(\d+)$@',
@@ -4014,6 +4032,24 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1793,
 		'text' => 'TL-SG5426: 22 RJ-45/10-100-1000T(X) + 4 combo ports',
 		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
+	),
+	'11863.1.1.12' => array
+	(
+		'dict_key' => 3671,
+		'text' => 'TL-SG2216: 16 RJ-45/10-100-1000T(X) + 2 combo ports',
+		'processors' => array ('tplink-15-to-16-combo-1000SFP', 'tplink-any-1000T'),
+	),
+	'11863.1.1.3' => array
+	(
+		'dict_key' => 3672,
+		'text' => 'TL-SG3424: 24 RJ-45/10-100-1000T(X) + 4 combo ports',
+		'processors' => array ('tplink-21-to-24-combo-1000SFP', 'tplink-any-1000T'),
+	),
+	'11863.5.31' => array
+	(
+		'dict_key' => 3670,
+		'text' => 'T1700G-28TQ: 24 RJ-45/10-100-1000T(X) + 4 SFP+/10000',
+		'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-10000SFP+'),
 	),
 	'12356.101.1.3002'=> array
 	(
