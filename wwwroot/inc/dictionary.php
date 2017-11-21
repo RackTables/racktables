@@ -3557,7 +3557,9 @@ $dictionary = array
 	3667 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5468-32QP'),
 	3668 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5340-48XP-6Q'),
 	3669 => array ('chapter_id' => 12, 'dict_value' => 'NEC%GPASS%PF5340-32QP'),
-
+	3665 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%T1700G-28TQ | http://www.tp-link.com/en/products/details/cat-40_T1700G-28TQ.html]]'),
+	3666 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%TL-SG2216 | http://www.tp-link.com/en/products/details/cat-5070_TL-SG2216.html]]'),
+	3667 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%TL-SG3424 | http://www.tp-link.com/en/products/details/cat-39_TL-SG3424.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
