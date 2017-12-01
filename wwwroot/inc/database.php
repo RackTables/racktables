@@ -3970,7 +3970,7 @@ function makeWhereSQL ($where_columns, $conjunction, &$params)
 function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 {
 	global $dbxlink;
-	if (! count ($columns))
+	if (! is_array ($columns) || ! count ($columns))
 		throw new InvalidArgException ('columns', '(empty array)', 'in this function DELETE must have WHERE');
 	$query = "DELETE FROM `${tablename}` WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
 	try
@@ -4004,9 +4004,9 @@ function usePreparedSelectBlade ($query, $args = array())
 function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conjunction = 'AND')
 {
 	global $dbxlink;
-	if (! count ($set_columns))
+	if (! is_array ($set_columns) || ! count ($set_columns))
 		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
-	if (! count ($where_columns))
+	if (! is_array ($where_columns) || ! count ($where_columns))
 		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
 	$query = "UPDATE `${tablename}` SET " . makeSetSQL (array_keys ($set_columns));
 	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
