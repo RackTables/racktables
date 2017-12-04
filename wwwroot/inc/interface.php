@@ -1350,7 +1350,7 @@ function renderRackProblems ($rack_id)
 
 function renderObjectPortRow ($port, $is_highlighted)
 {
-	// highlight port name with yellow if it's name is not canonical
+	// highlight port name with yellow if its name is not canonical
 	$canon_pn = shortenPortName ($port['name'], $port['object_id']);
 	$name_class = $canon_pn == $port['name'] ? '' : 'trwarning';
 
@@ -1726,7 +1726,7 @@ function renderPortsForObject ($object_id)
 	switchportInfoJS ($object_id); // load JS code to make portnames interactive
 	foreach ($object['ports'] as $port)
 	{
-		// highlight port name with yellow if it's name is not canonical
+		// highlight port name with yellow if its name is not canonical
 		$canon_pn = shortenPortName ($port['name'], $port['object_id']);
 		$name_class = $canon_pn == $port['name'] ? '' : 'trwarning';
 

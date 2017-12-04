@@ -1659,7 +1659,7 @@ function getResidentRackIDs ($object_id)
 		// Include racks that the object is directly mounted in
 		"SELECT rack_id FROM RackSpace WHERE object_id = ? " .
 		"UNION " .
-		// Include racks that it's parent is mounted in
+		// Include racks that its parent is mounted in
 		"SELECT RS.rack_id FROM RackSpace RS INNER JOIN EntityLink EL ON RS.object_id = EL.parent_entity_id AND EL.parent_entity_type = 'object' WHERE EL.child_entity_id = ? AND EL.child_entity_type = 'object' " .
 		"UNION " .
 		// and racks that it is 'Zero-U' mounted in
