@@ -983,3 +983,9 @@ function renderDataIntegrityReport ()
 	if (! $violations)
 		echo '<h2 class=centered>No integrity violations found</h2>';
 }
+
+function renderServerConfigurationReport ()
+{
+	echo '<br>';
+	platform_is_ok (TRUE);
+}
