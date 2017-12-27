@@ -1476,7 +1476,7 @@ ENDOFTEXT;
 <h1>Platform check status</h1>
 ENDOFTEXT;
 
-if (!platform_is_ok())
+if (! platform_is_ok (TRUE))
 {
 	echo '<h1>Please resolve the failed (red) item(s) above.</h1>';
 	die ('</body></html>');

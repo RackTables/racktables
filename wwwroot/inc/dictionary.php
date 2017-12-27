@@ -69,13 +69,15 @@ function pcre8_with_properties()
 }
 
 // Check for PHP extensions.
-function platform_is_ok ()
+function platform_is_ok ($test_innodb = FALSE)
 {
 	$nerrs = 0;
 	echo "<table border=1 cellpadding=5>\n";
 	$nerrs += platform_generic_test (version_compare (PHP_VERSION, '5.5.0', '>='), 'PHP version >= 5.5.0');
 	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
 	$nerrs += platform_generic_test (in_array  ('pdo_mysql', get_loaded_extensions()), 'PDO-MySQL extension');
+	if ($test_innodb)
+		$nerrs += platform_generic_test (isInnoDBSupported(), 'InnoDB support');
 	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
 	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with<br>--enable-unicode-properties');
 	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'trwarning');

@@ -352,6 +352,8 @@ function init_database_static ()
 {
 	connect_to_db_or_die();
 	global $dbxlink;
+	// platform_is_ok() didn't check for InnoDB support during its previous invocation, which
+	// was right because at that time secret.php did not exist yet and $dbxlink was not available.
 	if (!isInnoDBSupported())
 	{
 		echo 'InnoDB test failed! Please configure MySQL server properly and retry.';
