@@ -10,7 +10,7 @@ require_once '../wwwroot/inc/snmp.php';
 
 class RTTestCase extends RTTestCaseShim
 {
-	protected function myString ($s, $classname = NULL)
+	protected function myString ($s)
 	{
 		return sprintf ('%s-%s-%u', $s, get_class ($this), getmypid());
 	}
