@@ -7,8 +7,8 @@ class PortTriggerTest extends RTTestCase
 {
 	public function setUp ()
 	{
-		$this->object1_id = commitAddObject ('unit test object 1', NULL, 1, NULL);
-		$this->object2_id = commitAddObject ('unit test object 2', NULL, 1, NULL);
+		$this->object1_id = commitAddObject ($this->myString ('object 1'), NULL, 1, NULL);
+		$this->object2_id = commitAddObject ($this->myString ('object 2'), NULL, 1, NULL);
 		$this->port1_1_id = commitAddPort ($this->object1_id, 'port 1', '1-24', 'label 1', 'aabbccddee01');
 		$this->port1_2_id = commitAddPort ($this->object1_id, 'port 2', '1-24', 'label 2', 'aabbccddee02');
 		$this->port1_3_id = commitAddPort ($this->object1_id, 'port 8', '1-24', 'label 8', 'aabbccddee000008'); // WWN
