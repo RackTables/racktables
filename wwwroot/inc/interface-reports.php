@@ -156,10 +156,14 @@ function render8021QReport ()
 		foreach (array_keys ($domains) as $domain_id)
 		{
 			echo '<td class=tdcenter>';
-			if (array_key_exists ($domain_id, $vlanstats[$vlan_id]))
-				echo mkA ('&exist;', 'vlan', "${domain_id}-${vlan_id}");
-			else
+			if (! array_key_exists ($domain_id, $vlanstats[$vlan_id]))
 				echo '&nbsp;';
+			else
+			{
+				$attrs = $vlanstats[$vlan_id][$domain_id]['vlan_descr'] == '' ? NULL :
+					array ('title' => $vlanstats[$vlan_id][$domain_id]['vlan_descr']);
+				echo mkA ('&exist;', 'vlan', "${domain_id}-${vlan_id}", NULL, $attrs);
+			}
 			echo '</td>';
 		}
 		echo '</tr>';
