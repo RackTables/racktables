@@ -5,6 +5,18 @@ require_once '../wwwroot/inc/navigation.php';
 // Make sure renderDepot does not throw any exceptions
 class RenderReportsTest extends RTTestCase
 {
+	public function setUp ()
+	{
+		// A minimal prop to make renderPortsReport() print something.
+		$this->object_id = commitAddObject ($this->myString ('object'), NULL, 1, NULL);
+		commitAddPort ($this->object_id, 'port 1', '1-24', 'label 1', 'aabbccffff01');
+	}
+
+	public function tearDown ()
+	{
+		commitDeleteObject ($this->object_id);
+	}
+
 	/**
 	 * @group small
 	 * @dataProvider providerReportFunctions
