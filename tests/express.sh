@@ -52,6 +52,15 @@ for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	files=`expr $files + 1`
 	cd "$BASEDIR"
 done
+for f in tests/*.php; do
+	if php --syntax-check "$f" >/dev/null 2>&1; then
+		printf "$FORMAT" "$f" 'OK (syntax only)'
+	else
+		printf "$FORMAT" "$f" "ERROR: PHP syntax check failed"
+		errors=`expr $errors + 1`
+	fi
+	files=`expr $files + 1`
+done
 echo '---------------------------------------------------'
 echo "Files parsed: $files, failed tests: $errors"
 rm -f "$TEMPFILE"
