@@ -6688,19 +6688,17 @@ function etypeByPageno ($pg = NULL)
 	return $etype_by_pageno[$pg];
 }
 
-function requireExtraFiles ($reqlist)
+function requireListOfFiles ($x)
 {
-	global $pageno, $tabno;
+	if (! is_array ($x))
+		require_once $x;
+	else
+		foreach ($x as $filename)
+			require_once $filename;
+}
 
-	function requireListOfFiles ($x)
-	{
-		if (! is_array ($x))
-			require_once $x;
-		else
-			foreach ($x as $filename)
-				require_once $filename;
-	}
-
+function requireExtraFiles ($reqlist, $pageno, $tabno)
+{
 	if (array_key_exists ("${pageno}-${tabno}", $reqlist))
 		requireListOfFiles ($reqlist["${pageno}-${tabno}"]);
 	if (array_key_exists ("${pageno}-*", $reqlist))
