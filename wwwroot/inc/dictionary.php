@@ -3564,6 +3564,16 @@ $dictionary = array
 	3672 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%TL-SG3424 | http://www.tp-link.com/en/products/details/cat-39_TL-SG3424.html]]'),
 	3673 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1009-7G-1C-PC'),
 	3674 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1009-7G-1C-1S+PC'),
+	3675 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280QRA-C36S'),
+	3676 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SRA-48C6'),
+	3677 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280TRA-48C6'),
+	3678 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SRAM-48C6'),
+	3679 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR2-60'),
+	3680 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR2A-60'),
+	3681 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR2K-60'),
+	3682 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR2K-30'),
+	3683 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2-48YC6'),
+	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
