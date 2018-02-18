@@ -3574,6 +3574,7 @@ $dictionary = array
 	3682 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280CR2K-30'),
 	3683 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2-48YC6'),
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
+	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
