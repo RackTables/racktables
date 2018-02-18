@@ -13,6 +13,7 @@ case `"$PHPUNIT_BIN" --version` in
 		;;
 	*)
 		echo 'ERROR: failed to find a known version of PHPUnit'
+		"$PHPUNIT_BIN" --version
 		exit 5
 esac
 
