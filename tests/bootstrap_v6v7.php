@@ -1,6 +1,6 @@
 <?php
 
-// for PHPUnit 6
+// for PHPUnit 6 and 7
 
 use PHPUnit\Framework\TestCase;
 
