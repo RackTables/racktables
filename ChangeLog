@@ -3,6 +3,7 @@
 	update: 802.1Q: foreign VLANs (missing from the vlan domain list) are not propagated to uplinks
 	update: ability to extend supported device breed list via plug-in
 	update: add a server configuration report (same as before install/upgrade)
+        new feature: "shared router" allocation (GH#210 by Vladimir Ivanov)
 0.21.1 2017-10-22
 	update: improve Percona server support (Mantis#1793)
 	bugfix: fix an upgrade bug introduced in 0.21.0 (found by Chris James)

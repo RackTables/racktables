@@ -2144,7 +2144,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_ALLOCS)
 	{
 	if ($filter_flags & IPSCAN_RTR_ONLY)
-		$whereexpr2 .= " AND ia.type = 'router'";
+		$whereexpr2 .= " AND ( ia.type = 'router' OR ia.type = 'sharedrouter')";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
 		"from IPv4Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
@@ -2354,7 +2354,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_ALLOCS)
 	{
 	if ($filter_flags & IPSCAN_RTR_ONLY)
-		$whereexpr2 .= " AND ia.type = 'router'";
+		$whereexpr2 .= " AND (ia.type = 'router' OR ia.type = 'sharedrouter')";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
 		"from IPv6Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
