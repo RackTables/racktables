@@ -639,6 +639,35 @@ function queryLDAPServer ($username, $password)
 					validTagName ('$lgcn_' . $matches[1], TRUE)
 				)
 					$ret['memberof'][] = '$lgcn_' . $matches[1];
+
+		// Pull group membership based on Group Objects if Group Search DN is given
+        if (isset ($LDAP_options['group_search_dn']))
+        {
+    		// Default values
+    		if (!isset($LDAP_options['group_search_attr']))
+    			$LDAP_options['group_search_attr']= 'cn';
+    		if (!isset($LDAP_options['group_search_member_attr']))
+    			$LDAP_options['ggroup_search_member_attr']= 'memberuid';
+
+            $group_results = @ldap_search
+            (
+                    $connect,
+                    $LDAP_options['group_search_dn'],
+                    '(' . $LDAP_options['group_search_member_attr'] . '='. $username .')',
+                    array($LDAP_options['group_search_attr'], $LDAP_options['group_search_member_attr'])
+            );
+
+            if(@ldap_count_entries ($connect, $group_results) > 0)
+            {
+                   	$groups = @ldap_get_entries($connect, $group_results);
+                    foreach($groups as $group)
+                   	{
+                            $groupName = $group[$LDAP_options['group_search_attr']][0];
+                            $ret['memberof'][] = '$lgcn_' . $groupName;
+                   	}
+            }
+        }
+
 	}
 	@ldap_close ($connect);
 	return $ret;
