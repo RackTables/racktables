@@ -436,7 +436,7 @@ function genericAssertion ($argname, $argtype)
 		return $sic[$argname];
 	case 'enum/alloc_type':
 		assertStringArg ($argname);
-		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router', 'point2point')))
+		if (!in_array ($sic[$argname], array ('regular', 'shared', 'virtual', 'router', 'sharedrouter', 'point2point')))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
 	case 'enum/dqcode':
@@ -2151,6 +2151,7 @@ function markupIPAddrList (&$addrlist)
 			'virtual' => 0, // loopback
 			'regular' => 0, // connected host
 			'router' => 0,   // connected gateway
+			'sharedrouter' => 0, // VRRP gateway
 			'point2point' => 0,
 		);
 		$nallocs = 0;
@@ -2160,7 +2161,9 @@ function markupIPAddrList (&$addrlist)
 			$nallocs++;
 		}
 		$nreserved = ($addrlist[$ip_bin]['reserved'] == 'yes') ? 1 : 0; // only one reservation is possible ever
-		if ($nallocs > 1 && $nallocs != $refc['shared'] || $nallocs && $nreserved)
+		if ($nallocs && $nreserved ||                                                     // reserved cannot be allocated
+                    $nallocs > 1 && $nallocs != $refc['shared'] && $refc['sharedrouter'] == 0 ||  // multiple shared IPs allowed
+                    $nallocs > 1 && $nallocs != $refc['sharedrouter'] && $refc['shared'] ==0)     // multiple shared routers allowed
 		{
 			$addrlist[$ip_bin]['class'] = 'trerror';
 			++$used;
@@ -2196,7 +2199,7 @@ function findRouters ($addrlist)
 	$ret = array();
 	foreach ($addrlist as $addr)
 		foreach ($addr['allocs'] as $alloc)
-			if ($alloc['type'] == 'router')
+			if ($alloc['type'] == 'router' || $alloc['type'] == 'sharedrouter')
 				$ret[] = array
 				(
 					'id' => $alloc['object_id'],

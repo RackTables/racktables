@@ -24,6 +24,7 @@ $aat = array
 	'virtual' => 'Loopback',
 	'shared' => 'Shared',
 	'router' => 'Router',
+	'sharedrouter' => 'Shared router',
 	'point2point' => 'Point-to-point',
 );
 // address allocation code, IPv4 addresses and objects view
@@ -33,6 +34,7 @@ $aac_right = array
 	'virtual' => '<span class="aac-right" title="' . $aat['virtual'] . '">L</span>',
 	'shared' => '<span class="aac-right" title="' . $aat['shared'] . '">S</span>',
 	'router' => '<span class="aac-right" title="' . $aat['router'] . '">R</span>',
+	'sharedrouter' => '<span class="aac-right" title="' . $aat['sharedrouter'] . '">R</span>',
 	'point2point' => '<span class="aac-right" title="' . $aat['point2point'] . '">P</span>',
 );
 // address allocation code, IPv4 networks view
@@ -42,6 +44,7 @@ $aac_left = array
 	'virtual' => '<span class="aac-left" title="' . $aat['virtual'] . '">L:</span>',
 	'shared' => '<span class="aac-left" title="' . $aat['shared'] . '">S:</span>',
 	'router' => '<span class="aac-left" title="' . $aat['router'] . '">R:</span>',
+	'sharedrouter' => '<span class="aac-left" title="' . $aat['sharedrouter'] . '">R:</span>',
 	'point2point' => '<span class="aac-left" title="' . $aat['point2point'] . '">P:</span>',
 );
 
@@ -3039,7 +3042,7 @@ function renderIPv4NetworkAddresses ($range)
 		{
 			echo $delim . $aac_left[$ref['type']];
 			echo makeIPAllocLink ($ip_bin, $ref, TRUE);
-			$delim = '; ';
+			$delim = ';<br/>';
 		}
 		if ($delim != '')
 			$delim = '<br>';
@@ -3164,7 +3167,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		{
 			echo $delim . $aac_left[$ref['type']];
 			echo makeIPAllocLink ($ip_bin, $ref, TRUE);
-			$delim = '; ';
+			$delim = ';<br/>';
 		}
 		if ($delim != '')
 			$delim = '<br>';
