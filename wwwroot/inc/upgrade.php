@@ -1310,9 +1310,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "ALTER TABLE MountOperation ADD UNIQUE KEY `new_molecule_id` (new_molecule_id)";
 			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-old_molecule_id`";
 			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-new_molecule_id`";
-			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
 			$query[] = "ALTER TABLE IPv4Allocation MODIFY TYPE ENUM('regular','shared','virtual','router','point2point', 'sharedrouter') NOT NULL DEFAULT 'regular';";
 			$query[] = "ALTER TABLE IPv6Allocation MODIFY TYPE ENUM('regular','shared','virtual','router','point2point', 'sharedrouter') NOT NULL DEFAULT 'regular';";
+			// insert new queries here ^^^
+			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
