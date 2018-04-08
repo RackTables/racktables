@@ -3576,7 +3576,14 @@ $dictionary = array
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
-
+	3691 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.4 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.4]]'),
+	3692 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.0]]'),
+	3693 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.1]]'),
+	3694 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.2 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.2]]'),
+	3695 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.3 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.3]]'),
+	3696 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.4 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.4]]'),
+	3697 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.0]]'),
+	3698 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.1]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
