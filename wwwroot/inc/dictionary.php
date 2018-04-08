@@ -3576,10 +3576,11 @@ $dictionary = array
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
-
+	3687 => array ('chapter_id' => 39, 'dict_value' => '[[APC%GPASS%SMT1500RMI2U | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=SMT1500RMI2U]]'),
+	3688 => array ('chapter_id' => 39, 'dict_value' => '[[APC%GPASS%SMT1500RMI2UNC | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=SMT1500RMI2UNC]]'),
+	49999 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 15 | http://docs.fedoraproject.org/release-notes/f15/en-US/html/]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
 # and dictionary updates working properly.
-	49999 => array ('chapter_id' => 13, 'dict_value' => '[[RH Fedora%GSKIP%Fedora 15 | http://docs.fedoraproject.org/release-notes/f15/en-US/html/]]'),
 );
