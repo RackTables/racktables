@@ -3576,7 +3576,8 @@ $dictionary = array
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
-
+	3689 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS108 | https://www.netgear.com/business/products/switches/unmanaged/GS108.aspx]]'),
+	3690 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS105 | https://www.netgear.com/business/products/switches/unmanaged/GS105.aspx]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
