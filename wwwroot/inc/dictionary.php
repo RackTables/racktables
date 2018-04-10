@@ -3576,6 +3576,7 @@ $dictionary = array
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
+	3699 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%T1600G-18TS | https://www.tp-link.com/en/products/details/cat-40_T1600G-18TS.html]]'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
