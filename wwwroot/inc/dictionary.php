@@ -3578,7 +3578,19 @@ $dictionary = array
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
 	3687 => array ('chapter_id' => 13, 'dict_value' => 'SUSE Enterprise%GSKIP%SLES15'),
 	3688 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE Leap 15.x'),
-
+	3689 => array ('chapter_id' => 39, 'dict_value' => '[[APC%GPASS%SMT1500RMI2U | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=SMT1500RMI2U]]'),
+	3690 => array ('chapter_id' => 39, 'dict_value' => '[[APC%GPASS%SMT1500RMI2UNC | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=SMT1500RMI2UNC]]'),
+	3691 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS108 | https://www.netgear.com/business/products/switches/unmanaged/GS108.aspx]]'),
+	3692 => array ('chapter_id' => 12, 'dict_value' => '[[NETGEAR%GPASS%GS105 | https://www.netgear.com/business/products/switches/unmanaged/GS105.aspx]]'),
+	3693 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 3.4 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_3.4]]'),
+	3694 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.0]]'),
+	3695 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.1]]'),
+	3696 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.2 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.2]]'),
+	3697 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.3 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.3]]'),
+	3698 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 4.4 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_4.4]]'),
+	3699 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.0]]'),
+	3700 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.1]]'),
+	3701 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%T1600G-18TS | https://www.tp-link.com/en/products/details/cat-40_T1600G-18TS.html]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
