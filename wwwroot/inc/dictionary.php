@@ -3576,6 +3576,8 @@ $dictionary = array
 	3684 => array ('chapter_id' => 12, 'dict_value' => 'Arista%GPASS%7280SR2A-48YC6'),
 	3685 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS112-8P-4S-IN'),
 	3686 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 17.10'),
+	3687 => array ('chapter_id' => 13, 'dict_value' => 'SUSE Enterprise%GSKIP%SLES15'),
+	3688 => array ('chapter_id' => 13, 'dict_value' => 'OpenSUSE%GSKIP%openSUSE Leap 15.x'),
 
 
 # Any new "default" dictionary records must go above this line (i.e., with
