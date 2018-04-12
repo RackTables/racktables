@@ -1443,6 +1443,7 @@ WHERE O.objtype_id = 1562";
 (36,'no','serial console server models'),
 (37,'no','wireless OS type'),
 (38,'no','management interface type'),
+(39,'no','UPS models'),
 -- Default chapters must have ID less than 10000, add them above this line.
 (9999,'no','multiplexer models')";
 
@@ -1591,7 +1592,8 @@ WHERE O.objtype_id = 1562";
 (1644,3,NULL,'no'),
 (1787,3,NULL,'no'),
 (1787,14,NULL,'no'),
-(1787,30,38,'yes')";
+(1787,30,38,'yes'),
+(12,2,39,'no')";
 
 		$query[] = "INSERT INTO PatchCableConnector (id, origin, connector) VALUES
 (1,'default','FC/PC'),(2,'default','FC/APC'),
