@@ -2349,7 +2349,7 @@ $dictionary = array
 	2457 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS2240-2'),
 	2458 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS2240-4'),
 	2459 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS2520'),
-	2460 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS2552'),
+	2460 => array ('chapter_id' => 18, 'dict_value' => '[[ NetApp%GPASS%FAS2552 | http://mysupport.netapp.com/documentation/docweb/index.html?productID=61619 ]]'),
 	2461 => array ('chapter_id' => 18, 'dict_value' => 'NetApp%GPASS%FAS2554'),
 	2462 => array ('chapter_id' => 12, 'dict_value' => 'HP EI%GPASS%5130-24G-4SFP+ (JG932A)'),
 	2463 => array ('chapter_id' => 12, 'dict_value' => 'HP EI%GPASS%5130-24G-SFP-4SFP+ (JG933A)'),
@@ -3591,6 +3591,10 @@ $dictionary = array
 	3699 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.0 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.0]]'),
 	3700 => array ('chapter_id' => 13, 'dict_value' => '[[PROXMOX%GSKIP%Proxmox VE 5.1 | http://pve.proxmox.com/wiki/Roadmap#Proxmox_VE_5.1]]'),
 	3701 => array ('chapter_id' => 12, 'dict_value' => '[[TP-Link%GPASS%T1600G-18TS | https://www.tp-link.com/en/products/details/cat-40_T1600G-18TS.html]]'),
+	3702 => array ('chapter_id' => 27, 'dict_value' => '[[Raritan%GPASS%PX3-5514U | http://cdn.raritan.com/product-selector/pdus/PX3-5514U/MPX3-5514U.pdf]]'),
+	3703 => array ('chapter_id' => 12, 'dict_value' => '[[HP Aruba%GPASS%3810M 16SFP+ 2-slot (JL075A) | http://duckduckgo.com/?q=JL075A+manual ]]'),
+	3704 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 6.5'),
+	3705 => array ('chapter_id' => 17, 'dict_value' => '[[ Fortinet%GPASS%Fortigate 600D | http://www.fortinet.com/content/dam/fortinet/assets/data-sheets/FortiGate_600D.pdf ]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
