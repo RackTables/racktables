@@ -5315,7 +5315,7 @@ function showPathAndSearch ($pageno, $tabno)
 	echo "<input type=hidden name=last_page value=$pageno>";
 	echo "<input type=hidden name=last_tab value=$tabno>";
 	// This input will be the first, if we don't add ports or addresses.
-	echo '<label>Search:<input type=text name=q size=20 value="';
+	echo '<label><u>S</u>earch:<input accesskey="s" type=text name=q size=20 value="';
 	echo array_key_exists ('q', $sic) ? stringForTextInputValue ($sic['q']) : '';
 	echo '"></label></form></div>';
 
