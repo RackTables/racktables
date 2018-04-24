@@ -636,7 +636,7 @@ function get_pseudo_file ($name)
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL default '',
-  `type` enum('regular','shared','virtual','router','point2point') NOT NULL DEFAULT 'regular',
+  `type` enum('regular','shared','virtual','router','point2point','sharedrouter') NOT NULL DEFAULT 'regular',
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv4Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE
@@ -748,7 +748,7 @@ function get_pseudo_file ($name)
   `object_id` int(10) unsigned NOT NULL default '0',
   `ip` binary(16) NOT NULL,
   `name` char(255) NOT NULL default '',
-  `type` enum('regular','shared','virtual','router','point2point') NOT NULL DEFAULT 'regular',
+  `type` enum('regular','shared','virtual','router','point2point','sharedrouter') NOT NULL DEFAULT 'regular',
   PRIMARY KEY  (`object_id`,`ip`),
   KEY `ip` (`ip`),
   CONSTRAINT `IPv6Allocation-FK-object_id` FOREIGN KEY (`object_id`) REFERENCES `Object` (`id`) ON DELETE CASCADE

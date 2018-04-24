@@ -1310,8 +1310,8 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "ALTER TABLE MountOperation ADD UNIQUE KEY `new_molecule_id` (new_molecule_id)";
 			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-old_molecule_id`";
 			$query[] = "ALTER TABLE MountOperation DROP KEY `MountOperation-FK-new_molecule_id`";
-			$query[] = "ALTER TABLE IPv4Allocation MODIFY TYPE ENUM('regular','shared','virtual','router','point2point', 'sharedrouter') NOT NULL DEFAULT 'regular';";
-			$query[] = "ALTER TABLE IPv6Allocation MODIFY TYPE ENUM('regular','shared','virtual','router','point2point', 'sharedrouter') NOT NULL DEFAULT 'regular';";
+			$query[] = "ALTER TABLE IPv4Allocation MODIFY type ENUM('regular','shared','virtual','router','point2point','sharedrouter') NOT NULL DEFAULT 'regular'";
+			$query[] = "ALTER TABLE IPv6Allocation MODIFY type ENUM('regular','shared','virtual','router','point2point','sharedrouter') NOT NULL DEFAULT 'regular'";
 			$query[] = "INSERT INTO Chapter (`id`, `sticky`, `name`) VALUES (39,'no','UPS models')";
 			$query[] = "INSERT INTO AttributeMap (`objtype_id`,`attr_id`,`chapter_id`) VALUES (12,2,39)"; // UPS (UPS models) -> HW type
 			// insert new queries here ^^^
