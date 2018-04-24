@@ -397,7 +397,7 @@ function ios12PickSwitchportCommand (&$work, $line)
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 
 		// save work, if it makes sense
-		if (! in_array ($port_name, $work['switchports']))
+		if (! isset ($work['switchports']) || ! in_array ($port_name, $work['switchports']))
 			$work['current']['mode'] = 'SKIP'; // skip not switched ports
 		else
 		{
