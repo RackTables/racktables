@@ -3595,6 +3595,9 @@ $dictionary = array
 	3703 => array ('chapter_id' => 12, 'dict_value' => '[[HP Aruba%GPASS%3810M 16SFP+ 2-slot (JL075A) | http://duckduckgo.com/?q=JL075A+manual ]]'),
 	3704 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 6.5'),
 	3705 => array ('chapter_id' => 17, 'dict_value' => '[[ Fortinet%GPASS%Fortigate 600D | http://www.fortinet.com/content/dam/fortinet/assets/data-sheets/FortiGate_600D.pdf ]]'),
+	3706 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 18.04 LTS'),
+	3707 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS328-4C-20S-4S+RM'),
+	3708 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS328-24P-4S+RM'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
