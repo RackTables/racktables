@@ -1928,9 +1928,9 @@ $iftable_processors['tplink-jetstream-any-10000SFP+'] = array
 $iftable_processors['tplink-jetstream-any-1000SFP'] = array
 (
     'pattern' => '@^(gigabitEthernet\s|Gi)(\d+)/(\d+)/(\d+) : fiber@',
-    'replacement' => 'te\\1/\\2/\\3',
+    'replacement' => 'te\\2/\\3/\\4',
     'dict_key' => '4-1077',
-    'label' => '\\3',
+    'label' => '\\4',
     'try_next_proc' => FALSE,
 );
 
