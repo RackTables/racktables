@@ -1909,10 +1909,10 @@ $iftable_processors['tplink-sg-1000T'] = array
 
 $iftable_processors['tplink-jetstream-any-1000T'] = array
 (
-	'pattern' => '@^Gi(\d+)/(\d+)/(\d+) : copper$@',
-	'replacement' => 'gi\\1/\\2/\\3',
+	'pattern' => '@^(gigabitEthernet\s|Gi)(\d+)/(\d+)/(\d+) : copper$@',
+	'replacement' => 'gi\\2/\\3/\\4',
 	'dict_key' => 24,
-	'label' => '\\3',
+	'label' => '\\4',
 	'try_next_proc' => FALSE,
 );
 
@@ -1923,6 +1923,15 @@ $iftable_processors['tplink-jetstream-any-10000SFP+'] = array
 	'dict_key' => '9-1084',
 	'label' => '\\3',
 	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['tplink-jetstream-any-1000SFP'] = array
+(
+    'pattern' => '@^(gigabitEthernet\s|Gi)(\d+)/(\d+)/(\d+) : fiber@',
+    'replacement' => 'te\\2/\\3/\\4',
+    'dict_key' => '4-1077',
+    'label' => '\\4',
+    'try_next_proc' => FALSE,
 );
 
 $iftable_processors['motorola-rfs-any-1000T'] = array
@@ -4060,6 +4069,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'T1700G-28TQ: 24 RJ-45/10-100-1000T(X) + 4 SFP+/10000',
 		'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-10000SFP+'),
 	),
+	'11863.5.86' => array
+    (
+        'dict_key' => 3701,
+        'text' => 'T1600G-18TS: 16 RJ-45/10-100-1000T(X) + 2 SFP/1000',
+        'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-1000SFP'),
+    ),
 	'12356.101.1.3002'=> array
 	(
 		'dict_key' => 1609,
