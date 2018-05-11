@@ -3598,6 +3598,7 @@ $dictionary = array
 	3706 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 18.04 LTS'),
 	3707 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS328-4C-20S-4S+RM'),
 	3708 => array ('chapter_id' => 12, 'dict_value' => 'MikroTik%GPASS%CRS328-24P-4S+RM'),
+	3709 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 9 (Stretch) | http://debian.org/releases/stretch/]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
