@@ -340,17 +340,19 @@ function genericAssertion ($argname, $argtype)
 		return assertIPv4Arg ($argname);
 	case 'inet6':
 		return assertIPv6Arg ($argname);
-	case 'l2address':
-		return assertStringArg ($argname);
 	case 'l2address0':
-		assertStringArg ($argname, TRUE);
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+	case 'l2address':
+		assertStringArg ($argname);
 		try
 		{
 			l2addressForDatabase ($sic[$argname]);
 		}
-		catch (InvalidArgException $e)
+		catch (InvalidArgException $iae)
 		{
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'malformed MAC/WWN address');
+			throw $iae->newIRAE ($argname);
 		}
 		return $sic[$argname];
 	case 'tag':
@@ -466,17 +468,18 @@ function genericAssertion ($argname, $argtype)
 		return $sic[$argname];
 	case 'uint-vlan':
 	case 'uint-vlan1':
+		$argvalue = assertStringArg ($argname);
 		try
 		{
-			list ($vdom_id, $vlan_id) = decodeVLANCK (assertStringArg ($argname));
+			list ($vdom_id, $vlan_id) = decodeVLANCK ($argvalue);
 		}
 		catch (InvalidArgException $iae)
 		{
-			throw new InvalidRequestArgException ($argname, $sic[$argname], $iae->getMessage());
+			throw $iae->newIRAE ($argname);
 		}
 		if ($argtype == 'uint-vlan' && $vlan_id == VLAN_DFL_ID)
-			throw new InvalidRequestArgException ($argname, $sic[$argname], 'default VLAN not allowed');
-		return $sic[$argname];
+			throw new InvalidRequestArgException ($argname, $argvalue, 'default VLAN not allowed');
+		return $argvalue;
 	case 'rackcode/expr':
 		if ('' == assertStringArg ($argname, TRUE))
 			return array();
