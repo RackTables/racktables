@@ -1794,7 +1794,7 @@ function updateVS ()
 function addIPToVS()
 {
 	$ip_bin = assertIPArg ('ip');
-	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$row = array ('vs_id' => $vsinfo['id'], 'vip' => $ip_bin, 'vsconfig' => NULL, 'rsconfig' => NULL);
 	if ($vip = isVIPEnabled ($row, $vsinfo['vips']))
@@ -1839,7 +1839,7 @@ function addPortToVS()
 
 function updateIPInVS()
 {
-	$vs_id = assertUIntArg ('vs_id');
+	$vs_id = getBypassValue();
 	$ip_bin = assertIPArg ('ip');
 	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
 	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
@@ -1851,7 +1851,7 @@ function updateIPInVS()
 
 function updatePortInVS()
 {
-	$vs_id = assertUIntArg ('vs_id');
+	$vs_id = getBypassValue();
 	$proto = assertStringArg ('proto');
 	$vport = assertUIntArg ('port', TRUE);
 	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
@@ -1865,7 +1865,7 @@ function updatePortInVS()
 function removeIPFromVS()
 {
 	$vip = array ('vip' => assertIPArg ('ip'));
-	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$used = 0;
 	foreach (getTriplets ($vsinfo) as $triplet)
@@ -1880,7 +1880,7 @@ function removeIPFromVS()
 function removePortFromVS()
 {
 	$port = array ('proto' => assertStringArg ('proto'), 'vport' => assertUIntArg ('port', TRUE));
-	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$used = 0;
 	foreach (getTriplets ($vsinfo) as $triplet)
@@ -3445,7 +3445,7 @@ function cloneRSPool()
 function doVSMigrate()
 {
 	global $dbxlink;
-	$vs_id = assertUIntArg ('vs_id');
+	$vs_id = getBypassValue();
 	$vs_cell = spotEntity ('ipvs', $vs_id);
 	amplifyCell ($vs_cell);
 	$tag_ids = genericAssertion ('taglist', 'array0');
