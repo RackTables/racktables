@@ -339,10 +339,22 @@ function genericAssertion ($argname, $argtype)
 		return assertStringArg ($argname);
 	case 'string0':
 		return assertStringArg ($argname, TRUE);
+	case 'natural0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+		// old style, for backward compatibility
 	case 'uint':
-		return assertUIntArg ($argname);
+	case 'natural':
+		return assertNaturalNumArg ($argname);
+	case 'unsigned0':
+		if ('' == assertStringArg ($argname, TRUE))
+			return '';
+		// fall through
+		// old style, for backward compatibility
 	case 'uint0':
-		return assertUIntArg ($argname, TRUE);
+	case 'unsigned':
+		return assertUnsignedIntArg ($argname);
 	case 'decimal0':
 		if ('' == assertStringArg ($argname, TRUE))
 			return '';
@@ -469,7 +481,7 @@ function genericAssertion ($argname, $argtype)
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
 	case 'iif':
-		assertUIntArg ($argname);
+		assertNaturalNumArg ($argname);
 		if (!array_key_exists ($sic[$argname], getPortIIFOptions()))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'Unknown value');
 		return $sic[$argname];
@@ -477,7 +489,7 @@ function genericAssertion ($argname, $argtype)
 	// 'vlan1' -- any valid VLAN ID including the default
 	case 'vlan':
 	case 'vlan1':
-		assertUIntArg ($argname);
+		assertNaturalNumArg ($argname);
 		if (! isValidVLANID ($sic[$argname]))
 			throw new InvalidRequestArgException ($argname, $sic[$argname], 'not a valid VLAN ID');
 		if ($argtype == 'vlan' && $sic[$argname] == VLAN_DFL_ID)

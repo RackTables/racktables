@@ -14,10 +14,7 @@ function render8021QOrderForm ($some_id)
 		$focus = array();
 		foreach ($hintcodes as $hint_code => $option_name)
 			if (array_key_exists ($hint_code, $_REQUEST))
-			{
-				assertUIntArg ($hint_code);
-				$focus[$hint_code] = $_REQUEST[$hint_code];
-			}
+				$focus[$hint_code] = genericAssertion ($hint_code, 'natural');
 			elseif ($option_name != NULL)
 				$focus[$hint_code] = getConfigVar ($option_name);
 			else
@@ -440,7 +437,7 @@ function renderObject8021QPorts ($object_id)
 	$sockets = array();
 	if (isset ($_REQUEST['hl_port_id']))
 	{
-		assertUIntArg ('hl_port_id');
+		genericAssertion ('hl_port_id', 'natural');
 		$hl_port_id = intval ($_REQUEST['hl_port_id']);
 		$hl_port_name = NULL;
 		addAutoScrollScript ("port-$hl_port_id");
@@ -1166,7 +1163,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 {
 	if (isset ($_REQUEST['hl_port_id']))
 	{
-		assertUIntArg ('hl_port_id');
+		genericAssertion ('hl_port_id', 'natural');
 		$hl_port_id = intval ($_REQUEST['hl_port_id']);
 		$hl_port_name = NULL;
 		addAutoScrollScript ("port-$hl_port_id");

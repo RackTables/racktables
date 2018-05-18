@@ -217,8 +217,8 @@ function renderPopupObjectSelector()
 function handlePopupPortLink()
 {
 	assertPermission('depot', 'default');
-	assertUIntArg ('port');
-	assertUIntArg ('remote_port');
+	genericAssertion ('port', 'natural');
+	genericAssertion ('remote_port', 'natural');
 	assertStringArg ('cable', TRUE);
 	$port_info = getPortInfo ($_REQUEST['port']);
 	$remote_port_info = getPortInfo ($_REQUEST['remote_port']);
@@ -364,7 +364,7 @@ function renderPopupPortSelector()
 	if (isset ($_REQUEST['do_link']))
 		return handlePopupPortLink();
 	assertPermission('depot', 'default');
-	assertUIntArg ('port');
+	genericAssertion ('port', 'natural');
 	$port_id = $_REQUEST['port'];
 	$port_info = getPortInfo ($port_id);
 	$in_rack = isCheckSet ('in_rack');

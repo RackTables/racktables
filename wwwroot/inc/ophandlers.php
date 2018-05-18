@@ -652,8 +652,8 @@ function addPortForwarding ()
 	$proto = genericAssertion ('proto', 'enum/natv4proto');
 	if ($proto != 'ALL')
 	{
-		assertUIntArg ('localport');
-		assertUIntArg ('remoteport');
+		genericAssertion ('localport', 'natural');
+		genericAssertion ('remoteport', 'natural');
 	}
 	assertStringArg ('description', TRUE);
 	$remoteport = isset ($_REQUEST['remoteport']) ? $_REQUEST['remoteport'] : '';
@@ -686,8 +686,8 @@ function delPortForwarding ()
 	$proto = genericAssertion ('proto', 'enum/natv4proto');
 	if ($proto != 'ALL')
 	{
-		assertUIntArg ('localport');
-		assertUIntArg ('remoteport');
+		genericAssertion ('localport', 'natural');
+		genericAssertion ('remoteport', 'natural');
 	}
 
 	deletePortForwarding
@@ -708,8 +708,8 @@ function updPortForwarding ()
 	$proto = genericAssertion ('proto', 'enum/natv4proto');
 	if ($proto != 'ALL')
 	{
-		assertUIntArg ('localport');
-		assertUIntArg ('remoteport');
+		genericAssertion ('localport', 'natural');
+		genericAssertion ('remoteport', 'natural');
 	}
 	assertStringArg ('description', TRUE);
 
@@ -756,7 +756,7 @@ function editPortForObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $sic;
-	$port_id = assertUIntArg ('port_id');
+	$port_id = genericAssertion ('port_id', 'natural');
 	try
 	{
 		commitUpdatePort
@@ -1056,7 +1056,7 @@ function updateUser ()
 function supplementAttrMap ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 154));
-	$attr_id = assertUIntArg ('attr_id');
+	$attr_id = genericAssertion ('attr_id', 'natural');
 	if (getAttrType ($attr_id) != 'dict')
 		$chapter_id = NULL;
 	else
@@ -1078,7 +1078,7 @@ function supplementAttrMap ()
 function clearSticker ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$attr_id = assertUIntArg ('attr_id');
+	$attr_id = genericAssertion ('attr_id', 'natural');
 	if (permitted (NULL, NULL, NULL, array (array ('tag' => '$attr_' . $attr_id))))
 		commitUpdateAttrValue (getBypassValue(), $attr_id);
 	else
@@ -1718,7 +1718,7 @@ function deleteVService ()
 
 function deleteVS()
 {
-	$vsinfo = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+	$vsinfo = spotEntity ('ipvs', genericAssertion ('vs_id', 'natural'));
 	if (count (getTriplets ($vsinfo)) != 0)
 	{
 		showError ("Could not delete linked virtual service group");
@@ -1781,7 +1781,7 @@ function updateVService ()
 function updateVS ()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
-	$vs_id = assertUIntArg ('vs_id');
+	$vs_id = genericAssertion ('vs_id', 'natural');
 	$name = assertStringArg ('name');
 	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
 	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
@@ -1809,7 +1809,7 @@ function addIPToVS()
 function addPortToVS()
 {
 	$proto = genericAssertion ('proto', 'enum/ipproto');
-	$vport = assertUIntArg ('port', TRUE);
+	$vport = genericAssertion ('port', 'unsigned');
 	if ($proto == 'MARK')
 	{
 		if ($vport > 0xFFFFFFFF)
@@ -1853,7 +1853,7 @@ function updatePortInVS()
 {
 	$vs_id = getBypassValue();
 	$proto = assertStringArg ('proto');
-	$vport = assertUIntArg ('port', TRUE);
+	$vport = genericAssertion ('port', 'unsigned');
 	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
 	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
 	if (usePreparedUpdateBlade ('VSPorts', array ('vsconfig' => $vsconfig, 'rsconfig' => $rsconfig), array ('vs_id' => $vs_id, 'proto' => $proto, 'vport' => $vport)))
@@ -1879,7 +1879,7 @@ function removeIPFromVS()
 
 function removePortFromVS()
 {
-	$port = array ('proto' => assertStringArg ('proto'), 'vport' => assertUIntArg ('port', TRUE));
+	$port = array ('proto' => assertStringArg ('proto'), 'vport' => genericAssertion ('port', 'unsigned'));
 	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$used = 0;
@@ -1897,9 +1897,9 @@ function updateTripletConfig()
 	global $op;
 	$key_fields = array
 	(
-		'object_id' => assertUIntArg ('object_id'),
-		'vs_id' => assertUIntArg ('vs_id'),
-		'rspool_id' => assertUIntArg ('rspool_id'),
+		'object_id' => genericAssertion ('object_id', 'natural'),
+		'vs_id' => genericAssertion ('vs_id', 'natural'),
+		'rspool_id' => genericAssertion ('rspool_id', 'natural'),
 	);
 	$config_fields = array
 	(
@@ -1915,7 +1915,7 @@ function updateTripletConfig()
 	{
 		$table = 'VSEnabledPorts';
 		$proto = assertStringArg ('proto');
-		$vport = assertUIntArg ('port', TRUE);
+		$vport = genericAssertion ('port', 'unsigned');
 		$key_fields['proto'] = $proto;
 		$key_fields['vport'] = $vport;
 		$key = "Port $proto-$vport";
@@ -1998,9 +1998,9 @@ function removeTriplet()
 {
 	$key_fields = array
 	(
-		'object_id' => assertUIntArg ('object_id'),
-		'vs_id' => assertUIntArg ('vs_id'),
-		'rspool_id' => assertUIntArg ('rspool_id'),
+		'object_id' => genericAssertion ('object_id', 'natural'),
+		'vs_id' => genericAssertion ('vs_id', 'natural'),
+		'rspool_id' => genericAssertion ('rspool_id', 'natural'),
 	);
 
 	global $dbxlink;
@@ -2014,9 +2014,9 @@ function removeTriplet()
 function createTriplet()
 {
 	global $dbxlink;
-	$object_id = assertUIntArg ('object_id');
-	$vs_id = assertUIntArg ('vs_id');
-	$rspool_id = assertUIntArg ('rspool_id');
+	$object_id = genericAssertion ('object_id', 'natural');
+	$vs_id = genericAssertion ('vs_id', 'natural');
+	$rspool_id = genericAssertion ('rspool_id', 'natural');
 	$vips = genericAssertion ('enabled_vips', 'array0');
 	$ports = genericAssertion ('enabled_ports', 'array0');
 
@@ -2361,7 +2361,7 @@ function updateRow ()
 function deleteRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'UMOUNT' => 58));
-	$row_id = assertUIntArg ('row_id');
+	$row_id = genericAssertion ('row_id', 'natural');
 	$rowData = spotEntity ('row', $row_id);
 	$unmounted = getRowMountsCount ($row_id);
 	commitDeleteRow ($row_id);
@@ -2669,16 +2669,16 @@ function addIIFOIFCompatPack ()
 
 function addOIFCompat ()
 {
-	$type1 = assertUIntArg ('type1');
-	$type2 = assertUIntArg ('type2');
+	$type1 = genericAssertion ('type1', 'natural');
+	$type2 = genericAssertion ('type2', 'natural');
 	$n_changed = addPortOIFCompat ($type1, $type2);
 	showSuccess ("$n_changed row(s) added");
 }
 
 function delOIFCompat ()
 {
-	$type1 = assertUIntArg ('type1');
-	$type2 = assertUIntArg ('type2');
+	$type1 = genericAssertion ('type1', 'natural');
+	$type2 = genericAssertion ('type2', 'natural');
 	$n_changed = deletePortOIFCompat ($type1, $type2);
 	showSuccess ("$n_changed row(s) deleted");
 }
@@ -3746,8 +3746,8 @@ function setPatchCableAmount()
 
 function updateVLANDomain()
 {
-	$domain_id = assertUIntArg ('vdom_id');
-	$group_id = assertUIntArg ('group_id', TRUE);
+	$domain_id = genericAssertion ('vdom_id', 'natural');
+	$group_id = genericAssertion ('group_id', 'unsigned');
 	$description = assertStringArg ('vdom_descr');
 
 	if (! $group_id)

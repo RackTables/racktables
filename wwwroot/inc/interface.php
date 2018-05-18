@@ -1491,7 +1491,7 @@ function renderObject ($object_id)
 		$hl_port_id = 0;
 		if (isset ($_REQUEST['hl_port_id']))
 		{
-			assertUIntArg ('hl_port_id');
+			genericAssertion ('hl_port_id', 'natural');
 			$hl_port_id = $_REQUEST['hl_port_id'];
 			addAutoScrollScript ("port-$hl_port_id");
 		}
@@ -1722,7 +1722,7 @@ function renderPortsForObject ($object_id)
 
 	if (isset ($_REQUEST['hl_port_id']))
 	{
-		assertUIntArg ('hl_port_id');
+		genericAssertion ('hl_port_id', 'natural');
 		$hl_port_id = intval ($_REQUEST['hl_port_id']);
 		addAutoScrollScript ("port-$hl_port_id");
 	}
@@ -5391,7 +5391,7 @@ function dynamic_title_decoder_throwing ($path_position)
 			'params' => array()
 		);
 	case 'chapter':
-		$chapter_no = assertUIntArg ('chapter_no');
+		$chapter_no = genericAssertion ('chapter_no', 'natural');
 		$chapters = getChapterList();
 		$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no]['name'] : 'N/A';
 		return array
@@ -5400,42 +5400,42 @@ function dynamic_title_decoder_throwing ($path_position)
 			'params' => array ('chapter_no' => $chapter_no)
 		);
 	case 'user':
-		$userinfo = spotEntity ('user', assertUIntArg ('user_id'));
+		$userinfo = spotEntity ('user', genericAssertion ('user_id', 'natural'));
 		return array
 		(
 			'name' => "Local user '" . $userinfo['user_name'] . "'",
 			'params' => array ('user_id' => $userinfo['user_id'])
 		);
 	case 'ipv4rspool':
-		$pool_info = spotEntity ('ipv4rspool', assertUIntArg ('pool_id'));
+		$pool_info = spotEntity ('ipv4rspool', genericAssertion ('pool_id', 'natural'));
 		return array
 		(
 			'name' => $pool_info['name'] == '' ? 'ANONYMOUS' : $pool_info['name'],
 			'params' => array ('pool_id' => $pool_info['id'])
 		);
 	case 'ipv4vs':
-		$vs_info = spotEntity ('ipv4vs', assertUIntArg ('vs_id'));
+		$vs_info = spotEntity ('ipv4vs', genericAssertion ('vs_id', 'natural'));
 		return array
 		(
 			'name' => $vs_info['dname'],
 			'params' => array ('vs_id' => $vs_info['id'])
 		);
 	case 'ipvs':
-		$vs_info = spotEntity ('ipvs', assertUIntArg ('vs_id'));
+		$vs_info = spotEntity ('ipvs', genericAssertion ('vs_id', 'natural'));
 		return array
 		(
 			'name' => $vs_info['name'],
 			'params' => array ('vs_id' => $vs_info['id'])
 		);
 	case 'object':
-		$object = spotEntity ('object', assertUIntArg ('object_id'));
+		$object = spotEntity ('object', genericAssertion ('object_id', 'natural'));
 		return array
 		(
 			'name' => $object['dname'],
 			'params' => array ('object_id' => $object['id'])
 		);
 	case 'location':
-		$location = spotEntity ('location', assertUIntArg ('location_id'));
+		$location = spotEntity ('location', genericAssertion ('location_id', 'natural'));
 		return array
 		(
 			'name' => $location['name'],
@@ -5445,14 +5445,14 @@ function dynamic_title_decoder_throwing ($path_position)
 		switch ($pageno)
 		{
 		case 'rack':
-			$rack = spotEntity ('rack', assertUIntArg ('rack_id'));
+			$rack = spotEntity ('rack', genericAssertion ('rack_id', 'natural'));
 			return array
 			(
 				'name' => $rack['row_name'],
 				'params' => array ('row_id' => $rack['row_id'], 'location_id' => $rack['location_id'])
 			);
 		case 'row':
-			$row_info = getRowInfo (assertUIntArg ('row_id'));
+			$row_info = getRowInfo (genericAssertion ('row_id', 'natural'));
 			return array
 			(
 				'name' => $row_info['name'],
@@ -5462,7 +5462,7 @@ function dynamic_title_decoder_throwing ($path_position)
 			break;
 		}
 	case 'rack':
-		$rack_info = spotEntity ('rack', assertUIntArg ('rack_id'));
+		$rack_info = spotEntity ('rack', genericAssertion ('rack_id', 'natural'));
 		return array
 		(
 			'name' => $rack_info['name'],
@@ -5482,7 +5482,7 @@ function dynamic_title_decoder_throwing ($path_position)
 				'params' => array()
 			);
 	case 'file':
-		$file = spotEntity ('file', assertUIntArg ('file_id'));
+		$file = spotEntity ('file', genericAssertion ('file_id', 'natural'));
 		return array
 		(
 			'name' => niftyString ($file['name'], 30, FALSE),
@@ -5513,7 +5513,7 @@ function dynamic_title_decoder_throwing ($path_position)
 				);
 				return ($ret);
 			default:
-				$net = spotEntity ($path_position, assertUIntArg ('id'));
+				$net = spotEntity ($path_position, genericAssertion ('id', 'natural'));
 				return array
 				(
 					'name' => $net['ip'] . '/' . $net['mask'],
@@ -5685,7 +5685,7 @@ function renderDiscoveredNeighbors ($object_id)
 	// scroll to selected port
 	if (isset ($_REQUEST['hl_port_id']))
 	{
-		assertUIntArg('hl_port_id');
+		genericAssertion ('hl_port_id', 'natural');
 		$hl_port_id = intval ($_REQUEST['hl_port_id']);
 		addAutoScrollScript ("port-$hl_port_id");
 	}

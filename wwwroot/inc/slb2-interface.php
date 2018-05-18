@@ -492,9 +492,9 @@ function getTripletConfigAJAX()
 	$tr_list = fetchTripletRows
 	(
 		array (
-			'object_id' => assertUIntArg ('object_id'),
-			'vs_id' => assertUIntArg ('vs_id'),
-			'rspool_id' => assertUIntArg ('rspool_id'),
+			'object_id' => genericAssertion ('object_id', 'natural'),
+			'vs_id' => genericAssertion ('vs_id', 'natural'),
+			'rspool_id' => genericAssertion ('rspool_id', 'natural'),
 		)
 	);
 	echo '<div class="slbconf" style="max-height: 500px; max-width: 600px; overflow: auto">' . htmlspecialchars (generateSLBConfig2 ($tr_list)) . '</div>';
