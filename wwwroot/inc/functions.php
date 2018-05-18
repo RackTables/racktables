@@ -1138,7 +1138,7 @@ function sortTokenize ($a, $b)
 	$brc = count ($br);
 	for ($i = 0; $i < $arc && $i < $brc; $i++)
 	{
-		if (isUnsignedInteger ($ar[$i]) && isUnsignedInteger ($br[$i]))
+		if (isUnsignedInteger ($ar[$i], TRUE) && isUnsignedInteger ($br[$i], TRUE))
 			$ret = numCompare ($ar[$i], $br[$i]);
 		else
 			$ret = strcasecmp($ar[$i], $br[$i]);
