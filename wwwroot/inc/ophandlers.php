@@ -2838,7 +2838,7 @@ function save8021QPorts ()
 			case 'access':
 				if ($native == 'same')
 					continue 2;
-				assertUIntArg ('pnv_' . $i);
+				genericAssertion ('pnv_' . $i, 'vlan1');
 				$allowed = array ($native);
 				break;
 			default:
