@@ -13,15 +13,15 @@ function render8021QOrderForm ($some_id)
 		$hintcodes = array ('prev_vdid' => 'DEFAULT_VDOM_ID', 'prev_vstid' => 'DEFAULT_VST_ID', 'prev_objid' => NULL);
 		$focus = array();
 		foreach ($hintcodes as $hint_code => $option_name)
-		if (array_key_exists ($hint_code, $_REQUEST))
-		{
-			assertUIntArg ($hint_code);
-			$focus[$hint_code] = $_REQUEST[$hint_code];
-		}
-		elseif ($option_name != NULL)
-			$focus[$hint_code] = getConfigVar ($option_name);
-		else
-			$focus[$hint_code] = NULL;
+			if (array_key_exists ($hint_code, $_REQUEST))
+			{
+				assertUIntArg ($hint_code);
+				$focus[$hint_code] = $_REQUEST[$hint_code];
+			}
+			elseif ($option_name != NULL)
+				$focus[$hint_code] = getConfigVar ($option_name);
+			else
+				$focus[$hint_code] = NULL;
 		printOpFormIntro ('add');
 		echo '<tr>';
 		if ($pageno != 'object')
