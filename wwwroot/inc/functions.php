@@ -187,19 +187,18 @@ function assertUIntArg ($argname, $allow_zero = FALSE)
 
 // Tell whether the argument is a decimal integer (or, alternatively, a numeric
 // string with a decimal integer).
-function isInteger ($arg, $allow_zero = FALSE)
+function isInteger ($arg)
 {
 	// In PHP 7.0.0 and later is_numeric() rejects a string that contains
 	// a hexadecimal number, help PHP 5 achieve the same result here.
 	return is_numeric ($arg) &&
 		(! is_string ($arg) || FALSE === mb_strstr ($arg, '0x')) &&
-		is_int (0 + $arg) &&
-		($allow_zero || $arg != 0);
+		is_int (0 + $arg);
 }
 
 function isUnsignedInteger ($arg, $allow_zero = FALSE)
 {
-	return isInteger ($arg, $allow_zero) && $arg >= 0;
+	return isInteger ($arg) && $arg >= ($allow_zero ? 0 : 1);
 }
 
 function isHTMLColor ($color)
