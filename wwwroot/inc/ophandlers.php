@@ -3062,7 +3062,7 @@ function updVSTRule()
 			$rule_no++;
 			if
 			(
-				! isUnsignedInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field), TRUE) ||
+				! isUnsignedInteger (updVSTRule_get_named_param ('rule_no', $rule, $last_field)) ||
 				! isPCRE (updVSTRule_get_named_param ('port_pcre', $rule, $last_field)) ||
 				NULL === updVSTRule_get_named_param ('port_role', $rule, $last_field) ||
 				! array_key_exists (updVSTRule_get_named_param ('port_role', $rule, $last_field), $port_role_options) ||

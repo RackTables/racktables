@@ -5740,7 +5740,7 @@ function setConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue, TRUE))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
@@ -5763,7 +5763,7 @@ function setUserConfigVar ($varname, $varvalue)
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
-	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue, TRUE))
+	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue))
 		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedExecuteBlade

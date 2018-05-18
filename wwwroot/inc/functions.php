@@ -174,15 +174,10 @@ function defineIfNotDefined ($constant, $value, $case_insensitive = FALSE)
 		define ($constant, $value, $case_insensitive);
 }
 
-// This function assures that specified argument was passed
-// and is a number greater than zero.
+// For backward compatibility only, remove later.
 function assertUIntArg ($argname, $allow_zero = FALSE)
 {
-	if (!isset ($_REQUEST[$argname]))
-		throw new InvalidRequestArgException($argname, '', 'parameter is missing');
-	if (! isUnsignedInteger ($_REQUEST[$argname], $allow_zero))
-		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an unsigned integer' . ($allow_zero ? ' (or 0)' : ''));
-	return $_REQUEST[$argname];
+	return $allow_zero ? assertUnsignedIntArg ($argname) : assertNaturalNumArg ($argname);
 }
 
 // Tell whether the argument is a decimal integer (or, alternatively, a numeric
@@ -196,9 +191,9 @@ function isInteger ($arg)
 		is_int (0 + $arg);
 }
 
-function isUnsignedInteger ($arg, $allow_zero = FALSE)
+function isUnsignedInteger ($arg)
 {
-	return isInteger ($arg) && $arg >= ($allow_zero ? 0 : 1);
+	return isInteger ($arg) && $arg >= 0;
 }
 
 function isNaturalNumber ($arg)
@@ -214,6 +209,24 @@ function isHTMLColor ($color)
 function isValidVLANID ($x)
 {
 	return isInteger ($x) && $x >= VLAN_MIN_ID && $x <= VLAN_MAX_ID;
+}
+
+function assertUnsignedIntArg ($argname)
+{
+	if (! isset ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, '', 'parameter is missing');
+	if (! isUnsignedInteger ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not an unsigned integer (or 0)');
+	return $_REQUEST[$argname];
+}
+
+function assertNaturalNumArg ($argname)
+{
+	if (! isset ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, '', 'parameter is missing');
+	if (! isNaturalNumber ($_REQUEST[$argname]))
+		throw new InvalidRequestArgException ($argname, $_REQUEST[$argname], 'parameter is not a natural number');
+	return $_REQUEST[$argname];
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
@@ -1062,7 +1075,7 @@ function HTMLColorFromDatabase ($u)
 {
 	if ($u === NULL)
 		return NULL;
-	if (! isUnsignedInteger ($u, TRUE))
+	if (! isUnsignedInteger ($u))
 		throw new InvalidArgException ('u', $u, 'not an unsigned integer');
 	if ($u > 0xFFFFFF)
 		throw new InvalidArgException ('u', $u, 'value out of range');
@@ -1142,7 +1155,7 @@ function sortTokenize ($a, $b)
 	$brc = count ($br);
 	for ($i = 0; $i < $arc && $i < $brc; $i++)
 	{
-		if (isUnsignedInteger ($ar[$i], TRUE) && isUnsignedInteger ($br[$i], TRUE))
+		if (isUnsignedInteger ($ar[$i]) && isUnsignedInteger ($br[$i]))
 			$ret = numCompare ($ar[$i], $br[$i]);
 		else
 			$ret = strcasecmp($ar[$i], $br[$i]);
@@ -2703,7 +2716,7 @@ function constructIPRange ($ip_bin, $mask = NULL)
 		case 4: // IPv4
 			if ($mask === NULL)
 				$mask = 32;
-			elseif (! isUnsignedInteger ($mask, TRUE) || $mask > 32)
+			elseif (! isUnsignedInteger ($mask) || $mask > 32)
 				throw new InvalidArgException ('mask', $mask, "Invalid v4 prefix length");
 			$node['mask_bin'] = ip4_mask ($mask);
 			$node['mask'] = $mask;
@@ -2713,7 +2726,7 @@ function constructIPRange ($ip_bin, $mask = NULL)
 		case 16: // IPv6
 			if ($mask === NULL)
 				$mask = 128;
-			elseif (! isUnsignedInteger ($mask, TRUE) || $mask > 128)
+			elseif (! isUnsignedInteger ($mask) || $mask > 128)
 				throw new InvalidArgException ('mask', $mask, "Invalid v6 prefix length");
 			$node['mask_bin'] = ip6_mask ($mask);
 			$node['mask'] = $mask;
