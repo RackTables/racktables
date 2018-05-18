@@ -201,6 +201,11 @@ function isUnsignedInteger ($arg, $allow_zero = FALSE)
 	return isInteger ($arg) && $arg >= ($allow_zero ? 0 : 1);
 }
 
+function isNaturalNumber ($arg)
+{
+	return isInteger ($arg) && $arg >= 1;
+}
+
 function isHTMLColor ($color)
 {
 	return 1 == preg_match ('/^[0-9A-F]{6}$/i', $color);
@@ -3512,7 +3517,7 @@ function decodeVLANCK ($string)
 	$matches = array();
 	if (1 != preg_match ('/^([[:digit:]]+)-([[:digit:]]+)$/', $string, $matches))
 		throw new InvalidArgException ('VLAN compound key', $string, 'format error');
-	if (! isUnsignedInteger ($matches[1]))
+	if (! isNaturalNumber ($matches[1]))
 		throw new InvalidArgException ('VLAN compound key', $string, 'domain ID cannot be 0');
 	if (! isValidVLANID ($matches[2]))
 		throw new InvalidArgException ('VLAN compound key', $string, 'invalid VLAN ID');
@@ -4981,7 +4986,7 @@ function usort_portlist (&$portnames)
 // the string will be a part of an SQL query.
 function questionMarks ($count)
 {
-	if (! isUnsignedInteger ($count))
+	if (! isNaturalNumber ($count))
 		throw new InvalidArgException ('count', $count, 'must be greater than zero');
 	return implode (', ', array_fill (0, $count, '?'));
 }
