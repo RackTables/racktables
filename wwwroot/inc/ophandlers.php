@@ -1852,7 +1852,7 @@ function updateIPInVS()
 function updatePortInVS()
 {
 	$vs_id = getBypassValue();
-	$proto = assertStringArg ('proto');
+	$proto = genericAssertion ('proto', 'enum/ipproto');
 	$vport = genericAssertion ('port', 'unsigned');
 	$vsconfig = nullIfEmptyStr (assertStringArg ('vsconfig', TRUE));
 	$rsconfig = nullIfEmptyStr (assertStringArg ('rsconfig', TRUE));
@@ -1879,7 +1879,7 @@ function removeIPFromVS()
 
 function removePortFromVS()
 {
-	$port = array ('proto' => assertStringArg ('proto'), 'vport' => genericAssertion ('port', 'unsigned'));
+	$port = array ('proto' => genericAssertion ('proto', 'enum/ipproto'), 'vport' => genericAssertion ('port', 'unsigned'));
 	$vsinfo = spotEntity ('ipvs', getBypassValue());
 	amplifyCell ($vsinfo);
 	$used = 0;
