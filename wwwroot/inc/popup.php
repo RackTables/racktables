@@ -193,8 +193,7 @@ function sortObjectAddressesAndNames ($a, $b)
 		$name_b = (isset ($b['port_name'])) ? $b['port_name'] : '';
 		$objname_cmp = sortTokenize($name_a, $name_b);
 		if ($objname_cmp == 0)
-			sortTokenize($a['ip'], $b['ip']);
-		return $objname_cmp;
+			$objname_cmp = sortTokenize ($a['ip'], $b['ip']);
 	}
 	return $objname_cmp;
 }

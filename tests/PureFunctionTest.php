@@ -11,6 +11,8 @@ return value test that the actual return value is equal (assertEquals) or
 identical (assertSame) to the expected return value.
 */
 
+require_once '../wwwroot/inc/popup.php';
+
 class PureFunctionTest extends RTTestCase
 {
 	/**
@@ -1486,6 +1488,55 @@ class PureFunctionTest extends RTTestCase
 					'ip_bin' => "\x00\x00\x00\x00",
 					'ip' => '0.0.0.0',
 				),
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port b', 'ip' => '10.0.0.20'),
+				array ('object_name' => 'server b', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				-1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server b', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				array ('object_name' => 'server a', 'port_name' => 'port b', 'ip' => '10.0.0.20'),
+				1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.20'),
+				array ('object_name' => 'server a', 'port_name' => 'port b', 'ip' => '10.0.0.1'),
+				-1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port b', 'ip' => '10.0.0.1'),
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.20'),
+				1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.20'),
+				-1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.20'),
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				1
+			),
+			array
+			(
+				'sortObjectAddressesAndNames',
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				array ('object_name' => 'server a', 'port_name' => 'port a', 'ip' => '10.0.0.1'),
+				0
 			),
 		);
 	}
