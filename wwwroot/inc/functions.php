@@ -209,7 +209,7 @@ function isHTMLColor ($color)
 
 function isValidVLANID ($x)
 {
-	return isUnsignedInteger ($x) && $x >= VLAN_MIN_ID && $x <= VLAN_MAX_ID;
+	return isInteger ($x) && $x >= VLAN_MIN_ID && $x <= VLAN_MAX_ID;
 }
 
 # Make sure the arg is a parsable date, return its UNIX timestamp equivalent
