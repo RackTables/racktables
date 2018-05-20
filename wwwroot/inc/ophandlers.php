@@ -59,7 +59,7 @@ $opspec_list['object-edit-unlinkObjects'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'link_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'link_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['object-ports-useup'] = array
@@ -72,8 +72,8 @@ $opspec_list['object-ports-useup'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'), # preserve context
+		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'), # preserve context
 	),
 );
 $opspec_list['object-ports-delPort'] = array
@@ -82,8 +82,8 @@ $opspec_list['object-ports-delPort'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'port_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['object-ports-deleteAll'] = array
@@ -92,7 +92,7 @@ $opspec_list['object-ports-deleteAll'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['location-log-del'] = array
@@ -101,8 +101,8 @@ $opspec_list['location-log-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'location_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'location_id', 'table_colname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['object-log-del'] = array
@@ -111,8 +111,8 @@ $opspec_list['object-log-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['rack-log-del'] = array
@@ -121,8 +121,8 @@ $opspec_list['rack-log-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'rack_id', 'table_colname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['row-log-del'] = array
@@ -131,8 +131,8 @@ $opspec_list['row-log-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'uint'),
-		array ('url_argname' => 'row_id', 'table_colname' => 'object_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'log_id', 'table_colname' => 'id', 'assertion' => 'natural'),
+		array ('url_argname' => 'row_id', 'table_colname' => 'object_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['ipv4vs-editlblist-delLB'] =
@@ -143,9 +143,9 @@ $opspec_list['object-editrspvs-delLB'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'vs_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['ipv4vs-editlblist-updLB'] =
@@ -162,9 +162,9 @@ $opspec_list['object-editrspvs-updLB'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'vs_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'object_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'pool_id', 'table_colname' => 'rspool_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'vs_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['ipv4rspool-editrslist-delRS'] = array
@@ -173,7 +173,7 @@ $opspec_list['ipv4rspool-editrslist-delRS'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['parentmap-edit-add'] = array
@@ -182,8 +182,8 @@ $opspec_list['parentmap-edit-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'child_objtype_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['parentmap-edit-del'] = array
@@ -192,8 +192,8 @@ $opspec_list['parentmap-edit-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'child_objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'parent_objtype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'child_objtype_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['portifcompat-edit-add'] = array
@@ -202,8 +202,8 @@ $opspec_list['portifcompat-edit-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'iif_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['portifcompat-edit-del'] = array
@@ -212,8 +212,8 @@ $opspec_list['portifcompat-edit-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'iif_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'iif_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['portoifs-edit-add'] = array
@@ -231,7 +231,7 @@ $opspec_list['portoifs-edit-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['portoifs-edit-upd'] = array
@@ -244,7 +244,7 @@ $opspec_list['portoifs-edit-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['attrs-editmap-del'] = array
@@ -253,8 +253,8 @@ $opspec_list['attrs-editmap-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'attr_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'objtype_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'attr_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'objtype_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['attrs-editattrs-add'] = array
@@ -273,7 +273,7 @@ $opspec_list['attrs-editattrs-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['attrs-editattrs-upd'] = array
@@ -286,7 +286,7 @@ $opspec_list['attrs-editattrs-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'attr_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['dict-chapters-add'] = array
@@ -304,7 +304,7 @@ $opspec_list['chapter-edit-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'natural'),
 		array ('url_argname' => 'dict_value', 'assertion' => 'string'),
 	),
 );
@@ -317,8 +317,8 @@ $opspec_list['chapter-edit-del'] = array
 		// Technically dict_key is enough to delete, but including chapter_id into
 		// WHERE clause makes sure that the action actually happends for the same
 		// chapter that authorization was granted for.
-		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'dict_key', 'assertion' => 'natural'),
 		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
 	),
 );
@@ -333,8 +333,8 @@ $opspec_list['chapter-edit-upd'] = array
 	'where_arglist' => array
 	(
 		# same as above for listing chapter_no
-		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'dict_key', 'assertion' => 'uint'),
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'chapter_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'dict_key', 'assertion' => 'natural'),
 		array ('fix_argname' => 'dict_sticky', 'fix_argvalue' => 'no'), # protect system rows
 	),
 );
@@ -345,7 +345,7 @@ $opspec_list['tagtree-edit-createTag'] = array
 	'arglist' => array
 	(
 		array ('url_argname' => 'tag_name', 'table_colname' => 'tag', 'assertion' => 'tag'),
-		array ('url_argname' => 'parent_id', 'assertion' => 'uint0', 'translator' => 'nullIfZero'),
+		array ('url_argname' => 'parent_id', 'assertion' => 'unsigned', 'translator' => 'nullIfZero'),
 		array ('url_argname' => 'is_assignable', 'assertion' => 'enum/yesno'),
 		array ('url_argname' => 'color', 'assertion' => 'htmlcolor0', 'translator' => 'HTMLColorForDatabase'),
 	),
@@ -356,7 +356,7 @@ $opspec_list['tagtree-edit-destroyTag'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['8021q-vstlist-add'] = array
@@ -377,7 +377,7 @@ $opspec_list['8021q-vstlist-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['8021q-vstlist-upd'] = array
@@ -390,7 +390,7 @@ $opspec_list['8021q-vstlist-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vst_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['8021q-vdlist-del'] = array
@@ -399,7 +399,7 @@ $opspec_list['8021q-vdlist-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['vlandomain-vlanlist-add'] = array
@@ -408,7 +408,7 @@ $opspec_list['vlandomain-vlanlist-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'natural'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 		array ('url_argname' => 'vlan_type', 'assertion' => 'enum/vlan_type'),
 		array ('url_argname' => 'vlan_descr', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
@@ -420,7 +420,7 @@ $opspec_list['vlandomain-vlanlist-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'natural'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 	),
 );
@@ -436,7 +436,7 @@ $opspec_list['vlandomain-vlanlist-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'vdom_id', 'table_colname' => 'domain_id', 'assertion' => 'natural'),
 		array ('url_argname' => 'vlan_id', 'assertion' => 'vlan'),
 	),
 );
@@ -450,7 +450,7 @@ $opspec_list['dict-chapters-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
 	),
 );
@@ -460,7 +460,7 @@ $opspec_list['dict-chapters-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'chapter_no', 'table_colname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'sticky', 'fix_argvalue' => 'no'), # protect system chapters
 	),
 );
@@ -470,9 +470,9 @@ $opspec_list['cables-heaps-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'amount', 'fix_argvalue' => 0),
 		array ('url_argname' => 'length', 'assertion' => 'decimal'),
 		array ('url_argname' => 'description', 'assertion' => 'string0'),
@@ -484,7 +484,7 @@ $opspec_list['cables-heaps-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['cables-heaps-upd'] = array
@@ -493,15 +493,15 @@ $opspec_list['cables-heaps-upd'] = array
 	'action' => 'UPDATE',
 	'set_arglist' => array
 	(
-		array ('url_argname' => 'end1_conn_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'end2_conn_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'end1_conn_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'end2_conn_id', 'assertion' => 'natural'),
 		array ('url_argname' => 'length', 'assertion' => 'decimal'),
 		array ('url_argname' => 'description', 'assertion' => 'string0'),
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['cableconf-connectors-add'] = array
@@ -520,7 +520,7 @@ $opspec_list['cableconf-connectors-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
 	),
 );
@@ -534,7 +534,7 @@ $opspec_list['cableconf-connectors-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
 	),
 );
@@ -554,7 +554,7 @@ $opspec_list['cableconf-cabletypes-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
 	),
 );
@@ -568,7 +568,7 @@ $opspec_list['cableconf-cabletypes-upd'] = array
 	),
 	'where_arglist' => array
 	(
-		array ('url_argname' => 'id', 'assertion' => 'uint'),
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
 		array ('fix_argname' => 'origin', 'fix_argvalue' => 'custom'),
 	),
 );
@@ -578,8 +578,8 @@ $opspec_list['cableconf-conncompat-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['cableconf-conncompat-del'] = array
@@ -588,8 +588,8 @@ $opspec_list['cableconf-conncompat-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'connector_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'connector_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['cableconf-oifcompat-add'] = array
@@ -598,8 +598,8 @@ $opspec_list['cableconf-oifcompat-add'] = array
 	'action' => 'INSERT',
 	'arglist' => array
 	(
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['cableconf-oifcompat-del'] = array
@@ -608,8 +608,8 @@ $opspec_list['cableconf-oifcompat-del'] = array
 	'action' => 'DELETE',
 	'arglist' => array
 	(
-		array ('url_argname' => 'pctype_id', 'assertion' => 'uint'),
-		array ('url_argname' => 'oif_id', 'assertion' => 'uint'),
+		array ('url_argname' => 'pctype_id', 'assertion' => 'natural'),
+		array ('url_argname' => 'oif_id', 'assertion' => 'natural'),
 	),
 );
 $opspec_list['plugins-edit-disable'] = array
