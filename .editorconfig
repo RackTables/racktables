@@ -1,0 +1,30 @@
+; This file is for unifying the coding style for different editors and IDEs.
+; More information at http://editorconfig.org
+
+# This is the top-most .editorconfig file; do not search in parent directories.
+root = true
+
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*]
+indent_size = 4
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.yml]
+indent_style = space
+indent_size = 2
+
+[{wwwroot,scripts}/**.php]
+indent_style = tab
+
+[*.{js,css}]
+indent_size = unset
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
