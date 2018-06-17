@@ -41,8 +41,8 @@ function plugin_munin_init ()
 		'action' => 'INSERT',
 		'arglist' => array
 		(
-			array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-			array ('url_argname' => 'server_id', 'assertion' => 'uint'),
+			array ('url_argname' => 'object_id', 'assertion' => 'natural'),
+			array ('url_argname' => 'server_id', 'assertion' => 'natural'),
 			array ('url_argname' => 'graph', 'assertion' => 'string'),
 			array ('url_argname' => 'caption', 'assertion' => 'string0'),
 		),
@@ -53,8 +53,8 @@ function plugin_munin_init ()
 		'action' => 'DELETE',
 		'arglist' => array
 		(
-			array ('url_argname' => 'object_id', 'assertion' => 'uint'),
-			array ('url_argname' => 'server_id', 'assertion' => 'uint'),
+			array ('url_argname' => 'object_id', 'assertion' => 'natural'),
+			array ('url_argname' => 'server_id', 'assertion' => 'natural'),
 			array ('url_argname' => 'graph', 'assertion' => 'string'),
 		),
 	);
@@ -73,7 +73,7 @@ function plugin_munin_init ()
 		'action' => 'DELETE',
 		'arglist' => array
 		(
-			array ('url_argname' => 'id', 'assertion' => 'uint'),
+			array ('url_argname' => 'id', 'assertion' => 'natural'),
 		),
 	);
 	$opspec_list['munin-servers-upd'] = array
@@ -86,7 +86,7 @@ function plugin_munin_init ()
 		),
 		'where_arglist' => array
 		(
-			array ('url_argname' => 'id', 'assertion' => 'uint'),
+			array ('url_argname' => 'id', 'assertion' => 'natural'),
 		),
 	);
 
@@ -158,7 +158,7 @@ function plugin_munin_dispatchImageRequest ()
 		$graph = genericAssertion ('graph', 'string');
 		if (! array_key_exists ($graph, getMuninGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph', $graph);
-		proxyMuninRequest (genericAssertion ('server_id', 'uint'), $graph);
+		proxyMuninRequest (genericAssertion ('server_id', 'natural'), $graph);
 	}
 	return TRUE;
 }
