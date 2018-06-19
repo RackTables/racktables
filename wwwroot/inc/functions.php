@@ -6118,14 +6118,20 @@ function registerHook ($hook_name, $callback, $method = 'after')
 	if (empty ($hooks_stack[$hook_name]) && is_callable ($hook_name))
 		array_push ($hooks_stack[$hook_name], $hook_name);
 
-	if ($method == 'before')
+	switch ($method)
+	{
+	case 'before':
 		array_unshift ($hooks_stack[$hook_name], $callback);
-	elseif ($method == 'after')
+		break;
+	case 'after':
 		array_push ($hooks_stack[$hook_name], $callback);
-	elseif ($method == 'chain')
+		break;
+	case 'chain':
 		array_push ($hooks_stack[$hook_name], '!' . $callback);
-	else
-		throw new InvalidRequestArgException ('method', $method, "Invalid hook method");
+		break;
+	default:
+		throw new InvalidArgException ('method', $method, 'Invalid hook method');
+	}
 }
 
 // hook handlers dispatcher. registerHook leaves 'universalHookHandler' in $hook
@@ -6140,7 +6146,7 @@ function universalHookHandler()
 	$bk_params = func_get_args();
 	$hook_name = array_shift ($bk_params);
 	if (! array_key_exists ($hook_name, $hooks_stack) || ! is_array ($hooks_stack[$hook_name]))
-		throw new InvalidRequestArgException ('hooks_stack["' . $hook_name . '"]', $hooks_stack[$hook_name]);
+		throw new RackTablesError ("malformed structure in hooks_stack['{$hook_name}']", RackTablesError::INTERNAL);
 	foreach ($hooks_stack[$hook_name] as $callback)
 	{
 		$params = $bk_params;
