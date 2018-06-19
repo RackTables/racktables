@@ -1351,6 +1351,16 @@ function renderRackProblems ($rack_id)
 	renderGridForm ($rack_id, 'applyRackProblemMask', 'Rack problems', 'Mark unusable atoms', 'F', 'U');
 }
 
+function renderObjectPortHeaderRow()
+{
+	// Renders the headers for the ports table on the default page
+
+	echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
+	echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
+	echo '<th class=tdcenter colspan=2>Remote object and port</th>';
+	echo '<th class=tdleft>Cable ID</th></tr>';
+}
+
 function renderObjectPortRow ($port, $is_highlighted)
 {
 	// highlight port name with yellow if its name is not canonical
@@ -1496,10 +1506,7 @@ function renderObject ($object_id)
 			addAutoScrollScript ("port-$hl_port_id");
 		}
 		echo "<table cellspacing=0 cellpadding='5' align='center' class='widetable'>";
-		echo '<tr><th class=tdleft>Local name</th><th class=tdleft>Visible label</th>';
-		echo '<th class=tdleft>Interface</th><th class=tdleft>L2 address</th>';
-		echo '<th class=tdcenter colspan=2>Remote object and port</th>';
-		echo '<th class=tdleft>Cable ID</th></tr>';
+		callHook ('renderObjectPortHeaderRow');
 		foreach ($info['ports'] as $port)
 			callHook ('renderObjectPortRow', $port, ($hl_port_id == $port['id']));
 		if (permitted (NULL, 'ports', 'set_reserve_comment'))
