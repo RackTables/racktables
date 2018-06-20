@@ -1530,7 +1530,7 @@ else
 			echo 'It is <strong>highly recommended</strong> to make a database backup before ';
 			echo 'proceeding any further. <tt>mysqldump</tt> and <tt>PHPMyAdmin</tt> are convenient ';
 			echo 'tools for doing this.</p>';
-			echo '<p><input type=checkbox name=reallyreally id=reallyreally><label for=reallyreally>';
+			echo '<p><label><input type=checkbox name=reallyreally>';
 			echo 'I am ready to bear all risks of this upgrade. I am ready to roll it back in case of ';
 			echo 'a failure.</label> <input type=submit value="Yes, I am."></p></td></tr></form>';
 		}
