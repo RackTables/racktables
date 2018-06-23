@@ -264,8 +264,11 @@ function renderCactiServersEditor ()
 
 function renderObjectCactiGraphs ($object_id)
 {
-	function printNewItemTR ($options)
+	function printNewItemTR ($servers)
 	{
+		$options = array();
+		foreach ($servers as $server)
+			$options[$server['id']] = "${server['id']}: ${server['base_url']}";
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
 		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph ID</th><th>Caption</th><td>&nbsp;</td></tr>\n";
 		printOpFormIntro ('add');
@@ -282,12 +285,9 @@ function renderObjectCactiGraphs ($object_id)
 		throw new RackTablesError ('The PHP cURL extension is not loaded.', RackTablesError::MISCONFIGURED);
 
 	$servers = getCactiServers ();
-	$options = array ();
-	foreach ($servers as $server)
-		$options[$server['id']] = "${server['id']}: ${server['base_url']}";
 	startPortlet ('Cacti Graphs');
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes' && permitted ('object', 'cacti', 'add'))
-		printNewItemTR ($options);
+		printNewItemTR ($servers);
 	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">\n";
 	foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
 	{
@@ -303,7 +303,7 @@ function renderObjectCactiGraphs ($object_id)
 	}
 	echo "</table>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes' && permitted ('object', 'cacti', 'add'))
-		printNewItemTR ($options);
+		printNewItemTR ($servers);
 	finishPortlet ();
 }
 

@@ -259,8 +259,11 @@ function renderMuninServersEditor ()
 
 function renderObjectMuninGraphs ($object_id)
 {
-	function printNewItem ($options)
+	function printNewItem ($servers)
 	{
+		$options = array();
+		foreach ($servers as $server)
+			$options[$server['id']] = "${server['id']}: ${server['base_url']}";
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
 		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph</th><th>Caption</th><td>&nbsp;</td></tr>\n";
 		printOpFormIntro ('add');
@@ -289,12 +292,9 @@ function renderObjectMuninGraphs ($object_id)
 	}
 
 	$servers = getMuninServers ();
-	$options = array ();
-	foreach ($servers as $server)
-		$options[$server['id']] = "${server['id']}: ${server['base_url']}";
 	startPortlet ('Munin Graphs');
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
-		printNewItem ($options);
+		printNewItem ($servers);
 	echo "<table cellspacing=\"0\" cellpadding=\"10\" align=\"center\" width=\"50%\">\n";
 
 	foreach (getMuninGraphsForObject ($object_id) as $graph_name => $graph)
@@ -311,7 +311,7 @@ function renderObjectMuninGraphs ($object_id)
 	}
 	echo "</table>\n";
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
-		printNewItem ($options);
+		printNewItem ($servers);
 	finishPortlet ();
 }
 
