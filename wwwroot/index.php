@@ -141,7 +141,7 @@ try {
 			// 'progressbar's never change, make browser cache the result
 			if (checkCachedResponse (0, CACHE_DURATION))
 				break;
-			renderProgressBarImage (genericAssertion ('done', 'uint0'));
+			renderProgressBarImage (genericAssertion ('done', 'unsigned'));
 		}
 		catch (Exception $e)
 		{

@@ -86,7 +86,7 @@ $ophandler['depot']['addmore']['addLotOfObjects'] = 'addLotOfObjects';
 $ophandler['depot']['addmore']['deleteObject'] = 'deleteObject';
 
 $page['location']['bypass'] = 'location_id';
-$page['location']['bypass_type'] = 'uint';
+$page['location']['bypass_type'] = 'natural';
 $page['location']['parent'] = 'rackspace';
 $tab['location']['default'] = 'View';
 $tab['location']['edit'] = 'Properties';
@@ -110,7 +110,7 @@ $ophandler['location']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['location']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['row']['bypass'] = 'row_id';
-$page['row']['bypass_type'] = 'uint';
+$page['row']['bypass_type'] = 'natural';
 $page['row']['parent'] = 'rackspace';
 $tab['row']['default'] = 'View';
 $tab['row']['edit'] = 'Properties';
@@ -138,7 +138,7 @@ $ophandler['row']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['row']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['rack']['bypass'] = 'rack_id';
-$page['rack']['bypass_type'] = 'uint';
+$page['rack']['bypass_type'] = 'natural';
 $page['rack']['parent'] = 'row';
 $tab['rack']['default'] = 'View';
 $tab['rack']['edit'] = 'Properties';
@@ -169,7 +169,7 @@ $ophandler['rack']['files']['linkFile'] = 'linkFileToEntity';
 $ophandler['rack']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['object']['bypass'] = 'object_id';
-$page['object']['bypass_type'] = 'uint';
+$page['object']['bypass_type'] = 'natural';
 $page['object']['bypass_tabs'] = array ('hl_port_id', 'hl_ip');
 $page['object']['parent'] = 'depot';
 $tab['object']['default'] = 'View';
@@ -309,7 +309,7 @@ $ophandler['ipv6space']['manage']['del'] = 'delIPv6Prefix';
 
 $page['ipv4net']['parent'] = 'ipv4space';
 $page['ipv4net']['bypass'] = 'id';
-$page['ipv4net']['bypass_type'] = 'uint';
+$page['ipv4net']['bypass_type'] = 'natural';
 $page['ipv4net']['bypass_tabs'] = array ('pg');
 $tab['ipv4net']['default'] = 'Browse';
 $tab['ipv4net']['properties'] = 'Properties';
@@ -338,7 +338,7 @@ $interface_requires['ipv4net-8021q'] = 'interface-8021q.php';
 
 $page['ipv6net']['parent'] = 'ipv6space';
 $page['ipv6net']['bypass'] = 'id';
-$page['ipv6net']['bypass_type'] = 'uint';
+$page['ipv6net']['bypass_type'] = 'natural';
 $tab['ipv6net']['default'] = 'Browse';
 $tab['ipv6net']['properties'] = 'Properties';
 $tab['ipv6net']['tags'] = 'Tags';
@@ -405,7 +405,7 @@ $ophandler['ipv4slb']['defconfig']['save'] = 'updateSLBDefConfig';
 
 $page['ipv4vs']['parent'] = 'ipv4slb:default';
 $page['ipv4vs']['bypass'] = 'vs_id';
-$page['ipv4vs']['bypass_type'] = 'uint';
+$page['ipv4vs']['bypass_type'] = 'natural';
 $tab['ipv4vs']['default'] = 'View';
 $tab['ipv4vs']['edit'] = 'Edit';
 $tab['ipv4vs']['editlblist'] = 'VS links';
@@ -429,7 +429,7 @@ $ophandler['ipv4vs']['files']['unlinkFile'] = 'unlinkFile';
 
 $page['ipvs']['parent'] = 'ipv4slb:vs';
 $page['ipvs']['bypass'] = 'vs_id';
-$page['ipvs']['bypass_type'] = 'uint';
+$page['ipvs']['bypass_type'] = 'natural';
 $tab['ipvs']['default'] = 'View';
 $tab['ipvs']['edit'] = 'Edit';
 $tab['ipvs']['editvslinks'] = 'VSG links';
@@ -464,7 +464,7 @@ $trigger['ipvs']['convert'] = 'trigger_ipvs_convert';
 
 $page['ipv4rspool']['parent'] = 'ipv4slb:rspools';
 $page['ipv4rspool']['bypass'] = 'pool_id';
-$page['ipv4rspool']['bypass_type'] = 'uint';
+$page['ipv4rspool']['bypass_type'] = 'natural';
 $tab['ipv4rspool']['default'] = 'View';
 $tab['ipv4rspool']['edit'] = 'Edit';
 $tab['ipv4rspool']['editlblist'] = 'VS links';
@@ -520,7 +520,7 @@ $interface_requires['userlist-*'] = 'interface-config.php';
 
 $page['user']['parent'] = 'userlist';
 $page['user']['bypass'] = 'user_id';
-$page['user']['bypass_type'] = 'uint';
+$page['user']['bypass_type'] = 'natural';
 $tab['user']['default'] = 'View';
 $tab['user']['properties'] = 'Properties';
 $tab['user']['tags'] = 'Tags';
@@ -618,7 +618,7 @@ $interface_requires['dict-*'] = 'interface-config.php';
 
 $page['chapter']['parent'] = 'dict';
 $page['chapter']['bypass'] = 'chapter_no';
-$page['chapter']['bypass_type'] = 'uint';
+$page['chapter']['bypass_type'] = 'natural';
 $tab['chapter']['default'] = 'View';
 $tab['chapter']['edit'] = 'Edit';
 $tabhandler['chapter']['default'] = 'renderChapter';
@@ -734,7 +734,7 @@ $ophandler['files']['manage']['unlinkFile'] = 'unlinkFile';
 $ophandler['files']['manage']['deleteFile'] = 'deleteFile';
 
 $page['file']['bypass'] = 'file_id';
-$page['file']['bypass_type'] = 'uint';
+$page['file']['bypass_type'] = 'natural';
 $page['file']['parent'] = 'files';
 $tab['file']['default'] = 'View';
 $tab['file']['edit'] = 'Properties';
@@ -773,7 +773,7 @@ $interface_requires['8021q-*'] = 'interface-8021q.php';
 
 $page['vlandomain']['parent'] = '8021q';
 $page['vlandomain']['bypass'] = 'vdom_id';
-$page['vlandomain']['bypass_type'] = 'uint';
+$page['vlandomain']['bypass_type'] = 'natural';
 $tab['vlandomain']['default'] = 'View';
 $tab['vlandomain']['vlanlist'] = 'VLAN list';
 $tab['vlandomain']['8021qorder'] = '802.1Q orders';
@@ -814,7 +814,7 @@ $interface_requires['vlan-*'] = 'interface-8021q.php';
 
 $page['vst']['parent'] = '8021q';
 $page['vst']['bypass'] = 'vst_id';
-$page['vst']['bypass_type'] = 'uint';
+$page['vst']['bypass_type'] = 'natural';
 $tab['vst']['default'] = 'View';
 $tab['vst']['editrules'] = 'Edit';
 $tab['vst']['8021qorder'] = '802.1Q orders';

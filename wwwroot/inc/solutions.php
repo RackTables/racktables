@@ -57,9 +57,9 @@ function dispatchImageRequest()
 		{
 			fixContext();
 			assertPermission();
-			$scale = genericAssertion ('scale', 'uint');
+			$scale = genericAssertion ('scale', 'natural');
 			$object_id = array_key_exists ('object_id', $_REQUEST) ?
-				genericAssertion ('object_id', 'uint') : NULL;
+				genericAssertion ('object_id', 'natural') : NULL;
 		}
 		catch (RackTablesError $e)
 		{
