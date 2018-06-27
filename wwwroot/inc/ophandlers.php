@@ -848,7 +848,7 @@ function addBulkPorts ()
 	$port_type_id = genericAssertion ('port_type_id', 'string');
 	$port_label = $_REQUEST['port_label'];
 	$port_numbering_start = genericAssertion ('port_numbering_start', 'uint0');
-	$port_numbering_count = genericAssertion ('port_numbering_count', 'uint');
+	$port_numbering_count = genericAssertion ('port_numbering_count', 'natural');
 
 	$added_count = $error_count = 0;
 	if (strrpos ($port_name, '%u') === FALSE)
@@ -871,7 +871,7 @@ function updIPAllocation ()
 	updateIPBond
 	(
 		$ip_bin,
-		genericAssertion ('object_id', 'uint'),
+		genericAssertion ('object_id', 'natural'),
 		$_REQUEST['bond_name'],
 		genericAssertion ('bond_type', 'enum/alloc_type')
 	);
@@ -882,7 +882,7 @@ function updIPAllocation ()
 function delIPAllocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	unbindIPFromObject (genericAssertion ('ip', 'inet'), genericAssertion ('object_id', 'uint'));
+	unbindIPFromObject (genericAssertion ('ip', 'inet'), genericAssertion ('object_id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -913,7 +913,7 @@ function addIPAllocation ()
 	bindIPToObject
 	(
 		$ip_bin,
-		genericAssertion ('object_id', 'uint'),
+		genericAssertion ('object_id', 'natural'),
 		genericAssertion ('bond_name', 'string0'),
 		$alloc_type
 	);
@@ -969,7 +969,7 @@ function addIPv6Prefix ()
 function delIPv4Prefix ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$netinfo = spotEntity ('ipv4net', genericAssertion ('id', 'uint'));
+	$netinfo = spotEntity ('ipv4net', genericAssertion ('id', 'natural'));
 	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 	{
@@ -991,7 +991,7 @@ function delIPv4Prefix ()
 function delIPv6Prefix ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$netinfo = spotEntity ('ipv6net', genericAssertion ('id', 'uint'));
+	$netinfo = spotEntity ('ipv6net', genericAssertion ('id', 'natural'));
 	loadIPAddrList ($netinfo);
 	if (! isIPNetworkEmpty ($netinfo))
 	{
@@ -1039,7 +1039,7 @@ function createUser ()
 function updateUser ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	$user_id = genericAssertion ('user_id', 'uint');
+	$user_id = genericAssertion ('user_id', 'natural');
 	$username = assertStringArg ('username');
 	assertStringArg ('realname', TRUE);
 	$new_password = assertStringArg ('password', TRUE);
@@ -1063,7 +1063,7 @@ function supplementAttrMap ()
 	{
 		try
 		{
-			$chapter_id = genericAssertion ('chapter_no', 'uint');
+			$chapter_id = genericAssertion ('chapter_no', 'natural');
 		}
 		catch (InvalidRequestArgException $e)
 		{
@@ -1071,7 +1071,7 @@ function supplementAttrMap ()
 			return;
 		}
 	}
-	commitSupplementAttrMap ($attr_id, genericAssertion ('objtype_id', 'uint'), $chapter_id);
+	commitSupplementAttrMap ($attr_id, genericAssertion ('objtype_id', 'natural'), $chapter_id);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -1254,7 +1254,7 @@ function updateObject ()
 	genericAssertion ('object_label', 'string0');
 	genericAssertion ('object_asset_no', 'string0');
 	genericAssertion ('object_comment', 'string0');
-	$object_type_id = genericAssertion ('object_type_id', 'uint');
+	$object_type_id = genericAssertion ('object_type_id', 'natural');
 	$object_id = getBypassValue();
 
 	global $dbxlink;
@@ -1292,7 +1292,7 @@ function updateObjectAttributes ($object_id)
 	$num_attrs = genericAssertion ('num_attrs', 'uint0');
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		$attr_id = genericAssertion ("${i}_attr_id", 'uint');
+		$attr_id = genericAssertion ("${i}_attr_id", 'natural');
 		if (! array_key_exists ($attr_id, $oldvalues))
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
 		$value = genericAssertion ("${i}_value", 'string0');
@@ -1334,8 +1334,8 @@ function updateObjectAttributes ($object_id)
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'dict':
-				// Not 'uint0' as 0 is handled above.
-				genericAssertion ("${i}_value", 'uint');
+				// Not 'unsigned' as 0 is handled above.
+				genericAssertion ("${i}_value", 'natural');
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
@@ -1360,7 +1360,7 @@ function updateObjectAttributes ($object_id)
 function addMultipleObjects()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
-	$max = genericAssertion ('num_records', 'uint');
+	$max = genericAssertion ('num_records', 'natural');
 	for ($i = 0; $i < $max; $i++)
 	{
 		$tid = genericAssertion ("${i}_object_type_id", 'uint0');
@@ -1417,9 +1417,9 @@ function linkObjects ()
 	commitLinkEntities
 	(
 		genericAssertion ('parent_entity_type', 'string'),
-		genericAssertion ('parent_entity_id', 'uint'),
+		genericAssertion ('parent_entity_id', 'natural'),
 		genericAssertion ('child_entity_type', 'string'),
-		genericAssertion ('child_entity_id', 'uint')
+		genericAssertion ('child_entity_id', 'natural')
 	);
 	showSuccess ('Container set successfully');
 }
@@ -1427,7 +1427,7 @@ function linkObjects ()
 function deleteObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7));
-	$oinfo = spotEntity ('object', genericAssertion ('object_id', 'uint'));
+	$oinfo = spotEntity ('object', genericAssertion ('object_id', 'natural'));
 
 	$racklist = getResidentRackIDs ($oinfo['id']);
 	commitDeleteObject ($oinfo['id']);
@@ -1449,7 +1449,7 @@ function resetObject ()
 function updateUI ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	$num_vars = genericAssertion ('num_vars', 'uint');
+	$num_vars = genericAssertion ('num_vars', 'natural');
 	try
 	{
 		for ($i = 0; $i < $num_vars; $i++)
@@ -1472,7 +1472,7 @@ function updateUI ()
 function saveMyPreferences ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	$num_vars = genericAssertion ('num_vars', 'uint');
+	$num_vars = genericAssertion ('num_vars', 'natural');
 
 	for ($i = 0; $i < $num_vars; $i++)
 	{
@@ -1675,7 +1675,7 @@ function addVService ()
 		array
 		(
 			'vip' => genericAssertion ('vip', 'inet'),
-			'vport' => $proto == 'MARK' ? NULL : genericAssertion ('vport', 'uint'),
+			'vport' => $proto == 'MARK' ? NULL : genericAssertion ('vport', 'natural'),
 			'proto' => $proto,
 			'name' => nullIfEmptyStr ($_REQUEST['name']),
 			'vsconfig' => nullIfEmptyStr (genericAssertion ('vsconfig', 'string0')),
@@ -1705,7 +1705,7 @@ function addVSG ()
 function deleteVService ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$vsinfo = spotEntity ('ipv4vs', genericAssertion ('vs_id', 'uint'));
+	$vsinfo = spotEntity ('ipv4vs', genericAssertion ('vs_id', 'natural'));
 	if ($vsinfo['refcnt'] != 0)
 	{
 		showError ("Could not delete linked virtual service");
@@ -1747,7 +1747,7 @@ function updateRealServer ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	commitUpdateRS (
-		genericAssertion ('rs_id', 'uint'),
+		genericAssertion ('rs_id', 'natural'),
 		genericAssertion ('rsip', 'inet'),
 		genericAssertion ('rsport', 'string0'),
 		isCheckSet ('inservice', 'yesno'),
@@ -1763,7 +1763,7 @@ function updateVService ()
 	$vs_id = getBypassValue();
 	$taglist = genericAssertion ('taglist', 'array0');
 	$proto = genericAssertion ('proto', 'enum/ipproto');
-	genericAssertion ('vport', $proto == 'MARK' ? 'string0' : 'uint');
+	genericAssertion ('vport', $proto == 'MARK' ? 'string0' : 'natural');
 	assertStringArg ('name', TRUE);
 	commitUpdateVS (
 		$vs_id,
@@ -2047,9 +2047,9 @@ function addLoadBalancer ()
 	assertStringArg ('prio', TRUE);
 
 	addLBtoRSPool (
-		genericAssertion ('pool_id', 'uint'),
-		genericAssertion ('object_id', 'uint'),
-		genericAssertion ('vs_id', 'uint'),
+		genericAssertion ('pool_id', 'natural'),
+		genericAssertion ('object_id', 'natural'),
+		genericAssertion ('vs_id', 'natural'),
 		genericAssertion ('vsconfig', 'string0'),
 		genericAssertion ('rsconfig', 'string0'),
 		$_REQUEST['prio']
@@ -2073,7 +2073,7 @@ function addRSPool ()
 function deleteRSPool ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$poolinfo = spotEntity ('ipv4rspool', genericAssertion ('pool_id', 'uint'));
+	$poolinfo = spotEntity ('ipv4rspool', genericAssertion ('pool_id', 'natural'));
 	if ($poolinfo['refcnt'] != 0)
 	{
 		showError ("Could not delete linked RS pool");
@@ -2088,7 +2088,7 @@ function importPTRData ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 26, 'ERR' => 141));
 	$net = spotEntity ('ipv4net', getBypassValue());
-	$addrcount = genericAssertion ('addrcount', 'uint');
+	$addrcount = genericAssertion ('addrcount', 'natural');
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $addrcount; $i++)
 	{
@@ -2135,7 +2135,7 @@ function updateTag ()
 	{
 		commitUpdateTag
 		(
-			genericAssertion ('tag_id', 'uint'),
+			genericAssertion ('tag_id', 'natural'),
 			genericAssertion ('tag_name', 'tag'),
 			genericAssertion ('parent_id', 'uint0'),
 			genericAssertion ('is_assignable', 'enum/yesno'),
@@ -2162,7 +2162,7 @@ function saveEntityTags ()
 function rollTags ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 67, 'ERR' => 149));
-	if (genericAssertion ('sum', 'string0') != genericAssertion ('realsum', 'uint'))
+	if (genericAssertion ('sum', 'string0') != genericAssertion ('realsum', 'natural'))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR');
 		return;
@@ -2255,7 +2255,7 @@ function updateLocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $pageno;
-	$location_id = genericAssertion ('location_id', 'uint');
+	$location_id = genericAssertion ('location_id', 'natural');
 	$parent_id = genericAssertion ('parent_id', 'uint0');
 	assertStringArg ('name');
 
@@ -2295,7 +2295,7 @@ function updateLocation ()
 function deleteLocation ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7, 'ERR1' => 206));
-	$location_id = genericAssertion ('location_id', 'uint');
+	$location_id = genericAssertion ('location_id', 'natural');
 	$locationData = spotEntity ('location', $location_id);
 	amplifyCell ($locationData);
 	if (count ($locationData['locations']) || count ($locationData['rows']))
@@ -2327,7 +2327,7 @@ function addRow ()
 function updateRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	$row_id = genericAssertion ('row_id', 'uint');
+	$row_id = genericAssertion ('row_id', 'natural');
 	$location_id = genericAssertion ('location_id', 'uint0');
 	assertStringArg ('name');
 
@@ -2385,7 +2385,7 @@ function addRack ()
 	{
 	case 'one':
 		assertStringArg ('name');
-		$height = genericAssertion ('height1', 'uint');
+		$height = genericAssertion ('height1', 'natural');
 		assertStringArg ('asset_no', TRUE);
 		$rack_id = commitAddObject ($_REQUEST['name'], NULL, 1560, $_REQUEST['asset_no'], $taglist);
 
@@ -2398,7 +2398,7 @@ function addRack ()
 		showSuccess ('added ' . mkCellA (spotEntity ('rack', $rack_id)));
 		break;
 	case 'many':
-		$height = genericAssertion ('height2', 'uint');
+		$height = genericAssertion ('height2', 'natural');
 		assertStringArg ('names', TRUE);
 		foreach (textareaCooked ($_REQUEST['names']) as $cname)
 		{
@@ -2422,9 +2422,9 @@ function addRack ()
 function updateRack ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	$row_id = genericAssertion ('row_id', 'uint');
+	$row_id = genericAssertion ('row_id', 'natural');
 	assertStringArg ('name');
-	$height = genericAssertion ('height', 'uint');
+	$height = genericAssertion ('height', 'natural');
 	assertStringArg ('asset_no', TRUE);
 	assertStringArg ('comment', TRUE);
 	$taglist = genericAssertion ('taglist', 'array0');
@@ -2493,7 +2493,7 @@ function updateRackProblems ()
 
 function querySNMPData ()
 {
-	$ver = genericAssertion ('ver', 'uint');
+	$ver = genericAssertion ('ver', 'natural');
 	$snmpsetup = array ();
 	switch ($ver)
 	{
@@ -2591,7 +2591,7 @@ function addFileToEntity ()
 function linkFileToEntity ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 71));
-	$fi = spotEntity ('file', genericAssertion ('file_id', 'uint'));
+	$fi = spotEntity ('file', genericAssertion ('file_id', 'natural'));
 	usePreparedInsertBlade
 	(
 		'FileLink',
@@ -2626,14 +2626,14 @@ function replaceFile ()
 function unlinkFile ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 72));
-	commitUnlinkFile (genericAssertion ('link_id', 'uint'));
+	commitUnlinkFile (genericAssertion ('link_id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function deleteFile ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 7));
-	$file_id = genericAssertion ('file_id', 'uint');
+	$file_id = genericAssertion ('file_id', 'natural');
 	$shortInfo = spotEntity ('file', $file_id);
 	commitDeleteFile ($file_id);
 	showFuncMessage (__FUNCTION__, 'OK', array (htmlspecialchars ($shortInfo['name'])));
@@ -2734,9 +2734,9 @@ function delOIFCompatPack ()
 function add8021QOrder ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	$vdom_id = genericAssertion ('vdom_id', 'uint');
-	$object_id = genericAssertion ('object_id', 'uint');
-	$vst_id = genericAssertion ('vst_id', 'uint');
+	$vdom_id = genericAssertion ('vdom_id', 'natural');
+	$object_id = genericAssertion ('object_id', 'natural');
+	$vst_id = genericAssertion ('vst_id', 'natural');
 	global $pageno;
 	fixContext();
 	if ($pageno != 'object')
@@ -2756,9 +2756,9 @@ function add8021QOrder ()
 function del8021QOrder ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	$object_id = genericAssertion ('object_id', 'uint');
-	$vdom_id = genericAssertion ('vdom_id', 'uint');
-	$vst_id = genericAssertion ('vst_id', 'uint');
+	$object_id = genericAssertion ('object_id', 'natural');
+	$vdom_id = genericAssertion ('vdom_id', 'natural');
+	$vst_id = genericAssertion ('vst_id', 'natural');
 	global $pageno;
 	fixContext();
 	if ($pageno != 'object')
@@ -2819,7 +2819,7 @@ function save8021QPorts ()
 	switch ($form_mode)
 	{
 	case 'save':
-		$nports = genericAssertion ('nports', 'uint');
+		$nports = genericAssertion ('nports', 'natural');
 		if ($nports == 1)
 			$extra = array ('port_name' => genericAssertion ('pn_0', 'string'));
 		for ($i = 0; $i < $nports; $i++)
@@ -2871,28 +2871,28 @@ function save8021QPorts ()
 function bindVLANtoIPv4 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	commitSupplementVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
+	commitSupplementVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function bindVLANtoIPv6 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	commitSupplementVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
+	commitSupplementVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function unbindVLANfromIPv4 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	commitReduceVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
+	commitReduceVLANIPv4 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
 function unbindVLANfromIPv6 ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 49));
-	commitReduceVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'uint'));
+	commitReduceVLANIPv6 (genericAssertion ('vlan_ck', 'uint-vlan1'), genericAssertion ('id', 'natural'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -2923,7 +2923,7 @@ function resolve8021QConflicts ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR1' => 179, 'ERR2' => 109));
 	global $sic, $dbxlink;
 	$mutex_rev = genericAssertion ('mutex_rev', 'uint0'); // counts from 0
-	$nrows = genericAssertion ('nrows', 'uint');
+	$nrows = genericAssertion ('nrows', 'natural');
 	$object_id = getBypassValue();
 	// Divide submitted radio buttons into 3 groups:
 	// left (saved version wins)
@@ -3032,7 +3032,7 @@ function update8021QPortList()
 function cloneVST()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
-	$src_vst = spotEntity ('vst', genericAssertion ('from_id', 'uint'));
+	$src_vst = spotEntity ('vst', genericAssertion ('from_id', 'natural'));
 	amplifyCell ($src_vst);
 	commitUpdateVSTRules (getBypassValue(), genericAssertion ('mutex_rev', 'uint0'), $src_vst['rules']);
 	showFuncMessage (__FUNCTION__, 'OK');
@@ -3094,7 +3094,7 @@ function importDPData()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 44));
 	global $sic, $dbxlink;
-	$nports = genericAssertion ('nports', 'uint');
+	$nports = genericAssertion ('nports', 'natural');
 	$object_id = getBypassValue();
 	$nignored = $ndone = 0;
 	for ($i = 0; $i < $nports; $i++)
@@ -3403,7 +3403,7 @@ function getOpspec()
 
 function unlinkPort ()
 {
-	commitUnlinkPort (genericAssertion ('port_id', 'uint'));
+	commitUnlinkPort (genericAssertion ('port_id', 'natural'));
 	showSuccess ("Port unlinked successfully");
 }
 
@@ -3723,7 +3723,7 @@ function renameObjectPorts()
 
 function consumePatchCable()
 {
-	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), -1))
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'natural'), -1))
 		showSuccess ('consumed OK');
 	else
 		showError ('could not consume');
@@ -3731,7 +3731,7 @@ function consumePatchCable()
 
 function replenishPatchCable()
 {
-	if (commitModifyPatchCableAmount (genericAssertion ('id', 'uint'), 1))
+	if (commitModifyPatchCableAmount (genericAssertion ('id', 'natural'), 1))
 		showSuccess ('replenished OK');
 	else
 		showError ('could not replenish');
@@ -3740,7 +3740,7 @@ function replenishPatchCable()
 function setPatchCableAmount()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	commitSetPatchCableAmount (genericAssertion ('id', 'uint'), genericAssertion ('amount', 'uint0'));
+	commitSetPatchCableAmount (genericAssertion ('id', 'natural'), genericAssertion ('amount', 'uint0'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
