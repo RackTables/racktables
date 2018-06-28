@@ -209,7 +209,7 @@ function getPortInfoAJAX()
 		'get-port-portmac' => 'get_port_mac_list',
 		'get-port-conf' => 'get_port_conf',
 	);
-	$object_id = genericAssertion ('object_id', 'uint');
+	$object_id = genericAssertion ('object_id', 'natural');
 	fixContext (spotEntity ('object', $object_id));
 	assertPermission ('object', 'liveports', $opmap[$_REQUEST['ac']]);
 	echo json_encode ($funcmap[$_REQUEST['ac']] ($object_id));
@@ -218,7 +218,7 @@ function getPortInfoAJAX()
 function updatePortRsvAJAX()
 {
 	$text = genericAssertion ('text', 'string0');
-	$port_info = getPortInfo (genericAssertion ('id', 'uint'));
+	$port_info = getPortInfo (genericAssertion ('id', 'natural'));
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if ($port_info['linked'])
@@ -263,7 +263,7 @@ function updateIPCommentAJAX()
 function updateCableIdAJAX()
 {
 	$text = genericAssertion ('text', 'string0');
-	$port_info = getPortInfo (genericAssertion ('id', 'uint'));
+	$port_info = getPortInfo (genericAssertion ('id', 'natural'));
 	fixContext (spotEntity ('object', $port_info['object_id']));
 	assertPermission ('object', 'ports', 'editPort');
 	if (! $port_info['linked'])
@@ -323,7 +323,7 @@ function getAutocompleteListAJAX()
 			unset ($result);
 			break;
 		case 'bond_name':
-			$object_id = genericAssertion ('object_id', 'uint');
+			$object_id = genericAssertion ('object_id', 'natural');
 			$result = usePreparedSelectBlade ("SELECT name FROM Port WHERE object_id = ? AND name LIKE ? GROUP BY name ORDER BY name LIMIT 101", array ($object_id, "%$term%"));
 			$rows = $result->fetchAll (PDO::FETCH_COLUMN, 0);
 			unset ($result);

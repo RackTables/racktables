@@ -847,7 +847,7 @@ function addBulkPorts ()
 	$port_name = $_REQUEST['port_name'];
 	$port_type_id = genericAssertion ('port_type_id', 'string');
 	$port_label = $_REQUEST['port_label'];
-	$port_numbering_start = genericAssertion ('port_numbering_start', 'uint0');
+	$port_numbering_start = genericAssertion ('port_numbering_start', 'unsigned');
 	$port_numbering_count = genericAssertion ('port_numbering_count', 'natural');
 
 	$added_count = $error_count = 0;
@@ -1249,7 +1249,7 @@ function updateObject ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
 	$taglist = genericAssertion ('taglist', 'array0');
-	genericAssertion ('num_attrs', 'uint0');
+	genericAssertion ('num_attrs', 'unsigned');
 	genericAssertion ('object_name', 'string0');
 	genericAssertion ('object_label', 'string0');
 	genericAssertion ('object_asset_no', 'string0');
@@ -1289,7 +1289,7 @@ function updateObjectAttributes ($object_id)
 {
 	$type_id = getObjectType ($object_id);
 	$oldvalues = getAttrValues ($object_id);
-	$num_attrs = genericAssertion ('num_attrs', 'uint0');
+	$num_attrs = genericAssertion ('num_attrs', 'unsigned');
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
 		$attr_id = genericAssertion ("${i}_attr_id", 'natural');
@@ -1318,7 +1318,7 @@ function updateObjectAttributes ($object_id)
 			switch ($oldvalues[$attr_id]['type'])
 			{
 			case 'uint':
-				genericAssertion ("${i}_value", 'uint0');
+				genericAssertion ("${i}_value", 'unsigned');
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'float':
@@ -1363,7 +1363,7 @@ function addMultipleObjects()
 	$max = genericAssertion ('num_records', 'natural');
 	for ($i = 0; $i < $max; $i++)
 	{
-		$tid = genericAssertion ("${i}_object_type_id", 'uint0');
+		$tid = genericAssertion ("${i}_object_type_id", 'unsigned'); // 0 by default in the SELECT
 		assertStringArg ("${i}_object_name", TRUE);
 		assertStringArg ("${i}_object_label", TRUE);
 		assertStringArg ("${i}_object_asset_no", TRUE);
@@ -1394,7 +1394,7 @@ function addLotOfObjects()
 {
 	$taglist = genericAssertion ('taglist', 'array0');
 	assertStringArg ('namelist', TRUE);
-	$global_type_id = genericAssertion ('global_type_id', 'uint0');
+	$global_type_id = genericAssertion ('global_type_id', 'unsigned'); // 0 by default in the SELECT
 	if ($global_type_id == 0 || $_REQUEST['namelist'] == '')
 	{
 		showError ('Incomplete form has been ignored. Cheers.');
@@ -2137,7 +2137,7 @@ function updateTag ()
 		(
 			genericAssertion ('tag_id', 'natural'),
 			genericAssertion ('tag_name', 'tag'),
-			genericAssertion ('parent_id', 'uint0'),
+			genericAssertion ('parent_id', 'unsigned'),
 			genericAssertion ('is_assignable', 'enum/yesno'),
 			genericAssertion ('color', 'htmlcolor0')
 		);
@@ -2243,7 +2243,7 @@ function addLocation ()
 	assertStringArg ('name');
 
 	$location_id = commitAddObject ($_REQUEST['name'], NULL, 1562, NULL);
-	if (0 != $parent_id = genericAssertion ('parent_id', 'uint0'))
+	if (0 != $parent_id = genericAssertion ('parent_id', 'unsigned'))
 		commitLinkEntities ('location', $parent_id, 'location', $location_id);
 	showSuccess ('added location ' . mkA ($_REQUEST['name'], 'location', $location_id));
 }
@@ -2256,7 +2256,7 @@ function updateLocation ()
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	global $pageno;
 	$location_id = genericAssertion ('location_id', 'natural');
-	$parent_id = genericAssertion ('parent_id', 'uint0');
+	$parent_id = genericAssertion ('parent_id', 'unsigned');
 	assertStringArg ('name');
 
 	if ($pageno == 'location')
@@ -2313,7 +2313,7 @@ function deleteLocation ()
 function addRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 5));
-	$location_id = genericAssertion ('location_id', 'uint0');
+	$location_id = genericAssertion ('location_id', 'unsigned');
 	assertStringArg ('name');
 	$row_id = commitAddObject ($_REQUEST['name'], NULL, 1561, NULL);
 	if ($location_id)
@@ -2328,7 +2328,7 @@ function updateRow ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
 	$row_id = genericAssertion ('row_id', 'natural');
-	$location_id = genericAssertion ('location_id', 'uint0');
+	$location_id = genericAssertion ('location_id', 'unsigned');
 	assertStringArg ('name');
 
 	commitUpdateObject ($row_id, $_REQUEST['name'], NULL, 'no', NULL, NULL);
@@ -2864,7 +2864,7 @@ function save8021QPorts ()
 				$changes[$tpn] = $before[$from_port];
 		break;
 	}
-	apply8021qChangeRequest ($object_id, $changes, TRUE, genericAssertion ('mutex_rev', 'uint0'));
+	apply8021qChangeRequest ($object_id, $changes, TRUE, genericAssertion ('mutex_rev', 'unsigned'));
 	return buildRedirectURL (NULL, NULL, $extra);
 }
 
@@ -2922,7 +2922,7 @@ function resolve8021QConflicts ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 63, 'ERR1' => 179, 'ERR2' => 109));
 	global $sic, $dbxlink;
-	$mutex_rev = genericAssertion ('mutex_rev', 'uint0'); // counts from 0
+	$mutex_rev = genericAssertion ('mutex_rev', 'unsigned');
 	$nrows = genericAssertion ('nrows', 'natural');
 	$object_id = getBypassValue();
 	// Divide submitted radio buttons into 3 groups:
@@ -3034,7 +3034,7 @@ function cloneVST()
 	setFuncMessages (__FUNCTION__, array ('OK' => 48));
 	$src_vst = spotEntity ('vst', genericAssertion ('from_id', 'natural'));
 	amplifyCell ($src_vst);
-	commitUpdateVSTRules (getBypassValue(), genericAssertion ('mutex_rev', 'uint0'), $src_vst['rules']);
+	commitUpdateVSTRules (getBypassValue(), genericAssertion ('mutex_rev', 'unsigned'), $src_vst['rules']);
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
@@ -3051,7 +3051,7 @@ function updVSTRule()
 	global $port_role_options;
 	$vst_id = getBypassValue();
 	$taglist = genericAssertion ('taglist', 'array0');
-	$mutex_rev = genericAssertion ('mutex_rev', 'uint0');
+	$mutex_rev = genericAssertion ('mutex_rev', 'unsigned');
 	$data = genericAssertion ('template_json', 'json');
 	$rule_no = 0;
 	try
@@ -3740,7 +3740,7 @@ function replenishPatchCable()
 function setPatchCableAmount()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 51));
-	commitSetPatchCableAmount (genericAssertion ('id', 'natural'), genericAssertion ('amount', 'uint0'));
+	commitSetPatchCableAmount (genericAssertion ('id', 'natural'), genericAssertion ('amount', 'unsigned'));
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 

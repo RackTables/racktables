@@ -1782,7 +1782,7 @@ function fixContext ($target = NULL)
 	}
 	elseif (array_key_exists ($pageno, $etype_by_pageno))
 	{
-		// Each page listed in the map above requires one uint argument.
+		// Each page listed in the map above requires one natural argument.
 		$target = spotEntity ($etype_by_pageno[$pageno], getBypassValue());
 		$target_given_tags = $target['etags'];
 		if ($target['realm'] != 'user')

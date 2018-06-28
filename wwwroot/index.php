@@ -159,9 +159,9 @@ try {
 		{
 			renderProgressBar4Image
 			(
-				genericAssertion ('px1', 'uint0'),
-				genericAssertion ('px2', 'uint0'),
-				genericAssertion ('px3', 'uint0')
+				genericAssertion ('px1', 'unsigned'),
+				genericAssertion ('px2', 'unsigned'),
+				genericAssertion ('px3', 'unsigned')
 			);
 		}
 		catch (Exception $e)

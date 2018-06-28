@@ -98,7 +98,7 @@ function renderRackCodeViewer ()
 	else
 	{
 		// Line numbers start from 0 in CodeMirror API and from 1 elsewhere.
-		$lineno = genericAssertion ('line', 'uint') - 1;
+		$lineno = genericAssertion ('line', 'natural') - 1;
 		$scrollcode = "rackCodeMirror.addLineClass (${lineno}, 'wrap', 'border_highlight');\n" .
 			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
 	}
