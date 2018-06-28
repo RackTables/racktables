@@ -3527,21 +3527,6 @@ function buildOpspecColumns ($opspec, $listname)
 					throw new RackTablesError ('opspec translator function is not callable', RackTablesError::INTERNAL);
 				$arg_value = $argspec['translator'] ($arg_value);
 			}
-			elseif // FIXME: remove the old declaration style at a later point
-			(
-				($argspec['assertion'] == 'uint0' && $arg_value == 0) ||
-				($argspec['assertion'] == 'string0' && $arg_value == '')
-			)
-				switch (TRUE)
-				{
-				case !array_key_exists ('if_empty', $argspec): // no action requested
-					break;
-				case $argspec['if_empty'] == 'NULL':
-					$arg_value = NULL;
-					break;
-				default:
-					throw new InvalidArgException ('opspec', '(malformed array structure)', '"if_empty" not recognized');
-				}
 			$columns[$table_colname] = $arg_value;
 			break;
 		case array_key_exists ('fix_argname', $argspec): # fixed column
