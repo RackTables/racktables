@@ -179,11 +179,9 @@ ENDOFTEXT
 ,
 );
 
-// At the moment we assume that for any two releases we can
-// sequentally execute all batches that separate them, and
-// nothing will break. If this changes one day, the function
-// below will have to generate smarter upgrade paths, while
-// the upper layer will remain the same.
+// This function currently implements a convention that to upgrade any release R1
+// to a release R2 (such that R2 > R1) it takes to apply the sequence of batches
+// (R1, R2] to database R1.
 // Returning an empty array means that no upgrade is necessary.
 // Returning NULL indicates an error.
 function getDBUpgradePath ($v1, $v2)

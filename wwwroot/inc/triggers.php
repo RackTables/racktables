@@ -69,9 +69,6 @@ function trigger_liveports ()
 	return '';
 }
 
-// SNMP port finder tab trigger. At the moment we decide on showing it
-// for pristine switches/PDUs only. Once a user has begun
-// filling the data in, we stop showing the tab.
 function trigger_snmpportfinder ()
 {
 

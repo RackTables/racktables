@@ -2143,13 +2143,8 @@ function renderPortsInfo($object_id)
 	echo "</td></tr></table>";
 }
 
-/*
-The following conditions must be met:
-1. We can mount onto free atoms only. This means: if any record for an atom
-already exists in RackSpace, it can't be used for mounting.
-2. We can't unmount from 'W' atoms. Operator should review appropriate comments
-and either delete them before unmounting or refuse to unmount the object.
-*/
+// An object can be mounted onto free atoms only, that is, if any record for an atom
+// already exists in RackSpace, it cannot be used for mounting.
 function renderRackSpaceForObject ($object_id)
 {
 	// Always process occupied racks plus racks chosen by user. First get racks with
@@ -2241,8 +2236,8 @@ function renderRackSpaceForObject ($object_id)
 	finishPortlet();
 	echo "</td>";
 
-	// Right portlet with rendered racks. If this form submit is not final, we have to
-	// reflect the former state of the grid in current form.
+	// Right portlet with rendered racks. If this form submit is not final,
+	// the former state of the grid needs to make it to the current form.
 	echo "<td class=pcright rowspan=2 height='1%'>";
 	startPortlet ('Working copy');
 	includeJQueryUI (false);
@@ -2255,7 +2250,7 @@ function renderRackSpaceForObject ($object_id)
 		// Order is important here: only original allocation is highlighted.
 		highlightObject ($rackData, $object_id);
 		markupAtomGrid ($rackData, 'T');
-		// If we have a form processed, discard user input and show new database
+		// If an HTTP form has been processed, discard user input and show new database
 		// contents.
 		if (!$is_ro && isset ($_REQUEST['rackmulti'][0])) // is an update
 			mergeGridFormToRack ($rackData);
@@ -2315,7 +2310,7 @@ function renderMolecule ($mdata, $object_id)
 		$rackpack[$rack_id][$unit_no][$loclist[$atom]]['state'] = 'T';
 		$rackpack[$rack_id][$unit_no][$loclist[$atom]]['object_id'] = $object_id;
 	}
-	// now we have some racks to render
+	// Now there are some racks to render.
 	foreach ($rackpack as $rackData)
 	{
 		markAllSpans ($rackData);
@@ -5321,7 +5316,7 @@ function showPathAndSearch ($pageno, $tabno)
 	echo '<input type=hidden name=page value=search>';
 	echo "<input type=hidden name=last_page value=$pageno>";
 	echo "<input type=hidden name=last_tab value=$tabno>";
-	// This input will be the first, if we don't add ports or addresses.
+	// This input's implicit tabindex will be the lowest unless there is a form with ports or addresses on the page.
 	echo '<label><u>S</u>earch:<input accesskey="s" type=text name=q size=20 value="';
 	echo array_key_exists ('q', $sic) ? stringForTextInputValue ($sic['q']) : '';
 	echo '"></label></form></div>';

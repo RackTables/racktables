@@ -4614,7 +4614,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		$randomindex = preg_replace ("/^.*ifPhysAddress\.(.+)\$/", '\\1', $oid);
 		$value = trim ($value);
 		// NET-SNMP may return MAC addresses in one of two (?) formats depending on
-		// DISPLAY-HINT internal database. The best we can do about it is to accept both.
+		// DISPLAY-HINT internal database. Try to work around it.
 		// Bug originally reported by Walery Wysotsky against openSUSE 11.0.
 		if (preg_match ('/^string: [0-9a-f]{1,2}(:[0-9a-f]{1,2}){5}/i', $value)) // STRING: x:yy:z:xx:y:zz
 		{
@@ -4632,7 +4632,8 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			continue; // martian format
 		$ifInfo[$randomindex]['ifPhysAddress'] = implode ('', $addrbytes);
 	}
-	// process each interface only once regardless of how many processors we have to run
+	// Zero or more (depending on the way they are defined) processors may yield
+	// RackTables ports for each SNMP port.
 	foreach ($ifInfo as $iface)
 		foreach ($known_switches[$sysObjectID]['processors'] as $processor_name)
 		{

@@ -1126,14 +1126,14 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				$dbxlink->rollBack();
 				return FALSE;
 			}
-			// Here we avoid using ON DUPLICATE KEY UPDATE by first performing DELETE
-			// anyway and then looking for probable need of INSERT.
+			// This code uses an unconditional DELETE followed by a conditional INSERT
+			// rather than ON DUPLICATE KEY UPDATE.
 			usePreparedDeleteBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom));
 			if ($newstate != 'F')
 				usePreparedInsertBlade ('RackSpace', array ('rack_id' => $rack_id, 'unit_no' => $unit_no, 'atom' => $atom, 'state' => $newstate));
 			if ($newstate == 'T' && $object_id != 0)
 			{
-				// At this point we already have a record in RackSpace.
+				// At this point respective row exists in RackSpace and has state set to "T".
 				usePreparedUpdateBlade
 				(
 					'RackSpace',
@@ -3422,7 +3422,7 @@ function deleteVlan()
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
 		showSuccess ("VLAN $vlan_id removed from $n_cleared port(s)");
-	// since there is no strict foreign keys refering VLANDescription, we can delete a row
+	// Since there are no strict foreign keys refering VLANDescription, it is safe just to delete the row.
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
 	return buildRedirectURL ('vlandomain', 'default', array ('vdom_id' => $vdom_id));

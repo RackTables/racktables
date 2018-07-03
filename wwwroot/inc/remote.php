@@ -468,7 +468,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$protocol = 'netcat'; // default is netcat mode
 			$prompt = '^(Login|Username|Password|Please Enter Password): $|^\S+[>#]$'; // set the prompt in case user would like to specify telnet protocol
 			$commands = "skip-page-display\n" . $commands;
-			# using ssh and sshnokey we'll always receive 'Connection to $ip closed by remote host.' upon exit
+			# Using ssh and sshnokey will always result in 'Connection to $ip closed by remote host.' upon exit.
 			# let's hide the warnings
 			$tolerate_remote_errors = TRUE;
 			$hide_warnings = TRUE;
@@ -678,7 +678,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 			$gateway_log = substr ($gateway_log, -MAX_GW_LOGSIZE);
 
 	}
-	// we need to destroy our global link to the resource here.
+	// The global link to the resource needs to be destroyed here.
 	// PHP's proc_close implementation does nothing itself: it only returns
 	// the value saved by the resource destructor. If the resource was not
 	// destroyed (refcnt > 0), the return value is incorrect.
@@ -733,7 +733,7 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 // (i.e. some function in deviceconfig.php)
 function shortenIfName ($if_name, $breed = NULL, $object_id = NULL)
 {
-	// this is a port name we invented in snmp.php, do not translate it
+	// This is a port name invented in snmp.php, do not translate it.
 	if (preg_match ('/^AC-in(-[12])?$/', $if_name))
 		return $if_name;
 
