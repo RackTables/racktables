@@ -4437,7 +4437,7 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 function renderEntityTagsPortlet ($title, $tags, $preselect, $realm)
 {
 	startPortlet ($title);
-	echo  '<a class="toggleTreeMode" style="display:none" href="#"></a>';
+	echo '<a class="toggleTreeMode" style="display:none" href="#"></a>';
 	echo '<table border=0 cellspacing=0 cellpadding=3 align=center class="tagtree">';
 	printOpFormIntro ('saveTags');
 	printTagCheckboxTable ('taglist', $preselect, array(), $tags, $realm);
@@ -6216,7 +6216,7 @@ function switchportInfoJS($object_id)
 	(
 		'link' => array ('op' => 'get_link_status', 'gw' => 'getportstatus'),
 		'conf' => array ('op' => 'get_port_conf', 'gw' => 'get8021q'),
-		'mac' =>  array ('op' => 'get_mac_list', 'gw' => 'getmaclist'),
+		'mac' => array ('op' => 'get_mac_list', 'gw' => 'getmaclist'),
 		'portmac' => array ('op' => 'get_port_mac_list', 'gw' => 'getportmaclist'),
 	);
 	$breed = detectDeviceBreed ($object_id);

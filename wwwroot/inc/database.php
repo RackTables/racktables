@@ -495,7 +495,7 @@ function listCells ($realm, $parent_id = 0)
 				'id' => $tag_id,
 				'tag' => $taglist[$tag_id]['tag'],
 				'parent_id' => $taglist[$tag_id]['parent_id'],
-				'color' =>  $taglist[$tag_id]['color'],
+				'color' => $taglist[$tag_id]['color'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -608,7 +608,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 					'id' => $row['tag_id'],
 					'tag' => $taglist[$row['tag_id']]['tag'],
 					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
-					'color' =>  $taglist[$row['tag_id']]['color'],
+					'color' => $taglist[$row['tag_id']]['color'],
 					'user' => $row['tag_user'],
 					'time' => $row['tag_time'],
 				);
@@ -619,7 +619,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				'id' => $row['tag_id'],
 				'tag' => $taglist[$row['tag_id']]['tag'],
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
-				'color' =>  $taglist[$row['tag_id']]['color'],
+				'color' => $taglist[$row['tag_id']]['color'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
