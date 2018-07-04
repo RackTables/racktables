@@ -1558,7 +1558,7 @@ function renderVSTRulesEditor ($vst_id)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);
 	echo '</table>';
 	echo '<input type=hidden name="template_json">';
-	echo '<center>' . getImageHref ('SAVE', 'Save template', TRUE) . '</center>';
+	echo '<center>' . getImageHREF ('SAVE', 'Save template', TRUE) . '</center>';
 	echo '</form>';
 	if (isset ($_SESSION['vst_edited']))
 	{
