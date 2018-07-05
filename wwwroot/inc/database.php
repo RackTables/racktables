@@ -496,6 +496,7 @@ function listCells ($realm, $parent_id = 0)
 				'tag' => $taglist[$tag_id]['tag'],
 				'parent_id' => $taglist[$tag_id]['parent_id'],
 				'color' => $taglist[$tag_id]['color'],
+				'description' => $taglist[$tag_id]['description'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -609,6 +610,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 					'tag' => $taglist[$row['tag_id']]['tag'],
 					'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 					'color' => $taglist[$row['tag_id']]['color'],
+					'description' => $taglist[$row['tag_id']]['description'],
 					'user' => $row['tag_user'],
 					'time' => $row['tag_time'],
 				);
@@ -620,6 +622,7 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 				'tag' => $taglist[$row['tag_id']]['tag'],
 				'parent_id' => $taglist[$row['tag_id']]['parent_id'],
 				'color' => $taglist[$row['tag_id']]['color'],
+				'description' => $taglist[$row['tag_id']]['description'],
 				'user' => $row['tag_user'],
 				'time' => $row['tag_time'],
 			);
@@ -4271,7 +4274,7 @@ function getTagList ($extra_sql = '')
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color ' .
+		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color, description ' .
 		"FROM TagTree ORDER BY tag ${extra_sql}"
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));

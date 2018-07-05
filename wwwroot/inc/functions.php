@@ -1892,6 +1892,7 @@ function getObjectiveTagTree ($tree, $realm, $preselect)
 				'parent_id' => $taginfo['parent_id'],
 				'refcnt' => $taginfo['refcnt'],
 				'color' => $taginfo['color'],
+				'description' => $taginfo['description'],
 				'kids' => $subsearch
 			);
 		else

@@ -892,7 +892,9 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
-	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . "</td></tr>\n";
+	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . '</td>';
+	echo '<td>' . stringForTD ($taginfo['description'], 64) . '</td>';
+	echo "</tr>\n";
 	foreach ($taginfo['kids'] as $kid)
 		$self ($kid, $level + 1);
 }
@@ -900,6 +902,7 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 function renderTagTree ()
 {
 	echo '<center><table class=tagtree>';
+	echo '<tr><th>name</th><th>description</th></tr>';
 	foreach (getTagTree() as $taginfo)
 		renderTagRowForViewer ($taginfo);
 	echo '</table></center>';
@@ -1035,6 +1038,56 @@ function renderTagTreeEditor ()
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewItemTR ($options);
 	echo '</table>';
+}
+
+function renderTagRowForDescriptions ($taginfo, $level = 0)
+{
+	$self = __FUNCTION__;
+
+	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' trnull' : ' trwarning');
+	if (!count ($taginfo['kids']))
+		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
+	$refc = $taginfo['refcnt']['total'];
+	echo "<tr class='${trclass}'>";
+
+	echo '<td align=left style="padding-left: ' . ($level * 16) . 'px;">';
+	printOpFormIntro ('updTagDescr', array ('id' => $taginfo['id']));
+	if (count ($taginfo['kids']))
+		printImageHREF ('node-expanded-static');
+	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
+	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . "</td>";
+
+	echo '<td>';
+	if ($taginfo['description'] === NULL)
+		echo '&nbsp;';
+	else
+		echo getOpLink
+		(
+			array ('op' => 'updTagDescr', 'id' => $taginfo['id'], 'description' => ''),
+			'',
+			'clear',
+			'Clear value'
+		);
+	echo '</td>';
+
+	echo '<td><input type=text size=64 name=description value="';
+	echo stringForTextInputValue ($taginfo['description'], 0) . '"></td>';
+
+	echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
+	echo '</form>';
+	echo "</tr>\n";
+
+	foreach ($taginfo['kids'] as $kid)
+		$self ($kid, $level + 1);
+}
+
+function renderTagDescriptionsEditor()
+{
+	echo '<br><table cellspacing=0 cellpadding=5 align=center class=widetable>';
+	echo '<tr><th>tag name</th><th>&nbsp;</th><th>tag description</th></tr>';
+	foreach (getTagTree() as $taginfo)
+		renderTagRowForDescriptions ($taginfo);
+	echo '</table></center><br>';
 }
 
 function renderGraphCycleResolver()

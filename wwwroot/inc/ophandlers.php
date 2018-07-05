@@ -359,6 +359,19 @@ $opspec_list['tagtree-edit-destroyTag'] = array
 		array ('url_argname' => 'tag_id', 'table_colname' => 'id', 'assertion' => 'natural'),
 	),
 );
+$opspec_list['tagtree-descriptions-updTagDescr'] = array
+(
+	'table' => 'TagTree',
+	'action' => 'UPDATE',
+	'set_arglist' => array
+	(
+		array ('url_argname' => 'description', 'assertion' => 'string0', 'translator' => 'nullIfEmptyStr'),
+	),
+	'where_arglist' => array
+	(
+		array ('url_argname' => 'id', 'assertion' => 'natural'),
+	),
+);
 $opspec_list['8021q-vstlist-add'] = array
 (
 	'table' => 'VLANSwitchTemplate',

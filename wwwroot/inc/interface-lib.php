@@ -786,12 +786,20 @@ function serializeTags ($chain, $baseurl = '')
 				$title .= "\n";
 			$title .= implode (" &rarr;  ", $parent_info);
 		}
+		$has_descr = array_key_exists ('description', $taginfo) && $taginfo['description'] !== NULL;
+		if ($has_descr)
+			$title .= "\n\n" . stringForOption ($taginfo['description'], 0);
 		if ($title != '')
 			$title = "title='$title'";
 
-		$class = '';
-		if (isset ($taginfo['id']))
-			$class = 'class="' . getTagClassName ($taginfo['id']) . '"';
+		if (! array_key_exists ('id', $taginfo))
+			$class = '';
+		else
+		{
+			$class = $has_descr ? 'tag-descr ' : '';
+			$class .= getTagClassName ($taginfo['id']);
+			$class = "class='${class}'";
+		}
 
 		$href = '';
 		if ($baseurl == '')

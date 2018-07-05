@@ -4406,6 +4406,8 @@ function buildTagCheckboxRows ($inputname, $preselect, $neg_preselect, $taginfo,
 		$ret['input_extraattrs'] = 'disabled';
 		$ret['tr_class'] .= (array_key_exists ('kidc', $taginfo) && $taginfo['kidc'] == 0) ? ' trwarning' : ' trnull';
 	}
+	if (array_key_exists ('description', $taginfo) && $taginfo['description'] != '')
+		$ret['description'] = $taginfo['description'];
 
 	if ($refcnt_realm != '' && isset ($taginfo['refcnt'][$refcnt_realm]))
 		$ret['text_refcnt'] = $taginfo['refcnt'][$refcnt_realm];
@@ -4427,7 +4429,14 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 			echo "<label><input type=checkbox class='${row['input_class']}' name='${row['input_name']}[]' value='${row['input_value']}'";
 			if (array_key_exists ('input_extraattrs', $row))
 				echo ' ' . $row['input_extraattrs'];
-			echo '> <span class="' . $tag_class . '">' . $row['text_tagname'] . '</span>';
+			if (! array_key_exists ('description', $row))
+				$tag_extraattrs = '';
+			else
+			{
+				$tag_extraattrs = 'title="' . stringForOption ($row['description'], 0) . '"';
+				$tag_class .= ' tag-descr';
+			}
+			echo "> <span class='${tag_class}' ${tag_extraattrs}>${row['text_tagname']}</span>";
 			if (array_key_exists ('text_refcnt', $row))
 				echo " <i>(${row['text_refcnt']})</i>";
 			echo '</label></td></tr>';
