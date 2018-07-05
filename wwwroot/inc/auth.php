@@ -12,7 +12,7 @@ be working with only database.php file included.
 
 */
 
-// This function ensures that we don't continue without a legitimate
+// This function ensures that the web-interface does not continue without legitimate
 // username and password (also make sure that both are present, this
 // is especially useful for LDAP auth code to not deceive itself with
 // anonymous binding). It also initializes $remote_* and $*_tags vars.
@@ -540,7 +540,8 @@ function queryLDAPServer ($username, $password)
 		foreach ($LDAP_options['options'] as $opt_code => $opt_value)
 			ldap_set_option ($connect, $opt_code, $opt_value);
 
-	// Decide on the username we will actually authenticate for.
+	// Build the server's version of the user's username for ldap_bind(). This may
+	// involve an anonymous (or a non-anonymous, with another ldap_bind()) LDAP search.
 	if (isset ($LDAP_options['domain']) && $LDAP_options['domain'] != '')
 		$auth_user_name = $username . "@" . $LDAP_options['domain'];
 	elseif

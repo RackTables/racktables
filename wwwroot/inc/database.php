@@ -1650,7 +1650,7 @@ function getRackspaceHistory ()
 function getOperationMolecules ($op_id)
 {
 	$result = usePreparedSelectBlade ('SELECT old_molecule_id, new_molecule_id FROM MountOperation WHERE id = ?', array ($op_id));
-	// We expect one row.
+	// The result is a single row.
 	$row = $result->fetch (PDO::FETCH_ASSOC);
 	return array ($row['old_molecule_id'], $row['new_molecule_id']);
 }
@@ -3568,8 +3568,6 @@ function commitDeleteChapter ($chapter_no)
 	usePreparedDeleteBlade ('Chapter', array ('id' => $chapter_no, 'sticky' => 'no'));
 }
 
-// This is a dictionary accessor. We perform link rendering, so the user sees
-// nice <select> drop-downs.
 function readChapter ($chapter_id, $style = '')
 {
 	$result = usePreparedSelectBlade ('SELECT id FROM Chapter WHERE id = ?', array ($chapter_id));
@@ -3593,7 +3591,8 @@ function readChapter ($chapter_id, $style = '')
 		}
 		$chapter[$row['dict_key']] = $value;
 	}
-	// SQL ORDER BY had no sense, because we need to sort after link rendering, not before.
+	// SQL ORDER BY would make no sense in the query above because the rows need
+	// to be sorted after the wiki link parsing, not before.
 	// Try to sort after the parsing in the same way as ORDER BY would do.
 	asort ($chapter, SORT_STRING | SORT_FLAG_CASE);
 	return $chapter;
@@ -4924,7 +4923,7 @@ function acquireLDAPCache ($username, $max_tries = 2)
 	if ($row = fetchLDAPCacheRow ($username, 'FOR UPDATE'))
 		return $row;
 
-	// maybe another instance deleted our row before we've locked it. Try again
+	// Maybe another instance deleted the row before this instance had locked it. Try again.
 	if ($max_tries > 0)
 		return $self ($username, $max_tries - 1);
 
@@ -6049,7 +6048,7 @@ function getDBName()
 }
 
 // Sets exclusive server-global named lock.
-// Always returns TRUE if no exceptions were thrown
+// Returns TRUE or throws an exceptions.
 // A lock is implicitly released on any subsequent call to setDBMutex in the same connection
 function setDBMutex ($name, $timeout = 5)
 {

@@ -613,8 +613,8 @@ function rectHeight ($rackData, $startRow, $template_idx)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			// At least one value in template is TRUE, but the following block
-			// can meet 'skipped' atoms. Let's ensure we have something after processing
-			// the first row.
+			// can meet 'skipped' atoms. Let's ensure there is at least some result
+			// after processing the first row.
 			if ($template[$template_idx][$locidx])
 			{
 				if
@@ -667,8 +667,8 @@ function markSpan (&$rackData, $startRow, $maxheight, $template_idx)
 }
 
 // This function sets rowspan/solspan/skipped atom attributes for renderRack()
-// What we actually have to do is to find _all_ possible rectangles for each unit
-// and then select the widest of those with the maximal square.
+// by finding _all_ possible rectangles for each rack unit and then selecting
+// the widest of those with the maximal square.
 function markAllSpans (&$rackData)
 {
 	for ($i = $rackData['height']; $i > 0; $i--)
@@ -696,7 +696,7 @@ function markBestSpan (&$rackData, $i)
 	return TRUE;
 }
 
-// We can mount 'F' atoms and unmount our own 'T' atoms.
+// OK to mount to 'F' atoms and unmount from the current object's 'T' atoms.
 function applyObjectMountMask (&$rackData, $object_id)
 {
 	for ($unit_no = $rackData['height']; $unit_no > 0; $unit_no--)
@@ -791,10 +791,9 @@ function markupAtomGrid (&$data, $checked_state)
 		}
 }
 
-// This function is almost a clone of processGridForm(), but doesn't save anything to database
-// Return value is the changed rack data.
-// Here we assume that correct filter has already been applied, so we just
-// set or unset checkbox inputs w/o changing atom state.
+// This function is almost a clone of processGridForm(), except it does not modify
+// the database. This code assumes that a correct filter has already been applied,
+// hence it just sets or unsets checkbox inputs and leaves the atom state intact.
 function mergeGridFormToRack (&$rackData)
 {
 	$rack_id = $rackData['id'];
@@ -1649,7 +1648,7 @@ function getImplicitTags ($oldtags)
 	$tmp = array();
 	foreach ($oldtags as $taginfo)
 		$tmp = array_merge ($tmp, $taglist[$taginfo['id']]['trace']);
-	// don't call array_unique here, it is in the function we will call now
+	// The call below already includes a call to array_unique().
 	return buildTagChainFromIds ($tmp);
 }
 
@@ -1750,7 +1749,7 @@ function redirectIfNecessary ()
 	// store the last visited tab name
 	if (isset ($_REQUEST['tab']))
 		$_SESSION['RTLT'][$pageno] = array ('tabname' => $tabno, 'time' => time());
-	session_commit(); // if we are continuing to run, unlock session data
+	session_commit(); // There was no redirection, unlock the session data.
 }
 
 function prepareNavigation()
@@ -1774,9 +1773,9 @@ function fixContext ($target = NULL)
 	if ($target !== NULL)
 	{
 		$target_given_tags = $target['etags'];
-		// Don't reset autochain, because auth procedures could push stuff there in.
-		// Another important point is to ignore 'user' realm, so we don't infuse effective
-		// context with autotags of the displayed account.
+		// Do not reset the autochain as it may have items generated during the authentication step.
+		// Ignore the "user" realm to keep the displayed user account autotags out of the
+		// effective security context.
 		if ($target['realm'] != 'user')
 			$auto_tags = array_merge ($auto_tags, $target['atags']);
 	}
@@ -2010,7 +2009,8 @@ function getCellFilter ()
 	global $pageno;
 	$andor_used = FALSE;
 	startSession();
-	// if the page is submitted we get an andor value so we know they are trying to start a new filter or clearing the existing one.
+	// On the form submit "andor" appears on the request and means the user is
+	// trying to start a new filter or clear the existing one.
 	if (isset($_REQUEST['andor']))
 		$andor_used = TRUE;
 	if ($andor_used || array_key_exists ('clear-cf', $_REQUEST))
@@ -3177,9 +3177,9 @@ function buildPredicateTable (&$rackCode)
 	// make permitted() calls faster.
 	$rackCode = $new_rackCode;
 
-	// Now we have predicate table filled in with the latest definitions of each
-	// particular predicate met. This isn't as chik, as on-the-fly predicate
-	// overloading during allow/deny scan, but quite sufficient for this task.
+	// The latest (and the only, as the interpreter must not allow to redefine predicates)
+	// definition of every predicate is now in the predicate table, which will remain
+	// intact until the end of run-time.
 	return $ret;
 }
 
@@ -3857,12 +3857,13 @@ function generate8021QDeployOps ($vswitch, $device_vlanlist, $before, $changes)
 	// 2. all "current" non-alien allowed VLANs of those ports that are left
 	//    intact (regardless if a VLAN exists in VLAN domain, but looking,
 	//    if it is present in device's own VLAN table)
-	// 3. all "new" allowed VLANs of those ports that we do "push" now
+	// 3. all "new" allowed VLANs of the ports to be "pushed" now
 	// Like for old_managed_vlans, a VLANs is never listed, only if it
 	// exists and belongs to "alien" type.
 	$new_managed_vlans = array();
-	// We need to count down the number of ports still using specific vlan
-	// in order to delete it from device as soon as vlan will be removed from the last port
+	// It is necessary to count down the number of ports still using a specific VLAN
+	// in order to unconfigure the VLAN on the switch as soon as the VLAN membership
+	// is removed from its last port.
 	// This array tracks port count:
 	//  * keys are vlan_id's;
 	//  * values are the number of changed ports that were using this vlan in old configuration
@@ -6115,7 +6116,7 @@ function registerHook ($hook_name, $callback, $method = 'after')
 		array_push ($hooks_stack[$hook_name], $hook[$hook_name]);
 	$hook[$hook_name] = 'universalHookHandler';
 
-	// if we are trying to register on the built-in function, push it to the stack
+	// If the hook name is a built-in function, the function needs to be the first on the stack.
 	if (empty ($hooks_stack[$hook_name]) && is_callable ($hook_name))
 		array_push ($hooks_stack[$hook_name], $hook_name);
 

@@ -122,8 +122,8 @@ if (! isset ($script_mode) || $script_mode !== TRUE)
 	// even given/implicit tags. It also sets remote_username and remote_displayname.
 	authenticate();
 	// Authentication passed.
-	// Note that we don't perform autorization here, so each 1st level page
-	// has to do it in its way, e.g. by calling authorize() after fixContext().
+	// Note that authorization does not happen here as every CLI script, HTTP module and
+	// page does it differently, e.g. by calling authorize() after fixContext().
 }
 elseif (! isset ($remote_username))
 {

@@ -321,7 +321,7 @@ class RackCodeParser
 					'op' => 'clear',
 					'lineno' => $lineno,
 				);
-			elseif (! $list) // we need at least one CTXMOD
+			elseif (! $list) // a CTXMODLIST consists of at least one CTXMOD
 				throw new RCParserError ("expecting CTXMOD");
 			else
 				break;

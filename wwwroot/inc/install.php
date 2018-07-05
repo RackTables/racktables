@@ -90,11 +90,11 @@ function not_already_installed()
 	}
 }
 
-// Check that we can write to configuration file.
-// If so, ask for DB connection paramaters and test
-// the connection. Neither save the parameters nor allow
-// going further until we succeed with the given
-// credentials.
+// Test that the web-server can write to the configuration file.
+// If so, prompt for the DB connection parameters and test
+// the connection. Do not save the parameters into the configuration
+// file until the database connection succeeds. Do not proceed to the
+// next steps until a working configuration file is in place.
 function init_config ()
 {
 	function print_form

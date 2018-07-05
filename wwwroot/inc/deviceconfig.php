@@ -878,7 +878,7 @@ function vrp55Read8021QConfig ($input)
 		// VRP is known to filter off clauses that don't make sense for
 		// current link-type. This way any interface section should contain
 		// only one kind of "set native" clause (but if this constraint breaks,
-		// we get a problem).
+		// there is a problem).
 		case preg_match ('/^ port (default|trunk pvid) vlan ([[:digit:]]+)$/', $line, $matches):
 			$ret['current']['native'] = $matches[2];
 			break;
@@ -1181,9 +1181,9 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'set mode':
 			if ($cmd['arg2'] == 'trunk')
 			{
-				// some NX-OS platforms ask for confirmation if user tries to
-				// overwrite allowed vlan list. Hence, we need to use
-				// the differentiative remove syntax here
+				// Some NX-OS platforms interactively ask for a confirmation if the CLI user
+				// is trying to overwrite the allowed VLAN list for a port. The differentiative
+				// remove syntax works around this problem.
 				$ret .= "interface ${cmd['arg1']}\n";
 				$ret .= "switchport trunk encapsulation dot1q\n";
 				$ret .= "switchport mode ${cmd['arg2']}\n";
