@@ -783,7 +783,7 @@ function serializeTags ($chain, $baseurl = '')
 		}
 		$has_descr = array_key_exists ('description', $taginfo) && $taginfo['description'] !== NULL;
 		if ($has_descr)
-			$title .= "\n\n" . stringForOption ($taginfo['description'], 0);
+			$title .= ($title == '' ? '' : "\n\n") . stringForOption ($taginfo['description'], 0);
 		if ($title != '')
 			$title = "title='$title'";
 
