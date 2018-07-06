@@ -467,9 +467,6 @@ function escapeString ($value, $do_db_escape = FALSE)
 function transformRequestData()
 {
 	global $sic;
-	// Magic quotes feature is deprecated, but just in case the local system
-	// still has it activated, reverse its effect.
-	$do_magic_quotes = function_exists ('get_magic_quotes_gpc') && get_magic_quotes_gpc();
 	$seen_keys = array();
 
 	// Escape all globals before using and keep a copy of the original values.
@@ -483,8 +480,6 @@ function transformRequestData()
 		else
 		{
 			$value = dos2unix ($value);
-			if ($do_magic_quotes)
-				$value = stripslashes ($value);
 			$_REQUEST[$key] = escapeString ($value);
 		}
 		$sic[$key] = $value;
