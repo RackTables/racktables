@@ -2823,8 +2823,6 @@ function save8021QPorts ()
 	global $sic;
 	$object_id = getBypassValue();
 	$form_mode = genericAssertion ('form_mode', 'string');
-	if ($form_mode != 'save' && $form_mode != 'duplicate')
-		throw new InvalidRequestArgException ('form_mode', $form_mode);
 	$extra = array();
 
 	// prepare the $changes array
@@ -2839,19 +2837,21 @@ function save8021QPorts ()
 		{
 			$portname = assertStringArg ('pn_' . $i);
 			$portmode = assertStringArg ('pm_' . $i);
-			// An access port only generates form input for its native VLAN,
-			// which we derive allowed VLAN list from.
 			$native = isset ($sic['pnv_' . $i]) ? $sic['pnv_' . $i] : 0;
 			switch ($portmode)
 			{
 			case 'trunk':
 #				assertArrayArg ('pav_' . $i);
+				if ($native != 0)
+					genericAssertion ('pnv_' . $i, 'vlan1');
 				$allowed = isset ($sic['pav_' . $i]) ? $sic['pav_' . $i] : array();
 				break;
 			case 'access':
 				if ($native == 'same')
 					continue 2;
 				genericAssertion ('pnv_' . $i, 'vlan1');
+				// An access port only generates a form input for its native VLAN,
+				// the allowed VLAN list has to be derived.
 				$allowed = array ($native);
 				break;
 			default:
@@ -2876,6 +2876,8 @@ function save8021QPorts ()
 			elseif ($tpn != $from_port)
 				$changes[$tpn] = $before[$from_port];
 		break;
+	default:
+		throw new InvalidRequestArgException ('form_mode', $form_mode);
 	}
 	apply8021qChangeRequest ($object_id, $changes, TRUE, genericAssertion ('mutex_rev', 'unsigned'));
 	return buildRedirectURL (NULL, NULL, $extra);
