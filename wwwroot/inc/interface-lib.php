@@ -472,7 +472,7 @@ function transformRequestData()
 	$do_magic_quotes = function_exists ('get_magic_quotes_gpc') && get_magic_quotes_gpc();
 	$seen_keys = array();
 
-	// Escape any globals before we ever try to use them, but keep a copy of originals.
+	// Escape all globals before using and keep a copy of the original values.
 	$sic = array();
 	// walk through merged GET and POST instead of REQUEST array because it
 	// can contain cookies with data that could not be decoded from UTF-8

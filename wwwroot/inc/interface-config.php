@@ -617,7 +617,7 @@ function renderDictionary ()
 	echo '</ul>';
 }
 
-// We don't allow to rename/delete a sticky chapter and we don't allow
+// Do not allow to rename/delete a sticky chapter and do not allow
 // to delete a non-empty chapter.
 function renderChaptersEditor ()
 {

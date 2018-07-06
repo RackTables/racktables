@@ -882,7 +882,7 @@ function renderVLANInfo ($vlan_ck)
 		$confports += getVLANConfiguredPorts ($grouped_ck);
 	if ($vlan['domain_group_id'])
 	{
-		// we should find configured port on master's members
+		// Find configured port on master's members
 		// even if master domain itself does not have such VLAN
 		$master_ck = $vlan['domain_group_id'] . '-' . $vlan['vlan_id'];
 		if (! isset ($group_ck_list[$master_ck]))
@@ -1178,7 +1178,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 	}
 
 	switchportInfoJS ($vswitch['object_id']); // load JS code to make portnames interactive
-	// initialize one of three popups: we've got data already
+	// Initialize one of the three popups: the data is ready.
 	$port_config = addslashes (json_encode (formatPortConfigHints ($vswitch['object_id'], $R)));
 	addJS (<<<'END'
 $(document).ready(function(){
@@ -1198,7 +1198,7 @@ function checkColumnOfRadios8021Q (prefix, numRows, suffix)
 		if (document.getElementById(elemId) == null) // no radios on this row
 			continue;
 		// Not all radios are present on each form. Hence each time
-		// we are requested to switch from left to right (or vice versa)
+		// the user wants to flip all rows from left to right (or vice versa)
 		// it is better to half-complete the request by setting to the
 		// middle position rather than to fail completely due to missing
 		// target input.
