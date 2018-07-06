@@ -613,7 +613,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 			if (nativeVlanChangePermitted ($port_name, $from, $to, 'save8021QConfig'))
 				$vlanpermissions[$from][] = $to;
 	}
-	$ret = "<input type=hidden name=pn_${nports} value=${port_name}>";
+	$ret = "<input type=hidden name=pn_${nports} value='${port_name}'>";
 	$ret .= "<input type=hidden name=pm_${nports} value=access>";
 	$options = array();
 	// Offer only options that are listed in domain and fit into VST.
