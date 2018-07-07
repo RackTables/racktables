@@ -939,13 +939,24 @@ function addIPv4Prefix ()
 {
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv4Prefix
-	(
-		genericAssertion ('range', 'string'),
-		genericAssertion ('name', 'string0'),
-		isCheckSet ('is_connected'),
-		genericAssertion ('taglist', 'array0')
-	);
+	try
+	{
+		$net_id = createIPv4Prefix
+		(
+			genericAssertion ('range', 'string'),
+			genericAssertion ('name', 'string0'),
+			isCheckSet ('is_connected'),
+			genericAssertion ('taglist', 'array0')
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	$net_cell = spotEntity ('ipv4net', $net_id);
 	if (isset ($vlan_ck))
 	{
@@ -961,13 +972,24 @@ function addIPv6Prefix ()
 {
 	global $sic;
 	$vlan_ck = empty ($sic['vlan_ck']) ? NULL : genericAssertion ('vlan_ck', 'uint-vlan1');
-	$net_id = createIPv6Prefix
-	(
-		genericAssertion ('range', 'string'),
-		genericAssertion ('name', 'string0'),
-		isCheckSet ('is_connected'),
-		genericAssertion ('taglist', 'array0')
-	);
+	try
+	{
+		$net_id = createIPv6Prefix
+		(
+			genericAssertion ('range', 'string'),
+			genericAssertion ('name', 'string0'),
+			isCheckSet ('is_connected'),
+			genericAssertion ('taglist', 'array0')
+		);
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
+	catch (InvalidArgException $iae)
+	{
+		throw $iae->newIRAE();
+	}
 	$net_cell = spotEntity ('ipv6net', $net_id);
 	if (isset ($vlan_ck))
 	{

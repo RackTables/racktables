@@ -4451,7 +4451,7 @@ function createIPv4Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	// $range is in x.x.x.x/x format, split into ip/mask vars
 	$rangeArray = explode('/', $range);
 	if (count ($rangeArray) != 2)
-		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv4 prefix');
+		throw new InvalidArgException ('range', $range, 'Invalid IPv4 prefix');
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 	$forbidden_ranges = array
@@ -4493,7 +4493,7 @@ function createIPv6Prefix ($range = '', $name = '', $is_connected = FALSE, $tagl
 	// $range is in aaa0:b::c:d/x format, split into ip/mask vars
 	$rangeArray = explode ('/', $range);
 	if (count ($rangeArray) != 2)
-		throw new InvalidRequestArgException ('range', $range, 'Invalid IPv6 prefix');
+		throw new InvalidArgException ('range', $range, 'Invalid IPv6 prefix');
 	$ip = $rangeArray[0];
 	$mask = $rangeArray[1];
 	$net = constructIPRange (ip6_parse ($ip), $mask);
