@@ -166,11 +166,10 @@ td.tagbox.selected-inverted {
 td.tagbox.inverted {
 	text-decoration: line-through;
 }
-a.tag-descr {
+span.tag-descr, a.tag-descr {
 	border-bottom: 1px dashed;
 }
 span.tag-descr {
-	border-bottom: 1px dashed;
 	cursor: help;
 }
 
