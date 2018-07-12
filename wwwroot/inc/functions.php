@@ -5646,13 +5646,13 @@ function formatAgeSeconds ($seconds)
 		case $seconds < 86400 * 30.4375 * 4 :
 			$mon = intval ($seconds / 86400 / 30.4375);
 			$days = round (($seconds - $mon * 86400 * 30.4375) / 86400);
-			return ($days ? "${mon}m ${days}d" : "${mon}m") . ' ago';
+			return ($days ? "${mon}mo ${days}d" : "${mon}mo") . ' ago';
 		case $seconds < 365.25 * 86400:
-			return (round ($seconds / 86400 / 30.4375) . 'm') . ' ago';
+			return (round ($seconds / 86400 / 30.4375) . 'mo') . ' ago';
 		case $seconds < 2 * 365.25 * 86400:
 			$yrs = intval ($seconds / 86400 / 365.25);
 			$mon = round (($seconds - $yrs * 86400 * 365.25) / 86400 / 30.4375);
-			return ($mon ? "${yrs}y ${mon}m" : "${yrs}y") . ' ago';
+			return ($mon ? "${yrs}y ${mon}mo" : "${yrs}y") . ' ago';
 		default:
 			return (round ($seconds / 86400 / 365.25) . 'y') . ' ago';
 	}
