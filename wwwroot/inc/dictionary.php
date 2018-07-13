@@ -34,7 +34,7 @@ function reloadDictionary ($rows_per_query = 25)
 		}
 	}
 	if (count ($vlist))
-		$ret[] = buildIinsert ($vlist);
+		$ret[] = buildInsert ($vlist);
 	return $ret;
 }
 
