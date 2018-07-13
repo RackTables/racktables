@@ -15,7 +15,9 @@ function reloadDictionary ($rows_per_query = 25)
 		return $ret;
 	}
 
-	if (! isNaturalNumber ($rows_per_query))
+	// isNaturalNumber() depends on functions.php, which is not involved in an upgrade (see index.php).
+	$rows_per_query = (int) $rows_per_query;
+	if ($rows_per_query < 1)
 		throw new InvalidArgException ('rows_per_query', $rows_per_query, 'must be a natural number');
 	// Not only update existing stuff, but make sure all obsolete records are gone.
 	$ret = array ("DELETE FROM Dictionary WHERE dict_key BETWEEN 1 AND 49999");
