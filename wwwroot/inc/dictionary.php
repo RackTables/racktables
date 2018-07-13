@@ -4,32 +4,35 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-function reloadDictionary ($release = NULL)
+function reloadDictionary ($rows_per_query = 25)
 {
 	global $dictionary;
+
+	function buildInsert ($vlist)
+	{
+		$ret= 'INSERT INTO Dictionary (dict_key, chapter_id, dict_value, dict_sticky) VALUES ';
+		$ret .= implode (', ', $vlist);
+		return $ret;
+	}
+
+	if (! isNaturalNumber ($rows_per_query))
+		throw new InvalidArgException ('rows_per_query', $rows_per_query, 'must be a natural number');
 	// Not only update existing stuff, but make sure all obsolete records are gone.
 	$ret = array ("DELETE FROM Dictionary WHERE dict_key BETWEEN 1 AND 49999");
-	$buffered = 0;
+	$vlist = array();
 	# Iterating through 50K possible valid indices is way too slow in PHP and
 	# is likely to hit the default execution time limit of 30 seconds.
 	foreach ($dictionary as $dict_key => $record)
 	{
-		if (! $buffered)
+		$vlist[] = "(${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
+		if (count ($vlist) == $rows_per_query)
 		{
-			$insert = 'INSERT INTO Dictionary (dict_key, chapter_id, dict_value, dict_sticky) VALUES (' .
-				"${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
-			$buffered = 1;
-			continue;
-		}
-		$insert .= ", (${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
-		if (++$buffered == 25)
-		{
-			$ret[] = $insert;
-			$buffered = 0;
+			$ret[] = buildInsert ($vlist);
+			$vlist = array();
 		}
 	}
-	if ($buffered)
-		$ret[] = $insert;
+	if (count ($vlist))
+		$ret[] = buildIinsert ($vlist);
 	return $ret;
 }
 
