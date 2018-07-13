@@ -2740,7 +2740,8 @@ function ros11Read8021QPorts (&$work, $line)
 	}
 }
 
-function foundryReadInterfaceStatus ($text) {
+function foundryReadInterfaceStatus ($text)
+{
 	$result = array();
 	$state = 'headerSearch';
 	foreach (explode ("\n", $text) as $line)

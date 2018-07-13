@@ -1152,9 +1152,8 @@ function printTagsPickerUl ($input_name, $preselect = NULL)
 	}
 	usort ($preselect, 'cmpTags');
 	$preselect_hidden = "";
-	foreach ($preselect as $value){
+	foreach ($preselect as $value)
 		$preselect_hidden .= "<input type=hidden name=" . $input_name . "[] value=" . $value['id'] . ">";
-	}
 	echo $preselect_hidden; # print preselected tags id that used in case javascript problems
 	echo "<ul data-tagit='yes' data-tagit-valuename='" . $input_name . "' data-tagit-preselect='" . json_encode($preselect) . "' class='tagit-vertical'></ul>";
 }
