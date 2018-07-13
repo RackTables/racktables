@@ -1146,7 +1146,10 @@ function printTagsPickerUl ($input_name, $preselect = NULL)
 	if ($preselect === NULL)
 		$preselect = $target_given_tags;
 	foreach (array_keys ($preselect) as $key)
+	{
 		$preselect[$key]['time_parsed'] = formatAge ($preselect[$key]['time']); # readable time format
+		$preselect[$key]['description'] = stringForTextarea ($preselect[$key]['description']);
+	}
 	usort ($preselect, 'cmpTags');
 	$preselect_hidden = "";
 	foreach ($preselect as $value){
