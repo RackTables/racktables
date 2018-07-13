@@ -6,7 +6,7 @@
 # licensing information.
 
 $script_mode = TRUE;
-require 'inc/init.php';
+require_once 'inc/init.php';
 
 function usage ($rc)
 {

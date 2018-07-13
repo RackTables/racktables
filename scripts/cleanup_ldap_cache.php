@@ -12,7 +12,7 @@
 // this script from a cron job (say, once a day) to achieve the same effect.
 
 $script_mode = TRUE;
-require 'inc/init.php';
+require_once 'inc/init.php';
 
 if ($user_auth_src == 'ldap')
 {
