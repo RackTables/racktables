@@ -3731,13 +3731,13 @@ function buildVLANFilter ($role, $string)
 	switch ($role)
 	{
 	case 'access': // 1-4094
+	case 'anymode':
 		$min = VLAN_MIN_ID;
 		$max = VLAN_MAX_ID;
 		break;
 	case 'trunk': // 2-4094
 	case 'uplink':
 	case 'downlink':
-	case 'anymode':
 		$min = VLAN_MIN_ID + 1;
 		$max = VLAN_MAX_ID;
 		break;
