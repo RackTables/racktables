@@ -3891,6 +3891,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'CE6850-48S4Q-EI: 48 SFP+ slots + 4 QSFP+ slots',
 		'processors' => array ('hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
 	),
+	'2011.2.239.49' => array
+	(
+		'dict_key' => 3716,
+		'text' => 'CE6865-48S8CQ-EI: 48 SFP28 slots + 8 QSFP28 slots',
+		'processors' => array ('hce-any-SFP28', 'hce-any-QSFP28-split', 'hce-any-QSFP28', 'quidway-mgmt'),
+	),
 	'2011.2.239.32' => array
 	(
 		'dict_key' => 1772,
