@@ -1313,6 +1313,33 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "INSERT INTO Chapter (`id`, `sticky`, `name`) VALUES (39,'no','UPS models')";
 			$query[] = "INSERT INTO AttributeMap (`objtype_id`,`attr_id`,`chapter_id`) VALUES (12,2,39)"; // UPS (UPS models) -> HW type
 			$query[] = "ALTER TABLE TagTree ADD COLUMN description char(255) DEFAULT NULL AFTER color";
+
+			// new iif_type SFP28
+			$query[] = "INSERT INTO PortInnerInterface VALUES (16, 'SFP28')";
+			$query[] = "INSERT INTO PortOuterInterface VALUES
+				(1592, 'empty SFP28'),
+				(1651, '25GBase-KR'),
+				(1652, '25GBase-T'),
+				(1653, '25GBase-CR'),
+				(1654, '25GBase-SR'),
+				(1655, '25GBase-LR'),
+				(1656, '25Gbase-ER')";
+			$query[] = "INSERT INTO PortInterfaceCompat VALUES
+				(16,1592),(16,1651),(16,1653),(16,1654),(16,1655),(16,1656),
+				(16,30),(16,35),(16,36),(16,37),(16,38),(16,39),(16,40)";
+			$query[] = "INSERT INTO PortCompat VALUES
+				(1592, 1592),
+				(1592, 1084),
+				(1084, 1592),
+				(1651, 1651),
+				(1652, 1652),
+				(1653, 1653),
+				(1654, 1654),
+				(1655, 1655),
+				(1656, 1656)";
+			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 16=1592')
+				WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '16=')";
+
 			// insert new queries here ^^^
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
 			break;
