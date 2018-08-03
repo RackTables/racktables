@@ -1401,6 +1401,15 @@ $iftable_processors['hce-any-SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['hce-any-SFP28'] = array
+(
+	'pattern' => '@^25GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => '25ge\\1\\2',
+	'dict_key' => '16-1592',
+	'label' => '\\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['hce-any-QSFP-split'] = array
 (
 	'pattern' => '@^40GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+):([[:digit:]]+)$@',
@@ -1419,12 +1428,11 @@ $iftable_processors['hce-any-QSFP'] = array
 	'try_next_proc' => FALSE,
 );
 
-// FIXME: use SFP28:25GbE instead of SFP+:10GbE
 $iftable_processors['hce-any-QSFP28-split'] = array
 (
 	'pattern' => '@^100GE([[:digit:]]+/[[:digit:]]+/)([[:digit:]]+):([[:digit:]]+)$@',
 	'replacement' => '100ge\\1\\2:\\3',
-	'dict_key' => '9-1084',
+	'dict_key' => '16-1592',
 	'label' => '\\2:\\3',
 	'try_next_proc' => FALSE,
 );
@@ -3882,6 +3890,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1772,
 		'text' => 'CE6850-48S4Q-EI: 48 SFP+ slots + 4 QSFP+ slots',
 		'processors' => array ('hce-any-SFP', 'hce-any-QSFP', 'quidway-mgmt'),
+	),
+	'2011.2.239.49' => array
+	(
+		'dict_key' => 3716,
+		'text' => 'CE6865-48S8CQ-EI: 48 SFP28 slots + 8 QSFP28 slots',
+		'processors' => array ('hce-any-SFP28', 'hce-any-QSFP28-split', 'hce-any-QSFP28', 'quidway-mgmt'),
 	),
 	'2011.2.239.32' => array
 	(
