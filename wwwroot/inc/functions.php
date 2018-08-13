@@ -38,6 +38,7 @@ define ('CHAP_OBJTYPE', 1);
 define ('RE_L2_IFCFG', '/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/'); // most ifconfigs
 define ('RE_L2_IFCFG_SUNOS', '/^[0-9A-F]{1,2}(:[0-9A-F]{1,2}){5}$/'); // SunOS ifconfig
 define ('RE_L2_CISCO', '/^[0-9A-F]{4}(\.[0-9A-F]{4}){2}$/');
+define ('RE_L2_HP', '/^[0-9A-F]{6}-[0-9A-F]{6}$/');
 define ('RE_L2_HUAWEI', '/^[0-9A-F]{4}(-[0-9A-F]{4}){2}$/');
 define ('RE_L2_SOLID', '/^[0-9A-F]{12}$/i');
 define ('RE_L2_IPCFG', '/^[0-9A-F]{2}(-[0-9A-F]{2}){5}$/');
@@ -1041,6 +1042,9 @@ function l2addressForDatabase ($string)
 			break;
 		case preg_match (RE_L2_CISCO, $string):
 			$ret = str_replace ('.', '', $string);
+			break;
+		case preg_match (RE_L2_HP, $string):
+			$ret = str_replace ('-', '', $string);
 			break;
 		case preg_match (RE_L2_HUAWEI, $string):
 			$ret = str_replace ('-', '', $string);

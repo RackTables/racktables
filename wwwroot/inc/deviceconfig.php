@@ -4,6 +4,11 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
+// functions for HP Procurve switches (N.11 OS)
+require_once 'breed-hpprocurveN1178.php';
+// functions for Cisco IOS 15 switches
+require_once 'breed-ios15.php';
+
 // Read provided output of "show cdp neighbors detail" command and
 // return a list of records with (translated) local port name,
 // remote device name and (translated) remote port name.

@@ -3614,6 +3614,7 @@ $dictionary = array
 	3717 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R320'),
 	3718 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R330'),
 	3719 => array ('chapter_id' => 11, 'dict_value' => 'Dell PowerEdge%GPASS%R740xd'),
+	3720 => array ('chapter_id' => 14, 'dict_value' => 'HP Procurve OS N.11.78'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT

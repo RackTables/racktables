@@ -118,6 +118,25 @@ $breedfunc = array
 	'iosxr4-getportstatus-main'=> 'iosxr4ReadInterfaceStatus',
 	'ucs-xlatepushq-main'      => 'ucsTranslatePushQueue',
 	'ucs-getinventory-main'    => 'ucsReadInventory',
+	'hpprocurveN1178-getlldpstatus-main' => 'hpprocurveN1178ReadLLDPStatus',
+	'hpprocurveN1178-get8021q-main'      => 'hpprocurveN1178Read8021QConfig',
+	'hpprocurveN1178-getportstatus-main' => 'hpprocurveN1178ReadInterfaceStatus',
+	'hpprocurveN1178-getmaclist-main'    => 'hpprocurveN1178ReadMacList',
+	'hpprocurveN1178-getportmaclist-main'=> 'hpprocurveN1178ReadMacList',
+	'hpprocurveN1178-xlatepushq-main'    => 'hpprocurveN1178TranslatePushQueue',
+	'hpprocurveN1178-getallconf-main'    => 'hpprocurveN1178SpotConfigText',
+	'ios15-getcdpstatus-main'  => 'ios12ReadCDPStatus',
+	'ios15-getlldpstatus-main' => 'ios15ReadLLDPStatus',
+	'ios15-get8021q-main'      => 'ios12ReadVLANConfig',
+	'ios15-get8021q-swports'   => 'ios12ReadSwitchPortList',
+	'ios15-get8021q-top'       => 'ios12ScanTopLevel',
+	'ios15-get8021q-readport'  => 'ios12PickSwitchportCommand',
+	'ios15-get8021q-readvlan'  => 'ios12PickVLANCommand',
+	'ios15-getportstatus-main' => 'ciscoReadInterfaceStatus',
+	'ios15-getmaclist-main'    => 'ios12ReadMacList',
+	'ios15-getportmaclist-main'=> 'ios12ReadMacList',
+	'ios15-xlatepushq-main'    => 'ios15TranslatePushQueue',
+	'ios15-getallconf-main'    => 'ios12SpotConfigText',
 );
 
 define ('MAX_GW_LOGSIZE', 1024*1024); // do not store more than 1 MB of log data
@@ -134,7 +153,7 @@ $breed_by_swcode = array
 	258  => 'ios12', // IOS 12.4 (router OS)
 	1901 => 'ios12', // IOS 15.0 (switch)
 	2082 => 'ios12', // IOS 15.1 (switch)
-	2142 => 'ios12', // IOS 15.2 (switch)
+	2142 => 'ios15', // IOS 15.2 (switch)
 	2667 => 'ios12', // IOS 15.0 (router OS)
 	1963 => 'ios12', // IOS 15.1 (router OS)
 	2668 => 'ios12', // IOS 15.2 (router OS)
@@ -176,7 +195,7 @@ $breed_by_swcode = array
 	1675 => 'eos4',  // Arista EOS 4
 	1759 => 'iosxr4', // Cisco IOS XR 4.2
 	1786 => 'ros11', // Marvell ROS 1.1
-
+	3720 => 'hpprocurveN1178', // HP Procurve 11
 	//... linux items added by the loop below
 );
 
@@ -188,7 +207,6 @@ $shorten_by_breed = array (
 	'vrp85' => 'vrp85ShortenIfName',
 	'iosxr4' => 'iosxr4ShortenIfName',
 );
-
 $breed_by_hwcode = array (
 	1362 => 'fdry5', // Brocade FastIron CX648
 	//... dlink items added by the loop below
@@ -520,6 +538,15 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 		case 'dlink':
 			$protocol = 'netcat';
 			$commands = "disable clipaging\n" . $commands;
+			break;
+		case 'hpprocurveN1178':
+			$protocol = 'sshnokey';
+			$prompt = '(Login|[Uu]sername|[Pp]assword): $|Press any key to continue(\e\[\??\d+(;\d+)*[A-Za-z])*$|[#>].*$';
+			# Console emulator should be set to 'none' to avoid special characters to be sent by stupid default VT100!!!
+			$commands = "configure\nconsole local-terminal none\nexit\nno page\n" . $commands . "configure\nconsole local-terminal vt100\nend\nexit\nexit\ny\n";
+			break;
+		case 'ios15':
+			$commands = "terminal length 0\nno terminal monitor\n" . $commands;
 			break;
 	}
 	if (! isset ($protocol))

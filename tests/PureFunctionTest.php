@@ -13,6 +13,10 @@ identical (assertSame) to the expected return value.
 
 require_once '../wwwroot/inc/popup.php';
 
+// Breed hpprocurveN1178
+require ('BreedHPprocurveN1178PureProvider.php');
+// any other breed-specific files
+
 class PureFunctionTest extends RTTestCase
 {
 	/**
@@ -124,6 +128,14 @@ class PureFunctionTest extends RTTestCase
 	}
 
 	public function providerUnaryEquals ()
+	{
+		$ret = self::baseUnaryEquals();
+		$ret = array_merge ($ret, breedHPprocurveN1178UnaryEquals());
+		// any other breed-specific Unary additions
+		return $ret;
+	}
+
+	private static function baseUnaryEquals ()
 	{
 		return array
 		(
@@ -1481,6 +1493,14 @@ class PureFunctionTest extends RTTestCase
 	}
 
 	public function providerTernaryEquals ()
+	{
+		$ret = self::baseTernaryEquals();
+		$ret = array_merge ($ret, breedHPprocurveN1178TernaryEquals());
+		// any other breed-specific Ternary additions
+		return $ret;
+	}
+
+	private static function baseTernaryEquals ()
 	{
 		return array
 		(
