@@ -3367,19 +3367,23 @@ function commitCreateUserAccount ($username, $realname, $password)
 	return $user_id;
 }
 
-function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password)
+// Update the password only if it is provided.
+function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password = '')
 {
-	usePreparedUpdateBlade
+	$set_columns = array
 	(
-		'UserAccount',
-		array
-		(
-			'user_name' => $new_username,
-			'user_realname' => $new_realname == '' ? NULL : $new_realname,
-			'user_password_hash' => $new_password,
-		),
-		array ('user_id' => $id)
+		'user_name' => $new_username,
+		'user_realname' => nullIfEmptyStr ($new_realname),
 	);
+	if ($new_password != '')
+		$set_columns['user_password_hash'] = sha1 ($new_password);
+	$userinfo = spotEntity ('user', $id);
+	usePreparedUpdateBlade ('UserAccount', $set_columns, array ('user_id' => $id));
+	// There is no FK to do this update as user-specific configuration is always local,
+	// but authentication may be not (the rows in UserConfig may have no matching
+	// rows in UserAccount).
+	if ($userinfo['user_name'] != $new_username)
+		usePreparedUpdateBlade ('UserConfig', array ('user' => $new_username), array('user' => $userinfo['user_name']));
 }
 
 function commitDeleteUserAccount ($id)

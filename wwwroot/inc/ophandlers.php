@@ -1074,17 +1074,14 @@ function createUser ()
 function updateUser ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 6));
-	$user_id = genericAssertion ('user_id', 'natural');
-	$username = assertStringArg ('username');
-	assertStringArg ('realname', TRUE);
-	$new_password = assertStringArg ('password', TRUE);
-	$userinfo = spotEntity ('user', $user_id);
-	// Set new password only if provided.
-	$new_password = $new_password != '' ? sha1 ($new_password) : $userinfo['user_password_hash'];
-	commitUpdateUserAccount ($user_id, $username, $_REQUEST['realname'], $new_password);
-	// if user account renaming is being performed, change key value in UserConfig table
-	if ($userinfo['user_name'] !== $username)
-		usePreparedUpdateBlade ('UserConfig', array ('user' => $username), array('user' => $userinfo['user_name']));
+	$username = genericAssertion ('username', 'string');
+	commitUpdateUserAccount
+	(
+		genericAssertion ('user_id', 'natural'),
+		$username,
+		genericAssertion ('realname', 'string0'),
+		genericAssertion ('password', 'string0')
+	);
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
