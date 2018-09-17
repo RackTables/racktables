@@ -1080,7 +1080,7 @@ function updateUser ()
 		genericAssertion ('user_id', 'natural'),
 		$username,
 		genericAssertion ('realname', 'string0'),
-		genericAssertion ('password', 'string0')
+		sha1 (genericAssertion ('password', 'string0'))
 	);
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }

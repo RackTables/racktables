@@ -3350,16 +3350,18 @@ WHERE
 
 // returns user_id
 // throws an exception if error occured
-function commitCreateUserAccount ($username, $realname, $password)
+function commitCreateUserAccount ($username, $realname, $password_hash)
 {
+	if (! preg_match ('/^[0-9a-f]{40}$/', $password_hash))
+		throw new InvalidArgException ('password_hash', $password_hash, 'not a 20-octet hex string');
 	usePreparedInsertBlade
 	(
 		'UserAccount',
 		array
 		(
 			'user_name' => $username,
-			'user_realname' => $realname == '' ? NULL : $realname,
-			'user_password_hash' => $password,
+			'user_realname' => nullIfEmptyStr ($realname),
+			'user_password_hash' => $password_hash,
 		)
 	);
 	$user_id = lastInsertID();
@@ -3368,15 +3370,19 @@ function commitCreateUserAccount ($username, $realname, $password)
 }
 
 // Update the password only if it is provided.
-function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password = '')
+function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_password_hash = '')
 {
 	$set_columns = array
 	(
 		'user_name' => $new_username,
 		'user_realname' => nullIfEmptyStr ($new_realname),
 	);
-	if ($new_password != '')
-		$set_columns['user_password_hash'] = sha1 ($new_password);
+	if ($new_password_hash != '')
+	{
+		if (! preg_match ('/^[0-9a-f]{40}$/', $new_password_hash))
+			throw new InvalidArgException ('new_password_hash', $new_password_hash, 'not a 20-octet hex string');
+		$set_columns['user_password_hash'] = $new_password_hash;
+	}
 	$userinfo = spotEntity ('user', $id);
 	usePreparedUpdateBlade ('UserAccount', $set_columns, array ('user_id' => $id));
 	// There is no FK to do this update as user-specific configuration is always local,

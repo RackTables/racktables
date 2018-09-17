@@ -51,4 +51,22 @@ class UserAccountTest extends RTTestCase
 	{
 		commitCreateUserAccount ($this->user_name, 'x' . self::REALNAME, sha1 (self::PSWDHASH));
 	}
+
+	/**
+	 * @group small
+	 * @expectedException InvalidArgException
+	 */
+	public function testInvalidPassword1 ()
+	{
+		commitUpdateUserAccount ($this->user_id, $this->user_name, self::REALNAME, 'password');
+	}
+
+	/**
+	 * @group small
+	 * @expectedException InvalidArgException
+	 */
+	public function testInvalidPassword2 ()
+	{
+		commitCreateUserAccount ($this->user_name, self::REALNAME, 'password');
+	}
 }
