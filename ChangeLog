@@ -4,6 +4,7 @@
 	update: ability to extend supported device breed list via plug-in
 	update: add a server configuration report (same as before install/upgrade)
 	update: new modular port type 'SFP28'
+	update: allow to delete local user accounts (Mantis#1089)
 	new feature: "shared router" allocation (GH#210 by Vladimir Ivanov)
 	new feature: optional tag descriptions
 0.21.1 2017-10-22

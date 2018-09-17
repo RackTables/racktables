@@ -3382,6 +3382,15 @@ function commitUpdateUserAccount ($id, $new_username, $new_realname, $new_passwo
 	);
 }
 
+function commitDeleteUserAccount ($id)
+{
+	if ($id == 1)
+		throw new InvalidArgException ('id', $id, 'belongs to the administrator account');
+	$userinfo = spotEntity ('user', $id);
+	usePreparedDeleteBlade ('UserConfig', array ('user' => $userinfo['user_name']));
+	usePreparedDeleteBlade ('UserAccount', array ('user_id' => $id));
+}
+
 // This function returns an array of all port type pairs from PortCompat table.
 function getPortOIFCompat ($ignore_cache = FALSE)
 {

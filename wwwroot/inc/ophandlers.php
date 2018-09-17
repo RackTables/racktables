@@ -1088,6 +1088,15 @@ function updateUser ()
 	showFuncMessage (__FUNCTION__, 'OK', array ($username));
 }
 
+function deleteUser ()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 7));
+	$user_id = genericAssertion ('id', 'natural');
+	$userinfo = spotEntity ('user', $user_id);
+	commitDeleteUserAccount ($user_id);
+	showFuncMessage (__FUNCTION__, 'OK', array ($userinfo['user_name']));
+}
+
 function supplementAttrMap ()
 {
 	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 154));

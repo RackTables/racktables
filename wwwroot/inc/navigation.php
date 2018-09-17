@@ -516,6 +516,7 @@ $tabhandler['userlist']['default'] = 'renderUserList';
 $tabhandler['userlist']['edit'] = 'renderUserListEditor';
 $ophandler['userlist']['edit']['updateUser'] = 'updateUser';
 $ophandler['userlist']['edit']['createUser'] = 'createUser';
+$ophandler['userlist']['edit']['deleteUser'] = 'deleteUser';
 $interface_requires['userlist-*'] = 'interface-config.php';
 
 $page['user']['parent'] = 'userlist';
