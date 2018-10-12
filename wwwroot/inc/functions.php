@@ -285,6 +285,10 @@ function assertIPArg ($argname)
 	{
 		return ip_parse (assertStringArg ($argname));
 	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
 	catch (InvalidArgException $e)
 	{
 		throw $e->newIRAE ($argname);
@@ -298,6 +302,10 @@ function assertIPv4Arg ($argname)
 	{
 		return ip4_parse (assertStringArg ($argname));
 	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
+	}
 	catch (InvalidArgException $e)
 	{
 		throw $e->newIRAE ($argname);
@@ -310,6 +318,10 @@ function assertIPv6Arg ($argname)
 	try
 	{
 		return ip6_parse (assertStringArg ($argname));
+	}
+	catch (InvalidRequestArgException $irae)
+	{
+		throw $irae;
 	}
 	catch (InvalidArgException $e)
 	{
