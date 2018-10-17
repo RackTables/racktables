@@ -151,15 +151,15 @@ $breed_by_swcode = array
 	256  => 'ios12', // IOS 12.2 (router OS)
 	257  => 'ios12', // IOS 12.3 (router OS)
 	258  => 'ios12', // IOS 12.4 (router OS)
-	1901 => 'ios12', // IOS 15.0 (switch)
-	2082 => 'ios12', // IOS 15.1 (switch)
+	1901 => 'ios15', // IOS 15.0 (switch)
+	2082 => 'ios15', // IOS 15.1 (switch)
 	2142 => 'ios15', // IOS 15.2 (switch)
-	2667 => 'ios12', // IOS 15.0 (router OS)
-	1963 => 'ios12', // IOS 15.1 (router OS)
-	2668 => 'ios12', // IOS 15.2 (router OS)
-	2669 => 'ios12', // IOS 15.3 (router OS)
-	2670 => 'ios12', // IOS 15.4 (router OS)
-	2671 => 'ios12', // IOS 15.5 (router OS)
+	2667 => 'ios15', // IOS 15.0 (router OS)
+	1963 => 'ios15', // IOS 15.1 (router OS)
+	2668 => 'ios15', // IOS 15.2 (router OS)
+	2669 => 'ios15', // IOS 15.3 (router OS)
+	2670 => 'ios15', // IOS 15.4 (router OS)
+	2671 => 'ios15', // IOS 15.5 (router OS)
 	963  => 'nxos4', // NX-OS 4.0
 	964  => 'nxos4', // NX-OS 4.1
 	1365 => 'nxos4', // NX-OS 4.2
@@ -201,12 +201,14 @@ $breed_by_swcode = array
 
 $shorten_by_breed = array (
 	'ios12' => 'ios12ShortenIfName_real',
+	'ios15' => 'ios12ShortenIfName_real',
 	'nxos4' => 'nxos4ShortenIfName',
 	'vrp53' => 'vrp5xShortenIfName',
 	'vrp55' => 'vrp5xShortenIfName',
 	'vrp85' => 'vrp85ShortenIfName',
 	'iosxr4' => 'iosxr4ShortenIfName',
 );
+
 $breed_by_hwcode = array (
 	1362 => 'fdry5', // Brocade FastIron CX648
 	//... dlink items added by the loop below

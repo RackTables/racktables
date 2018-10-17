@@ -1,5 +1,9 @@
 <?php
 
+# This file is a part of RackTables, a datacenter and server room management
+# framework. See accompanying file "COPYING" for the full copyright and
+# licensing information.
+
 function ios15ReadLLDPStatus ($input)
 {
 	$ret = array();
@@ -59,7 +63,6 @@ function ios15TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors detail | i Local Intf:|Chassis id:|Port id:|Port Description:|System Name:\n";
 			break;
-			// fall-through
 		default:
 			$ret .= ios12TranslatePushQueue ($dummy_object_id, array ($cmd), $dummy_vlan_names);
 			break;

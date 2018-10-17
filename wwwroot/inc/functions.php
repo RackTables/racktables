@@ -1044,8 +1044,6 @@ function l2addressForDatabase ($string)
 			$ret = str_replace ('.', '', $string);
 			break;
 		case preg_match (RE_L2_HP, $string):
-			$ret = str_replace ('-', '', $string);
-			break;
 		case preg_match (RE_L2_HUAWEI, $string):
 			$ret = str_replace ('-', '', $string);
 			break;
