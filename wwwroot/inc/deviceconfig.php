@@ -373,7 +373,7 @@ function ios12ScanTopLevel (&$work, $line)
 		$work['current'] = array ('port_name' => $port_name);
 		$work['portconfig'][$port_name][] = array ('type' => 'line-header', 'line' => $line);
 		return 'ios12-get8021q-readport'; // switch to interface block reading
-	case (preg_match ('/^VLAN Name                             Status    Ports$/', $line, $matches)):
+	case (preg_match ('/^VLAN Name\s+Status\s+Ports$/', $line, $matches)):
 		return 'ios12-get8021q-readvlan';
 	default:
 		return 'ios12-get8021q-top'; // continue scan
@@ -509,7 +509,7 @@ function ios12PickVLANCommand (&$work, $line)
 	{
 	case (preg_match ('@! END OF VLAN LIST$@', $line)):
 		return 'ios12-get8021q-top';
-	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active    @', $line, $matches)):
+	case (preg_match ('@^([[:digit:]]+) {1,4}.{32} active\s*@', $line, $matches)):
 		$work['vlanlist'][] = $matches[1];
 		break;
 	default:
