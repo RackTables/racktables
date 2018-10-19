@@ -4292,7 +4292,7 @@ function getTagList ($extra_sql = '')
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color, description ' .
+		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color ' .
 		"FROM TagTree ORDER BY tag ${extra_sql}"
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
