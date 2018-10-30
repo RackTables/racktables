@@ -1996,6 +1996,34 @@ $iftable_processors['dlink-any-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['Dlink-3028-100TX'] = array
+(
+     'pattern' => '@^D-Link DES-.+ R.+ Port (\d+)$@',
+     'replacement' => 'e\\1',
+     'dict_key' => 19,
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['Dlink-3028-25-to-28-1000T'] = array
+(
+     'pattern' => '@^D-Link DES-.+ R.+ Port (25|26|27|28)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => 24,
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['Dlink-3028-25-to-26-Combo'] = array
+(
+     'pattern' => '@^D-Link DES-.+ R.+ Port (25|26)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => '4-1077',
+     'label' => 'G\\1',
+     'try_next_proc' => TRUE,
+);
+
+
 $iftable_processors['dlink-rmon-any-100TX'] = array
 (
 	'pattern' => '@^RMON Port (\d+) on Unit (\d+)$@',
@@ -3615,6 +3643,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PF5240: 48 RJ-45/10-100-1000T(X) + 4 SFP+',
 		'processors' => array ('nec-any-1000T', 'nec-any-SFP+', 'nec-mgmt'),
 	),
+	'171.10.63.6' => array
+	(
+		'dict_key' => 614,
+		'text' => '24-Port Fast Ethernet L2 Managed PoE Switch with 2 x 1000BASE-T and 2 x Combo 1000BASE-T/SFP ports ',
+		'processors' => array ('Dlink-3028-25-to-26-Combo','Dlink-3028-25-to-28-1000T','Dlink-3028-100TX'),
+	),
 	'171.10.63.8' => array
 	(
 		'dict_key' => 616,
@@ -4527,6 +4561,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		if ($serialNo != '')
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
 		break;
+	case preg_match ('/^171\.10\.63\.6/', $sysObjectID): // D-Link DES-3028
 	case preg_match ('/^171\.10\.63\.8/', $sysObjectID): // D-Link DES-3052
 	case preg_match ('/^202\.20\./', $sysObjectID): // SMC TigerSwitch
 	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
