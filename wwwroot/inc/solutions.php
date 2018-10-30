@@ -455,14 +455,20 @@ function proxyStaticURI ($URI)
 {
 	$content_type = array
 	(
-		'css' => 'text/css',
-		'js' => 'text/javascript',
-		'html' => 'text/html',
-		'png' => 'image/png',
-		'gif' => 'image/gif',
-		'jpg' => 'image/jpeg',
-		'jpeg' => 'image/jpeg',
-		'ico' => 'image/x-icon',
+		'css'   => 'text/css',
+		'js'    => 'text/javascript',
+		'html'  => 'text/html',
+		'png'   => 'image/png',
+		'gif'   => 'image/gif',
+		'jpg'   => 'image/jpeg',
+		'jpeg'  => 'image/jpeg',
+		'ico'   => 'image/x-icon',
+		'eot'   => 'application/vnd.ms-fontobject',
+		'otf'   => 'application/font-sfnt',
+		'svg'   => 'image/svg+xml',
+		'ttf'   => 'application/font-sfnt',
+		'woff'  => 'application/font-woff',
+		'woff2' => 'font/woff2',
 	);
 	$matches = array();
 	if
