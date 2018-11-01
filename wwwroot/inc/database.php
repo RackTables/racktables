@@ -3397,6 +3397,7 @@ function commitDeleteUserAccount ($id)
 	if ($id == 1)
 		throw new InvalidArgException ('id', $id, 'belongs to the administrator account');
 	$userinfo = spotEntity ('user', $id);
+	destroyTagsForEntity ('user', $id);
 	usePreparedDeleteBlade ('UserConfig', array ('user' => $userinfo['user_name']));
 	usePreparedDeleteBlade ('UserAccount', array ('user_id' => $id));
 }
