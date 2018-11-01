@@ -335,11 +335,34 @@ class RTImageError extends RackTablesError
 	}
 }
 
+function dumpArrayElement ($x)
+{
+	switch (gettype ($x))
+	{
+	case 'integer':
+		echo $x;
+		break;
+	case 'array':
+		dumpArray ($x);
+		break;
+	default:
+		echo stringForTD ($x, 100);
+	}
+}
+
 function dumpArray ($arr)
 {
-	echo '<table class="exceptionParametersDump">';
+	$self = __FUNCTION__;
+	echo '<table><caption>(array)</caption>';
 	foreach ($arr as $key => $value)
-		echo '<tr><th class=tdright>' . stringForTD ($key) . '</th><td>' . stringForTD ($value, 100) . '</td></tr>';
+	{
+		echo '<tr valign=top><th class=tdright>';
+		// stringForTD() does not handle key 0 properly.
+		dumpArrayElement ($key);
+		echo '</th><td>';
+		dumpArrayElement ($value);
+		echo '</td></tr>';
+	}
 	echo '</table>';
 }
 
