@@ -527,7 +527,7 @@ function renderDataIntegrityReport ()
 		'FROM Object CO ' .
 		'LEFT JOIN EntityLink EL ON CO.id = EL.child_entity_id ' .
 		'LEFT JOIN Object PO ON EL.parent_entity_id = PO.id ' .
-		'LEFT JOIN ObjectParentCompat OPC ON PO.objtype_id = OPC.parent_objtype_id ' .
+		'LEFT JOIN ObjectParentCompat OPC ON PO.objtype_id = OPC.parent_objtype_id AND CO.objtype_id = OPC.child_objtype_id ' .
 		'LEFT JOIN Dictionary PD ON PO.objtype_id = PD.dict_key ' .
 		'LEFT JOIN Dictionary CD ON CO.objtype_id = CD.dict_key ' .
 		"WHERE EL.parent_entity_type = 'object' AND EL.child_entity_type = 'object' " .
