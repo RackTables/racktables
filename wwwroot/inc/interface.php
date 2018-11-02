@@ -2313,7 +2313,6 @@ function renderMolecule ($mdata, $object_id)
 	// Now there are some racks to render.
 	foreach ($rackpack as $rackData)
 	{
-		markAllSpans ($rackData);
 		echo "<table class=molecule cellspacing=0>\n";
 		echo "<caption>${rackData['name']}</caption>\n";
 		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th><th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
