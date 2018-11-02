@@ -837,7 +837,9 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 	// Display list of child objects, if any
 	$objectChildren = getChildren ($objectData, 'object');
 	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
-	if (count($objectChildren) > 0)
+	if (! count ($objectChildren))
+		$suffix = "'>";
+	else
 	{
 		foreach ($objectChildren as $childData)
 		{
@@ -884,8 +886,6 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 		natsort($childNames);
 		$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
 	}
-	else
-		$suffix = "'>";
 	echo "${prefix}${body}${suffix}" . mkCellA ($objectData) . '</div>';
 	if (in_array ($objectData['objtype_id'], array (1502,1503))) // server chassis, network chassis
 	{
