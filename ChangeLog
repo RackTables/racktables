@@ -9,6 +9,7 @@
 	new feature: optional tag descriptions
 	new feature: support for HP N.11.78 and IOS 15 (GH #225 by Vasilii Shashkov)
 	bugfix: fixup an SQL query in the integrity report
+	bugfix: make the "Uncheck all" button rack-specific
 0.21.1 2017-10-22
 	update: improve Percona server support (Mantis#1793)
 	bugfix: fix an upgrade bug introduced in 0.21.0 (found by Chris James)

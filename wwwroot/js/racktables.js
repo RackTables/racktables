@@ -38,18 +38,16 @@ function toggleColumnOfAtoms (rackId, columnId, numRows) {
 	}
 }
 
-function uncheckAll () {
-    // Get all of the inputs that are in this form
-    var elements = document.getElementsByTagName("input");
-
-    for (var i = 0; i < elements.length; i++) {
-	// Abort if the box is disabled
-	if (elements[i].disabled == true) continue;
-
-	// If it's a checkbox, uncheck it
-        if (elements[i].type == "checkbox")
-            elements[i].checked = false;
-    }
+// Unchecks all checkboxes in the specified rack.
+function uncheckAllAtoms (rackId, numRows) {
+	var element;
+	for (var rowId=1; rowId<numRows+1; rowId++) {
+		for (var columnId=0; columnId<=2; columnId++) {
+			element = document.getElementById("atom_" + rackId + "_" + rowId + "_" + columnId);
+			if (element != null && ! element.disabled)
+				element.checked = false;
+		}
+	}
 }
 
 // used by portinfo.js
