@@ -1323,11 +1323,14 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	// Grid form.
 	$is_ro = !rackModificationPermitted ($rackData, 'updateRack');
 	startPortlet ($header);
+	includeJQueryUI (FALSE);
 	addJS ('js/racktables.js');
+	$table_id = 'selectableRack';
+	addBulkSelectorJS ($table_id);
 	echo "<center>\n";
 	$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
 	echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
-	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
+	echo "<table class=rack id={$table_id} border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th>";
 	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 	echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
@@ -2143,6 +2146,25 @@ function renderPortsInfo($object_id)
 	echo "</td></tr></table>";
 }
 
+function addBulkSelectorJS ($element_id)
+{
+	// Heredoc, not nowdoc!
+	addJS (<<<"ENDOFJAVASCRIPT"
+$(function () {
+    $("#{$element_id} tbody").selectable({
+        filter: 'td.atom',
+        cancel: 'th',
+        stop: function () {
+            $(".ui-selected input:enabled", this).each(function () {
+                this.checked = !this.checked
+            });
+        }
+    });
+});
+ENDOFJAVASCRIPT
+, TRUE);
+}
+
 // An object can be mounted onto free atoms only, that is, if any record for an atom
 // already exists in RackSpace, it cannot be used for mounting.
 function renderRackSpaceForObject ($object_id)
@@ -2242,10 +2264,11 @@ function renderRackSpaceForObject ($object_id)
 	startPortlet ('Working copy');
 	includeJQueryUI (false);
 	addJS ('js/racktables.js');
-	addJS ('js/bulkselector.js');
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
+		$table_id = "selectableRack_{$rack_id}";
+		addBulkSelectorJS ($table_id);
 		$is_ro = !rackModificationPermitted ($rackData, 'updateObjectAllocation');
 		// Order is important here: only original allocation is highlighted.
 		highlightObject ($rackData, $object_id);
@@ -2258,7 +2281,7 @@ function renderRackSpaceForObject ($object_id)
 		echo "<center>\n<h2 style='margin:0px'>${rackData['name']}</h2>\n";
 		$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
 		echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
-		echo "<table class=rack id=selectableRack border=0 cellspacing=0 cellpadding=1>\n";
+		echo "<table class=rack id={$table_id} border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th width='10%'>&nbsp;</th>";
 		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
 		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
