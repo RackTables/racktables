@@ -1302,7 +1302,6 @@ function renderRackInfoPortlet ($rackData)
 }
 
 // This is a universal editor of rack design/waste.
-// FIXME: switch to using printOpFormIntro()
 function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 {
 	$rackData = spotEntity ('rack', $rack_id);
