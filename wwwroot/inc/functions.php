@@ -794,14 +794,9 @@ function markupAtomGrid (&$data, $checked_state)
 {
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
-		{
-			if (!($data[$unit_no][$locidx]['enabled'] === TRUE))
-				continue;
-			if ($data[$unit_no][$locidx]['state'] == $checked_state)
-				$data[$unit_no][$locidx]['checked'] = ' checked';
-			else
-				$data[$unit_no][$locidx]['checked'] = '';
-		}
+			if ($data[$unit_no][$locidx]['enabled'])
+				$data[$unit_no][$locidx]['checked'] =
+					$data[$unit_no][$locidx]['state'] == $checked_state ? ' checked' : '';
 }
 
 // This function is almost a clone of processGridForm(), except it does not modify
