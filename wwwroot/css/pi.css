@@ -769,7 +769,7 @@ a.img-link {
 	font-family: "Courier New",Courier,monospace;
 }
 
-/* VLAN lists diff formatting (8021Q Ports and 8021Q Sync pages) */
+/* VLAN lists diff formatting (802.1Q Ports and 802.1Q Sync pages) */
 .vlan-diff {
 	font-weight: bold;
 	float: right;
