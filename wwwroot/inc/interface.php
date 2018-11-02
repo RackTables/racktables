@@ -2153,7 +2153,7 @@ function addBulkSelectorJS ($element_id)
 $(function () {
     $("#{$element_id} tbody").selectable({
         filter: 'td.atom',
-        cancel: 'th',
+        cancel: 'th,a',
         stop: function () {
             $(".ui-selected input:enabled", this).each(function () {
                 this.checked = !this.checked
@@ -3961,8 +3961,9 @@ function renderSearchResults ($terms, $summary)
 // produced by amplifyCell(), the second is the R/O flag. When this flag is true all checkboxes
 // are become disabled
 
-function renderAtomGrid ($data, $is_ro=FALSE)
+function renderAtomGrid ($data, $is_ro = FALSE)
 {
+	markAllSpans ($data);
 	$rack_id = $data['id'];
 	$reverse = considerConfiguredConstraint ($data, 'REVERSED_RACKS_LISTSRC');
 	addJS ('js/racktables.js');
@@ -3972,17 +3973,44 @@ function renderAtomGrid ($data, $is_ro=FALSE)
 		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_label}</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
-			$name = "atom_${rack_id}_${unit_no}_${locidx}";
+			$show_checkbox = $data[$unit_no][$locidx]['enabled'];
+			if (! $show_checkbox && array_fetch ($data[$unit_no][$locidx], 'skipped', FALSE))
+				continue;
 			$state = $data[$unit_no][$locidx]['state'];
-			echo "<td class='atom state_${state}";
-			if (isset ($data[$unit_no][$locidx]['hl']))
-				echo $data[$unit_no][$locidx]['hl'];
-			echo "'>";
-			$disabled_text = $is_ro ? ' disabled' : '';
-			if (!($data[$unit_no][$locidx]['enabled'] === TRUE))
-				echo "<input type=checkbox id=${name} disabled>";
-			else
+			$td = array ('class' => $show_checkbox ? 'atom ' : '');
+			$td['class'] .= "state_{$state}";
+			if (array_key_exists ('hl', $data[$unit_no][$locidx]))
+			{
+				// Implies $state != 'F'.
+				$hl = $data[$unit_no][$locidx]['hl'];
+				$td['class'] .= $hl;
+				if ($state == 'T')
+				{
+					// Implies object_id is set and the value is not NULL.
+					$objectData = spotEntity ('object', $data[$unit_no][$locidx]['object_id']);
+					setEntityColors ($objectData);
+					$extrastyle = $hl != '' ? 'border:3px solid #80ffff !important;' : '';
+					$td['class'] .= getObjectClass ($objectData, $extrastyle);
+				}
+			}
+			if (! $show_checkbox)
+				foreach (array ('colspan', 'rowspan') as $key)
+					if (array_key_exists ($key, $data[$unit_no][$locidx]))
+						$td[$key] = $data[$unit_no][$locidx][$key];
+
+			echo makeHtmlTag ('td', $td);
+			if ($show_checkbox)
+			{
+				// FIXME: This data requires a cleaner handover from markupAtomGrid()
+				// to be better suited for makeHtmlTag().
+				$name = "atom_${rack_id}_${unit_no}_${locidx}";
+				$disabled_text = $is_ro ? ' disabled' : '';
 				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=${name} id=${name}${disabled_text}>";
+			}
+			elseif ($state == 'T')
+				printObjectDetailsForRenderRack ($data[$unit_no][$locidx]['object_id']);
+			else
+				echo '&nbsp;';
 			echo '</td>';
 		}
 		echo "</tr>\n";
