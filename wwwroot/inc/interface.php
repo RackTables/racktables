@@ -969,9 +969,10 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
 	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+	$reverse = considerConfiguredConstraint ($rackData, 'REVERSED_RACKS_LISTSRC');
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo "<tr><th>" . inverseRackUnit ($i, $rackData) . "</th>";
+		echo '<tr><th>' . inverseRackUnit ($rackData['height'], $i, $reverse) . '</th>';
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
@@ -2316,9 +2317,10 @@ function renderMolecule ($mdata, $object_id)
 		echo "<table class=molecule cellspacing=0>\n";
 		echo "<caption>${rackData['name']}</caption>\n";
 		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th><th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+		$reverse = considerConfiguredConstraint ($rackData, 'REVERSED_RACKS_LISTSRC');
 		for ($i = $rackData['height']; $i > 0; $i--)
 		{
-			echo "<tr><th>" . inverseRackUnit ($i, $rackData) . "</th>";
+			echo '<tr><th>' . inverseRackUnit ($rackData['height'], $i, $reverse) . '</th>';
 			for ($locidx = 0; $locidx < 3; $locidx++)
 			{
 				$state = $rackData[$i][$locidx]['state'];
@@ -3940,10 +3942,12 @@ function renderSearchResults ($terms, $summary)
 function renderAtomGrid ($data, $is_ro=FALSE)
 {
 	$rack_id = $data['id'];
+	$reverse = considerConfiguredConstraint ($data, 'REVERSED_RACKS_LISTSRC');
 	addJS ('js/racktables.js');
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
-		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">" . inverseRackUnit ($unit_no, $data) . "</a></th>";
+		$unit_label = inverseRackUnit ($data['height'], $unit_no, $reverse);
+		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_label}</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			$name = "atom_${rack_id}_${unit_no}_${locidx}";

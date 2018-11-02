@@ -6299,13 +6299,11 @@ function formatEntityName ($entity)
 	return $ret;
 }
 
-// returns reversed (top-to-bottom) $unit_no if $rack_cell is configured to be reversed,
-// or unchanged $unit_no otherwise.
-function inverseRackUnit ($unit_no, $rack_cell)
+// Returns reversed (top-to-bottom) $unit_no if the rack is configured to be
+// that way (the calling function tells this), or unchanged $unit_no otherwise.
+function inverseRackUnit ($height, $unit_no, $reverse)
 {
-	if (considerConfiguredConstraint ($rack_cell, 'REVERSED_RACKS_LISTSRC'))
-		$unit_no = $rack_cell['height'] - $unit_no + 1;
-	return $unit_no;
+	return $reverse ? ($height - $unit_no + 1) : $unit_no;
 }
 
 // returns true either if given domains are the same
