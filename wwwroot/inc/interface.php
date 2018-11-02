@@ -2299,7 +2299,7 @@ function renderRackSpaceForObject ($object_id)
 		else
 			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
 		$disabled_text = $is_ro ? ' disabled' : '';
-		echo "<label for=zerou_${rack_id}>Zero-U:</label> <input type=checkbox ${checked} name=zerou_${rack_id} id=zerou_${rack_id}${disabled_text}>\n<br><br>\n";
+		echo "<label>Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id}${disabled_text}></label>\n<br><br>\n";
 		echo "<input type='button' onclick='uncheckAllAtoms({$rack_id}, {$rackData['height']});' value='Uncheck all'>\n";
 		echo '</center></td>';
 	}
