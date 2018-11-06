@@ -879,7 +879,8 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 
 				$child = spotEntity ('object', $childData['id']);
 				setEntityColors ($child);
-				$slotClass[$slot] .= getObjectClass ($child, 'background:white;');
+				$class_context = $childData['id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
+				$slotClass[$slot] .= getObjectClass ($child, $class_context);
 
 			}
 		}
@@ -988,7 +989,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			{
 				$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 				setEntityColors ($objectData);
-				$class .= getObjectClass ($objectData, (isset ($rackData[$i][$locidx]['hl']) && $rackData[$i][$locidx]['hl'] != "" ? "border:3px solid #80ffff !important;" : "")."background:white;");
+				$class_context = $rackData[$i][$locidx]['object_id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
+				$class .= getObjectClass ($objectData, $class_context);
 			}
 
 			echo "<td class='${class}'";
@@ -1036,7 +1038,8 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 			$class = "atom state_${state}";
 			setEntityColors ($zeroUObject);
-			$class .= getObjectClass ($zeroUObject, 'background:white;');
+			$class_context = $zeroUObject['id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
+			$class .= getObjectClass ($zeroUObject, $class_context);
 
 			echo "<tr><td class='${class}'>";
 			printObjectDetailsForRenderRack ($zeroUObject['id']);
@@ -2392,7 +2395,7 @@ function renderDepot ()
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
 
 				setEntityColors ($obj);
-				$class = getObjectClass ($obj, ($order == 'even' ? 'background:white;' : ''));
+				$class = getObjectClass ($obj, 'list_plain');
 
 				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
@@ -2562,22 +2565,16 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 				$decor['symbolurl'] = "${baseurl}&eid=${item['id']}&hl_net=1";
 			elseif ($item['symbol'] == 'node-expanded')
 				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}&hl_net=1" : '');
-			$tr_class = '';
-			$extrastyle = '';
-			if ($target == $item['id'] && isset ($_REQUEST['hl_net']))
-			{
-				if (isset ($item['colors'][0]))
-					$extrastyle = 'outline: 3px solid #0aff0a;';
-				else
-				{
-					$decor['tdclass'] = ' highlight';
-					$tr_class = $decor['tdclass'];
-				}
-
-			}
 
 			setEntityColors ($item);
-			$tr_class .= getObjectClass ($item, $extrastyle);
+			$class_context = ($target == $item['id'] && isset ($_REQUEST['hl_net'])) ? 'list_selected' : 'list_plain';
+			$tr_class = getObjectClass ($item, $class_context);
+			// Use old-style highlighting for colourless networks.
+			if ($class_context == 'list_selected' && $tr_class == '')
+			{
+				$decor['tdclass'] = ' highlight';
+				$tr_class = $decor['tdclass'];
+			}
 
 			echo "<tr valign=top class=\"$tr_class\">";
 			printIPNetInfoTDs ($item, $decor);
@@ -3989,8 +3986,8 @@ function renderAtomGrid ($data, $is_ro = FALSE)
 					// Implies object_id is set and the value is not NULL.
 					$objectData = spotEntity ('object', $data[$unit_no][$locidx]['object_id']);
 					setEntityColors ($objectData);
-					$extrastyle = $hl != '' ? 'border:3px solid #80ffff !important;' : '';
-					$td['class'] .= getObjectClass ($objectData, $extrastyle);
+					$class_context = ($hl == 'h' || $hl == 'hw') ? 'atom_selected' : 'atom_plain';
+					$td['class'] .= getObjectClass ($objectData, $class_context);
 				}
 			}
 			if (! $show_checkbox)

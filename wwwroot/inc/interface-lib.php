@@ -1203,10 +1203,20 @@ function makeHtmlTag ($tagname, $attributes = array())
 	return $ret;
 }
 
-function getObjectClass ($object, $extrastyle = '')
+function getObjectClass ($object, $context)
 {
+	$ctxmap = array
+	(
+		'atom_plain' => 'background:white;',
+		'atom_selected' => 'border:3px solid #80ffff !important;background:white;',
+		'list_plain' => '',
+		'list_selected' => 'outline: 3px solid #0aff0a;',
+	);
+	if (! array_key_exists ($context, $ctxmap))
+		throw new InvalidArgException ('context', $context, 'unknown value');
 	if (! array_key_exists ('colors', $object) || ! count ($object['colors']))
 		return '';
+	$style = $ctxmap[$context];
 	$step = intval (round (100 / count ($object['colors'])));
 	$percent = 0;
 	$gradient = '';
@@ -1216,7 +1226,7 @@ function getObjectClass ($object, $extrastyle = '')
 		$gradient .= "rgba(${rgb},0.2) ${percent}%, rgba(${rgb},0.3) " . ($percent + $step) . "%,";
 		$percent += $step;
 	}
-	$style = "${extrastyle}background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
+	$style .= "background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
 	return getCachedCSSClassForStyle ("objectcolor-${object['id']}", $style);
 }
 
