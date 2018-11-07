@@ -5529,7 +5529,7 @@ function isConfigVarChanged ($varname, $varvalue)
 	if (!isset ($configCache[$varname]))
 		return TRUE;
 	if ($configCache[$varname]['vartype'] == 'uint')
-		return $configCache[$varname]['varvalue'] !== 0 + $varvalue;
+		return $configCache[$varname]['varvalue'] !== intval ($varvalue);
 	else
 		return $configCache[$varname]['varvalue'] !== $varvalue;
 }
