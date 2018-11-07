@@ -984,7 +984,7 @@ function getColorSelect($id = 'color', $selected = NULL)
 			$class = '';
 
 		$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
-		$ret .= '<option value=""option>';
+		$ret .= '<option value=""></option>';
 
 		$colors = array(
 				'FFFFFF',
