@@ -5081,10 +5081,12 @@ function renderCell ($cell)
 		echo $override;
 		return;
 	}
+	setEntityColors ($cell);
+	$class = 'slbcell vscell ' . getObjectClass ($cell, 'list_plain');
 	switch ($cell['realm'])
 	{
 	case 'user':
-		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('USER');
 		echo '</td><td>' . mkA (stringForTD ($cell['user_name']), 'user', $cell['user_id']) . '</td></tr>';
 		if ($cell['user_realname'] != '')
@@ -5098,7 +5100,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'file':
-		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=3 width='5%'>";
 		switch ($cell['type'])
 		{
 			case 'text/plain':
@@ -5138,7 +5140,7 @@ function renderCell ($cell)
 		break;
 	case 'ipv4net':
 	case 'ipv6net':
-		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('NET');
 		echo '</td><td>' . mkCellA ($cell);
 		echo getRenderedIPNetCapacity ($cell);
@@ -5157,7 +5159,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'rack':
-		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=3 width='5%'>";
 		echo getRackThumbLink ($cell);
 		echo "</td><td>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'rack', $cell['id']);
@@ -5168,7 +5170,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'location':
-		echo "<table class='slbcell vscell'><tr><td rowspan=3 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=3 width='5%'>";
 		printImageHREF ('LOCATION');
 		echo "</td><td>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'location', $cell['id']);
@@ -5179,7 +5181,7 @@ function renderCell ($cell)
 		echo "</td></tr></table>";
 		break;
 	case 'object':
-		echo "<table class='slbcell vscell'><tr><td rowspan=2 width='5%'>";
+		echo "<table class='{$class}'><tr><td rowspan=2 width='5%'>";
 		printImageHREF ('OBJECT');
 		echo '</td><td>';
 		echo mkA ('<strong>' . stringForLabel ($cell['dname']) . '</strong>', 'object', $cell['id']);
@@ -5194,8 +5196,14 @@ function renderCell ($cell)
 
 function renderRouterCell ($ip_bin, $ifname, $cell)
 {
+	setEntityColors ($cell);
+	// This block appears either on a plain page background (in which case both
+	// "list" and "atom" work about the same), or inside a network row, which
+	// uses a mix of zebra and tag colours (in which case "atom" works better
+	// as it overlays the router's tag colours without mixing).
+	$class = 'slbcell ' . getObjectClass ($cell, 'atom_plain');
 	$dottedquad = ip_format ($ip_bin);
-	echo "<table class=slbcell><tr><td rowspan=3>${dottedquad}";
+	echo "<table class='${class}'><tr><td rowspan=3>${dottedquad}";
 	if ($ifname != '')
 		echo '@' . $ifname;
 	echo "</td>";
