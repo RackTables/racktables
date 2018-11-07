@@ -1115,7 +1115,6 @@ function renderNewRackForm()
 
 function renderEditObjectForm()
 {
-	global $pageno;
 	$object_id = getBypassValue();
 	$object = spotEntity ('object', $object_id);
 	startPortlet ();
@@ -1190,7 +1189,6 @@ function renderEditObjectForm()
 
 function renderEditRackForm ($rack_id)
 {
-	global $pageno;
 	$rack = spotEntity ('rack', $rack_id);
 	amplifyCell ($rack);
 
@@ -2976,7 +2974,7 @@ function renderIPv4NetworkPagination ($range, $page, $numpages)
 
 function renderIPv4NetworkAddresses ($range)
 {
-	global $pageno, $tabno, $aac_left;
+	global $aac_left;
 	$startip = ip4_bin2int ($range['ip_bin']);
 	$endip = ip4_bin2int (ip_last ($range));
 
@@ -3234,7 +3232,6 @@ function renderIPv6NetworkAddresses ($netinfo)
 
 function renderIPNetworkProperties ($id)
 {
-	global $pageno;
 	$netdata = spotEntity (etypeByPageno(), $id);
 	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
 	printOpFormIntro ('editRange');
@@ -4105,7 +4102,6 @@ function renderLocationPage ($location_id)
 
 function renderEditLocationForm ($location_id)
 {
-	global $pageno;
 	$location = spotEntity ('location', $location_id);
 	amplifyCell ($location);
 
