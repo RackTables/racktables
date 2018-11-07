@@ -1489,7 +1489,7 @@ function resetObject ()
 
 function updateUI ()
 {
-	setFuncMessages (__FUNCTION__, array ('OK' => 51));
+	setFuncMessages (__FUNCTION__, array ('OK' => 43));
 	$num_vars = genericAssertion ('num_vars', 'natural');
 	try
 	{
