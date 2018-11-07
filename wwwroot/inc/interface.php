@@ -4015,9 +4015,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 {
 	if ($realm === NULL)
 		$realm = etypeByPageno();
-	global $nextorder;
 	global $pageno;
-	$order = 'odd';
 	$cellfilter = getCellFilter();
 	if (! isset ($celllist))
 		$celllist = applyCellFilter ($realm, $cellfilter);
@@ -4032,15 +4030,19 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 		if ($do_amplify)
 			array_walk ($celllist, 'amplifyCell');
 		startPortlet ($title . ' (' . count ($celllist) . ')');
-		echo "<table class=cooltable border=0 cellpadding=5 cellspacing=0 align=center>\n";
-		foreach ($celllist as $cell)
+		if (! count ($celllist))
+			echo '(none)';
+		else
 		{
-			echo "<tr class=row_${order}><td>";
-			renderCell ($cell);
-			echo "</td></tr>\n";
-			$order = $nextorder[$order];
+			echo '<table class="cooltable zebra0" border=0 cellpadding=5 cellspacing=0 align=center>';
+			foreach ($celllist as $cell)
+			{
+				echo '<tr><td>';
+				renderCell ($cell);
+				echo '</td></tr>';
+			}
+			echo '</table>';
 		}
-		echo '</table>';
 		finishPortlet();
 	}
 	echo "</td><td class='pcright ${pageno}'>";
