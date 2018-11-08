@@ -2253,7 +2253,7 @@ function renderRackSpaceForObject ($object_id)
 	// Middle portlet with comment and submit.
 	echo "<td class=pcleft>";
 	startPortlet ('Comment (for Rackspace History)');
-	echo "<textarea name=comment rows=10 cols=40></textarea><br>\n";
+	echo '<textarea name=comment rows=10 cols=40></textarea><br><br>';
 	echo "<input type=submit value='Save' name=got_atoms>\n";
 	echo "<br><br>";
 	finishPortlet();
@@ -2278,8 +2278,12 @@ function renderRackSpaceForObject ($object_id)
 		// contents.
 		if (!$is_ro && isset ($_REQUEST['rackmulti'][0])) // is an update
 			mergeGridFormToRack ($rackData);
-		echo "<td valign=top>";
-		echo "<center>\n<h2 style='margin:0px'>${rackData['name']}</h2>\n";
+		echo '<td valign=bottom>';
+		echo '<center><h2 style="margin:0px">';
+		echo mkA ($rackData['row_name'], 'row', $rackData['row_id']);
+		echo ' : ';
+		echo mkA ($rackData['name'], 'rack', $rackData['id']);
+		echo '</h2>';
 		$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
 		echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
 		echo "<table class=rack id={$table_id} border=0 cellspacing=0 cellpadding=1>\n";
