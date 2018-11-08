@@ -32,7 +32,40 @@ function renderSystemReports ()
 			'type' => 'custom',
 			'func' => 'renderTagStats'
 		),
+		array
+		(
+			'title' => 'RackCode stats',
+			'type' => 'counters',
+			'func' => 'getRackCodeStats',
+		),
+		array
+		(
+			'title' => 'RackCode warnings',
+			'type' => 'messages',
+			'func' => 'getRackCodeWarnings',
+		),
+		array
+		(
+			'title' => 'IPv4',
+			'type' => 'counters',
+			'func' => 'getIPv4Stats'
+		),
+		array
+		(
+			'title' => 'IPv6',
+			'type' => 'counters',
+			'func' => 'getIPv6Stats'
+		),
 	);
+	foreach (getPortIIFOptions() as $iif_id => $iif_name)
+		if (count (getPortIIFStats ($iif_id)))
+			$tmp[] = array
+			(
+				'title' => "{$iif_name} ports",
+				'type' => 'meters',
+				'func' => 'getPortIIFStats',
+				'args' => $iif_id,
+			);
 	renderReports ($tmp);
 }
 
@@ -40,69 +73,6 @@ function renderLocalReports ()
 {
 	global $localreports;
 	renderReports ($localreports);
-}
-
-function renderRackCodeReports ()
-{
-	$tmp = array
-	(
-		array
-		(
-			'title' => 'Stats',
-			'type' => 'counters',
-			'func' => 'getRackCodeStats',
-		),
-		array
-		(
-			'title' => 'Warnings',
-			'type' => 'messages',
-			'func' => 'getRackCodeWarnings',
-		),
-	);
-	renderReports ($tmp);
-}
-
-function renderIPv4Reports ()
-{
-	$tmp = array
-	(
-		array
-		(
-			'title' => 'Stats',
-			'type' => 'counters',
-			'func' => 'getIPv4Stats'
-		),
-	);
-	renderReports ($tmp);
-}
-
-function renderIPv6Reports ()
-{
-	$tmp = array
-	(
-		array
-		(
-			'title' => 'Stats',
-			'type' => 'counters',
-			'func' => 'getIPv6Stats'
-		),
-	);
-	renderReports ($tmp);
-}
-
-function renderPortsReport ()
-{
-	$tmp = array();
-	foreach (getPortIIFOptions() as $iif_id => $iif_name)
-		if (count (getPortIIFStats ($iif_id)))
-			$tmp[] = array
-			(
-				'title' => $iif_name,
-				'type' => 'meters',
-				'func' => 'getPortIIFStats',
-				'args' => $iif_id,
-			);
-	renderReports ($tmp);
 }
 
 function render8021QReport ()
@@ -207,9 +177,9 @@ function renderReports ($what)
 					$data = $item['func'] ();
 				foreach ($data as $meter)
 				{
-					echo "<tr><td class=tdright>${meter['title']}:</td><td class=tdcenter>";
+					echo "<tr><td class=tdright>${meter['title']}:</td><td class=tdleft>";
 					renderProgressBar ($meter['max'] ? $meter['current'] / $meter['max'] : 0);
-					echo '<br><small>' . ($meter['max'] ? $meter['current'] . '/' . $meter['max'] : '0') . '</small></td></tr>';
+					echo ' <small>' . ($meter['max'] ? $meter['current'] . '/' . $meter['max'] : '0') . '</small></td></tr>';
 				}
 				break;
 			case 'custom':
@@ -228,7 +198,7 @@ function renderReports ($what)
 function renderTagStats ()
 {
 	global $taglist;
-	echo '<table border=1><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>IPv6 nets</th>';
+	echo '<table class="zebra widetable"><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>IPv6 nets</th>';
 	echo '<th>racks</th><th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
 	(
