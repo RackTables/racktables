@@ -961,5 +961,14 @@ function renderDataIntegrityReport ()
 function renderServerConfigurationReport ()
 {
 	echo '<br>';
-	platform_is_ok (TRUE);
+	try
+	{
+		$test_innodb = isInnoDBSupported();
+	}
+	catch (PDOException $e)
+	{
+		showError ('InnoDB test failed (is binary logging enabled?).');
+		$test_innodb = FALSE;
+	}
+	platform_is_ok ($test_innodb);
 }
