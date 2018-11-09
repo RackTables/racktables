@@ -22,19 +22,24 @@
 # without any user interaction (i.e. the git remote must be on a local
 # filesystem or be configured to use SSH keys).
 #
+# The commit message text is optional; when omitted or empty, a default value
+# will be used. The message may be a multi-line string, in which case it should
+# follow the format recommended in the "discussion" section of the
+# git-commit(1) man page.
+#
 # This script uses sudo to switch between the pseudo-users and requires an
 # entry in sudoers along the following lines:
 # httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
-[ $# -eq 4 ] || {
-	echo "Usage: $0 <pseudo-user> <repo dir> <path to file> <commit message>" >&2
+[ $# -eq 3 -o $# -eq 4 ] || {
+	echo "Usage: $0 <pseudo-user> <repo dir> <path to file> [commit message]" >&2
 	exit 1
 }
 
 SUDOUSER=$1
 REPODIR="$2"
 FILEPATH="$3"
-COMMITMSG="$4"
+COMMITMSG="${4:-update $FILEPATH}"
 
 [ `whoami` = "$SUDOUSER" ] || {
 	sudo --non-interactive --set-home --user=$SUDOUSER -- "$0" "$@"
@@ -59,7 +64,7 @@ cat > "$FILEPATH" || {
 
 git diff --quiet -- "$FILEPATH" || {
 	git add -- "$FILEPATH"
-	printf "update %s\n\n%s\n" "$FILEPATH" "$COMMITMSG" | git commit --quiet --file=- -- "$FILEPATH"
+	git commit --quiet --message="$COMMITMSG" -- "$FILEPATH"
 	git push --quiet || {
 		echo "Failed to run 'git push' (rc=$?)" >&2
 		exit 5
