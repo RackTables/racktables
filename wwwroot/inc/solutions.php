@@ -347,7 +347,7 @@ function renderProgressBar4Image ($px1, $px2, $px3)
 		colorFromHex ($img, '808080'),
 		colorFromHex ($img, 'c0c0c0'),
 	);
-	$pos =  0;
+	$pos = 0;
 	for ($i = 0; $i < count ($offsets); $i++)
 	{
 		$off = $offsets[$i];

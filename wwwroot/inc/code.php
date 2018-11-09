@@ -168,7 +168,7 @@ class RackCodeParser
 						default:
 							if (preg_match ('/[\p{L}]/u', $char))
 							{
-								$state =  self::LEX_S_KEYWORD;
+								$state = self::LEX_S_KEYWORD;
 								$buffer = $char;
 							}
 							else

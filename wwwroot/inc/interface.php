@@ -1407,7 +1407,7 @@ function renderObject ($object_id)
 	echo "<tr><td class=pcleft>";
 
 	// display summary portlet
-	$summary  = array();
+	$summary = array();
 	if ($info['name'] != '')
 		$summary['Common name'] = $info['name'];
 	elseif (considerConfiguredConstraint ($info, 'NAMEWARN_LISTSRC'))

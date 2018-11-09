@@ -993,7 +993,7 @@ function renderVLANIPLinks ($some_id)
 			);
 		// Any VLAN can link to any network that isn't yet linked to current domain.
 		// get free IP nets
-		$netlist_func  = $ip_ver == 'ipv6' ? 'getVLANIPv6Options' : 'getVLANIPv4Options';
+		$netlist_func = $ip_ver == 'ipv6' ? 'getVLANIPv6Options' : 'getVLANIPv4Options';
 		foreach ($netlist_func ($vlan['domain_id']) as $net_id)
 		{
 			$netinfo = spotEntity ($ip_ver . 'net', $net_id);
@@ -1545,7 +1545,7 @@ function renderVSTRulesEditor ($vst_id)
 	echo "</td></tr>";
 	echo '<tr><th></th><th>sequence</th><th>regexp</th><th>role</th>';
 	echo '<th>VLAN IDs</th><th>comment</th><th><a href="#" class="vst-add-rule initial">' . getImageHREF ('add', 'Add rule') . '</a></th></tr>';
-	$row_html  = '<td><a href="#" class="vst-del-rule">' . getImageHREF ('destroy', 'delete rule') . '</a></td>';
+	$row_html = '<td><a href="#" class="vst-del-rule">' . getImageHREF ('destroy', 'delete rule') . '</a></td>';
 	$row_html .= '<td><input type=text name=rule_no value="%s" size=3></td>';
 	$row_html .= '<td><input type=text name=port_pcre value="%s"></td>';
 	$row_html .= '<td>%s</td>';

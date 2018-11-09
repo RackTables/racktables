@@ -643,7 +643,7 @@ function getRenderedIPv4NetCapacity ($range)
 				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}&times;</small>" : "") . "/$mask free";
 			}
 		}
-		$text =  ip4_range_size ($range) . $free_text;
+		$text = ip4_range_size ($range) . $free_text;
 	}
 
 	$div_id = $range['ip'] . '/' . $range['mask'];
@@ -893,7 +893,7 @@ function renderEntitySummary ($cell, $title, $values = array())
 		{
 			$baseurl = '';
 			if (isset ($page_by_realm[$cell['realm']]))
-				$baseurl =  makeHref(array('page'=>$page_by_realm[$cell['realm']], 'tab'=>'default'))."&";
+				$baseurl = makeHref(array('page'=>$page_by_realm[$cell['realm']], 'tab'=>'default'))."&";
 			printTagTRs ($cell, $baseurl);
 		}
 		else

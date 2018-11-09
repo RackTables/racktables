@@ -155,7 +155,7 @@ function findObjectParentCandidates ($object_id)
 	$object = spotEntity ('object', $object_id);
 	$args = array ($object['objtype_id'], $object_id, $object_id);
 
-	$query  = "SELECT O.id, O.name, O.objtype_id FROM Object O ";
+	$query = "SELECT O.id, O.name, O.objtype_id FROM Object O ";
 	$query .= "LEFT JOIN ObjectParentCompat OPC ON O.objtype_id = OPC.parent_objtype_id ";
 	$query .= "WHERE OPC.child_objtype_id = ? ";
 	$query .= "AND O.id != ? ";

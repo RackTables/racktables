@@ -1449,7 +1449,7 @@ function commitUpdateRack ($rack_id, $new_row_id, $new_name, $new_height, $new_h
 		throw new InvalidArgException ('new_height', $new_height, 'Cannot shrink rack, objects are still mounted there');
 
 	// Determine if the row changed
-	$old_rack =  spotEntity ('rack', $rack_id);
+	$old_rack = spotEntity ('rack', $rack_id);
 	$old_row_id = $old_rack['row_id'];
 	if ($old_row_id != $new_row_id)
 	{
@@ -3514,7 +3514,7 @@ function getDictStats ()
 	$ret['Words in user chapters'] = $uw;
 	$ret['Total objects'] = $to;
 	$ret['Objects with stickers'] = $so;
-	$ret['Total stickers attached']  = $ta;
+	$ret['Total stickers attached'] = $ta;
 	return $ret;
 }
 
