@@ -85,7 +85,7 @@ function not_already_installed()
 	}
 	else
 	{
-		echo 'There seem to be no existing installation here, I am going to setup one now.<br>';
+		echo 'There seems to be no existing installation here, let\'s set one up now.<br>';
 		return TRUE;
 	}
 }
@@ -317,7 +317,7 @@ function check_config_access()
 	global $path_to_secret_php;
 	if (! is_writable ($path_to_secret_php) && is_readable ($path_to_secret_php))
 	{
-		echo 'The configuration file ownership/permissions seem to be OK.<br>';
+		echo 'The configuration file ownership and permissions seem to be OK.<br>';
 		return TRUE;
 	}
 	$uname = get_process_owner();
