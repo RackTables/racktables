@@ -75,6 +75,7 @@ for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	files=`expr $files + 1`
 done
 for f in tests/*.php; do
+	[ -h "$f" ] && continue
 	testPHPSyntaxOnly "$FORMAT" "$f" || errors=`expr $errors + 1`
 	files=`expr $files + 1`
 done
