@@ -197,7 +197,6 @@ function renderReports ($what)
 
 function renderTagStats ()
 {
-	global $taglist;
 	echo '<table class="zebra widetable"><tr><th>tag</th><th>total</th><th>objects</th><th>IPv4 nets</th><th>IPv6 nets</th>';
 	echo '<th>racks</th><th>IPv4 VS</th><th>IPv4 RS pools</th><th>users</th><th>files</th></tr>';
 	$pagebyrealm = array
