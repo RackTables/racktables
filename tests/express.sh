@@ -20,6 +20,43 @@ esac
 echo "Running express tests using the base directory '$BASEDIR'"
 echo "and PHPUnit bootstrap file '$BOOTSTRAP_FILE'."
 
+testPHPSyntaxOnly()
+{
+	local FORMAT="${1:?}"
+	local INPUT="${2:?}"
+
+	if php --syntax-check "$INPUT" >/dev/null 2>&1; then
+		printf "$FORMAT" "$INPUT" 'OK (syntax only)'
+		return 0
+	else
+		printf "$FORMAT" "$INPUT" "ERROR: PHP syntax check failed"
+		return 1
+	fi
+}
+
+testPHPExitCodeAndOutput()
+{
+	local FORMAT="${1:?}"
+	local INPUT="${2:?}"
+	local TEMPFILE="${3:?}"
+	local fname rc curdir
+
+	fname=`basename "$INPUT"`
+	curdir=`pwd`
+	cd `dirname "$INPUT"`
+	php "$fname" > "$TEMPFILE"
+	rc=$?
+	cd "$curdir"
+	if [ $rc -eq 0 -a ! -s "$TEMPFILE" ]; then
+		printf "$FORMAT" "$INPUT" 'OK'
+		return 0
+	else
+		[ $rc -ne 0 ] && printf "$FORMAT" "$INPUT" "ERROR: PHP interpreter returned code $rc"
+		[ -s "$TEMPFILE" ] && printf "$FORMAT" "$f" 'ERROR: produces output when parsed'
+		return 1
+	fi
+}
+
 # Every file in wwwroot/inc/ must be a valid PHP input file and must not
 # produce any output when parsed by PHP (because, for instance, a plain text
 # file is a valid PHP input file).
@@ -28,46 +65,25 @@ cd "$BASEDIR"
 files=0
 errors=0
 TEMPFILE=`mktemp /tmp/racktables_unittest.XXXXXX`
-FORMAT='%-40s : %s\n'
+FORMAT='%-50s : %s\n'
 for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	if [ "$f" = "wwwroot/inc/init.php" ]; then
-		printf "$FORMAT" "$f" 'not tested'
-		continue # see below
-	fi
-	fname=`basename "$f"`
-	cd `dirname "$f"`
-	php "$fname" > "$TEMPFILE"
-	rc=$?
-	if [ $rc -eq 0 -a ! -s "$TEMPFILE" ]; then
-		printf "$FORMAT" "$f" 'OK'
+		testPHPSyntaxOnly "$FORMAT" "$f" || errors=`expr $errors + 1`
 	else
-		if [ $rc -ne 0 ]; then
-			printf "$FORMAT" "$f" "ERROR: PHP interpreter returned code $rc"
-			errors=`expr $errors + 1`
-		fi
-		if [ -s "$TEMPFILE" ]; then
-			printf "$FORMAT" "$f" 'ERROR: produces output when parsed'
-			errors=`expr $errors + 1`
-		fi
+		testPHPExitCodeAndOutput "$FORMAT" "$f" "$TEMPFILE" || errors=`expr $errors + 1`
 	fi
 	files=`expr $files + 1`
-	cd "$BASEDIR"
 done
 for f in tests/*.php; do
-	if php --syntax-check "$f" >/dev/null 2>&1; then
-		printf "$FORMAT" "$f" 'OK (syntax only)'
-	else
-		printf "$FORMAT" "$f" "ERROR: PHP syntax check failed"
-		errors=`expr $errors + 1`
-	fi
+	testPHPSyntaxOnly "$FORMAT" "$f" || errors=`expr $errors + 1`
 	files=`expr $files + 1`
 done
 echo '---------------------------------------------------'
-echo "Files parsed: $files, failed tests: $errors"
+echo "Files parsed: $files, failed: $errors"
 rm -f "$TEMPFILE"
 [ $errors -eq 0 ] || exit 1
 
-# A side effect of syncdomain.php is testing whether init.php is functional.
+# The command-line scripts among other things prove that init.php actually works.
 echo
 cd "$BASEDIR/wwwroot"
 echo 'Testing syncdomain.php'; ../scripts/syncdomain.php --help || exit 1
