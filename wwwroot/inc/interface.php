@@ -62,10 +62,6 @@ $vtoptions = array
 #	'alien' => 'never touch',
 );
 
-// This may be populated later onsite, report rendering function will use it.
-// See the $systemreport for structure.
-$localreports = array();
-
 $attrtypes = array
 (
 	'uint' => '[U] unsigned integer',

@@ -175,6 +175,9 @@ ENDOFTEXT
 ,
 	'0.21.2' => <<<'ENDOFTEXT'
 "Shared router" allocation type introduced, useful for documenting VRRP-protected addresses.
+
+This version drops support for the $localreports global variable, which is
+trivial to replace in a local plugin if necessary.
 ENDOFTEXT
 ,
 );

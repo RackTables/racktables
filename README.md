@@ -164,6 +164,10 @@ and initialize the application.
 
 ## Release notes
 
+### Upgrading to 0.21.2
+This version drops support for the `$localreports` global variable, which is
+trivial to replace in a local plugin if necessary.
+
 ### Upgrading to 0.21.0
 
 From now on the minimum (oldest) release of PHP that can run RackTables is

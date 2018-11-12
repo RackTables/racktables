@@ -136,12 +136,6 @@ function trigger_passwdchange ()
 	return ($user_auth_src == 'database' || 1 === getUserIDByUsername ($remote_username)) ? 'std' : '';
 }
 
-function trigger_localreports ()
-{
-	global $localreports;
-	return count ($localreports) ? 'std' : '';
-}
-
 function trigger_file_editText ()
 {
 	$fileInfo = spotEntity ('file', getBypassValue());

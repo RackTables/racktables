@@ -40,7 +40,6 @@ if (! fileSearchExists ($path_to_secret_php))
 connectDB();
 transformRequestData();
 $configCache = loadConfigDefaults();
-$tab['reports']['local'] = getConfigVar ('enterprise');
 
 if (getConfigVar ('DB_VERSION') != CODE_VERSION)
 {

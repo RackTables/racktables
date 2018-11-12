@@ -69,12 +69,6 @@ function renderSystemReports ()
 	renderReports ($tmp);
 }
 
-function renderLocalReports ()
-{
-	global $localreports;
-	renderReports ($localreports);
-}
-
 function render8021QReport ()
 {
 	if (!count ($domains = getVLANDomainOptions()))
