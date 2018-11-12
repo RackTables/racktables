@@ -9,11 +9,11 @@ class TagTreeCircularReferenceTest extends RTTestCase
 	public function setUp ()
 	{
 		// add sample data
-		usePreparedInsertBlade ('TagTree', array ('tag' => 'unit test tag a'));
+		usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ('tag a')));
 		$this->taga_id = lastInsertID ();
-		usePreparedInsertBlade ('TagTree', array ('tag' => 'unit test tag b'));
+		usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ('tag b')));
 		$this->tagb_id = lastInsertID ();
-		usePreparedInsertBlade ('TagTree', array ('tag' => 'unit test tag c'));
+		usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ('tag c')));
 		$this->tagc_id = lastInsertID ();
 	}
 
@@ -32,9 +32,9 @@ class TagTreeCircularReferenceTest extends RTTestCase
 	public function testCreateCircularReference ()
 	{
 		// set A as the parent of B, and B as the parent of C
-		commitUpdateTag ($this->tagb_id, 'unit test tag b', $this->taga_id, 'yes');
-		commitUpdateTag ($this->tagc_id, 'unit test tag c', $this->tagb_id, 'yes');
+		commitUpdateTag ($this->tagb_id, $this->myString ('tag b'), $this->taga_id, 'yes');
+		commitUpdateTag ($this->tagc_id, $this->myString ('tag c'), $this->tagb_id, 'yes');
 		// setting C as the parent of A should fail
-		commitUpdateTag ($this->taga_id, 'unit test tag a', $this->tagc_id, 'yes');
+		commitUpdateTag ($this->taga_id, $this->myString ('tag a'), $this->tagc_id, 'yes');
 	}
 }

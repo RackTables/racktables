@@ -6,7 +6,7 @@ class EmptySQLWhereTest extends RTTestCase
 
 	public function setUp ()
 	{
-		usePreparedInsertBlade ('TagTree', array ('tag' => 'unit test tag'));
+		usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ('tag')));
 		$this->tag_id = lastInsertID ();
 	}
 
