@@ -12,15 +12,15 @@ class ObjectCircularReferenceTest extends RTTestCase
 	public static function setUpBeforeClass ()
 	{
 		// add sample data
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type', __CLASS__)));
 		self::$objtype_id = lastInsertID ();
 		commitSupplementOPC (self::$objtype_id, self::$objtype_id);
-		self::$objecta_id = commitAddObject ('unit test object a', NULL, self::$objtype_id, NULL);
-		self::$objectb_id = commitAddObject ('unit test object b', NULL, self::$objtype_id, NULL);
-		self::$objectc_id = commitAddObject ('unit test object c', NULL, self::$objtype_id, NULL);
-		self::$locationa_id = commitAddObject ('unit test location a', NULL, 1562, NULL);
-		self::$locationb_id = commitAddObject ('unit test location b', NULL, 1562, NULL);
-		self::$locationc_id = commitAddObject ('unit test location c', NULL, 1562, NULL);
+		self::$objecta_id = commitAddObject (self::myStringStatic ('object a', __CLASS__), NULL, self::$objtype_id, NULL);
+		self::$objectb_id = commitAddObject (self::myStringStatic ('object b', __CLASS__), NULL, self::$objtype_id, NULL);
+		self::$objectc_id = commitAddObject (self::myStringStatic ('object c', __CLASS__), NULL, self::$objtype_id, NULL);
+		self::$locationa_id = commitAddObject (self::myStringStatic ('location a', __CLASS__), NULL, 1562, NULL);
+		self::$locationb_id = commitAddObject (self::myStringStatic ('location b', __CLASS__), NULL, 1562, NULL);
+		self::$locationc_id = commitAddObject (self::myStringStatic ('location c', __CLASS__), NULL, 1562, NULL);
 	}
 
 	public static function tearDownAfterClass ()

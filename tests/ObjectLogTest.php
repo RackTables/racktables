@@ -16,10 +16,10 @@ class ObjectLogTest extends RTTestCase
 		$sic['logentry'] = $_REQUEST['logentry'] = 'unit test log entry';
 
 		// add sample data
-		self::$rack_id = commitAddObject ('unit test rack', NULL, 1560, NULL);
-		self::$row_id = commitAddObject ('unit test row', NULL, 1561, NULL);
-		self::$location_id = commitAddObject ('unit test location', NULL, 1562, NULL);
-		self::$object_id = commitAddObject ('unit test object', NULL, 1, NULL);
+		self::$rack_id = commitAddObject (self::myStringStatic ('rack', __CLASS__), NULL, 1560, NULL);
+		self::$row_id = commitAddObject (self::myStringStatic ('row', __CLASS__), NULL, 1561, NULL);
+		self::$location_id = commitAddObject (self::myStringStatic ('location', __CLASS__), NULL, 1562, NULL);
+		self::$object_id = commitAddObject (self::myStringStatic ('object', __CLASS__), NULL, 1, NULL);
 	}
 
 	public static function tearDownAfterClass ()

@@ -14,6 +14,10 @@ class RTTestCase extends RTTestCaseShim
 	{
 		return sprintf ('%s-%s-%u', $s, get_class ($this), getmypid());
 	}
+	protected static function myStringStatic ($s, $c)
+	{
+		return sprintf ('%s-%s-%u', $s, $c, getmypid());
+	}
 }
 
 // Sanity check DB connection

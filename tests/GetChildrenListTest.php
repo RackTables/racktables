@@ -13,10 +13,10 @@ class GetChildrenListTest extends RTTestCase
 	public static function setUpBeforeClass ()
 	{
 		// add sample locations
-		self::$locations[] = $parent_location_id = commitAddObject ('unit test location 0', NULL, 1562, NULL);
+		self::$locations[] = $parent_location_id = commitAddObject (self::myStringStatic ('location 0', __CLASS__), NULL, 1562, NULL);
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			$child_location_id = commitAddObject ("unit test location ${i}", NULL, 1562, NULL);
+			$child_location_id = commitAddObject (self::myStringStatic ("location ${i}", __CLASS__), NULL, 1562, NULL);
 			self::$locations[] = $child_location_id;
 			commitLinkEntities ('location', $parent_location_id, 'location', $child_location_id);
 			self::$links[] = lastInsertID();
@@ -24,13 +24,13 @@ class GetChildrenListTest extends RTTestCase
 		}
 
 		// add sample objects
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type', __CLASS__)));
 		self::$objtype_id = lastInsertID ();
 		commitSupplementOPC (self::$objtype_id, self::$objtype_id);
-		self::$objects[] = $parent_object_id = commitAddObject ('unit test object 0', NULL, self::$objtype_id, NULL);
+		self::$objects[] = $parent_object_id = commitAddObject (self::myStringStatic ('object 0', __CLASS__), NULL, self::$objtype_id, NULL);
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			$child_object_id = commitAddObject ("unit test object ${i}", NULL, self::$objtype_id, NULL);
+			$child_object_id = commitAddObject (self::myStringStatic ("object ${i}", __CLASS__), NULL, self::$objtype_id, NULL);
 			self::$objects[] = $child_object_id;
 			commitLinkEntities ('object', $parent_object_id, 'object', $child_object_id);
 			self::$links[] = lastInsertID();
@@ -38,11 +38,11 @@ class GetChildrenListTest extends RTTestCase
 		}
 
 		// add sample tags
-		usePreparedInsertBlade ('TagTree', array ('tag' => 'unit test tag 0'));
+		usePreparedInsertBlade ('TagTree', array ('tag' => self::myStringStatic ('tag 0', __CLASS__)));
 		self::$tags[] = $parent_tag_id = lastInsertID ();
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			usePreparedInsertBlade ('TagTree', array ('parent_id' => $parent_tag_id, 'tag' => "unit test tag ${i}"));
+			usePreparedInsertBlade ('TagTree', array ('parent_id' => $parent_tag_id, 'tag' => self::myStringStatic ("tag ${i}", __CLASS__)));
 			$parent_tag_id = lastInsertID ();
 			self::$tags[] = $parent_tag_id;
 		}

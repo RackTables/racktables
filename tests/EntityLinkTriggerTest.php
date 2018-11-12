@@ -15,13 +15,13 @@ class EntityLinkTriggerTest extends RTTestCase
 	public static function setUpBeforeClass ()
 	{
 		// add sample data
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type a'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type a', __CLASS__)));
 		self::$objtypea_id = lastInsertID ();
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type b'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type b', __CLASS__)));
 		self::$objtypeb_id = lastInsertID ();
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type c'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type c', __CLASS__)));
 		self::$objtypec_id = lastInsertID ();
-		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => 'unit test object type d'));
+		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type d', __CLASS__)));
 		self::$objtyped_id = lastInsertID ();
 		commitSupplementOPC (self::$objtypea_id, self::$objtypeb_id);
 		commitSupplementOPC (self::$objtypea_id, self::$objtypec_id);
@@ -29,17 +29,17 @@ class EntityLinkTriggerTest extends RTTestCase
 		commitSupplementOPC (self::$objtypeb_id, self::$objtypec_id);
 		commitSupplementOPC (self::$objtypec_id, self::$objtypea_id);
 		commitSupplementOPC (self::$objtypec_id, self::$objtypeb_id);
-		self::$objecta_id = commitAddObject ('unit test object a', NULL, self::$objtypea_id, NULL);
-		self::$objectb_id = commitAddObject ('unit test object b', NULL, self::$objtypeb_id, NULL);
-		self::$objectc_id = commitAddObject ('unit test object c', NULL, self::$objtypec_id, NULL);
-		self::$objectd_id = commitAddObject ('unit test object d', NULL, self::$objtyped_id, NULL);
-		self::$locationa_id = commitAddObject ('unit test location a', NULL, 1562, NULL);
-		self::$locationb_id = commitAddObject ('unit test location b', NULL, 1562, NULL);
-		self::$locationc_id = commitAddObject ('unit test location c', NULL, 1562, NULL);
-		self::$rowa_id = commitAddObject ('unit test row a', NULL, 1561, NULL);
-		self::$rowb_id = commitAddObject ('unit test row b', NULL, 1561, NULL);
-		self::$racka_id = commitAddObject ('unit test rack a', NULL, 1560, NULL);
-		self::$rackb_id = commitAddObject ('unit test rack b', NULL, 1560, NULL);
+		self::$objecta_id = commitAddObject (self::myStringStatic ('object a', __CLASS__), NULL, self::$objtypea_id, NULL);
+		self::$objectb_id = commitAddObject (self::myStringStatic ('object b', __CLASS__), NULL, self::$objtypeb_id, NULL);
+		self::$objectc_id = commitAddObject (self::myStringStatic ('object c', __CLASS__), NULL, self::$objtypec_id, NULL);
+		self::$objectd_id = commitAddObject (self::myStringStatic ('object d', __CLASS__), NULL, self::$objtyped_id, NULL);
+		self::$locationa_id = commitAddObject (self::myStringStatic ('location a', __CLASS__), NULL, 1562, NULL);
+		self::$locationb_id = commitAddObject (self::myStringStatic ('location b', __CLASS__), NULL, 1562, NULL);
+		self::$locationc_id = commitAddObject (self::myStringStatic ('location c', __CLASS__), NULL, 1562, NULL);
+		self::$rowa_id = commitAddObject (self::myStringStatic ('row a', __CLASS__), NULL, 1561, NULL);
+		self::$rowb_id = commitAddObject (self::myStringStatic ('row b', __CLASS__), NULL, 1561, NULL);
+		self::$racka_id = commitAddObject (self::myStringStatic ('rack a', __CLASS__), NULL, 1560, NULL);
+		self::$rackb_id = commitAddObject (self::myStringStatic ('rack b', __CLASS__), NULL, 1560, NULL);
 	}
 
 	public static function tearDownAfterClass ()
