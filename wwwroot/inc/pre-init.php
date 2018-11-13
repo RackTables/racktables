@@ -103,3 +103,27 @@ function fileSearchExists ($filename)
 	}
 	return file_exists ($filename);
 }
+
+// tries to see if a table is present and returns true/false.
+// needs to be here to be available to both the install and
+// core sections.
+function doesTableExist ($name)
+{
+	global $dbxlink;
+
+	try {
+		if (!isset($dbxlink) || $dbxlink == NULL)
+			connectDB();
+
+		if (!isset($dbxlink) || $dbxlink == NULL)
+			return false;
+
+		$query = 'SHOW TABLES LIKE \'' . $name . '\'';
+		$prepare = $dbxlink->prepare($query);
+		$prepare->execute();
+		$row = $prepare->fetchAll (PDO::FETCH_ASSOC);
+		return !empty($row);
+	} catch (Exception $e) {
+		return false;
+	}
+}

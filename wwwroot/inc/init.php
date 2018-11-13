@@ -27,7 +27,15 @@ require_once 'slb.php';
 require_once 'slbv2.php';
 
 // secret.php may be missing, in which case this is a special fatal error
+$isDBInitialised = true;
 if (! fileSearchExists ($path_to_secret_php))
+	$isDBInitialised = false;
+else {
+	connectDB();
+	$isDBInitialised = doesTableExist('Config');
+}
+
+if (!$isDBInitialised)
 	throw new RackTablesError
 	(
 		"This instance of RackTables misses a configuration file " .
@@ -37,7 +45,6 @@ if (! fileSearchExists ($path_to_secret_php))
 		RackTablesError::MISCONFIGURED
 	);
 
-connectDB();
 transformRequestData();
 $configCache = loadConfigDefaults();
 

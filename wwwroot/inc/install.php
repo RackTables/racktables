@@ -78,7 +78,9 @@ echo "<input type=hidden name=step value='${next_step}'>\n";
 function not_already_installed()
 {
 	global $found_secret_file, $pdo_dsn;
-	if ($found_secret_file && isset ($pdo_dsn))
+
+	// Do we have a database connection, and a Config table?
+	if ($found_secret_file && isset ($pdo_dsn) && doesTableExist('Config'))
 	{
 		echo 'Your configuration file exists and seems to hold necessary data already.<br>';
 		return FALSE;
@@ -133,6 +135,13 @@ function init_config ()
 		echo '</table>';
 	}
 	global $path_to_secret_php;
+
+	if (try_connect_db ())
+	{
+		echo "Database connectivity seems to be OK.<br>";
+		return TRUE;
+	}
+
 	if (!is_writable ($path_to_secret_php))
 	{
 		echo "The $path_to_secret_php file is not writable by web-server. Make sure it is.";
@@ -334,6 +343,21 @@ function check_config_access()
 	echo 'only as an example):';
 	echo "<pre>chown $uname:nogroup secret.php; chmod 440 secret.php</pre>";
 	return FALSE;
+}
+
+// Similar to connect_to_db_or_die but allow for a
+// TRUE/FALSE return instead of throwing an exception
+function try_connect_db () {
+	try
+	{
+		connectDB();
+		return true;
+	}
+	catch (RackTablesError $e)
+	{
+	}
+
+	return false;
 }
 
 function connect_to_db_or_die ()
