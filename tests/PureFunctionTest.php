@@ -503,6 +503,15 @@ class PureFunctionTest extends RTTestCase
 			array ('datetimeFormatHint', '%Y-%m-%d', 'YYYY-MM-DD'),
 			array ('datetimeFormatHint', '%d/%m/%y', 'DD/MM/YY'),
 			array ('datetimeFormatHint', '%d.%m.%Y', 'DD.MM.YYYY'),
+
+			// validate various URI/URL combinations
+			array ('isUri', 'https://www.test.com', FALSE),
+			array ('isUri', '/js/table.js', TRUE),
+			array ('isUri', '!#$%', FALSE),
+
+			array ('isUrl', 'https://www.test.com', TRUE),
+			array ('isUrl', '/js/table.js', FALSE),
+			array ('isUrl', '!#$%', FALSE),
 		);
 	}
 

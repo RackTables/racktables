@@ -96,10 +96,10 @@ function renderUserProperties ($user_id)
 function renderRackCodeViewer ()
 {
 	echo '<table width="100%" border=0>';
-	addJS ('js/codemirror/codemirror.js');
-	addJS ('js/codemirror/rackcode.js');
-	addCSS ('css/codemirror/codemirror.css');
-	addCSS ('css/codemirror/rackcode.css');
+	addJSInternal ('js/codemirror/codemirror.js');
+	addJSInternal ('js/codemirror/rackcode.js');
+	addCSSInternal ('css/codemirror/codemirror.css');
+	addCSSInternal ('css/codemirror/rackcode.css');
 	if (! array_key_exists ('line', $_REQUEST))
 		$scrollcode = '';
 	else
@@ -110,7 +110,7 @@ function renderRackCodeViewer ()
 			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
 	}
 	// Heredoc, not nowdoc!
-	addJS (<<<"ENDJAVASCRIPT"
+	addJSText (<<<"ENDJAVASCRIPT"
 $(document).ready(function() {
 	var rackCodeMirror = CodeMirror.fromTextArea(document.getElementById("RCTA"),{
 		mode:'rackcode',
@@ -128,11 +128,11 @@ ENDJAVASCRIPT
 
 function renderRackCodeEditor ()
 {
-	addJS ('js/codemirror/codemirror.js');
-	addJS ('js/codemirror/rackcode.js');
-	addCSS ('css/codemirror/codemirror.css');
-	addCSS ('css/codemirror/rackcode.css');
-	addJS (<<<'ENDJAVASCRIPT'
+	addJSInternal ('js/codemirror/codemirror.js');
+	addJSInternal ('js/codemirror/rackcode.js');
+	addCSSInternal ('css/codemirror/codemirror.css');
+	addCSSInternal ('css/codemirror/rackcode.css');
+	addJSText (<<<'ENDJAVASCRIPT'
 function verify()
 {
 	$.ajax({
@@ -959,7 +959,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 
 function addParentNodeOptionsJS ($prefix, $nodetype)
 {
-	addJS
+	addJSText
 	(
 // Heredoc, not nowdoc!
 <<<"END"

@@ -168,6 +168,39 @@ and initialize the application.
 This version drops support for the `$localreports` global variable, which is
 trivial to replace in a local plugin if necessary.
 
+There has been a separation of the `addJS` and `addCSS` functions to easily 
+identify the resource usage.  The original `addJS` and `addCSS` functions will 
+most likely to be removed in 0.22.0 as they are depreciated.
+
+- *`addJSText`/`addCSSText`*
+
+  These functions should be used to add inline JS/CSS 
+  not defined in a separate file.
+
+- *`addJSInternal`/`addCSSInternal`*
+
+  These functions should be used to add an internal reference to a JS/CSS file 
+  which is accessed using the `?module=chrome&uri=` for self hosted JS/CSS 
+  files.  This can be utilised by both the core and plugins.
+
+- *`addJSExternal`/`addCSSExternal`*
+
+  These functions should be used to add an external reference to a JS/CSS file 
+  which hosted on an external site or CDN. This can be utilised by both the core 
+  and plugins.
+
+Each of these functions expect the first parameter to be the data or URI, and 
+the second parameter to be an optional group.  By default, the group is set to 
+'default' and groups are sorted alphabetically.  It should be noted that when 
+the `addJSInternal` function is used, it will also add the jQuery and RackTables 
+common JavaScript functons.
+
+Due to this separation, you will no longer need to supply a TRUE or FALSE to 
+identify whether the parameter value is text or a URI.  If you rename an 
+existing `addJS`/`addCSS` function call, be sure to remove this parameter. 
+Failure to do so will mean you are effectively be saying that the group name is 
+'' (false) or '1' (true).
+
 ### Upgrading to 0.21.0
 
 From now on the minimum (oldest) release of PHP that can run RackTables is
@@ -355,3 +388,4 @@ besides 'yes' and 'no': 'none'. Use 'none' value if you are experiencing low
 performance on IP tree page. It will completely disable IP ranges scan for
 used/spare IPs and the speed of IP tree will increase radically. The price is
 you will not see the routers in IP tree at all.
+

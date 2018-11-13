@@ -363,7 +363,7 @@ function expand(id) {
 	}
 }
 END
-	,TRUE);
+	);
 	startPortlet ('Location filter');
 	echo <<<'END'
 <table border=0 align=center cellspacing=0 class="tagtree" id="locationFilter">
@@ -596,7 +596,7 @@ function renderRackspaceLocationEditor ()
 	});
 JSTXT;
 
-	addJS($js, TRUE	);
+	addJS($js);
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addLocation');
@@ -1066,7 +1066,7 @@ function renderRackSortForm ($row_id)
 		}
 	);
 JSTXT;
-	addJS ($js, TRUE);
+	addJSText ($js);
 
 	startPortlet ('Racks');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center class=widetable>\n";
@@ -1321,7 +1321,7 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	$is_ro = !rackModificationPermitted ($rackData, 'updateRack');
 	startPortlet ($header);
 	includeJQueryUI (FALSE);
-	addJS ('js/racktables.js');
+	addJSInternal ('js/racktables.js');
 	$table_id = 'selectableRack';
 	addBulkSelectorJS ($table_id);
 	echo "<center>\n";
@@ -1510,7 +1510,7 @@ function renderObject ($object_id)
 		foreach ($info['ports'] as $port)
 			callHook ('renderObjectPortRow', $port, ($hl_port_id == $port['id']));
 		if (permitted (NULL, 'ports', 'set_reserve_comment'))
-			addJS ('js/inplace-edit.js');
+			addJSInternal ('js/inplace-edit.js');
 		echo "</table><br>";
 		finishPortlet();
 	}
@@ -1831,7 +1831,7 @@ function renderIPForObject ($object_id)
 		includeJQueryUI (TRUE);
 
 		// Heredoc, not nowdoc!
-		addJS (<<<"JSEND"
+		addJSText (<<<"JSEND"
 			$(document).ready( function() {
 				$('[name="bond_name"]').autocomplete({
 					source: "?module=ajax&ac=autocomplete&realm=bond_name&object_id=$object_id",
@@ -1847,7 +1847,7 @@ function renderIPForObject ($object_id)
 				});
 			});
 JSEND
-		, TRUE);
+		);
 		printOpFormIntro ('add');
 		echo "<tr><td>"; // left btn
 		printImageHREF ('add', 'allocate', TRUE);
@@ -2146,7 +2146,7 @@ function renderPortsInfo($object_id)
 function addBulkSelectorJS ($element_id)
 {
 	// Heredoc, not nowdoc!
-	addJS (<<<"ENDOFJAVASCRIPT"
+	addJSText (<<<"ENDOFJAVASCRIPT"
 $(function () {
     $("#{$element_id} tbody").selectable({
         filter: 'td.atom',
@@ -2159,7 +2159,7 @@ $(function () {
     });
 });
 ENDOFJAVASCRIPT
-, TRUE);
+	);
 }
 
 // An object can be mounted onto free atoms only, that is, if any record for an atom
@@ -2260,7 +2260,7 @@ function renderRackSpaceForObject ($object_id)
 	echo "<td class=pcright rowspan=2 height='1%'>";
 	startPortlet ('Working copy');
 	includeJQueryUI (false);
-	addJS ('js/racktables.js');
+	addJSInternal ('js/racktables.js');
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
 	{
@@ -2725,16 +2725,16 @@ function renderIPNewNetForm ()
 	}
 
 	// IP prefix validator
-	addJS ('js/live_validation.js');
+	addJSInternal ('js/live_validation.js');
 	$regexp = addslashes ($regexp);
 	// Heredoc, not nowdoc!
-	addJS (<<<"END"
+	addJSText (<<<"END"
 $(document).ready(function () {
 	$('form#add input[name="range"]').attr('match', '$regexp');
 	Validate.init();
 });
 END
-	, TRUE);
+	);
 
 	startPortlet ('Add new');
 	printOpFormIntro ('add');
@@ -3091,7 +3091,7 @@ function renderIPv4NetworkAddresses ($range)
 	}
 	// end of iteration
 	if (permitted (NULL, NULL, 'set_reserve_comment'))
-		addJS ('js/inplace-edit.js');
+		addJSInternal ('js/inplace-edit.js');
 
 	echo "</table>";
 	if ($rendered_pager != '')
@@ -3227,7 +3227,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 	}
 	echo "</table>";
 	if (permitted (NULL, NULL, 'set_reserve_comment'))
-		addJS ('js/inplace-edit.js');
+		addJSInternal ('js/inplace-edit.js');
 }
 
 function renderIPNetworkProperties ($id)
@@ -3408,7 +3408,7 @@ function renderIPAddressAllocations ($ip_bin)
 
 		includeJQueryUI (TRUE);
 
-		addJS (<<<'JSEND'
+		addJSText (<<<'JSEND'
 			$(document).ready( function() {
 				$('[name="bond_name"]').autocomplete({
 					//minLength: 3,
@@ -3430,7 +3430,7 @@ function renderIPAddressAllocations ($ip_bin)
 				});
 			});
 JSEND
-		, TRUE);
+		);
 		printOpFormIntro ('add');
 		echo "<tr id='aid-new'><td>";
 		printImageHREF ('add', 'allocate', TRUE);
@@ -3960,7 +3960,7 @@ function renderAtomGrid ($data, $is_ro = FALSE)
 	markAllSpans ($data);
 	$rack_id = $data['id'];
 	$reverse = considerConfiguredConstraint ($data, 'REVERSED_RACKS_LISTSRC');
-	addJS ('js/racktables.js');
+	addJSInternal ('js/racktables.js');
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
 		$unit_label = inverseRackUnit ($data['height'], $unit_no, $reverse);
@@ -4380,7 +4380,7 @@ function renderLivePTR ($id)
 	if ($can_import && $box_counter > 1)
 	{
 		echo '<tr><td colspan=3 align=center><input type=submit value="Import selected records"></td><td>';
-		addJS ('js/racktables.js');
+		addJSInternal ('js/racktables.js');
 		echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, ${box_counter})\">(toggle selection)</a>" : '&nbsp;';
 		echo '</td></tr>';
 	}
@@ -4533,8 +4533,8 @@ function renderEntityTags ($entity_id)
 				$js_code .= "\n\t${tag['id']} : 1";
 			}
 			$js_code .= "\n});\n$(document).ready(tag_cb.compactTreeMode);";
-			addJS ('js/tag-cb.js');
-			addJS ($js_code, TRUE);
+			addJSInternal ('js/tag-cb.js');
+			addJSText ($js_code);
 		}
 	}
 
@@ -4549,8 +4549,8 @@ function renderEntityTags ($entity_id)
 // This one is going to replace the tag filter.
 function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $bypass_params = array())
 {
-	addJS ('js/tag-cb.js');
-	addJS ('tag_cb.enableNegation()', TRUE);
+	addJSInternal ('js/tag-cb.js');
+	addJSText ('tag_cb.enableNegation()');
 
 	global $pageno, $tabno, $taglist;
 	$filterc =
@@ -4607,7 +4607,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		}
 
 		if (getConfigVar('SHRINK_TAG_TREE_ON_CLICK') == 'yes')
-			addJS ('tag_cb.enableSubmitOnClick()', TRUE);
+			addJSText ('tag_cb.enableSubmitOnClick()');
 	}
 	// predicates block
 	if (getConfigVar ('FILTER_SUGGEST_PREDICATES') == 'yes' || count ($preselect['pnamelist']))
@@ -4682,7 +4682,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 			echo " <a href=\"#\" onclick=\"textifyCellFilter(this, '$text'); return false\">";
 			printImageHREF ('COPY', 'Make text expression from current filter');
 			echo '</a>';
-			addJS (<<<'END'
+			addJSText (<<<'END'
 function textifyCellFilter(target, text)
 {
 	var portlet = $(target).closest ('.portlet');
@@ -4691,7 +4691,6 @@ function textifyCellFilter(target, text)
 	portlet.find ('input[type="radio"][value="and"]').attr('checked','true');
 }
 END
-				, TRUE
 			);
 		}
 		echo '</td><td class=tdright>';
@@ -5911,7 +5910,7 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	echo '</table></form>';
 
-	addJS (<<<'END'
+	addJSText (<<<'END'
 $(document).ready(function () {
 	$('#cb-toggle').click(function (event) {
 		var list = $('.cb-makelink');
@@ -5922,7 +5921,6 @@ $(document).ready(function () {
 	}).triggerHandler('click');
 });
 END
-		, TRUE
 	);
 }
 
@@ -6074,14 +6072,14 @@ function formatAttributeValue ($record, $objtype_id)
 function addAutoScrollScript ($anchor_name)
 {
 	// Heredoc, not nowdoc!
-	addJS (<<<"END"
+	addJSText (<<<"END"
 $(document).ready(function() {
 	var anchor = document.getElementsByName('$anchor_name')[0];
 	if (anchor)
 		anchor.scrollIntoView(false);
 });
 END
-	, TRUE);
+	);
 }
 
 //
@@ -6293,11 +6291,11 @@ function switchportInfoJS($object_id)
 		)
 			$allowed_ops[] = $prefix;
 
-	addJS ('js/jquery.thumbhover.js');
-	addCSS ('css/jquery.contextmenu.css');
-	addJS ('js/jquery.contextmenu.js');
-	addJS ("enabled_elements = " . json_encode ($allowed_ops), TRUE);
-	addJS ('js/portinfo.js');
+	addJSInternal ('js/jquery.thumbhover.js');
+	addCSSInternal ('css/jquery.contextmenu.css');
+	addJSInternal ('js/jquery.contextmenu.js');
+	addJSText ("enabled_elements = " . json_encode ($allowed_ops));
+	addJSInternal ('js/portinfo.js');
 }
 
 function renderIPAddressLog ($ip_bin)

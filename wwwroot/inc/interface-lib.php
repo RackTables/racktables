@@ -403,8 +403,8 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 		'empty_value' => '',
 		'indexed' => TRUE,
 	);
-	addJS ('js/jquery.optionTree.js');
-	addJS ("
+	addJSInternal ('js/jquery.optionTree.js');
+	addJSText ("
 $(function() {
 	var option_tree = " . json_encode ($tree_options) . ";
 	var options = " . json_encode ($tree_config + $default_config) . ";
@@ -497,47 +497,90 @@ function transformRequestData()
 		$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 }
 
-// JS scripts should be included through this function.
-// They automatically appear in the <head> of your page.
-// $data is a JS filename, or JS code w/o tags around, if $inline = TRUE
-// Scripts are included in the order of adding within the same group, and groups are sorted alphabetically.
+// Return whether value passed is likely to be a Uri
+function isUri ($uri)
+{
+	return preg_match ('~^[\w\-\._\/ ]+$~', $uri);
+}
+
+// Return whether value passed is likely to be a Url
+function isUrl ($url)
+{
+	return preg_match ('~^[\w]+:\/\/[\w \-\.\_\/]+$~', $url);
+}
+
+// JS scripts should be included through the addJS* functions. They will automatically appear in the <head> of your page.
+// the addJS function has been replaced by addJSInternal, addJSExternal and addJSText() functions.  This function will be
+// removed in 2.22.0
 function addJS ($data, $inline = FALSE, $group = 'default')
 {
-	static $javascript = array();
-	static $seen_data = array();
+	if ($inline)
+		addJSText ($data, $group);
+	else if (isURL ($data))
+		addJSExternal ($data, $group);
+	else
+		addJSInternal ($data, $group);
+}
 
-	if (! isset ($data))
+// addJSExternal links to external scripts via URL and must be prefixed with
+// either http:// or https://
+function addJSExternal ($url, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
+	if (! isUrl ($url))
+		throw new InvalidArgException ('url', $url, 'Value passed is not a URL');
+
+	$url = "<script type='text/javascript' src='${url}'></script>\n";
+	if (!isset ($seen_headers[$url]))
 	{
-		ksort ($javascript);
-		return $javascript;
+		$html_headers[$group][] = $url;
+		$seen_headers[$url] = 1;
 	}
+}
+
+// addJSInternal adds links that go through the Chrome module of index.php
+function addJSInternal ($uri, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
 	// Add jquery.js and racktables.js the first time a Javascript file is added.
-	if (! count ($javascript))
+	if (! array_key_exists ('a_core', $html_headers))
 	{
-		$javascript = array
-		(
-			'a_core' => array
-			(
-				array('type' => 'file', 'script' => 'js/jquery-1.4.4.min.js'),
-				array('type' => 'file', 'script' => 'js/racktables.js'),
-			),
-		);
+		$html_headers['a_core'] = array();
 
-		// initialize core js filelist
-		foreach ($javascript as $group_name => $group_array)
-			foreach ($group_array as $item)
-				if ($item['type'] == 'file')
-					$seen_data[$item['script']] = 1;
+		addJSInternal('js/jquery-1.4.4.min.js', 'a_core');
+		addJSInternal('js/racktables.js',       'a_core');
 	}
 
-	if (! isset ($seen_data[$data]))
+	if (! isUri ($uri))
+		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid Uri');
+
+	$uri = "<script type='text/javascript' src='?module=chrome&uri=${uri}'></script>\n";
+	if (! isset ($seen_headers[$uri]))
 	{
-		$javascript[$group][] = array
-		(
-			'type' => $inline ? 'inline' : 'file',
-			'script' => $data,
-		);
-		$seen_data[$data] = 1;
+		$html_headers[$group][] = $uri;
+		$seen_headers[$uri] = 1;
+	}
+}
+
+// This function adds script blocks that automatically appear in the <head> of your page.
+// Scripts are included in the order of adding within the same group, and groups are sorted alphabetically.
+function addJSText ($text, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
+	if (isUrl ($text))
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Url and should use addJSExternal');
+
+	if (isUri ($text))
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Uri and should use addJSInternal');
+
+	$text = '<script type="text/javascript">' . "\n" . trim ($text, "\r\n") . "\n</script>\n";
+	if (! isset ($seen_headers[$text]))
+	{
+		$html_headers[$group][] = $text;
+		$seen_headers[$text] = 1;
 	}
 }
 
@@ -545,21 +588,73 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 // They automatically appear in the <head> of your page.
 // $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
 // Styles are included in the order of adding.
-function addCSS ($data, $inline = FALSE)
+function addCSS ($data, $inline = FALSE, $group = 'default')
 {
-	static $styles = array();
-	static $seen_data = array();
+	if ($inline)
+		addCSSText ($data, $group);
+	else if (isURL ($data))
+		addCSSExternal ($data, $group);
+	else
+		addCSSInternal ($data, $group);
+}
 
-	if (! isset ($data))
-		return $styles;
-	if (! isset ($seen_data[$data]))
+// CSS styles should be included through this function.
+// They automatically appear in the <head> of your page.
+// $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
+// Styles are included in the order of adding.
+function addCSSExternal ($url, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
+	if (! isUrl ($url))
+		throw new InvalidArgException ('url', $url, 'Value passed is not a valid Url');
+
+	$url = "<link rel=stylesheet type='text/css' href='$url' />\n";
+	if (! isset ($seen_headers[$url]))
 	{
-		$styles[] = array
-		(
-			'type' => $inline ? 'inline' : 'file',
-			'style' => $data,
-		);
-		$seen_data[$data] = 1;
+		$html_headers[$group][] = $url;
+		$seen_headers[$url] = 1;
+	}
+}
+
+// CSS styles should be included through this function.
+// They automatically appear in the <head> of your page.
+// $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
+// Styles are included in the order of adding.
+function addCSSInternal ($uri, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
+	if (! isUri ($uri))
+		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid Uri');
+
+	$uri = "<link rel=stylesheet type='text/css' href='?module=chrome&uri=$uri' />\n";
+	if (! isset ($seen_headers[$uri]))
+	{
+		$html_headers[$group][] = $uri;
+		$seen_headers[$uri] = 1;
+	}
+}
+
+// CSS styles should be included through this function.
+// They automatically appear in the <head> of your page.
+// $data is a CSS filename, or CSS code w/o tags around, if $inline = TRUE
+// Styles are included in the order of adding.
+function addCSSText ($text, $group = 'default')
+{
+	global $html_headers, $seen_headers;
+
+	if (isUrl ($text))
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Url and should use addCSSExternal');
+
+	if (isUri ($text))
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Uri and should use addCSSInternal');
+
+	$text = '<style type="text/css">' . "\n" . trim ($text, "\r\n") . "\n</style>\n";
+	if (! isset ($seen_headers[$text]))
+	{
+		$html_headers[$group][] = $text;
+		$seen_headers[$text] = 1;
 	}
 }
 
@@ -630,7 +725,7 @@ function getRenderedIPv4NetCapacity ($range)
 	{
 		// fast mode
 		$class .= ' pending';
-		addJS ('js/net-usage.js');
+		addJSInternal ('js/net-usage.js');
 
 		$free_text = '';
 		if (isset ($range['kidc']) && $range['kidc'] > 0)
@@ -661,7 +756,7 @@ function getRenderedIPv6NetCapacity ($range)
 	{
 		$used = NULL;
 		$class .= ' pending';
-		addJS ('js/net-usage.js');
+		addJSInternal ('js/net-usage.js');
 	}
 
 	static $prefixes = array
@@ -709,22 +804,15 @@ function printPageHeaders ()
 	foreach ($pageheaders as $s)
 		echo $s . "\n";
 	// add tabindex to all input forms
-	addJS ('js/tabindex_auto.js', FALSE);
+	addJSInternal ('js/tabindex_auto.js');
 
-	// add CSS styles
-	foreach (addCSS (NULL) as $item)
-		if ($item['type'] == 'inline')
-			echo '<style type="text/css">' . "\n" . trim ($item['style'], "\r\n") . "\n</style>\n";
-		elseif ($item['type'] == 'file')
-			echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=${item['style']}' />\n";
+	// add JS/CSS headers
+	global $html_headers;
+	ksort($html_headers);
 
-	// add JS scripts
-	foreach (addJS (NULL) as $group_name => $js_list)
-		foreach ($js_list as $item)
-			if ($item['type'] == 'inline')
-				echo '<script type="text/javascript">' . "\n" . trim ($item['script'], "\r\n") . "\n</script>\n";
-			elseif ($item['type'] == 'file')
-				echo "<script type='text/javascript' src='?module=chrome&uri=${item['script']}'></script>\n";
+	foreach ($html_headers as $group_name => $list)
+		foreach ($list as $index => $item)
+			echo "<!-- $group_name:$index -->\n" . $item;
 }
 
 function cmpTags ($a, $b)
@@ -928,7 +1016,7 @@ function getOpLink ($params, $title,  $img_name = '', $comment = '', $class = ''
 			$ret .= ' ';
 	}
 	if (FALSE !== strpos ($class, 'need-confirmation'))
-		addJS ('js/racktables.js');
+		addJSInternal ('js/racktables.js');
 	$ret .= $title . '</a>';
 	return $ret;
 }
@@ -999,9 +1087,9 @@ function getRenderedNetVLAN ($cell)
 
 function includeJQueryUI ($do_css = TRUE)
 {
-	addJS ('js/jquery-ui-1.8.21.min.js');
+	addJSInternal ('js/jquery-ui-1.8.21.min.js');
 	if ($do_css)
-		addCSS ('css/jquery-ui-1.8.22.redmond.css');
+		addCSSInternal ('css/jquery-ui-1.8.22.redmond.css');
 }
 
 function getRenderedIPPortPair ($ip, $port = NULL)
@@ -1160,9 +1248,9 @@ function enableTagsPicker ()
 	global $taglist;
 	static $taglist_inserted;
 	includeJQueryUI ();
-	addCSS ('css/tagit.css');
-	addJS ('js/tag-it.js');
-	addJS ('js/tag-it-local.js');
+	addCSSInternal ('css/tagit.css');
+	addJSInternal ('js/tag-it.js');
+	addJSInternal ('js/tag-it-local.js');
 	if (! $taglist_inserted)
 	{
 		$taglist_filtered = array();
@@ -1172,7 +1260,7 @@ function enableTagsPicker ()
 			if ($taginfo['color'] != NULL)
 				$taglist_filtered[$key]['tagclass'] = getTagClass ($taginfo);
 		}
-		addJS ('var taglist = ' . json_encode ($taglist_filtered) . ';', TRUE);
+		addJSText ('var taglist = ' . json_encode ($taglist_filtered) . ';');
 		$taglist_inserted = TRUE;
 	}
 }
@@ -1242,7 +1330,7 @@ function getCachedCSSClassForStyle ($class, $style)
 	$cachedclass = array_search ($style, $cache);
 	if ($cachedclass !== FALSE)
 		return " $cachedclass";
-	addCSS (".{$class} {{$style}}", TRUE);
+	addCSSText (".{$class} {{$style}}");
 	$cache[$class] = $style;
 	return " $class";
 }
