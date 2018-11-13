@@ -6123,8 +6123,8 @@ function allObjectLogs ()
 	$columns = array
 	(
 		array ('th_text' => 'Object', 'th_class' => 'tdleft', 'row_key' => 0, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
-		array ('th_text' => 'Date/user', 'th_class' => 'tdleft', 'row_key' => 1, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
-		array ('th_text' => getImageHREF ('text'), 'th_class' => 'tdcenter', 'row_key' => 2, 'td_class' => 'logentry'),
+		array ('th_text' => 'Date/user', 'th_class' => 'tdleft', 'row_key' => 1, 'td_class' => 'tdleft'),
+		array ('th_text' => getImageHREF ('text'), 'th_class' => 'tdcenter', 'row_key' => 2, 'td_escape' => FALSE, 'td_class' => 'logentry'),
 	);
 	$rows = array();
 	foreach ($logs as $row)
