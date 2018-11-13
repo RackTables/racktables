@@ -6123,7 +6123,7 @@ function allObjectLogs ()
 	$columns = array
 	(
 		array ('th_text' => 'Object', 'th_class' => 'tdleft', 'row_key' => 0, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
-		array ('th_text' => 'Date/user', 'th_class' => 'tdleft', 'row_key' => 1, 'td_class' => 'tdleft'),
+		array ('th_text' => 'Date/user', 'th_class' => 'tdleft', 'row_key' => 1, 'td_escape' => FALSE, 'td_class' => 'tdleft'),
 		array ('th_text' => getImageHREF ('text'), 'th_class' => 'tdcenter', 'row_key' => 2, 'td_escape' => FALSE, 'td_class' => 'logentry'),
 	);
 	$rows = array();
@@ -6152,7 +6152,7 @@ function allObjectLogs ()
 		$rows[] = array
 		(
 			mkA ($text, $entity, $row['object_id'], 'log'),
-			$row['date'] . '<br>' . $row['user'],
+			$row['date'] . '<br>' . stringForLabel ($row['user'], 0),
 			string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)),
 		);
 	}
