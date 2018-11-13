@@ -157,8 +157,8 @@ function renderEditVS ($vs_id)
 	echo '</th></tr>';
 	echo '</table></form>';
 
-	addJS ('js/jquery.thumbhover.js');
-	addJS ('js/slb_editor.js');
+	addJSInternal ('js/jquery.thumbhover.js');
+	addJSInternal ('js/slb_editor.js');
 
 	// second form - ports and IPs settings
 	echo '<p>'; // vertical indentation
@@ -326,8 +326,8 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		echo "</tr>";
 	}
 
-	addJS ('js/slb_editor.js');
-	addJS ('js/jquery.thumbhover.js');
+	addJSInternal ('js/slb_editor.js');
+	addJSInternal ('js/jquery.thumbhover.js');
 
 	$class = 'slb-checks';
 	if ($editable)
@@ -584,15 +584,15 @@ function getPopupSLBConfig ($row)
 	static $js_added = FALSE;
 	if (! $js_added)
 	{
-		addJS ('js/jquery.thumbhover.js');
-		addJS (<<<'END'
+		addJSInternal ('js/jquery.thumbhover.js');
+		addJSText (<<<'END'
 $(document).ready (function () {
 	$('.slbconf-btn').each (function () {
 		$(this).thumbPopup($(this).siblings('.slbconf.popup-box'), { showFreezeHint: false });
 	});
 });
 END
-		, TRUE);
+		);
 	}
 	return $ret;
 }

@@ -1180,7 +1180,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 	switchportInfoJS ($vswitch['object_id']); // load JS code to make portnames interactive
 	// Initialize one of the three popups: the data is ready.
 	$port_config = addslashes (json_encode (formatPortConfigHints ($vswitch['object_id'], $R)));
-	addJS (<<<'END'
+	addJSText (<<<'END'
 $(document).ready(function(){
 	var confData = $.parseJSON('$port_config');
 	applyConfData(confData);
@@ -1222,7 +1222,7 @@ END
 	echo '<tr valign=top><th>port</th><th width="40%">last&nbsp;saved&nbsp;version</th>';
 	if ($maxdecisions)
 	{
-		addJS ('js/racktables.js');
+		addJSInternal ('js/racktables.js');
 		printOpFormIntro ('resolve8021QConflicts', array ('mutex_rev' => $vswitch['mutex_rev']));
 		foreach (array ('left', 'asis', 'right') as $pos)
 			echo "<th class=tdcenter><input type=radio name=column_radio value=${pos} " .
@@ -1525,7 +1525,7 @@ function renderVSTRulesEditor ($vst_id)
 		foreach (listCells ('vst') as $vst_id => $vst_info)
 			if ($vst_info['rulec'])
 				$source_options[$vst_id] = '(' . $vst_info['rulec'] . ') ' . $vst_info['description'];
-	addJS ('js/vst_editor.js');
+	addJSInternal ('js/vst_editor.js');
 	echo '<center><h1>' . stringForLabel ($vst['description']) . '</h1></center>';
 	if (count ($source_options))
 	{
@@ -1552,7 +1552,7 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td><input type=text name=wrt_vlans value="%s"></td>';
 	$row_html .= '<td><input type=text name=description value="%s"></td>';
 	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
-	addJS ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
+	addJSText ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
 	startSession();
 	foreach (array_fetch ($_SESSION, 'vst_edited', $vst['rules']) as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);

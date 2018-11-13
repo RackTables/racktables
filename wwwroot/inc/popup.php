@@ -264,31 +264,31 @@ function handlePopupPortLink()
 					showError ('failed to consume a patch cable');
 			}
 		}
-		showOneLiner 
+		showOneLiner
 		(
-			8, 
+			8,
 			array
 			(
 				formatPortLink ($port_info['object_id'], NULL, $port_info['id'], $port_info['name']),
 				formatPort ($remote_port_info),
 			)
 		);
-		addJS (<<<'END'
+		addJSText (<<<'END'
 window.opener.location.reload(true);
 window.close();
 END
-		, TRUE);
+		);
 		backupLogMessages();
 	}
 	else
 	{
 		// JS code to display port compatibility hint
 		// Heredoc, not nowdoc!
-		addJS (<<<"END"
+		addJSText (<<<"END"
 POIFC = {};
 $js_table
 $(document).ready(function () {
-	$('select.porttype').change(onPortTypeChange);	
+	$('select.porttype').change(onPortTypeChange);
 	onPortTypeChange();
 });
 function onPortTypeChange() {
@@ -305,8 +305,8 @@ function onPortTypeChange() {
 	}
 }
 END
-		, TRUE);
-		addCSS (<<<'END'
+		);
+		addCSSText (<<<'END'
 .compat-hint {
 	display: none;
 	font-size: 125%;
@@ -318,7 +318,7 @@ END
 	color: #804040;
 }
 END
-		, TRUE);
+		);
 		// render port type editor form
 		echo '<form method=GET>';
 		echo '<input type=hidden name="module" value="popup">';
@@ -423,7 +423,7 @@ function renderPopupPortSelector()
 	echo '</tr></table>';
 	finishPortlet();
 
-	addJS (<<<'JSEND'
+	addJSText (<<<'JSEND'
 		$(document).ready( function() {
 			$("#filter-obj").autocomplete({
 				source: "?module=ajax&ac=autocomplete&realm=object",
@@ -463,7 +463,7 @@ function renderPopupPortSelector()
 			});
 		});
 JSEND
-	, TRUE);
+	);
 
 	// display results
 	startPortlet ('Compatible spare ports');
