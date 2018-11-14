@@ -1054,11 +1054,8 @@ function makeFileDownloadButton ($file_id, $imgname = 'download')
 	return "<a href='${href}'>${img}</a>";
 }
 
-// XXX: in new code please use one of the stringFor... functions below
-//
-// This is a dual-purpose formating function:
-// 1. Replace empty strings with nbsp.
-// 2. Cut strings that are too long: append "cut here" indicator and provide a mouse hint.
+// This function is DEPRECATED and will be removed in version 0.22.0.
+// Instead of it please use one of the stringFor...() functions below.
 function niftyString ($string, $maxlen = 30, $usetags = TRUE)
 {
 	$cutind = '&hellip;'; // length is 1

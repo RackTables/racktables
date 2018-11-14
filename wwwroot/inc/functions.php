@@ -3573,7 +3573,7 @@ function formatVLANAsLabel ($vlaninfo)
 {
 	$ret = $vlaninfo['vlan_id'];
 	if ($vlaninfo['vlan_descr'] != '')
-		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+		$ret .= ' <i>(' . stringForLabel ($vlaninfo['vlan_descr']) . ')</i>';
 	return $ret;
 }
 
@@ -3581,7 +3581,7 @@ function formatVLANAsPlainText ($vlaninfo)
 {
 	$ret = 'VLAN' . $vlaninfo['vlan_id'];
 	if ($vlaninfo['vlan_descr'] != '')
-		$ret .= ' (' . niftyString ($vlaninfo['vlan_descr'], 20, FALSE) . ')';
+		$ret .= ' (' . stringForLabel ($vlaninfo['vlan_descr'], 20) . ')';
 	return $ret;
 }
 
@@ -3602,9 +3602,9 @@ function formatVLANAsShortLink ($vlaninfo)
 function formatVLANAsRichText ($vlaninfo)
 {
 	$ret = 'VLAN' . $vlaninfo['vlan_id'];
-	$ret .= ' @' . niftyString ($vlaninfo['domain_descr']);
+	$ret .= ' @' . stringForLabel ($vlaninfo['domain_descr']);
 	if ($vlaninfo['vlan_descr'] != '')
-		$ret .= ' <i>(' . niftyString ($vlaninfo['vlan_descr']) . ')</i>';
+		$ret .= ' <i>(' . stringForLabel ($vlaninfo['vlan_descr']) . ')</i>';
 	return $ret;
 }
 
@@ -6633,7 +6633,7 @@ function formatPatchCableHeapAsPlainText ($heap)
 	$text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
 	if ($heap['description'] != '')
 		$text .=  " (${heap['description']})";
-	return niftyString ($text, 512, FALSE);
+	return stringForOption ($text, 512);
 }
 
 // takes a list of structures and the field name in those structures.

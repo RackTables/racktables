@@ -5551,14 +5551,14 @@ function dynamic_title_decoder_throwing ($path_position)
 		$file = spotEntity ('file', genericAssertion ('file_id', 'natural'));
 		return array
 		(
-			'name' => niftyString ($file['name'], 30, FALSE),
+			'name' => stringForOption ($file['name'], 30),
 			'params' => array ('file_id' => $_REQUEST['file_id'])
 		);
 	case 'ipaddress':
 		$address = getIPAddress (ip_parse ($_REQUEST['ip']));
 		return array
 		(
-			'name' => niftyString ($address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50, FALSE),
+			'name' => stringForOption ($address['ip'] . ($address['name'] != '' ? ' (' . $address['name'] . ')' : ''), 50),
 			'params' => array ('ip' => $address['ip'])
 		);
 	case 'ipv4net':
@@ -5628,7 +5628,7 @@ function dynamic_title_decoder_throwing ($path_position)
 			throw new EntityNotFoundException ('VLAN domain', $vdom_id);
 		return array
 		(
-			'name' => "domain '" . niftyString ($vdlist[$vdom_id], 40, FALSE) . "'",
+			'name' => "domain '" . stringForOption ($vdlist[$vdom_id], 40) . "'",
 			'params' => array ('vdom_id' => $vdom_id)
 		);
 	case 'vlan':
@@ -5641,7 +5641,7 @@ function dynamic_title_decoder_throwing ($path_position)
 		$vst = spotEntity ('vst', $sic['vst_id']);
 		return array
 		(
-			'name' => "template '" . niftyString ($vst['description'], 40, FALSE) . "'",
+			'name' => "template '" . stringForOption ($vst['description'], 40) . "'",
 			'params' => array ('vst_id' => $sic['vst_id'])
 		);
 	case 'dqueue':
