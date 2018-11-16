@@ -1627,7 +1627,7 @@ function resetUIConfig()
 		'MGMT_PROTOS' => 'ssh: {$typeid_4}; telnet: {$typeid_8}',
 		'SYNC_8021Q_LISTSRC' => '',
 		'QUICK_LINK_PAGES' => 'depot,ipv4space,rackspace',
-		'VIRTUAL_OBJ_LISTSRC' => '1504,1505,1506,1507',
+		'VIRTUAL_OBJ_CSV' => '1504,1505,1506,1507',
 		'DATETIME_ZONE' => 'UTC',
 		'DATETIME_FORMAT' => '%Y-%m-%d',
 		'DATEONLY_FORMAT' => '%Y-%m-%d',

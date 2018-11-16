@@ -1342,6 +1342,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 				(1656, 1656)";
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 16=1592')
 				WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '16=')";
+			$query[] = "UPDATE Config SET varname = 'VIRTUAL_OBJ_CSV' WHERE varname = 'VIRTUAL_OBJ_LISTSRC'";
 
 			// insert new queries here ^^^
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";

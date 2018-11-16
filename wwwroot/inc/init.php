@@ -139,7 +139,7 @@ elseif (! isset ($remote_username))
 	unset ($admin_account);
 }
 
-$virtual_obj_types = explode (',', getConfigVar ('VIRTUAL_OBJ_LISTSRC'));
+$virtual_obj_types = explode (',', getConfigVar ('VIRTUAL_OBJ_CSV'));
 
 alterConfigWithUserPreferences();
 $op = '';

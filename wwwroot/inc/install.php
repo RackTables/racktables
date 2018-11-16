@@ -2289,7 +2289,7 @@ WHERE O.objtype_id = 1562";
 ('MGMT_PROTOS','ssh: {\$typeid_4}; telnet: {\$typeid_8}','string','yes','no','yes','Mapping of management protocol to devices'),
 ('SYNC_8021Q_LISTSRC','','string','yes','no','no','List of VLAN switches sync is enabled on'),
 ('QUICK_LINK_PAGES','depot,ipv4space,rackspace','string','yes','no','yes','List of pages to display in quick links'),
-('VIRTUAL_OBJ_LISTSRC','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
+('VIRTUAL_OBJ_CSV','1504,1505,1506,1507','string','no','no','no','List source: virtual objects'),
 ('DATETIME_ZONE','UTC','string','yes','no','yes','Timezone to use for displaying/calculating dates'),
 ('DATETIME_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for date+time'),
 ('DATEONLY_FORMAT','%Y-%m-%d','string','no','no','yes','PHP strftime() format for dates'),
