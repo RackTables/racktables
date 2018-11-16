@@ -4653,6 +4653,12 @@ function updatePortForwarding ($object_id, $localip_bin, $localport, $remoteip_b
 	);
 }
 
+function getNATv4CountForObject ($object_id)
+{
+	$result = usePreparedSelectBlade ('SELECT COUNT(*) FROM IPv4NAT WHERE object_id = ?', array ($object_id));
+	return $result->fetchColumn();
+}
+
 function getNATv4ForObject ($object_id)
 {
 	$ret = array();
