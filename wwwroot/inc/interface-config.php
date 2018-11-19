@@ -120,7 +120,7 @@ $(document).ready(function() {
 	${scrollcode}
 });
 ENDJAVASCRIPT
-	, TRUE);
+	); // addJSText ()
 	echo "<tr><td><textarea rows=40 cols=100 id=RCTA>";
 	echo loadScript ('RackCode') . "</textarea></td></tr>\n";
 	echo '</table>';
@@ -173,7 +173,7 @@ $(document).ready(function() {
     });
 });
 ENDJAVASCRIPT
-	, TRUE);
+	); // addJSText ()
 
 	printOpFormIntro ('saveRackCode');
 	echo '<table width="100%" border=0>';
@@ -971,8 +971,7 @@ $(document).ready(function () {
 	$('select.nodelist-popup').bind('mousedown', ${prefix}_showselectbox);
 });
 END
-		, TRUE
-	);
+	); // addJSText()
 }
 
 function getColorSelect($id = 'color', $selected = NULL)

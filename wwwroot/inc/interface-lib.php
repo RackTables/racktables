@@ -409,8 +409,8 @@ $(function() {
 	var option_tree = " . json_encode ($tree_options) . ";
 	var options = " . json_encode ($tree_config + $default_config) . ";
 	$('input[name=${tree_name}]').optionTree(option_tree, options);
-});
-", TRUE);
+});"
+	); // addJSText()
 
 	return "<input type=hidden name=${tree_name}>";
 }
@@ -497,13 +497,13 @@ function transformRequestData()
 		$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
 }
 
-// Return whether value passed is likely to be a Uri
+// Return whether value passed is likely to be a URI.
 function isUri ($uri)
 {
-	return preg_match ('~^[\w\-\._\/ ]+$~', $uri);
+	return preg_match (RE_STATIC_URI, $uri);
 }
 
-// Return whether value passed is likely to be a Url
+// Return whether value passed is likely to be a URL.
 function isUrl ($url)
 {
 	return preg_match ('~^[\w]+:\/\/[\w \-\.\_\/]+$~', $url);
@@ -526,27 +526,22 @@ function addJS ($data, $inline = FALSE, $group = 'default')
 // either http:// or https://
 function addJSExternal ($url, $group = 'default')
 {
-	global $html_headers, $seen_headers;
-
 	if (! isUrl ($url))
 		throw new InvalidArgException ('url', $url, 'Value passed is not a URL');
 
-	$url = "<script type='text/javascript' src='${url}'></script>\n";
-	if (!isset ($seen_headers[$url]))
-	{
-		$html_headers[$group][] = $url;
-		$seen_headers[$url] = 1;
-	}
+	addPageHeader ("<script type='text/javascript' src='${url}'></script>\n", $group);
 }
 
 // addJSInternal adds links that go through the Chrome module of index.php
 function addJSInternal ($uri, $group = 'default')
 {
-	global $html_headers, $seen_headers;
+	global $html_headers;
 
 	// Add jquery.js and racktables.js the first time a Javascript file is added.
+	// FIXME: Would it be better to do this initialization elsewhere?
 	if (! array_key_exists ('a_core', $html_headers))
 	{
+		// Prevent infinite recursion.
 		$html_headers['a_core'] = array();
 
 		addJSInternal('js/jquery-1.4.4.min.js', 'a_core');
@@ -554,34 +549,22 @@ function addJSInternal ($uri, $group = 'default')
 	}
 
 	if (! isUri ($uri))
-		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid Uri');
+		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid URI');
 
-	$uri = "<script type='text/javascript' src='?module=chrome&uri=${uri}'></script>\n";
-	if (! isset ($seen_headers[$uri]))
-	{
-		$html_headers[$group][] = $uri;
-		$seen_headers[$uri] = 1;
-	}
+	addPageHeader ("<script type='text/javascript' src='?module=chrome&uri=${uri}'></script>\n", $group);
 }
 
 // This function adds script blocks that automatically appear in the <head> of your page.
 // Scripts are included in the order of adding within the same group, and groups are sorted alphabetically.
 function addJSText ($text, $group = 'default')
 {
-	global $html_headers, $seen_headers;
-
 	if (isUrl ($text))
-		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Url and should use addJSExternal');
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a URL and should use addJSExternal()');
 
 	if (isUri ($text))
-		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Uri and should use addJSInternal');
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a URI and should use addJSInternal()');
 
-	$text = '<script type="text/javascript">' . "\n" . trim ($text, "\r\n") . "\n</script>\n";
-	if (! isset ($seen_headers[$text]))
-	{
-		$html_headers[$group][] = $text;
-		$seen_headers[$text] = 1;
-	}
+	addPageHeader ('<script type="text/javascript">' . "\n" . trim ($text, "\r\n") . "\n</script>\n", $group);
 }
 
 // CSS styles should be included through this function.
@@ -604,17 +587,10 @@ function addCSS ($data, $inline = FALSE, $group = 'default')
 // Styles are included in the order of adding.
 function addCSSExternal ($url, $group = 'default')
 {
-	global $html_headers, $seen_headers;
-
 	if (! isUrl ($url))
-		throw new InvalidArgException ('url', $url, 'Value passed is not a valid Url');
+		throw new InvalidArgException ('url', $url, 'Value passed is not a valid URL');
 
-	$url = "<link rel=stylesheet type='text/css' href='$url' />\n";
-	if (! isset ($seen_headers[$url]))
-	{
-		$html_headers[$group][] = $url;
-		$seen_headers[$url] = 1;
-	}
+	addPageHeader ("<link rel=stylesheet type='text/css' href='$url' />\n", $group);
 }
 
 // CSS styles should be included through this function.
@@ -623,17 +599,10 @@ function addCSSExternal ($url, $group = 'default')
 // Styles are included in the order of adding.
 function addCSSInternal ($uri, $group = 'default')
 {
-	global $html_headers, $seen_headers;
-
 	if (! isUri ($uri))
-		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid Uri');
+		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid URI');
 
-	$uri = "<link rel=stylesheet type='text/css' href='?module=chrome&uri=$uri' />\n";
-	if (! isset ($seen_headers[$uri]))
-	{
-		$html_headers[$group][] = $uri;
-		$seen_headers[$uri] = 1;
-	}
+	addPageHeader ("<link rel=stylesheet type='text/css' href='?module=chrome&uri=$uri' />\n", $group);
 }
 
 // CSS styles should be included through this function.
@@ -642,20 +611,13 @@ function addCSSInternal ($uri, $group = 'default')
 // Styles are included in the order of adding.
 function addCSSText ($text, $group = 'default')
 {
-	global $html_headers, $seen_headers;
-
 	if (isUrl ($text))
-		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Url and should use addCSSExternal');
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a URL and should use addCSSExternal()');
 
 	if (isUri ($text))
-		throw new InvalidArgException ('text', $text, 'Value passed is most likely a Uri and should use addCSSInternal');
+		throw new InvalidArgException ('text', $text, 'Value passed is most likely a URI and should use addCSSInternal()');
 
-	$text = '<style type="text/css">' . "\n" . trim ($text, "\r\n") . "\n</style>\n";
-	if (! isset ($seen_headers[$text]))
-	{
-		$html_headers[$group][] = $text;
-		$seen_headers[$text] = 1;
-	}
+	addPageHeader ('<style type="text/css">' . "\n" . trim ($text, "\r\n") . "\n</style>\n", $group);
 }
 
 function getRenderedIPNetCapacity ($range)
@@ -794,6 +756,17 @@ function getRenderedIPv6NetCapacity ($range)
 		$cnt = '1';
 
 	return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}${cnt}${mult} ${what}" . "</div>";
+}
+
+function addPageHeader ($header, $group)
+{
+	global $html_headers, $seen_headers;
+
+	if (! array_key_exists ($header, $seen_headers))
+	{
+		$html_headers[$group][] = $header;
+		$seen_headers[$header] = 1;
+	}
 }
 
 // print part of HTML HEAD block

@@ -50,6 +50,7 @@ define ('RE_L2_IPOIB_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){19}$/');
 define ('RE_L2_IPOIB_SOLID', '/^[0-9A-F]{40}$/');
 define ('RE_IP4_ADDR', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}$#');
 define ('RE_IP4_NET', '#^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$#');
+define ('RE_STATIC_URI', '#^(?:[[:alnum:]]+[[:alnum:]_.-]*/)+[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
 define ('E_8021Q_NOERROR', 0);
 define ('E_8021Q_VERSION_CONFLICT', 101);
 define ('E_8021Q_PULL_REMOTE_ERROR', 102);

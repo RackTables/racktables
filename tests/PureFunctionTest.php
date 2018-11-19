@@ -506,7 +506,8 @@ class PureFunctionTest extends RTTestCase
 
 			// validate various URI/URL combinations
 			array ('isUri', 'https://www.test.com', FALSE),
-			array ('isUri', '/js/table.js', TRUE),
+			array ('isUri', '/js/table.js', FALSE),
+			array ('isUri', 'js/table.js', TRUE),
 			array ('isUri', '!#$%', FALSE),
 
 			array ('isUrl', 'https://www.test.com', TRUE),

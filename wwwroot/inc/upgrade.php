@@ -179,11 +179,11 @@ ENDOFTEXT
 This version drops support for the $localreports global variable, which is
 trivial to replace in a local plugin if necessary.
 
-The "addJS()" function is now depreciated in favour of "addJSText()", "addJSInternal()",
-and "addJSExternal()" functions.  The "addJS()" function will likely be removed in 0.22.0
+The "addJS()" function is now deprecated in favour of "addJSText()", "addJSInternal()",
+and "addJSExternal()" functions.  The "addJS()" function will likely be removed in 0.22.0.
 
-The "addCSS()" function is now depreciated in favour of "addCSSText()", "addCSSInternal()",
-and "addCSSExternal()" functions.  The "addCSS()" function will likely be removed in 0.22.0
+The "addCSS()" function is now deprecated in favour of "addCSSText()", "addCSSInternal()",
+and "addCSSExternal()" functions.  The "addCSS()" function will likely be removed in 0.22.0.
 
 For more information on the "addJS()" and "addCSS()" changes see the README.md
 ENDOFTEXT

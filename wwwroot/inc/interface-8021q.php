@@ -1215,7 +1215,7 @@ function checkColumnOfRadios8021Q (prefix, numRows, suffix)
 	}
 }
 END
-	, TRUE);
+	); // addJSText()
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable width="100%">';
 	if ($maxdecisions)
 		echo '<tr><th colspan=2>&nbsp;</th><th colspan=3>discard</th><th>&nbsp;</th></tr>';
@@ -1552,7 +1552,7 @@ function renderVSTRulesEditor ($vst_id)
 	$row_html .= '<td><input type=text name=wrt_vlans value="%s"></td>';
 	$row_html .= '<td><input type=text name=description value="%s"></td>';
 	$row_html .= '<td><a href="#" class="vst-add-rule">' . getImageHREF ('add', 'Duplicate rule') . '</a></td>';
-	addJSText ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';", TRUE);
+	addJSText ("var new_vst_row = '" . addslashes (sprintf ($row_html, '', '', getSelect ($port_role_options, array ('name' => 'port_role'), 'anymode'), '', '')) . "';");
 	startSession();
 	foreach (array_fetch ($_SESSION, 'vst_edited', $vst['rules']) as $item)
 		printf ('<tr>' . $row_html . '</tr>', $item['rule_no'], htmlspecialchars ($item['port_pcre'], ENT_QUOTES),  getSelect ($port_role_options, array ('name' => 'port_role'), $item['port_role']), $item['wrt_vlans'], $item['description']);

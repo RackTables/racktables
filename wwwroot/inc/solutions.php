@@ -15,8 +15,6 @@ implement the "interface" module.
 
 require_once 'slb-interface.php';
 
-define ('RE_STATIC_URI', '#^(?:[[:alnum:]]+[[:alnum:]_.-]*/)+[[:alnum:]\._-]+\.([[:alpha:]]+)$#');
-
 $color = array();
 
 function castRackImageException ($e)

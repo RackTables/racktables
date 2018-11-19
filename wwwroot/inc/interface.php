@@ -308,7 +308,7 @@ function renderLocationFilterPortlet ()
 		}
 	}
 
-	addJS(<<<'END'
+	addJSText (<<<'END'
 function checkAll(bx) {
 	for (var tbls=document.getElementsByTagName("table"), i=tbls.length; i--;)
 		if (tbls[i].id == "locationFilter") {
@@ -363,7 +363,7 @@ function expand(id) {
 	}
 }
 END
-	);
+	); // addJSText()
 	startPortlet ('Location filter');
 	echo <<<'END'
 <table border=0 align=center cellspacing=0 class="tagtree" id="locationFilter">
@@ -586,7 +586,7 @@ function renderLocationSelectTree ($select_name, $selected_id = NULL)
 
 function renderRackspaceLocationEditor ()
 {
-	$js = <<<'JSTXT'
+	addJSText (<<<'JSTXT'
 	function locationeditor_showselectbox(e) {
 		$(this).load('index.php', {module: 'ajax', ac: 'get-location-select', locationid: this.id});
 		$(this).unbind('mousedown', locationeditor_showselectbox);
@@ -594,9 +594,9 @@ function renderRackspaceLocationEditor ()
 	$(document).ready(function () {
 		$('select.locationlist-popup').bind('mousedown', locationeditor_showselectbox);
 	});
-JSTXT;
+JSTXT
+	); // addJSText()
 
-	addJS($js);
 	function printNewItemTR ()
 	{
 		printOpFormIntro ('addLocation');
@@ -1847,7 +1847,7 @@ function renderIPForObject ($object_id)
 				});
 			});
 JSEND
-		);
+		); // addJSText()
 		printOpFormIntro ('add');
 		echo "<tr><td>"; // left btn
 		printImageHREF ('add', 'allocate', TRUE);
@@ -2159,7 +2159,7 @@ $(function () {
     });
 });
 ENDOFJAVASCRIPT
-	);
+	); // addJSText()
 }
 
 // An object can be mounted onto free atoms only, that is, if any record for an atom
@@ -2734,7 +2734,7 @@ $(document).ready(function () {
 	Validate.init();
 });
 END
-	);
+	); // addJSText()
 
 	startPortlet ('Add new');
 	printOpFormIntro ('add');
@@ -3430,7 +3430,7 @@ function renderIPAddressAllocations ($ip_bin)
 				});
 			});
 JSEND
-		);
+		); // addJSText()
 		printOpFormIntro ('add');
 		echo "<tr id='aid-new'><td>";
 		printImageHREF ('add', 'allocate', TRUE);
@@ -4691,7 +4691,7 @@ function textifyCellFilter(target, text)
 	portlet.find ('input[type="radio"][value="and"]').attr('checked','true');
 }
 END
-			);
+			); // addJSText()
 		}
 		echo '</td><td class=tdright>';
 		// "reset"

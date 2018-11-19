@@ -110,6 +110,8 @@ $user_given_tags = array();
 $user_defined_atags = array();
 
 // Initial the HTML header arrays used by addJSxxx() and addCSSxxx() functions
+// FIXME: For some reason without this global declaration there two variables do
+// not exist for addPageHeader() in PHPUnit.
 global $html_headers, $seen_headers;
 $html_headers = array();
 $seen_headers = array();
