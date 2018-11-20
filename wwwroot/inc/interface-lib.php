@@ -453,6 +453,8 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 	return makeHtmlTag ($element, $attrs);
 }
 
+// This function is DEPRECATED and will be removed in 0.22.0. See the set
+// of stringForXXXXX() functions for a proper replacement.
 function escapeString ($value, $do_db_escape = FALSE)
 {
 	$ret = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
@@ -480,7 +482,7 @@ function transformRequestData()
 		else
 		{
 			$value = dos2unix ($value);
-			$_REQUEST[$key] = escapeString ($value);
+			$_REQUEST[$key] = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
 		}
 		$sic[$key] = $value;
 		$seen_keys[$key] = 1;
@@ -492,9 +494,9 @@ function transformRequestData()
 			unset ($_REQUEST[$key]);
 
 	if (isset ($_SERVER['PHP_AUTH_USER']))
-		$_SERVER['PHP_AUTH_USER'] = escapeString ($_SERVER['PHP_AUTH_USER']);
+		$_SERVER['PHP_AUTH_USER'] = htmlspecialchars ($_SERVER['PHP_AUTH_USER'], ENT_QUOTES, 'UTF-8');
 	if (isset ($_SERVER['REMOTE_USER']))
-		$_SERVER['REMOTE_USER'] = escapeString ($_SERVER['REMOTE_USER']);
+		$_SERVER['REMOTE_USER'] = htmlspecialchars ($_SERVER['REMOTE_USER'], ENT_QUOTES, 'UTF-8');
 }
 
 // Return whether value passed is likely to be a URI.
