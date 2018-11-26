@@ -5219,7 +5219,7 @@ function getDomainGroupMembers ($vdom_group_id)
 }
 
 // This function is pretty heavy. Consider use of getDomainVLANList instead
-// If $strict is false, returns VLANs belonging to the domain or group.
+// If $strict is FALSE, returns VLANs belonging to the domain or group.
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANs ($vdom_id, $strict = FALSE)
 {
@@ -5272,7 +5272,7 @@ END
 }
 
 // faster than getDomainVLANs, but w/o statistics.
-// If $strict is false, returns VLANs belonging to the domain or group.
+// If $strict is FALSE, returns VLANs belonging to the domain or group.
 // Otherwise the vlans of group subdomains are not returned.
 function getDomainVLANList ($vdom_id, $strict = FALSE)
 {
@@ -5894,7 +5894,7 @@ function isTransactionActive()
 			$dbxlink->rollBack();
 			return FALSE;
 		}
-		throw new RackTablesError ("beginTransaction returned false instead of throwing exception", RackTablesError::INTERNAL);
+		throw new RackTablesError ("beginTransaction() returned FALSE instead of throwing exception", RackTablesError::INTERNAL);
 	}
 	catch (PDOException $e)
 	{
