@@ -1060,11 +1060,22 @@ function getRenderedNetVLAN ($cell)
 	return "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
 }
 
+// DEPRECATED and will be removed in 0.22.0
 function includeJQueryUI ($do_css = TRUE)
 {
-	addJSInternal ('js/jquery-ui-1.8.21.min.js');
+	includeJQueryUIJS();
 	if ($do_css)
-		addCSSInternal ('css/jquery-ui-1.8.22.redmond.css');
+		includeJQueryUICSS();
+}
+
+function includeJQueryUIJS()
+{
+	addJSInternal ('js/jquery-ui-1.8.21.min.js');
+}
+
+function includeJQueryUICSS()
+{
+	addCSSInternal ('css/jquery-ui-1.8.22.redmond.css');
 }
 
 function getRenderedIPPortPair ($ip, $port = NULL)
@@ -1222,7 +1233,8 @@ function enableTagsPicker ()
 {
 	global $taglist;
 	static $taglist_inserted;
-	includeJQueryUI ();
+	includeJQueryUIJS();
+	includeJQueryUICSS();
 	addCSSInternal ('css/tagit.css');
 	addJSInternal ('js/tag-it.js');
 	addJSInternal ('js/tag-it-local.js');

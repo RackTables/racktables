@@ -405,7 +405,8 @@ function renderPopupPortSelector()
 	)
 		$spare_ports = findSparePorts ($port_info, $filter);
 
-	includeJQueryUI (TRUE);
+	includeJQueryUIJS();
+	includeJQueryUICSS();
 
 	// display search form
 	echo 'Link ' . formatPort ($port_info) . ' to...';

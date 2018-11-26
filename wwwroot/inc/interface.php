@@ -1048,7 +1048,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 
 function renderRackSortForm ($row_id)
 {
-	includeJQueryUI (false);
+	includeJQueryUIJS();
 	// Heredoc, not nowdoc!
 	$js = <<<"JSTXT"
 	$(document).ready(
@@ -1320,7 +1320,7 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	// Grid form.
 	$is_ro = !rackModificationPermitted ($rackData, 'updateRack');
 	startPortlet ($header);
-	includeJQueryUI (FALSE);
+	includeJQueryUIJS();
 	addJSInternal ('js/racktables.js');
 	$table_id = 'selectableRack';
 	addBulkSelectorJS ($table_id);
@@ -1828,7 +1828,8 @@ function renderIPForObject ($object_id)
 	{
 		global $aat;
 
-		includeJQueryUI (TRUE);
+		includeJQueryUIJS();
+		includeJQueryUICSS();
 
 		// Heredoc, not nowdoc!
 		addJSText (<<<"JSEND"
@@ -2259,7 +2260,7 @@ function renderRackSpaceForObject ($object_id)
 	// the former state of the grid needs to make it to the current form.
 	echo "<td class=pcright rowspan=2 height='1%'>";
 	startPortlet ('Working copy');
-	includeJQueryUI (false);
+	includeJQueryUIJS();
 	addJSInternal ('js/racktables.js');
 	echo '<table border=0 cellspacing=10 align=center><tr>';
 	foreach ($workingRacksData as $rack_id => $rackData)
@@ -3406,7 +3407,8 @@ function renderIPAddressAllocations ($ip_bin)
 	{
 		global $aat;
 
-		includeJQueryUI (TRUE);
+		includeJQueryUIJS();
+		includeJQueryUICSS();
 
 		addJSText (<<<'JSEND'
 			$(document).ready( function() {
