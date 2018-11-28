@@ -760,15 +760,16 @@ function getRenderedIPv6NetCapacity ($range)
 	return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}${cnt}${mult} ${what}" . "</div>";
 }
 
+// Buffer the header only once. Disregard subsequent calls even if they
+// are made for a different group.
 function addPageHeader ($header, $group)
 {
-	global $html_headers, $seen_headers;
+	global $html_headers;
 
-	if (! array_key_exists ($header, $seen_headers))
-	{
-		$html_headers[$group][] = $header;
-		$seen_headers[$header] = 1;
-	}
+	foreach ($html_headers as $group_contents)
+		if (in_array ($header, $group_contents))
+			return;
+	$html_headers[$group][] = $header;
 }
 
 // print part of HTML HEAD block
