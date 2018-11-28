@@ -2888,7 +2888,7 @@ function getAccountSearchResult ($terms)
 	$byUsername = getSearchResultByField
 	(
 		'UserAccount',
-		array ('user_id', 'user_name', 'user_realname'),
+		array ('user_id'),
 		'user_name',
 		$terms,
 		'user_name'
@@ -2896,7 +2896,7 @@ function getAccountSearchResult ($terms)
 	$byRealname = getSearchResultByField
 	(
 		'UserAccount',
-		array ('user_id', 'user_name', 'user_realname'),
+		array ('user_id'),
 		'user_realname',
 		$terms,
 		'user_name'
@@ -2905,11 +2905,7 @@ function getAccountSearchResult ($terms)
 	$ret = array();
 	foreach (array ($byRealname, $byUsername) as $array)
 		foreach ($array as $user)
-		{
-			$user['realm'] = 'user';
-			$user['id'] = $user['user_id'];
-			$ret[$user['user_id']] = $user;
-		}
+			$ret[$user['user_id']] = spotEntity ('user', $user['user_id']);
 	return $ret;
 }
 

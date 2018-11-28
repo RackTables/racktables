@@ -1299,7 +1299,9 @@ function getObjectClass ($object, $context)
 		$percent += $step;
 	}
 	$style .= "background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
-	return getCachedCSSClassForStyle ("objectcolor-${object['id']}", $style);
+	$cell = $object;
+	$cell_id = $cell[$cell['realm'] == 'user' ? 'user_id' : 'id'];
+	return getCachedCSSClassForStyle ("cellcolor-${cell_id}", $style);
 }
 
 function getTagClass ($taginfo)
