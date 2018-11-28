@@ -24,7 +24,7 @@ function renderSLBDefConfig()
 function renderSLBEntityCell ($cell, $highlighted = FALSE)
 {
 	setEntityColors ($cell);
-	$class = "slbcell realm-${cell['realm']} id-${cell['id']} " . getObjectClass ($cell, 'list_plain');
+	$class = "slbcell realm-${cell['realm']} id-${cell['id']} " . getCellClass ($cell, 'list_plain');
 	$a_class = $highlighted ? 'highlight' : '';
 
 	echo "<table class='$class'>";

@@ -876,7 +876,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 				$child = spotEntity ('object', $childData['id']);
 				setEntityColors ($child);
 				$class_context = $childData['id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
-				$slotClass[$slot] .= getObjectClass ($child, $class_context);
+				$slotClass[$slot] .= getCellClass ($child, $class_context);
 
 			}
 		}
@@ -986,7 +986,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 				$objectData = spotEntity ('object', $rackData[$i][$locidx]['object_id']);
 				setEntityColors ($objectData);
 				$class_context = $rackData[$i][$locidx]['object_id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
-				$class .= getObjectClass ($objectData, $class_context);
+				$class .= getCellClass ($objectData, $class_context);
 			}
 
 			echo "<td class='${class}'";
@@ -1035,7 +1035,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			$class = "atom state_${state}";
 			setEntityColors ($zeroUObject);
 			$class_context = $zeroUObject['id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
-			$class .= getObjectClass ($zeroUObject, $class_context);
+			$class .= getCellClass ($zeroUObject, $class_context);
 
 			echo "<tr><td class='${class}'>";
 			printObjectDetailsForRenderRack ($zeroUObject['id']);
@@ -2394,7 +2394,7 @@ function renderDepot ()
 				$problem = ($obj['has_problems'] == 'yes') ? 'has_problems' : '';
 
 				setEntityColors ($obj);
-				$class = getObjectClass ($obj, 'list_plain');
+				$class = getCellClass ($obj, 'list_plain');
 
 				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
@@ -2567,7 +2567,7 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 
 			setEntityColors ($item);
 			$class_context = ($target == $item['id'] && isset ($_REQUEST['hl_net'])) ? 'list_selected' : 'list_plain';
-			$tr_class = getObjectClass ($item, $class_context);
+			$tr_class = getCellClass ($item, $class_context);
 			// Use old-style highlighting for colourless networks.
 			if ($class_context == 'list_selected' && $tr_class == '')
 			{
@@ -3986,7 +3986,7 @@ function renderAtomGrid ($data, $is_ro = FALSE)
 					$objectData = spotEntity ('object', $data[$unit_no][$locidx]['object_id']);
 					setEntityColors ($objectData);
 					$class_context = ($hl == 'h' || $hl == 'hw') ? 'atom_selected' : 'atom_plain';
-					$td['class'] .= getObjectClass ($objectData, $class_context);
+					$td['class'] .= getCellClass ($objectData, $class_context);
 				}
 			}
 			if (! $show_checkbox)
@@ -5083,7 +5083,7 @@ function renderCell ($cell)
 		return;
 	}
 	setEntityColors ($cell);
-	$class = 'slbcell vscell ' . getObjectClass ($cell, 'list_plain');
+	$class = 'slbcell vscell ' . getCellClass ($cell, 'list_plain');
 	switch ($cell['realm'])
 	{
 	case 'user':
@@ -5200,7 +5200,7 @@ function renderRouterCell ($ip_bin, $ifname, $cell)
 	// "list" and "atom" work about the same), or inside a network row, which
 	// uses a mix of zebra and tag colours (in which case "atom" works better
 	// as it overlays the router's tag colours without mixing).
-	$class = 'slbcell ' . getObjectClass ($cell, 'atom_plain');
+	$class = 'slbcell ' . getCellClass ($cell, 'atom_plain');
 	$dottedquad = ip_format ($ip_bin);
 	echo "<table class='${class}'><tr><td rowspan=3>${dottedquad}";
 	if ($ifname != '')

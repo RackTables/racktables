@@ -1275,7 +1275,7 @@ function makeHtmlTag ($tagname, $attributes = array())
 	return $ret;
 }
 
-function getObjectClass ($object, $context)
+function getCellClass ($cell, $context)
 {
 	$ctxmap = array
 	(
@@ -1286,20 +1286,19 @@ function getObjectClass ($object, $context)
 	);
 	if (! array_key_exists ($context, $ctxmap))
 		throw new InvalidArgException ('context', $context, 'unknown value');
-	if (! array_key_exists ('colors', $object) || ! count ($object['colors']))
+	if (! array_key_exists ('colors', $cell) || ! count ($cell['colors']))
 		return '';
 	$style = $ctxmap[$context];
-	$step = intval (round (100 / count ($object['colors'])));
+	$step = intval (round (100 / count ($cell['colors'])));
 	$percent = 0;
 	$gradient = '';
-	foreach ($object['colors'] as $color)
+	foreach ($cell['colors'] as $color)
 	{
 		$rgb = colorHex2Rgb ($color);
 		$gradient .= "rgba(${rgb},0.2) ${percent}%, rgba(${rgb},0.3) " . ($percent + $step) . "%,";
 		$percent += $step;
 	}
 	$style .= "background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
-	$cell = $object;
 	$cell_id = $cell[$cell['realm'] == 'user' ? 'user_id' : 'id'];
 	return getCachedCSSClassForStyle ("cellcolor-${cell_id}", $style);
 }
