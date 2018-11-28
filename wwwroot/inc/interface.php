@@ -1585,16 +1585,16 @@ function renderObject ($object_id)
 					$osif = $info['ipv4'][$localip_bin]['osif'] . ': ';
 				}
 				echo "<tr class='$class'>";
-				echo "<td>${pf['proto']}</td><td class=tdleft>${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+				echo "<td class=tdleft>${pf['proto']}</td><td class=tdleft>${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 				echo "<td class=tdleft>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 				$address = getIPAddress (ip4_parse ($pf['remoteip']));
-				echo "<td class='description'>";
+				echo "<td class='description tdleft'>";
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
 						echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
 				elseif ($pf['remote_addr_name'] != '')
 					echo '(' . $pf['remote_addr_name'] . ')';
-				echo "</td><td class='description'>${pf['description']}</td></tr>";
+				echo "</td><td class='description tdleft'>${pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
 		}
@@ -1606,10 +1606,10 @@ function renderObject ($object_id)
 			foreach ($forwards['in'] as $pf)
 			{
 				echo "<tr>";
-				echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
-				echo '<td class="description">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
-				echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
-				echo "<td class='description'>${pf['description']}</td></tr>";
+				echo "<td class=tdleft>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+				echo '<td class="description tdleft">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
+				echo "</td><td class=tdleft>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
+				echo "<td class='description tdleft'>${pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
 		}
