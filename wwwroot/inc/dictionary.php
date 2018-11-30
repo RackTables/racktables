@@ -168,6 +168,7 @@ function getConfigDefaults()
 		'8021Q_DEPLOY_RETRY' => '10800',
 		'8021Q_WRI_AFTER_CONFT_LISTSRC' => 'false',
 		'8021Q_INSTANT_DEPLOY' => 'no',
+		'ENABLE_BULKPORT_FORM' => 'yes',
 		'CDP_RUNNERS_LISTSRC' => '',
 		'LLDP_RUNNERS_LISTSRC' => '',
 		'SHRINK_TAG_TREE_ON_CLICK' => 'yes',

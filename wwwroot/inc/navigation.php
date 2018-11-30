@@ -714,6 +714,7 @@ $tabhandler['reports']['integrity'] = 'renderDataIntegrityReport';
 $tabhandler['reports']['serverconf'] = 'renderServerConfigurationReport';
 $interface_requires['reports-default'] = 'code.php';
 $interface_requires['reports-serverconf'] = 'dictionary.php';
+$interface_requires['reports-integrity'] = 'dictionary.php';
 $interface_requires['reports-*'] = 'interface-reports.php';
 
 $page['files']['title'] = 'Files';

@@ -947,6 +947,45 @@ function renderDataIntegrityReport ()
 		finishPortlet();
 	}
 
+	// check 13: configuration variables
+	$config_nodefaults = array
+	(
+		'enterprise' => 'MyCompanyName',
+		'DB_VERSION' => CODE_VERSION,
+	);
+	$config_recognized = array_merge (getConfigDefaults(), $config_nodefaults);
+	$config_present = loadConfigCache();
+	// 13.1: anything that is present but not recognized
+	if (count ($martians = array_diff_key ($config_present, $config_recognized)))
+	{
+		$violations = TRUE;
+		startPortlet ('Unknown configuration options');
+		$columns = array
+		(
+			array ('th_text' => 'Option', 'row_key' => 'varname', 'td_class' => 'varname tdright'),
+			array ('th_text' => 'Current value', 'row_key' => 'varvalue'),
+		);
+		renderTableViewer ($columns, $martians);
+		finishPortlet();
+	}
+	// 13.2: anything that would be recognized if it was present (but is not)
+	if (count ($missing = array_diff_key ($config_recognized, $config_present)))
+	{
+		$violations = TRUE;
+		startPortlet ('Missing configuration options');
+		$columns = array
+		(
+			array ('th_text' => 'Option', 'row_key' => 'varname', 'td_class' => 'varname tdright'),
+			array ('th_text' => 'Default value', 'row_key' => 'varvalue'),
+		);
+		// $config_recognized has a different structure
+		$rows = array();
+		foreach ($missing as $varname => $default_value)
+			$rows[] = array ('varname' => $varname, 'varvalue' => $default_value);
+		renderTableViewer ($columns, $rows);
+		finishPortlet();
+	}
+
 	if (! $violations)
 		echo '<h2 class=centered>No integrity violations found</h2>';
 }
