@@ -6471,7 +6471,7 @@ function renderTableViewer ($columns, $rows, $params = NULL)
 			{
 				echo '<td';
 				if (array_key_exists ('td_class', $col))
-					echo ' class=' . $col['td_class'];
+					echo " class='{$col['td_class']}'";
 				echo '>';
 				$text = $row[$col['row_key']];
 				if (array_fetch ($col, 'td_escape', TRUE))
