@@ -853,7 +853,7 @@ function renderConfigEditor ()
 
 function renderUIResetForm()
 {
-	printOpFormIntro ('go');
+	printOpFormIntro ('resetUIConfig');
 	echo "This button will reset user interface configuration to its defaults (except organization name): ";
 	echo "<input type=submit value='proceed'>";
 	echo "</form>";

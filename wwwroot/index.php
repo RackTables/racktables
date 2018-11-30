@@ -205,6 +205,10 @@ try {
 		// snmp.php is an exception, it is treated by a special hack
 		if (isset ($_REQUEST['op']) && $_REQUEST['op'] == 'querySNMPData')
 			require_once 'inc/snmp.php';
+		// FIXME: One more time doing this and the hack should rather be replaced
+		// with a better structured solution.
+		if (isset ($_REQUEST['op']) && $_REQUEST['op'] == 'resetUIConfig')
+			require_once 'inc/dictionary.php';
 		require_once 'inc/init.php';
 		try
 		{

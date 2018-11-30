@@ -638,7 +638,7 @@ $tabhandler['ui']['default'] = 'renderUIConfig';
 $tabhandler['ui']['edit'] = 'renderConfigEditor';
 $tabhandler['ui']['reset'] = 'renderUIResetForm';
 $ophandler['ui']['edit']['upd'] = 'updateUI';
-$ophandler['ui']['reset']['go'] = 'resetUIConfig';
+$ophandler['ui']['reset']['resetUIConfig'] = 'resetUIConfig';
 $interface_requires['ui-*'] = 'interface-config.php';
 
 $page['tagtree']['title'] = 'Tag tree';
