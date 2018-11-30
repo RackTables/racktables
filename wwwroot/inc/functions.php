@@ -40,7 +40,7 @@ define ('RE_L2_IFCFG_SUNOS', '/^[0-9A-F]{1,2}(:[0-9A-F]{1,2}){5}$/'); // SunOS i
 define ('RE_L2_CISCO', '/^[0-9A-F]{4}(\.[0-9A-F]{4}){2}$/');
 define ('RE_L2_HP', '/^[0-9A-F]{6}-[0-9A-F]{6}$/');
 define ('RE_L2_HUAWEI', '/^[0-9A-F]{4}(-[0-9A-F]{4}){2}$/');
-define ('RE_L2_SOLID', '/^[0-9A-F]{12}$/i');
+define ('RE_L2_SOLID', '/^[0-9A-F]{12}$/');
 define ('RE_L2_IPCFG', '/^[0-9A-F]{2}(-[0-9A-F]{2}){5}$/');
 define ('RE_L2_WWN_COLON', '/^[0-9A-F]{2}(:[0-9A-F]{2}){7}$/');
 define ('RE_L2_WWN_HYPHEN', '/^[0-9A-F]{2}(-[0-9A-F]{2}){7}$/');
