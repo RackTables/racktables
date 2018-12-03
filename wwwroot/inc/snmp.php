@@ -4219,6 +4219,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
          'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
          'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
      ),
+	'11.2.3.7.11.146' => array
+     (
+         'dict_key' => 3723,
+         'text' => 'HP Aruba 1950 48G 2SFP+ 2XGT PoE+ Switch, (48) RJ-45 auto-negotiating 10/100/1000 PoE+ ports, (2) SFP+ fixed 1000/10000 SFP+ports, (2) RJ-45 1/10GBASE-T ports',
+         'processors' => array ('procurve-51-to-52-1000SFP','procurve-chassis-1000T'),
+     ),
 );
 
 global $swtype_pcre;
