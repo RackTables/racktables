@@ -2158,6 +2158,14 @@ $iftable_processors['brocade-icx-64xx-1000T'] = array
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
+$iftable_processors['catalyst-chassis-any-TenGb'] = array
+(
+     'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@',
+     'replacement' => 'Tgi\\1\\2',
+     'dict_key' => '3-1078',
+     'label' => '\\2',
+     'try_next_proc' => FALSE,
+);
 
 // In the following two declarations the leading zero is a placeholder -- in
 // the CLI it may be another number but the SNMP agent does not report it.
@@ -4224,6 +4232,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
          'dict_key' => 3723,
          'text' => 'HP Aruba 1950 48G 2SFP+ 2XGT PoE+ Switch, (48) RJ-45 auto-negotiating 10/100/1000 PoE+ ports, (2) SFP+ fixed 1000/10000 SFP+ports, (2) RJ-45 1/10GBASE-T ports',
          'processors' => array ('procurve-51-to-52-1000SFP','procurve-chassis-1000T'),
+     ),
+	'25506.11.1.100' => array
+     (
+         'dict_key' => 3724,
+         'text' => 'HPE FlexFabric 5900AF 48XG 4QSFP+ Switch, 1G/10G SFP+ and 4 QSFP+-ports, dual hot-pluggable power supplies and fan trays,',
+         'processors' => array ('catalyst-chassis-FortyGigE','catalyst-chassis-any-TenGb'),
      ),
 );
 
