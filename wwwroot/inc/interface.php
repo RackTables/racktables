@@ -2454,24 +2454,22 @@ END;
 // History viewer for history-enabled simple dictionaries.
 function renderObjectHistory ($object_id)
 {
-	$order = 'odd';
-	global $nextorder;
-	echo '<table border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-	echo '<tr><th>change time</th><th>author</th><th>name</th><th>visible label</th><th>asset no</th><th>has problems?</th><th>comment</th></tr>';
 	$result = usePreparedSelectBlade
 	(
 		'SELECT ctime, user_name, name, label, asset_no, has_problems, comment FROM ObjectHistory WHERE id=? ORDER BY ctime',
 		array ($object_id)
 	);
-	while ($row = $result->fetch (PDO::FETCH_NUM))
-	{
-		echo "<tr class=row_${order}><td>${row[0]}</td>";
-		for ($i = 1; $i <= 6; $i++)
-			echo "<td>" . $row[$i] . "</td>";
-		echo "</tr>\n";
-		$order = $nextorder[$order];
-	}
-	echo "</table><br>\n";
+	$columns = array
+	(
+		array ('th_text' => 'Change time', 'row_key' => 'ctime'),
+		array ('th_text' => 'Author', 'row_key' => 'user_name'),
+		array ('th_text' => 'Name', 'row_key' => 'name'),
+		array ('th_text' => 'Visible label', 'row_key' => 'label'),
+		array ('th_text' => 'Asset tag', 'row_key' => 'asset_no'),
+		array ('th_text' => 'Has problems?', 'row_key' => 'has_problems'),
+		array ('th_text' => 'Comment', 'row_key' => 'comment'),
+	);
+	renderTableViewer ($columns, $result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function renderRackspaceHistory ()
