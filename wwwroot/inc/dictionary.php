@@ -51,11 +51,6 @@ function isInnoDBSupported ()
 	return $innodb_row['Engine'] == 'InnoDB' && $trigger_row['count'] == 1;
 }
 
-function platform_function_test ($funcname, $extname, $what_if_not = 'not found', $error_class = 'trerror')
-{
-	return platform_generic_test (function_exists ($funcname), $extname, 'NOT PRESENT', $error_class);
-}
-
 function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'trerror')
 {
 	echo "<tr><th class=tdleft>${topic}</th>";
@@ -76,23 +71,102 @@ function pcre8_with_properties()
 // Check for PHP extensions.
 function platform_is_ok ($test_innodb = FALSE)
 {
+	$extlist = array
+	(
+		// mandatory
+		array
+		(
+			'name' => 'PDO',
+			'comment' => 'PHP data objects',
+		),
+		array
+		(
+			'name' => 'pdo_mysql',
+			'comment' => 'PDO MySQL driver',
+		),
+		array
+		(
+			'name' => 'pcre',
+			'comment' => 'PCRE',
+		),
+		array
+		(
+			'name' => 'gd',
+			'comment' => 'GD and image',
+		),
+		array
+		(
+			'name' => 'mbstring',
+			'comment' => 'multibyte string',
+		),
+		array
+		(
+			'name' => 'json',
+			'comment' => 'JSON',
+		),
+		array
+		(
+			'name' => 'bcmath',
+			'comment' => 'arbitrary precision mathematics',
+		),
+		// optional
+		array
+		(
+			'name' => 'snmp',
+			'comment' => 'SNMP',
+			'impact' => 'SNMP sync feature will not work',
+		),
+		array
+		(
+			'name' => 'ldap',
+			'comment' => 'LDAP',
+			'impact' => 'LDAP authentication will not work',
+		),
+		array
+		(
+			'name' => 'curl',
+			'comment' => 'client URL library',
+			'impact' => 'some plugins may not work',
+		),
+		array
+		(
+			'name' => 'pcntl',
+			'comment' => 'process control',
+			'impact' => '802.1Q parallel sync will not work',
+		),
+	);
 	$nerrs = 0;
 	echo "<table border=1 cellpadding=5>\n";
 	$nerrs += platform_generic_test (version_compare (PHP_VERSION, '5.5.0', '>='), 'PHP version >= 5.5.0');
-	$nerrs += platform_generic_test (class_exists ('PDO'), 'PDO extension');
-	$nerrs += platform_generic_test (in_array  ('pdo_mysql', get_loaded_extensions()), 'PDO-MySQL extension');
+	foreach ($extlist as $e)
+	{
+		if (array_key_exists ('impact', $e))
+		{
+			// When an optional PHP extension is not available, display a warning and a message
+			// with some additional information so that the user can decide if it is OK to proceed
+			// without the feature(s) that depend on the extension.
+			$what_if_not = "Not found ({$e['impact']}).";
+			$error_class = 'trwarning';
+			$c = 0;
+		}
+		else
+		{
+			// If a mandatory PHP extension is not available, just report the failure.
+			$what_if_not = 'Not found.';
+			$error_class = 'trerror';
+			$c = 1;
+		}
+		$nerrs += $c * platform_generic_test
+		(
+			extension_loaded ($e['name']),
+			"{$e['comment']} extension ({$e['name']})",
+			$what_if_not,
+			$error_class
+		);
+	}
 	if ($test_innodb)
 		$nerrs += platform_generic_test (isInnoDBSupported(), 'InnoDB support');
-	$nerrs += platform_function_test ('preg_match', 'PCRE extension');
 	$nerrs += platform_generic_test (pcre8_with_properties(), 'PCRE compiled with<br>--enable-unicode-properties');
-	platform_function_test ('snmpwalk', 'SNMP extension', 'Not found, Live SNMP feature will not work.', 'trwarning');
-	$nerrs += platform_function_test ('gd_info', 'GD extension');
-	$nerrs += platform_function_test ('mb_strlen', 'Multibyte string extension');
-	platform_function_test ('ldap_connect', 'LDAP extension', 'Not found, LDAP authentication will not work.', 'trwarning');
-	platform_function_test ('pcntl_waitpid', 'PCNTL extension', '802.1Q parallel sync is unavailable.', 'trwarning');
-	platform_function_test ('curl_init', 'cURL extension', 'Not found, some plugins may not work.', 'trwarning');
-	$nerrs += platform_function_test ('json_encode', 'JSON extension', 'JavaScript interface bits may fail.');
-	$nerrs += platform_function_test ('bcmul', 'BC Math extension');
 	platform_generic_test
 	(
 		(! empty ($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off'),
