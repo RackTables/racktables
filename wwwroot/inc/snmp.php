@@ -2214,6 +2214,30 @@ $iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
 	'label' => '\\2',
 	'try_next_proc' => FALSE,
 );
+$iftable_processors['procurve-49-to-50-10000SFP+'] = array
+(
+     'pattern' => '@^(Ten-GigabitEthernet1/0/(49|50)|50)$@',
+     'replacement' => '\\1',
+     'dict_key' => '9-1084',
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+$iftable_processors['procurve-51-to-52-10GBase-T'] = array
+(
+     'pattern' => '@^Ten-GigabitEthernet1/0/(51|52)$@',
+     'replacement' => '\\1',
+     'dict_key' => '1-1642',
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+$iftable_processors['procurve-any-1000T'] = array
+(
+     'pattern' => '@^GigabitEthernet1/0/(\d+)$@',
+     'replacement' => '\\1/\\2/\\3',
+     'dict_key' => 24,
+     'label' => '\\3',
+     'try_next_proc' => FALSE,
+);
 
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
@@ -4218,6 +4242,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
          'dict_key' => 3655,
          'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
          'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
+     ),
+	'25506.11.1.181' => array
+     (
+         'dict_key' => 3723,
+         'text' => 'HP 1950 48G 2SFP+ 2XGT Switch, (48) RJ-45 auto-negotiating 10/100/1000 PoE+ ports, (2) SFP+ fixed 1000/10000 SFP+ ports, (2) RJ-45 1/10GBASE-T ports',
+         'processors' => array ('procurve-51-to-52-10GBase-T','procurve-49-to-50-10000SFP+','procurve-any-1000T'),
      ),
 );
 
