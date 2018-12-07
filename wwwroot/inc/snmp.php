@@ -2215,6 +2215,42 @@ $iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-chassis-any-TenGb'] = array
+(
+     'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@',
+     'replacement' => 'Tgi\\1\\2',
+     'dict_key' => '3-1078',
+     'label' => '\\2',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['catalyst-chassis-FortyGigE'] = array
+(
+     'pattern' => '@^FortyGigE([[:digit:]]+/)?([[:digit:]]+/)?(49|50|51|52)$@',
+     'replacement' => 'FGi\\1\\2',
+     'dict_key' => '3-1078',
+     'label' => '\\2',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-25-to-28-combo-1000SFP'] = array
+(
+     'pattern' => '@^(25|26|27|28)$@',
+     'replacement' => '\\1',
+     'dict_key' => '4-1077',
+     'label' => '\\1',
+     'try_next_proc' => TRUE,
+);
+
+$iftable_processors['procurve-8ports-1000T'] = array
+(
+     'pattern' => '@^Port:  (\d+) Gigabit - Level$@',
+     'replacement' => '\\1',
+     'dict_key' => 24,
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4219,6 +4255,31 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
          'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
          'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
      ),
+	'25506.11.1.100' => array
+	(
+     'dict_key' => 3724,
+     'text' => 'HPE FlexFabric 5900AF 48XG 4QSFP+ Switch, 1G/10G SFP+ and 4 QSFP+-ports, dual hot-pluggable power supplies and fan trays,',
+     'processors' => array ('catalyst-chassis-FortyGigE','catalyst-chassis-any-TenGb'),
+	),
+	'25506.11.1.101' => array
+	(
+     'dict_key' => 3725,
+     'text' => 'HPE 5500-24G-4SFP, 24 RJ-45 autosensing 10/100/1000 ports, 4 fixed Gigabit Ethernet SFP ports',
+     'processors' => array ('procurve-25-to-28-combo-1000SFP','procurve-modular-1000T'),
+	),
+	'25506.11.1.46' => array
+     (
+         'dict_key' => 3726,
+         'text' => 'HP A5800AF-48G Switch with 2 Processors (JG225A),(48) RJ-45 10/100/1000 ports, (6) fixed 1000/10000 SFP+ ports',
+         'processors' => array ('catalyst-chassis-any-TenGb','procurve-any-1000T'),
+     ),
+	'11.2.3.7.11.150' => array
+     (
+         'dict_key' => 3727,
+         'text' => 'HP 1810-8G v2 (J9802A)',
+         'processors' => array ('procurve-8ports-1000T'),
+     ),
+	
 );
 
 global $swtype_pcre;
