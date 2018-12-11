@@ -4208,17 +4208,17 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+'),
 	),
 	'11.2.3.7.11.145' => array
-     (
-         'dict_key' => 3654,
-         'text' => 'HP Aruba 2530 48 PoE+ Switch, (48) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
-         'processors' => array ('procurve-51-to-52-1000SFP','procurve-49-to-50-1000T','procurve-chassis-100TX'),
-     ),
-     '11.2.3.7.11.146' => array
-     (
-         'dict_key' => 3655,
-         'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
-         'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
-     ),
+	(
+		'dict_key' => 3654,
+		'text' => 'HP Aruba 2530 48 PoE+ Switch, (48) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
+		'processors' => array ('procurve-51-to-52-1000SFP','procurve-49-to-50-1000T','procurve-chassis-100TX'),
+	),
+	'11.2.3.7.11.146' => array
+	(
+		'dict_key' => 3655,
+		'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
+		'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
+	),
 );
 
 global $swtype_pcre;
