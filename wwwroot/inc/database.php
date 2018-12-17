@@ -4733,25 +4733,12 @@ function getFilesOfEntity ($entity_type, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT FileLink.file_id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
+		'SELECT FileLink.file_id as id, FileLink.id AS link_id, name, type, size, ctime, mtime, atime, comment ' .
 		'FROM FileLink LEFT JOIN File ON FileLink.file_id = File.id ' .
 		'WHERE FileLink.entity_type = ? AND FileLink.entity_id = ? ORDER BY name',
 		array ($entity_type, $entity_id)
 	);
-	$ret = array();
-	while ($row = $result->fetch (PDO::FETCH_ASSOC))
-		$ret[$row['file_id']] = array (
-			'id' => $row['file_id'],
-			'link_id' => $row['link_id'],
-			'name' => $row['name'],
-			'type' => $row['type'],
-			'size' => $row['size'],
-			'ctime' => $row['ctime'],
-			'mtime' => $row['mtime'],
-			'atime' => $row['atime'],
-			'comment' => $row['comment'],
-		);
-	return $ret;
+	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
 
 function getFile ($file_id)
