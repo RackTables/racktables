@@ -1240,7 +1240,6 @@ ENDOFTRIGGER;
 				(11,1088), (12,1088), (11,1089), (12,1089),
 				(11,1090), (12,1090), (11,1091), (12,1091)";
 
-
 			$query[] = "UPDATE Config SET varvalue = '0.20.12' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.20.13':

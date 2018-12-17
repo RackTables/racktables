@@ -296,7 +296,6 @@ function getNetUsageAJAX()
 	echo getRenderedIPNetCapacity ($net);
 }
 
-
 function getAutocompleteListAJAX()
 {
 	$term = genericAssertion ('term', 'string0');

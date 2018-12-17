@@ -4984,7 +4984,6 @@ function renderFilesForEntity ($entity_id)
 	}
 }
 
-
 // Iterate over what findRouters() returned and output some text suitable for a TD element.
 function printRoutersTD ($rlist, $as_cell = 'yes')
 {

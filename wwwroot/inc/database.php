@@ -2714,7 +2714,6 @@ function updateIPv6Bond ($ip_bin, $object_id=0, $name='', $type='')
 	);
 }
 
-
 function unbindIPFromObject ($ip_bin, $object_id)
 {
 	switch (strlen ($ip_bin))
@@ -3342,7 +3341,6 @@ WHERE
 );
 	return $result->fetchAll (PDO::FETCH_COLUMN, 0);
 }
-
 
 // returns user_id
 // throws an exception if error occured
@@ -5602,7 +5600,6 @@ function upd8021QPort ($instance = 'desired', $object_id, $port_name, $port, $be
 			array ('object_id' => $object_id, 'port_name' => $port_name)
 		);
 
-
 	if (isset ($before))
 	{
 		$add_list = array_diff ($port['allowed'], $before['allowed']);
@@ -5897,7 +5894,6 @@ function isTransactionActive()
 		return TRUE;
 	}
 }
-
 
 function getRowsCount ($table)
 {

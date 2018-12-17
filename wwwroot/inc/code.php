@@ -12,7 +12,6 @@
  *
  */
 
-
 class RCParserError extends Exception
 {
 	public $lineno;

@@ -480,7 +480,6 @@ function renderRealServerList ()
 	echo "</table>";
 }
 
-
 function renderNewRSPoolForm ()
 {
 	startPortlet ('Add new RS pool');

@@ -6323,7 +6323,6 @@ function checkPortRole ($vswitch, $portinfo, $port_name, $port_order)
 	if (! $portinfo || ! $portinfo['linked'])
 		return TRUE; // not linked port
 
-
 	// find linked port with the same name
 	if ($port_name != $portinfo['name'])
 		return FALSE; // typo in local port name

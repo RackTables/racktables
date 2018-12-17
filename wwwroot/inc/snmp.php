@@ -726,7 +726,6 @@ $iftable_processors['nexus-any-10000SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
-
 $iftable_processors['nexus-any-QSFP-split'] = array
 (
 	'pattern' => '@^Ethernet(([[:digit:]]+)/([[:digit:]]+)/([[:digit:]]+))$@',
@@ -2022,7 +2021,6 @@ $iftable_processors['Dlink-3028-25-to-26-Combo'] = array
      'label' => 'G\\1',
      'try_next_proc' => TRUE,
 );
-
 
 $iftable_processors['dlink-rmon-any-100TX'] = array
 (

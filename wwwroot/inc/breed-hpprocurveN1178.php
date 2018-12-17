@@ -88,7 +88,6 @@ function hpprocurveN1178ReadLLDPStatus ($input)
 	return $ret;
 }
 
-
 function hpprocurveN1178ReadInterfaceStatus ($text)
 {
 	$result = array();
@@ -141,7 +140,6 @@ function hpprocurveN1178ReadInterfaceStatus ($text)
 	return $result;
 }
 
-
 function hpprocurveN1178ReadMacList ($text)
 {
 	$result = array();
@@ -190,7 +188,6 @@ function hpprocurveN1178ReadMacList ($text)
 		sort ($maclist);
 	return $result;
 }
-
 
 function hpprocurveN1178Read8021QConfig ($input)
 {
@@ -291,7 +288,6 @@ function hpprocurveN1178Read8021QConfig ($input)
 	unset($rawdata);
 	return $ret;
 }
-
 
 function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 {

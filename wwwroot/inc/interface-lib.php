@@ -1103,7 +1103,6 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 		printf ('<input type=hidden name="%s" value="%s">', htmlspecialchars ($inputname, ENT_QUOTES), htmlspecialchars ($inputvalue, ENT_QUOTES));
 }
 
-
 // Display hrefs for all of a file's parents. If scissors are requested,
 // prepend cutting button to each of them.
 function serializeFileLinks ($links, $scissors = FALSE)
