@@ -4719,12 +4719,12 @@ function getAllUnlinkedFiles ($entity_type, $entity_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT id, name FROM File ' .
+		'SELECT id, name, SUBSTR(comment FROM 1 FOR 128) AS comment FROM File ' .
 		'WHERE id NOT IN (SELECT file_id FROM FileLink WHERE entity_type = ? AND entity_id = ?) ' .
 		'ORDER BY name, id',
 		array ($entity_type, $entity_id)
 	);
-	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
+	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
 
 // FIXME: return a standard cell list, so upper layer can iterate over

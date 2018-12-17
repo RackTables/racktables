@@ -8,6 +8,7 @@
 	update: allow to delete local user accounts (Mantis#1089)
 	update: show names in allocated units when assigning rackspace (Mantis#1711)
 	update: drop support for $localreports
+	update: display file comment in the SELECT (Mantis#1419)
 	new feature: "shared router" allocation (GH#210 by Vladimir Ivanov)
 	new feature: optional tag descriptions
 	new feature: support for HP N.11.78 and IOS 15 (GH #225 by Vasilii Shashkov)

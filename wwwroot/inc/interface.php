@@ -4953,11 +4953,18 @@ function renderFilesForEntity ($entity_id)
 	$files = getAllUnlinkedFiles ($entity_type, $entity_id);
 	if (count ($files))
 	{
+		$options = array();
+		foreach ($files as $file)
+		{
+			$options[$file['id']] = $file['name'];
+			if ($file['comment'] != '')
+				$options[$file['id']] .= ': ' . $file['comment'];
+		}
 		startPortlet ('Link existing (' . count ($files) . ')');
 		printOpFormIntro ('linkFile');
 		echo "<table border=0 cellspacing=0 cellpadding='5' align='center'>\n";
 		echo '<tr><td class=tdleft>';
-		printSelect ($files, array ('name' => 'file_id'));
+		printSelect ($options, array ('name' => 'file_id'));
 		echo '</td><td class=tdleft>';
 		printImageHREF ('ATTACH', 'Link file', TRUE);
 		echo '</td></tr></table>';
