@@ -3782,6 +3782,11 @@ $dictionary = array
 	3720 => array ('chapter_id' => 14, 'dict_value' => 'HP Procurve OS N.11.78'),
 	3721 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP Aruba 2530 48 PoE+ Switch | https://www.hpe.com/us/en/product-catalog/networking/networking-switches/pip.specifications.aruba-2530-48-poeplus-switch.5384996.html]]'),
 	3722 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP Aruba 2530 24 PoE+ Switch | https://www.hpe.com/uk/en/product-catalog/networking/networking-switches/pip.specifications.aruba-2530-24-poeplus-switch.5384999.html]]'),
+	3723 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP 1950 48G 2SFP+ 2XGT Switch | https://www.hpe.com/us/en/product-catalog/networking/networking-switches/pip.specifications.hpe-officeconnect-1950-48g-2sfpplus-2xgt-poeplus-switch.6887601.html]]'),
+	3724 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP FlexFabric 5900AF 48XG 4QSFP+ Switch | https://www.hpe.com/us/en/product-catalog/networking/networking-switches/pip.specifications.hpe-flexfabric-5900af-48xg-4qsfpplus-switch.5223200.html]]'),
+	3725 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HPE 5500-24G-4SFP | https://h20195.www2.hpe.com/v2/default.aspx?cc=az&lc=az&oid=5195377]]'),
+	3726 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5800AF-48G Switch with 2 Processors (JG225A) | https://www.hpe.com/us/en/product-catalog/networking/networking-switches/pip.specifications.hpe-flexfabric-5800af-48g-switch.7482188.html]]'),
+	3727 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP 1810-8G v2 (J9802A)]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
