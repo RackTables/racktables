@@ -52,6 +52,11 @@ git pull --quiet || {
 	exit 2
 }
 
+# git processes the path to the file automatically, but the shell
+# redirection obviously does not.
+DIRNAME=`dirname "$FILEPATH"`
+[ -d "$DIRNAME" ] || mkdir -p "$DIRNAME"
+
 # New file contents is on stdin.
 cat > "$FILEPATH" || {
 	echo "Failed to write new file contents, trying to roll back." >&2
@@ -62,13 +67,14 @@ cat > "$FILEPATH" || {
 	exit 3
 }
 
-git diff --quiet -- "$FILEPATH" || {
+# git-diff exits with 0 if the file is not in the repository.
+if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
 	git add -- "$FILEPATH"
 	git commit --quiet --message="$COMMITMSG" -- "$FILEPATH"
 	git push --quiet || {
 		echo "Failed to run 'git push' (rc=$?)" >&2
 		exit 5
 	}
-}
+fi
 
 exit 0
