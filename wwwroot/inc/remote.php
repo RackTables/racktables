@@ -646,7 +646,7 @@ function callScript ($gwname, $params, $in, &$out, &$errors)
 		$cwd
 	);
 	if (! is_resource ($child))
-		throw new RTGatewayError ("cant execute $binary");
+		throw new RTGatewayError ("failed to execute $binary");
 	$script_child_res = $child;
 
 	$buff_size = 4096;
