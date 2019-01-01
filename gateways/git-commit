@@ -9,38 +9,80 @@
 #
 # $params = array
 # (
-#   'racktables_pseudo_user',
-#   '/path/to/repository',
-#   'path/to/file/within/the/repository',
-#   'commit message text',
+#   'u' => 'racktables_pseudo_user',
+#   'r' => '/path/to/repository',
+#   'f' => 'path/to/file/within/the/repository/file.txt',
+#   'm' => 'commit message text',
 # );
 # $rc = callScript ('git-commit', $params, $file_contents, $stdout, $stderr);
 #
 # The meaning of $stdout and $stderr is the same as in queryTerminal().
-# The specified repository must exist and the specified pseudo-user must be
-# able to write to the repository and run "git pull", "git commit" and "git push"
-# without any user interaction (i.e. the git remote must be on a local
-# filesystem or be configured to use SSH keys).
-#
-# The commit message text is optional; when omitted or empty, a default value
-# will be used. The message may be a multi-line string, in which case it should
-# follow the format recommended in the "discussion" section of the
-# git-commit(1) man page.
 #
 # This script uses sudo to switch between the pseudo-users and requires an
 # entry in sudoers along the following lines:
 # httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
 THISFILE=`basename "$0"`
-[ $# -eq 3 -o $# -eq 4 ] || {
-	echo "Usage: $THISFILE <pseudo-user> <repo dir> <path to file> [commit message]" >&2
+
+usage_and_exit()
+{
+	cat >&2 <<ENDOFMESSAGE
+Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m>]
+  -u <username>    A pseudo-user to work as (this script will try to sudo
+                     itself if the current user is not the same). The user
+                     must be able to write to the repository filesystem and to
+                     run "git pull", "git commit" and "git push" without any
+                     user interaction (i.e. the git remote must be on a local
+                     filesystem or be configured to use SSH keys).
+  -r <repodir>     An absolute path to an existing git repository.
+  -f <filepath>    A relative path to a file within the repository (if the
+                     file or the path do not exist, the missing component(s)
+                     will be created automatically).
+  -m <msg>         An optional custom commit message instead of the default
+                     one. The message may be a multi-line string, in which
+                     case it should follow the format recommended in the
+                     "discussion" section of the git-commit(1) man page.
+ENDOFMESSAGE
 	exit 1
 }
 
-SUDOUSER=$1
-REPODIR="$2"
-FILEPATH="$3"
-COMMITMSG="${4:-update $FILEPATH}"
+# Both callScript() and GNU getopt support both short and long option formats.
+# However, use of any getopt normally implies shift, which unsets the $@
+# special parameter and makes it impossible or difficult to pass properly
+# quoted option values to self via sudo. The getopts shell builtin (available
+# in bash, dash and other shells) depends on its own state variables rather
+# than shifting, but supports short options only.
+#
+# The only easy way to use any long options in this script would be to make
+# the username a fixed argument, which could be tested before the getopt
+# processing, but that would not look consistent. Hence this script uses
+# getopts and short options for all arguments.
+
+while getopts u:r:f:m: opt; do
+	case "$opt" in
+	u)
+		SUDOUSER="$OPTARG"
+		;;
+	r)
+		REPODIR="$OPTARG"
+		;;
+	f)
+		FILEPATH="$OPTARG"
+		;;
+	m)
+		COMMITMSG="$OPTARG"
+		;;
+	*)
+		echo "$THISFILE: internal error parsing options!" >&2
+		exit 3
+	esac
+done
+: ${COMMITMSG:=update $FILEPATH}
+
+if [ -z "$SUDOUSER" -o -z "$REPODIR" -o -z "$FILEPATH" ]; then
+	echo "$THISFILE: not all mandatory parameters are present" >&2
+	usage_and_exit
+fi
 
 [ `whoami` = "$SUDOUSER" ] || {
 	sudo --non-interactive --set-home --user=$SUDOUSER -- "$0" "$@"
