@@ -31,8 +31,9 @@
 # entry in sudoers along the following lines:
 # httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
+THISFILE=`basename "$0"`
 [ $# -eq 3 -o $# -eq 4 ] || {
-	echo "Usage: $0 <pseudo-user> <repo dir> <path to file> [commit message]" >&2
+	echo "Usage: $THISFILE <pseudo-user> <repo dir> <path to file> [commit message]" >&2
 	exit 1
 }
 
@@ -48,7 +49,7 @@ COMMITMSG="${4:-update $FILEPATH}"
 
 cd "$REPODIR"
 git pull --quiet || {
-	echo "Failed to run 'git pull' (rc=$?)" >&2
+	echo "$THISFILE: failed to run 'git pull' (rc=$?)" >&2
 	exit 2
 }
 
@@ -59,9 +60,9 @@ DIRNAME=`dirname "$FILEPATH"`
 
 # New file contents is on stdin.
 cat > "$FILEPATH" || {
-	echo "Failed to write new file contents, trying to roll back." >&2
+	echo "$THISFILE: failed to write new file contents, trying to roll back." >&2
 	git checkout --quiet -- "$FILEPATH" || {
-		echo "Failed to run 'git checkout' after a write error." >&2
+		echo "$THISFILE: failed to run 'git checkout' after a write error." >&2
 		exit 4
 	}
 	exit 3
@@ -72,7 +73,7 @@ if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FIL
 	git add -- "$FILEPATH"
 	git commit --quiet --message="$COMMITMSG" -- "$FILEPATH"
 	git push --quiet || {
-		echo "Failed to run 'git push' (rc=$?)" >&2
+		echo "$THISFILE: failed to run 'git push' (rc=$?)" >&2
 		exit 5
 	}
 fi
