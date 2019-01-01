@@ -91,7 +91,7 @@ if [ -z "$SUDOUSER" -o -z "$REPODIR" -o -z "$FILEPATH" ]; then
 fi
 
 [ `whoami` = "$SUDOUSER" ] || {
-	sudo --non-interactive --set-home --user=$SUDOUSER -- "$0" "$@"
+	sudo --non-interactive --set-home --user="$SUDOUSER" -- "$0" "$@"
 	exit $?
 }
 
