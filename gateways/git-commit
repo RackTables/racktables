@@ -13,6 +13,7 @@
 #   'r' => '/path/to/repository',
 #   'f' => 'path/to/file/within/the/repository/file.txt',
 #   'm' => 'commit message text',
+#   'a' => 'Some Author <user@example.org>',
 # );
 # $rc = callScript ('git-commit', $params, $file_contents, $stdout, $stderr);
 #
@@ -27,7 +28,7 @@ THISFILE=`basename "$0"`
 usage_and_exit()
 {
 	cat >&2 <<ENDOFMESSAGE
-Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m>]
+Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m> -a <a>]
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
                      must be able to write to the repository filesystem and to
@@ -42,6 +43,8 @@ Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m>]
                      one. The message may be a multi-line string, in which
                      case it should follow the format recommended in the
                      "discussion" section of the git-commit(1) man page.
+  -a <author>      An optional git commit author instead of the default or the
+                     one previously configured with git-config(1).
 ENDOFMESSAGE
 	exit 1
 }
@@ -58,7 +61,7 @@ ENDOFMESSAGE
 # processing, but that would not look consistent. Hence this script uses
 # getopts and short options for all arguments.
 
-while getopts u:r:f:m: opt; do
+while getopts u:r:f:m:a: opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
@@ -71,6 +74,9 @@ while getopts u:r:f:m: opt; do
 		;;
 	m)
 		COMMITMSG="$OPTARG"
+		;;
+	a)
+		AUTHOR="$OPTARG"
 		;;
 	*)
 		echo "$THISFILE: internal error parsing options!" >&2
@@ -113,7 +119,7 @@ cat > "$FILEPATH" || {
 # git-diff exits with 0 if the file is not in the repository.
 if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
 	git add -- "$FILEPATH"
-	git commit --quiet --message="$COMMITMSG" -- "$FILEPATH"
+	git commit --quiet --message="$COMMITMSG" ${AUTHOR:+--author="$AUTHOR"} -- "$FILEPATH"
 	git push --quiet || {
 		echo "$THISFILE: failed to run 'git push' (rc=$?)" >&2
 		exit 5
