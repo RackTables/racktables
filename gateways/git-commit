@@ -11,6 +11,7 @@
 # (
 #   'u' => 'racktables_pseudo_user',
 #   'r' => '/path/to/repository',
+#   'o' => 'pull', # or 'commit' or 'push' or unset
 #   'f' => 'path/to/file/within/the/repository/file.txt',
 #   'm' => 'commit message text',
 #   'a' => 'Some Author <user@example.org>',
@@ -28,7 +29,11 @@ THISFILE=`basename "$0"`
 usage_and_exit()
 {
 	cat >&2 <<ENDOFMESSAGE
-Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m> -a <a>]
+Usage: $THISFILE -u <u> -r <r> -o pull
+   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a>]
+   or: $THISFILE -u <u> -r <r> -o push
+   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a>]
+
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
                      must be able to write to the repository filesystem and to
@@ -36,6 +41,13 @@ Usage: $THISFILE -u <u> -r <r> -f <f> [-m <m> -a <a>]
                      user interaction (i.e. the git remote must be on a local
                      filesystem or be configured to use SSH keys).
   -r <repodir>     An absolute path to an existing git repository.
+  -o pull          Only run git-pull(1).
+  -o commit        Only replace the file contents with stdin and run
+                     git-commit(1) if the contents has changed.
+  -o push          Only run git-push(1).
+  -o full          This is the default and is the same as running the three
+                     actions above one after another, except the push will be
+                     skipped if the commit was skipped.
   -f <filepath>    A relative path to a file within the repository (if the
                      file or the path do not exist, the missing component(s)
                      will be created automatically).
@@ -94,7 +106,7 @@ git_commit_or_exit()
 	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
 		git add -- "$FILEPATH"
 		git commit --quiet --message="$COMMITMSG" ${AUTHOR:+--author="$AUTHOR"} -- "$FILEPATH"
-		git_push_or_exit
+		[ "$1" = "and_push" ] && git_push_or_exit
 	fi
 }
 
@@ -110,13 +122,17 @@ git_commit_or_exit()
 # processing, but that would not look consistent. Hence this script uses
 # getopts and short options for all arguments.
 
-while getopts u:r:f:m:a: opt; do
+ONLYRUN=full
+while getopts u:r:o:f:m:a: opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
 		;;
 	r)
 		REPODIR="$OPTARG"
+		;;
+	o)
+		ONLYRUN="$OPTARG"
 		;;
 	f)
 		FILEPATH="$OPTARG"
@@ -141,9 +157,27 @@ assert_nonempty_option -u "$SUDOUSER"
 }
 
 assert_nonempty_option -r "$REPODIR"
-assert_nonempty_option -f "$FILEPATH"
 cd "$REPODIR"
-git_pull_or_exit
-git_commit_or_exit
+
+case "$ONLYRUN" in
+pull)
+	git_pull_or_exit
+	;;
+commit)
+	assert_nonempty_option -f "$FILEPATH"
+	git_commit_or_exit
+	;;
+push)
+	git_push_or_exit
+	;;
+full)
+	assert_nonempty_option -f "$FILEPATH"
+	git_pull_or_exit
+	git_commit_or_exit and_push
+	;;
+*)
+	usage_and_exit
+	;;
+esac
 
 exit 0
