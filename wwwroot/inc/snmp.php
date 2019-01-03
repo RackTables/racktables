@@ -2213,18 +2213,18 @@ $iftable_processors['ubiquiti-chassis-51-to-52-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['procurve-25-to-28-combo-1000SFP'] = array
+$iftable_processors['procurve-25-to-28-1000SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet1/0/(25|26|27|28)$@',
 	'replacement' => '\\1',
 	'dict_key' => '4-1077',
 	'label' => '\\1',
-	'try_next_proc' => TRUE,
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['catalyst-chassis-any-TenGb'] = array
 (
-	'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)?([[:digit:]]+/)?([[:digit:]]+)$@',
+	'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
 	'replacement' => 'Tgi\\1\\2\\3',
 	'dict_key' => '9-1084',
 	'label' => '\\3',
@@ -2233,7 +2233,7 @@ $iftable_processors['catalyst-chassis-any-TenGb'] = array
 
 $iftable_processors['catalyst-chassis-FortyGigE'] = array
 (
-	'pattern' => '@^FortyGigE([[:digit:]]+/)?([[:digit:]]+/)?(49|50|51|52)$@',
+	'pattern' => '@^FortyGigE([[:digit:]]+/)([[:digit:]]+/)(49|50|51|52)$@',
 	'replacement' => 'FGi\\1\\2\\3',
 	'dict_key' => '10-1588',
 	'label' => '\\3',
@@ -2242,7 +2242,7 @@ $iftable_processors['catalyst-chassis-FortyGigE'] = array
 
 $iftable_processors['procurve-51-to-52-10000SFP+'] = array
 (
-	'pattern' => '@^(Ten-GigabitEthernet1/0/(51|52)|50)$@',
+	'pattern' => '@^(Ten-GigabitEthernet1/0/(51|52))$@',
 	'replacement' => '\\1',
 	'dict_key' => '9-1084',
 	'label' => '\\1',
@@ -4296,7 +4296,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 3658,
 		'text' => 'HPE 5500-24G-4SFP, 24 RJ-45 autosensing 10/100/1000 ports, 4 fixed Gigabit Ethernet SFP ports',
-		'processors' => array ('procurve-25-to-28-combo-1000SFP','procurve-any-1000T'),
+		'processors' => array ('procurve-25-to-28-1000SFP', 'procurve-any-1000T', 'catalyst-chassis-any-TenGb'),
 	),
 	'25506.11.1.46' => array
 	(
