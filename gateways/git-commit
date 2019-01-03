@@ -15,6 +15,7 @@
 #   'f' => 'path/to/file/within/the/repository/file.txt',
 #   'm' => 'commit message text',
 #   'a' => 'Some Author <user@example.org>',
+#   'd' => '<git author date>',
 # );
 # $rc = callScript ('git-commit', $params, $file_contents, $stdout, $stderr);
 #
@@ -30,9 +31,9 @@ usage_and_exit()
 {
 	cat >&2 <<ENDOFMESSAGE
 Usage: $THISFILE -u <u> -r <r> -o pull
-   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a>]
+   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d>]
    or: $THISFILE -u <u> -r <r> -o push
-   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a>]
+   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a> -d <d>]
 
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
@@ -57,6 +58,8 @@ Usage: $THISFILE -u <u> -r <r> -o pull
                      "discussion" section of the git-commit(1) man page.
   -a <author>      An optional git commit author instead of the default or the
                      one previously configured with git-config(1).
+  -d <date>        An optional author date for the commit, see the "date
+                     formats" section of the git-commit(1) man page.
 ENDOFMESSAGE
 	exit 1
 }
@@ -105,7 +108,8 @@ git_commit_or_exit()
 	# git-diff exits with 0 if the file is not in the repository.
 	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
 		git add -- "$FILEPATH"
-		git commit --quiet --message="$COMMITMSG" ${AUTHOR:+--author="$AUTHOR"} -- "$FILEPATH"
+		git commit --quiet --message="$COMMITMSG" ${AUTHOR:+--author="$AUTHOR"} \
+			${COMMITDATE:+--date="$COMMITDATE"} -- "$FILEPATH"
 		[ "$1" = "and_push" ] && git_push_or_exit
 	fi
 }
@@ -123,7 +127,7 @@ git_commit_or_exit()
 # getopts and short options for all arguments.
 
 ONLYRUN=full
-while getopts u:r:o:f:m:a: opt; do
+while getopts u:r:o:f:m:a:d: opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
@@ -142,6 +146,9 @@ while getopts u:r:o:f:m:a: opt; do
 		;;
 	a)
 		AUTHOR="$OPTARG"
+		;;
+	d)
+		COMMITDATE="$OPTARG"
 		;;
 	*)
 		echo "$THISFILE: internal error parsing options!" >&2
