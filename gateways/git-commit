@@ -41,7 +41,8 @@ Usage: $THISFILE -u <u> -r <r> -o pull
                      run "git pull", "git commit" and "git push" without any
                      user interaction (i.e. the git remote must be on a local
                      filesystem or be configured to use SSH keys).
-  -r <repodir>     An absolute path to an existing git repository.
+  -r <repodir>     An absolute path within an existing git repository (does
+                     not need to be the top directory of the repository).
   -o pull          Only run git-pull(1).
   -o commit        Only replace the file contents with stdin and run
                      git-commit(1) if the contents has changed.
@@ -51,7 +52,8 @@ Usage: $THISFILE -u <u> -r <r> -o pull
                      skipped if the commit was skipped.
   -f <filepath>    A relative path to a file within the repository (if the
                      file or the path do not exist, the missing component(s)
-                     will be created automatically).
+                     will be created automatically). The path includes the
+                     file name and is relative to the <repodir> above.
   -m <msg>         An optional custom commit message instead of the default
                      one. The message may be a multi-line string, in which
                      case it should follow the format recommended in the
@@ -107,9 +109,19 @@ git_commit_or_exit()
 
 	# git-diff exits with 0 if the file is not in the repository.
 	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
-		git add -- "$FILEPATH"
-		git commit --quiet --message="$COMMITMSG" ${AUTHOR:+--author="$AUTHOR"} \
-			${COMMITDATE:+--date="$COMMITDATE"} -- "$FILEPATH"
+		git add -- "$FILEPATH" || {
+			echo "$THISFILE: failed to run 'git add'" >&2
+			exit 9
+		}
+		git commit --quiet \
+			--message="${COMMITMSG:-update $FILEPATH}" \
+			${AUTHOR:+--author="$AUTHOR"} \
+			${COMMITDATE:+--date="$COMMITDATE"} \
+			-- "$FILEPATH" || \
+		{
+			echo "$THISFILE: failed to run 'git commit'" >&2
+			exit 10
+		}
 		[ "$1" = "and_push" ] && git_push_or_exit
 	fi
 }
@@ -155,7 +167,6 @@ while getopts u:r:o:f:m:a:d: opt; do
 		exit 3
 	esac
 done
-: ${COMMITMSG:=update $FILEPATH}
 
 assert_nonempty_option -u "$SUDOUSER"
 [ `whoami` = "$SUDOUSER" ] || {
@@ -164,7 +175,18 @@ assert_nonempty_option -u "$SUDOUSER"
 }
 
 assert_nonempty_option -r "$REPODIR"
-cd "$REPODIR"
+# Do not suppress the error message from cd, which may be more useful
+# (e.g. permission denied) than a hard-coded default message.
+cd "$REPODIR" || exit 6
+`which git >/dev/null` || {
+	echo "$THISFILE: git is not available" >&2
+	exit 7
+}
+INTREE=`git rev-parse --is-inside-work-tree 2>/dev/null`
+[ "$INTREE" = 'true' ] || {
+	echo "$THISFILE: the directory '$REPODIR' exists, but is not within a git repository" >&2
+	exit 8
+}
 
 case "$ONLYRUN" in
 pull)
