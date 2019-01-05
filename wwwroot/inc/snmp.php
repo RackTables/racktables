@@ -2276,6 +2276,16 @@ $iftable_processors['procurve-8ports-1000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['3COM-GigabitEthernet-1000TX'] = array
+(
+	'pattern' => '@^GigabitEthernet1/0/(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4310,6 +4320,37 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'HP 1810-8G v2 (J9802A)',
 		'processors' => array ('procurve-8ports-1000T'),
 	),
+	'11.2.3.7.11.151' => array
+	(
+		'dict_key' => 2242,
+		'text' => 'HP 1810-24G v2 (J9803A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP+',
+		'processors' => array ('procurve-25-to-26-combo-1000SFP','procurve-modular-1000T'),
+	),
+	'25506.11.1.82' => array
+	(
+		'dict_key' => 2176,
+		'text' => 'HP 1910 JE006A: 24 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports',
+		'processors' => array ('procurve-25-to-26-combo-1000SFP','procurve-modular-1000T'),
+	),
+	'11.2.3.7.11.194' => array
+	(
+		'dict_key' => 3728,
+		'text' => 'HP 1810-24G (J9450A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP+',
+		'processors' => array ('procurve-25-to-26-combo-1000SFP','procurve-modular-1000T'),
+	),
+	'11.2.3.7.11.103' => array
+	(
+		'dict_key' => 3729,
+		'text' => 'HP 1810-8G v2 (J9449A), 8 Gigabit Ethernet 10/100/1000',
+		'processors' => array ('procurve-8ports-1000T'),
+	),
+	'43.1.8.72' => array
+	(
+		'dict_key' => 3730,
+		'text' => '3Com Baseline Plus Switch 2928, 24 x 10/100/1000 + 4 x SFP',
+		'processors' => array ('3COM-GigabitEthernet-1000TX'),
+	),
+
 );
 
 global $swtype_pcre;
