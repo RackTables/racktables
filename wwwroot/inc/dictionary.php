@@ -2236,7 +2236,7 @@ $dictionary = array
 	2173 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1009-8G-1S'),
 	2174 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1009-8G-1S-1S+'),
 	2175 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1016-12S-1S+'),
-	2176 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1910-24G'),
+	2176 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1910-24G (JE006A)'),
 	2177 => array ('chapter_id' => 13, 'dict_value' => '[[Univention%GSKIP%Univention Corporate Server 3.2 (borgfeld) | http://docs.univention.de/release-notes-3.2-2-de.html]]'),
 	2178 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP8941 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP8941]]'),
 	2179 => array ('chapter_id' => 27, 'dict_value' => '[[APC%GPASS%AP8959EU3 | http://www.apc.com/products/resource/include/techspec_index.cfm?base_sku=AP8959EU3]]'),
