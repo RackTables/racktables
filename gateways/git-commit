@@ -34,6 +34,7 @@ Usage: $THISFILE -u <u> -r <r> -o pull
    or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d>]
    or: $THISFILE -u <u> -r <r> -o push
    or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a> -d <d>]
+   or: $THISFILE -h
 
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
@@ -62,8 +63,9 @@ Usage: $THISFILE -u <u> -r <r> -o pull
                      one previously configured with git-config(1).
   -d <date>        An optional author date for the commit, see the "date
                      formats" section of the git-commit(1) man page.
+  -h               Print this message and exit.
 ENDOFMESSAGE
-	exit 1
+	exit ${1:-1}
 }
 
 assert_nonempty_option()
@@ -139,7 +141,7 @@ git_commit_or_exit()
 # getopts and short options for all arguments.
 
 ONLYRUN=full
-while getopts u:r:o:f:m:a:d: opt; do
+while getopts u:r:o:f:m:a:d:h opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
@@ -162,9 +164,11 @@ while getopts u:r:o:f:m:a:d: opt; do
 	d)
 		COMMITDATE="$OPTARG"
 		;;
+	h)
+		usage_and_exit 0
+		;;
 	*)
-		echo "$THISFILE: internal error parsing options!" >&2
-		exit 3
+		usage_and_exit
 	esac
 done
 
