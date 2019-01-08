@@ -97,7 +97,12 @@ git_commit_or_exit()
 	# git processes the path to the file automatically, but the shell
 	# redirection obviously does not.
 	DIRNAME=`dirname "$FILEPATH"`
-	[ -d "$DIRNAME" ] || mkdir -p "$DIRNAME"
+	if [ ! -d "$DIRNAME" ]; then
+		mkdir -p "$DIRNAME" || {
+			echo "$THISFILE: failed to create missing directory '$DIRNAME'" >&2
+			exit 11
+		}
+	fi
 
 	# New file contents is on stdin.
 	cat > "$FILEPATH" || {
