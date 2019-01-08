@@ -162,7 +162,15 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 		REPODIR="$OPTARG"
 		;;
 	o)
-		ONLYRUN="$OPTARG"
+		case "$OPTARG" in
+		pull|commit|push|full)
+			ONLYRUN="$OPTARG"
+			;;
+		*)
+			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt"
+			usage_and_exit
+			;;
+		esac
 		;;
 	f)
 		FILEPATH="$OPTARG"
