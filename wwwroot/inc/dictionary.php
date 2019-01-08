@@ -2302,7 +2302,7 @@ $dictionary = array
 	2239 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6430-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
 	2240 => array ('chapter_id' => 12, 'dict_value' => '[[Brocade%GPASS%ICX-6450-48 | http://www.brocade.com/products/all/switches/product-details/icx-6430-and-6450-switches/index.page]]'),
 	2241 => array ('chapter_id' => 12, 'dict_value' => '[[IBM%GPASS%RackSwitch G8000 | http://www-03.ibm.com/systems/networking/switches/rack/g8000/]]'),
-	2242 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1810G-24'),
+	2242 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1810G-24 (J9450A)'),
 	2243 => array ('chapter_id' => 17, 'dict_value' => 'Huawei%GPASS%NE20E-S4'),
 	2244 => array ('chapter_id' => 17, 'dict_value' => 'Huawei%GPASS%NE20E-S8'),
 	2245 => array ('chapter_id' => 17, 'dict_value' => 'Huawei%GPASS%NE20E-S16'),
