@@ -16,6 +16,7 @@
 #   'm' => 'commit message text',
 #   'a' => 'Some Author <user@example.org>',
 #   'd' => '<git author date>',
+#   'v' => 'normal',
 # );
 # $rc = callScript ('git-commit', $params, $file_contents, $stdout, $stderr);
 #
@@ -30,10 +31,10 @@ THISFILE=`basename "$0"`
 usage_and_exit()
 {
 	cat >&2 <<ENDOFMESSAGE
-Usage: $THISFILE -u <u> -r <r> -o pull
-   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d>]
-   or: $THISFILE -u <u> -r <r> -o push
-   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a> -d <d>]
+Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
+   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d> -v <v>]
+   or: $THISFILE -u <u> -r <r> -o push [-v <v>]
+   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a> -d <d> -v <v>]
    or: $THISFILE -h
 
   -u <username>    A pseudo-user to work as (this script will try to sudo
@@ -63,6 +64,11 @@ Usage: $THISFILE -u <u> -r <r> -o pull
                      one previously configured with git-config(1).
   -d <date>        An optional author date for the commit, see the "date
                      formats" section of the git-commit(1) man page.
+  -v quiet         This is the default. Run the requested git command(s) with
+                     --quiet. Any errors will still be printed to stderr.
+  -v verbose       Run the requested git command(s) with --verbose.
+  -v normal        Run the requested git command(s) without --quiet and
+                     without --verbose.
   -h               Print this message and exit.
 ENDOFMESSAGE
 	exit ${1:-1}
@@ -78,7 +84,7 @@ assert_nonempty_option()
 
 git_pull_or_exit()
 {
-	git pull --quiet || {
+	git pull $VLEVEL || {
 		echo "$THISFILE: failed to run 'git pull' (rc=$?)" >&2
 		exit 2
 	}
@@ -86,7 +92,7 @@ git_pull_or_exit()
 
 git_push_or_exit()
 {
-	git push --quiet || {
+	git push $VLEVEL || {
 		echo "$THISFILE: failed to run 'git push' (rc=$?)" >&2
 		exit 5
 	}
@@ -120,7 +126,7 @@ git_commit_or_exit()
 			echo "$THISFILE: failed to run 'git add'" >&2
 			exit 9
 		}
-		git commit --quiet \
+		git commit $VLEVEL \
 			--message="${COMMITMSG:-update $FILEPATH}" \
 			${AUTHOR:+--author="$AUTHOR"} \
 			${COMMITDATE:+--date="$COMMITDATE"} \
@@ -146,7 +152,8 @@ git_commit_or_exit()
 # getopts and short options for all arguments.
 
 ONLYRUN=full
-while getopts u:r:o:f:m:a:d:h opt; do
+VLEVEL='--quiet'
+while getopts u:r:o:f:m:a:d:v:h opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
@@ -168,6 +175,23 @@ while getopts u:r:o:f:m:a:d:h opt; do
 		;;
 	d)
 		COMMITDATE="$OPTARG"
+		;;
+	v)
+		case "$OPTARG" in
+		quiet)
+			VLEVEL='--quiet'
+			;;
+		normal)
+			VLEVEL=
+			;;
+		verbose)
+			VLEVEL='--verbose'
+			;;
+		*)
+			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt"
+			usage_and_exit
+			;;
+		esac
 		;;
 	h)
 		usage_and_exit 0
