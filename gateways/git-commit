@@ -167,7 +167,7 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 			ONLYRUN="$OPTARG"
 			;;
 		*)
-			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt"
+			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
 			usage_and_exit
 			;;
 		esac
@@ -196,7 +196,7 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 			VLEVEL='--verbose'
 			;;
 		*)
-			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt"
+			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
 			usage_and_exit
 			;;
 		esac
@@ -206,6 +206,7 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 		;;
 	*)
 		usage_and_exit
+		;;
 	esac
 done
 
@@ -229,6 +230,7 @@ INTREE=`git rev-parse --is-inside-work-tree 2>/dev/null`
 	exit 8
 }
 
+# The getopts loop above validates the value of ONLYRUN.
 case "$ONLYRUN" in
 pull)
 	git_pull_or_exit
@@ -244,9 +246,6 @@ full)
 	assert_nonempty_option -f "$FILEPATH"
 	git_pull_or_exit
 	git_commit_or_exit and_push
-	;;
-*)
-	usage_and_exit
 	;;
 esac
 
