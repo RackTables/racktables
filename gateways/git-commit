@@ -28,9 +28,9 @@
 
 THISFILE=`basename "$0"`
 
-usage_and_exit()
+print_usage_and_exit_0()
 {
-	cat >&2 <<ENDOFMESSAGE
+	cat <<ENDOFMESSAGE
 Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
    or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d> -v <v>]
    or: $THISFILE -u <u> -r <r> -o push [-v <v>]
@@ -71,14 +71,20 @@ Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
                      without --verbose.
   -h               Print this message and exit.
 ENDOFMESSAGE
-	exit ${1:-1}
+	exit 0
+}
+
+mention_usage_and_exit_1()
+{
+	echo "Try '$THISFILE -h' for more information." >&2
+	exit 1
 }
 
 assert_nonempty_option()
 {
 	if [ -z "$2" ]; then
 		echo "$THISFILE: missing option $1" >&2
-		usage_and_exit
+		mention_usage_and_exit_1
 	fi
 }
 
@@ -168,7 +174,7 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 			;;
 		*)
 			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
-			usage_and_exit
+			mention_usage_and_exit_1
 			;;
 		esac
 		;;
@@ -197,15 +203,15 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 			;;
 		*)
 			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
-			usage_and_exit
+			mention_usage_and_exit_1
 			;;
 		esac
 		;;
 	h)
-		usage_and_exit 0
+		print_usage_and_exit_0
 		;;
 	*)
-		usage_and_exit
+		mention_usage_and_exit_1
 		;;
 	esac
 done
