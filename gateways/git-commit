@@ -93,10 +93,15 @@ mention_usage_and_exit_1()
 	exit 1
 }
 
+print_error()
+{
+	echo "$THISFILE: ${1:?}" >&2
+}
+
 assert_nonempty_option()
 {
 	if [ -z "$2" ]; then
-		echo "$THISFILE: missing option $1" >&2
+		print_error "missing option $1"
 		mention_usage_and_exit_1
 	fi
 }
@@ -104,7 +109,7 @@ assert_nonempty_option()
 git_pull_or_exit()
 {
 	git pull $VLEVEL || {
-		echo "$THISFILE: failed to run 'git pull' (rc=$?)" >&2
+		print_error "failed to run 'git pull' (rc=$?)"
 		exit 2
 	}
 }
@@ -112,7 +117,7 @@ git_pull_or_exit()
 git_push_or_exit()
 {
 	git push $VLEVEL || {
-		echo "$THISFILE: failed to run 'git push' (rc=$?)" >&2
+		print_error "failed to run 'git push' (rc=$?)"
 		exit 5
 	}
 }
@@ -122,7 +127,7 @@ git_commit_or_exit()
 	assert_nonempty_option -f "$FILEPATH"
 	REALPATH=`realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH"`
 	if [ "$REALPATH" != "${REALPATH#../}" ]; then
-		echo "$THISFILE: file path '$FILEPATH' is outside of the repository directory '$REPODIR'" >&2
+		print_error "file path '$FILEPATH' is outside of the repository directory '$REPODIR'"
 		exit 12
 	fi
 	# git processes the path to the file automatically, but the shell
@@ -130,16 +135,16 @@ git_commit_or_exit()
 	DIRNAME=`dirname "$FILEPATH"`
 	if [ ! -d "$DIRNAME" ]; then
 		mkdir -p "$DIRNAME" || {
-			echo "$THISFILE: failed to create missing directory '$DIRNAME'" >&2
+			print_error "failed to create missing directory '$DIRNAME'"
 			exit 11
 		}
 	fi
 
 	# New file contents is on stdin.
 	cat > "$FILEPATH" || {
-		echo "$THISFILE: failed to write new file contents, trying to roll back." >&2
+		print_error "failed to write new file contents, trying to roll back."
 		git checkout --quiet -- "$FILEPATH" || {
-			echo "$THISFILE: failed to run 'git checkout' after a write error." >&2
+			print_error "failed to run 'git checkout' after a write error."
 			exit 4
 		}
 		exit 3
@@ -148,7 +153,7 @@ git_commit_or_exit()
 	# git-diff exits with 0 if the file is not in the repository.
 	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
 		git add -- "$FILEPATH" || {
-			echo "$THISFILE: failed to run 'git add'" >&2
+			print_error "failed to run 'git add'"
 			exit 9
 		}
 		local message="update $FILEPATH"
@@ -169,7 +174,7 @@ git_commit_or_exit()
 			${COMMITDATE:+--date="$COMMITDATE"} \
 			-- "$FILEPATH" || \
 		{
-			echo "$THISFILE: failed to run 'git commit'" >&2
+			print_error "failed to run 'git commit'"
 			exit 10
 		}
 		[ "$1" = "and_push" ] && git_push_or_exit
@@ -205,7 +210,7 @@ while getopts u:r:o:f:m:M:a:d:v:h opt; do
 			ONLYRUN="$OPTARG"
 			;;
 		*)
-			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
+			print_error "'$OPTARG' is not a valid value for -$opt"
 			mention_usage_and_exit_1
 			;;
 		esac
@@ -222,7 +227,7 @@ while getopts u:r:o:f:m:M:a:d:v:h opt; do
 			MESSAGEMODE="$OPTARG"
 			;;
 		*)
-			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
+			print_error "'$OPTARG' is not a valid value for -$opt"
 			mention_usage_and_exit_1
 			;;
 		esac
@@ -245,7 +250,7 @@ while getopts u:r:o:f:m:M:a:d:v:h opt; do
 			VLEVEL='--verbose'
 			;;
 		*)
-			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
+			print_error "'$OPTARG' is not a valid value for -$opt"
 			mention_usage_and_exit_1
 			;;
 		esac
@@ -270,12 +275,12 @@ assert_nonempty_option -r "$REPODIR"
 # (e.g. permission denied) than a hard-coded default message.
 cd "$REPODIR" || exit 6
 `which git >/dev/null` || {
-	echo "$THISFILE: git is not available" >&2
+	print_error "git is not available"
 	exit 7
 }
 INTREE=`git rev-parse --is-inside-work-tree 2>/dev/null`
 [ "$INTREE" = 'true' ] || {
-	echo "$THISFILE: the directory '$REPODIR' exists, but is not within a git repository" >&2
+	print_error "the directory '$REPODIR' exists, but is not within a git repository"
 	exit 8
 }
 
