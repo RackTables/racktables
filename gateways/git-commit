@@ -174,7 +174,15 @@ git_commit_or_exit()
 			${COMMITDATE:+--date="$COMMITDATE"} \
 			-- "$FILEPATH" || \
 		{
-			print_error "failed to run 'git commit'"
+			print_error "failed to run 'git commit', trying to roll back."
+			git reset --quiet -- "$FILEPATH" || {
+				print_error "failed to run 'git reset'"
+				exit 13
+			}
+			git checkout --quiet -- "$FILEPATH" || {
+				print_error "failed to run 'git checkout'"
+				exit 14
+			}
 			exit 10
 		}
 		[ "$1" = "and_push" ] && git_push_or_exit
