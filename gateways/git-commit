@@ -119,6 +119,12 @@ git_push_or_exit()
 
 git_commit_or_exit()
 {
+	assert_nonempty_option -f "$FILEPATH"
+	REALPATH=`realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH"`
+	if [ "$REALPATH" != "${REALPATH#../}" ]; then
+		echo "$THISFILE: file path '$FILEPATH' is outside of the repository directory '$REPODIR'" >&2
+		exit 12
+	fi
 	# git processes the path to the file automatically, but the shell
 	# redirection obviously does not.
 	DIRNAME=`dirname "$FILEPATH"`
@@ -279,14 +285,12 @@ pull)
 	git_pull_or_exit
 	;;
 commit)
-	assert_nonempty_option -f "$FILEPATH"
 	git_commit_or_exit
 	;;
 push)
 	git_push_or_exit
 	;;
 full)
-	assert_nonempty_option -f "$FILEPATH"
 	git_pull_or_exit
 	git_commit_or_exit and_push
 	;;
