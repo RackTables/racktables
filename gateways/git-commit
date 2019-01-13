@@ -40,8 +40,8 @@ Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
                      must be able to write to the repository filesystem and to
-                     run "git pull", "git commit" and "git push" without any
-                     user interaction (i.e. the git remote must be on a local
+                     run "git pull" and "git push" without any user
+                     interaction (i.e. the git remote must be on a local
                      filesystem or be configured to use SSH keys).
   -r <repodir>     An absolute path within an existing git repository (does
                      not need to be the top directory of the repository).
