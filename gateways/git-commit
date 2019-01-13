@@ -14,6 +14,7 @@
 #   'o' => 'pull', # or 'commit' or 'push' or unset
 #   'f' => 'path/to/file/within/the/repository/file.txt',
 #   'm' => 'commit message text',
+#   'M' => 'append',
 #   'a' => 'Some Author <user@example.org>',
 #   'd' => '<git author date>',
 #   'v' => 'normal',
@@ -32,10 +33,12 @@ print_usage_and_exit_0()
 {
 	cat <<ENDOFMESSAGE
 Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
-   or: $THISFILE -u <u> -r <r> -o commit -f <f> [-m <m> -a <a> -d <d> -v <v>]
+   or: $THISFILE -u <u> -r <r> -o commit -f <f> [<commit-options>] [-v <v>]
    or: $THISFILE -u <u> -r <r> -o push [-v <v>]
-   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [-m <m> -a <a> -d <d> -v <v>]
+   or: $THISFILE -u <u> -r <r> [-o full] -f <f> [<commit-options>] [-v <v>]
    or: $THISFILE -h
+
+Commit options: [-m <msg> [-M <M>]] [-a <author>] [-d <date>]
 
   -u <username>    A pseudo-user to work as (this script will try to sudo
                      itself if the current user is not the same). The user
@@ -60,6 +63,16 @@ Usage: $THISFILE -u <u> -r <r> -o pull [-v <v>]
                      one. The message may be a multi-line string, in which
                      case it should follow the format recommended in the
                      "discussion" section of the git-commit(1) man page.
+  -M replace       This is the default. If -m <msg> is specified and is not an
+                     empty string, <msg> will be used as the full commit
+                     message (both the one-line summary and the multi-line
+                     description, if present) instead of the default
+                     single-line summary.
+  -M append        If -m <msg> is specified, <msg> will be appended to the
+                     default single-line summary. This will extend the summary
+                     and/or add a description (supposedly with an empty line
+                     between the two), given proper amount and placement of
+                     newlines in <msg>.
   -a <author>      An optional git commit author instead of the default or the
                      one previously configured with git-config(1).
   -d <date>        An optional author date for the commit, see the "date
@@ -132,8 +145,20 @@ git_commit_or_exit()
 			echo "$THISFILE: failed to run 'git add'" >&2
 			exit 9
 		}
+		local message="update $FILEPATH"
+		# getopts validates the value of MESSAGEMODE.
+		case "$MESSAGEMODE" in
+		replace)
+			[ -n "$COMMITMSG" ] && message="$COMMITMSG"
+			;;
+		append)
+			# No space in between -- the appended part may skip straight to
+			# the commit description.
+			message="$message$COMMITMSG"
+			;;
+		esac
 		git commit $VLEVEL \
-			--message="${COMMITMSG:-update $FILEPATH}" \
+			--message="$message" \
 			${AUTHOR:+--author="$AUTHOR"} \
 			${COMMITDATE:+--date="$COMMITDATE"} \
 			-- "$FILEPATH" || \
@@ -159,7 +184,8 @@ git_commit_or_exit()
 
 ONLYRUN=full
 VLEVEL='--quiet'
-while getopts u:r:o:f:m:a:d:v:h opt; do
+MESSAGEMODE=replace
+while getopts u:r:o:f:m:M:a:d:v:h opt; do
 	case "$opt" in
 	u)
 		SUDOUSER="$OPTARG"
@@ -183,6 +209,17 @@ while getopts u:r:o:f:m:a:d:v:h opt; do
 		;;
 	m)
 		COMMITMSG="$OPTARG"
+		;;
+	M)
+		case "$OPTARG" in
+		replace|append)
+			MESSAGEMODE="$OPTARG"
+			;;
+		*)
+			echo "$THISFILE: '$OPTARG' is not a valid value for -$opt" >&2
+			mention_usage_and_exit_1
+			;;
+		esac
 		;;
 	a)
 		AUTHOR="$OPTARG"
