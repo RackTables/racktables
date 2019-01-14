@@ -95,6 +95,7 @@ echo
 cd "$BASEDIR/tests"
 "$PHPUNIT_BIN" --group small --bootstrap $BOOTSTRAP_FILE || exit 1
 
+cd "$BASEDIR/wwwroot"
 # PHPUnit would fail if this was not a unit testing database, hence
 # at this point is is OK to let the scripts below make changes.
 echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit 1
