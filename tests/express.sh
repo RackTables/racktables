@@ -87,11 +87,15 @@ rm -f "$TEMPFILE"
 # The command-line scripts among other things prove that init.php actually works.
 echo
 cd "$BASEDIR/wwwroot"
+# Requires init.php, prints usage and leaves the database intact.
 echo 'Testing syncdomain.php'; ../scripts/syncdomain.php --help || exit 1
-echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit 1
-echo 'Testing reload_dictionary.php'; ../scripts/reload_dictionary.php || exit 1
 
 # At this point it makes sense to test specific functions.
 echo
 cd "$BASEDIR/tests"
 "$PHPUNIT_BIN" --group small --bootstrap $BOOTSTRAP_FILE || exit 1
+
+# PHPUnit would fail if this was not a unit testing database, hence
+# at this point is is OK to let the scripts below make changes.
+echo 'Testing cleanup_ldap_cache.php'; ../scripts/cleanup_ldap_cache.php || exit 1
+echo 'Testing reload_dictionary.php'; ../scripts/reload_dictionary.php || exit 1
