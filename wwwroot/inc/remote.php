@@ -548,7 +548,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$commands = "configure\nconsole local-terminal none\nexit\nno page\n" . $commands . "configure\nconsole local-terminal vt100\nend\nexit\nexit\ny\n";
 			break;
 		case 'ios15':
-			$commands = "terminal length 0\nno terminal monitor\n" . $commands;
+			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 	}
 	if (! isset ($protocol))
