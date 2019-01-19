@@ -73,10 +73,14 @@ Commit options: [-m <msg> [-M <M>]] [-a <author>] [-d <date>]
                      and/or add a description (supposedly with an empty line
                      between the two), given proper amount and placement of
                      newlines in <msg>.
-  -a <author>      An optional git commit author instead of the default or the
-                     one previously configured with git-config(1).
-  -d <date>        An optional author date for the commit, see the "date
-                     formats" section of the git-commit(1) man page.
+  -a <author>      An optional commit author if different from the committer.
+                     Regardless of this option, the committer will be either
+                     the default (which might or might not work) or the one
+                     previously configured with git-config(1).
+  -d <date>        An optional author date if different from the committer
+                     date, see the "date formats" section of the git-commit(1)
+                     man page. Regardless of this option, the committer date
+                     will be the current date.
   -v quiet         This is the default. Run the requested git command(s) with
                      --quiet. Any errors will still be printed to stderr.
   -v verbose       Run the requested git command(s) with --verbose.
