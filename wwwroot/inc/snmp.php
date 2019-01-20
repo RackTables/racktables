@@ -2296,11 +2296,11 @@ $iftable_processors['procurve-1810-1000SFP'] = array
 
 $iftable_processors['procurve-1810-23-to-24-COMBO'] = array
 (
-	'pattern' => '@^Port: (\d+) Gigabit - Level$@',
+	'pattern' => '@^Port: (23|24) Gigabit - Level$@',
 	'replacement' => '\\1',
 	'dict_key' => '4-1077',
 	'label' => '\\1',
-	'try_next_proc' => FALSE,
+	'try_next_proc' => TRUE,
 );
 
 global $known_switches;
@@ -4346,19 +4346,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'11.2.3.7.11.151' => array
 	(
 		'dict_key' => 3730,
-		'text' => 'HP 1810-24G v2 (J9803A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP+',
+		'text' => 'HP 1810-24G v2 (J9803A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP',
 		'processors' => array ('procurve-1810-1000SFP','procurve-1810-1000T'),
 	),
 	'11.2.3.7.11.194' => array
 	(
-		'dict_key' => 3728,
-		'text' => 'HP 1810-24G (J9450A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP+',
+		'dict_key' => 2242,
+		'text' => 'HP 1810-24G (J9450A), 22 x Gigabit Ethernet 10/100/1000, 2 combo ports',
 		'processors' => array ('procurve-1810-23-to-24-COMBO','procurve-1810-1000T'),
 	),
 	'11.2.3.7.11.103' => array
 	(
 		'dict_key' => 3729,
-		'text' => 'HP 1810-8G v2 (J9449A), 8 Gigabit Ethernet 10/100/1000',
+		'text' => 'HP 1810-8G (J9449A), 8 Gigabit Ethernet 10/100/1000',
 		'processors' => array ('procurve-8ports-1000T'),
 	),
 );
