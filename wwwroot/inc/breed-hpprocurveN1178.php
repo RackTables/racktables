@@ -213,7 +213,7 @@ function hpprocurveN1178Read8021QConfig ($input)
 				{
 				continue;
 				}
-			if (preg_match('/^([0-9]+)$/', trim($vlans), $matches))
+			if (preg_match('/^((?:[0-9]+)|(?:[Tt]rk[0-9]+))$/', trim($vlans), $matches))
 				{
 				$port['port_id'] = $matches[1];
 				continue;
