@@ -154,43 +154,48 @@ git_commit_or_exit()
 		exit 3
 	}
 
+	local message
 	# git-diff exits with 0 if the file is not in the repository.
-	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null || ! git diff --quiet -- "$FILEPATH"; then
-		git add -- "$FILEPATH" || {
-			print_error "failed to run 'git add'"
-			exit 9
-		}
-		local message="update $FILEPATH"
-		# getopts validates the value of MESSAGEMODE.
-		case "$MESSAGEMODE" in
-		replace)
-			[ -n "$COMMITMSG" ] && message="$COMMITMSG"
-			;;
-		append)
-			# No space in between -- the appended part may skip straight to
-			# the commit description.
-			message="$message$COMMITMSG"
-			;;
-		esac
-		git commit $VLEVEL \
-			--message="$message" \
-			${AUTHOR:+--author="$AUTHOR"} \
-			${COMMITDATE:+--date="$COMMITDATE"} \
-			-- "$FILEPATH" || \
-		{
-			print_error "failed to run 'git commit', trying to roll back."
-			git reset --quiet -- "$FILEPATH" || {
-				print_error "failed to run 'git reset'"
-				exit 13
-			}
-			git checkout --quiet -- "$FILEPATH" || {
-				print_error "failed to run 'git checkout'"
-				exit 14
-			}
-			exit 10
-		}
-		[ "$1" = "and_push" ] && git_push_or_exit
+	if ! git cat-file -e HEAD:"$FILEPATH" 2>/dev/null; then
+		message="add $FILEPATH"
+	else
+		git diff --quiet -- "$FILEPATH" && return # in the repository and has not changed
+		message="update $FILEPATH"
 	fi
+
+	git add -- "$FILEPATH" || {
+		print_error "failed to run 'git add'"
+		exit 9
+	}
+	# getopts validates the value of MESSAGEMODE.
+	case "$MESSAGEMODE" in
+	replace)
+		[ -n "$COMMITMSG" ] && message="$COMMITMSG"
+		;;
+	append)
+		# No space in between -- the appended part may skip straight to
+		# the commit description.
+		message="$message$COMMITMSG"
+		;;
+	esac
+	git commit $VLEVEL \
+		--message="$message" \
+		${AUTHOR:+--author="$AUTHOR"} \
+		${COMMITDATE:+--date="$COMMITDATE"} \
+		-- "$FILEPATH" || \
+	{
+		print_error "failed to run 'git commit', trying to roll back."
+		git reset --quiet -- "$FILEPATH" || {
+			print_error "failed to run 'git reset'"
+			exit 13
+		}
+		git checkout --quiet -- "$FILEPATH" || {
+			print_error "failed to run 'git checkout'"
+			exit 14
+		}
+		exit 10
+	}
+	[ "$1" = "and_push" ] && git_push_or_exit
 }
 
 # Both callScript() and GNU getopt support both short and long option formats.
