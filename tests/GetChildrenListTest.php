@@ -1,6 +1,6 @@
 <?php
 
-// Verify that some recursive functions return the correct data set 
+// Verify that some recursive functions return the correct data set
 class GetChildrenListTest extends RTTestCase
 {
 	protected static $num_children = 10;

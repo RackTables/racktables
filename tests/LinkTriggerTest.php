@@ -16,7 +16,7 @@ class LinkTriggerTest extends RTTestCase
 	public static function setUpBeforeClass ()
 	{
 		// make sure AUTOPORTS_CONFIG is empty
-		self::$autoports_config_var = getConfigVar ('AUTOPORTS_CONFIG'); 
+		self::$autoports_config_var = getConfigVar ('AUTOPORTS_CONFIG');
 		if (self::$autoports_config_var != '')
 			setConfigVar ('AUTOPORTS_CONFIG', '');
 

@@ -1894,7 +1894,7 @@ $iftable_processors['tplink-any-100T'] = array
 	'dict_key' => 24,
 	'label' => '\\1',
 	'try_next_proc' => FALSE,
-); 
+);
 
 $iftable_processors['tplink-sg-stackable-any-1000T'] = array
 (

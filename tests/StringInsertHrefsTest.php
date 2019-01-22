@@ -7,7 +7,7 @@ class StringInsertHrefsTest extends RTTestCase
 	public static function setUpBeforeClass ()
 	{
 		// make sure DETECT_URLS is set to yes
-		self::$detect_urls_var = getConfigVar ('DETECT_URLS'); 
+		self::$detect_urls_var = getConfigVar ('DETECT_URLS');
 		if (self::$detect_urls_var != 'yes')
 			setConfigVar ('DETECT_URLS', 'yes');
 	}

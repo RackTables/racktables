@@ -447,7 +447,7 @@ function renderRackspace ()
 			$found_racks = array_merge ($found_racks, $rackList);
 			$location_id = $rowInfo['location_id'];
 			$locationIdx = 0;
-			// contains location names in the form of 'grandparent parent child', used for sorting 
+			// contains location names in the form of 'grandparent parent child', used for sorting
 			$locationTree = '';
 			// contains location names as well as links
 			$hrefLocationTree = '';
