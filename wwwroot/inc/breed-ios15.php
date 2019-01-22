@@ -45,6 +45,7 @@ function ios15ReadLLDPStatus ($input)
 					);
 			}
 			unset ($ret['current']);
+			break;
 		default:
 		}
 	}
