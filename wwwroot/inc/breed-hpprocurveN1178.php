@@ -4,7 +4,7 @@
 # framework. See accompanying file "COPYING" for the full copyright and
 # licensing information.
 
-// Functions for HP Procurve switches 
+// Functions for HP Procurve switches
 
 function hpprocurveN1178ReadLLDPStatus ($input)
 {
@@ -15,30 +15,30 @@ function hpprocurveN1178ReadLLDPStatus ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^  Local Port.+:(.+)$/', $line, $matches):
-			if (empty(trim($matches[1])))
+			if (trim ($matches[1]) == '')
 				$ret['current']['local_port'] = 'NULL';
 			else
-				$ret['current']['local_port'] = shortenIfName (trim($matches[1]));
+				$ret['current']['local_port'] = shortenIfName (trim ($matches[1]));
 			break;
 		case preg_match ('/^  PortId.+:(.+)$/', $line, $matches):
-			if (empty(trim($matches[1])))
+			if (trim ($matches[1]) == '')
 				$ret['current']['remote_port'] = 'NULL';
 			else
-				$ret['current']['remote_port'] = trim($matches[1]);
+				$ret['current']['remote_port'] = trim ($matches[1]);
 			break;
 		case preg_match ('/^  SysName\s+:(.+)?$/', $line, $matches):
-			if (empty(trim($matches[1])))
+			if (trim ($matches[1]) == '')
 				$ret['current']['sys_name'] = 'NULL';
 			else
-				$ret['current']['sys_name'] = trim($matches[1]);
+				$ret['current']['sys_name'] = trim ($matches[1]);
 			break;
 		case preg_match ('/^  PortDescr\s+:(.+)?$/', $line, $matches):
-			if (empty(trim($matches[1])))
+			if (trim ($matches[1]) == '')
 			{
 				$ret['current']['sys_name'] = 'NULL';
 				break;
 			}
-			$ret['current']['port_descr'] = trim($matches[1]);
+			$ret['current']['port_descr'] = trim ($matches[1]);
 			if
 			(
 				array_key_exists ('current', $ret) &&
@@ -49,7 +49,7 @@ function hpprocurveN1178ReadLLDPStatus ($input)
 			)
 			{
 				$port = NULL;
-				if (preg_match ('/^[a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2}$/',$ret['current']['remote_port']))
+				if (preg_match ('/^[a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2} [a-f0-9]{2}$/', $ret['current']['remote_port']))
 					$port = $ret['current']['port_descr'];
 				else
 					$port = $ret['current']['remote_port'];
@@ -78,24 +78,24 @@ function hpprocurveN1178ReadInterfaceStatus ($text)
 		switch ($state)
 		{
 		case 'headerSearch':
-			if (preg_match('/\s?Port\s+Type\s+/', $line))
+			if (preg_match ('/\s?Port\s+Type\s+/', $line))
 			{
-				$name_field_borders = getColumnCoordinates($line, 'Port');
+				$name_field_borders = getColumnCoordinates ($line, 'Port');
 				if (isset ($name_field_borders['from']))
 					$state = 'readPort';
 			}
 			break;
 		case 'readPort':
-			if ( preg_match('/^[0-9]+/', trim (substr ($line, 0, $name_field_borders['length'])), $matches) )
+			if (preg_match('/^[0-9]+/', trim (substr ($line, 0, $name_field_borders['length'])), $matches))
 				$portname = $matches[0];
-			if (!isset($portname))
+			if (! isset($portname))
 				$portname = NULL;
-			if ( preg_match('/^[0-9]+.+/', trim (substr ($line, $name_field_borders['from'] + $name_field_borders['length'] + 1)), $matches) )
+			if (preg_match ('/^[0-9]+.+/', trim (substr ($line, $name_field_borders['from'] + $name_field_borders['length'] + 1)), $matches))
 				$rest = $matches[0];
-			if (!isset($rest))
+			if (! isset($rest))
 				$rest = NULL;
 
-			$field_list = preg_split('/\s+/', $rest);
+			$field_list = preg_split ('/\s+/', $rest);
 			if (count ($field_list) < 4)
 				break;
 			list ($type, $delim, $alert, $adm_status, $status_raw, $mode) = $field_list;
@@ -105,9 +105,9 @@ function hpprocurveN1178ReadInterfaceStatus ($text)
 				$status = 'down';
 			elseif ($adm_status == 'No')
 				$status = 'disabled';
-			if ( preg_match('/([01]+)/', $mode, $matches) )
+			if (preg_match ('/([01]+)/', $mode, $matches))
 				$speed = $matches[0];
-			if ( preg_match('/([a-zA-Z]+)/', $mode, $matches) )
+			if (preg_match ('/([a-zA-Z]+)/', $mode, $matches))
 				$duplex = $matches[0];
 			$result[$portname] = array
 			(
@@ -130,9 +130,9 @@ function hpprocurveN1178ReadMacList ($text)
 		switch ($state)
 		{
 		case 'headerSearch':
-			if (preg_match('/\s?MAC Address\s+Located on Port\s?/', $line))
+			if (preg_match ('/\s?MAC Address\s+Located on Port\s?/', $line))
 				$state = 'readPort_all';
-			elseif (preg_match('/^\s*Status and Counters -\s*Port Address Table -\s*([0-9]+)$/', $line, $portdata))
+			elseif (preg_match ('/^\s*Status and Counters -\s*Port Address Table -\s*([0-9]+)$/', $line, $portdata))
 			{
 				$state = 'readPort_single';
 				$portname = $portdata[1];
@@ -145,7 +145,7 @@ function hpprocurveN1178ReadMacList ($text)
 			$vid = NULL;
 			$result[$portname][] = array
 			(
-				'mac' => implode (":", str_split(str_replace ('-', '', $matches[1]), 2)),
+				'mac' => implode (":", str_split (str_replace ('-', '', $matches[1]), 2)),
 				'vid' => '',
 			);
 			break;
@@ -155,7 +155,7 @@ function hpprocurveN1178ReadMacList ($text)
 			$vid = NULL;
 			$result[$portname][] = array
 			(
-				'mac' => implode (":", str_split(str_replace ('-', '', $matches[1]), 2)),
+				'mac' => implode (":", str_split (str_replace ('-', '', $matches[1]), 2)),
 				'vid' => '',
 			);
 			break;
@@ -173,7 +173,7 @@ function hpprocurveN1178Read8021QConfig ($input)
 	$matches = array();
 	$vlanlist = array();
 	$rawdata = explode ("Status and Counters - VLAN Information - for ports", $input);
-	array_shift($rawdata); 
+	array_shift ($rawdata);
 
 	foreach ($rawdata as $line)
 	{
@@ -187,14 +187,14 @@ function hpprocurveN1178Read8021QConfig ($input)
 		$port_mode = '';
 		foreach (explode ("\n", $line) as $vlans)
 		{
-			if (preg_match('/^ VLAN ID Name |^\s*-------/', $vlans))
+			if (preg_match ('/^ VLAN ID Name |^\s*-------/', $vlans))
 				continue;
-			if (preg_match('/^((?:[0-9]+)|(?:[Tt]rk[0-9]+))$/', trim($vlans), $matches))
+			if (preg_match ('/^((?:[0-9]+)|(?:[Tt]rk[0-9]+))$/', trim ($vlans), $matches))
 			{
 				$port['port_id'] = $matches[1];
 				continue;
 			}
-			if (preg_match('/^\s+Port name: (.+)$/', $vlans, $matches))
+			if (preg_match ('/^\s+Port name: (.+)$/', $vlans, $matches))
 			{
 				$port['port_name'] = $matches[1];
 				continue;
@@ -212,15 +212,15 @@ function hpprocurveN1178Read8021QConfig ($input)
 
 		// Port config
 		$ret['portconfig'][$port_id][] = array ('type' => 'line-header', 'line' => 'interface ' . $port_id);
-		if (!empty($port_name))
+		if ($port_name != '')
 			$ret['portconfig'][$port_id][] = array ('type' => 'line-other', 'line' => 'name ' . $port_name);
 
 		// Port data
 		$allowed_vlans = array();
-		if (array_search('Tagged', array_column($port['vlan_data'], 'vlan_mode')) === FALSE)
+		if (array_search ('Tagged', array_column ($port['vlan_data'], 'vlan_mode')) === FALSE)
 		{
 			$port_mode = 'access';
-			foreach ($port['vlan_data'] as $vid=>$value)
+			foreach ($port['vlan_data'] as $vid => $value)
 			{
 				$allowed_vlans[] = $vid;
 				$native = $vid;
@@ -229,11 +229,11 @@ function hpprocurveN1178Read8021QConfig ($input)
 		else
 		{
 			$port_mode = 'trunk';
-			foreach ($port['vlan_data'] as $vid=>$value)
-				if (preg_match('/\d+/', $vid))
+			foreach ($port['vlan_data'] as $vid => $value)
+				if (preg_match ('/\d+/', $vid))
 					$allowed_vlans[] = $vid;
-			foreach ($port['vlan_data'] as $vid=>$value)
-				if (preg_match('/\d+/', $vid) && $value['vlan_mode'] === "Untagged")
+			foreach ($port['vlan_data'] as $vid => $value)
+				if (preg_match ('/\d+/', $vid) && $value['vlan_mode'] === "Untagged")
 				{
 					$native = $vid;
 					break;
@@ -243,15 +243,15 @@ function hpprocurveN1178Read8021QConfig ($input)
 		}
 		$ret['portdata'][$port_id] = array ('mode' => $port_mode, 'allowed' => $allowed_vlans, 'native' => $native);
 
-		unset($port);
-		unset($allowed_vlans);
+		unset ($port);
+		unset ($allowed_vlans);
 	}
 	// Return de-duplicated and sorted list of vlans
-	$ret['vlanlist'] = array_merge($ret['vlanlist'], array_keys(array_flip($vlanlist)));
-	sort($ret['vlanlist']);
-	unset($vlanlist);
-	unset($matches);
-	unset($rawdata);
+	$ret['vlanlist'] = array_merge ($ret['vlanlist'], array_keys (array_flip ($vlanlist)));
+	sort ($ret['vlanlist']);
+	unset ($vlanlist);
+	unset ($matches);
+	unset ($rawdata);
 	return $ret;
 }
 
@@ -278,21 +278,21 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 			// Here is a workaround: remove untagged port for case access->trunk(non-native)
 			if
 			(
-				array_key_exists('port_id', $unset_access_data) &&
-				array_key_exists('vlan_id', $unset_access_data) &&
+				array_key_exists ('port_id', $unset_access_data) &&
+				array_key_exists ('vlan_id', $unset_access_data) &&
 				$unset_access_data['port_id'] === $cmd['port']
 			)
 			{
 				$ret .= "no vlan ${unset_access_data['vlan_id']} untagged ${unset_access_data['port_id']}\n";
-				unset($unset_access_data);
+				unset ($unset_access_data);
 			}
 			///////////////////////////////////////////////////////////////////////////////////////
 			// Here is a workaround: remove port tagged from vlans again for case trunk(non-native)->trunk(non-native)
-			if ( $rem_tagged_data )
-				foreach ($rem_tagged_data as $port_id=>$vlan_list)
-					if ( !empty($port_id) && $port_id === $cmd['port'] )
-						foreach ($vlan_list as $key=>$vlan_id)
-							if ( isset($vlan_id) )
+			if ($rem_tagged_data)
+				foreach ($rem_tagged_data as $port_id => $vlan_list)
+					if (! empty ($port_id) && $port_id === $cmd['port'])
+						foreach ($vlan_list as $key => $vlan_id)
+							if (isset ($vlan_id))
 								$ret .= "no vlan ${vlan_id} tagged ${port_id}\n";
 			$rem_tagged_data = array();
 			break;
@@ -301,7 +301,7 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 			{
 				$ret .= "no vlan ${vlan_id} tagged ${cmd['port']}\n";
 				///////////////////////////////////////////////////////////////////////////////////////
-				// Here is a workaround: we should remove untagged port before 
+				// Here is a workaround: we should remove untagged port before
 				// add it as tagged for case access->trunk(non-native)
 				// HP L2 switches doesn't allow "orphaned" ports (without tags)
 				$rem_allowed_data[$cmd['port']][] = $vlan_id;
@@ -313,10 +313,10 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 			///////////////////////////////////////////////////////////////////////////////////////
 			// Now remove tagged port for case trunk(non-native)->access
 			//file_put_contents ('/var/log/racktables.log', var_export($rem_allowed_data, true), FILE_APPEND | LOCK_EX);
-			foreach ($rem_allowed_data as $port_id=>$vlan_list)
-				if ( !empty($port_id) && $port_id === $cmd['arg1'] )
-					foreach ($vlan_list as $key=>$vlan_id)
-						if ( isset($vlan_id) )
+			foreach ($rem_allowed_data as $port_id => $vlan_list)
+				if (! empty ($port_id) && $port_id === $cmd['arg1'] )
+					foreach ($vlan_list as $key => $vlan_id)
+						if (isset ($vlan_id))
 							$ret .= "no vlan ${vlan_id} tagged ${cmd['arg1']}\n";
 			$rem_allowed_data = array();
 			break;
