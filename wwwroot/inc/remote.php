@@ -201,7 +201,7 @@ $breed_by_swcode = array
 
 $shorten_by_breed = array (
 	'ios12' => 'ios12ShortenIfName_real',
-	'ios15' => 'ios12ShortenIfName_real',
+	'ios15' => 'ios15ShortenIfName_real',
 	'nxos4' => 'nxos4ShortenIfName',
 	'vrp53' => 'vrp5xShortenIfName',
 	'vrp55' => 'vrp5xShortenIfName',

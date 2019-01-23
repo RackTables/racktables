@@ -70,3 +70,14 @@ function ios15TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		}
 	return $ret;
 }
+
+function ios15ShortenIfName_real ($ifname)
+{
+	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
+	$ifname = preg_replace ('@^GigabitEthernet(.+)$@', 'gi\\1', $ifname);
+	$ifname = preg_replace ('@^TenGigabitEthernet(.+)$@', 'te\\1', $ifname);
+	$ifname = preg_replace ('@^po([0-9]+)$@i', 'port-channel\\1', $ifname);
+	$ifname = strtolower ($ifname);
+	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
+	return $ifname;
+}
