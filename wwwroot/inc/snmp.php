@@ -2303,6 +2303,15 @@ $iftable_processors['procurve-1810-23-to-24-COMBO'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['cisco-25-to-28-1000SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet1/1/(25|26|27|28)$@',
+	'replacement' => 'gi\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4361,6 +4370,30 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'HP 1810-8G (J9449A), 8 Gigabit Ethernet 10/100/1000',
 		'processors' => array ('procurve-8ports-1000T'),
 	),
+	'9.1.1643' => array
+	(
+		'dict_key' => 3728,
+		'text' => 'Cisco Catalyst 3850-48T-S Switch, 48 10/100/1000',
+		'processors' => array ('cisco-smb-49-to-50-combo-1000SFP','cisco-smb-any-1000T'),
+	),
+	'9.1.571' => array
+	(
+		'dict_key' => 3731,
+		'text' => 'Cisco 871',
+		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.12.3.1.3.1239' => array
+	(
+		'dict_key' => 2332,
+		'text' => 'Cisco Nexus 3064-T Switch,  48 x 10GBase-T + 4 x QSFP+',
+		'processors' => array ('nexus-any-QSFP+','nexus-any-10000SFP+'),
+	),
+	'9.1.1644' => array
+	(
+		'dict_key' => 2650,
+		'text' => 'Cisco Catalyst Model WS-C3850-24T, 24 Gigabit Ethernet PoE, 2 Сombo 10 Gigabit SFP+, 4 Combo Gigabit SFP',
+		'processors' => array ('cisco-29-to-30-10000SFP+','cisco-25-to-28-1000SFP','3com-any-1000T'),
+	),	
 );
 
 global $swtype_pcre;
