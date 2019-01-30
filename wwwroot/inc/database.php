@@ -3328,6 +3328,9 @@ function searchByAttrValue ($attr_id, $value)
 		case 'date':
 			$field = 'uint_value';
 			break;
+		case 'text':
+			$field = 'text_value';
+			break;
 		default:
 			throw new InvalidArgException ('type', $type);
 	}
@@ -3751,7 +3754,7 @@ function fetchAttrsForObjects ($object_set = array())
 	$ret = array();
 	$query =
 		"select AM.attr_id, A.name as attr_name, A.type as attr_type, C.name as chapter_name, " .
-		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, D.dict_value, O.id as object_id from " .
+		"C.id as chapter_id, AV.uint_value, AV.float_value, AV.string_value, AV.text_value, D.dict_value, O.id as object_id from " .
 		"Object as O left join AttributeMap as AM on O.objtype_id = AM.objtype_id " .
 		"left join Attribute as A on AM.attr_id = A.id " .
 		"left join AttributeValue as AV on AV.attr_id = AM.attr_id and AV.object_id = O.id " .
@@ -3785,6 +3788,7 @@ function fetchAttrsForObjects ($object_set = array())
 			case 'uint':
 			case 'float':
 			case 'string':
+			case 'text':
 				$record['value'] = $row[$row['attr_type'] . '_value'];
 				parseWikiLink ($record);
 				break;
@@ -3842,7 +3846,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		unset ($object_attribute_cache[$object_id]);
 	$result = usePreparedSelectBlade
 	(
-		'SELECT A.type AS attr_type, AV.attr_id, AV.uint_value, AV.float_value, AV.string_value ' .
+		'SELECT A.type AS attr_type, AV.attr_id, AV.uint_value, AV.float_value, AV.string_value, AV.text_value ' .
 		'FROM Attribute AS A ' .
 		'LEFT JOIN AttributeValue AS AV ON A.id = AV.attr_id AND AV.object_id = ? ' .
 		'WHERE A.id = ?',
@@ -3857,6 +3861,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 		case 'uint':
 		case 'float':
 		case 'string':
+		case 'text':
 			$column = $attr_type . '_value';
 			break;
 		case 'dict':

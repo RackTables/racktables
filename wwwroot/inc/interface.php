@@ -68,7 +68,8 @@ $attrtypes = array
 	'float' => '[F] floating point',
 	'string' => '[S] string',
 	'dict' => '[D] dictionary record',
-	'date' => '[T] date'
+	'date' => '[T] date',
+	'text' => '[L] text',
 );
 
 function showLogoutURL ()
@@ -758,6 +759,10 @@ function renderEditAttributeTRs ($update_op, $values, $objtype_id, $skip_ids = a
 			case 'string':
 				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
 				echo "<input type=text ${ro_or_rw} value='${record['value']}'>";
+				break;
+			case 'text':
+				$ro_or_rw = $can_update ? "name=${i}_value" : 'readonly';
+				echo "<textarea $readonly $ro_or_rw>${record['value']}</textarea>";
 				break;
 			case 'date':
 				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
@@ -6038,6 +6043,8 @@ function formatAttributeValue ($record, $objtype_id)
 		return array_key_exists ('href', $record) ?
 			"<a href='${record['href']}'>${record['a_value']}</a>" :
 			$record['a_value'];
+	case 'text':
+			return "<div class=commentblock>${record['a_value']}</div>";
 	case 'dict':
 		$map = array
 		(
