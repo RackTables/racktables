@@ -2321,6 +2321,24 @@ $iftable_processors['nexus-any-10000T'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
+(
+	'pattern' => '@^GigabitEthernet1/0/(25|26|27|28)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['procurve-49-to-52-combo-1000SFP'] = array
+(
+	'pattern' => '@^(49|50|51|52)$@',
+	'replacement' => '\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => TRUE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4402,6 +4420,30 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2189,
 		'text' => 'Cisco Catalyst Model WS-C3850-24T, 24 Gigabit Ethernet',
 		'processors' => array ('cisco-25-to-28-1000SFP', 'catalyst-stack-any-1000T'),
+	),
+	'11.2.3.7.11.50' => array
+	(
+		'dict_key' => 3728,
+		'text' => 'HP ProCurve Switch 5400zl Series, RJ-45 48 auto-sensing 10/100/1000 ports',
+		'processors' => array ('procurve-modular-1000T'),
+	),
+	'10.107.158.51' => array
+	(
+		'dict_key' => 3732,
+		'text' => 'HP A5120-24G EI (JE068A),  24 ports 10/100/1000Base-T, 4 Combo ports 10/100/1000Base-T/SFP, 2 interface slots for 10Gbe',
+		'processors' => array ('procurve-25-to-28-1000SFPcombo','procurve-any-1000T'),
+	),
+	'25506.11.1.85' => array
+	(
+		'dict_key' => 2238,
+		'text' => 'JE009A: 48 RJ-45/10-100-1000T(X) + 4 SFP-1000 ports',
+		'processors' => array ('procurve-49-to-52-combo-1000SFP','procurve-modular-1000T'),
+	),
+	'11.2.3.7.11.69' => array
+	(
+		'dict_key' => 872,
+		'text' => ' J9049A: 24 RJ-45/10-100-1000T',
+		'processors' => array ('procurve-chassis-1000T'),
 	),
 );
 
