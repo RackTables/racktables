@@ -16,13 +16,10 @@ td.submit {
 	text-align: center;
 }
 
-th.rack {
-	font: bold 12px Verdana, sans-serif;
-}
-
 body {
-  font-family: Arial, Sans-Serif, sans-serif;
-  font-size : small;
+  background-color : #FCFCFC;
+  font-family: Verdana, sans-serif;
+  font-size : 14px;
 }
 
 table.molecule {
@@ -30,7 +27,8 @@ table.molecule {
 }
 
 .molecule {
-	font: bold 12px Verdana, sans-serif;
+        font-weight: bold;
+        font-size: 12px;
 	border: 1px solid black;
 	border-top: 0px solid black;
 	border-right: 0px solid black;
@@ -291,18 +289,12 @@ div.greeting {
 
 /* Contents of original static.css end here, the rest is pi.css */
 
-body {
-  margin: 0px;
-  background-attachment : fixed;
-  background-color : #FCFCFC;
-}
 /* collapse space between headings, and where paragraph follows heading */
 hr {
   height : 1px;
 }
 
 a {
-	font-family: Verdana, sans-serif;
 	color: #3c78b5;
 	text-decoration: none;
 }
@@ -349,22 +341,17 @@ textarea {
 }
 .mainheader a {
 	color: #5C98D5;
-	font-family: Arial,Sans-Serif,sans-serif;
 }
 
 /* search and path bar (blue one) */
 .menubar {
 	padding: 5px 3px;
-	font-size: 17px;
-	line-height: 20px;
 	background-color : #3c78b5;
-
-	font-family: Verdana, arial, sans-serif;
 	color : #ffffff;
+        font-size: 12px;
 }
 
 .menubar a {
-	font-family: Verdana, arial, sans-serif;
 	color : #ffffff;
 	text-decoration : none;
 }
@@ -384,7 +371,8 @@ textarea {
 padding: 3px 0px 3px 8px;
 margin-left: 0;
 border-bottom: 1px solid #3c78b5;
-font: bold 11px Verdana, sans-serif;
+font-weight: bold;
+font-size: 12px;
 }
 
 #foldertab li {
@@ -436,31 +424,52 @@ border-color: #ffa500;
 #foldertab li a.attn:link { color: white; }
 #foldertab li a.attn:visited { color: white; }
 #foldertab li a.attn:hover {
-color: white;
-background: #ff8c00;
-border-color: #ff8c00;
+  color: white;
+  background: #ff8c00;
+  border-color: #ff8c00;
 }
 
-.rack {
-	font: bold 12px Verdana, sans-serif;
-	border: 1px solid black;
-	border-top: 0px solid black;
-	border-right: 0px solid black;
-	text-align: center;
+table.rack {
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.rack th {
-	border-top: 1px solid black;
-	border-right: 1px solid black;
+table.rack th {
+  font-weight: 100;
+  color: #666666;
+  text-align: right;
+}
+
+table.rack th.rack-front-label {
+  text-align: left;
+}
+
+th.rack-unit-label {
+  padding-right: 4px;
+  border-right: 1px solid #5B898A;
 }
 
 .rack td {
-	border-top: 1px solid black;
-	border-right: 1px solid black;
+  padding: 2px;
+  border-top: 1px solid #5B898A;
+  border-bottom: 1px solid #5B898A;
+  overflow: hidden;
+}
+
+table.rack td:last-child {
+  border-right: 1px solid #5B898A;
+}
+
+td.atom div {
+  height: 16px;
+  overflow: hidden;
 }
 
 .rack a {
-	font: bold 10px Verdana, sans-serif;
 	color: #000;
 	text-decoration: none;
 }
@@ -480,11 +489,13 @@ border-color: #ff8c00;
 }
 
 .rackspace h2 {
-	font: bold 25px Verdana, sans-serif;
+        font-weight: bold;
+        font-size: 25px;
 }
 
 .rackspace h3 {
-	font: bold 20px Verdana, sans-serif;
+        font-weight: bold;
+        font-size: 20px;
 }
 
 .rackspace a {
@@ -664,7 +675,6 @@ div.vlan {
 .nolink {
 	text-decoration: none;
 	color: black;
-	font-family: Arial,Sans-Serif,sans-serif;
 	font-size: small;
 }
 .nolink:hover {
@@ -734,7 +744,6 @@ div.vlan {
 /*link to popup menu (...) showed on td hover*/
 .port-popup {
 	margin-left: 3px;
-	font-family: Arial,Sans-Serif,sans-serif;
 }
 
 .l2address {
@@ -744,15 +753,19 @@ div.vlan {
 /*common rack item attributes*/
 .atom {
 	text-align: center;
-	font: bold 10px Verdana, sans-serif;
 }
+
 .state_F   { background-color: #8fbfbf; }
 .state_A   { background-color: #bfbfbf; }
 .state_U   { background-color: #bf8f8f; }
-.state_T   { background-color: #408080; }
-.state_Th  { background-color: #80ffff; }
+.state_T   { background-color: #408080; 
+  border: 1px solid #5B898A;
+}
+.state_Th  { background-color: #80ffff; font-weight: bold; 
+  border: 1px solid #5B898A;
+}
 .state_Tw  { background-color: #804040; }
-.state_Thw { background-color: #ff8080; }
+.state_Thw { background-color: #ff8080; font-weight: bold; }
 
 /* highlighting for drag selection */
 .atom.ui-selecting { 
@@ -766,7 +779,7 @@ a.img-link {
 
 /* text label with rackcode (object-rackspace tab) */
 .filter-text {
-	font-family: "Courier New",Courier,monospace;
+	font-family: monospace;
 }
 
 /* VLAN lists diff formatting (802.1Q Ports and 802.1Q Sync pages) */
@@ -806,7 +819,6 @@ ul.qlinks li {
 ul.qlinks li a {
 	font-size: 14px;
 	font-weight: bold;
-	font-family: Verdana,arial,sans-serif;
 }
 
 /* checkboxes in the MyAccount page */
@@ -867,7 +879,7 @@ a.noclick {
 }
 
 .varname {
-	font-family: "Courier New",Courier,monospace;
+	font-family: monospace;
 	font-weight: bold;
 }
 
@@ -942,7 +954,6 @@ a.noclick {
 	background-color: #3C78B5;
 	color: white;
 	text-align: center;
-	font-family: verdana, tahoma;
 	font-weight: normal;
 	padding: 0px;
 	margin: 0px -5px;

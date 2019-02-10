@@ -405,6 +405,7 @@ function printPDOException ($e)
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' . "\n";
 	echo "<head><title>PDOException</title>\n";
+	echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=css/normalize.css' />\n";
 	echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=css/pi.css' />\n";
 	echo "<link rel=icon href='?module=chrome&uri=pix/favicon.ico' type='image/x-icon' />\n";
 	echo '</head><body>';
@@ -433,6 +434,7 @@ function printGenericException ($e)
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' . "\n";
 	echo "<head><title> Exception </title>\n";
+	echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=css/normalize.css' />\n";
 	echo "<link rel=stylesheet type='text/css' href='?module=chrome&uri=css/pi.css' />\n";
 	echo "<link rel=icon href='?module=chrome&uri=pix/favicon.ico' type='image/x-icon' />\n";
 	echo '</head> <body>';

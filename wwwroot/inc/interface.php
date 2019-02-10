@@ -964,12 +964,12 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 		echo '<td>' . mkA (getImageHREF ('next', 'next rack'), 'rack', $next_id) . '</td>';
 	echo "</h2></td></tr></table>\n";
 	echo "<table class=rack border=0 cellspacing=0 cellpadding=1>\n";
-	echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th>";
-	echo "<th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
+	echo "<tr><th width='10%'>&nbsp;</th><th width='20%' class=\"rack-front-label\">Front</th>";
+	echo "<th width='50%'></th><th width='20%'>Back</th></tr>\n";
 	$reverse = considerConfiguredConstraint ($rackData, 'REVERSED_RACKS_LISTSRC');
 	for ($i = $rackData['height']; $i > 0; $i--)
 	{
-		echo '<tr><th>' . inverseRackUnit ($rackData['height'], $i, $reverse) . '</th>';
+		echo '<tr><th class="rack-unit-label">' . inverseRackUnit ($rackData['height'], $i, $reverse) . '</th>';
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			if (isset ($rackData[$i][$locidx]['skipped']))
