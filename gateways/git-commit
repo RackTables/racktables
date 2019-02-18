@@ -27,7 +27,7 @@
 # entry in sudoers along the following lines:
 # httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
-THISFILE=`basename "$0"`
+readonly THISFILE=`basename "$0"`
 
 print_usage_and_exit_0()
 {
@@ -129,14 +129,14 @@ git_push_or_exit()
 git_commit_or_exit()
 {
 	assert_nonempty_option -f "$FILEPATH"
-	REALPATH=`realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH"`
+	local readonly REALPATH=`realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH"`
 	if [ "$REALPATH" != "${REALPATH#../}" ]; then
 		print_error "file path '$FILEPATH' is outside of the repository directory '$REPODIR'"
 		exit 12
 	fi
 	# git processes the path to the file automatically, but the shell
 	# redirection obviously does not.
-	DIRNAME=`dirname "$FILEPATH"`
+	local readonly DIRNAME=`dirname "$FILEPATH"`
 	if [ ! -d "$DIRNAME" ]; then
 		mkdir -p "$DIRNAME" || {
 			print_error "failed to create missing directory '$DIRNAME'"
@@ -295,7 +295,7 @@ cd "$REPODIR" || exit 6
 	print_error "git is not available"
 	exit 7
 }
-INTREE=`git rev-parse --is-inside-work-tree 2>/dev/null`
+readonly INTREE=`git rev-parse --is-inside-work-tree 2>/dev/null`
 [ "$INTREE" = 'true' ] || {
 	print_error "the directory '$REPODIR' exists, but is not within a git repository"
 	exit 8
