@@ -4,15 +4,15 @@ git:
   quiet: true
   depth: 3
 
-php:
- - 5.5
- - 5.6
- - 7.0
- - 7.1
- - 7.2
-
 matrix:
   fast_finish: true
+  include:
+  - php: 5.5
+  - php: 5.6
+  - php: 7.0
+  - php: 7.1
+  - php: 7.2
+    env: SKIP_PHPUNIT=yes # PHPUnit 8
 
 services:
  - mysql
@@ -21,6 +21,8 @@ before_script:
  - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
 
 script:
- - ./tests/express.sh
+ - ./tests/express_pre.sh
+ - if [ "$SKIP_PHPUNIT" = yes ]; then echo '(skipped PHPUnit tests on request)'; else ./tests/express_phpunit.sh; fi
+ - ./tests/express_post.sh
  - mysql -u racktables -ptravistest racktables_unittest < scripts/init-sample-racks.sql
  - DESTDIR=/tmp make install
