@@ -291,7 +291,7 @@ assert_nonempty_option -r "$REPODIR"
 # Do not suppress the error message from cd, which may be more useful
 # (e.g. permission denied) than a hard-coded default message.
 cd "$REPODIR" || exit 6
-`which git >/dev/null` || {
+which git >/dev/null || {
 	print_error "git is not available"
 	exit 7
 }
