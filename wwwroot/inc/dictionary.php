@@ -3787,11 +3787,11 @@ $dictionary = array
 	3725 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HPE 5500-24G-4SFP | https://h20195.www2.hpe.com/v2/default.aspx?cc=az&lc=az&oid=5195377]]'),
 	3726 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5800AF-48G Switch with 2 Processors (JG225A) | https://www.hpe.com/us/en/product-catalog/networking/networking-switches/pip.specifications.hpe-flexfabric-5800af-48g-switch.7482188.html]]'),
 	3727 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP 1810-8G v2 (J9802A)]]'),
-	3728 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP ProCurve Switch 5400zl Series | http://www.hp.com/hpinfo/newsroom/press_kits/2010/HPOptimizesAppDelivery/E5400zl_Switch_Series_Data_Sheet.pdf]]'),
+	3728 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP ProCurve 5406zl (J8697A) | http://www.hp.com/hpinfo/newsroom/press_kits/2010/HPOptimizesAppDelivery/E5400zl_Switch_Series_Data_Sheet.pdf]]'),
 	3729 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP 1810-8G v2 (J9449A) | https://h10057.www1.hp.com/ecomcat/hpcatalog/specs/provisioner/99/J9449A.htm]]'),
 	3730 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1810G-24 (J9803A)'),
 	3731 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Cisco 871'),
-	3732 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5120-24G EI Switch with 2 Interface Slots | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
+	3732 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5120-24G EI (JE068A) | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
