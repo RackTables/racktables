@@ -1,6 +1,6 @@
 #!/bin/sh
 
-THISDIR=`dirname $0`
+THISDIR=`dirname "$0"`
 BASEDIR=`readlink -f "$THISDIR/.."`
 : ${PHPUNIT_BIN:=phpunit}
 

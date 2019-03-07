@@ -1,6 +1,6 @@
 #!/bin/sh
 
-THISDIR=`dirname $0`
+THISDIR=`dirname "$0"`
 BASEDIR=`readlink -f "$THISDIR/.."`
 
 echo "Running post-PHPUnit express tests using the base directory '$BASEDIR'."

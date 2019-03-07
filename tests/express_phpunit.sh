@@ -1,6 +1,6 @@
 #!/bin/sh
 
-THISDIR=`dirname $0`
+THISDIR=`dirname "$0"`
 : ${PHPUNIT_BIN:=phpunit}
 
 case `"$PHPUNIT_BIN" --version` in

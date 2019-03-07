@@ -10,7 +10,7 @@ fi
 DBNAME="$1"
 USERNAME="$2"
 PASSWORD="$3"
-THISDIR=`dirname $0`
+THISDIR=`dirname "$0"`
 BASEDIR=`readlink -f "$THISDIR/.."`
 
 if mysql -u root -e "SHOW TABLES FROM $DBNAME" >/dev/null 2>&1; then
