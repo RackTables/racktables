@@ -1374,6 +1374,10 @@ function updateObjectAttributes ($object_id)
 				$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
+			case 'text':
+				// already checked above
+				$oldvalue = $oldvalues[$attr_id]['value'];
+				break;
 			case 'dict':
 				// Not 'unsigned' as 0 is handled above.
 				genericAssertion ("${i}_value", 'natural');

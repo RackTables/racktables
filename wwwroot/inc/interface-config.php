@@ -553,6 +553,7 @@ function getAttributeOptions ($attrMap)
 		'string' => 'S',
 		'dict' => 'D',
 		'date' => 'T',
+		'text' => 'L',
 	);
 	foreach ($attrMap as $attr)
 		$ret[$attr['id']] = sprintf ('[%s] %s', $shortType[$attr['type']], $attr['name']);

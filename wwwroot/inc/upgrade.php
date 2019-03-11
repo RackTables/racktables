@@ -186,6 +186,8 @@ The "addCSS()" function is now deprecated in favour of "addCSSText()", "addCSSIn
 and "addCSSExternal()" functions.  The "addCSS()" function will likely be removed in 0.22.0.
 
 For more information on the "addJS()" and "addCSS()" changes see the README.md
+
+Added new AttributeType text for long text
 ENDOFTEXT
 ,
 );
@@ -691,7 +693,7 @@ EntityLinkTrigger:BEGIN
     ELSE
       # some other scenario, assume it is valid
       SET count = 0;
-  END CASE; 
+  END CASE;
   IF count > 0 THEN
     SET NEW.parent_entity_id = NULL;
     LEAVE EntityLinkTrigger;
@@ -732,7 +734,7 @@ EntityLinkTrigger:BEGIN
     ELSE
       # some other scenario, assume it is valid
       SET count = 0;
-  END CASE; 
+  END CASE;
   IF count > 0 THEN
     SET NEW.parent_entity_id = NULL;
     LEAVE EntityLinkTrigger;
@@ -764,7 +766,7 @@ LinkTrigger:BEGIN
     SET tmp = NEW.porta;
     SET NEW.porta = NEW.portb;
     SET NEW.portb = tmp;
-  END IF; 
+  END IF;
 
   # lock ports to prevent concurrent link establishment
   SELECT type INTO porta_type FROM Port WHERE id = NEW.porta FOR UPDATE;
@@ -1350,6 +1352,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 16=1592')
 				WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '16=')";
 			$query[] = "UPDATE Config SET varname = 'VIRTUAL_OBJ_CSV' WHERE varname = 'VIRTUAL_OBJ_LISTSRC'";
+
+			// Add new AttributeType text
+			$query[] = "ALTER TABLE `AttributeValue` ADD COLUMN `text_value` TEXT NULL DEFAULT NULL";
+			$query[] = "ALTER TABLE `Attribute` CHANGE COLUMN `type` `type` ENUM('string', 'uint', 'float', 'dict', 'date', 'text') NULL DEFAULT NULL";
 
 			// insert new queries here ^^^
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
