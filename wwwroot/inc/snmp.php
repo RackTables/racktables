@@ -2330,6 +2330,24 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['Mikrotik-GigabitEthernet-1000TX'] = array
+(
+     'pattern' => '@^Port(\d+)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => 24,
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['Mikrotik-25-to-26-SFP+'] = array
+(
+     'pattern' => '@^SFP(\d+)$@',
+     'replacement' => 'e\\1',
+     'dict_key' => '9-1084',
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4435,6 +4453,30 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 872,
 		'text' => ' J9049A: 24 RJ-45/10-100-1000T',
 		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'14988.2' => array
+	(
+    	'dict_key' => 3651,
+     	'text' => 'Mikrotik  CSS326-24G-2S+RM 24 port Gigabit Ethernet switch with two SFP+ ports',
+     	'processors' => array ('Mikrotik-25-to-26-SFP+','Mikrotik-GigabitEthernet-1000TX'),
+	),
+	'9.1.574' => array
+	(
+    	'dict_key' => 143,
+     	'text' => 'Cisco Catalyst 3750 Metro Series Switches, 24 ports 10/100, 2 port SFP Gigabit Ethernet, 2 port SFP',
+     	'processors' => array ('cisco-25-to-28-1000SFP','catalyst-stack-any-100TX'),
+	),
+	'9.1.917' => array
+	(
+    	'dict_key' => 1018,
+     	'text' => 'Cisco Catalyst WS-C4900M 20-port wirespeed 10/100/1000 (RJ-45), 4-port wirespeed 10GbE (X2), 8-port (2:1) 10GbE (X2)',
+     	'processors' => array ('catalyst-chassis-uplinks-10000X2','catalyst-chassis-any-1000T'),
+	),
+	'9.1.287' => array
+	(
+    	'dict_key' => 394,
+     	'text' => 'Cisco WS-C3524-PWR-XL, 24 ports 10/100BASE-T, 2 ports 1000BASE-T',
+     	'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
 	),
 );
 
