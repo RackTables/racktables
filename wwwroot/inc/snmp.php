@@ -2369,6 +2369,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
 	),
+	'9.1.287' => array
+	(
+    	'dict_key' => 394,
+    	'text' => 'Cisco WS-C3524-PWR-XL, 24 ports 10/100BASE-T, 2 ports 1000BASE-T',
+    	'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+	),
 	'9.1.323' => array
 	(
 		'dict_key' => 381,
@@ -2494,6 +2500,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2025,
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.574' => array
+	(
+    	'dict_key' => 143,
+    	'text' => 'Cisco Catalyst 3750 Metro Series Switches, 24 ports 10/100, 2 port SFP Gigabit Ethernet, 2 port SFP',
+    	'processors' => array ('cisco-25-to-28-1000SFP','catalyst-stack-any-100TX'),
 	),
 	'9.1.614' => array
 	(
@@ -2644,6 +2656,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 168,
 		'text' => 'WS-C2960G-8TC-L: 7 RJ-45/10-100-1000T(X) + 1 combo-gig',
 		'processors' => array ('catalyst-chassis-8-combo-1000SFP', 'catalyst-chassis-any-1000T'),
+	),
+	'9.1.917' => array
+	(
+    	'dict_key' => 1018,
+    	'text' => 'Cisco Catalyst WS-C4900M 20-port wirespeed 10/100/1000 (RJ-45), 4-port wirespeed 10GbE (X2), 8-port (2:1) 10GbE (X2)',
+    	'processors' => array ('catalyst-chassis-uplinks-10000X2','catalyst-chassis-any-1000T'),
 	),
 	'9.1.920' => array
 	(
