@@ -13,6 +13,8 @@ matrix:
   - php: 7.1
   - php: 7.2
     env: SKIP_PHPUNIT=yes # PHPUnit 8
+  - php: 7.3
+    env: SKIP_PHPUNIT=yes # PHPUnit 8
 
 services:
  - mysql
