@@ -3110,7 +3110,7 @@ function jun10ReadInterfaceStatus ($input)
 					break 2;
 				$field_list = preg_split('/\s+/', $line);
 				if (count ($field_list) < 3)
-					continue;
+					continue 2;
 				$portname = $field_list[0];
 				$admin_status = ($field_list[1] == 'up' || $field_list[1] == 'down') ? $field_list[1] : 'disabled';
 				$link_status = ($field_list[2] == 'up' || $field_list[2] == 'down') ? $field_list[2] : 'disabled';
