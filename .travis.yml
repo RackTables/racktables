@@ -12,15 +12,18 @@ matrix:
   - php: 7.0
   - php: 7.1
   - php: 7.2
-    env: SKIP_PHPUNIT=yes # PHPUnit 8
+    env: PHPUNIT_BIN=~/bin/phpunit-7.5.7 # PHPUnit 8 by default
   - php: 7.3
-    env: SKIP_PHPUNIT=yes # PHPUnit 8
+    env: PHPUNIT_BIN=~/bin/phpunit-7.5.7 # PHPUnit 8 by default
 
 services:
  - mysql
 
 before_script:
  - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
+ - mkdir -p ~/bin
+ - curl -sSfL -o ~/bin/phpunit-7.5.7 https://phar.phpunit.de/phpunit-7.5.7.phar
+ - chmod a+x ~/bin/phpunit-7.5.7
 
 script:
  - ./tests/express_pre.sh
