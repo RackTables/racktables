@@ -2330,6 +2330,15 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['catalyst-stack-25-to-28-SFP'] = array
+(
+     'pattern' => '@^GigabitEthernet(\d+)/(\d+)/([25-28])$@',
+     'replacement' => 'gi\\1/\\2/\\3',
+     'dict_key' => '4-1077',
+     'label' => 'unit \\1 port \\3',
+     'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2368,6 +2377,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 154,
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'9.1.287' => array
+	(
+    	'dict_key' => 394,
+     	'text' => 'Cisco WS-C3524-PWR-XL, 24 RJ-45/10-100TX + 2 GBIC/1000',
+	    'processors' => array ('catalyst-chassis-any-1000GBIC',
+		'catalyst-chassis-any-100TX'),
 	),
 	'9.1.323' => array
 	(
@@ -2494,6 +2510,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2025,
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.574' => array
+	(
+    	'dict_key' => 143,
+     	'text' => 'ME-C3750-24TE-M: 24 RJ-45/10-100TX + 4 SFP/1000',
+     	'processors' => array ('catalyst-stack-25-to-28-SFP','catalyst-stack-any-100TX'),
 	),
 	'9.1.614' => array
 	(
