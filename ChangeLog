@@ -1,4 +1,4 @@
-0.21.2
+0.21.2 2019-03-25
 	update: enable CSS and JavaScript from external URLs (GH#231)
 	update: 802.1Q: do permission check for changing native vlan while keeping the allowed vlans list unchanged
 	update: 802.1Q: foreign VLANs (missing from the vlan domain list) are not propagated to uplinks
