@@ -2532,11 +2532,11 @@ $dictionary = array
 	2470 => array ('chapter_id' => 12, 'dict_value' => 'HP EI%GPASS%5130-48G-PoE+-2SFP+-2XGT (JG941A)'),
 	2471 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%CCR1072-1G-8S+'),
 	2472 => array ('chapter_id' => 17, 'dict_value' => 'MikroTik%GPASS%3011UiAS-RM'),
-	2473 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 14'),
-	2474 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 15'),
+	2473 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 14.07'),
+	2474 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 15.05'),
 	2475 => array ('chapter_id' => 16, 'dict_value' => 'RouterOS 6'),
-	2476 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 14'),
-	2477 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 15'),
+	2476 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 14.07'),
+	2477 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 15.05'),
 	2478 => array ('chapter_id' => 37, 'dict_value' => 'RouterOS 6'),
 	2479 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7702 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-2-slot-switch/index.html]]'),
 	2480 => array ('chapter_id' => 12, 'dict_value' => '[[Cisco%GPASS%Nexus 7706 | http://www.cisco.com/c/en/us/products/switches/nexus-7700-6-slot-switch/index.html]]'),
@@ -3792,6 +3792,10 @@ $dictionary = array
 	3730 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1810G-24 (J9803A)'),
 	3731 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Cisco 871'),
 	3732 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5120-24G EI (JE068A) | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
+	3733 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 17.01'),
+	3734 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 18.06'),
+	3735 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 17.01'),
+	3736 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 18.06'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
