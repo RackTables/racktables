@@ -217,6 +217,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.21.0',
 		'0.21.1',
 		'0.21.2',
+		'0.21.3',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1350,8 +1351,10 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = CONCAT(varvalue, '; 16=1592')
 				WHERE varname = 'DEFAULT_PORT_OIF_IDS' AND 0 = INSTR(varvalue, '16=')";
 			$query[] = "UPDATE Config SET varname = 'VIRTUAL_OBJ_CSV' WHERE varname = 'VIRTUAL_OBJ_LISTSRC'";
-
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.3':
+			$query[] = "UPDATE Config SET varvalue = '0.21.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
