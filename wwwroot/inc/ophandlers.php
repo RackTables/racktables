@@ -1221,7 +1221,7 @@ function updateObjectAllocation ()
 	// Get a list of rack ids that are parents of the object
 	$parentRacks = reduceSubarraysToColumn (getParents ($object, 'rack'), 'id');
 	$workingRacksData = array();
-	foreach ($_REQUEST['rackmulti'] as $cand_id)
+	foreach (genericAssertion ('rackmulti', 'array0') as $cand_id)
 	{
 		if (!isset ($workingRacksData[$cand_id]))
 		{
