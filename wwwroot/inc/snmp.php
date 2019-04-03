@@ -2330,6 +2330,41 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['Dell-GigabitEthernet-1000TX'] = array
+(
+     'pattern' => '@^gigabitethernet1/0/(\d+)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => '4-1077',
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['Dell-49-to-50-TenGb'] = array
+(
+     'pattern' => '@^tengigabitethernet1/0/(\d+)$@',
+     'replacement' => 'Tgi\\1\\2',
+     'dict_key' => '9-1084',
+     'label' => '\\2',
+     'try_next_proc' => FALSE,
+);
+
+$iftable_processors['Avaya-GigabitEthernet-1000TX'] = array
+(
+     'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (\d+)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => '4-1077',
+     'label' => '\\1',
+     'try_next_proc' => FALSE,
+);
+$iftable_processors['Avaya-45-to-48-SFP'] = array
+(
+     'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (45|46|47|48)$@',
+     'replacement' => 'g\\1',
+     'dict_key' => '4-1077',
+     'label' => 'g\\1',
+     'try_next_proc' => TRUE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -3758,6 +3793,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
 	),
+	'45.3.71.2' => array
+    (
+     	'dict_key' => 3734,
+        'text' => 'Nortel Avaya 4548GT: 48 RJ-45/10-100-1000T(PoE) + 4 SFP',
+        'processors' => array ('Avaya-45-to-48-SFP','Avaya-GigabitEthernet-1000TX'),
+    ),
 	'119.1.203.2.2.41' => array
 	(
 		'dict_key' => 1810,
@@ -3919,6 +3960,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('dell-g23-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
+	'674.10895.3031' => array
+    (
+    	'dict_key' => 1792,
+        'text' => 'Dell PowerConnect 5548: 48 RJ-45/10-100-1000T(X) + 2 SFP+/10Gig',
+        'processors' => array ('Dell-49-to-50-TenGb','Dell-GigabitEthernet-1000TX'),
+    ),
 	'1916.2.71' => array
 	(
 		'dict_key' => 694,
@@ -4095,6 +4142,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
 	),
+	'2636.1.1.1.2.41' => array
+    (
+    	'dict_key' => 3733,
+        'text' => 'Juniper SRX 100: 8 RJ-45/10-100TX + 1 USB (support for 3G USB)',
+        'processors' => array ('Juniper-100TX'),
+    ),
 	'2636.1.1.1.2.43' => array
 	(
 		'dict_key' => 2395,
