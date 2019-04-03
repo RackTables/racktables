@@ -3792,6 +3792,8 @@ $dictionary = array
 	3730 => array ('chapter_id' => 12, 'dict_value' => 'HP ProCurve%GPASS%1810G-24 (J9803A)'),
 	3731 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%Cisco 871'),
 	3732 => array ('chapter_id' => 12, 'dict_value' => '[[HP%GPASS%HP A5120-24G EI (JE068A) | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
+	3733 => array ('chapter_id' => 24, 'dict_value' => 'Juniper%GPASS%SRX 100'),
+	3734 => array ('chapter_id' => 24, 'dict_value' => 'Nortel%GPASS%Avaya 4548GT'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
