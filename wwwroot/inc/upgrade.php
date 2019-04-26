@@ -1354,6 +1354,7 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = '0.21.2' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.21.3':
+			$query[] = "INSERT INTO Config VALUES ('OBJECTLOG_PREVIEW_ENTRIES','5','uint','no','no','yes','Object log preview maximum entries (0 disables the preview)')";
 			$query[] = "UPDATE Config SET varvalue = '0.21.3' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

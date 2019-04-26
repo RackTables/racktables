@@ -1474,13 +1474,22 @@ function renderObject ($object_id)
 		finishPortlet ();
 	}
 
-	$logrecords = getLogRecordsForObject ($_REQUEST['object_id']);
-	if (count ($logrecords))
+	$logrecords = getLogRecordsForObject ($object_id);
+	$lr_nrows = count ($logrecords);
+	$lr_confmax = getConfigVar ('OBJECTLOG_PREVIEW_ENTRIES');
+	$lr_max = array_key_exists ('ope', $_REQUEST) ? genericAssertion ('ope', 'unsigned') : $lr_confmax;
+	if ($lr_nrows > 0 && $lr_max > 0)
 	{
-		startPortlet ('log records');
+		$title = 'log records';
+		if ($lr_max < $lr_nrows)
+			$title .= sprintf (' (last %u, <a href="%s">show all</a>)', $lr_max, buildRedirectURL (NULL, NULL, array ('ope' => $lr_nrows)));
+		elseif ($lr_confmax > 0 && $lr_confmax < $lr_nrows)
+			$title .= sprintf (' (all, <a href="%s">show last %u</a>)', buildRedirectURL(), $lr_confmax);
+
+		startPortlet ($title);
 		echo "<table cellspacing=0 cellpadding=5 align=center class=widetable width='100%'>";
 		$order = 'odd';
-		foreach ($logrecords as $row)
+		foreach (array_slice ($logrecords, 0, $lr_max) as $row)
 		{
 			echo "<tr class=row_${order} valign=top>";
 			echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
