@@ -4822,7 +4822,7 @@ function authorize8021QChangeRequests ($before, $changes, $op = NULL)
 	{
 		if (! array_key_exists($pn, $before))
 		{
-			$removed = [];
+			$removed = array();
 			$added = $new['allowed'];
 		}
 		else
@@ -4841,10 +4841,10 @@ function authorize8021QChangeRequests ($before, $changes, $op = NULL)
 			}
 		}
 		foreach ($removed as $vid)
-			if (!permitted (NULL, NULL, $op, [['tag' => "\$fromvlan_{$vid}"], ['tag' => "\$vlan_{$vid}"]]))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => "\$fromvlan_{$vid}"), array ('tag' => "\$vlan_{$vid}"))))
 				continue 2; // next port
 		foreach ($added as $vid)
-			if (!permitted (NULL, NULL, $op, [['tag' => "\$tovlan_{$vid}"], ['tag' => "\$vlan_{$vid}"]]))
+			if (!permitted (NULL, NULL, $op, array (array ('tag' => "\$tovlan_{$vid}"), array ('tag' => "\$vlan_{$vid}"))))
 				continue 2; // next port
 		$ret[$pn] = $new;
 	}
