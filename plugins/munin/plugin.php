@@ -159,8 +159,8 @@ function plugin_munin_dispatchImageRequest ()
 		if (! array_key_exists ($graph, getMuninGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph', $graph);
 		proxyMuninRequest (genericAssertion ('server_id', 'natural'), $graph);
+		return TRUE;
 	}
-	return TRUE;
 }
 
 function plugin_munin_resetObject ($object_id)

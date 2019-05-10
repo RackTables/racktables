@@ -167,8 +167,8 @@ function plugin_cacti_dispatchImageRequest ()
 		if (! array_key_exists ($graph_id, getCactiGraphsForObject (getBypassValue())))
 			throw new InvalidRequestArgException ('graph_id', $graph_id);
 		proxyCactiRequest (genericAssertion ('server_id', 'natural'), $graph_id);
+		return TRUE;
 	}
-	return TRUE;
 }
 
 function plugin_cacti_resetObject ($object_id)
