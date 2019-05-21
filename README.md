@@ -21,7 +21,7 @@ for RackTables is Apache httpd.
 | Fedora 23-26       | `dnf install mariadb-server mariadb`                                    |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
 | openSUSE 42.1      | `zypper install mysql-community-server`                                 |
-| Scientific Linux 6 | `yum install mysql-server mysql`                                        |
+| Scientific&nbsp;Linux&nbsp;6 | `yum install mysql-server mysql` |
 | Ubuntu 14.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 16.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 18.04       | `apt-get install mysql-server`                                          |
@@ -35,7 +35,7 @@ for RackTables is Apache httpd.
 | Fedora 8-16        | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
 | Fedora 23-26       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
-| Scientific Linux 6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld                |
+| Scientific&nbsp;Linux&nbsp;6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld |
 | Ubuntu 14.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 | Ubuntu 16.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 | Ubuntu 18.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
@@ -51,7 +51,7 @@ for RackTables is Apache httpd.
 | Fedora 26          | `dnf install httpd php php-mysqlnd php-pdo php-gd php-snmp php-mbstring php-bcmath`  |
 | FreeBSD 10         | see note 1.3.c                                                                       | 
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
-| Scientific Linux 6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath`             |
+| Scientific&nbsp;Linux&nbsp;6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath` |
 | Ubuntu 14.04       | `apt-get install apache2-bin libapache2-mod-php5 php5-gd php5-mysql php5-snmp`       |
 | Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-bcmath php7.0-json php7.0-snmp`
 | Ubuntu 18.04       | `apt-get install apache2-bin libapache2-mod-php7.2 php7.2-gd php7.2-mysql php7.2-mbstring php7.2-bcmath php7.2-json php7.2-snmp`
@@ -70,14 +70,14 @@ content - so maximum of 60 seconds is advised, but by default it is not enabled.
 #### 1.3.c. FreeBSD 10
 There are 3 different ways how you can install RackTables and its dependencies on FreeBSD.
 
-######A. use pkg (Binary Package Management) (not always the newest version)
+###### A. use pkg (Binary Package Management) (not always the newest version)
 ```
 # pkg install racktables
 # pkg install mod_php56 mysql56-server
 ```
 As of March 2017 this will install RackTables Version 0.20.11 and its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######B. use the ports system (possibly more recent than pkg)
+###### B. use the ports system (possibly more recent than pkg)
 ```
 # cd /usr/ports/sysutils/racktables
 # make install
@@ -85,7 +85,7 @@ As of March 2017 this will install RackTables Version 0.20.11 and its dependenci
 ```
 As of March 2017 this will install RackTables Version 0.20.11 and build and install its dependencies (php 5.6, mysql-server 5.6 and apache 2.4).
 
-######C. manual (newest version)
+###### C. manual (newest version)
 Install dependencies with pkg:
 ```
 # pkg install php70-bcmath php70-curl php70-filter php70-gd php70-gmp php70-json php70-mbstring php70-openssl php70-pdo php70-pdo_mysql php70-session php70-simplexml php70-snmp php70-sockets
@@ -116,11 +116,10 @@ Alias /racktables /usr/local/www/racktables/wwwroot
 
 Start services:
 ```
-#echo 'apache24_enable="YES"' >> /etc/rc.conf
-#service apache24 start
-
-#echo 'mysql_enable="YES"' >> /etc/rc.conf
-#service mysql-server start
+# echo 'apache24_enable="YES"' >> /etc/rc.conf
+# service apache24 start
+# echo 'mysql_enable="YES"' >> /etc/rc.conf
+# service mysql-server start
 ```
 
 Browse to http://address.to.your.server/racktables/index.php and follow the instructions.
@@ -324,8 +323,8 @@ more than a year to be released. So this release is considered "BETA" and is
 recommended only to curiuos users, who agree to sacrifice the stability to the
 progress.
 
-Racks and Rows are now stored in the database as Objects.  The RackObject table
-was renamed to Object.  SQL views were created to ease the migration of custom
+Racks and Rows are now stored in the database as Objects. The RackObject table
+was renamed to Object. SQL views were created to ease the migration of custom
 reports and scripts.
 
 New plugins engine instead of `local.php` file. To make your own code stored in
