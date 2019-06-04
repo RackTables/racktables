@@ -2421,6 +2421,24 @@ $iftable_processors['avaya-ers-45-to-48-combo-SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['dell-gigabit-any-1000TX'] = array
+(
+	'pattern' => '@^gigabitethernet(\d+)/0/(\d+)$@',
+	'replacement' => 'g\\1 \\2',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-49-to-50-tengb'] = array
+(
+	'pattern' => '@^tengigabitethernet(\d+)/0/(\d+)$@',
+	'replacement' => 'Tgi\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4027,6 +4045,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PowerConnect 2824: 22 RJ-45/10-100-1000T(X) + 2 combo ports',
 		'processors' => array ('dell-g23-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3031' => array
+	(
+		'dict_key' => 1792,
+        'text' => 'Dell PowerConnect 5548, 48 x 10/100/1000, 2 x 10 Gigabit SFP+',
+        'processors' => array ('dell-49-to-50-tengb','dell-gigabit-any-1000TX'),
 	),
 	'1916.2.71' => array
 	(
