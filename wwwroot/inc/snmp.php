@@ -2330,6 +2330,52 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['dell-gigabit-any-1000TX'] = array
+(
+	'pattern' => '@^gigabitethernet(\d+)/0/(\d+)$@',
+	'replacement' => 'g\\1 \\2',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-49-to-50-tengb'] = array
+(
+	'pattern' => '@^tengigabitethernet(\d+)/0/(\d+)$@',
+	'replacement' => 'Tgi\\1\\2',
+	'dict_key' => '9-1084',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['avaya-gigabitethernet-1000TX'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['avaya-45-to-48-SFP'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (45|46|47|48)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['juniper-100TX'] = array
+(
+	'pattern' => '@^fe-0/0/(\d+)$@',
+	'replacement' => '\\1\\2\\3',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2494,6 +2540,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2025,
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.574' => array
+	(
+		'dict_key' => 143,
+		'text' => 'Cisco Catalyst 3750 Metro Series Switches, 24 ports 10/100, 2 port SFP Gigabit Ethernet, 2 port SFP',
+		'processors' => array ('catalyst-stack-25-to-28-SFP','catalyst-stack-any-100TX'),
 	),
 	'9.1.614' => array
 	(
@@ -3758,6 +3810,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
 	),
+	'45.3.71.2' => array
+	(
+		'dict_key' => 3738,
+        'text' => 'Nortel Avaya 4548GT, 48 x 10/100/1000 (PoE),  4xSFP',
+        'processors' => array ('avaya-45-to-48-SFP','avaya-gigabitethernet-1000TX'),
+	),
 	'119.1.203.2.2.41' => array
 	(
 		'dict_key' => 1810,
@@ -3918,6 +3976,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'PowerConnect 2824: 22 RJ-45/10-100-1000T(X) + 2 combo ports',
 		'processors' => array ('dell-g23-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3031' => array
+	(
+		'dict_key' => 1792,
+        'text' => 'Dell PowerConnect 5548, 48 x 10/100/1000, 2 x 10 Gigabit SFP+',
+        'processors' => array ('dell-49-to-50-tengb','dell-gigabit-any-1000TX'),
 	),
 	'1916.2.71' => array
 	(
@@ -4094,6 +4158,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 905,
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
+	'2636.1.1.1.2.41' => array
+	(
+		'dict_key' => 3733,
+        'text' => 'Juniper SRX 100, 8 x 10/100',
+        'processors' => array ('juniper-100TX'),
 	),
 	'2636.1.1.1.2.43' => array
 	(
