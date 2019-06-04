@@ -2403,6 +2403,24 @@ $iftable_processors['h3c-any-Gb'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['avaya-gigabitethernet-1000TX'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['avaya-45-to-48-SFP'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (45|46|47|48)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'g\\1',
+	'try_next_proc' => TRUE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -3842,6 +3860,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1085,
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
+	),
+	'45.3.71.2' => array
+	(
+		'dict_key' => 3794,
+        'text' => 'Nortel Avaya 4548GT, 48 x 10/100/1000 (PoE),  4xSFP',
+        'processors' => array ('avaya-45-to-48-SFP','avaya-gigabitethernet-1000TX'),
 	),
 	'119.1.203.2.2.41' => array
 	(
