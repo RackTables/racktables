@@ -219,12 +219,14 @@ try {
 			if ($op == 'addFile' && !isset($_FILES['file']['error']))
 				throw new RackTablesError ('File upload error, check upload_max_filesize in php.ini', RackTablesError::MISCONFIGURED);
 			fixContext();
+			// This could be a malformed request rather than an internal error, but spelling
+			// that in proper detail would require finer checks.
 			if
 			(
 				! isset ($ophandler[$pageno][$tabno][$op]) ||
 				! is_callable ($ophandler[$pageno][$tabno][$op])
 			)
-				throw new RackTablesError ("Invalid navigation data for '${pageno}-${tabno}-${op}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ('This request has no ophandler function.', RackTablesError::INTERNAL);
 			// We have a chance to handle an error before starting HTTP header.
 			if (!isset ($delayauth["${pageno}-${tabno}-${op}"]))
 				assertPermission();
