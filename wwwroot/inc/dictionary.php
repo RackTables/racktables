@@ -3797,6 +3797,10 @@ $dictionary = array
 	3734 => array ('chapter_id' => 16, 'dict_value' => 'OpenWrt 18.06'),
 	3735 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 17.01'),
 	3736 => array ('chapter_id' => 37, 'dict_value' => 'OpenWrt 18.06'),
+	3737 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 27'),
+	3738 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 28'),
+	3739 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 29'),
+	3740 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 30'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
