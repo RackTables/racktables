@@ -164,7 +164,7 @@ $SQLSchema = array
 	),
 	'row' => array
 	(
-		'table' => 'Row',
+		'table' => '`Row`',
 		'columns' => array
 		(
 			'id' => 'id',
@@ -277,13 +277,13 @@ function getLocations ($location_id)
 function getRowInfo ($row_id)
 {
 	$query =
-		"SELECT Row.id AS id, Row.name AS name, COUNT(Rack.id) AS count, " .
+		"SELECT `Row`.id AS id, `Row`.name AS name, COUNT(Rack.id) AS count, " .
 		"IF(ISNULL(SUM(Rack.height)),0,SUM(Rack.height)) AS sum, " .
 		"Location.id AS location_id, Location.name AS location " .
-		"FROM Row LEFT JOIN Rack ON Rack.row_id = Row.id " .
-		"LEFT OUTER JOIN Location ON Row.location_id = Location.id " .
-		"WHERE Row.id = ? " .
-		"GROUP BY Row.id, Location.id";
+		"FROM `Row` LEFT JOIN Rack ON Rack.row_id = `Row`.id " .
+		"LEFT OUTER JOIN Location ON `Row`.location_id = Location.id " .
+		"WHERE `Row`.id = ? " .
+		"GROUP BY `Row`.id, Location.id";
 	$result = usePreparedSelectBlade ($query, array ($row_id));
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
 		return $row;
@@ -301,7 +301,7 @@ function getRows ($location_id)
 {
 	$result = usePreparedSelectBlade
 	(
-		'SELECT R.id, R.name FROM Row R ' .
+		'SELECT R.id, R.name FROM `Row` R ' .
 		'INNER JOIN EntityLink EL ON ' .
 		"EL.parent_entity_type = 'location' " .
 		"AND EL.child_entity_type = 'row' " .
@@ -2990,7 +2990,7 @@ function getRowSearchResult ($terms)
 {
 	$byName = getSearchResultByField
 	(
-		'Row',
+		'`Row`',
 		array ('id'),
 		'name',
 		$terms,
@@ -3555,7 +3555,7 @@ function getRackspaceStats ()
 {
 	$ret = array();
 	$subject = array();
-	$subject[] = array ('q' => 'select count(*) from Row', 'txt' => 'Rows');
+	$subject[] = array ('q' => 'select count(*) from `Row`', 'txt' => 'Rows');
 	$subject[] = array ('q' => 'select count(*) from Rack', 'txt' => 'Racks');
 	$subject[] = array ('q' => 'select avg(height) from Rack', 'txt' => 'Average rack height');
 	$subject[] = array ('q' => 'select sum(height) from Rack', 'txt' => 'Total rack units in field');
