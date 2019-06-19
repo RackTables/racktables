@@ -1,3 +1,4 @@
+0.21.4
 0.21.3 2019-06-12
 	update: add a log entry limit to the object page (Mantis#769)
 	bugfix: fix an XSS issue in an error message

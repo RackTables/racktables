@@ -218,6 +218,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.21.1',
 		'0.21.2',
 		'0.21.3',
+		'0.21.4',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1356,6 +1357,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 		case '0.21.3':
 			$query[] = "INSERT INTO Config VALUES ('OBJECTLOG_PREVIEW_ENTRIES','5','uint','no','no','yes','Object log preview maximum entries (0 disables the preview)')";
 			$query[] = "UPDATE Config SET varvalue = '0.21.3' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.4':
+			$query[] = "UPDATE Config SET varvalue = '0.21.4' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
