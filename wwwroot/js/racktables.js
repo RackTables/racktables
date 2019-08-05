@@ -1,5 +1,22 @@
 // JavaScript functions
-
+function bbcodes() {
+	$commentblock = document.getElementsByClassName("commentblock")
+  $format_search =  [
+      /\[b\](.*?)\[\/b\]/ig,
+      /\[i\](.*?)\[\/i\]/ig,
+      /\[u\](.*?)\[\/u\]/ig
+  ];
+  $format_replace = [
+      '<strong>$1</strong>',
+      '<em>$1</em>',
+      '<span style="text-decoration: underline;">$1</span>'
+  ];
+  Array.prototype.forEach.call($commentblock, function(str) {
+      $str = str.innerHTML
+      for (var i =0;i<$format_search.length;i++) $str = $str.replace($format_search[i], $format_replace[i]);
+      str.innerHTML=$str;
+  });
+}
 // Used for (un)checking an entire row of rackspace atoms
 function toggleRowOfAtoms (rackId, rowId) {
 	var toSet;

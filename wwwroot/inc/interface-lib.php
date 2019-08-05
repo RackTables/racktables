@@ -881,6 +881,7 @@ function startPortlet ($title = '')
 function finishPortlet ()
 {
 	echo "</div>\n";
+	echo "<script type='application/javascript'>bbcodes()</script>";
 }
 
 function getPageName ($page_code)
