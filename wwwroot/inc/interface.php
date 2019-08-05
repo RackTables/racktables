@@ -6064,12 +6064,18 @@ function formatAttributeValue ($record, $objtype_id)
 			$result = $record['a_value'];
 		else
 		{
+			$attrs = getChapterAttributes($record['chapter_id']);
+			$tmp = array();
+			$keyattr = $record['key'];
+			foreach ($attrs as $attr_id)
+							$tmp[] = "{\$attr_${attr_id}_$keyattr}";
+			$cfe = implode (' or ', $tmp);
 			$filter_args = array
 			(
 				'page' => $filter_pageno,
 				'tab' => 'default',
 				'andor' => 'and',
-				'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
+				'cfe' => $cfe,
 			);
 			$filter_url = makeHref ($filter_args);
 			$result = "<a href='${filter_url}'>${record['a_value']}</a>";
