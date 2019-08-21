@@ -84,7 +84,7 @@ function render8021QReport ()
 	{
 		foreach (getDomainVLANList ($domain_id) as $vlan_id => $vlan_info)
 			$vlanstats[$vlan_id][$domain_id] = $vlan_info;
-		$header .= '<th>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
+		$header .= '<th class=vertical-rl>' . mkA ($domain_name, 'vlandomain', $domain_id) . '</th>';
 	}
 	$header .= '</tr>';
 	$output = $available = array();

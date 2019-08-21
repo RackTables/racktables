@@ -93,6 +93,9 @@ table.molecule {
 .centered {
 	text-align: center;
 }
+.vertical-rl {
+	writing-mode: vertical-rl;
+}
 table.objectview {
 	width: 100%;
 }
