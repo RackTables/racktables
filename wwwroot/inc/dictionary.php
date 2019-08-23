@@ -3808,6 +3808,7 @@ $dictionary = array
 	3745 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 10 | https://www.debian.org/releases/buster/]]'),
 	3746 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 20.04'),
 	3747 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 32'),
+	3748 => array ('chapter_id' => 12, 'dict_value' => '[[HP EI%GPASS%A5120-48G-PoE+ (JG237A) | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
