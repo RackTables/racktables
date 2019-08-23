@@ -2340,6 +2340,33 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 	'try_next_proc' => TRUE,
 );
 
+$iftable_processors['h3c-any-SFP+'] = array
+(
+        'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
+        'replacement' => 'XGE\\1\\2\\3',
+        'dict_key' => '9-1084',
+        'label' => '\\3',
+        'try_next_proc' => FALSE,
+);
+
+$iftable_processors['h3c-49-to-52-SFP'] = array
+(
+        'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)(49|50|51|52)$@',
+        'replacement' => 'GE\\1\\2\\3',
+        'dict_key' => '4-1077',
+        'label' => '\\3',
+        'try_next_proc' => FALSE,
+);
+
+$iftable_processors['h3c-any-Gb'] = array
+(
+        'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
+        'replacement' => 'GE\\1\\2\\3',
+        'dict_key' => '24',
+        'label' => '\\3',
+        'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4451,6 +4478,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 872,
 		'text' => ' J9049A: 24 RJ-45/10-100-1000T',
 		'processors' => array ('procurve-21-to-24-combo-1000SFP', 'procurve-chassis-1000T'),
+	),
+	'25506.11.1.189' => array
+	(
+		'dict_key' => 2466,
+		'text' => 'HP EI%GPASS%5130-48G-PoE+-4SFP+ (JG937A)',
+		'processors' => array ('h3c-any-Gb','h3c-any-SFP+'),
+	),
+	'25506.11.1.36' => array
+	(
+		'dict_key' => 3748,
+		'text' => 'HP%GPASS%HP A5120-48G-PoE+ EI (JG237A)',
+		'processors' => array ('h3c-49-to-52-SFP','h3c-any-Gb','h3c-any-SFP+'),
 	),
 );
 
