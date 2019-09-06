@@ -1,6 +1,7 @@
 0.21.4
 	bugfix: amend SQL to work on MySQL 8 (Mantis#1909)
 	update: use vertical writing mode in the 802.1Q report
+	update: add snmp syncing support for Arista DCS-7050SX-64
 0.21.3 2019-06-12
 	update: add a log entry limit to the object page (Mantis#769)
 	bugfix: fix an XSS issue in an error message
