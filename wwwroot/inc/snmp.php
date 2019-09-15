@@ -1662,9 +1662,10 @@ $iftable_processors['arista-any-SFP+'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['arista-any-QSFP+'] = array
+# This entry matches the SFP+ interfaces of the QSFP+ ports.
+$iftable_processors['arista-QSFP+-breakout'] = array
 (
-	'pattern' => '@^Ethernet([[:digit:]]+)/([[:digit:]]+)$@',
+	'pattern' => '@^Ethernet(49|50|51|52)/(1|2|3|4)$@',
 	'replacement' => 'e\\1/\2',
 	'dict_key' => '9-1084',
 	'label' => '\\1/\2',
@@ -4287,7 +4288,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2258,
 		'text' => 'DCS-7050SX-64: 48 SFP+ + 4 QSFP+',
-		'processors' => array ('arista-any-SFP+', 'arista-any-QSFP+', 'arista-management'),
+		'processors' => array ('arista-any-SFP+', 'arista-QSFP+-breakout', 'arista-management'),
 	),
 	'30065.1.3011.7124.3282' => array
 	(
