@@ -1,3 +1,5 @@
+# Ubuntu 16.04 with PHP 5.6, 7.0, 7.1, 7.2 and 7.3
+dist: xenial
 language: php
 
 git:
