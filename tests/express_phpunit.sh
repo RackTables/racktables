@@ -4,9 +4,6 @@ THISDIR=`dirname "$0"`
 : ${PHPUNIT_BIN:=phpunit}
 
 case `"$PHPUNIT_BIN" --version` in
-	'PHPUnit 4.'*|'PHPUnit 5.'*)
-		BOOTSTRAP_FILE=bootstrap_v4v5.php
-		;;
 	'PHPUnit 6.'*|'PHPUnit 7.'*)
 		BOOTSTRAP_FILE=bootstrap_v6v7.php
 		;;
