@@ -49,7 +49,7 @@ echo
 cd "$BASEDIR"
 files=0
 errors=0
-TEMPFILE=`mktemp /tmp/racktables_unittest.XXXXXX`
+TEMPFILE=`mktemp --tmpdir racktables_unittest.XXXXXX`
 FORMAT='%-50s : %s\n'
 for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	if [ "$f" = "wwwroot/inc/init.php" ]; then
