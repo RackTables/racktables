@@ -7,7 +7,7 @@ look for the respective links at [project's web-site](http://racktables.org).
 
 ## 1. Prepare the server
 
-RackTables uses a web-server with PHP (5.5.0 or newer) for front-end and a
+RackTables uses a web-server with PHP (7.1 or newer) for front-end and a
 MySQL/MariaDB server version 5 for back-end. The most commonly used web-server
 for RackTables is Apache httpd.
 
@@ -162,6 +162,9 @@ and initialize the application.
 4. Do that and report any errors to the bug tracker or the mailing list.
 
 ## Release notes
+
+### Upgrading to 0.22.0
+As of this release the minimum supported PHP version is 7.1.
 
 ### Upgrading to 0.21.2
 This version drops support for the `$localreports` global variable, which is

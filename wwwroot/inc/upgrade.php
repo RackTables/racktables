@@ -188,6 +188,11 @@ and "addCSSExternal()" functions.  The "addCSS()" function will likely be remove
 For more information on the "addJS()" and "addCSS()" changes see the README.md
 ENDOFTEXT
 ,
+
+	'0.22.0' => <<<'ENDOFTEXT'
+As of this release the minimum supported PHP version is 7.1.
+ENDOFTEXT
+,
 );
 
 // This function currently implements a convention that to upgrade any release R1
