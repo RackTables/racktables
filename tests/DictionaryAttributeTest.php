@@ -164,7 +164,11 @@ class DictionaryAttributeTest extends RTTestCase
 		$cl = getChapterList();
 		$this->assertArrayHasKey ($this->new_chapter_id, $cl);
 		$subset = array ('id' => $this->new_chapter_id, 'sticky' => 'no', 'wordc' => count ($this->new_word_ids));
-		$this->assertArraySubset ($subset, $cl[$this->new_chapter_id]);
+		foreach ($subset as $k => $v)
+		{
+			$this->assertArrayHasKey ($k, $cl[$this->new_chapter_id]);
+			$this->assertEquals ($v, $cl[$this->new_chapter_id][$k]);
+		}
 	}
 
 	public function tearDown () : void
