@@ -4,14 +4,14 @@ class ObjectIPv4Test extends RTTestCase
 {
 	protected $rtr_object_id, $extnet_id, $intnet_id;
 
-	public function setUp()
+	public function setUp() : void
 	{
 		$this->extnet_id = createIPv4Prefix ('10.0.0.0/24', $this->myString ('external'), TRUE);
 		$this->intnet_id = createIPv4Prefix ('192.168.0.0/24', $this->myString ('internal'), TRUE);
 		$this->rtr_object_id = commitAddObject ($this->myString ('object'), NULL, 1, NULL);
 	}
 
-	public function tearDown()
+	public function tearDown() : void
 	{
 		commitDeleteObject ($this->rtr_object_id);
 		destroyIPv4Prefix ($this->extnet_id);

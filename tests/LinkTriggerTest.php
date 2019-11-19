@@ -13,7 +13,7 @@ class LinkTriggerTest extends RTTestCase
 	protected static $portc;
 	protected static $portc_type;
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		// make sure AUTOPORTS_CONFIG is empty
 		self::$autoports_config_var = getConfigVar ('AUTOPORTS_CONFIG');
@@ -36,7 +36,7 @@ class LinkTriggerTest extends RTTestCase
 		self::$portc = commitAddPort (self::$object_id, 'test portc', self::$portc_type, NULL, NULL);
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		// restore AUTOPORTS_CONFIG to original setting
 		if (self::$autoports_config_var != '')
@@ -46,7 +46,7 @@ class LinkTriggerTest extends RTTestCase
 		commitDeleteObject (self::$object_id);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		// delete any links created during the test
 		usePreparedExecuteBlade

@@ -6,13 +6,13 @@ class SQLDateFromDateStrTest extends RTTestCase
 {
 	protected static $old_format;
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		self::$old_format = getConfigVar ('DATEONLY_FORMAT');
 		setConfigVar ('DATEONLY_FORMAT', '%Y-%m-%d');
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		setConfigVar ('DATEONLY_FORMAT', self::$old_format);
 	}

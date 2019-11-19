@@ -17,7 +17,7 @@ class TagFunctionsTest extends RTTestCase
 		$this->assertEquals ($html_colors, $obj['colors']);
 	}
 
-	public function setUp()
+	public function setUp() : void
 	{
 		global $taglist;
 
@@ -37,7 +37,7 @@ class TagFunctionsTest extends RTTestCase
 		$this->ab_obj_id = commitAddObject ($this->myString ('server ab'), NULL, 4, NULL, array_merge ($this->a_tag_ids, $this->b_tag_ids));
 	}
 
-	public function tearDown()
+	public function tearDown() : void
 	{
 		// Objects first to release the foreign key.
 		commitDeleteObject ($this->a_obj_id);

@@ -10,7 +10,7 @@ class GetChildrenListTest extends RTTestCase
 	protected static $links = array();
 	protected static $tags = array();
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		// add sample locations
 		self::$locations[] = $parent_location_id = commitAddObject (self::myStringStatic ('location 0', __CLASS__), NULL, 1562, NULL);
@@ -51,7 +51,7 @@ class GetChildrenListTest extends RTTestCase
 		$taglist = addTraceToNodes (getTagList());
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		foreach (array_reverse (self::$links) as $each)
 			commitUnlinkEntitiesByLinkID ($each);

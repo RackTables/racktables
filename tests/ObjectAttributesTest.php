@@ -4,13 +4,13 @@ class ObjectAttributesTest extends RTTestCase
 {
 	private $server_id, $switch_id;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->server_id = commitAddObject ($this->myString ('server'), NULL, 4, NULL);
 		$this->switch_id = commitAddObject ($this->myString ('switch'), NULL, 8, NULL);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		commitDeleteObject ($this->server_id);
 		commitDeleteObject ($this->switch_id);

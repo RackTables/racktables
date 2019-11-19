@@ -4,13 +4,13 @@ class EmptySQLWhereTest extends RTTestCase
 {
 	protected $tag_id;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ('tag')));
 		$this->tag_id = lastInsertID ();
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		usePreparedDeleteBlade ('TagTree', array ('id' => $this->tag_id));
 	}

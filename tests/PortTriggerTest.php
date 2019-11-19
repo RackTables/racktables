@@ -5,7 +5,7 @@
 
 class PortTriggerTest extends RTTestCase
 {
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->object1_id = commitAddObject ($this->myString ('object 1'), NULL, 1, NULL);
 		$this->object2_id = commitAddObject ($this->myString ('object 2'), NULL, 1, NULL);
@@ -16,7 +16,7 @@ class PortTriggerTest extends RTTestCase
 		$this->port2_1_id = commitAddPort ($this->object2_id, 'port 1', '1-24', 'label 1', 'aabbccddee03');
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		commitDeleteObject ($this->object1_id);
 		commitDeleteObject ($this->object2_id);

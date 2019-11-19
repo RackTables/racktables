@@ -10,7 +10,7 @@ class ObjectLogTest extends RTTestCase
 	protected $location_log_id = NULL;
 	protected $object_log_id = NULL;
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		global $sic;
 		$sic['logentry'] = $_REQUEST['logentry'] = 'unit test log entry';
@@ -22,7 +22,7 @@ class ObjectLogTest extends RTTestCase
 		self::$object_id = commitAddObject (self::myStringStatic ('object', __CLASS__), NULL, 1, NULL);
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		// remove sample data
 		commitDeleteObject (self::$rack_id);

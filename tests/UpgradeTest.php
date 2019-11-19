@@ -9,7 +9,7 @@ class UpgradeTest extends RTTestCase
 {
 	protected static $versions = NULL;
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		$files = scandir ('./data');
 		self::$versions = array ();

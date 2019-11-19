@@ -6,7 +6,7 @@ class RenderDepotTest extends RTTestCase
 	protected $shelf_id = NULL;
 	protected $modem_id = NULL;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		@session_start();
 		// create a nameless shelf that contains a modem (re: ticket #1115)
@@ -15,7 +15,7 @@ class RenderDepotTest extends RTTestCase
 		commitLinkEntities ('object', $this->shelf_id, 'object', $this->modem_id);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		// remove sample data
 		commitDeleteObject ($this->modem_id);

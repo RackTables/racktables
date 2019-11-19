@@ -12,7 +12,7 @@ class EntityLinkTriggerTest extends RTTestCase
 	protected static $rowa_id, $rowb_id;
 	protected static $racka_id, $rackb_id;
 
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		// add sample data
 		usePreparedInsertBlade ('Dictionary', array ('chapter_id' => 1, 'dict_value' => self::myStringStatic ('type a', __CLASS__)));
@@ -42,7 +42,7 @@ class EntityLinkTriggerTest extends RTTestCase
 		self::$rackb_id = commitAddObject (self::myStringStatic ('rack b', __CLASS__), NULL, 1560, NULL);
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		// remove sample data
 		commitDeleteObject (self::$objecta_id);
@@ -65,7 +65,7 @@ class EntityLinkTriggerTest extends RTTestCase
 		commitDeleteObject (self::$rackb_id);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		// delete any links created during the test
 		usePreparedExecuteBlade

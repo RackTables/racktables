@@ -4,7 +4,7 @@ class GetRowsCountTest extends RTTestCase
 {
 	protected $table_name;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->table_name = $this->myString ('tmptest');
 		usePreparedExecuteBlade
@@ -37,7 +37,7 @@ class GetRowsCountTest extends RTTestCase
 		$this->assertEquals (0, getRowsCount ($this->table_name));
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		usePreparedExecuteBlade ('DROP TABLE `' . $this->table_name . '`');
 	}

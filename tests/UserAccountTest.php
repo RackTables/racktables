@@ -7,13 +7,13 @@ class UserAccountTest extends RTTestCase
 	private $user_name;
 	private $user_id;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->user_name = $this->myString ('testuser');
 		$this->user_id = commitCreateUserAccount ($this->user_name, self::REALNAME, self::PSWDHASH);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		commitDeleteUserAccount ($this->user_id);
 	}

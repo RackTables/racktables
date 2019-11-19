@@ -10,7 +10,7 @@ class DictionaryAttributeTest extends RTTestCase
 		$AM_count, $AM_attrs,
 		$AV_count;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->attr_types = array();
 		foreach (array ('string', 'uint', 'float', 'dict', 'date') as $attr_type)
@@ -167,7 +167,7 @@ class DictionaryAttributeTest extends RTTestCase
 		$this->assertArraySubset ($subset, $cl[$this->new_chapter_id]);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		foreach ($this->new_object_ids as $each)
 			commitDeleteObject ($each); // includes AttributeValue

@@ -4,7 +4,7 @@ class ConfigVarTest extends RTTestCase
 {
 	private $varname;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		$this->varname = $this->myString ('testvar');
 		usePreparedInsertBlade
@@ -22,7 +22,7 @@ class ConfigVarTest extends RTTestCase
 		);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		usePreparedDeleteBlade ('Config', array ('varname' => $this->varname));
 	}

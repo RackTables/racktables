@@ -4,7 +4,7 @@ class ObjectPortsTest extends RTTestCase
 {
 	private $object_id;
 
-	public function setUp ()
+	public function setUp () : void
 	{
 		// Let it be a server as AutoPorts rows shall not get in the way of the test.
 		$this->object_id = commitAddObject ($this->myString ('testobject'), '', 4, '');
@@ -186,7 +186,7 @@ class ObjectPortsTest extends RTTestCase
 		);
 	}
 
-	public function tearDown ()
+	public function tearDown () : void
 	{
 		commitDeleteObject ($this->object_id);
 	}

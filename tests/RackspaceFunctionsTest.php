@@ -9,7 +9,7 @@ class RackspaceFunctionsTest extends RTTestCase
 	private static $row_name;
 
 	// Add a temporary row with a few racks.
-	public static function setUpBeforeClass ()
+	public static function setUpBeforeClass () : void
 	{
 		// This method is static and thus cannot call myString(), which uses $this.
 		self::$row_name = sprintf ('testrow-%s-%u', get_class(), getmypid());
@@ -231,7 +231,7 @@ class RackspaceFunctionsTest extends RTTestCase
 		);
 	}
 
-	public static function tearDownAfterClass ()
+	public static function tearDownAfterClass () : void
 	{
 		commitDeleteRow (self::$row_id);
 	}
