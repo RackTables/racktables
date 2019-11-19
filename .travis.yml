@@ -9,12 +9,21 @@ git:
 matrix:
   fast_finish: true
   include:
-  - php: 7.1 # PHPUnit 8 by default
+    # PHP 7.0 is not available on U18.04. U16.04 with PHP 7.0 comes with
+    # PHPUnit 7, which requires PHP >= 7.1 hence does not work. PHPUnit 6.5.14
+    # on PHP 7.0.33 errors RackTables tests that were updated to meet the
+    # requirements of PHPUnit 8. Quite oddly, the error message of PHPUnit 6
+    # after the update resembles the message of PHPUnit 8 before the update:
+    # "TypeError: Return value of ConfigVarTest::setUp() must be an instance of
+    # void, none returned"
+    # That said, outside of Travis CI on a U18.04 host PHPUnit 6.5.5 with
+    # PHP 7.2.24 works fine, but anyway.
+  - php: 7.1
+    # U18.04 with PHP 7.1 comes with PHPUnit 8, which requires PHP >= 7.2
+    # hence does not work.
     env: PHPUNIT_BIN=~/bin/phpunit-7.5.17.phar
   - php: 7.2 # PHPUnit 8 by default
-    env: PHPUNIT_BIN=~/bin/phpunit-7.5.17.phar
   - php: 7.3 # PHPUnit 8 by default
-    env: PHPUNIT_BIN=~/bin/phpunit-7.5.17.phar
 
 services:
  - mysql
