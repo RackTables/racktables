@@ -58,10 +58,10 @@ class LinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testCreateLinkToSelf ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'Link',
@@ -71,10 +71,10 @@ class LinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkToSelf ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'Link',
@@ -132,10 +132,10 @@ class LinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testCreateLinkBetweenIncompatiblePorts ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'Link',
@@ -145,10 +145,10 @@ class LinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkBetweenIncompatiblePorts ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'Link',

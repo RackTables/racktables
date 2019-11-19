@@ -46,10 +46,10 @@ class ConfigVarTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerIAE1
-	 * @expectedException InvalidArgException
 	 */
 	public function testSystemIAE1 ($varvalue, $columns)
 	{
+		$this->expectException (InvalidArgException::class);
 		global $configCache;
 		$columns['is_userdefined'] = 'no';
 		usePreparedUpdateBlade ('Config', $columns, array ('varname' => $this->varname));
@@ -59,19 +59,19 @@ class ConfigVarTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testSystemIAE2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		setConfigVar ('x' . $this->varname, 'no such variable');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testSystemIAE3 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		getConfigVar ('x' . $this->varname);
 	}
 
@@ -102,10 +102,10 @@ class ConfigVarTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerIAE1
-	 * @expectedException InvalidArgException
 	 */
 	public function testUserIAE1 ($varvalue, $columns)
 	{
+		$this->expectException (InvalidArgException::class);
 		global $configCache;
 		$columns['is_userdefined'] = 'yes';
 		usePreparedUpdateBlade ('Config', $columns, array ('varname' => $this->varname));
@@ -115,10 +115,10 @@ class ConfigVarTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUserIAE2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		setUserConfigVar ('x' . $this->varname, 'no such variable');
 	}
 

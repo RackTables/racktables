@@ -37,19 +37,19 @@ class ScriptFunctionsTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testSaveEmptyName ()
 	{
+		$this->expectException (InvalidArgException::class);
 		saveScript ('', NULL);
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testSaveNULLName ()
 	{
+		$this->expectException (InvalidArgException::class);
 		saveScript (NULL, NULL);
 	}
 }

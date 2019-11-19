@@ -17,28 +17,28 @@ class EmptySQLWhereTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedDelete ()
 	{
+		$this->expectException (InvalidArgException::class);
 		usePreparedDeleteBlade ('TagTree', NULL);
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedUpdate1 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		usePreparedUpdateBlade ('TagTree', array ('is_assignable' => 'yes'), NULL);
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testMalformedUpdate2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		usePreparedUpdateBlade ('TagTree', NULL, NULL);
 	}
 }

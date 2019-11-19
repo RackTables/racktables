@@ -56,11 +56,11 @@ class ObjectIPv4Test extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 * @dataProvider providerNATv4Invalid
 	 */
 	public function testNATv4InvalidArg ($rule)
 	{
+		$this->expectException (InvalidArgException::class);
 		newPortForwarding
 		(
 			$this->rtr_object_id,

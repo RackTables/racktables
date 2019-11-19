@@ -27,10 +27,10 @@ class TagTreeCircularReferenceTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testCreateCircularReference ()
 	{
+		$this->expectException (InvalidArgException::class);
 		// set A as the parent of B, and B as the parent of C
 		commitUpdateTag ($this->tagb_id, $this->myString ('tag b'), $this->taga_id, 'yes');
 		commitUpdateTag ($this->tagc_id, $this->myString ('tag c'), $this->tagb_id, 'yes');

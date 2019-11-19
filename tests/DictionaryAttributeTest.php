@@ -124,10 +124,10 @@ class DictionaryAttributeTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException EntityNotFoundException
 	 */
 	public function testReadChapterNE ()
 	{
+		$this->expectException (EntityNotFoundException::class);
 		readChapter (-1);
 	}
 

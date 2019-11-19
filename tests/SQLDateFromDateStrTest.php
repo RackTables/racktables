@@ -29,10 +29,10 @@ class SQLDateFromDateStrTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerUnaryIAE
-	 * @expectedException InvalidArgException
 	 */
 	public function testUnaryIAE ($input)
 	{
+		$this->expectException (InvalidArgException::class);
 		SQLDateFromDateStr ($input);
 	}
 

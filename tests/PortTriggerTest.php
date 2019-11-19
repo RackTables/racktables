@@ -44,55 +44,55 @@ class PortTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueMacAdd()
 	{
+		$this->expectException (InvalidArgException::class);
 		$port2_2_id = commitAddPort ($this->object2_id, 'port 2', '1-24', 'label 1', 'aabbccddee01');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueWWNAdd()
 	{
+		$this->expectException (InvalidArgException::class);
 		$port2_2_id = commitAddPort ($this->object2_id, 'port 2', '1-24', 'label 1', 'aabbccddee000008');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueIPoIBAdd()
 	{
+		$this->expectException (InvalidArgException::class);
 		$port2_2_id = commitAddPort ($this->object2_id, 'port 2', '1-24', 'label 1', 'aabbccddee000000000000000000000000000005');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueMacUpdate()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitUpdatePort ($this->object2_id, $this->port2_1_id, 'port 1', '1-24', 'label 1', 'aabbccddee01', '');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueWWNUpdate()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitUpdatePort ($this->object2_id, $this->port2_1_id, 'port 1', '1-24', 'label 1', 'aabbccddee000008', '');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testUniqueIPoIBUpdate()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitUpdatePort ($this->object2_id, $this->port2_1_id, 'port 1', '1-24', 'label 1', 'aabbccddee000000000000000000000000000005', '');
 	}
 }

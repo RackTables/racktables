@@ -90,10 +90,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testLinkObjectToSelfByInsert ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -107,10 +107,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testLinkObjectToSelfByUpdate ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -183,10 +183,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testCreateLinkBetweenIncompatibleObjects ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -200,10 +200,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testUpdateLinkBetweenIncompatibleObjects ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -240,10 +240,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testLinkLocationToMultipleLocations ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -319,10 +319,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testLinkRowToMultipleLocations ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -368,10 +368,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testInvalidateRowLink ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -417,10 +417,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testLinkRackToMultipleRows ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',
@@ -466,10 +466,10 @@ class EntityLinkTriggerTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException PDOException
 	 */
 	public function testInvalidateRackLink ()
 	{
+		$this->expectException (PDOException::class);
 		usePreparedInsertBlade
 		(
 			'EntityLink',

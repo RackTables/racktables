@@ -63,10 +63,10 @@ class ObjectCircularReferenceTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RackTablesError
 	 */
 	public function testCreateObjectCircularReference ()
 	{
+		$this->expectException (RackTablesError::class);
 		// set A as the parent of B, and B as the parent of C
 		commitLinkEntities ('object', self::$objecta_id, 'object', self::$objectb_id);
 		commitLinkEntities ('object', self::$objectb_id, 'object', self::$objectc_id);
@@ -76,10 +76,10 @@ class ObjectCircularReferenceTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RackTablesError
 	 */
 	public function testUpdateObjectCircularReference ()
 	{
+		$this->expectException (RackTablesError::class);
 		// set A as the parent of B, and B as the parent of C
 		commitLinkEntities ('object', self::$objecta_id, 'object', self::$objectb_id);
 		commitLinkEntities ('object', self::$objectb_id, 'object', self::$objectc_id);
@@ -93,10 +93,10 @@ class ObjectCircularReferenceTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RackTablesError
 	 */
 	public function testCreateLocationCircularReference ()
 	{
+		$this->expectException (RackTablesError::class);
 		// set A as the parent of B, and B as the parent of C
 		commitLinkEntities ('location', self::$locationa_id, 'location', self::$locationb_id);
 		commitLinkEntities ('location', self::$locationb_id, 'location', self::$locationc_id);
@@ -106,10 +106,10 @@ class ObjectCircularReferenceTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RackTablesError
 	 */
 	public function testUpdateLocationCircularReference ()
 	{
+		$this->expectException (RackTablesError::class);
 		// set A as the parent of B, and B as the parent of C
 		commitLinkEntities ('location', self::$locationa_id, 'location', self::$locationb_id);
 		commitLinkEntities ('location', self::$locationb_id, 'location', self::$locationc_id);

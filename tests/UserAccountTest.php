@@ -45,37 +45,37 @@ class UserAccountTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RTDatabaseError
 	 */
 	public function testDuplicate ()
 	{
+		$this->expectException (RTDatabaseError::class);
 		commitCreateUserAccount ($this->user_name, 'x' . self::REALNAME, sha1 (self::PSWDHASH));
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testInvalidPassword1 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitUpdateUserAccount ($this->user_id, $this->user_name, self::REALNAME, 'password');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testInvalidPassword2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitCreateUserAccount ($this->user_name, self::REALNAME, 'password');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException EntityNotFoundException
 	 */
 	public function testDelete1 ()
 	{
+		$this->expectException (EntityNotFoundException::class);
 		$user2_id = commitCreateUserAccount ($this->user_name . 'x', self::REALNAME, self::PSWDHASH);
 		commitDeleteUserAccount ($user2_id);
 		spotEntity ('user', $user2_id, TRUE);
@@ -83,19 +83,19 @@ class UserAccountTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testDelete2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		commitDeleteUserAccount (1);
 	}
 
 	/**
 	 * @group small
-	 * @expectedException EntityNotFoundException
 	 */
 	public function testDelete3 ()
 	{
+		$this->expectException (EntityNotFoundException::class);
 		commitDeleteUserAccount (1000000);
 	}
 }

@@ -79,10 +79,10 @@ class PureFunctionTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerNaryIAE
-	 * @expectedException InvalidArgException
 	 */
 	public function testNaryIAE ($func, $input)
 	{
+		$this->expectException (InvalidArgException::class);
 		call_user_func_array ($func, $input);
 	}
 
@@ -100,10 +100,10 @@ class PureFunctionTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerMakeWhereSQLIAE
-	 * @expectedException InvalidArgException
 	 */
 	public function testMakeWhereSQLIAE ($where_columns, $conjunction)
 	{
+		$this->expectException (InvalidArgException::class);
 		$dummy_params = array();
 		makeWhereSQL ($where_columns, $conjunction, $dummy_params);
 	}
@@ -113,10 +113,10 @@ class PureFunctionTest extends RTTestCase
 	/**
 	 * @group small
 	 * @dataProvider providerTreeApplyFuncIAE
-	 * @expectedException InvalidArgException
 	 */
 	public function testTreeApplyFuncIAE ($func, $stopfunc)
 	{
+		$this->expectException (InvalidArgException::class);
 		$forest_byref = array();
 		treeApplyFunc ($forest_byref, $func, $stopfunc);
 	}

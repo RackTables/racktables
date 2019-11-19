@@ -65,20 +65,20 @@ class ObjectAttributesTest extends RTTestCase
 
 	/**
 	 * @group small
-	 * @expectedException RTDatabaseError
 	 */
 	public function testIncompatible1 ()
 	{
+		$this->expectException (RTDatabaseError::class);
 		// SW version attribute is not enabled for servers by default
 		commitUpdateAttrValue ($this->server_id, 5, '1.2.3');
 	}
 
 	/**
 	 * @group small
-	 * @expectedException InvalidArgException
 	 */
 	public function testIncompatible2 ()
 	{
+		$this->expectException (InvalidArgException::class);
 		// no such attribute
 		commitUpdateAttrValue ($this->server_id, 5000, 0);
 	}
