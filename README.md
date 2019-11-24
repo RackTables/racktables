@@ -7,9 +7,10 @@ look for the respective links at [project's web-site](http://racktables.org).
 
 ## 1. Prepare the server
 
-RackTables uses a web-server with PHP (7.1 or newer) for front-end and a
-MySQL/MariaDB server version 5 for back-end. The most commonly used web-server
-for RackTables is Apache httpd.
+RackTables uses a web-server with PHP (7.0 is the minimum required version, 7.1
+is the minimum tested version, 7.3 is the recommended version) for front-end and
+a MySQL/MariaDB server version 5 or later for back-end. The most commonly used
+web-server for RackTables is Apache httpd.
 
 ### 1.1. Install MySQL server
 

@@ -190,7 +190,7 @@ ENDOFTEXT
 ,
 
 	'0.22.0' => <<<'ENDOFTEXT'
-As of this release the minimum supported PHP version is 7.1.
+As of this release the minimum supported PHP version is 7.0.
 ENDOFTEXT
 ,
 );
