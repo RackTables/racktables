@@ -7,7 +7,7 @@ function plugin_munin_info ()
 		'name' => 'munin',
 		'longname' => 'Munin',
 		'version' => '1.0',
-		'home_url' => 'http://www.racktables.org/'
+		'home_url' => 'https://www.racktables.org/'
 	);
 }
 

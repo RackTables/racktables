@@ -3,7 +3,7 @@
 Each plugin should reside in its own directory and contain a file named
 plugin.php housing certain mandatory functions.
 
-Refer to http://wiki.racktables.org/index.php/Plugins
+Refer to https://wiki.racktables.org/index.php/Plugins
 for more information.
 
 *** Old Plugin Architecture ***

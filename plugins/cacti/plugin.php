@@ -7,7 +7,7 @@ function plugin_cacti_info ()
 		'name' => 'cacti',
 		'longname' => 'Cacti',
 		'version' => '1.0',
-		'home_url' => 'http://www.racktables.org/'
+		'home_url' => 'https://www.racktables.org/'
 	);
 }
 
