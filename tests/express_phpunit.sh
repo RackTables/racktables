@@ -3,6 +3,10 @@
 THISDIR=`dirname "$0"`
 : ${PHPUNIT_BIN:=phpunit}
 
+which php >/dev/null || {
+	echo 'ERROR: PHP CLI binary is not available!' >&2
+	exit 3
+}
 if ! which "$PHPUNIT_BIN" >/dev/null; then
 	echo "ERROR: $PHPUNIT_BIN is not an executable file" >&2
 	exit 4

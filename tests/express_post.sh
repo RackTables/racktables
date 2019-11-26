@@ -3,6 +3,10 @@
 THISDIR=`dirname "$0"`
 BASEDIR=`readlink -f "$THISDIR/.."`
 
+which php >/dev/null || {
+	echo 'ERROR: PHP CLI binary is not available!' >&2
+	exit 1
+}
 echo "Running post-PHPUnit express tests using the base directory '$BASEDIR'."
 cd "$BASEDIR/wwwroot"
 # PHPUnit would fail if this was not a unit testing database, hence

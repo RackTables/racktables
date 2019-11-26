@@ -3,6 +3,10 @@
 THISDIR=`dirname "$0"`
 BASEDIR=`readlink -f "$THISDIR/.."`
 
+which php >/dev/null || {
+	echo 'ERROR: PHP CLI binary is not available!' >&2
+	exit 1
+}
 echo "Running pre-PHPUnit express tests using the base directory '$BASEDIR'."
 
 testPHPSyntaxOnly()
