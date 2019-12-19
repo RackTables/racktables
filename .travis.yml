@@ -1,4 +1,4 @@
-# Ubuntu 18.04 with PHP 7.1, 7.2 and 7.3
+# Ubuntu 18.04 with PHP 7.1, 7.2, 7.3 and 7.4
 dist: bionic
 language: php
 
@@ -24,6 +24,7 @@ matrix:
     env: PHPUNIT_BIN=~/bin/phpunit-7.5.17.phar
   - php: 7.2 # PHPUnit 8 by default
   - php: 7.3 # PHPUnit 8 by default
+  - php: 7.4 # PHPUnit 8 by default
 
 services:
  - mysql
