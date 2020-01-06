@@ -3811,7 +3811,7 @@ $dictionary = array
 	3748 => array ('chapter_id' => 12, 'dict_value' => '[[D-Link%GPASS%DGS-1510-28X | https://www.dlink.com/en/products/dgs-1510-28x-gigabit-stackable-smart-managed-switch-with-10g-uplinks]]'),
 	3749 => array ('chapter_id' => 12, 'dict_value' => '[[D-Link%GPASS%DGS-1100-08 | https://www.dlink.com/en/products/dgs-1100-08-8-port-gigabit-smart-managed-switch]]'),
 	3750 => array ('chapter_id' => 25, 'dict_value' => '[[MikroTik%QRT2 (RBQRTG-2SHPnD) | https://mikrotik.com/product/RBQRTG-2SHPnDr2]'),
-	3751 => array ('chapter_id' => 25, 'dict_value' => '[[[MikroTik%DynaDish 5 (RBDynaDishG-5HacDr3) | https://mikrotik.com/product/RBDynaDishG-5HacDr3]]'),
+	3751 => array ('chapter_id' => 25, 'dict_value' => '[[MikroTik%DynaDish 5 (RBDynaDishG-5HacDr3) | https://mikrotik.com/product/RBDynaDishG-5HacDr3]]'),
 	3752 => array ('chapter_id' => 17, 'dict_value' => '[[AVM%GPASS%FritzBox 7490 | https://avm.de/produkte/fritzbox/fritzbox-7490/]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
