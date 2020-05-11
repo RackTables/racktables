@@ -3,6 +3,7 @@ wwwroot/inc/local.php
 /.idea
 /.project
 tags
+tests/.phpunit.result.cache
 
 # vim
 [._]*.s[a-w][a-z]
