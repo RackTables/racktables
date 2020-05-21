@@ -3806,6 +3806,8 @@ $dictionary = array
 	3743 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 19.04'),
 	3744 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 19.10'),
 	3745 => array ('chapter_id' => 13, 'dict_value' => '[[Debian%GSKIP%Debian 10 | https://www.debian.org/releases/buster/]]'),
+	3746 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 20.04'),
+	3747 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 32'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
