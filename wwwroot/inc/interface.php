@@ -108,7 +108,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 	showLogoutURL();
 	echo '">logout</a> ]</div>'; // greeting
 	echo getConfigVar ('enterprise') . ' RackTables ';
-	echo '<a href="http://racktables.org" title="Visit RackTables site">' . CODE_VERSION . '</a>';
+	echo '<a href="https://racktables.org/" title="Visit RackTables site">' . CODE_VERSION . '</a>';
 	renderQuickLinks();
 	echo '</div>'; // mainheader
 	echo '<div class=menubar>';
