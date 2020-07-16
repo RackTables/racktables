@@ -25,6 +25,7 @@ for RackTables is Apache httpd.
 | Ubuntu 16.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 18.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 20.04       | `apt-get install mariadb-server`                                        |
+| RHEL 7             | `yum install -y mariadb-server mariadb`                                 |
 
 ### 1.2. Enable Unicode in the MySQL/MariaDB server
 
@@ -38,6 +39,7 @@ for RackTables is Apache httpd.
 | Ubuntu 16.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 | Ubuntu 18.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
 | Ubuntu 20.04       | No action required, comes configured for UTF-8 by default.                                                         |
+| RHEL 7             | add `character-set-server=utf8` line to `[server]` section of `/etc/my.cnf.d/server.cnf` file and restart mysqld   |
 
 ### 1.3. Install PHP and Apache httpd (or nginx)
 
@@ -53,7 +55,9 @@ for RackTables is Apache httpd.
 | Ubuntu 16.04       | `apt-get install apache2-bin libapache2-mod-php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-bcmath php7.0-json php7.0-snmp`
 | Ubuntu 18.04       | `apt-get install apache2-bin libapache2-mod-php7.2 php7.2-gd php7.2-mysql php7.2-mbstring php7.2-bcmath php7.2-json php7.2-snmp`
 | Ubuntu 20.04       | `apt-get install apache2-bin libapache2-mod-php7.4 php7.4-gd php7.4-mysql php7.4-mbstring php7.4-bcmath php7.4-json php7.4-snmp`
-
+| RHEL 7             | `subscription-manager repos --enable=rhel-server-rhscl-7-rpms`
+|                    | `yum install httpd24 rh-php70 rh-php70-php-mysqlnd rh-php70-php-pdo rh-php70-php-gd rh-php70-php-snmp rh-php70-php-mbstring rh-php70-php-bcmath rh-php70-php-ldap rh-php70-php`
+                       
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
 will point to localhost (and thus fail).
@@ -128,6 +132,8 @@ Note: set `secret.php` permissions when prompted.
 # chmod 400 /usr/local/www/racktables/wwwroot/inc/secret.php
 ```
 
+#### 1.3.d. RHEL 7
+Apache configuration and webroot is under /opt/rh/httpd24/root/
 
 ## 2. Copy the files
 Unpack the tar.gz/zip archive to a directory of your choice and configure Apache
