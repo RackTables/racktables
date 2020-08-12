@@ -479,26 +479,36 @@ function renderPortOIFEditor()
 function renderAttributes ()
 {
 	global $attrtypes;
-	startPortlet ('Optional attributes');
-	echo '<table class="cooltable zebra" border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo "<tr><th class=tdleft>Attribute name</th><th class=tdleft>Attribute type</th><th class=tdleft>Applies to</th></tr>";
+
+	$columns = array
+	(
+		array ('th_text' => 'Name', 'row_key' => 'name', 'th_class' => 'tdleft'),
+		array ('th_text' => 'Type', 'row_key' => 'type', 'th_class' => 'tdleft'),
+		array ('th_text' => 'Applies to', 'row_key' => 'appto', 'th_class' => 'tdleft', 'td_escape' => FALSE),
+	);
+
+	$rows = array();
 	foreach (getAttrMap() as $attr)
 	{
-		echo '<tr>';
-		echo "<td class=tdleft>${attr['name']}</td>";
-		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td>";
-		echo '<td class=tdleft>';
-		if (count ($attr['application']) == 0)
-			echo '&nbsp;';
-		else
-			foreach ($attr['application'] as $app)
-				if ($attr['type'] == 'dict')
-					echo decodeObjectType ($app['objtype_id']) . " (values from '${app['chapter_name']}')<br>";
-				else
-					echo decodeObjectType ($app['objtype_id']) . '<br>';
-		echo '</td></tr>';
+		$row = array
+		(
+			'name' => $attr['name'],
+			'type' => $attrtypes[$attr['type']],
+			'appto' => '',
+		);
+		foreach ($attr['application'] as $app)
+		{
+			$row['appto'] .= stringForTD (decodeObjectType ($app['objtype_id']), 128);
+			if ($attr['type'] == 'dict')
+				$row['appto'] .= ' (values from \'' . stringForTD ($app['chapter_name'], 128) . '\')';
+			$row['appto'] .= '<br>';
+		}
+		$rows[] = $row;
 	}
-	echo "</table><br>\n";
+
+	startPortlet ('Optional attributes');
+	renderTableViewer ($columns, $rows);
+	echo '<br>';
 	finishPortlet();
 }
 
