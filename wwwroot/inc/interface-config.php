@@ -482,6 +482,7 @@ function renderAttributes ()
 
 	$columns = array
 	(
+		array ('th_text' => 'ID', 'row_key' => 'id', 'th_class' => 'tdright', 'td_class' => 'tdright'),
 		array ('th_text' => 'Name', 'row_key' => 'name', 'th_class' => 'tdleft'),
 		array ('th_text' => 'Type', 'row_key' => 'type', 'th_class' => 'tdleft'),
 		array ('th_text' => 'Applies to', 'row_key' => 'appto', 'th_class' => 'tdleft', 'td_escape' => FALSE),
@@ -492,6 +493,7 @@ function renderAttributes ()
 	{
 		$row = array
 		(
+			'id' => $attr['id'],
 			'name' => $attr['name'],
 			'type' => $attrtypes[$attr['type']],
 			'appto' => '',
