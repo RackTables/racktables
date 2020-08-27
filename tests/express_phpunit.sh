@@ -1,7 +1,7 @@
 #!/bin/sh
 
-THISDIR=`dirname "$0"`
-: ${PHPUNIT_BIN:=phpunit}
+THISDIR=$(dirname "$0")
+: "${PHPUNIT_BIN:=phpunit}"
 
 which php >/dev/null || {
 	echo 'ERROR: PHP CLI binary is not available!' >&2
@@ -12,7 +12,7 @@ if ! which "$PHPUNIT_BIN" >/dev/null; then
 	exit 4
 fi
 
-case `"$PHPUNIT_BIN" --version` in
+case $("$PHPUNIT_BIN" --version) in
 	'PHPUnit 6.'*|'PHPUnit 7.'*|'PHPUnit 8.'*)
 		BOOTSTRAP_FILE=bootstrap_v6v7v8.php
 		;;
@@ -25,5 +25,5 @@ esac
 # At this point it makes sense to test specific functions.
 echo "Running PHPUnit tests using bootstrap file '$BOOTSTRAP_FILE'."
 
-cd "$THISDIR"
+cd "$THISDIR" || exit 1
 "$PHPUNIT_BIN" --group small --bootstrap $BOOTSTRAP_FILE || exit 1

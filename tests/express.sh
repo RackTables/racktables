@@ -1,8 +1,7 @@
 #!/bin/sh
 
-THISDIR=`dirname "$0"`
-BASEDIR=`readlink -f "$THISDIR/.."`
-: ${PHPUNIT_BIN:=phpunit}
+THISDIR=$(dirname "$0")
+: "${PHPUNIT_BIN:=phpunit}"
 
 "$THISDIR"/express_pre.sh && \
 "$THISDIR"/express_phpunit.sh && \

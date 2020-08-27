@@ -10,8 +10,8 @@ fi
 DBNAME="$1"
 USERNAME="$2"
 PASSWORD="$3"
-THISDIR=`dirname "$0"`
-BASEDIR=`readlink -f "$THISDIR/.."`
+THISDIR=$(dirname "$0")
+BASEDIR=$(readlink -f "$THISDIR/..")
 
 if mysql -u root -e "SHOW TABLES FROM $DBNAME" >/dev/null 2>&1; then
 	echo "Error: database $DBNAME already exists!"
@@ -51,6 +51,6 @@ init_database_static();
 ob_end_clean();
 EOF
 
-cd "$BASEDIR"
+cd "$BASEDIR" || exit 3
 php cli_install.php || exit 3
 mysql -u root "$DBNAME" -e "INSERT INTO UserAccount (user_id, user_name, user_password_hash) VALUES (1, 'admin', SHA1('${PASSWORD}'));" || exit 3
