@@ -9,25 +9,28 @@ which php >/dev/null || {
 }
 echo "Running pre-PHPUnit express tests using the base directory '$BASEDIR'."
 
+printTestResult()
+{
+	printf '%-50s : %s\n' "${1:?}" "${2:?}"
+}
+
 testPHPSyntaxOnly()
 {
-	local FORMAT="${1:?}"
-	local INPUT="${2:?}"
+	local INPUT="${1:?}"
 
 	if php --syntax-check "$INPUT" >/dev/null 2>&1; then
-		printf "$FORMAT" "$INPUT" 'OK (syntax only)'
+		printTestResult "$INPUT" 'OK (syntax only)'
 		return 0
 	else
-		printf "$FORMAT" "$INPUT" "ERROR: PHP syntax check failed"
+		printTestResult "$INPUT" 'ERROR: PHP syntax check failed'
 		return 1
 	fi
 }
 
 testPHPExitCodeAndOutput()
 {
-	local FORMAT="${1:?}"
-	local INPUT="${2:?}"
-	local TEMPFILE="${3:?}"
+	local INPUT="${1:?}"
+	local TEMPFILE="${2:?}"
 	local fname rc curdir
 
 	fname=`basename "$INPUT"`
@@ -37,11 +40,11 @@ testPHPExitCodeAndOutput()
 	rc=$?
 	cd "$curdir"
 	if [ $rc -eq 0 -a ! -s "$TEMPFILE" ]; then
-		printf "$FORMAT" "$INPUT" 'OK'
+		printTestResult "$INPUT" 'OK'
 		return 0
 	else
-		[ $rc -ne 0 ] && printf "$FORMAT" "$INPUT" "ERROR: PHP interpreter returned code $rc"
-		[ -s "$TEMPFILE" ] && printf "$FORMAT" "$f" 'ERROR: produces output when parsed'
+		[ $rc -ne 0 ] && printTestResult "$INPUT" "ERROR: PHP interpreter returned code $rc"
+		[ -s "$TEMPFILE" ] && printTestResult "$INPUT" 'ERROR: produces output when parsed'
 		return 1
 	fi
 }
@@ -54,18 +57,17 @@ cd "$BASEDIR"
 files=0
 errors=0
 TEMPFILE=`mktemp --tmpdir racktables_unittest.XXXXXX`
-FORMAT='%-50s : %s\n'
 for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	if [ "$f" = "wwwroot/inc/init.php" ]; then
-		testPHPSyntaxOnly "$FORMAT" "$f" || errors=`expr $errors + 1`
+		testPHPSyntaxOnly "$f" || errors=`expr $errors + 1`
 	else
-		testPHPExitCodeAndOutput "$FORMAT" "$f" "$TEMPFILE" || errors=`expr $errors + 1`
+		testPHPExitCodeAndOutput "$f" "$TEMPFILE" || errors=`expr $errors + 1`
 	fi
 	files=`expr $files + 1`
 done
 for f in tests/*.php; do
 	[ -h "$f" ] && continue
-	testPHPSyntaxOnly "$FORMAT" "$f" || errors=`expr $errors + 1`
+	testPHPSyntaxOnly "$f" || errors=`expr $errors + 1`
 	files=`expr $files + 1`
 done
 echo '---------------------------------------------------'
