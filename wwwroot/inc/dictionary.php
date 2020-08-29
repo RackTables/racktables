@@ -3809,6 +3809,10 @@ $dictionary = array
 	3746 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 20.04'),
 	3747 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 32'),
 	3748 => array ('chapter_id' => 12, 'dict_value' => '[[HP EI%GPASS%A5120-48G-PoE+ (JG237A) | [[https://h20195.www2.hpe.com/v2/GetDocument.aspx?docname=c04111657&doctype=quickspecs&doclang=EN_US&searchquery=&cc=za&lc=en]]'),
+	3749 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS728TPv2'),
+	3750 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS728TPPv2'),
+	3751 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS752TPv2'),
+	3752 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS752TPP'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
