@@ -4172,18 +4172,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'FSM7328S: 24 RJ-45/10-100TX + 4 combo-gig',
 		'processors' => array ('netgear-chassis-any-100TX', 'netgear-chassis-any-1000SFPcombo', 'netgear-chassis-any-1000T'),
 	),
-	'4526.100.2.2' => array
-	(
-		'dict_key' => 562,
-		'text' => 'GSM7224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
-		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
-	),
-	'4526.100.2.3' => array
-	(
-		'dict_key' => 559,
-		'text' => 'GSM7212: 12 combo-gig',
-		'processors' => array ('netgear-chassis-any-1000SFPcombo', 'netgear-chassis-any-1000T'),
-	),
 	'4526.100.1.13' => array
 	(
 		'dict_key' => 1601,
@@ -4195,6 +4183,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1794,
 		'text' => 'GSM7352Sv2: 44 RJ-45/10-100-1000T(X) + 4 combo-gig + SFP+ uplinks',
 		'processors' => array ('netgear-chassis-45-to-48-1000SFPcombo', 'netgear-chassis-any-1000T', 'netgear-chassis-any-SFP+'),
+	),
+	'4526.100.2.2' => array
+	(
+		'dict_key' => 562,
+		'text' => 'GSM7224: 20 RJ-45/10-100-1000T(X) + 4 combo-gig',
+		'processors' => array ('netgear-chassis-21-to-24-1000SFP', 'netgear-chassis-21-to-24-1000Tcombo', 'netgear-chassis-any-1000T'),
+	),
+	'4526.100.2.3' => array
+	(
+		'dict_key' => 559,
+		'text' => 'GSM7212: 12 combo-gig',
+		'processors' => array ('netgear-chassis-any-1000SFPcombo', 'netgear-chassis-any-1000T'),
 	),
 	'4526.100.4.6' => array
 	(
@@ -4844,6 +4844,12 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		}
 		if ($serialNo != '')
 			updateStickerForCell ($objectInfo, 1, str_replace ('"', '', substr ($serialNo, strlen ('STRING: '))));
+		break;
+	case preg_match ('/^4526\.100\.4\./', $sysObjectID): // Netgear (without console)
+		if (preg_match ('/^NETGEAR .+, Software Version ([\d\.]+), /', $sysDescr, $m))
+			updateStickerForCell ($objectInfo, 5, $m[1]);
+		checkPIC ('1-16');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
 	case preg_match ('/^171\.10\.63\.6/', $sysObjectID): // D-Link DES-3028
 	case preg_match ('/^171\.10\.63\.8/', $sysObjectID): // D-Link DES-3052
