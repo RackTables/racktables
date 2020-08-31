@@ -4622,7 +4622,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
-	case preg_match ('/^9\.5\.18/', $sysObjectID):
+	case preg_match ('/^9\.5\.18$/', $sysObjectID):
 		$exact_release = preg_replace ('/^.*, Version ([^ ]+), .*$/', '\\1', $sysDescr);
 		$major_line = preg_replace ('/^([[:digit:]]+\.[[:digit:]]+)[^[:digit:]].*/', '\\1', $exact_release);
 		$ios_codes = array
@@ -4658,7 +4658,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 			addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		}
 		break;
-	case preg_match ('/^9\.5\.42/', $sysObjectID): // Catalyst 2948 running CatOS
+	case preg_match ('/^9\.5\.42$/', $sysObjectID): // Catalyst 2948 running CatOS
 	case preg_match ('/^9\.6\.1\./', $sysObjectID): // Cisco SMB series switches (200, 220, 300, 500)
 	case preg_match ('/^2011\.2\.239?\./', $sysObjectID): // Huawei
 		checkPIC ('1-681');
@@ -4915,7 +4915,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		break;
 	case preg_match ('/^171\.10\.76\.10/', $sysObjectID): // D-Link DGS-1210-24
 	case preg_match ('/^207\.1\.4\./', $sysObjectID): // Allied Telesyn AT-GS950/24
-	case preg_match ('/^4526\.100\.4\.(6|10)/', $sysObjectID): // NETGEAR (without console)
 		// one AC port, no console
 		checkPIC ('1-16');
 		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
