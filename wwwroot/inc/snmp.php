@@ -1229,6 +1229,33 @@ $iftable_processors['netgear-any-100TX'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['netgear-prosafe-25-to-28-SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(25|26|27|28)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-prosafe-49-to-52-SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(49|50|51|52)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['netgear-prosafe-any-1000T'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '1-24',
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['nortel-any-1000T'] = array
 (
 	'pattern' => '@^Ethernet Port on unit 1, port ([[:digit:]]+)$@',
@@ -4208,6 +4235,18 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'GS724TP: 24 RJ-45/10-100-1000T + 2 combo-gig SFP',
 		'ifDescrOID' => 'ifName',
 		'processors' => array ('netgear-23-to-24-1000SPFcombo', 'netgear-any-1000T'),
+	),
+	'4526.100.4.48' => array
+	(
+		'dict_key' => 3749,
+		'text' => '24-Port Gigabit PoE+ + 4 SFP (GS728TPv2)',
+		'processors' => array ('netgear-prosafe-25-to-28-SFP', 'netgear-prosafe-any-1000T'),
+	),
+	'4526.100.4.50' => array
+	(
+		'dict_key' => 3751,
+		'text' => '48-Port Gigabit PoE+ + 4 SFP (GS752TPv2)',
+		'processors' => array ('netgear-prosafe-49-to-52-SFP', 'netgear-prosafe-any-1000T'),
 	),
 	'4526.100.11.1' => array
 	(
