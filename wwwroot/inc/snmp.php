@@ -1944,11 +1944,11 @@ $iftable_processors['tplink-jetstream-any-10000SFP+'] = array
 
 $iftable_processors['tplink-jetstream-any-1000SFP'] = array
 (
-    'pattern' => '@^(gigabitEthernet\s|Gi)(\d+)/(\d+)/(\d+) : fiber@',
-    'replacement' => 'te\\2/\\3/\\4',
-    'dict_key' => '4-1077',
-    'label' => '\\4',
-    'try_next_proc' => FALSE,
+	'pattern' => '@^(gigabitEthernet\s|Gi)(\d+)/(\d+)/(\d+) : fiber@',
+	'replacement' => 'te\\2/\\3/\\4',
+	'dict_key' => '4-1077',
+	'label' => '\\4',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['motorola-rfs-any-1000T'] = array
@@ -2007,29 +2007,29 @@ $iftable_processors['dlink-any-1000T'] = array
 
 $iftable_processors['Dlink-3028-100TX'] = array
 (
-     'pattern' => '@^D-Link DES-.+ R.+ Port (\d+)$@',
-     'replacement' => 'e\\1',
-     'dict_key' => 19,
-     'label' => '\\1',
-     'try_next_proc' => FALSE,
+	'pattern' => '@^D-Link DES-.+ R.+ Port (\d+)$@',
+	'replacement' => 'e\\1',
+	'dict_key' => 19,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['Dlink-3028-25-to-28-1000T'] = array
 (
-     'pattern' => '@^D-Link DES-.+ R.+ Port (25|26|27|28)$@',
-     'replacement' => 'g\\1',
-     'dict_key' => 24,
-     'label' => '\\1',
-     'try_next_proc' => FALSE,
+	'pattern' => '@^D-Link DES-.+ R.+ Port (25|26|27|28)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => 24,
+	'label' => '\\1',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['Dlink-3028-25-to-26-Combo'] = array
 (
-     'pattern' => '@^D-Link DES-.+ R.+ Port (25|26)$@',
-     'replacement' => 'g\\1',
-     'dict_key' => '4-1077',
-     'label' => 'G\\1',
-     'try_next_proc' => TRUE,
+	'pattern' => '@^D-Link DES-.+ R.+ Port (25|26)$@',
+	'replacement' => 'g\\1',
+	'dict_key' => '4-1077',
+	'label' => 'G\\1',
+	'try_next_proc' => TRUE,
 );
 
 $iftable_processors['dlink-rmon-any-100TX'] = array
@@ -2342,29 +2342,29 @@ $iftable_processors['procurve-25-to-28-1000SFPcombo'] = array
 
 $iftable_processors['h3c-any-SFP+'] = array
 (
-        'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
-        'replacement' => 'XGE\\1\\2\\3',
-        'dict_key' => '9-1084',
-        'label' => '\\3',
-        'try_next_proc' => FALSE,
+	'pattern' => '@^Ten-GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'XGE\\1\\2\\3',
+	'dict_key' => '9-1084',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['h3c-49-to-52-SFP'] = array
 (
-        'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)(49|50|51|52)$@',
-        'replacement' => 'GE\\1\\2\\3',
-        'dict_key' => '4-1077',
-        'label' => '\\3',
-        'try_next_proc' => FALSE,
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)(49|50|51|52)$@',
+	'replacement' => 'GE\\1\\2\\3',
+	'dict_key' => '4-1077',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['h3c-any-Gb'] = array
 (
-        'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
-        'replacement' => 'GE\\1\\2\\3',
-        'dict_key' => '24',
-        'label' => '\\3',
-        'try_next_proc' => FALSE,
+	'pattern' => '@^GigabitEthernet([[:digit:]]+/)([[:digit:]]+/)([[:digit:]]+)$@',
+	'replacement' => 'GE\\1\\2\\3',
+	'dict_key' => '24',
+	'label' => '\\3',
+	'try_next_proc' => FALSE,
 );
 
 global $known_switches;
@@ -4276,11 +4276,11 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-10000SFP+'),
 	),
 	'11863.5.86' => array
-    (
-        'dict_key' => 3701,
-        'text' => 'T1600G-18TS: 16 RJ-45/10-100-1000T(X) + 2 SFP/1000',
-        'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-1000SFP'),
-    ),
+	(
+		'dict_key' => 3701,
+		'text' => 'T1600G-18TS: 16 RJ-45/10-100-1000T(X) + 2 SFP/1000',
+		'processors' => array ('tplink-jetstream-any-1000T', 'tplink-jetstream-any-1000SFP'),
+	),
 	'12356.101.1.3002'=> array
 	(
 		'dict_key' => 1609,
