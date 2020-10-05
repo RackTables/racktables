@@ -57,7 +57,7 @@ for RackTables is Apache httpd.
 | Ubuntu 20.04       | `apt-get install apache2-bin libapache2-mod-php7.4 php7.4-gd php7.4-mysql php7.4-mbstring php7.4-bcmath php7.4-json php7.4-snmp`
 | RHEL 7             | `subscription-manager repos --enable=rhel-server-rhscl-7-rpms`
 |                    | `yum install httpd24 rh-php70 rh-php70-php-mysqlnd rh-php70-php-pdo rh-php70-php-gd rh-php70-php-snmp rh-php70-php-mbstring rh-php70-php-bcmath rh-php70-php-ldap rh-php70-php`
-                       
+
 #### 1.3.a. Debian 7 with nginx
 Remember to adjust `server_name` in `server {}` section, otherwise your logout link
 will point to localhost (and thus fail).
