@@ -301,6 +301,31 @@ $image['upgrade']['path'] = 'pix/tango-go-up.png';
 $image['upgrade']['width'] = 16;
 $image['upgrade']['height'] = 16;
 
+// Use the same workflow as for the array above:
+// 1. This file is required early, it assigns the default elements.
+// 2. Then plugin(s) load and can modify the array if necessary.
+// 3. Then interface-config.php, when conditionally required, can read it.
+$tag_palette = array
+(
+	'FFFFFF',
+	'C0C0C0',
+	'808080',
+	'000000',
+	'FF0000',
+	'800000',
+	'FF8000',
+	'FFFF00',
+	'808000',
+	'00FF00',
+	'008000',
+	'00FFFF',
+	'008080',
+	'0000FF',
+	'000080',
+	'FF00FF',
+	'800080',
+);
+
 $page_by_realm = array();
 $page_by_realm['object'] = 'depot';
 $page_by_realm['rack'] = 'rackspace';
