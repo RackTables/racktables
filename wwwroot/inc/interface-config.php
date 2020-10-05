@@ -988,6 +988,8 @@ END
 
 function getColorSelect($id = 'color', $selected = NULL)
 {
+	global $tag_palette;
+
 	if ($selected)
 		$class = ' class=' . getTagClass (array ('id' => $selected, 'color' => $selected));
 	else
@@ -996,29 +998,10 @@ function getColorSelect($id = 'color', $selected = NULL)
 	$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
 	$ret .= '<option value=""></option>';
 
-	$colors = array
-	(
-		'FFFFFF',
-		'C0C0C0',
-		'808080',
-		'000000',
-		'FF0000',
-		'800000',
-		'FF8000',
-		'FFFF00',
-		'808000',
-		'00FF00',
-		'008000',
-		'00FFFF',
-		'008080',
-		'0000FF',
-		'000080',
-		'FF00FF',
-		'800080'
-	);
-
+	$colors = $tag_palette;
 	if ($selected != NULL && !in_array ($selected, $colors))
 		$colors[] = $selected;
+	$colors = array_unique (array_map ('strtoupper', array_filter ($colors, 'isHTMLColor')));
 
 	foreach ($colors as $color)
 	{

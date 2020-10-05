@@ -1,6 +1,7 @@
 0.22.0
 	update: drop support for PHP 5.x
 	update: add two more Netgear switches (Mantis#1983)
+	new feature: allow to customize tag palette (Mantis #1991)
 0.21.4 2019-11-17
 	bugfix: amend SQL to work on MySQL 8 (Mantis#1909)
 	update: use vertical writing mode in the 802.1Q report
