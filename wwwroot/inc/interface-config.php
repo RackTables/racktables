@@ -988,46 +988,46 @@ END
 
 function getColorSelect($id = 'color', $selected = NULL)
 {
+	if ($selected)
+		$class = ' class=' . getTagClass (array ('id' => $selected, 'color' => $selected));
+	else
+		$class = '';
 
-		if ($selected)
-			$class = ' class=' . getTagClass (array ('id' => $selected, 'color' => $selected));
-		else
-			$class = '';
+	$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
+	$ret .= '<option value=""></option>';
 
-		$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
-		$ret .= '<option value=""></option>';
+	$colors = array
+	(
+		'FFFFFF',
+		'C0C0C0',
+		'808080',
+		'000000',
+		'FF0000',
+		'800000',
+		'FF8000',
+		'FFFF00',
+		'808000',
+		'00FF00',
+		'008000',
+		'00FFFF',
+		'008080',
+		'0000FF',
+		'000080',
+		'FF00FF',
+		'800080'
+	);
 
-		$colors = array(
-				'FFFFFF',
-				'C0C0C0',
-				'808080',
-				'000000',
-				'FF0000',
-				'800000',
-				'FF8000',
-				'FFFF00',
-				'808000',
-				'00FF00',
-				'008000',
-				'00FFFF',
-				'008080',
-				'0000FF',
-				'000080',
-				'FF00FF',
-				'800080'
-		);
+	if ($selected != NULL && !in_array ($selected, $colors))
+		$colors[] = $selected;
 
-		if ($selected != NULL && !in_array ($selected, $colors))
-			$colors[] = $selected;
+	foreach ($colors as $color)
+	{
+		$class = getTagClass (array ('id' => $color, 'color' => $color));
+		$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
+	}
 
-		foreach ($colors as $color)
-		{
-			$class = getTagClass (array ('id' => $color, 'color' => $color));
-			$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
-		}
-
-		$ret .= '</select>';
-		return $ret;
+	$ret .= '</select>';
+	return $ret;
 }
 
 function renderTagTreeEditor ()
