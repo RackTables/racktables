@@ -1,4 +1,4 @@
-0.21.5
+0.21.5 2020-10-05
 	update: fix assorted URL and notes
 	update: add SNMP support for HPE 5130 (JG937A) and A5120 (JG237A)
 	update: add an ID column to the table of attributes
