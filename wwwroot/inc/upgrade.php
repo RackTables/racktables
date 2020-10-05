@@ -219,6 +219,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.21.2',
 		'0.21.3',
 		'0.21.4',
+		'0.21.5',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1360,6 +1361,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			break;
 		case '0.21.4':
 			$query[] = "UPDATE Config SET varvalue = '0.21.4' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.21.5':
+			$query[] = "UPDATE Config SET varvalue = '0.21.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();

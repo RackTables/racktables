@@ -1,3 +1,9 @@
+0.21.5
+	update: fix assorted URL and notes
+	update: add SNMP support for HPE 5130 (JG937A) and A5120 (JG237A)
+	update: add an ID column to the table of attributes
+	update: refine some SNMP code
+	update: upgrade CodeMirror to 5.58.1
 0.21.4 2019-11-17
 	bugfix: amend SQL to work on MySQL 8 (Mantis#1909)
 	update: use vertical writing mode in the 802.1Q report
