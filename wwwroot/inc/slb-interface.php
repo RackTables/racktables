@@ -200,7 +200,7 @@ function renderSLBTriplets ($cell)
 	}
 }
 
-// renders a list of slb links. it is called from 3 different pages, wich compute their links lists differently.
+// renders a list of slb links. it is called from 3 different pages, which compute their links lists differently.
 // each triplet in $triplets array contains balancer, pool, VS cells and config values for triplet: RS, VS configs and pair.
 function renderSLBTripletsEdit ($cell)
 {

@@ -432,7 +432,7 @@ class RackCodeParser
 		elseif ($k = $this->accept ('LEX_PREDICATE'))
 		{
 			if ($this->prog_mode && ! isset ($this->defined_preds[$k]))
-				throw new RCParserError ("Undefined predicate [$k] refered");
+				throw new RCParserError ("Undefined predicate [$k] referred");
 			return array(
 				'type' => 'LEX_PREDICATE',
 				'load' => $k,

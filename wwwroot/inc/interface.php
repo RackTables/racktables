@@ -1962,7 +1962,7 @@ function showMessageOrError ()
 		37 => array ('code' => 'success', 'format' => 'added %u record(s) successfully'),
 		38 => array ('code' => 'success', 'format' => 'removed %u record(s) successfully'),
 		43 => array ('code' => 'success', 'format' => 'Saved successfully.'),
-		44 => array ('code' => 'success', 'format' => '%s failure(s) and %s successfull change(s).'),
+		44 => array ('code' => 'success', 'format' => '%s failure(s) and %s successful change(s).'),
 		48 => array ('code' => 'success', 'format' => 'added a record successfully'),
 		49 => array ('code' => 'success', 'format' => 'deleted a record successfully'),
 		51 => array ('code' => 'success', 'format' => 'updated a record successfully'),
@@ -2223,7 +2223,7 @@ function renderRackSpaceForObject ($object_id)
 					break;
 				}
 		}
-		// add current object's racks even if they dont match filter
+		// add current object's racks even if they don't match filter
 		foreach ($workingRacksData as $rack_id => $rack)
 			if (! isset ($matching_racks[$rack_id]))
 				$matching_racks[$rack_id] = $rack;

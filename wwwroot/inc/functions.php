@@ -619,7 +619,7 @@ function setDisplayedName (&$cell)
 function rectHeight ($rackData, $startRow, $template_idx)
 {
 	$height = 0;
-	// The first met object_id is used to match all the folowing IDs.
+	// The first met object_id is used to match all the following IDs.
 	$object_id = 0;
 	global $template;
 	do

@@ -15,7 +15,7 @@ and it is responsibility of each ophandler function to verify that all
 necessary parameters are provided by the user and have proper values. There
 is a number of helper functions to make such verification simpler.
 
-Errors occuring in ophandlers are typically indicated with exceptions of
+Errors occurring in ophandlers are typically indicated with exceptions of
 assorted classes. Namely, an "InvalidRequestArgException" class means that
 at least one of the parameters provided by the user is not acceptable. This
 is a "soft" error, which gets displayed in the standard message area of
@@ -31,7 +31,7 @@ As long as an ophandler makes through its request (extracting arguments,
 performing validation and actually updating records in the database), it
 may queue up messages (often referred to as "green" and "red" bars) by
 means of showError() and showSuccess() functions. The messages are not
-displayed immediately, because successfull ophandlers are expected to
+displayed immediately, because successful ophandlers are expected to
 return only the new URL, where the user will be immediately redirected to
 (it is also possible to return an empty string to mean that the current
 logical location remains the same). The page at the "next" location is
@@ -3379,7 +3379,7 @@ function deleteVlan()
 	$n_cleared = pinpointDeleteVlan ($vdom_id, $vlan_id);
 	if ($n_cleared > 0)
 		showSuccess ("VLAN $vlan_id removed from $n_cleared port(s)");
-	// Since there are no strict foreign keys refering VLANDescription, it is safe just to delete the row.
+	// Since there are no strict foreign keys referring VLANDescription, it is safe just to delete the row.
 	usePreparedDeleteBlade ('VLANDescription', array ('domain_id' => $vdom_id, 'vlan_id' => $vlan_id));
 	showSuccess ("VLAN $vlan_id has been deleted");
 	return buildRedirectURL ('vlandomain', 'default', array ('vdom_id' => $vdom_id));

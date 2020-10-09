@@ -249,7 +249,7 @@ function groupTriplets ($tr_list)
 				continue;
 			elseif (count ($group) == 1)
 			{
-				// dont create groups of 1 element
+				// don't create groups of 1 element
 				if (isset ($index[$first_tr['key']]))
 				{
 					unset ($index[$first_tr['key']]);

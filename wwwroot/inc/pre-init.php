@@ -90,7 +90,7 @@ function connectDB()
 	}
 }
 
-// tries to guess the existance of the file before the php's include using the same searching method.
+// tries to guess the existence of the file before the php's include using the same searching method.
 // in addition to calling file_exists, searches the current file's directory if the path is not looks
 // like neither absolute nor relative.
 function fileSearchExists ($filename)

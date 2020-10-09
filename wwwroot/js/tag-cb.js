@@ -76,7 +76,7 @@ this.compactTreeMode = function() {
 	link.onclick = function () {self.fullTreeMode(); return false;};
 	$(link).html('show full tree').show();
 
-	$('.tagtree').addClass('compact'); // disable hierachical padding
+	$('.tagtree').addClass('compact'); // disable hierarchical padding
 
 	var separator = false; // next visible row is separator
 	var bPrevSeparator = true; // prev visible row was separator
@@ -109,7 +109,7 @@ this.fullTreeMode = function() {
 	link.onclick = function () {self.compactTreeMode(); return false;};
 	$(link).html('show compact tree').show();
 
-	$('.tagtree').removeClass('compact'); // restore hierachical padding
+	$('.tagtree').removeClass('compact'); // restore hierarchical padding
 
 	var bPrevSeparator = true; // prev visible row was separator
 	$('input.tag-cb').each(function (i, item) { // // do not draw two separators together or very first separator

@@ -1988,7 +1988,7 @@ function getObjectIPAllocationList ($object_id)
 }
 
 // Returns all IPv4 addresses allocated to object, but does not attach detailed info about address
-// Used instead of getObjectIPv4Allocations if you need perfomance but 'addrinfo' value
+// Used instead of getObjectIPv4Allocations if you need performance but 'addrinfo' value
 function getObjectIPv4AllocationList ($object_id)
 {
 	$ret = array();
@@ -2004,7 +2004,7 @@ function getObjectIPv4AllocationList ($object_id)
 }
 
 // Returns all IPv6 addresses allocated to object, but does not attach detailed info about address
-// Used instead of getObjectIPv6Allocations if you need perfomance but 'addrinfo' value
+// Used instead of getObjectIPv6Allocations if you need performance but 'addrinfo' value
 function getObjectIPv6AllocationList ($object_id)
 {
 	$ret = array();
@@ -3343,7 +3343,7 @@ WHERE
 }
 
 // returns user_id
-// throws an exception if error occured
+// throws an exception if error occurred
 function commitCreateUserAccount ($username, $realname, $password_hash)
 {
 	if (! preg_match ('/^[0-9a-f]{40}$/', $password_hash))
@@ -4820,7 +4820,7 @@ function getFileStats ()
 }
 
 // returns file id
-// throws an exception if error occured
+// throws an exception if error occurred
 function commitAddFile ($name, $type, $contents, $comment)
 {
 	global $dbxlink;
@@ -6061,7 +6061,7 @@ function setDBMutex ($name, $timeout = 5)
 	$result = usePreparedSelectBlade ('SELECT GET_LOCK(?, ?)', array ($fullname, $timeout));
 	$row = $result->fetchColumn();
 	if ($row === NULL)
-		throw new RTDatabaseError ("error occured when executing GET_LOCK on $fullname");
+		throw new RTDatabaseError ("error occurred when executing GET_LOCK on $fullname");
 	if ($row !== '1')
 		throw new RTDatabaseError ("lock wait timeout for $fullname");
 	return TRUE;

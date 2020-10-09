@@ -65,7 +65,7 @@ will point to localhost (and thus fail).
 Notice that fpm.sock is advised, keep the rest on default configuration, or
 tweak to your needs. You may need to set `fastcgi_read_timeout 600;` if you use
 some external addons like fping, which may take some time in certain situations.
-Please note that setting aggresive caching for php scripts may result in stale
+Please note that setting aggressive caching for php scripts may result in stale
 content - so maximum of 60 seconds is advised, but by default it is not enabled.
 
 #### 1.3.b. [redacted]

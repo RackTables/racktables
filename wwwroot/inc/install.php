@@ -302,7 +302,7 @@ ENDOFTEXT
 
 function get_process_owner()
 {
-	// this function requires the posix extention and returns the fallback value otherwise
+	// this function requires the posix extension and returns the fallback value otherwise
 	if (is_callable ('posix_getpwuid') && is_callable ('posix_geteuid'))
 	{
 		$user = posix_getpwuid(posix_geteuid());

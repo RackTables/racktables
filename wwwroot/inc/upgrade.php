@@ -424,7 +424,7 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			$query[] = "INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdefined, description) VALUES ('SEARCH_DOMAINS','','string','yes','no','yes','DNS domain list (comma-separated) to search in FQDN attributes')";
 
-			// update some config variables that changed their defaults in this verison
+			// update some config variables that changed their defaults in this version
 			replaceConfigVarValue ('SHOW_LAST_TAB', 'yes');
 			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE','no');
 			replaceConfigVarValue ('IPV4LB_LISTSRC', 'false', '{$typeid_4}');
@@ -1455,7 +1455,7 @@ function showUpgradeError ($info = '', $location = 'N/A')
 		$location = basename ($location);
 	elseif ($location != 'N/A')
 		$location = $location . '()';
-	echo "<div class=msg_error>An error has occured in [${location}]. ";
+	echo "<div class=msg_error>An error has occurred in [${location}]. ";
 	if ($info == '')
 		echo 'No additional information is available.';
 	else
