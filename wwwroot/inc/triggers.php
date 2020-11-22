@@ -71,7 +71,6 @@ function trigger_liveports ()
 
 function trigger_snmpportfinder ()
 {
-
 	$object = spotEntity ('object', getBypassValue());
 	switch ($object['objtype_id'])
 	{
