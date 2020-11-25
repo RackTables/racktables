@@ -20,20 +20,20 @@ class DictionaryAttributeTest extends RTTestCase
 		}
 
 		usePreparedInsertBlade ('Chapter', array ('name' => $this->myString ('chapter')));
-		$this->new_chapter_id = lastInsertId();
+		$this->new_chapter_id = lastInsertID();
 
 		$this->new_word_ids = array();
 		foreach (array ('A', 'B', 'C', 'D', 'E') as $word)
 		{
 			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => $this->new_chapter_id, 'dict_value' => $this->myString ($word)));
-			$this->new_word_ids[$word] = lastInsertId();
+			$this->new_word_ids[$word] = lastInsertID();
 		}
 
 		$this->new_object_types = array();
 		foreach (array ('none', 'obj', 'map', 'obj_map', 'obj_map_val') as $code)
 		{
 			usePreparedInsertBlade ('Dictionary', array ('chapter_id' => CHAP_OBJTYPE, 'dict_value' => $this->myString ($code)));
-			$this->new_object_types[$code] = lastInsertId();
+			$this->new_object_types[$code] = lastInsertID();
 		}
 
 		$this->new_object_ids = array();
@@ -45,7 +45,7 @@ class DictionaryAttributeTest extends RTTestCase
 		foreach (array ('F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O') as $each)
 		{
 			usePreparedInsertBlade ('Attribute', array ('type' => 'dict', 'name' => $this->myString ($each)));
-			$this->new_attr_ids[$each] = lastInsertId();
+			$this->new_attr_ids[$each] = lastInsertID();
 		}
 
 		$AM_values = array
