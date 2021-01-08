@@ -506,8 +506,9 @@ function transformRequestData()
 			$_REQUEST[$key] = $value;
 		else
 		{
-			$value = dos2unix ($value);
-			$_REQUEST[$key] = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
+                        $value = dos2unix ($value);
+                        $value = htmlspecialchars ($value, ENT_QUOTES, 'UTF-8');
+                        $_REQUEST[$key] = $value;
 		}
 		$sic[$key] = $value;
 		$seen_keys[$key] = 1;
