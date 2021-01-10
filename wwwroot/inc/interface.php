@@ -755,9 +755,16 @@ function renderEditAttributeTRs ($update_op, $values, $objtype_id, $skip_ids = a
 		{
 			case 'uint':
 			case 'float':
-			case 'string':
 				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
 				echo "<input type=text ${ro_or_rw} value='${record['value']}'>";
+				break;
+			case 'string':
+				printf
+				(
+					'<input type=text %s value="%s">',
+					$can_update ? "name=${i}_value" : 'disabled',
+					stringForTextInputValue ($record['value'], 255)
+				);
 				break;
 			case 'date':
 				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
