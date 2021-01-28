@@ -3837,7 +3837,13 @@ function getAttrValuesSorted ($object_id)
 // the mismatch here and throw InvalidArgException instead.
 function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 {
+
 	global $object_attribute_cache;
+
+	$override = callHook ('commitUpdateAttrBefore_hook', $object_id, $attr_id, $value);
+	if (isset($override))
+		$value = $override;
+
 	if (isset ($object_attribute_cache[$object_id]))
 		unset ($object_attribute_cache[$object_id]);
 	$result = usePreparedSelectBlade
@@ -3887,6 +3893,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 				'attr_id' => $attr_id,
 			)
 		);
+	callHook('commitUpdateAttrAfter_hook', $object_id, $attr_id, $value);
 }
 
 function convertPDOException ($e)
