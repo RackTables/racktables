@@ -37,8 +37,6 @@ before_script:
   - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
 
 script:
-  - ./tests/express_pre.sh
-  - if [ "$SKIP_PHPUNIT" = yes ]; then echo '(skipped PHPUnit tests on request)'; else ./tests/express_phpunit.sh; fi
-  - ./tests/express_post.sh
+  - ./tests/express.sh
   - mysql -u racktables -ptravistest racktables_unittest < scripts/init-sample-racks.sql
   - DESTDIR=/tmp make install
