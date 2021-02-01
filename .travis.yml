@@ -34,9 +34,9 @@ install:
   - ./tests/travis_download_phpunit.sh
 
 before_script:
-  - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
+  - ./tests/travis_setup_mysql.sh racktables_unittest racktables $(dd if=/dev/random bs=16 count=1 status=none | od -A n -t x | tr -d ' ')
 
 script:
   - ./tests/express.sh
-  - mysql -u racktables -ptravistest racktables_unittest < scripts/init-sample-racks.sql
+  - mysql racktables_unittest < scripts/init-sample-racks.sql
   - DESTDIR=/tmp make install

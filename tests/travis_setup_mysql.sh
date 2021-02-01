@@ -33,6 +33,15 @@ mysql -u root mysql -e "CREATE DATABASE ${DBNAME} CHARACTER SET utf8 COLLATE utf
 mysql -u root -e "CREATE USER ${USERNAME}@localhost IDENTIFIED BY '${PASSWORD}';" || exit 2
 mysql -u root -e "GRANT ALL PRIVILEGES ON ${DBNAME}.* TO ${USERNAME}@localhost;" || exit 2
 
+# "database" has no effect in this environment
+if ! [ -e ~/.my.cnf ]; then
+	cat > ~/.my.cnf <<EOF
+[client]
+user=$USERNAME
+password=$PASSWORD
+EOF
+fi
+
 cat > "$BASEDIR/wwwroot/inc/secret.php" <<EOF
 <?php
 \$pdo_dsn = 'mysql:host=localhost;port=3306;dbname=${DBNAME}';
