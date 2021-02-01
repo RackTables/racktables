@@ -3840,7 +3840,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 
 	global $object_attribute_cache;
 
-	$override = callHook ('commitUpdateAttrBefore_hook', $object_id, $attr_id, $value);
+	$override = callHook ('commitUpdateAttrValueBefore_hook', $object_id, $attr_id, $value);
 	if (isset($override))
 		$value = $override;
 
@@ -3893,7 +3893,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 				'attr_id' => $attr_id,
 			)
 		);
-	callHook('commitUpdateAttrAfter_hook', $object_id, $attr_id, $value);
+	callHook ('commitUpdateAttrValueAfter_hook', $object_id, $attr_id, $value);
 }
 
 function convertPDOException ($e)
