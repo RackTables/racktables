@@ -29,9 +29,11 @@ matrix:
 services:
  - mysql
 
+install:
+ - ./tests/travis_download_phpunit.sh
+
 before_script:
  - ./tests/travis_setup_mysql.sh racktables_unittest racktables travistest
- - if [ "$PHPUNIT_BIN" != "" ]; then mkdir -p ~/bin && curl -sSfL -o "$PHPUNIT_BIN" https://phar.phpunit.de/${PHPUNIT_BIN##~/bin/} && chmod a+x "$PHPUNIT_BIN"; fi
 
 script:
  - ./tests/express_pre.sh
