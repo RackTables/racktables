@@ -1,0 +1,42 @@
+env:
+  CIRRUS_CLONE_DEPTH: 3
+  DEBIAN_FRONTEND: noninteractive
+
+task:
+  matrix:
+    # PHP 7.0 means at most PHPUnit 6, and PHPUnit 6 fails to run RackTables
+    # tests on PHP 7.0, specifically, the bits that were necessary to make the
+    # tests compatible with PHPUnit 8.
+    - container:
+        image: ubuntu:16.04 # PHP 7.0
+        cpu: 1
+        memory: 1G
+    - container:
+        image: ubuntu:18.04 # PHP 7.2
+        cpu: 1
+        memory: 1G
+      env:
+        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.14.phar
+    - container:
+        image: ubuntu:20.04 # PHP 7.4
+        cpu: 1
+        memory: 1G
+      env:
+        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.14.phar
+  script:
+    - apt-get -qqy update
+    - apt-get -qqy install mariadb-server make curl php-cli php-xml php-gd php-mysql php-mbstring php-bcmath php-json >/dev/null
+    # MariaDB has no systemd props in Ubuntu 16.04, rc.d props work even in
+    # Ubuntu 20.04.
+    - test -S /var/run/mysqld/mysqld.sock && service mysql stop
+    - printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf
+    - service mysql start
+    - mysql --version
+    - php --version
+    - ./tests/ci_download_phpunit.sh
+    - ./tests/ci_setup_mysql.sh racktables_unittest racktables $(dd if=/dev/random bs=16 count=1 status=none | od -A n -t x | tr -d ' ')
+    - ./tests/express_pre.sh
+    - test -n "$PHPUNIT_BIN" && ./tests/express_phpunit.sh
+    - ./tests/express_post.sh
+    - mysql racktables_unittest < scripts/init-sample-racks.sql
+    - DESTDIR=/tmp/destdir make install
