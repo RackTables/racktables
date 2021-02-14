@@ -3813,6 +3813,12 @@ $dictionary = array
 	3750 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS728TPPv2'),
 	3751 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS752TPv2'),
 	3752 => array ('chapter_id' => 12, 'dict_value' => 'NETGEAR%GPASS%GS752TPP'),
+	3753 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 7.2'),
+	3754 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 8.0'),
+	3755 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 8.1'),
+	3756 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 8.2'),
+	3757 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 9.0'),
+	3758 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 9.1'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
