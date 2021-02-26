@@ -208,6 +208,28 @@ existing `addJS()`/`addCSS()` function call, be sure to remove this parameter.
 Failure to do so will mean you are effectively be saying that the group name is
 '' (FALSE) or '1' (TRUE).
 
+### Docker setup 
+Run:
+docker-compose up -d
+docker ps - to get container ids
+docker inspect {DB_CONTAINER} to get i.p. for setup 
+
+Browse:
+http://localhost
+
+Setup steps 1 - 3
+
+Setup step 4:
+docker exec -it {CONTAINER_NAME} /bin/bash
+run: chown www-data:nogroup /var/www/racktables/inc/secret.php; chmod 440 /var/www/racktables/inc/secret.php
+
+If you get the "You do not have the SUPER privilege and binary logging is enabled" error the work around is:
+docker exec -it {DB_CONTAINER} /bin/bash
+mysql -u root -p
+set global log_bin_trust_function_creators=1;
+
+Finish setup steps
+
 ### Upgrading to 0.21.0
 
 From now on the minimum (oldest) release of PHP that can run RackTables is

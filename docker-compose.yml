@@ -1,0 +1,22 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    links:
+      - mysql
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'racktables_db'
+      MYSQL_USER: 'racktables_user'
+      MYSQL_PASSWORD: 'MY_SECRET_PASSWORD'
+      MYSQL_ROOT_PASSWORD: 'CHANGEME'
+    ports:
+      - '3306:3306'
+    volumes:
+      - my-db:/var/lib/sql
+volumes:
+  my-db:
