@@ -1,0 +1,21 @@
+version: '3'
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password --log_bin_trust_function_creators=1
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: racktables_db
+      MYSQL_USER: racktables_user
+      MYSQL_PASSWORD: example
+    ports:
+      - "3306:3306"
+    

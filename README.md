@@ -154,6 +154,24 @@ and initialize the application.
 | Ubuntu 18.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 | Ubuntu 20.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
+## Docker Setup
+Run:
+docker-compose up -d
+docker ps - get container ids
+docker logs - look for "GENERATED ROOT PASSWORD" of you need the randomly generated root password
+docker inspect {DB_CONTAINER} - to get db container ip
+
+Browse to http://localhost and run the setup.
+When you get to the screen that asks you to change the permissions of secret.php:
+
+Run:
+docker exec -it {WEB_CONTAINER} /bin/bash
+
+Inside the container RUN:
+chmod 400 /app/wwwroot/inc/secret.php
+
+Then hit retry and continue with the install.
+
 # How to upgrade RackTables
 
 0. **Backup your database** and check the release notes below before actually

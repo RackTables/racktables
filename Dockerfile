@@ -14,7 +14,7 @@ RUN ln -s /app/wwwroot /var/www/racktables
 
 RUN a2ensite racktables && a2dissite 000-default
 
-RUN touch /app/wwwroot/inc/secret.php && chown www-data:nogroup -R /app/wwwroot && chmod -R 0700 /app/wwwroot && chmod a=rw /app/wwwroot/inc/secret.php
+RUN touch /app/wwwroot/inc/secret.php && chown www-data:nogroup -R /app/wwwroot && chmod -R 0700 /app/wwwroot && chmod 600 /app/wwwroot/inc/secret.php
 
 EXPOSE 80
 
