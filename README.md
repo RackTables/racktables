@@ -154,43 +154,28 @@ and initialize the application.
 | Ubuntu 18.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 | Ubuntu 20.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
-<<<<<<< HEAD
-## Docker Setup
-Run:
-docker-compose up -d
-docker ps - get container ids
-docker logs - look for "GENERATED ROOT PASSWORD" for the randomly generated root password
-
-Browse to http://localhost and run the setup.
-Enter db for the database host.
-
-When you get to the screen that asks you to change the permissions of secret.php:
-Run:
-docker exec -it {WEB_CONTAINER} /bin/bash
-Then inside the container RUN:
-chmod 400 /app/wwwroot/inc/secret.php
-=======
 # Docker Setup
 
-## Edit:  
-
-docker-compose.yml - set your MYSQL_PASSWORD  
-
-## Run:  
+Run:  
 docker-compose up -d  
 docker ps - get container ids  
-docker logs - look for "GENERATED ROOT PASSWORD" if you need the randomly generated root password  
-docker inspect {DB_CONTAINER} - to get db container ip  
+docker logs - look for "GENERATED ROOT PASSWORD" for the randomly generated root password  
 
-## Browse to http://localhost and run the setup  
+Browse to http://localhost and run the setup  
+
+Enter db for the database host  
 
 When you get to the screen that asks you to change the permissions of secret.php  
+
 Run:  
+
 docker exec -it {WEB_CONTAINER} /bin/bash  
+
 Inside the container RUN:  
+
 chmod 400 /var/www/racktables/inc/secret.php  
+
 Then hit retry and continue with the install.  
->>>>>>> e0961bbf26e9ff28b77b02f20641045167f16614
 
 
 # How to upgrade RackTables
