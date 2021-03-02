@@ -15,7 +15,7 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: racktables_db
       MYSQL_USER: racktables_user
-      MYSQL_PASSWORD: example
+      MYSQL_PASSWORD: change-me
     ports:
       - "3306:3306"
     
