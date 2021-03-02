@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    volumes:
+      - racktables_web_data:/var/www/racktables
 
   db:
     image: mysql
@@ -18,4 +20,10 @@ services:
       MYSQL_PASSWORD: example
     ports:
       - "3306:3306"
+    volumes:
+      - racktables_db_data:/var/lib/mysql
+
+volumes:
+  racktables_db_data:
+  racktables_web_data:
     

@@ -158,16 +158,15 @@ and initialize the application.
 Run:
 docker-compose up -d
 docker ps - get container ids
-docker logs - look for "GENERATED ROOT PASSWORD" of you need the randomly generated root password
-docker inspect {DB_CONTAINER} - to get db container ip
+docker logs - look for "GENERATED ROOT PASSWORD" for the randomly generated root password
 
 Browse to http://localhost and run the setup.
-When you get to the screen that asks you to change the permissions of secret.php:
+Enter db for the database host.
 
+When you get to the screen that asks you to change the permissions of secret.php:
 Run:
 docker exec -it {WEB_CONTAINER} /bin/bash
-
-Inside the container RUN:
+Then inside the container RUN:
 chmod 400 /app/wwwroot/inc/secret.php
 
 Then hit retry and continue with the install.
