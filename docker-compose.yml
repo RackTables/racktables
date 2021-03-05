@@ -8,6 +8,7 @@ services:
       - "80:80"
     volumes:
       - racktables_web_data:/var/www/racktables
+      - racktables_web_php_config:/etc/php
 
   db:
     image: mysql
@@ -26,4 +27,4 @@ services:
 volumes:
   racktables_db_data:
   racktables_web_data:
-    
+  racktables_web_php_config:

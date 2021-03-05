@@ -3819,6 +3819,13 @@ $dictionary = array
 	3756 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 8.2'),
 	3757 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 9.0'),
 	3758 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 9.1'),
+	3759 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 6.7'),
+	3759 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 7.0'),
+	3760 => array ('chapter_id' => 11, 'dict_value' => 'Nutanix%GSKIP%NX-8035-G7'),
+	3761 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2019'),
+	3762 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2022'),
+	3762 => array ('chapter_id' => 13, 'dict_value' => 'Nutanix%GSKIP%AOS 5.18'),
+
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
