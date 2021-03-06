@@ -2394,6 +2394,42 @@ $iftable_processors['h3c-any-Gb'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['mikrotik-ether'] = array
+(
+        'pattern' => '@^ether(\d+)$@',
+        'replacement' => 'eth\1',
+        'dict_key' => '1-24',
+        'label' => 'eth\1',
+        'try_next_proc' => TRUE,
+);
+
+$iftable_processors['mikrotik-combo'] = array
+(
+        'pattern' => '@^combo(\d+)$@',
+        'replacement' => 'combo\1',
+        'dict_key' => '4-1077',
+        'label' => 'combo\1',
+        'try_next_proc' => TRUE,
+);
+
+$iftable_processors['mikrotik-sfpplus'] = array
+(
+        'pattern' => '@^sfpplus(\d+)$@',
+        'replacement' => 'sfpplus\1',
+        'dict_key' => '9-1084',
+        'label' => 'sfpplus\1',
+        'try_next_proc' => TRUE,
+);
+
+$iftable_processors['mikrotik-qsfpplus'] = array
+(
+        'pattern' => '@^qsfpplus(\d+)-(\d+)$@',
+        'replacement' => 'qsfpplus\1-\2',
+        'dict_key' => '10-1588',
+        'label' => 'qsfpplus\1-\2',
+        'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -4530,6 +4566,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'HP%GPASS%HP A5120-48G-PoE+ EI (JG237A)',
 		'processors' => array ('h3c-49-to-52-SFP','h3c-any-Gb','h3c-any-SFP+'),
 	),
+	// MikroTik block
+	'RouterOS CCR1009-7G-1C-1S+'	=>	array
+	(
+		'dict_key' => 2704,
+		'text' => 'MikroTik%GPASS%CCR1009-7G-1C-1S+',
+		'processors' => array ('mikrotik-ether', 'mikrotik-combo', 'mikrotik-sfpplus'),
+	),
+	'RouterOS CRS354-48G-4S+2Q+'	=>	array
+	(
+		'dict_key' => 3759,
+		'text' => 'MikroTik%GPASS%CRS354-48G-4S+2Q+',
+		'processors' => array ('mikrotik-ether', 'mikrotik-sfpplus', 'mikrotik-qsfpplus'),
+	),
 );
 
 global $swtype_pcre;
@@ -4638,11 +4687,21 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		return;
 	}
 	$sysObjectID = preg_replace ('/^.*( \.1\.3\.6\.1\.|enterprises\.|joint-iso-ccitt\.)([\.[:digit:]]+)$/', '\\2', $sysObjectID);
-	if (!isset ($known_switches[$sysObjectID]))
+
+	if (!isset ($known_switches[$sysObjectID]) && $sysObjectID !== '14988.1')
 	{
 		showError ("Unknown OID '{$sysObjectID}'");
 		return;
+	} elseif ($sysObjectID == '14988.1') {
+		$sysObjectID = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
+		if (!isset ($known_switches[$sysObjectID]))
+		{
+			showError ("Unknown Model '{$sysObjectID}'");
+			return;
+		}
 	}
+
+
 	$sysName = substr ($device->snmpget ('sysName.0'), strlen ('STRING: '));
 	$sysDescr = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 	$sysDescr = str_replace (array ("\n", "\r"), " ", $sysDescr);  // Make it one line
@@ -4658,6 +4717,30 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	updateStickerForCell ($objectInfo, 3, $sysName);
 	detectSoftwareType ($objectInfo, $sysDescr);
 	$desiredPorts = array();
+	//MikroTik block
+	switch ($sysObjectID)
+	{
+		case "RouterOS CCR1009-7G-1C-1S+":
+			//AC x2
+			checkPIC ('1-16');
+			addDesiredPort ($desiredPorts, 'AC-in-1', '1-16', 'AC1', '');
+			addDesiredPort ($desiredPorts, 'AC-in-2', '1-16', 'AC2', '');
+			//RS-232
+			checkPIC ('1-681');
+			addDesiredPort ($desiredPorts, 'serial0', '1-681', 'serial0', '');
+		break;
+
+		case "RouterOS CRS354-48G-4S+2Q+":
+			//AC x2
+			checkPIC ('1-16');
+			addDesiredPort ($desiredPorts, 'AC-in-1', '1-16', 'AC1', '');
+			addDesiredPort ($desiredPorts, 'AC-in-2', '1-16', 'AC2', '');
+			//RS-232
+			checkPIC ('1-29');
+			addDesiredPort ($desiredPorts, 'serial0', '1-29', 'serial0', '');
+		break;
+	}
+
 	switch (1)
 	{
 	case preg_match ('/^9\.1\./', $sysObjectID): // Catalyst w/one AC port
