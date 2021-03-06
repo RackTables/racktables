@@ -4692,7 +4692,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	{
 		showError ("Unknown OID '{$sysObjectID}'");
 		return;
-	} else {
+	} elseif ($sysObjectID == '14988.1') {
 		$sysObjectID = substr ($device->snmpget ('sysDescr.0'), strlen ('STRING: '));
 		if (!isset ($known_switches[$sysObjectID]))
 		{
