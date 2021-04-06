@@ -83,7 +83,6 @@ $tabhandler['depot']['default'] = 'renderDepot';
 $tabhandler['depot']['addmore'] = 'renderAddMultipleObjectsForm';
 $ophandler['depot']['addmore']['addObjects'] = 'addMultipleObjects';
 $ophandler['depot']['addmore']['addLotOfObjects'] = 'addLotOfObjects';
-$ophandler['depot']['addmore']['deleteObject'] = 'deleteObject';
 
 $page['location']['bypass'] = 'location_id';
 $page['location']['bypass_type'] = 'natural';
@@ -248,6 +247,7 @@ $ophandler['object']['ip']['add'] = 'addIPAllocation';
 $ophandler['object']['ip']['del'] = 'delIPAllocation';
 $ophandler['object']['edit']['clearSticker'] = 'clearSticker';
 $ophandler['object']['edit']['update'] = 'updateObject';
+$ophandler['object']['edit']['deleteObject'] = 'deleteObject';
 $ophandler['object']['edit']['resetObject'] = 'resetObject';
 $ophandler['object']['log']['add'] = 'addObjectlog';
 $ophandler['object']['log']['del'] = 'tableHandler';

@@ -1475,6 +1475,7 @@ function deleteObject ()
 	foreach ($racklist as $rack_id)
 		usePreparedDeleteBlade ('RackThumbnail', array ('rack_id' => $rack_id));
 	showFuncMessage (__FUNCTION__, 'OK', array ($oinfo['dname']));
+	return buildRedirectURL ('depot', 'addmore');
 }
 
 function resetObject ()
