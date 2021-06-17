@@ -3836,6 +3836,13 @@ $dictionary = array
 	3773 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 20.10'),
 	3774 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 21.04'),
 	3775 => array ('chapter_id' => 13, 'dict_value' => 'Ubuntu%GSKIP%Ubuntu 21.10'),
+	3776 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 6.7'),
+	3777 => array ('chapter_id' => 13, 'dict_value' => 'VMWare Hypervisor%GSKIP%VMware ESXi 7.0'),
+	3778 => array ('chapter_id' => 13, 'dict_value' => '[[CentOS%GSKIP%CentOS V8 | http://www.centos.org/]]'),
+	3779 => array ('chapter_id' => 13, 'dict_value' => 'Red Hat Enterprise%GSKIP%RHEL V8'),
+	3780 => array ('chapter_id' => 13, 'dict_value' => '[[AlmaLinux%GSKIP%AlmaLinux V8 | https://almalinux.org/]]'),
+	3781 => array ('chapter_id' => 13, 'dict_value' => '[[Oracle Linux%GSKIP%Oracle Linux V7 | https://www.oracle.com/linux/]]'),
+	3782 => array ('chapter_id' => 13, 'dict_value' => '[[Oracle Linux%GSKIP%Oracle Linux V8 | https://www.oracle.com/linux/]]'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
