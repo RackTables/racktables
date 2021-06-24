@@ -3843,6 +3843,14 @@ $dictionary = array
 	3780 => array ('chapter_id' => 13, 'dict_value' => '[[AlmaLinux%GSKIP%AlmaLinux V8 | https://almalinux.org/]]'),
 	3781 => array ('chapter_id' => 13, 'dict_value' => '[[Oracle Linux%GSKIP%Oracle Linux V7 | https://www.oracle.com/linux/]]'),
 	3782 => array ('chapter_id' => 13, 'dict_value' => '[[Oracle Linux%GSKIP%Oracle Linux V8 | https://www.oracle.com/linux/]]'),
+	3783 => array ('chapter_id' => 13, 'dict_value' => 'XCP-ng 8.0'),
+	3784 => array ('chapter_id' => 13, 'dict_value' => 'XCP-ng 8.1'),
+	3785 => array ('chapter_id' => 13, 'dict_value' => 'XCP-ng 8.2'),
+	3786 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows Server 2019'),
+	3787 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows 7'),
+	3788 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows 8'),
+	3789 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows 8.1'),
+	3790 => array ('chapter_id' => 13, 'dict_value' => 'MicroSoft%GSKIP%Windows 10'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
