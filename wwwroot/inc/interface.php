@@ -862,8 +862,18 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 			if (isset ($attrData['28'])) // slot number
 			{
 				$slot = $attrData['28']['value'];
-				if (preg_match ('/\d+/', $slot, $matches))
-					$slot = $matches[0];
+				$numRows = 1;
+				$numCols = 1;
+				if ( strpos($slot,',') !== FALSE ||
+					strpos($slot,'-') !== FALSE )
+				{
+					$pieces = explode(",", $slot);
+					$numRows = count($pieces);
+					$pieces = explode("-", $pieces[0]);
+					$slot = $pieces[0];
+					if (count($pieces) > 1)
+						$numCols = $pieces[1] - $pieces[0] + 1;
+				}
 				$slotRows[$slot] = $numRows;
 				$slotCols[$slot] = $numCols;
 				$slotInfo[$slot] = $childData['dname'];
