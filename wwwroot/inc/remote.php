@@ -201,7 +201,7 @@ $breed_by_swcode = array
 
 $shorten_by_breed = array (
 	'ios12' => 'ios12ShortenIfName_real',
-	'ios15' => 'ios15ShortenIfName_real',
+	'ios15' => 'ios15ShortenIfName',
 	'nxos4' => 'nxos4ShortenIfName',
 	'vrp53' => 'vrp5xShortenIfName',
 	'vrp55' => 'vrp5xShortenIfName',
@@ -791,6 +791,13 @@ function ios12ShortenIfName_real ($ifname)
 	$ifname = strtolower ($ifname);
 	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
+}
+
+function ios15ShortenIfName ($ifname)
+{
+	return preg_match ('/^port-channel/i', $ifname) ?
+		strtolower ($ifname) :
+		ios12ShortenIfName_real ($ifname);
 }
 
 function nxos4ShortenIfName ($ifname)
