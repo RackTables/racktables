@@ -298,8 +298,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
 			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
-			"LEFT JOIN ${table} ON EL.child_entity_id = ${table}.id " .
-			"WHERE EL.child_entity_type = ? AND ${table}.id IS NULL",
+			"LEFT JOIN `${table}` ON EL.child_entity_id = `${table}`.id " .
+			"WHERE EL.child_entity_type = ? AND `${table}`.id IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -342,8 +342,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
 			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
-			"LEFT JOIN ${table} ON EL.parent_entity_id = ${table}.id " .
-			"WHERE EL.parent_entity_type = ? AND ${table}.id IS NULL",
+			"LEFT JOIN `${table}` ON EL.parent_entity_id = `${table}`.id " .
+			"WHERE EL.parent_entity_type = ? AND `${table}`.id IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -605,8 +605,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT FL.entity_type, FL.entity_id, F.id FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
-			"LEFT JOIN ${details['table']} ON FL.entity_id = ${details['table']}.${details['column']} " .
-			"WHERE FL.entity_type = ? AND ${details['table']}.${details['column']} IS NULL",
+			"LEFT JOIN `${details['table']}` ON FL.entity_id = `${details['table']}`.`${details['column']}` " .
+			"WHERE FL.entity_type = ? AND `${details['table']}`.`${details['column']}` IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
