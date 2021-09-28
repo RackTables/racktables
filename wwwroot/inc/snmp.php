@@ -1827,19 +1827,19 @@ $iftable_processors['dell-any-1000SFP'] = array
 
 $iftable_processors['dell-5500-any-1000T'] = array
 (
-	'pattern' => '@^gigabitethernet(\d+)/(\d+)/(\d+)$@',
-	'replacement' => 'gi\\1/\\2/\\3',
+	'pattern' => '@^gi(\d+)/\d+/(\d+)$@',
+	'replacement' => '\\0',
 	'dict_key' => 24,
-	'label' => 'unit \\1 port \\3',
+	'label' => 'unit \\1 port \\2',
 	'try_next_proc' => FALSE,
 );
 
 $iftable_processors['dell-5500-any-SFP+'] = array
 (
-	'pattern' => '@^tengigabitethernet(\d+)/(\d+)/(\d+)$@',
-	'replacement' => 'te\\1/\\2/\\3',
+	'pattern' => '@^te(\d+)/\d+/(\d+)$@',
+	'replacement' => '\\0',
 	'dict_key' => '9-1084',
-	'label' => 'unit \\1 port \\3',
+	'label' => 'unit \\1 port \\2',
 	'try_next_proc' => FALSE,
 );
 
@@ -2437,24 +2437,6 @@ $iftable_processors['avaya-ers-45-to-48-combo-SFP'] = array
 	'dict_key' => '4-1077',
 	'label' => 'unit \\1 port \\2',
 	'try_next_proc' => TRUE,
-);
-
-$iftable_processors['dell-5500-10000SFP'] = array
-(
-	'pattern' => '@^te(\d+)/(\d+)/(\d+)$@',
-	'replacement' => 't\\1/\\3',
-	'dict_key' => '9-1084',
-	'label' => '\\1/\\3',
-	'try_next_proc' => FALSE,
-);
-
-$iftable_processors['dell-5500-1000T'] = array
-(
-	'pattern' => '@^gi(\d+)/(\d+)/(\d+)$@',
-	'replacement' => 'g\\1/\\3',
-	'dict_key' => 24,
-	'label' => '\\1/\\3',
-	'try_next_proc' => FALSE,
 );
 
 global $known_switches;
@@ -4064,11 +4046,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'processors' => array ('dell-g23-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
+	'674.10895.3030' => array
+	(
+		'dict_key' => 1791,
+		'text' => 'Dell PowerConnect 5524, 24 x 10/100/1000, 2 x 10 Gigabit SFP+',
+		'processors' => array ('dell-5500-any-SFP+', 'dell-5500-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
 	'674.10895.3031' => array
 	(
 		'dict_key' => 1792,
 		'text' => 'Dell PowerConnect 5548, 48 x 10/100/1000, 2 x 10 Gigabit SFP+',
 		'processors' => array ('dell-5500-any-SFP+', 'dell-5500-any-1000T'),
+		'ifDescrOID' => 'ifName',
 	),
 	'1916.2.71' => array
 	(
@@ -4617,20 +4607,6 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'HP%GPASS%HP A5120-48G-PoE+ EI (JG237A)',
 		'processors' => array ('h3c-49-to-52-SFP','h3c-any-Gb','h3c-any-SFP+'),
 	),
-	'674.10895.3030' => array
-	(
-		'dict_key' => 1791,
-		'text' => 'PowerConnect 5524: 24 RJ-45/10-100-1000T(X) + 4 10G ports',
-		'processors' => array ('dell-5500-10000SFP','dell-5500-1000T'),
-		'ifDescrOID' => 'ifName',
-	),
-	'674.10895.3031' => array
-	(
-		'dict_key' => 1792,
-		'text' => 'PowerConnect 5548: 48 RJ-45/10-100-1000T(X) + 4 10G ports',
-		'processors' => array ('dell-5500-10000SFP','dell-5500-1000T'),
-		'ifDescrOID' => 'ifName',
-	),
 );
 
 global $swtype_pcre;
@@ -4997,7 +4973,6 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	case preg_match ('/^674\.10895\.4/', $sysObjectID): // Dell PowerConnect
 	case preg_match ('/^674\.10895\.300(3|4|7|9)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.301(0|4|7|9)/', $sysObjectID):
-	case preg_match ('/^674\.10895\.303(0|1)/', $sysObjectID):
 	case preg_match ('/^674\.10895\.302(0|1|8)/', $sysObjectID):
 	case preg_match ('/^3955\.6\.1\.20(24|48)\.1/', $sysObjectID): // Linksys
 	case preg_match ('/^3955\.6\.50(24|48)/', $sysObjectID): // Linksys
@@ -5008,6 +4983,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		addDesiredPort ($desiredPorts, 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^674\.10895\.303(0|1)/', $sysObjectID):
+		checkPIC ('1-29');
+		addDesiredPort ($desiredPorts, 'console', '1-29', 'IOIOI', '');
+		checkPIC ('1-441');
+		addDesiredPort ($desiredPorts, 'stacking 1', '1-441', 'stacking 1', '');
+		addDesiredPort ($desiredPorts, 'stacking 2', '1-441', 'stacking 2', '');
 		checkPIC ('1-16');
 		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
