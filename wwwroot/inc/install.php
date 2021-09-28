@@ -1696,6 +1696,7 @@ WHERE O.objtype_id = 1562";
 (42, '1000Base-EX'),
 (439,'dry contact'),
 (440,'unknown'),
+(441,'HDMI'),
 (446,'KVM (console)'),
 (681,'RS-232 (DB-9)'),
 (682,'RS-232 (DB-25)'),
@@ -1992,6 +1993,8 @@ WHERE O.objtype_id = 1562";
 (16,1592),(16,1651),(16,1653),(16,1654),(16,1655),(16,1656),
 -- SFP28: 10GBase-SR, 10GBase-ER, 10GBase-LR, 10GBase-LRM, 10GBase-ZR, 10GBase-LX4, 10GBase-CX4
 (16,30),(16,35),(16,36),(16,37),(16,38),(16,39),(16,40),
+-- hardwired: HDMI
+(1,441),
 -- hardwired: AC-in, 100Base-TX, 1000Base-T, RS-232 (RJ-45), virtual bridge, KVM (host), KVM (console), RS-232 (DB-9), RS-232 (DB-25), AC-out, DC, virtual port
 (1,16),(1,19),(1,24),(1,29),(1,31),(1,33),(1,446),(1,681),(1,682),(1,1322),(1,1399),(1,1469)";
 
@@ -2020,6 +2023,7 @@ WHERE O.objtype_id = 1562";
 (41,41),
 (42,42),
 (439,439),
+(441,441),
 (681,681),
 (681,682),
 (682,682),

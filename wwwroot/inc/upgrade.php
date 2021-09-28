@@ -1372,6 +1372,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = '0.21.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.22.0':
+			$query[] = "INSERT INTO PortOuterInterface VALUES (441, 'HDMI')";
+			$query[] = "INSERT INTO PortCompat VALUES (441, 441)";
+			$query[] = "INSERT INTO PortInterfaceCompat VALUES (1, 441)";
 			$query[] = "UPDATE Config SET varvalue = '0.22.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
