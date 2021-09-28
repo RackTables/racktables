@@ -2403,21 +2403,21 @@ $iftable_processors['h3c-any-Gb'] = array
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['avaya-gigabitethernet-1000TX'] = array
+$iftable_processors['avaya-ers-any-1000T'] = array
 (
-	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (\d+)$@',
-	'replacement' => 'g\\1',
-	'dict_key' => '4-1077',
-	'label' => '\\1',
+	'pattern' => '@^Avaya Ethernet Routing Switch .+ - Unit (\d+) Port (\d+) *$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => 24,
+	'label' => 'unit \\1 port \\2',
 	'try_next_proc' => FALSE,
 );
 
-$iftable_processors['avaya-45-to-48-SFP'] = array
+$iftable_processors['avaya-ers-45-to-48-combo-SFP'] = array
 (
-	'pattern' => '@^Avaya Ethernet Routing Switch 4548GT PWR Module - Unit (\d+) Port (45|46|47|48)$@',
-	'replacement' => 'g\\1',
+	'pattern' => '@^Avaya Ethernet Routing Switch .+ - Unit (\d+) Port (45|46|47|48)$@',
+	'replacement' => '\\1/\\2',
 	'dict_key' => '4-1077',
-	'label' => 'g\\1',
+	'label' => 'unit \\1 port \\2',
 	'try_next_proc' => TRUE,
 );
 
@@ -3864,8 +3864,8 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'45.3.71.2' => array
 	(
 		'dict_key' => 3794,
-        'text' => 'Nortel Avaya 4548GT, 48 x 10/100/1000 (PoE),  4xSFP',
-        'processors' => array ('avaya-45-to-48-SFP','avaya-gigabitethernet-1000TX'),
+		'text' => 'Nortel Avaya 4548GT-PWR, 48 x 10/100/1000 (PoE),  4xSFP',
+		'processors' => array ('avaya-ers-45-to-48-combo-SFP', 'avaya-ers-any-1000T'),
 	),
 	'119.1.203.2.2.41' => array
 	(
