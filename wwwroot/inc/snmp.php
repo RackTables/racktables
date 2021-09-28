@@ -2439,12 +2439,12 @@ $iftable_processors['avaya-ers-45-to-48-combo-SFP'] = array
 	'try_next_proc' => TRUE,
 );
 
-$iftable_processors['juniper-100TX'] = array
+$iftable_processors['juniper-srx-100TX'] = array
 (
 	'pattern' => '@^fe-0/0/(\d+)$@',
-	'replacement' => '\\1\\2\\3',
+	'replacement' => '\\0',
 	'dict_key' => 19,
-	'label' => '\\1',
+	'label' => '0/\\1',
 	'try_next_proc' => FALSE,
 );
 
@@ -4248,8 +4248,8 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	'2636.1.1.1.2.41' => array
 	(
 		'dict_key' => 3795,
-        'text' => 'Juniper SRX 100, 8 x 10/100',
-        'processors' => array ('juniper-100TX'),
+		'text' => 'Juniper SRX100, 8 x 10/100',
+		'processors' => array ('juniper-srx-100TX'),
 	),
 	'2636.1.1.1.2.43' => array
 	(
