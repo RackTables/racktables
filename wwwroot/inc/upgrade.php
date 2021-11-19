@@ -426,7 +426,7 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			// update some config variables that changed their defaults in this version
 			replaceConfigVarValue ('SHOW_LAST_TAB', 'yes');
-			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE','no');
+			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE', 'no');
 			replaceConfigVarValue ('IPV4LB_LISTSRC', 'false', '{$typeid_4}');
 			replaceConfigVarValue ('FILTER_DEFAULT_ANDOR', 'and');
 			replaceConfigVarValue ('FILTER_SUGGEST_EXTRA', 'yes');
