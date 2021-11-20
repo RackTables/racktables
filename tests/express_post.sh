@@ -3,7 +3,7 @@
 THISDIR=$(dirname "$0")
 BASEDIR=$(readlink -f "$THISDIR/..")
 
-which php >/dev/null || {
+command -v php >/dev/null || {
 	echo 'ERROR: PHP CLI binary is not available!' >&2
 	exit 1
 }

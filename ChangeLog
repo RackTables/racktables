@@ -1,6 +1,10 @@
 0.22.0
 	update: drop support for PHP 5.x
+	update: add HDMI port type
 	bugfix: display log records consistently
+	bugfix: evaluate {$op_deleteObject} in the right context (Mantis#2021)
+	bugfix: fix remote interface to IOS 15 devices (Mantis#2029) (Mantis#2031)
+	bugfix: fix more cases of "ROW is a keyword in MySQL 8"
 0.21.5 2020-10-05
 	update: fix assorted URL and notes
 	update: add SNMP support for HPE 5130 (JG937A) and A5120 (JG237A)

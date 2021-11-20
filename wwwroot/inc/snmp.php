@@ -663,6 +663,15 @@ $iftable_processors['catalyst-stack-any-100TX'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['catalyst-stack-any-SFP'] = array
+(
+	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(\d+)$@',
+	'replacement' => 'gi\\1/\\2/\\3',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\1 port \\3',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['catalyst-stack-25-to-28-SFP'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(25|26|27|28)$@',
@@ -1816,6 +1825,24 @@ $iftable_processors['dell-any-1000SFP'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['dell-5500-any-1000T'] = array
+(
+	'pattern' => '@^gi(\d+)/\d+/(\d+)$@',
+	'replacement' => '\\0',
+	'dict_key' => 24,
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['dell-5500-any-SFP+'] = array
+(
+	'pattern' => '@^te(\d+)/\d+/(\d+)$@',
+	'replacement' => '\\0',
+	'dict_key' => '9-1084',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
 $iftable_processors['3com-27-to-28-1000T'] = array
 (
 	'pattern' => '@^GigabitEthernet(\d+)/(\d+)/(27|28)$@',
@@ -2394,6 +2421,33 @@ $iftable_processors['h3c-any-Gb'] = array
 	'try_next_proc' => FALSE,
 );
 
+$iftable_processors['avaya-ers-any-1000T'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch .+ - Unit (\d+) Port (\d+) *$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => 24,
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => FALSE,
+);
+
+$iftable_processors['avaya-ers-45-to-48-combo-SFP'] = array
+(
+	'pattern' => '@^Avaya Ethernet Routing Switch .+ - Unit (\d+) Port (45|46|47|48)$@',
+	'replacement' => '\\1/\\2',
+	'dict_key' => '4-1077',
+	'label' => 'unit \\1 port \\2',
+	'try_next_proc' => TRUE,
+);
+
+$iftable_processors['juniper-srx-100TX'] = array
+(
+	'pattern' => '@^fe-0/0/(\d+)$@',
+	'replacement' => '\\0',
+	'dict_key' => 19,
+	'label' => '0/\\1',
+	'try_next_proc' => FALSE,
+);
+
 global $known_switches;
 $known_switches = array // key is system OID w/o "enterprises" prefix
 (
@@ -2432,6 +2486,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 154,
 		'text' => 'WS-C6506: modular device (INCOMPLETE!)',
 		'processors' => array ('catalyst-chassis-any-1000T'),
+	),
+	'9.1.287' => array
+	(
+		'dict_key' => 394,
+		'text' => 'Cisco WS-C3524-PWR-XL, 24 RJ-45/10-100TX + 2 GBIC/1000',
+		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.323' => array
 	(
@@ -2503,13 +2563,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 383,
 		'text' => 'WS-C2950G-24-DC 24 RJ-45/10-100TX + 2 GBIC/1000',
-		'processors' => array ('catalyst-chassis-any-1000GBIC','catalyst-chassis-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000GBIC', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.480' => array
 	(
 		'dict_key' => 385,
 		'text' => 'WS-C2950SX-24 24 RJ-45/10-100TX + 2 1000Base-SX',
-		'processors' => array ('catalyst-chassis-uplinks-1000SX','catalyst-chassis-any-100TX'),
+		'processors' => array ('catalyst-chassis-uplinks-1000SX', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.527' => array
 	(
@@ -2558,6 +2618,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 2025,
 		'text' => 'Cisco 878 ISR: 4 RJ-45/10-100TX',
 		'processors' => array ('catalyst-chassis-any-100TX'),
+	),
+	'9.1.574' => array
+	(
+		'dict_key' => 3793,
+		'text' => 'ME-C3750-24TE-M: 24 RJ-45/10-100TX + 4 SFP/1000',
+		'processors' => array ('catalyst-stack-any-SFP', 'catalyst-stack-any-100TX'),
 	),
 	'9.1.614' => array
 	(
@@ -2759,13 +2825,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2038,
 		'text' => 'WS-CBS3012-IBM 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)',
-		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.1000' => array
 	(
 		'dict_key' => 2038,
 		'text' => 'WS-CBS3012-IBM-I 14 10-100-1000T + 1 10/100T + 4 RJ45/10/100/1000T(X)',
-		'processors' => array ('catalyst-chassis-any-1000T','catalyst-chassis-any-100TX'),
+		'processors' => array ('catalyst-chassis-any-1000T', 'catalyst-chassis-any-100TX'),
 	),
 	'9.1.1005' => array
 	(
@@ -3822,6 +3888,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'text' => 'BES50GE-12T PWR: 12 RJ-45/10-100-1000T(X)',
 		'processors' => array ('nortel-any-1000T'),
 	),
+	'45.3.71.2' => array
+	(
+		'dict_key' => 3794,
+		'text' => 'Nortel Avaya 4548GT-PWR, 48 x 10/100/1000 (PoE),  4xSFP',
+		'processors' => array ('avaya-ers-45-to-48-combo-SFP', 'avaya-ers-any-1000T'),
+	),
 	'119.1.203.2.2.41' => array
 	(
 		'dict_key' => 1810,
@@ -3832,7 +3904,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 614,
 		'text' => '24-Port Fast Ethernet L2 Managed PoE Switch with 2 x 1000BASE-T and 2 x Combo 1000BASE-T/SFP ports ',
-		'processors' => array ('Dlink-3028-25-to-26-Combo','Dlink-3028-25-to-28-1000T','Dlink-3028-100TX'),
+		'processors' => array ('Dlink-3028-25-to-26-Combo', 'Dlink-3028-25-to-28-1000T', 'Dlink-3028-100TX'),
 	),
 	'171.10.63.8' => array
 	(
@@ -3981,6 +4053,20 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 1063,
 		'text' => 'PowerConnect 2824: 22 RJ-45/10-100-1000T(X) + 2 combo ports',
 		'processors' => array ('dell-g23-to-g24-combo-1000SFP', 'generic-g-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3030' => array
+	(
+		'dict_key' => 1791,
+		'text' => 'Dell PowerConnect 5524, 24 x 10/100/1000, 2 x 10 Gigabit SFP+',
+		'processors' => array ('dell-5500-any-SFP+', 'dell-5500-any-1000T'),
+		'ifDescrOID' => 'ifName',
+	),
+	'674.10895.3031' => array
+	(
+		'dict_key' => 1792,
+		'text' => 'Dell PowerConnect 5548, 48 x 10/100/1000, 2 x 10 Gigabit SFP+',
+		'processors' => array ('dell-5500-any-SFP+', 'dell-5500-any-1000T'),
 		'ifDescrOID' => 'ifName',
 	),
 	'1916.2.71' => array
@@ -4158,6 +4244,12 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 		'dict_key' => 905,
 		'text' => 'Juniper EX4200 series',
 		'processors' => array ('juniper-ex-pic0-1000T', 'juniper-ex-mgmt'),
+	),
+	'2636.1.1.1.2.41' => array
+	(
+		'dict_key' => 3795,
+		'text' => 'Juniper SRX100, 8 x 10/100',
+		'processors' => array ('juniper-srx-100TX'),
 	),
 	'2636.1.1.1.2.43' => array
 	(
@@ -4366,19 +4458,19 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2239,
 		'text' => 'ICX6430-48: 48 1000T + 4 SFP+/1000',
-		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+		'processors' => array ('brocade-icx-64xx-1000T', 'brocade-icx-64xx-1000SFP', 'fcx-management'),
 	),
 	'1991.1.3.48.4.1' => array
 	(
 		'dict_key' => 2239,
 		'text' => 'Stacked ICX6430-48: 48 1000T + 4 SFP+/1000',
-		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-1000SFP', 'fcx-management'),
+		'processors' => array ('brocade-icx-64xx-1000T', 'brocade-icx-64xx-1000SFP', 'fcx-management'),
 	),
 	'1991.1.3.48.5.1' => array
 	(
 		'dict_key' => 2240,
 		'text' => 'Stacked ICX6450-48: 48 1000T + 4 SFP+/10000',
-		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+		'processors' => array ('brocade-icx-64xx-1000T', 'brocade-icx-64xx-10000SFP', 'fcx-management'),
 	),
 	'25506.11.1.82' => array
 	(
@@ -4390,49 +4482,49 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2241,
 		'text' => 'IBM System Networking RackSwitch G8000',
-		'processors' => array ('ibm-45-to-48-SFP','ibm-49-to-52-SFP+','ibm-any-1000T'),
+		'processors' => array ('ibm-45-to-48-SFP', 'ibm-49-to-52-SFP+', 'ibm-any-1000T'),
 	),
 	'1588.3.3.1.131' => array
 	(
 		'dict_key' => 2665,
 		'text' => 'Brocade VDX 6740',
-		'processors' => array ('brocade-vdx-QSFP+','brocade-vdx-SFP+', 'brocade-vdx-management'),
+		'processors' => array ('brocade-vdx-QSFP+', 'brocade-vdx-SFP+', 'brocade-vdx-management'),
 	),
 	'1991.1.3.62.2.1.1.1' => array
 	(
 		'dict_key' => 2666,
 		'text' => 'ICX7250-48 48x1000T + 8 SFP+/1000',
-		'processors' => array ('brocade-icx-64xx-1000T','brocade-icx-64xx-10000SFP', 'fcx-management'),
+		'processors' => array ('brocade-icx-64xx-1000T', 'brocade-icx-64xx-10000SFP', 'fcx-management'),
 	),
 	'4413' => array
 	(
 		'dict_key' => 2624,
 		'text' => 'Ubiquiti EdgeSwitch ES-48-LITE',
-		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP','ubiquiti-chassis-any-1000T','ubiquiti-chassis-any-SFP+'),
+		'processors' => array ('ubiquiti-chassis-51-to-52-1000SFP', 'ubiquiti-chassis-any-1000T', 'ubiquiti-chassis-any-SFP+'),
 	),
 	'11.2.3.7.11.145' => array
 	(
 		'dict_key' => 3654,
 		'text' => 'HP Aruba 2530 48 PoE+ Switch, (48) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
-		'processors' => array ('procurve-51-to-52-1000SFP','procurve-49-to-50-1000T','procurve-chassis-100TX'),
+		'processors' => array ('procurve-51-to-52-1000SFP', 'procurve-49-to-50-1000T', 'procurve-chassis-100TX'),
 	),
 	'11.2.3.7.11.146' => array
 	(
 		'dict_key' => 3655,
 		'text' => 'HP Aruba 2530 24 PoE+ Switch, (24) RJ-45 10/100 PoE+ ports, (2) autosensing 10/100/1000 ports, (2) fixed Gigabit Ethernet SFP ports',
-		'processors' => array ('procurve-27-to-28-1000SFP','procurve-25-to-26-1000T','procurve-chassis-100TX'),
+		'processors' => array ('procurve-27-to-28-1000SFP', 'procurve-25-to-26-1000T', 'procurve-chassis-100TX'),
 	),
 	'25506.11.1.181' => array
 	(
 		'dict_key' => 3656,
 		'text' => 'HP 1950 48G 2SFP+ 2XGT Switch, (48) RJ-45 auto-negotiating 10/100/1000 PoE+ ports, (2) SFP+ fixed 1000/10000 SFP+ ports, (2) RJ-45 1/10GBASE-T ports',
-		'processors' => array ('procurve-49-to-50-10GBase-T','procurve-51-to-52-10000SFP+','procurve-any-1000T'),
+		'processors' => array ('procurve-49-to-50-10GBase-T', 'procurve-51-to-52-10000SFP+', 'procurve-any-1000T'),
 	),
 	'25506.11.1.100' => array
 	(
 		'dict_key' => 3659,
 		'text' => 'HPE FlexFabric 5900AF 48XG 4QSFP+ Switch, 1G/10G SFP+ and 4 QSFP+-ports, dual hot-pluggable power supplies and fan trays,',
-		'processors' => array ('catalyst-chassis-FortyGigE','catalyst-chassis-any-TenGb'),
+		'processors' => array ('catalyst-chassis-FortyGigE', 'catalyst-chassis-any-TenGb'),
 	),
 	'25506.11.1.101' => array
 	(
@@ -4444,7 +4536,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 3662,
 		'text' => 'HP A5800AF-48G Switch with 2 Processors (JG225A), (48) RJ-45 10/100/1000 ports, (6) fixed 1000/10000 SFP+ ports',
-		'processors' => array ('catalyst-chassis-any-TenGb','procurve-any-1000T'),
+		'processors' => array ('catalyst-chassis-any-TenGb', 'procurve-any-1000T'),
 	),
 	'11.2.3.7.11.150' => array
 	(
@@ -4456,13 +4548,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 3730,
 		'text' => 'HP 1810-24G v2 (J9803A), 24 x Gigabit Ethernet 10/100/1000, 2 x SFP',
-		'processors' => array ('procurve-1810-1000SFP','procurve-1810-1000T'),
+		'processors' => array ('procurve-1810-1000SFP', 'procurve-1810-1000T'),
 	),
 	'11.2.3.7.11.194' => array
 	(
 		'dict_key' => 2242,
 		'text' => 'HP 1810-24G (J9450A), 22 x Gigabit Ethernet 10/100/1000, 2 combo ports',
-		'processors' => array ('procurve-1810-23-to-24-COMBO','procurve-1810-1000T'),
+		'processors' => array ('procurve-1810-23-to-24-COMBO', 'procurve-1810-1000T'),
 	),
 	'11.2.3.7.11.103' => array
 	(
@@ -4504,7 +4596,7 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 3732,
 		'text' => 'HP A5120-24G EI (JE068A),  24 ports 10/100/1000Base-T, 4 Combo ports 10/100/1000Base-T/SFP, 2 interface slots for 10Gbe',
-		'processors' => array ('procurve-25-to-28-1000SFPcombo','procurve-any-1000T'),
+		'processors' => array ('procurve-25-to-28-1000SFPcombo', 'procurve-any-1000T'),
 	),
 	'25506.11.1.85' => array
 	(
@@ -4522,13 +4614,13 @@ $known_switches = array // key is system OID w/o "enterprises" prefix
 	(
 		'dict_key' => 2466,
 		'text' => 'HP EI%GPASS%5130-48G-PoE+-4SFP+ (JG937A)',
-		'processors' => array ('h3c-any-Gb','h3c-any-SFP+'),
+		'processors' => array ('h3c-any-Gb', 'h3c-any-SFP+'),
 	),
 	'25506.11.1.36' => array
 	(
 		'dict_key' => 3748,
 		'text' => 'HP%GPASS%HP A5120-48G-PoE+ EI (JG237A)',
-		'processors' => array ('h3c-49-to-52-SFP','h3c-any-Gb','h3c-any-SFP+'),
+		'processors' => array ('h3c-49-to-52-SFP', 'h3c-any-Gb', 'h3c-any-SFP+'),
 	),
 );
 
@@ -4906,6 +4998,15 @@ function doSwitchSNMPmining ($objectInfo, $device)
 		// one DB-9 RS-232 and one AC port
 		checkPIC ('1-681');
 		addDesiredPort ($desiredPorts, 'console', '1-681', '', ''); // DB-9 RS-232
+		checkPIC ('1-16');
+		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
+		break;
+	case preg_match ('/^674\.10895\.303(0|1)/', $sysObjectID):
+		checkPIC ('1-29');
+		addDesiredPort ($desiredPorts, 'console', '1-29', 'IOIOI', '');
+		checkPIC ('1-441');
+		addDesiredPort ($desiredPorts, 'stacking 1', '1-441', 'stacking 1', '');
+		addDesiredPort ($desiredPorts, 'stacking 2', '1-441', 'stacking 2', '');
 		checkPIC ('1-16');
 		addDesiredPort ($desiredPorts, 'AC-in', '1-16', '', '');
 		break;
