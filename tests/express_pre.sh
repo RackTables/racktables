@@ -3,7 +3,7 @@
 THISDIR=$(dirname "$0")
 BASEDIR=$(readlink -f "$THISDIR/..")
 
-which php >/dev/null || {
+command -v php >/dev/null || {
 	echo 'ERROR: PHP CLI binary is not available!' >&2
 	exit 1
 }
@@ -16,7 +16,7 @@ printTestResult()
 
 testPHPSyntaxOnly()
 {
-	local INPUT="${1:?}"
+	INPUT="${1:?}"
 
 	if php --syntax-check "$INPUT" >/dev/null 2>&1; then
 		printTestResult "$INPUT" 'OK (syntax only)'
@@ -29,9 +29,9 @@ testPHPSyntaxOnly()
 
 testPHPExitCodeAndOutput()
 {
-	local INPUT="${1:?}"
-	local TEMPFILE="${2:?}"
-	local fname rc curdir
+	INPUT="${1:?}"
+	TEMPFILE=$(mktemp --tmpdir racktables_unittest.XXXXXX)
+	myrc=2
 
 	fname=$(basename "$INPUT")
 	curdir=$(pwd)
@@ -41,12 +41,14 @@ testPHPExitCodeAndOutput()
 	cd "$curdir" || return 1
 	if [ $rc -eq 0 ] && [ ! -s "$TEMPFILE" ]; then
 		printTestResult "$INPUT" 'OK'
-		return 0
+		myrc=0
 	else
 		[ $rc -ne 0 ] && printTestResult "$INPUT" "ERROR: PHP interpreter returned code $rc"
 		[ -s "$TEMPFILE" ] && printTestResult "$INPUT" 'ERROR: produces output when parsed'
-		return 1
+		myrc=1
 	fi
+	rm -f "$TEMPFILE"
+	return $myrc
 }
 
 # Every file in wwwroot/inc/ must be a valid PHP input file and must not
@@ -56,12 +58,11 @@ echo
 cd "$BASEDIR" || exit 1
 files=0
 errors=0
-TEMPFILE=$(mktemp --tmpdir racktables_unittest.XXXXXX)
 for f in wwwroot/inc/*.php plugins/*/plugin.php; do
 	if [ "$f" = "wwwroot/inc/init.php" ]; then
 		testPHPSyntaxOnly "$f" || errors=$((errors + 1))
 	else
-		testPHPExitCodeAndOutput "$f" "$TEMPFILE" || errors=$((errors + 1))
+		testPHPExitCodeAndOutput "$f" || errors=$((errors + 1))
 	fi
 	files=$((files + 1))
 done
@@ -72,7 +73,6 @@ for f in tests/*.php; do
 done
 echo '---------------------------------------------------'
 echo "Files parsed: $files, failed: $errors"
-rm -f "$TEMPFILE"
 [ $errors -eq 0 ] || exit 1
 
 # The command-line scripts among other things prove that init.php actually works.

@@ -201,7 +201,7 @@ $breed_by_swcode = array
 
 $shorten_by_breed = array (
 	'ios12' => 'ios12ShortenIfName_real',
-	'ios15' => 'ios15ShortenIfName_real',
+	'ios15' => 'ios15ShortenIfName',
 	'nxos4' => 'nxos4ShortenIfName',
 	'vrp53' => 'vrp5xShortenIfName',
 	'vrp55' => 'vrp5xShortenIfName',
@@ -476,6 +476,7 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	switch ($breed = detectDeviceBreed ($object_id))
 	{
 		case 'ios12':
+		case 'ios15':
 		case 'air12':
 		case 'ftos8':
 			$protocol = 'netcat'; // default is netcat mode
@@ -546,9 +547,6 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 			$prompt = '(Login|[Uu]sername|[Pp]assword): $|Press any key to continue(\e\[\??\d+(;\d+)*[A-Za-z])*$|[#>].*$';
 			# Console emulator should be set to 'none' to avoid special characters to be sent by stupid default VT100!!!
 			$commands = "configure\nconsole local-terminal none\nexit\nno page\n" . $commands . "configure\nconsole local-terminal vt100\nend\nexit\nexit\ny\n";
-			break;
-		case 'ios15':
-			$commands = "terminal length 0\nterminal no monitor\n" . $commands;
 			break;
 	}
 	if (! isset ($protocol))
@@ -791,6 +789,13 @@ function ios12ShortenIfName_real ($ifname)
 	$ifname = strtolower ($ifname);
 	$ifname = preg_replace ('/^(fa|gi|te|po)\s+(\d.*)/', '$1$2', $ifname);
 	return $ifname;
+}
+
+function ios15ShortenIfName ($ifname)
+{
+	return preg_match ('/^port-channel/i', $ifname) ?
+		strtolower ($ifname) :
+		ios12ShortenIfName_real ($ifname);
 }
 
 function nxos4ShortenIfName ($ifname)

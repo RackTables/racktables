@@ -426,7 +426,7 @@ CREATE VIEW `RackObject` AS SELECT id, name, label, objtype_id, asset_no, has_pr
 
 			// update some config variables that changed their defaults in this version
 			replaceConfigVarValue ('SHOW_LAST_TAB', 'yes');
-			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE','no');
+			replaceConfigVarValue ('IPV4_TREE_SHOW_USAGE', 'no');
 			replaceConfigVarValue ('IPV4LB_LISTSRC', 'false', '{$typeid_4}');
 			replaceConfigVarValue ('FILTER_DEFAULT_ANDOR', 'and');
 			replaceConfigVarValue ('FILTER_SUGGEST_EXTRA', 'yes');
@@ -1372,6 +1372,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "UPDATE Config SET varvalue = '0.21.5' WHERE varname = 'DB_VERSION'";
 			break;
 		case '0.22.0':
+			$query[] = "INSERT INTO PortOuterInterface VALUES (441, 'HDMI')";
+			$query[] = "INSERT INTO PortCompat VALUES (441, 441)";
+			$query[] = "INSERT INTO PortInterfaceCompat VALUES (1, 441)";
 			$query[] = "UPDATE Config SET varvalue = '0.22.0' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':

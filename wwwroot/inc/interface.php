@@ -1173,7 +1173,7 @@ function renderEditObjectForm()
 		echo ' checked';
 	echo "></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
-	echo getOpLink (array ('op'=>'deleteObject', 'page'=>'depot', 'tab'=>'addmore', 'object_id'=>$object_id), '' ,'destroy', 'Delete object', 'need-confirmation');
+	echo getOpLink (array ('op' => 'deleteObject'), '' ,'destroy', 'Delete object', 'need-confirmation');
 	echo "&nbsp;";
 	echo getOpLink (array ('op'=>'resetObject'), '' ,'clear', 'Reset (cleanup) object', 'need-confirmation');
 	echo "</td></tr>\n";
