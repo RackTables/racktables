@@ -3856,6 +3856,10 @@ $dictionary = array
 	3793 => array ('chapter_id' => 12, 'dict_value' => 'Cisco%GPASS%ME-C3750-24TE'),
 	3794 => array ('chapter_id' => 12, 'dict_value' => 'Nortel%GPASS%Avaya 4548GT-PWR'),
 	3795 => array ('chapter_id' => 24, 'dict_value' => 'Juniper%GPASS%SRX100'),
+	3796 => array ('chapter_id' => 13, 'dict_value' => 'RH Fedora%GSKIP%Fedora 35'),
+	3797 => array ('chapter_id' => 13, 'dict_value' => 'NetBSD%GSKIP%NetBSD 9.2'),
+	3798 => array ('chapter_id' => 13, 'dict_value' => 'OpenBSD%GSKIP%OpenBSD 7.0'),
+	3799 => array ('chapter_id' => 13, 'dict_value' => 'Debian%GSKIP%Debian 11'),
 
 # Any new "default" dictionary records must go above this line (i.e., with
 # dict_key code less than 50000). This is necessary to keep AUTO_INCREMENT
