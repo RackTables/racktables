@@ -449,11 +449,20 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE)
 function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
+	if (array_key_exists ($tag, $image))
+	{
+		// Starts by 'data:' ?
+		if (stripos($image[$tag]['path'] , 'data:') === 0)
+			$src = $image[$tag]['path'];
+		else
+			$src = '?module=chrome&uri=' . $image[$tag]['path'];
+	}
+	else
+		$src = '?module=image&img=error';
+
 	$attrs = array
 	(
-		'src' => array_key_exists ($tag, $image) ?
-			'?module=chrome&uri=' . $image[$tag]['path'] :
-			'?module=image&img=error',
+		'src' => $src,
 		'border' => 0,
 	);
 	if ($title != '')
