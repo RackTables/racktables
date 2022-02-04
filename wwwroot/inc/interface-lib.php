@@ -449,16 +449,19 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE)
 function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
-	if (array_key_exists ($tag, $image))
-	{
-		// Starts by 'data:' ?
-		if (stripos($image[$tag]['path'] , 'data:') === 0)
-			$src = $image[$tag]['path'];
-		else
-			$src = '?module=chrome&uri=' . $image[$tag]['path'];
-	}
-	else
+	if (! array_key_exists ($tag, $image))
 		$src = '?module=image&img=error';
+	else
+	{
+		$srctype = array_key_exists ('srctype', $image[$tag]) ? $image[$tag]['srctype'] : 'path';
+
+		if ($srctype == 'path' && array_key_exists ('path', $image[$tag]))
+			$src = '?module=chrome&uri=' . $image[$tag]['path'];
+		elseif ($srctype == 'dataurl' && array_key_exists ('data', $image[$tag]))
+			$src = 'data:' . $image[$tag]['data'];
+		else
+			throw new RackTablesError ('$image is not properly set', RackTablesError::INTERNAL);
+	}
 
 	$attrs = array
 	(
