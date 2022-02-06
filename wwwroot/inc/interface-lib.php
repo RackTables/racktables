@@ -449,19 +449,20 @@ function printImageHREF ($tag, $title = '', $do_input = FALSE)
 function getImageHREF ($tag, $title = '', $do_input = FALSE)
 {
 	global $image;
-	if (! array_key_exists ($tag, $image))
-		$src = '?module=image&img=error';
-	else
-	{
-		$srctype = array_key_exists ('srctype', $image[$tag]) ? $image[$tag]['srctype'] : 'path';
 
-		if ($srctype == 'path' && array_key_exists ('path', $image[$tag]))
+	$src = NULL;
+	if (array_key_exists ($tag, $image))
+	{
+		$srctype = array_fetch ($image[$tag], 'srctype', 'intpath');
+		if ($srctype == 'intpath' && array_key_exists ('path', $image[$tag]))
 			$src = '?module=chrome&uri=' . $image[$tag]['path'];
 		elseif ($srctype == 'dataurl' && array_key_exists ('data', $image[$tag]))
 			$src = 'data:' . $image[$tag]['data'];
-		else
-			throw new RackTablesError ('$image is not properly set', RackTablesError::INTERNAL);
+		elseif ($srctype == 'exturl' && array_key_exists ('url', $image[$tag]))
+			$src = $image[$tag]['url'];
 	}
+	if ($src === NULL)
+		throw new RackTablesError ("malformed \$image declaration for '$tag'");
 
 	$attrs = array
 	(
@@ -481,10 +482,11 @@ function getImageHREF ($tag, $title = '', $do_input = FALSE)
 	else
 	{
 		$element = 'img';
-		if (array_key_exists ($tag, $image))
+		foreach (array ('width', 'height') as $each)
 		{
-			$attrs['width'] = $image[$tag]['width'];
-			$attrs['height'] = $image[$tag]['height'];
+			if (! array_key_exists ($each, $image[$tag]))
+				throw new RackTablesError ("no '$each' in \$image['$tag']");
+			$attrs[$each] = $image[$tag][$each];
 		}
 	}
 	return makeHtmlTag ($element, $attrs);
