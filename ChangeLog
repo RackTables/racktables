@@ -1,4 +1,4 @@
-0.22.0
+0.22.0 2022-02-15
 	update: drop support for PHP 5.x
 	update: add HDMI port type
 	update: support new source types in getImageHREF() (GH#279)
