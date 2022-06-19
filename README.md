@@ -24,6 +24,7 @@ web-server for RackTables is Apache httpd.
 | Scientific&nbsp;Linux&nbsp;6 | `yum install mysql-server mysql` |
 | Ubuntu 18.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 20.04       | `apt-get install mariadb-server`                                        |
+| Ubuntu 22.04       | `apt-get install mariadb-server`                                        |
 | RHEL 7             | `yum install -y mariadb-server mariadb`                                 |
 
 ### 1.2. Enable Unicode in the MySQL/MariaDB server
@@ -47,8 +48,7 @@ web-server for RackTables is Apache httpd.
 | FreeBSD 10         | see note 1.3.c                                                                       | 
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
 | Scientific&nbsp;Linux&nbsp;6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath` |
-| Ubuntu 18.04       | `apt-get install apache2-bin libapache2-mod-php7.2 php7.2-gd php7.2-mysql php7.2-mbstring php7.2-bcmath php7.2-json php7.2-snmp`
-| Ubuntu 20.04       | `apt-get install apache2-bin libapache2-mod-php7.4 php7.4-gd php7.4-mysql php7.4-mbstring php7.4-bcmath php7.4-json php7.4-snmp`
+| Ubuntu any release | `apt-get install apache2-bin libapache2-mod-php php-gd php-mysql php-mbstring php-bcmath php-json php-snmp`
 | RHEL 7             | `subscription-manager repos --enable=rhel-server-rhscl-7-rpms`
 |                    | `yum install httpd24 rh-php70 rh-php70-php-mysqlnd rh-php70-php-pdo rh-php70-php-gd rh-php70-php-snmp rh-php70-php-mbstring rh-php70-php-bcmath rh-php70-php-ldap rh-php70-php`
 
