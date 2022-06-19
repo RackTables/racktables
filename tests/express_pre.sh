@@ -3,6 +3,16 @@
 THISDIR=$(dirname "$0")
 BASEDIR=$(readlink -f "$THISDIR/..")
 
+SHELL_SCRIPTS='
+gateways/git-commit
+tests/ci_download_phpunit.sh
+tests/ci_setup_mysql.sh
+tests/express_phpunit.sh
+tests/express_post.sh
+tests/express_pre.sh
+tests/express.sh
+'
+
 command -v php >/dev/null || {
 	echo 'ERROR: PHP CLI binary is not available!' >&2
 	exit 1
@@ -51,6 +61,23 @@ testPHPExitCodeAndOutput()
 	return $myrc
 }
 
+testSHSyntaxOnly()
+{
+	INPUT="${1:?}"
+
+	command -v shellcheck >/dev/null || {
+		printTestResult "$INPUT" 'WARNING: shellcheck not installed'
+		return 0
+	}
+	if shellcheck "$INPUT" >/dev/null 2>&1; then
+		printTestResult "$INPUT" 'OK (shellcheck only)'
+		return 0
+	else
+		printTestResult "$INPUT" 'ERROR: shellcheck failed'
+		return 1
+	fi
+}
+
 # Every file in wwwroot/inc/ must be a valid PHP input file and must not
 # produce any output when parsed by PHP (because, for instance, a plain text
 # file is a valid PHP input file).
@@ -69,6 +96,10 @@ done
 for f in tests/*.php; do
 	[ -h "$f" ] && continue
 	testPHPSyntaxOnly "$f" || errors=$((errors + 1))
+	files=$((files + 1))
+done
+for f in $SHELL_SCRIPTS; do
+	testSHSyntaxOnly "$f" || errors=$((errors + 1))
 	files=$((files + 1))
 done
 echo '---------------------------------------------------'

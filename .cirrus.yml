@@ -23,9 +23,11 @@ task:
         memory: 1G
       env:
         - PHPUNIT_BIN: $HOME/bin/phpunit-9.5.21.phar
+        - INSTALL_SHELLCHECK: yes
   script:
     - apt-get -qqy update
     - apt-get -qqy install mariadb-server make curl php-cli php-xml php-gd php-mysql php-mbstring php-bcmath php-json >/dev/null
+    - [ "$INSTALL_SHELLCHECK" = yes ] && apt-get -qqy install shellcheck >/dev/null
     # MariaDB has no systemd props in Ubuntu 16.04, rc.d props work even in
     # Ubuntu 20.04.
     - test -S /var/run/mysqld/mysqld.sock && service mysql stop
