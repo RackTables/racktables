@@ -13,8 +13,8 @@ if ! command -v "$PHPUNIT_BIN" >/dev/null; then
 fi
 
 case $("$PHPUNIT_BIN" --version) in
-	'PHPUnit 6.'*|'PHPUnit 7.'*|'PHPUnit 8.'*)
-		BOOTSTRAP_FILE=bootstrap_v6v7v8.php
+	'PHPUnit '[6789].*)
+		BOOTSTRAP_FILE=bootstrap.php
 		;;
 	*)
 		echo 'ERROR: unsupported PHPUnit version' >&2
