@@ -16,13 +16,13 @@ task:
         cpu: 1
         memory: 1G
       env:
-        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.27.phar
+        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.32.phar
     - container:
         image: ubuntu:20.04 # PHP 7.4
         cpu: 1
         memory: 1G
       env:
-        - PHPUNIT_BIN: $HOME/bin/phpunit-9.5.21.phar
+        - PHPUNIT_BIN: $HOME/bin/phpunit-9.5.28.phar
         - INSTALL_SHELLCHECK: yes
   script:
     - apt-get -qqy update
