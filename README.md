@@ -16,7 +16,7 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                               |
 | ------------------ | ----------------------------------------------------------------------- |
-| Debian 7           | `aptitude install mysql-server-5.1`                                     |
+| Debian 11          | `apt-get install mariadb-server`                                        |
 | Fedora 26          | `dnf install mariadb-server mariadb`                                    |
 | Fedora 32          | `dnf install mariadb-server`                                            |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
@@ -31,7 +31,7 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Debian 7           | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/mysql/my.cnf` file and restart mysqld          |
+| Debian 11          | No action required, comes configured for UTF-8 by default.                                                         |
 | Fedora 26-32       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
 | openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
 | Scientific&nbsp;Linux&nbsp;6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld |
@@ -43,7 +43,7 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| Debian 7 (nginx)   | `aptitude install nginx php5-fpm` **(see note below)**                               |
+| Debian 11          | `apt-get install apache2-bin libapache2-mod-php php-gd php-mysql php-mbstring php-bcmath php-json php-snmp && systemctl restart apache2`
 | Fedora 26-32       | `dnf install httpd php php-mysqlnd php-pdo php-gd php-snmp php-mbstring php-bcmath`  |
 | FreeBSD 10         | see note 1.3.c                                                                       | 
 | openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
@@ -52,14 +52,7 @@ web-server for RackTables is Apache httpd.
 | RHEL 7             | `subscription-manager repos --enable=rhel-server-rhscl-7-rpms`
 |                    | `yum install httpd24 rh-php70 rh-php70-php-mysqlnd rh-php70-php-pdo rh-php70-php-gd rh-php70-php-snmp rh-php70-php-mbstring rh-php70-php-bcmath rh-php70-php-ldap rh-php70-php`
 
-#### 1.3.a. Debian 7 with nginx
-Remember to adjust `server_name` in `server {}` section, otherwise your logout link
-will point to localhost (and thus fail).
-Notice that fpm.sock is advised, keep the rest on default configuration, or
-tweak to your needs. You may need to set `fastcgi_read_timeout 600;` if you use
-some external addons like fping, which may take some time in certain situations.
-Please note that setting aggressive caching for php scripts may result in stale
-content - so maximum of 60 seconds is advised, but by default it is not enabled.
+#### 1.3.a. [redacted]
 
 #### 1.3.b. [redacted]
 
@@ -141,6 +134,7 @@ and initialize the application.
 
 | Distribution    | Apache httpd UID:GID    | MySQL/MariaDB UNIX socket path   |
 | --------------- | ----------------------- | -------------------------------- |
+| Debian 11       | `www-data:www-data`     | `/run/mysqld/mysqld.sock`    |
 | Fedora 26-32    | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
 | openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
 | Ubuntu 18.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
