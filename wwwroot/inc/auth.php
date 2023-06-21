@@ -273,7 +273,7 @@ function authenticated_via_saml (&$saml_username = NULL, &$saml_displayname = NU
 	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
 		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
 	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
-	$as = new SimpleSAML_Auth_Simple ($SAML_options['sp_profile']);
+	$as = new SimpleSAML\Auth\Simple ($SAML_options['sp_profile']);
 	if (! $as->isAuthenticated())
 		$as->requireAuth();
 	$attributes = $as->getAttributes();
@@ -291,7 +291,7 @@ function saml_logout ()
 	if (! file_exists ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php'))
 		throw new RackTablesError ('Configured for SAML authentication, but simplesaml is not found.', RackTablesError::MISCONFIGURED);
 	require_once ($SAML_options['simplesamlphp_basedir'] . '/lib/_autoload.php');
-	$as = new SimpleSAML_Auth_Simple ($SAML_options['sp_profile']);
+	$as = new SimpleSAML\Auth\Simple ($SAML_options['sp_profile']);
 	header("Location: ".$as->getLogoutURL('/'));
 	exit;
 }
