@@ -16,7 +16,7 @@ task:
         cpu: 1
         memory: 1G
       env:
-        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.32.phar
+        - PHPUNIT_BIN: $HOME/bin/phpunit-8.5.33.phar
     - container:
         image: ubuntu:20.04 # PHP 7.4
         cpu: 1
