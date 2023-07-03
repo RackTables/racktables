@@ -5084,7 +5084,7 @@ function doSwitchSNMPmining ($objectInfo, $device)
 	$ifInfo = array();
 	foreach ($device->snmpwalkoid ($ifDescr_tablename) as $oid => $value)
 	{
-		$randomindex = preg_replace ("/^.*${ifDescr_tablename}\.(.+)\$/", '\\1', $oid);
+		$randomindex = preg_replace ("/^.*{$ifDescr_tablename}\.(.+)\$/", '\\1', $oid);
 		$value = trim (preg_replace ('/^[^:]+: (.+)$/', '\\1', $value), '"');
 		$ifInfo[$randomindex]['ifDescr'] = $value;
 	}
@@ -5170,7 +5170,7 @@ function doPDUSNMPmining ($objectInfo, $switch)
 	{
 		throw $iae->newIRAE();
 	}
-	showSuccess ("Added ${portno} port(s)");
+	showSuccess ("Added {$portno} port(s)");
 	return buildRedirectURL (NULL, 'ports');
 }
 

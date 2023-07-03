@@ -335,7 +335,7 @@ CREATE TABLE `IPv6Log` (
 				$prepared->execute (array($row['name'], 1561));
 				$row_id = $dbxlink->lastInsertID();
 				// Turn all racks in this row into objects
-				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id=${row['id']} ORDER BY name");
+				$result = $dbxlink->query ("SELECT id, name, height, comment FROM Rack WHERE row_id={$row['id']} ORDER BY name");
 				$racks = $result->fetchAll (PDO::FETCH_ASSOC);
 				unset ($result);
 				$sort_order = 1;
@@ -346,14 +346,14 @@ CREATE TABLE `IPv6Log` (
 					$prepared = $dbxlink->prepare ('INSERT INTO `Object` (`name`,`objtype_id`,`comment`) VALUES (?,?,?)');
 					$prepared->execute (array($rack['name'], 1560, $rack['comment']));
 					$rack_id = $dbxlink->lastInsertID();
-					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,27,${rack['height']})";
-					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES (${rack_id},1560,29,${sort_order})";
-					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',${row_id},'rack',${rack_id})";
-					$query[] = "UPDATE `RackSpace` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
-					$query[] = "UPDATE `Atom` SET `rack_id`=${rack_id} WHERE `rack_id`=${rack['id']}";
-					$query[] = "UPDATE `TagStorage` SET `entity_id`=${rack_id} WHERE `entity_realm`='rack' AND `entity_id`=${rack['id']}";
-					$query[] = "UPDATE `FileLink` SET `entity_id`=${rack_id} WHERE `entity_type`='rack' AND `entity_id`=${rack['id']}";
-					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT ${rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`=${rack['id']}";
+					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES ({$rack_id},1560,27,{$rack['height']})";
+					$query[] = "INSERT INTO `AttributeValue` (`object_id`,`object_tid`,`attr_id`,`uint_value`) VALUES ({$rack_id},1560,29,{$sort_order})";
+					$query[] = "INSERT INTO `EntityLink` (`parent_entity_type`,`parent_entity_id`,`child_entity_type`,`child_entity_id`) VALUES ('row',{$row_id},'rack',{$rack_id})";
+					$query[] = "UPDATE `RackSpace` SET `rack_id`={$rack_id} WHERE `rack_id`={$rack['id']}";
+					$query[] = "UPDATE `Atom` SET `rack_id`={$rack_id} WHERE `rack_id`={$rack['id']}";
+					$query[] = "UPDATE `TagStorage` SET `entity_id`={$rack_id} WHERE `entity_realm`='rack' AND `entity_id`={$rack['id']}";
+					$query[] = "UPDATE `FileLink` SET `entity_id`={$rack_id} WHERE `entity_type`='rack' AND `entity_id`={$rack['id']}";
+					$query[] = "INSERT INTO `ObjectHistory` (`id`,`name`,`objtype_id`,`comment`,`ctime`,`user_name`) SELECT {$rack_id},`name`,1560,`comment`,`ctime`,`user_name` FROM `RackHistory` WHERE `id`={$rack['id']}";
 					$sort_order++;
 				}
 			}
@@ -675,7 +675,7 @@ CREATE TABLE `VSEnabledPorts` (
 			$links = $result->fetchAll (PDO::FETCH_ASSOC);
 			unset ($result);
 			foreach ($links as $link)
-				$query[] = "UPDATE `Link` SET `porta`=${link['portb']}, `portb`=${link['porta']} WHERE `porta`=${link['porta']} AND `portb`=${link['portb']}";
+				$query[] = "UPDATE `Link` SET `porta`={$link['portb']}, `portb`={$link['porta']} WHERE `porta`={$link['porta']} AND `portb`={$link['portb']}";
 
 			// add triggers
 			$query[] = "
@@ -1392,11 +1392,11 @@ function executeUpgradeBatch ($batchid)
 	$query = getUpgradeBatch($batchid);
 	if ($query === NULL)
 	{
-		showError ("unknown batch '${batchid}'", __FUNCTION__);
+		showError ("unknown batch '{$batchid}'", __FUNCTION__);
 		die;
 	}
 	$failures = array();
-	echo "<tr><th>Executing batch '${batchid}'</th><td>";
+	echo "<tr><th>Executing batch '{$batchid}'</th><td>";
 	foreach ($query as $q)
 	{
 		try
@@ -1417,7 +1417,7 @@ function executeUpgradeBatch ($batchid)
 		foreach ($failures as $f)
 		{
 			list ($q, $i) = $f;
-			echo "${q} -- ${i}\n";
+			echo "{$q} -- {$i}\n";
 		}
 		echo "</pre>";
 	}
@@ -1458,11 +1458,11 @@ function showUpgradeError ($info = '', $location = 'N/A')
 		$location = basename ($location);
 	elseif ($location != 'N/A')
 		$location = $location . '()';
-	echo "<div class=msg_error>An error has occurred in [${location}]. ";
+	echo "<div class=msg_error>An error has occurred in [{$location}]. ";
 	if ($info == '')
 		echo 'No additional information is available.';
 	else
-		echo "Additional information:<br><p>\n<pre>\n${info}\n</pre></p>";
+		echo "Additional information:<br><p>\n<pre>\n{$info}\n</pre></p>";
 	echo "Go back or try starting from <a href='index.php'>index page</a>.<br></div>\n";
 }
 
@@ -1555,7 +1555,7 @@ echo '<h1>Upgrade status</h1>';
 global $dbver;
 $dbver = getDatabaseVersion();
 echo '<table border=1 cellpadding=5>';
-echo "<tr><th>Current status</th><td>Data version: ${dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
+echo "<tr><th>Current status</th><td>Data version: {$dbver}<br>Code version: " . CODE_VERSION . "</td></tr>\n";
 
 $path = getDBUpgradePath ($dbver, CODE_VERSION);
 if ($path === NULL)
@@ -1570,11 +1570,11 @@ else
 		echo "<tr><th>Summary</th><td>Come back later.</td></tr>\n";
 	else
 	{
-		echo "<tr><th>Upgrade path</th><td>${dbver} &rarr; " . implode (' &rarr; ', $path) . "</td></tr>\n";
+		echo "<tr><th>Upgrade path</th><td>{$dbver} &rarr; " . implode (' &rarr; ', $path) . "</td></tr>\n";
 		global $relnotes;
 		foreach ($path as $batchid)
 			if (isset ($relnotes[$batchid]))
-				echo "<tr><th>Release notes for ${batchid}</th><td><pre>" . $relnotes[$batchid] . "</pre></td></tr>\n";
+				echo "<tr><th>Release notes for {$batchid}</th><td><pre>" . $relnotes[$batchid] . "</pre></td></tr>\n";
 		if (array_key_exists ('reallyreally', $_REQUEST))
 		{
 			foreach ($path as $batchid)

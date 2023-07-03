@@ -189,7 +189,7 @@ class RackCodeParser
 							$this->lex_value = $buffer;
 							return $buffer;
 						default:
-							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == {$state}, char == {$char}");
 					}
 					break;
 				case self::LEX_S_TAG:
@@ -209,7 +209,7 @@ class RackCodeParser
 						case 'END':
 							throw new RCParserError ("Expecting '$breaking_char' character");
 						default:
-							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == {$state}, char == {$char}");
 					}
 					break;
 				case self::LEX_S_COMMENT:
@@ -224,11 +224,11 @@ class RackCodeParser
 							$buffer = '';
 							break;
 						default:
-							throw new RackTablesError ("Lex FSM error, state == ${state}, char == ${char}");
+							throw new RackTablesError ("Lex FSM error, state == {$state}, char == {$char}");
 					}
 					break;
 				default:
-					throw new RackTablesError ("Lex FSM error, state == ${state}");
+					throw new RackTablesError ("Lex FSM error, state == {$state}");
 			endswitch;
 		endwhile;
 		return NULL;
@@ -451,7 +451,7 @@ class RackCodeParser
 
 function refRCLineno ($ln)
 {
-	return "<a href='index.php?page=perms&tab=default&line=${ln}'>line ${ln}</a>";
+	return "<a href='index.php?page=perms&tab=default&line={$ln}'>line {$ln}</a>";
 }
 
 // returns warning message or NULL
@@ -513,20 +513,20 @@ function checkAutotagName ($atag_name)
 			}
 			catch (EntityNotFoundException $e)
 			{
-				return "$description with ID '${recid}' does not exist.";
+				return "$description with ID '{$recid}' does not exist.";
 			}
 			break;
 		case (preg_match ('/^\$username_/', $atag_name)):
 			$recid = preg_replace ('/^\$username_/', '', $atag_name);
 			global $require_local_account;
 			if ($require_local_account && NULL === getUserIDByUsername ($recid))
-				return "Local user account '${recid}' does not exist.";
+				return "Local user account '{$recid}' does not exist.";
 			break;
 		case (preg_match ('/^\$page_([\p{L}0-9]+)$/u', $atag_name, $m)):
 			$recid = $m[1];
 			global $page;
 			if (! isset ($page[$recid]))
-				return "Page number '${recid}' does not exist.";
+				return "Page number '{$recid}' does not exist.";
 			break;
 		case (preg_match ('/^\$(tab|op)_[\p{L}0-9_]+$/u', $atag_name)):
 		case (preg_match ('/^\$typeid_\d+$/', $atag_name)): // FIXME: check value validity
@@ -604,9 +604,9 @@ function findTagWarnings ($expr)
 		default:
 			return array (array
 			(
-				'header' => "internal error in ${self}",
+				'header' => "internal error in {$self}",
 				'class' => 'error',
-				'text' => "Skipped expression of unknown type '${expr['type']}'"
+				'text' => "Skipped expression of unknown type '{$expr['type']}'"
 			));
 	}
 }
@@ -721,7 +721,7 @@ function getRackCodeWarnings ()
 				(
 					'header' => 'internal error',
 					'class' => 'error',
-					'text' => "Skipped sentence of unknown type '${sentence['type']}'"
+					'text' => "Skipped sentence of unknown type '{$sentence['type']}'"
 				);
 		}
 
@@ -754,7 +754,7 @@ function getRackCodeWarnings ()
 	(
 		'header' => 'summary',
 		'class' => $nwarnings ? 'error' : 'success',
-		'text' => "Analysis complete, ${nwarnings} issues discovered."
+		'text' => "Analysis complete, {$nwarnings} issues discovered."
 	);
 	return $ret;
 }

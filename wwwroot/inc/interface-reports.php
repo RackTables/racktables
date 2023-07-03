@@ -126,7 +126,7 @@ function render8021QReport ()
 			{
 				$attrs = $vlanstats[$vlan_id][$domain_id]['vlan_descr'] == '' ? NULL :
 					array ('title' => $vlanstats[$vlan_id][$domain_id]['vlan_descr']);
-				echo mkA ('&exist;', 'vlan', "${domain_id}-${vlan_id}", NULL, $attrs);
+				echo mkA ('&exist;', 'vlan', "{$domain_id}-{$vlan_id}", NULL, $attrs);
 			}
 			echo '</td>';
 		}
@@ -145,7 +145,7 @@ function renderReports ($what)
 	echo "<table align=center>\n";
 	foreach ($what as $item)
 	{
-		echo "<tr><th colspan=2><h3>${item['title']}</h3></th></tr>\n";
+		echo "<tr><th colspan=2><h3>{$item['title']}</h3></th></tr>\n";
 		switch ($item['type'])
 		{
 			case 'counters':
@@ -154,7 +154,7 @@ function renderReports ($what)
 				else
 					$data = $item['func'] ();
 				foreach ($data as $header => $data)
-					echo "<tr><td class=tdright>${header}:</td><td class=tdleft>${data}</td></tr>\n";
+					echo "<tr><td class=tdright>{$header}:</td><td class=tdleft>{$data}</td></tr>\n";
 				break;
 			case 'messages':
 				if (array_key_exists ('args', $item))
@@ -162,7 +162,7 @@ function renderReports ($what)
 				else
 					$data = $item['func'] ();
 				foreach ($data as $msg)
-					echo "<tr class='msg_${msg['class']}'><td class=tdright>${msg['header']}:</td><td class=tdleft>${msg['text']}</td></tr>\n";
+					echo "<tr class='msg_{$msg['class']}'><td class=tdright>{$msg['header']}:</td><td class=tdleft>{$msg['text']}</td></tr>\n";
 				break;
 			case 'meters':
 				if (array_key_exists ('args', $item))
@@ -171,7 +171,7 @@ function renderReports ($what)
 					$data = $item['func'] ();
 				foreach ($data as $meter)
 				{
-					echo "<tr><td class=tdright>${meter['title']}:</td><td class=tdleft>";
+					echo "<tr><td class=tdright>{$meter['title']}:</td><td class=tdleft>";
 					renderProgressBar ($meter['max'] ? $meter['current'] / $meter['max'] : 0);
 					echo ' <small>' . ($meter['max'] ? $meter['current'] . '/' . $meter['max'] : '0') . '</small></td></tr>';
 				}
@@ -206,7 +206,7 @@ function renderTagStats ()
 	);
 	foreach (getTagChart (getConfigVar ('TAGS_TOPLIST_SIZE')) as $taginfo)
 	{
-		echo "<tr><td>${taginfo['tag']}</td><td>" . $taginfo['refcnt']['total'] . "</td>";
+		echo "<tr><td>{$taginfo['tag']}</td><td>" . $taginfo['refcnt']['total'] . "</td>";
 		foreach (array ('object', 'ipv4net', 'ipv6net', 'rack', 'ipv4vs', 'ipv4rspool', 'user', 'file') as $realm)
 		{
 			echo '<td>';
@@ -214,7 +214,7 @@ function renderTagStats ()
 				echo '&nbsp;';
 			else
 			{
-				echo "<a href='index.php?page=" . $pagebyrealm[$realm] . "&cft[]=${taginfo['id']}'>";
+				echo "<a href='index.php?page=" . $pagebyrealm[$realm] . "&cft[]={$taginfo['id']}'>";
 				echo $taginfo['refcnt'][$realm] . '</a>';
 			}
 			echo '</td>';
@@ -238,7 +238,7 @@ function renderExpirations ()
 			$result = scanAttrRelativeDays ($attr_id, $section['from'], $section['to']);
 
 			echo '<table align=center width=60% border=0 cellpadding=5 cellspacing=0 align=center class=cooltable>';
-			echo "<caption>${section['title']}</caption>\n";
+			echo "<caption>{$section['title']}</caption>\n";
 
 			if (! count ($result))
 			{
@@ -255,11 +255,11 @@ function renderExpirations ()
 				$attributes = getAttrValues ($object['id']);
 				$oem_sn_1 = array_key_exists (1, $attributes) ? $attributes[1]['a_value'] : '&nbsp;';
 				echo '<tr class=' . $section['class'] . $order . ' valign=top>';
-				echo "<td class=tdright>${count}</td>";
+				echo "<td class=tdright>{$count}</td>";
 				echo '<td class=tdleft>' . mkCellA ($object) . '</td>';
-				echo "<td class=tdleft>${object['asset_no']}</td>";
-				echo "<td class=tdleft>${oem_sn_1}</td>";
-				echo "<td>${date_value}</td>";
+				echo "<td class=tdleft>{$object['asset_no']}</td>";
+				echo "<td class=tdleft>{$oem_sn_1}</td>";
+				echo "<td>{$date_value}</td>";
 				echo "</tr>\n";
 				$order = $nextorder[$order];
 				$count++;
@@ -298,8 +298,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
 			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
-			"LEFT JOIN `${table}` ON EL.child_entity_id = `${table}`.id " .
-			"WHERE EL.child_entity_type = ? AND `${table}`.id IS NULL",
+			"LEFT JOIN `{$table}` ON EL.child_entity_id = `{$table}`.id " .
+			"WHERE EL.child_entity_type = ? AND `{$table}`.id IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -325,9 +325,9 @@ function renderDataIntegrityReport ()
 				$parent_name = 'missing from DB';
 			}
 			echo '<tr>';
-			echo "<td>${realm_name}: ${parent_name}</td>";
-			echo "<td>${orphan['child_entity_type']}</td>";
-			echo "<td class=tdright>${orphan['child_entity_id']}</td>";
+			echo "<td>{$realm_name}: {$parent_name}</td>";
+			echo "<td>{$orphan['child_entity_type']}</td>";
+			echo "<td class=tdright>{$orphan['child_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -342,8 +342,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT EL.parent_entity_type, EL.parent_entity_id, ' .
 			'EL.child_entity_type, EL.child_entity_id FROM EntityLink EL ' .
-			"LEFT JOIN `${table}` ON EL.parent_entity_id = `${table}`.id " .
-			"WHERE EL.parent_entity_type = ? AND `${table}`.id IS NULL",
+			"LEFT JOIN `{$table}` ON EL.parent_entity_id = `{$table}`.id " .
+			"WHERE EL.parent_entity_type = ? AND `{$table}`.id IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -369,9 +369,9 @@ function renderDataIntegrityReport ()
 				$child_name = 'missing from DB';
 			}
 			echo '<tr>';
-			echo "<td>${realm_name}: ${child_name}</td>";
-			echo "<td>${orphan['parent_entity_type']}</td>";
-			echo "<td class=tdright>${orphan['parent_entity_id']}</td>";
+			echo "<td>{$realm_name}: {$child_name}</td>";
+			echo "<td>{$orphan['parent_entity_type']}</td>";
+			echo "<td class=tdright>{$orphan['parent_entity_id']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -570,8 +570,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT TS.entity_realm, TS.entity_id, TT.tag FROM TagStorage TS ' .
 			'LEFT JOIN TagTree TT ON TS.tag_id = TT.id ' .
-			"LEFT JOIN ${details['table']} ON TS.entity_id = ${details['table']}.${details['column']} " .
-			"WHERE TS.entity_realm = ? AND ${details['table']}.${details['column']} IS NULL",
+			"LEFT JOIN {$details['table']} ON TS.entity_id = {$details['table']}.{$details['column']} " .
+			"WHERE TS.entity_realm = ? AND {$details['table']}.{$details['column']} IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -605,8 +605,8 @@ function renderDataIntegrityReport ()
 		(
 			'SELECT FL.entity_type, FL.entity_id, F.id FROM FileLink FL ' .
 			'LEFT JOIN File F ON FL.file_id = F.id ' .
-			"LEFT JOIN `${details['table']}` ON FL.entity_id = `${details['table']}`.`${details['column']}` " .
-			"WHERE FL.entity_type = ? AND `${details['table']}`.`${details['column']}` IS NULL",
+			"LEFT JOIN `{$details['table']}` ON FL.entity_id = `{$details['table']}`.`{$details['column']}` " .
+			"WHERE FL.entity_type = ? AND `{$details['table']}`.`{$details['column']}` IS NULL",
 			array ($realm)
 		);
 		$rows = $result->fetchAll (PDO::FETCH_ASSOC);
@@ -751,9 +751,9 @@ function renderDataIntegrityReport ()
 	$plugins = getPlugins ('enabled');
 	foreach (array_keys ($plugins) as $plugin)
 	{
-		global ${"plugin_${plugin}_fkeys"};
-		if (isset (${"plugin_${plugin}_fkeys"}))
-			$known_fkeys = array_merge ($known_fkeys, ${"plugin_${plugin}_fkeys"});
+		global {$"plugin_{$plugin}_fkeys"};
+		if (isset ({$"plugin_{$plugin}_fkeys"}))
+			$known_fkeys = array_merge ($known_fkeys, {$"plugin_{$plugin}_fkeys"});
 	}
 	$known_fkeys = reindexById ($known_fkeys, 'fkey_name');
 	ksort ($known_fkeys);
@@ -816,10 +816,10 @@ function renderDataIntegrityReport ()
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td class=tdright>${invalid['id']}</td>";
-			echo "<td>${invalid['name']}</td>";
-			echo "<td class=tdright>${invalid['parent_id']}</td>";
-			echo "<td>${invalid['parent_name']}</td>";
+			echo "<td class=tdright>{$invalid['id']}</td>";
+			echo "<td>{$invalid['name']}</td>";
+			echo "<td class=tdright>{$invalid['parent_id']}</td>";
+			echo "<td>{$invalid['parent_name']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -869,9 +869,9 @@ function renderDataIntegrityReport ()
 		foreach ($invalids as $invalid)
 		{
 			echo '<tr>';
-			echo "<td class=tdright>${invalid['id']}</td>";
-			echo "<td>${invalid['tag']}</td>";
-			echo "<td class=tdright>${invalid['parent_id']}</td>";
+			echo "<td class=tdright>{$invalid['id']}</td>";
+			echo "<td>{$invalid['tag']}</td>";
+			echo "<td class=tdright>{$invalid['parent_id']}</td>";
 			printf('<td>%s</td>', $taglist[$invalid['parent_id']]['tag']);
 			echo "</tr>\n";
 		}
