@@ -31,6 +31,7 @@ class RCParserError extends Exception
  * 	$statements = $parser->parse ($text1);
  * 	$expression = $parser->parse ($text2, 'expr');
  */
+#[AllowDynamicProperties]
 class RackCodeParser
 {
 	function parse ($text, $root_nt = 'prog')
