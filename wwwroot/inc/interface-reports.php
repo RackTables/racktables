@@ -751,9 +751,9 @@ function renderDataIntegrityReport ()
 	$plugins = getPlugins ('enabled');
 	foreach (array_keys ($plugins) as $plugin)
 	{
-		global {$"plugin_{$plugin}_fkeys"};
-		if (isset ({$"plugin_{$plugin}_fkeys"}))
-			$known_fkeys = array_merge ($known_fkeys, {$"plugin_{$plugin}_fkeys"});
+		global ${"plugin_${plugin}_fkeys"};
+		if (isset (${"plugin_${plugin}_fkeys"}))
+			$known_fkeys = array_merge ($known_fkeys, ${"plugin_${plugin}_fkeys"});
 	}
 	$known_fkeys = reindexById ($known_fkeys, 'fkey_name');
 	ksort ($known_fkeys);
