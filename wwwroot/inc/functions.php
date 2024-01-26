@@ -5040,8 +5040,14 @@ function searchEntitiesByText ($terms)
 		if ($net_id = getIPv4AddressNetworkId ($ip_bin))
 			$summary['ipv4addressbydq'][$ip_bin] = array ('net_id' => $net_id, 'ip' => $ip_bin);
 	}
-	elseif (FALSE !== ($ip_bin = ip6_checkparse ($terms)))
-	// Search for IPv6 address
+	elseif (FALSE !== ($ip_bin = ip6_checkparse ($terms)) && $ip_bin[0] != "\x00")
+	// Search for an IPv6 address, unless this is a WWN address.  The matter is,
+	// all WWN addresses in the colon-separated syntax (xx:xx:xx:xx:xx:xx:xx:xx)
+	// conform to IPv6 address syntax, so the attempt to parse would not fail.
+	// To tell IPv6 from WWN, mind that in the parse result all WWN addresses
+	// would have every odd octet equal to zero, and all remotely valid IPv6
+	// addresses from the currently assigned address space would have the first
+	// octet equal to 0x20, 0xFC, 0xFE or 0xFF.
 	{
 		if ($net_id = getIPv6AddressNetworkId ($ip_bin))
 			$summary['ipv6addressbydq'][$ip_bin] = array ('net_id' => $net_id, 'ip' => $ip_bin);
