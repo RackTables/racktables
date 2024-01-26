@@ -6062,7 +6062,7 @@ function setDBMutex ($name, $timeout = 5)
 	$row = $result->fetchColumn();
 	if ($row === NULL)
 		throw new RTDatabaseError ("error occurred when executing GET_LOCK on $fullname");
-	if ($row !== '1')
+	if ($row != 1)
 		throw new RTDatabaseError ("lock wait timeout for $fullname");
 	return TRUE;
 }
@@ -6082,8 +6082,7 @@ function tryDBMutex ($name, $timeout = 0)
 function releaseDBMutex ($name)
 {
 	$result = usePreparedSelectBlade ('SELECT RELEASE_LOCK(?)', array (getDBName() . '.' . $name));
-	$row = $result->fetchColumn();
-	return $row === '1';
+	return $result->fetchColumn() == 1;
 }
 
 // valid states: disabled, enabled, not_installed
