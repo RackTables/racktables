@@ -27,7 +27,8 @@
 # entry in sudoers along the following lines:
 # httpduser ALL=(racktablesuser) NOPASSWD:/path/to/racktables/gateways/git-commit
 
-readonly THISFILE=$(basename "$0")
+THISFILE=$(basename "$0")
+readonly THISFILE
 
 print_usage_and_exit_0()
 {
@@ -129,14 +130,16 @@ git_push_or_exit()
 git_commit_or_exit()
 {
 	assert_nonempty_option -f "$FILEPATH"
-	readonly GCOE_REALPATH=$(realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH")
+	GCOE_REALPATH=$(realpath --canonicalize-missing --relative-to="$REPODIR" "$FILEPATH")
+	readonly GCOE_REALPATH
 	if [ "$GCOE_REALPATH" != "${GCOE_REALPATH#../}" ]; then
 		print_error "file path '$FILEPATH' is outside of the repository directory '$REPODIR'"
 		exit 12
 	fi
 	# git processes the path to the file automatically, but the shell
 	# redirection obviously does not.
-	readonly GCOE_DIRNAME=$(dirname "$FILEPATH")
+	GCOE_DIRNAME=$(dirname "$FILEPATH")
+	readonly GCOE_DIRNAME
 	if [ ! -d "$GCOE_DIRNAME" ]; then
 		mkdir -p "$GCOE_DIRNAME" || {
 			print_error "failed to create missing directory '$GCOE_DIRNAME'"
@@ -294,7 +297,8 @@ command -v git >/dev/null || {
 	print_error "git is not available"
 	exit 7
 }
-readonly INTREE=$(git rev-parse --is-inside-work-tree 2>/dev/null)
+INTREE=$(git rev-parse --is-inside-work-tree 2>/dev/null)
+readonly INTREE
 [ "$INTREE" = 'true' ] || {
 	print_error "the directory '$REPODIR' exists, but is not within a git repository"
 	exit 8
