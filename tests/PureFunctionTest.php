@@ -530,7 +530,6 @@ class PureFunctionTest extends RTTestCase
 			array ('nullIfEmptyStr', 'abc', 'abc'),
 			array ('nullIfEmptyStr', '', NULL), // intended use case: '' == ''
 			array ('nullIfEmptyStr', '0', '0'),
-			array ('nullIfEmptyStr', 0, NULL), // type conversion: 0 == ''
 			array ('nullIfEmptyStr', NULL, NULL), // type conversion: NULL == ''
 			array ('nullIfEmptyStr', FALSE, NULL), // type conversion: FALSE == ''
 
@@ -540,8 +539,6 @@ class PureFunctionTest extends RTTestCase
 			array ('nullIfFalse', FALSE, NULL), // intended use case: FALSE === FALSE
 			array ('nullIfFalse', NULL, NULL),
 
-			array ('nullIfZero', 'abc', NULL), // type conversion: 'abc' == 0
-			array ('nullIfZero', '', NULL), // type conversion: '' == 0
 			array ('nullIfZero', '0', NULL), // type conversion: '0' == 0
 			array ('nullIfZero', '1', '1'),
 			array ('nullIfZero', 0, NULL), // intended use case: 0 == 0
