@@ -1,6 +1,7 @@
 0.22.1
 	bugfix: squelch some warnings with PHP 8.0 (GH #280 by Dirk Meyer)
 	update: use PHP namespaces for SimpleSAMLphp (GH #284 by Jacob LeMire)
+	update: upgrade CodeMirror to 5.65.16
 0.22.0 2022-02-15
 	update: drop support for PHP 5.x
 	update: add HDMI port type
