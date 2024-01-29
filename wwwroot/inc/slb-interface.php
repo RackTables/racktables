@@ -24,14 +24,14 @@ function renderSLBDefConfig()
 function renderSLBEntityCell ($cell, $highlighted = FALSE)
 {
 	setEntityColors ($cell);
-	$class = "slbcell realm-${cell['realm']} id-${cell['id']} " . getCellClass ($cell, 'list_plain');
+	$class = "slbcell realm-{$cell['realm']} id-{$cell['id']} " . getCellClass ($cell, 'list_plain');
 	$a_class = $highlighted ? 'highlight' : '';
 
 	echo "<table class='$class'>";
 	switch ($cell['realm'])
 	{
 	case 'object':
-		echo "<tr><td><a class='$a_class' href='index.php?page=object&object_id=${cell['id']}'>${cell['dname']}</a>";
+		echo "<tr><td><a class='$a_class' href='index.php?page=object&object_id={$cell['id']}'>{$cell['dname']}</a>";
 		echo "</td></tr><tr><td>";
 		printImageHREF ('LB');
 		echo "</td></tr>";
@@ -40,7 +40,7 @@ function renderSLBEntityCell ($cell, $highlighted = FALSE)
 		echo "<tr><td rowspan=3 width='5%'>";
 		printImageHREF ('VS');
 		echo "</td><td>";
-		echo "<a class='$a_class' href='index.php?page=ipv4vs&vs_id=${cell['id']}'>";
+		echo "<a class='$a_class' href='index.php?page=ipv4vs&vs_id={$cell['id']}'>";
 		echo $cell['dname'] . "</a></td></tr><tr><td>";
 		echo $cell['name'] . '</td></tr>';
 		break;
@@ -48,13 +48,13 @@ function renderSLBEntityCell ($cell, $highlighted = FALSE)
 		echo "<tr><td rowspan=3 width='5%'>";
 		printImageHREF ('VS');
 		echo "</td><td>";
-		echo "<a class='$a_class' href='index.php?page=ipvs&vs_id=${cell['id']}'>";
+		echo "<a class='$a_class' href='index.php?page=ipvs&vs_id={$cell['id']}'>";
 		echo $cell['name'] . "</a></td></tr>";
 		break;
 	case 'ipv4rspool':
 		echo "<tr><td>";
-		echo "<a class='$a_class' href='index.php?page=ipv4rspool&pool_id=${cell['id']}'>";
-		echo $cell['name'] == '' ? "ANONYMOUS pool [${cell['id']}]" : stringForTD ($cell['name']);
+		echo "<a class='$a_class' href='index.php?page=ipv4rspool&pool_id={$cell['id']}'>";
+		echo $cell['name'] == '' ? "ANONYMOUS pool [{$cell['id']}]" : stringForTD ($cell['name']);
 		echo "</a></td></tr><tr><td>";
 		printImageHREF ('RS pool');
 		if ($cell['rscount'])
@@ -177,7 +177,7 @@ function renderSLBTriplets ($cell)
 			$cells = array();
 			foreach ($slb->display_cells as $field)
 				$cells[] = $slb->$field;
-			echo "<tr valign=top class='row_${order} triplet-row'>";
+			echo "<tr valign=top class='row_{$order} triplet-row'>";
 			foreach ($cells as $slb_cell)
 			{
 				echo "<td class=tdleft>";
@@ -233,7 +233,7 @@ function renderSLBTripletsEdit ($cell)
 			$del_params = $ids;
 			$del_params['op'] = 'delLB';
 			printOpFormIntro ('updLB', $ids);
-			echo "<tr valign=top class=row_${order}><td rowspan=2 class=tdright valign=middle>";
+			echo "<tr valign=top class=row_{$order}><td rowspan=2 class=tdright valign=middle>";
 			echo getOpLink ($del_params, '', 'DELETE', 'Unconfigure');
 			echo "</td><td class=tdleft valign=bottom>";
 			renderSLBEntityCell ($cells[0]);
@@ -241,7 +241,7 @@ function renderSLBTripletsEdit ($cell)
 			echo '<td class=tdleft rowspan=2 valign=middle>';
 			printImageHREF ('SAVE', 'Save changes', TRUE);
 			echo "</td>";
-			echo "</tr><tr class=row_${order}><td class=tdleft valign=top>";
+			echo "</tr><tr class=row_{$order}><td class=tdleft valign=top>";
 			renderSLBEntityCell ($cells[1]);
 			echo '</td><td>';
 			echo "<textarea name=rsconfig rows=5 cols=70>" . stringForTextarea ($slb->slb['rsconfig']) . "</textarea><br>RS config &uarr;";
@@ -389,14 +389,14 @@ function renderEditRSList ($rs_list)
 	foreach ($rs_list as $rsid => $rs)
 	{
 		printOpFormIntro ('updRS', array ('rs_id' => $rsid));
-		echo "<tr valign=top class=row_${order}><td>";
+		echo "<tr valign=top class=row_{$order}><td>";
 		echo getOpLink (array('op'=>'delRS', 'id'=>$rsid), '', 'delete', 'Delete this real server');
-		echo "</td><td><input type=text name=rsip value='${rs['rsip']}'></td>";
-		echo "<td><input type=text name=rsport size=5 value='${rs['rsport']}'></td>";
-		echo "<td><input type=text name=comment size=15 value='${rs['comment']}'></td>";
+		echo "</td><td><input type=text name=rsip value='{$rs['rsip']}'></td>";
+		echo "<td><input type=text name=rsport size=5 value='{$rs['rsport']}'></td>";
+		echo "<td><input type=text name=comment size=15 value='{$rs['comment']}'></td>";
 		$checked = $rs['inservice'] == 'yes' ? 'checked' : '';
 		echo "<td><input type=checkbox name=inservice $checked></td>";
-		echo "<td><textarea name=rsconfig>${rs['rsconfig']}</textarea></td><td>";
+		echo "<td><textarea name=rsconfig>{$rs['rsconfig']}</textarea></td><td>";
 		printImageHREF ('SAVE', 'Save changes', TRUE);
 		echo "</td></tr></form>\n";
 		$order = $nextorder[$order];
@@ -425,7 +425,7 @@ function portletRSPoolAddMany ($pool_id)
 function renderRSPoolServerForm ($pool_id)
 {
 	$poolInfo = spotEntity ('ipv4rspool', $pool_id);
-	startPortlet ("Manage RS list (${poolInfo['rscount']})");
+	startPortlet ("Manage RS list ({$poolInfo['rscount']})");
 	renderEditRSList (getRSListInPool ($pool_id));
 	finishPortlet();
 
@@ -464,7 +464,7 @@ function renderRealServerList ()
 			$order = $nextorder[$order];
 			$last_pool_id = $rsinfo['rspool_id'];
 		}
-		echo "<tr valign=top class=row_${order}><td>";
+		echo "<tr valign=top class=row_{$order}><td>";
 		$dname = $pool_list[$rsinfo['rspool_id']]['name'] != '' ? $pool_list[$rsinfo['rspool_id']]['name'] : 'ANONYMOUS';
 		echo mkA ($dname, 'ipv4rspool', $rsinfo['rspool_id']);
 		echo '</td><td align=center>';
@@ -473,8 +473,8 @@ function renderRealServerList ()
 		else
 			printImageHREF ('notinservice', 'NOT in service');
 		echo '</td><td>' . mkA ($rsinfo['rsip'], 'ipaddress', $rsinfo['rsip']) . '</td>';
-		echo "<td>${rsinfo['rsport']}</td>";
-		echo "<td><pre>${rsinfo['rsconfig']}</pre></td>";
+		echo "<td>{$rsinfo['rsport']}</td>";
+		echo "<td><pre>{$rsinfo['rsconfig']}</pre></td>";
 		echo "</tr>\n";
 	}
 	echo "</table>";
@@ -504,7 +504,7 @@ function renderVirtualService ($vsid)
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	if ($vsinfo['name'] != '')
-		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
+		echo "<tr><td colspan=2 align=center><h1>{$vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
 	echo '<td class=pcleft>';
@@ -540,7 +540,7 @@ function renderNewVSForm ()
 	echo "<table border=0 cellpadding=5 cellspacing=0 align=center>\n";
 	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip></td>";
 	echo "<tr><th class=tdright>Port:</th><td class=tdleft>";
-	echo "<input type=text name=vport size=5 value='${default_port}'></td></tr>";
+	echo "<input type=text name=vport size=5 value='{$default_port}'></td></tr>";
 	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
 	printSelect ($vs_proto, array ('name' => 'proto'), array_first (array_keys ($vs_proto)));
 	echo "</td></tr>";
@@ -562,12 +562,12 @@ function renderEditRSPool ($pool_id)
 	$poolinfo = spotEntity ('ipv4rspool', $pool_id);
 	printOpFormIntro ('updIPv4RSP');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='${poolinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='{$poolinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${poolinfo['vsconfig']}</textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${poolinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>{$poolinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>{$poolinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
@@ -581,7 +581,7 @@ function renderEditRSPool ($pool_id)
 	// delete link
 	echo '<p class="centered">';
 	if ($poolinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are ${poolinfo['refcnt']} LB link(s)");
+		echo getOpLink (NULL, 'Delete RS pool', 'nodestroy', "Could not delete: there are {$poolinfo['refcnt']} LB link(s)");
 	else
 		echo getOpLink (array ('op' => 'del'), 'Delete RS pool', 'destroy');
 	echo '</p>';
@@ -592,18 +592,18 @@ function renderEditVService ($vsid)
 	$vsinfo = spotEntity ('ipv4vs', $vsid);
 	printOpFormIntro ('updIPv4VS');
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='${vsinfo['vip']}'></td></tr>\n";
-	echo "<tr><th class=tdright>Port:</th><td class=tdleft><input type=text name=vport value='${vsinfo['vport']}'></td></tr>\n";
+	echo "<tr><th class=tdright>VIP:</th><td class=tdleft><input type=text name=vip value='{$vsinfo['vip']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Port:</th><td class=tdleft><input type=text name=vport value='{$vsinfo['vport']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Proto:</th><td class=tdleft>";
 	global $vs_proto;
 	printSelect ($vs_proto, array ('name' => 'proto'), $vsinfo['proto']);
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='${vsinfo['name']}'></td></tr>\n";
+	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name=name value='{$vsinfo['name']}'></td></tr>\n";
 	echo "<tr><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
-	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>${vsinfo['vsconfig']}</textarea></td></tr>\n";
-	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>${vsinfo['rsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>VS config:</th><td class=tdleft><textarea name=vsconfig rows=20 cols=80>{$vsinfo['vsconfig']}</textarea></td></tr>\n";
+	echo "<tr><th class=tdright>RS config:</th><td class=tdleft><textarea name=rsconfig rows=20 cols=80>{$vsinfo['rsconfig']}</textarea></td></tr>\n";
 	echo "<tr><th class=submit colspan=2>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
@@ -612,7 +612,7 @@ function renderEditVService ($vsid)
 	// delete link
 	echo '<p class="centered">';
 	if ($vsinfo['refcnt'] > 0)
-		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are ${vsinfo['refcnt']} LB link(s)");
+		echo getOpLink (NULL, 'Delete virtual service', 'nodestroy', "Could not delete: there are {$vsinfo['refcnt']} LB link(s)");
 	else
 		echo getOpLink (array ('op' => 'del'), 'Delete virtual service', 'destroy');
 }

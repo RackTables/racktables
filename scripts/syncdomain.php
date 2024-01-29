@@ -32,7 +32,7 @@ function print_message_line($text, $flags = 0)
 	global $options;
 	if (! array_key_exists ('verbose', $options) and $flags & PML_VERBOSE)
 		return;
-	$buff = date (DATE_RFC1123) . ": ${text}\n";
+	$buff = date (DATE_RFC1123) . ": {$text}\n";
 	echo $buff;
 	if (array_key_exists ('stderr', $options) and ! ($flags & PML_NOTICE))
 		fwrite (STDERR, $buff);
@@ -75,7 +75,7 @@ if (! $nolock)
 	$filename = '/var/tmp/RackTables-syncdomain-' . $domain_key . '.pid';
 	if (FALSE === $fp = @fopen ($filename, 'c+'))
 	{
-		print_message_line ("Failed to open ${filename}");
+		print_message_line ("Failed to open {$filename}");
 		exit (1);
 	}
 	$wouldblock = 0;
@@ -85,19 +85,19 @@ if (! $nolock)
 		$stat = fstat ($fp);
 		if (! isset ($stat['mtime']))
 		{
-			print_message_line ("Failed to obtain mtime of ${filename}");
+			print_message_line ("Failed to obtain mtime of {$filename}");
 			exit (1);
 		}
 		$pidfile_mtime = $stat['mtime'];
 		if ($current_time < $pidfile_mtime)
 		{
-			print_message_line ("Warning: pidfile ${filename} mtime is in future!");
+			print_message_line ("Warning: pidfile {$filename} mtime is in future!");
 			exit (1);
 		}
 		// don't indicate failure unless the pidfile is 15 minutes or more old
 		if ($current_time < $pidfile_mtime + 15 * 60)
 			exit (0);
-		print_message_line ("Failed to lock ${filename}, already locked by PID " . trim (fgets ($fp, 10)));
+		print_message_line ("Failed to lock {$filename}, already locked by PID " . trim (fgets ($fp, 10)));
 		exit (1);
 	}
 
@@ -166,11 +166,11 @@ foreach ($switch_queue as $object)
 			$flags = PML_NOTICE;
 			if (! $portsdone)
 				$flags |= PML_VERBOSE;
-			print_message_line ("Done '${object['dname']}': ${portsdone}", $flags);
+			print_message_line ("Done '{$object['dname']}': {$portsdone}", $flags);
 		}
 		catch (RackTablesError $e)
 		{
-			print_message_line ("FAILED '${object['dname']}': " . $e->getMessage());
+			print_message_line ("FAILED '{$object['dname']}': " . $e->getMessage());
 		}
 		if ($i_am_child)
 			exit (0);
@@ -180,7 +180,7 @@ foreach ($switch_queue as $object)
 
 	if (++$switchesdone == $max)
 	{
-		print_message_line ("Maximum of ${max} items reached, terminating", PML_NOTICE|PML_VERBOSE);
+		print_message_line ("Maximum of {$max} items reached, terminating", PML_NOTICE|PML_VERBOSE);
 		break;
 	}
 }
@@ -197,7 +197,7 @@ if (! $nolock)
 	flock ($fp, LOCK_UN); // explicitly unlock file as PHP 5.3.2 made it mandatory
 	if (FALSE === unlink ($filename))
 	{
-		print_message_line ("Failed removing pidfile ${filename}");
+		print_message_line ("Failed removing pidfile {$filename}");
 		exit (1);
 	}
 }

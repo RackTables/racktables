@@ -143,7 +143,7 @@ function render8021QOrderForm ($some_id)
 			echo '<td>' . mkA (stringForTD ($vdomlist[$item['vdom_id']], 64), 'vlandomain', $item['vdom_id']) . '</td>';
 		if ($pageno != 'vst')
 			echo '<td>' . mkA ($vstlist[$item['vst_id']], 'vst', $item['vst_id']) . '</td>';
-		echo "<td>${cutblock}</td></tr>";
+		echo "<td>{$cutblock}</td></tr>";
 	}
 	if
 	(
@@ -207,7 +207,7 @@ function render8021QStatus ()
 			if (count ($vst_info['etags']))
 				echo '<br><small>' . serializeTags ($vst_info['etags']) . '</small>';
 			echo '</td>';
-			echo "<td class=tdright>${vst_info['rulec']}</td><td class=tdright>${vst_info['switchc']}</td></tr>";
+			echo "<td class=tdright>{$vst_info['rulec']}</td><td class=tdright>{$vst_info['switchc']}</td></tr>";
 		}
 		echo '</table>';
 	}
@@ -304,13 +304,13 @@ function renderVLANDomain ($vdom_id)
 		global $dqtitle;
 		foreach ($mydomain['switchlist'] as $switchinfo)
 		{
-			echo "<tr class=row_${order}><td>";
+			echo "<tr class=row_{$order}><td>";
 			renderCell (spotEntity ('object', $switchinfo['object_id']));
 			echo '</td><td class=tdleft>';
 			echo $vstlist[$switchinfo['template_id']];
 			echo '</td><td>';
 			$qcode = detectVLANSwitchQueue (getVLANSwitchInfo ($switchinfo['object_id']));
-			printImageHREF ("DQUEUE ${qcode}", $dqtitle[$qcode]);
+			printImageHREF ("DQUEUE {$qcode}", $dqtitle[$qcode]);
 			echo '</td></tr>';
 			$order = $nextorder[$order];
 		}
@@ -346,7 +346,7 @@ function renderVLANDomain ($vdom_id)
 		{
 			foreach ($vlan_list as $domain_id => $vlan_info)
 			{
-				echo "<tr class=row_${order}>";
+				echo "<tr class=row_{$order}>";
 				echo '<td class=tdright>' . (count ($vlan_list) > 1 ? stringForLabel ($domain_options[$domain_id]) . ' ' : '') .
 					formatVLANAsShortLink ($vlan_info) . '</td>';
 				echo '<td>' . $vtdecoder[$vlan_info['vlan_type']] . '</td>';
@@ -525,8 +525,8 @@ function renderObject8021QPorts ($object_id)
 			$tdclass .= 'class="border_highlight"';
 			$anchor = "name='port-$hl_port_id'";
 		}
-		echo "<tr class='${trclass}' valign=top><td${td_extra} ${tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>" . $socket_columns;
-		echo "<td${td_extra}>${text_left}</td><td class=tdright nowrap${td_extra}>${text_right}</td></tr>";
+		echo "<tr class='{$trclass}' valign=top><td{$td_extra} {$tdclass} NOWRAP><a class='interactive-portname port-menu nolink' $anchor>{$port_name}</a></td>" . $socket_columns;
+		echo "<td{$td_extra}>{$text_left}</td><td class=tdright nowrap{$td_extra}>{$text_right}</td></tr>";
 		if (!array_key_exists ($port_name, $sockets))
 			continue;
 		$first_socket = TRUE;
@@ -535,7 +535,7 @@ function renderObject8021QPorts ($object_id)
 				$first_socket = FALSE;
 			else
 			{
-				echo "<tr class=${trclass} valign=top>";
+				echo "<tr class={$trclass} valign=top>";
 				foreach ($socket as $tmp)
 					echo '<td>' . $tmp . '</td>';
 				echo '</tr>';
@@ -544,7 +544,7 @@ function renderObject8021QPorts ($object_id)
 	echo '<tr><td colspan=5 class=tdcenter><ul class="btns-8021q-sync">';
 	if ($req_port_name == '' && $nports)
 	{
-		echo "<input type=hidden name=nports value=${nports}>";
+		echo "<input type=hidden name=nports value={$nports}>";
 		echo '<li>' . getImageHREF ('SAVE', 'save configuration', TRUE) . '</li>';
 	}
 	echo '</form>';
@@ -562,7 +562,7 @@ function renderObject8021QPorts ($object_id)
 		foreach ($desired_config as $pn => $portinfo)
 			if (editable8021QPort ($portinfo))
 				$port_options[$pn] = same8021QConfigs ($desired_config[$pn], $cached_config[$pn]) ?
-					$pn : "${pn} (*)";
+					$pn : "{$pn} (*)";
 		if (count ($port_options) < 2)
 			echo '&nbsp;';
 		else
@@ -613,8 +613,8 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 			if (nativeVlanChangePermitted ($port_name, $from, $to, 'save8021QConfig'))
 				$vlanpermissions[$from][] = $to;
 	}
-	$ret = "<input type=hidden name=pn_${nports} value='${port_name}'>";
-	$ret .= "<input type=hidden name=pm_${nports} value=access>";
+	$ret = "<input type=hidden name=pn_{$nports} value='{$port_name}'>";
+	$ret .= "<input type=hidden name=pm_{$nports} value=access>";
 	$options = array();
 	// Offer only options that are listed in domain and fit into VST.
 	// Never offer immune VLANs regardless of VST filter for this port.
@@ -632,7 +632,7 @@ function getAccessPortControlCode ($req_port_name, $vdom, $port_name, $port, &$n
 			$options[$vlan_id] = formatVLANAsOption ($vlan_info);
 	ksort ($options);
 	$options['same'] = '-- no change --';
-	$ret .= getSelect ($options, array ('name' => "pnv_${nports}"), 'same');
+	$ret .= getSelect ($options, array ('name' => "pnv_{$nports}"), 'same');
 	$nports++;
 	return $ret;
 }
@@ -694,7 +694,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 			$allowed_options[$vlan_id] = array
 			(
 				'vlan_type' => 'none',
-				'text' => "unlisted VLAN ${vlan_id}",
+				'text' => "unlisted VLAN {$vlan_id}",
 			);
 	ksort ($allowed_options);
 	foreach ($allowed_options as $vlan_id => $option)
@@ -710,8 +710,8 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 		// particular port, but it cannot be changed by user.
 		if ($option['vlan_type'] == 'alien')
 			$selected .= ' disabled';
-		echo "<tr><td nowrap colspan=2 class='${class}'>";
-		echo "<label><input type=checkbox name='pav_0[]' value='${vlan_id}'${selected}> ";
+		echo "<tr><td nowrap colspan=2 class='{$class}'>";
+		echo "<label><input type=checkbox name='pav_0[]' value='{$vlan_id}'{$selected}> ";
 		echo $option['text'] . "</label></td></tr>";
 	}
 	echo '</table>';
@@ -732,7 +732,7 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 				) : array
 				(
 					'vlan_type' => 'none',
-					'text' => "unlisted VLAN ${vlan_id}",
+					'text' => "unlisted VLAN {$vlan_id}",
 				);
 		foreach ($native_options as $vlan_id => $option)
 		{
@@ -755,8 +755,8 @@ function renderTrunkPortControls ($vswitch, $vdom, $port_name, $vlanport)
 				$option['vlan_type'] == 'alien'
 			)
 				$selected .= ' disabled';
-			echo "<tr><td nowrap colspan=2 class='${class}'>";
-			echo "<label><input type=radio name='pnv_0' value='${vlan_id}'${selected}> ";
+			echo "<tr><td nowrap colspan=2 class='{$class}'>";
+			echo "<label><input type=radio name='pnv_0' value='{$vlan_id}'{$selected}> ";
 			echo $option['text'] . "</label></td></tr>";
 		}
 	}
@@ -813,7 +813,7 @@ function renderVLANInfo ($vlan_ck)
 	foreach ($others as $other)
 		if ($other['domain_id'] != $vlan['domain_id'])
 		{
-			$counterpart_ck = "${other['domain_id']}-${vlan['vlan_id']}";
+			$counterpart_ck = "{$other['domain_id']}-{$vlan['vlan_id']}";
 			$counterpart_vlan = getVlanRow ($counterpart_ck);
 			$counterpart_link = mkA
 			(
@@ -907,7 +907,7 @@ function renderVLANInfo ($vlan_ck)
 		$order = 'odd';
 		foreach ($foreign_devices as $cell_id => $ports)
 		{
-			echo "<tr class=row_${order} valign=top><td>";
+			echo "<tr class=row_{$order} valign=top><td>";
 			$cell = spotEntity ('object', $cell_id);
 			renderCell ($cell);
 			echo "</td><td><ul>";
@@ -933,7 +933,7 @@ function renderVLANInfo ($vlan_ck)
 		foreach ($confports as $switch_id => $portlist)
 		{
 			usort_portlist ($portlist);
-			echo "<tr class=row_${order} valign=top><td>";
+			echo "<tr class=row_{$order} valign=top><td>";
 			$object = spotEntity ('object', $switch_id);
 			renderCell ($object);
 			echo '</td><td class=tdleft><ul>';
@@ -1116,7 +1116,7 @@ function renderObject8021QSync ($object_id)
 	if ($R !== NULL)
 		renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdecisions);
 	else
-		echo "<p class=row_error>gateway error: ${error}</p>";
+		echo "<p class=row_error>gateway error: {$error}</p>";
 	finishPortlet();
 	echo '</td></tr></table>';
 }
@@ -1134,7 +1134,7 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 	{
 		$push_duration = $vswitch['last_push_finished'] - $vswitch['last_push_started'];
 		$rows['last sync session with device'] = datetimestrFromTimestamp ($vswitch['last_push_started']) . ' (' . formatAge ($vswitch['last_push_started']) .
-			', ' . ($push_duration < 0 ?  'interrupted' : "lasted ${push_duration}s") . ')';
+			', ' . ($push_duration < 0 ?  'interrupted' : "lasted {$push_duration}s") . ')';
 	}
 	if ($vswitch['last_errno'])
 		$rows['failed'] = datetimestrFromTimestamp ($vswitch['last_error_ts']) . ' (' . strerror8021Q ($vswitch['last_errno']) . ')';
@@ -1143,7 +1143,7 @@ function renderObject8021QSyncSchedule ($object, $vswitch, $maxdecisions)
 		$rows = $new_rows;
 
 	foreach ($rows as $th => $td)
-		echo "<tr><th width='50%' class=tdright>${th}:</th><td class=tdleft colspan=2>${td}</td></tr>";
+		echo "<tr><th width='50%' class=tdright>{$th}:</th><td class=tdleft colspan=2>{$td}</td></tr>";
 
 	echo '<tr><th class=tdright>run now:</th><td class=tdcenter>';
 	printOpFormIntro ('exec8021QPull');
@@ -1225,8 +1225,8 @@ END
 		addJSInternal ('js/racktables.js');
 		printOpFormIntro ('resolve8021QConflicts', array ('mutex_rev' => $vswitch['mutex_rev']));
 		foreach (array ('left', 'asis', 'right') as $pos)
-			echo "<th class=tdcenter><input type=radio name=column_radio value=${pos} " .
-				"onclick=\"checkColumnOfRadios8021Q('i_', ${maxdecisions}, '_${pos}')\"></th>";
+			echo "<th class=tdcenter><input type=radio name=column_radio value={$pos} " .
+				"onclick=\"checkColumnOfRadios8021Q('i_', {$maxdecisions}, '_{$pos}')\"></th>";
 	}
 	echo '<th width="40%">running&nbsp;version</th></tr>';
 	$rownum = 0;
@@ -1356,35 +1356,35 @@ END
 			$anchor = "name='port-$hl_port_id'";
 			$td_class = ' border_highlight';
 		}
-		echo "<tr class='${trclass}'><td class='tdleft${td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $anchor>${port_name}</a></td>";
+		echo "<tr class='{$trclass}'><td class='tdleft{$td_class}' NOWRAP><a class='interactive-portname port-menu nolink' $anchor>{$port_name}</a></td>";
 		if (!count ($radio_attrs))
 		{
-			echo "<td class='tdleft${left_extra}'>${left_text}</td>";
+			echo "<td class='tdleft{$left_extra}'>{$left_text}</td>";
 			if ($maxdecisions)
 				echo '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
-			echo "<td class='tdleft${right_extra}'>${right_text}</td>";
+			echo "<td class='tdleft{$right_extra}'>{$right_text}</td>";
 		}
 		else
 		{
-			echo "<td class='tdleft${left_extra}'><label for=i_${rownum}_left>${left_text}</label></td>";
+			echo "<td class='tdleft{$left_extra}'><label for=i_{$rownum}_left>{$left_text}</label></td>";
 			foreach ($radio_attrs as $pos => $attrs)
-				echo "<td><input id=i_${rownum}_${pos} name=i_${rownum} type=radio value=${pos}${attrs}></td>";
-			echo "<td class='tdleft${right_extra}'><label for=i_${rownum}_right>${right_text}</label></td>";
+				echo "<td><input id=i_{$rownum}_{$pos} name=i_{$rownum} type=radio value={$pos}{$attrs}></td>";
+			echo "<td class='tdleft{$right_extra}'><label for=i_{$rownum}_right>{$right_text}</label></td>";
 		}
 		echo '</tr>';
 		if (count ($radio_attrs))
 		{
-			echo "<input type=hidden name=rm_${rownum} value=" . $item['right']['mode'] . '>';
-			echo "<input type=hidden name=rn_${rownum} value=" . $item['right']['native'] . '>';
+			echo "<input type=hidden name=rm_{$rownum} value=" . $item['right']['mode'] . '>';
+			echo "<input type=hidden name=rn_{$rownum} value=" . $item['right']['native'] . '>';
 			foreach ($item['right']['allowed'] as $a)
-				echo "<input type=hidden name=ra_${rownum}[] value=${a}>";
-			echo "<input type=hidden name=pn_${rownum} value='" . htmlspecialchars ($port_name) . "'>";
+				echo "<input type=hidden name=ra_{$rownum}[] value={$a}>";
+			echo "<input type=hidden name=pn_{$rownum} value='" . htmlspecialchars ($port_name) . "'>";
 		}
 		$rownum += count ($radio_attrs) ? 1 : 0;
 	}
 	if ($rownum) // normally should be equal to $maxdecisions
 	{
-		echo "<input type=hidden name=nrows value=${rownum}>";
+		echo "<input type=hidden name=nrows value={$rownum}>";
 		echo '<tr><td colspan=2>&nbsp;</td><td colspan=3 align=center class=tdcenter>';
 		printImageHREF ('UNLOCK', 'resolve conflicts', TRUE);
 		echo '</td><td>&nbsp;</td></tr>';
@@ -1401,14 +1401,14 @@ function renderObject8021QSyncPorts ($object, $D)
 	$enabled = array();
 	# OPTIONSs for existing 802.1Q ports
 	foreach (sortPortList ($D) as $portname => $portconfig)
-		$enabled["disable ${portname}"] = "${portname} ("
+		$enabled["disable {$portname}"] = "{$portname} ("
 			. (array_key_exists ($portname, $allethports) ? $allethports[$portname]['iifoif']: 'N/A')
 			. ') ' . serializeVLANPack ($portconfig);
 	# OPTIONs for potential 802.1Q ports
 	$disabled = array();
 	foreach (sortPortList ($allethports) as $portname => $each)
-		if (! array_key_exists ("disable ${portname}", $enabled))
-			$disabled["enable ${portname}"] = "${portname} (${each['iifoif']})";
+		if (! array_key_exists ("disable {$portname}", $enabled))
+			$disabled["enable {$portname}"] = "{$portname} ({$each['iifoif']})";
 	printOpFormIntro ('updPortList');
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><td>';
@@ -1468,12 +1468,12 @@ function renderVSTRules ($rules, $title = NULL)
 		$order = 'odd';
 		foreach ($rules as $item)
 		{
-			echo "<tr class=row_${order} align=left>";
-			echo "<td>${item['rule_no']}</td>";
-			echo "<td nowrap><tt>${item['port_pcre']}</tt></td>";
+			echo "<tr class=row_{$order} align=left>";
+			echo "<td>{$item['rule_no']}</td>";
+			echo "<td nowrap><tt>{$item['port_pcre']}</tt></td>";
 			echo '<td nowrap>' . $port_role_options[$item['port_role']] . '</td>';
-			echo "<td>${item['wrt_vlans']}</td>";
-			echo "<td>${item['description']}</td>";
+			echo "<td>{$item['wrt_vlans']}</td>";
+			echo "<td>{$item['description']}</td>";
 			echo '</tr>';
 			$order = $nextorder[$order];
 		}
@@ -1504,7 +1504,7 @@ function renderVST ($vst_id)
 		$order = 'odd';
 		foreach (array_keys ($vst['switches']) as $object_id)
 		{
-			echo "<tr class=row_${order}><td>";
+			echo "<tr class=row_{$order}><td>";
 			renderCell (spotEntity ('object', $object_id));
 			echo '</td></tr>';
 			$order = $nextorder[$order];
@@ -1588,7 +1588,7 @@ function renderDeployQueue()
 			echo '<tr><th>switch</th><th>changed</th><th>';
 			foreach ($data as $item)
 			{
-				echo "<tr class=row_${order}><td>";
+				echo "<tr class=row_{$order}><td>";
 				renderCell (spotEntity ('object', $item['object_id']));
 				echo "</td><td>" . formatAge ($item['last_change']) . "</td></tr>";
 				$order = $nextorder[$order];
@@ -1655,7 +1655,7 @@ function renderEditVlan ($vlan_ck)
 	{
 		$clear_line .= '<p>';
 		$clear_line .= getOpLink (array ('op' => 'clear'), 'remove', 'clear', "remove this VLAN from $portc port(s)") .
-			' this VLAN from ' . mkA ("${portc} port(s)", 'vlan', $vlan_ck);
+			' this VLAN from ' . mkA ("{$portc} port(s)", 'vlan', $vlan_ck);
 	}
 
 	if ($vlan['vlan_id'] == VLAN_DFL_ID)

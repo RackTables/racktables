@@ -447,19 +447,19 @@ function listCells ($realm, $parent_id = 0)
 	$query = 'SELECT ';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
-		$query .= ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}") . ', ';
+		$query .= ($alias == $expression ? "{$SQLinfo['table']}.{$alias}" : "{$expression} as {$alias}") . ', ';
 	$query = trim($query, ', ');
-	$query .= " FROM ${SQLinfo['table']}";
+	$query .= " FROM {$SQLinfo['table']}";
 	if (isset ($SQLinfo['pidcolumn']) && $parent_id)
 	{
-		$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['pidcolumn']} = ?";
+		$query .= " WHERE {$SQLinfo['table']}.{$SQLinfo['pidcolumn']} = ?";
 		$qparams[] = $parent_id;
 	}
 	if (isset ($SQLinfo['ordcolumns']))
 	{
 		$query .= " ORDER BY ";
 		foreach ($SQLinfo['ordcolumns'] as $oc)
-			$query .= "${oc}, ";
+			$query .= "{$oc}, ";
 		$query = trim($query, ', ');
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
@@ -583,9 +583,9 @@ function spotEntity ($realm, $id, $ignore_cache = FALSE)
 	$query = 'SELECT tag_id, TagStorage.user as tag_user, UNIX_TIMESTAMP(TagStorage.date) AS tag_time';
 	foreach ($SQLinfo['columns'] as $alias => $expression)
 		// Automatically prepend table name to each single column, but leave all others intact.
-		$query .= ', ' . ($alias == $expression ? "${SQLinfo['table']}.${alias}" : "${expression} as ${alias}");
-	$query .= " FROM ${SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = ${SQLinfo['table']}.${SQLinfo['keycolumn']}";
-	$query .= " WHERE ${SQLinfo['table']}.${SQLinfo['keycolumn']} = ?";
+		$query .= ', ' . ($alias == $expression ? "{$SQLinfo['table']}.{$alias}" : "{$expression} as {$alias}");
+	$query .= " FROM {$SQLinfo['table']} LEFT JOIN TagStorage on entity_realm = ? and entity_id = {$SQLinfo['table']}.{$SQLinfo['keycolumn']}";
+	$query .= " WHERE {$SQLinfo['table']}.{$SQLinfo['keycolumn']} = ?";
 	$result = usePreparedSelectBlade ($query, array ($realm, $id));
 	$ret = array();
 	global $taglist;
@@ -1104,7 +1104,7 @@ function getObjectContentsList ($object_id, $children = array ())
 	foreach ($rows as $row)
 	{
 		if (in_array ($row['child_entity_id'], $children))
-			throw new RackTablesError ("Circular reference for object ${object_id}", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Circular reference for object {$object_id}", RackTablesError::INTERNAL);
 		$children[] = $row['child_entity_id'];
 		$children = array_unique (array_merge ($children, $self ($row['child_entity_id'], $children)));
 	}
@@ -1121,7 +1121,7 @@ function getLocationChildrenList ($location_id, $children = array ())
 	foreach ($rows as $row)
 	{
 		if (in_array ($row['id'], $children))
-			throw new RackTablesError ("Circular reference for location ${location_id}", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Circular reference for location {$location_id}", RackTablesError::INTERNAL);
 		$children[] = $row['id'];
 		$children = array_unique (array_merge ($children, $self ($row['id'], $children)));
 	}
@@ -1139,7 +1139,7 @@ function getTagChildrenList ($tag_id, $children = array ())
 	foreach ($rows as $row)
 	{
 		if (in_array ($row['id'], $children))
-			throw new RackTablesError ("Circular reference for tag ${tag_id}", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Circular reference for tag {$tag_id}", RackTablesError::INTERNAL);
 		$children[] = $row['id'];
 		$children = array_unique (array_merge ($children, $self ($row['id'], $children)));
 	}
@@ -1155,7 +1155,7 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 		$child_entity_type == 'location' &&
 		in_array ($parent_entity_id, getLocationChildrenList ($child_entity_id))
 	)
-		throw new RackTablesError ("Circular reference for location ${parent_entity_id}", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Circular reference for location {$parent_entity_id}", RackTablesError::INTERNAL);
 
 	// an object's container may not be one of its contained objects
 	if
@@ -1164,7 +1164,7 @@ function commitLinkEntities ($parent_entity_type, $parent_entity_id, $child_enti
 		$child_entity_type == 'object' &&
 		in_array ($parent_entity_id, getObjectContentsList ($child_entity_id))
 	)
-		throw new RackTablesError ("Circular reference for object ${parent_entity_id}", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Circular reference for object {$parent_entity_id}", RackTablesError::INTERNAL);
 
 	usePreparedInsertBlade
 	(
@@ -1192,7 +1192,7 @@ function commitUpdateEntityLink
 		$new_child_entity_type == 'location' &&
 		in_array ($new_parent_entity_id, getLocationChildrenList ($new_child_entity_id))
 	)
-		throw new RackTablesError ("Circular reference for location ${new_parent_entity_id}", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Circular reference for location {$new_parent_entity_id}", RackTablesError::INTERNAL);
 
 	// an object's container may not be one of its contained objects
 	if
@@ -1201,7 +1201,7 @@ function commitUpdateEntityLink
 		$new_child_entity_type == 'object' &&
 		in_array ($new_parent_entity_id, getObjectContentsList ($new_child_entity_id))
 	)
-		throw new RackTablesError ("Circular reference for object ${new_parent_entity_id}", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Circular reference for object {$new_parent_entity_id}", RackTablesError::INTERNAL);
 
 	usePreparedUpdateBlade
 	(
@@ -1829,7 +1829,7 @@ function linkPorts ($porta, $portb, $cable = NULL)
 		array ($porta, $portb, $porta, $portb)
 	);
 	if ($result->fetchColumn () != 0)
-		throw new RTDatabaseError ("Port ${porta} or ${portb} is already linked");
+		throw new RTDatabaseError ("Port {$porta} or {$portb} is already linked");
 	unset ($result);
 
 	$ret = usePreparedInsertBlade
@@ -2129,7 +2129,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_ADDR)
 	{
 	$query = "select ip, name, comment, reserved from IPv4Address ".
-		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
+		"where {$whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2150,7 +2150,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		$whereexpr2 .= " AND ( ia.type = 'router' OR ia.type = 'sharedrouter')";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
-		"from IPv4Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
+		"from IPv4Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where {$whereexpr2} order by ia.type";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2171,7 +2171,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	// 3a. look for virtual services
 	if ($filter_flags & IPSCAN_DO_VS)
 	{
-	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
+	$query = "select id, vip from IPv4VS where {$whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -2184,7 +2184,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	}
 
 	// 3b. look for virtual service groups
-	$query = "select vs_id, vip from VSIPs where ${whereexpr3b}";
+	$query = "select vs_id, vip from VSIPs where {$whereexpr3b}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -2200,7 +2200,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	// 4. don't forget about real servers along with pools
 	if ($filter_flags & IPSCAN_DO_RS)
 	{
-	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
+	$query = "select rsip, rspool_id from IPv4RS where {$whereexpr4}";
 	$result = usePreparedSelectBlade ($query, $qparams_bin);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2224,7 +2224,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		"remoteport, " .
 		"description " .
 		"from IPv4NAT " .
-		"where ${whereexpr5a} " .
+		"where {$whereexpr5a} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2250,7 +2250,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		"remoteport, " .
 		"description " .
 		"from IPv4NAT " .
-		"where ${whereexpr5b} " .
+		"where {$whereexpr5b} " .
 		"order by localip, localport, remoteip, remoteport, proto";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -2272,7 +2272,7 @@ function scanIPv4Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_LOG)
 	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv4Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv4Log WHERE ${whereexpr6a} GROUP BY ip) v USING (id) WHERE ${whereexpr6b}";
+		" (SELECT MAX(id) as id FROM IPv4Log WHERE {$whereexpr6a} GROUP BY ip) v USING (id) WHERE {$whereexpr6b}";
 	$result = usePreparedSelectBlade ($query, array_merge ($qparams, $qparams));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2339,7 +2339,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_ADDR)
 	{
 	$query = "select ip, name, comment, reserved from IPv6Address ".
-		"where ${whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
+		"where {$whereexpr1} and (reserved = 'yes' or name != '' or comment != '')";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2360,7 +2360,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 		$whereexpr2 .= " AND (ia.type = 'router' OR ia.type = 'sharedrouter')";
 	$query =
 		"select ia.ip, ia.object_id, ia.name, ia.type, Object.name as object_name " .
-		"from IPv6Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where ${whereexpr2} order by ia.type";
+		"from IPv6Allocation AS ia INNER JOIN Object ON ia.object_id = Object.id where {$whereexpr2} order by ia.type";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2381,7 +2381,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	// 3a. look for virtual services
 	if ($filter_flags & IPSCAN_DO_VS)
 	{
-	$query = "select id, vip from IPv4VS where ${whereexpr3a}";
+	$query = "select id, vip from IPv4VS where {$whereexpr3a}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -2394,7 +2394,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	}
 
 	// 3b. look for virtual service groups
-	$query = "select vs_id, vip from VSIPs where ${whereexpr3b}";
+	$query = "select vs_id, vip from VSIPs where {$whereexpr3b}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$allRows = $result->fetchAll (PDO::FETCH_ASSOC);
 	unset ($result);
@@ -2410,7 +2410,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	// 4. don't forget about real servers along with pools
 	if ($filter_flags & IPSCAN_DO_RS)
 	{
-	$query = "select rsip, rspool_id from IPv4RS where ${whereexpr4}";
+	$query = "select rsip, rspool_id from IPv4RS where {$whereexpr4}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2426,7 +2426,7 @@ function scanIPv6Space ($pairlist, $filter_flags = IPSCAN_ANY)
 	if ($filter_flags & IPSCAN_DO_LOG)
 	{
 	$query = "select l.ip, l.user, UNIX_TIMESTAMP(l.date) AS time from IPv6Log l INNER JOIN " .
-		" (SELECT MAX(id) as id FROM IPv6Log WHERE ${whereexpr6a} GROUP BY ip) v USING (id) WHERE ${whereexpr6b}";
+		" (SELECT MAX(id) as id FROM IPv6Log WHERE {$whereexpr6a} GROUP BY ip) v USING (id) WHERE {$whereexpr6b}";
 	$result = usePreparedSelectBlade ($query, array_merge ($qparams, $qparams));
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -2480,7 +2480,7 @@ function bindIPToObject ($ip_bin, $object_id = 0, $name = '', $type = '')
 	// store history line
 	$cell = spotEntity ('object', $object_id);
 	setDisplayedName ($cell);
-	addIPLogEntry ($ip_bin, "Binded with ${cell['dname']}, ifname=$name");
+	addIPLogEntry ($ip_bin, "Binded with {$cell['dname']}, ifname=$name");
 }
 
 function bindIPv4ToObject ($ip_bin, $object_id = 0, $name = '', $type = '')
@@ -2739,7 +2739,7 @@ function unbindIPFromObject ($ip_bin, $object_id)
 		// store history line
 		$cell = spotEntity ('object', $object_id);
 		setDisplayedName ($cell);
-		addIPLogEntry ($ip_bin, "Removed from ${cell['dname']}");
+		addIPLogEntry ($ip_bin, "Removed from {$cell['dname']}");
 	}
 }
 
@@ -2804,8 +2804,8 @@ function getIPv4AddressSearchResult ($terms)
 	{
 		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
-		$qparams[] = "%${term}%";
-		$qparams[] = "%${term}%";
+		$qparams[] = "%{$term}%";
+		$qparams[] = "%{$term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
 	$ret = array();
@@ -2827,8 +2827,8 @@ function getIPv6AddressSearchResult ($terms)
 	{
 		$query .= $or . "name like ? or comment like ?";
 		$or = ' or ';
-		$qparams[] = "%${term}%";
-		$qparams[] = "%${term}%";
+		$qparams[] = "%{$term}%";
+		$qparams[] = "%{$term}%";
 	}
 	$result = usePreparedSelectBlade ($query, $qparams);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC), 'ip');
@@ -3059,7 +3059,7 @@ function getVLANSearchResult ($terms)
 
 function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $ordercolumn = '', $exactness = 0)
 {
-	$query = 'SELECT ' . implode (', ', $retcolumns) . " FROM ${tablename} WHERE ";
+	$query = 'SELECT ' . implode (', ', $retcolumns) . " FROM {$tablename} WHERE ";
 	$qparams = array();
 	$pfx = '';
 	$pterms = $exactness == 3 ? explode (' ', $terms) : parseSearchTerms ($terms);
@@ -3068,26 +3068,26 @@ function getSearchResultByField ($tablename, $retcolumns, $scancolumn, $terms, $
 		switch ($exactness)
 		{
 		case 3:
-			$query .= $pfx . "${scancolumn} REGEXP ?";
+			$query .= $pfx . "{$scancolumn} REGEXP ?";
 			$qparams[] = $term;
 			break;
 		case 2: // does this work as expected?
-			$query .= $pfx . "BINARY ${scancolumn} = ?";
+			$query .= $pfx . "BINARY {$scancolumn} = ?";
 			$qparams[] = $term;
 			break;
 		case 1:
-			$query .= $pfx . "${scancolumn} = ?";
+			$query .= $pfx . "{$scancolumn} = ?";
 			$qparams[] = $term;
 			break;
 		default:
-			$query .= $pfx . "${scancolumn} LIKE ?";
-			$qparams[] = "%${term}%";
+			$query .= $pfx . "{$scancolumn} LIKE ?";
+			$qparams[] = "%{$term}%";
 			break;
 		}
 		$pfx = ' OR ';
 	}
 	if ($ordercolumn != '')
-		$query .= " ORDER BY ${ordercolumn}";
+		$query .= " ORDER BY {$ordercolumn}";
 	$result = usePreparedSelectBlade ($query, $qparams);
 	return $result->fetchAll (PDO::FETCH_ASSOC);
 }
@@ -3141,13 +3141,13 @@ function getStickerSearchResults ($tablename, $what)
 	$result = usePreparedSelectBlade
 	(
 		'SELECT AV.object_id, AV.attr_id FROM AttributeValue AV ' .
-		"INNER JOIN ${tablename} O ON AV.object_id = O.id " .
+		"INNER JOIN {$tablename} O ON AV.object_id = O.id " .
 		'INNER JOIN Attribute A ON AV.attr_id = A.id ' .
 		'LEFT JOIN AttributeMap AM ON A.type = "dict" AND AV.object_tid = AM.objtype_id AND AV.attr_id = AM.attr_id ' .
 		'LEFT JOIN Dictionary D ON AM.chapter_id = D.chapter_id AND AV.uint_value = D.dict_key ' .
 		'WHERE string_value LIKE ? ' .
 		'OR (A.type = "dict" AND dict_value LIKE ?) ORDER BY object_id',
-		array ("%${what}%", "%${what}%")
+		array ("%{$what}%", "%{$what}%")
 	);
 	$ret = array ();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -3275,7 +3275,7 @@ function searchCableIDs ($what)
 		'SELECT object_id, cable ' .
 		'FROM Link INNER JOIN Port ON porta = Port.id OR portb = Port.id ' .
 		'WHERE cable LIKE ? ORDER BY object_id',
-		array ("%${what}%")
+		array ("%{$what}%")
 	);
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 	{
@@ -3792,7 +3792,7 @@ function fetchAttrsForObjects ($object_set = array())
 				$record['value'] = $row['uint_value'];
 				break;
 			default:
-				throw new RackTablesError ("unexpected attribute type '${row['attr_type']}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ("unexpected attribute type '{$row['attr_type']}'", RackTablesError::INTERNAL);
 		}
 		$ret[$object_id][$row['attr_id']] = $record;
 	}
@@ -3864,7 +3864,7 @@ function commitUpdateAttrValue ($object_id, $attr_id, $value = '')
 			$column = 'uint_value';
 			break;
 		default:
-			throw new RackTablesError ("Unknown attribute type '${attr_type}' for object_id ${object_id} attr_id ${attr_id}", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Unknown attribute type '{$attr_type}' for object_id {$object_id} attr_id {$attr_id}", RackTablesError::INTERNAL);
 	}
 	if (isset ($row['attr_id']))
 	{
@@ -3932,7 +3932,7 @@ function assertListOfColumnNames ($column_names)
 function usePreparedInsertBlade ($tablename, $columns)
 {
 	global $dbxlink;
-	$query = "INSERT INTO `${tablename}` SET " . makeSetSQL (array_keys ($columns));
+	$query = "INSERT INTO `{$tablename}` SET " . makeSetSQL (array_keys ($columns));
 	// INSERT INTO `table` SET `c1` = ?, `c2` = ?, `c3` = ?
 	try
 	{
@@ -3952,7 +3952,7 @@ function makeSetSQL ($column_names)
 	$tmp = array();
 	// Same syntax works for NULL as well.
 	foreach ($column_names as $each)
-		$tmp[] = "`${each}` = ?";
+		$tmp[] = "`{$each}` = ?";
 	return implode (', ', $tmp);
 }
 
@@ -3965,7 +3965,7 @@ function makeWhereSQL ($where_columns, $conjunction, &$params)
 	$tmp = array();
 	foreach ($where_columns as $colname => $colvalue)
 		if ($colvalue === NULL)
-			$tmp[] = "`${colname}` IS NULL";
+			$tmp[] = "`{$colname}` IS NULL";
 		elseif (is_array ($colvalue))
 		{
 			// Suppress any string keys to keep array_merge() from overwriting.
@@ -3974,10 +3974,10 @@ function makeWhereSQL ($where_columns, $conjunction, &$params)
 		}
 		else
 		{
-			$tmp[] = "`${colname}` = ?";
+			$tmp[] = "`{$colname}` = ?";
 			$params[] = $colvalue;
 		}
-	return implode (" ${conjunction} ", $tmp);
+	return implode (" {$conjunction} ", $tmp);
 }
 
 // This swiss-knife blade deletes any number of records from the specified table
@@ -3988,7 +3988,7 @@ function usePreparedDeleteBlade ($tablename, $columns, $conjunction = 'AND')
 	global $dbxlink;
 	if (! is_array ($columns) || ! count ($columns))
 		throw new InvalidArgException ('columns', '(empty array)', 'in this function DELETE must have WHERE');
-	$query = "DELETE FROM `${tablename}` WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
+	$query = "DELETE FROM `{$tablename}` WHERE " . makeWhereSQL ($columns, $conjunction, $where_values);
 	try
 	{
 		$prepared = $dbxlink->prepare ($query);
@@ -4024,7 +4024,7 @@ function usePreparedUpdateBlade ($tablename, $set_columns, $where_columns, $conj
 		throw new InvalidArgException ('set_columns', '(empty array)', 'UPDATE must have SET');
 	if (! is_array ($where_columns) || ! count ($where_columns))
 		throw new InvalidArgException ('where_columns', '(empty array)', 'in this function UPDATE must have WHERE');
-	$query = "UPDATE `${tablename}` SET " . makeSetSQL (array_keys ($set_columns));
+	$query = "UPDATE `{$tablename}` SET " . makeSetSQL (array_keys ($set_columns));
 	$query .= ' WHERE ' . makeWhereSQL ($where_columns, $conjunction, $where_values);
 	try
 	{
@@ -4200,8 +4200,8 @@ function generateEntityAutoTags ($cell)
 		case 'ipv6net':
 			// common (v4 & v6) rules
 			$ver = $cell['realm'] == 'ipv4net' ? 4 : 6;
-			$ret[] = array ('tag' => "\$ip${ver}netid_" . $cell['id']);
-			$ret[] = array ('tag' => "\$any_ip${ver}net");
+			$ret[] = array ('tag' => "\$ip{$ver}netid_" . $cell['id']);
+			$ret[] = array ('tag' => "\$any_ip{$ver}net");
 			$ret[] = array ('tag' => '$any_net');
 
 			$ret[] = array ('tag' => '$masklen_eq_' . $cell['mask']);
@@ -4288,7 +4288,7 @@ function getTagList ($extra_sql = '')
 	$result = usePreparedSelectBlade
 	(
 		'SELECT id, parent_id, is_assignable, tag, LPAD(HEX(color), 6, "0") AS color, description ' .
-		"FROM TagTree ORDER BY tag ${extra_sql}"
+		"FROM TagTree ORDER BY tag {$extra_sql}"
 	);
 	return reindexById ($result->fetchAll (PDO::FETCH_ASSOC));
 }
@@ -4799,7 +4799,7 @@ function getFileStats ()
 	$ret = array();
 	while ($row = $result->fetch (PDO::FETCH_ASSOC))
 		if ($row['count'] > 0)
-			$ret["Links in realm '${row['entity_type']}'"] = $row['count'];
+			$ret["Links in realm '{$row['entity_type']}'"] = $row['count'];
 	unset ($result);
 
 	// Find number of files without any linkage
@@ -5029,7 +5029,7 @@ function assertUniqueL2Addresses ($db_l2addresses, $my_object_id)
 	// BINARY in the second comparison is what the query is actually looking for but without
 	// the first (non-BINARY) comparison the table index does not work as expected.
 	$query = 'SELECT l2address, object_id, name FROM Port ' .
-		"WHERE l2address IN(${qm}) AND BINARY l2address IN(${qm}) AND object_id != ? LIMIT 1";
+		"WHERE l2address IN({$qm}) AND BINARY l2address IN({$qm}) AND object_id != ? LIMIT 1";
 	$params = array_merge ($db_l2addresses, $db_l2addresses, array ($my_object_id));
 	$result = usePreparedSelectBlade ($query, $params);
 	if ($row = $result->fetch (PDO::FETCH_ASSOC))
@@ -5659,7 +5659,7 @@ function commitUpdateVSTRules ($vst_id, $mutex_rev, $rules)
 	$vst = $result->fetch (PDO::FETCH_ASSOC);
 	unset ($result);
 	if ($vst['mutex_rev'] != $mutex_rev)
-		throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, "already saved by ${vst['saved_by']}");
+		throw new InvalidRequestArgException ('mutex_rev', $mutex_rev, "already saved by {$vst['saved_by']}");
 	usePreparedDeleteBlade ('VLANSTRule', array ('vst_id' => $vst_id));
 	foreach ($rules as $rule)
 		usePreparedInsertBlade ('VLANSTRule', array_merge (array ('vst_id' => $vst_id), $rule));
@@ -5675,7 +5675,7 @@ function lookupEntityByString ($realm, $value, $column = 'name')
 	if (!isset ($SQLSchema[$realm]))
 		throw new InvalidArgException ('realm', $realm);
 	$SQLinfo = $SQLSchema[$realm];
-	$query = "SELECT ${SQLinfo['keycolumn']} AS id FROM ${SQLinfo['table']} WHERE ${SQLinfo['table']}.${column}=? LIMIT 2";
+	$query = "SELECT {$SQLinfo['keycolumn']} AS id FROM {$SQLinfo['table']} WHERE {$SQLinfo['table']}.{$column}=? LIMIT 2";
 	$result = usePreparedSelectBlade ($query, array ($value));
 	$rows = $result->fetchAll (PDO::FETCH_ASSOC);
 	return count ($rows) == 1 ? $rows[0]['id'] : NULL;
@@ -5747,9 +5747,9 @@ function setConfigVar ($varname, $varvalue)
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
-		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
+		throw new InvalidArgException ('varvalue', $varvalue, "'{$varname}' must have a non-empty value");
 	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue))
-		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
+		throw new InvalidArgException ('varvalue', $varvalue, "'{$varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedUpdateBlade ('Config', array ('varvalue' => $varvalue), array ('varname' => $varname));
 	$configCache[$varname]['varvalue'] = $varvalue;
@@ -5770,9 +5770,9 @@ function setUserConfigVar ($varname, $varvalue)
 	if ($var['is_hidden'] != 'no')
 		throw new InvalidArgException ('varname', $varname, 'a hidden variable cannot be changed');
 	if ($varvalue == '' && $var['emptyok'] != 'yes')
-		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must have a non-empty value");
+		throw new InvalidArgException ('varvalue', $varvalue, "'{$varname}' must have a non-empty value");
 	if ($varvalue != '' && $var['vartype'] == 'uint' && ! isUnsignedInteger ($varvalue))
-		throw new InvalidArgException ('varvalue', $varvalue, "'${varname}' must be an unsigned integer");
+		throw new InvalidArgException ('varvalue', $varvalue, "'{$varname}' must be an unsigned integer");
 	// Update cache only if the changes went into DB.
 	usePreparedExecuteBlade
 	(
@@ -5997,7 +5997,7 @@ function commitModifyPatchCableAmount ($heap_id, $by_amount)
 		'UPDATE PatchCableHeap SET amount = amount + ? WHERE id = ? AND amount + ? >= 0',
 		array ($by_amount, $heap_id, $by_amount)
 	);
-	addPatchCableHeapLogEntry ($heap_id, "amount adjusted by ${by_amount}");
+	addPatchCableHeapLogEntry ($heap_id, "amount adjusted by {$by_amount}");
 	return $dbxlink->commit();
 }
 
@@ -6011,7 +6011,7 @@ function commitSetPatchCableAmount ($heap_id, $new_amount)
 		array ('amount' => $new_amount),
 		array ('id' => $heap_id)
 	);
-	addPatchCableHeapLogEntry ($heap_id, "amount set to ${new_amount}");
+	addPatchCableHeapLogEntry ($heap_id, "amount set to {$new_amount}");
 	return $dbxlink->commit();
 }
 
@@ -6105,19 +6105,19 @@ function getPlugins ($state = NULL)
 
 	// available
 	global $racktables_plugins_dir;
-	$plugin_dirs = glob ("${racktables_plugins_dir}/*", GLOB_ONLYDIR);
+	$plugin_dirs = glob ("{$racktables_plugins_dir}/*", GLOB_ONLYDIR);
 	$in_code = array ();
 	foreach ($plugin_dirs as $plugin_dir)
 	{
 		$plugin = basename ($plugin_dir);
-		if (! file_exists ("${plugin_dir}/plugin.php"))
+		if (! file_exists ("{$plugin_dir}/plugin.php"))
 			continue;
 
-		require_once "${plugin_dir}/plugin.php";
-		if (! function_exists ("plugin_${plugin}_info"))
+		require_once "{$plugin_dir}/plugin.php";
+		if (! function_exists ("plugin_{$plugin}_info"))
 			continue;
 
-		$info = call_user_func ("plugin_${plugin}_info");
+		$info = call_user_func ("plugin_{$plugin}_info");
 		$in_code[$info['name']] = array
 		(
 			'longname' => $info['longname'],
@@ -6159,13 +6159,13 @@ function getPlugin ($name)
 
 	global $racktables_plugins_dir;
 	$in_code = array ();
-	if (file_exists ("$racktables_plugins_dir/${name}/plugin.php"))
+	if (file_exists ("$racktables_plugins_dir/{$name}/plugin.php"))
 	{
-		require_once "${racktables_plugins_dir}/${name}/plugin.php";
-		if (! function_exists ("plugin_${name}_info"))
+		require_once "{$racktables_plugins_dir}/{$name}/plugin.php";
+		if (! function_exists ("plugin_{$name}_info"))
 			return FALSE;
 
-		$code_info = call_user_func ("plugin_${name}_info");
+		$code_info = call_user_func ("plugin_{$name}_info");
 		$in_code['name'] = $code_info['name'];
 		$in_code['longname'] = $code_info['longname'];
 		$in_code['code_version'] = $code_info['version'];

@@ -477,9 +477,9 @@ function proxyStaticURI ($URI)
 		printStatic404();
 	global $local_staticdir, $racktables_staticdir;
 	if (isset ($local_staticdir))
-		$fh = @fopen ("${local_staticdir}/${URI}", 'r');
+		$fh = @fopen ("{$local_staticdir}/{$URI}", 'r');
 	if (! isset ($fh) || FALSE === $fh)
-		$fh = @fopen ("${racktables_staticdir}/${URI}", 'r');
+		$fh = @fopen ("{$racktables_staticdir}/{$URI}", 'r');
 	if (FALSE === $fh)
 		printStatic404();
 	if (FALSE !== $stat = fstat ($fh))
@@ -520,10 +520,10 @@ function printSVGMessageBar ($text = 'lost message', $textattrs = array(), $rect
 	echo "xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>\n";
 	echo '<rect';
 	foreach ($myrectattrs as $k => $v)
-		echo " ${k}='${v}'";
+		echo " {$k}='{$v}'";
 	echo " />\n<text";
 	foreach ($mytextattrs as $k => $v)
-		echo " ${k}='${v}'";
-	echo ">${text}</text>\n";
+		echo " {$k}='{$v}'";
+	echo ">{$text}</text>\n";
 	echo "</svg>\n";
 }

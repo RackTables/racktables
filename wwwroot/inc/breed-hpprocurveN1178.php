@@ -266,14 +266,14 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
-				$ret .= "vlan ${vlan_id} tagged ${cmd['port']}\n";
+				$ret .= "vlan {$vlan_id} tagged {$cmd['port']}\n";
 			///////////////////////////////////////////////////////////////////////////////////////
 			// Here is a workaround: remove untagged port for case access->trunk(non-native)
 			if
@@ -283,7 +283,7 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 				$unset_access_data['port_id'] === $cmd['port']
 			)
 			{
-				$ret .= "no vlan ${unset_access_data['vlan_id']} untagged ${unset_access_data['port_id']}\n";
+				$ret .= "no vlan {$unset_access_data['vlan_id']} untagged {$unset_access_data['port_id']}\n";
 				unset ($unset_access_data);
 			}
 			///////////////////////////////////////////////////////////////////////////////////////
@@ -293,13 +293,13 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 					if (! empty ($port_id) && $port_id === $cmd['port'])
 						foreach ($vlan_list as $key => $vlan_id)
 							if (isset ($vlan_id))
-								$ret .= "no vlan ${vlan_id} tagged ${port_id}\n";
+								$ret .= "no vlan {$vlan_id} tagged {$port_id}\n";
 			$rem_tagged_data = array();
 			break;
 		case 'rem allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
 			{
-				$ret .= "no vlan ${vlan_id} tagged ${cmd['port']}\n";
+				$ret .= "no vlan {$vlan_id} tagged {$cmd['port']}\n";
 				///////////////////////////////////////////////////////////////////////////////////////
 				// Here is a workaround: we should remove untagged port before
 				// add it as tagged for case access->trunk(non-native)
@@ -309,7 +309,7 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 			}
 			break;
 		case 'set access':
-			$ret .= "vlan ${cmd['arg2']} untagged ${cmd['arg1']}\n";
+			$ret .= "vlan {$cmd['arg2']} untagged {$cmd['arg1']}\n";
 			///////////////////////////////////////////////////////////////////////////////////////
 			// Now remove tagged port for case trunk(non-native)->access
 			//file_put_contents ('/var/log/racktables.log', var_export($rem_allowed_data, true), FILE_APPEND | LOCK_EX);
@@ -317,7 +317,7 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 				if (! empty ($port_id) && $port_id === $cmd['arg1'] )
 					foreach ($vlan_list as $key => $vlan_id)
 						if (isset ($vlan_id))
-							$ret .= "no vlan ${vlan_id} tagged ${cmd['arg1']}\n";
+							$ret .= "no vlan {$vlan_id} tagged {$cmd['arg1']}\n";
 			$rem_allowed_data = array();
 			break;
 		case 'unset access':
@@ -327,18 +327,18 @@ function hpprocurveN1178TranslatePushQueue ($dummy_object_id, $queue, $dummy_vla
 			// HP L2 switches doesn't allow "orphaned" ports (without tags)
 			$unset_access_data['port_id'] = $cmd['arg1'];
 			$unset_access_data['vlan_id'] = $cmd['arg2'];
-			$ret .= "no vlan ${cmd['arg2']} untagged ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg2']} untagged {$cmd['arg1']}\n";
 			break;
 		case 'set native':
-			$ret .= "vlan ${cmd['arg2']} untagged ${cmd['arg1']}\n";
+			$ret .= "vlan {$cmd['arg2']} untagged {$cmd['arg1']}\n";
 			///////////////////////////////////////////////////////////////////////////////////////
 			// Here is a workaround: we should add tagged port again for case
 			// when we remove native but keep it as tagged
-			$ret .= "no vlan ${cmd['arg2']} tagged ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg2']} tagged {$cmd['arg1']}\n";
 			break;
 		case 'unset native': // NOP
-			$ret .= "no vlan ${cmd['arg2']} untagged ${cmd['arg1']}\n";
-			$ret .= "vlan ${cmd['arg2']} tagged ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg2']} untagged {$cmd['arg1']}\n";
+			$ret .= "vlan {$cmd['arg2']} tagged {$cmd['arg1']}\n";
 			break;
 		case 'set mode': // NOP
 			break;

@@ -25,13 +25,13 @@ if (! array_key_exists ($step, $stepfunc))
 	header ('Location: ' . $_SERVER['PHP_SELF']);
 	exit;
 }
-$title = "RackTables installation: step ${step} of " . count ($stepfunc);
+$title = "RackTables installation: step {$step} of " . count ($stepfunc);
 header ('Content-Type: text/html; charset=UTF-8');
 	// Heredoc, not nowdoc!
 	echo <<<"ENDOFTEXT"
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head><title>${title}</title>
+<head><title>{$title}</title>
 <style type="text/css">
 .tdleft {
 	text-align: left;
@@ -53,7 +53,7 @@ header ('Content-Type: text/html; charset=UTF-8');
 <body>
 <center>
 ENDOFTEXT;
-echo "<h1>${title}</h1><p>";
+echo "<h1>{$title}</h1><p>";
 
 echo "</p><form method=post>\n";
 $testres = $stepfunc[$step] ();
@@ -67,7 +67,7 @@ else
 	$next_step = $step;
 	echo "<br><input type=submit value='retry'>";
 }
-echo "<input type=hidden name=step value='${next_step}'>\n";
+echo "<input type=hidden name=step value='{$next_step}'>\n";
 	echo '</form>';
 	echo '</center>';
 	echo '</body>';
@@ -119,17 +119,17 @@ function init_config ()
 		echo '<tr><td><label for=conn_unix>UNIX socket</label></td>';
 		echo '<td><input type=radio name=conn value=conn_unix id=conn_unix' . ($use_tcp ? '' : ' checked') . '></td></tr>';
 		echo "<tr><td><label for=mysql_host>TCP host:</label></td>";
-		echo "<td><input type=text name=mysql_host id=mysql_host value='${tcp_host}'></td></tr>\n";
+		echo "<td><input type=text name=mysql_host id=mysql_host value='{$tcp_host}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_port>TCP port (if not 3306):</label></td>";
-		echo "<td><input type=text name=mysql_port id=mysql_port value='${tcp_port}'></td></tr>\n";
+		echo "<td><input type=text name=mysql_port id=mysql_port value='{$tcp_port}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_socket>UNIX socket:</label></td>";
-		echo "<td><input type=text name=mysql_socket id=mysql_socket value='${unix_socket}'></td></tr>\n";
+		echo "<td><input type=text name=mysql_socket id=mysql_socket value='{$unix_socket}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_db>database:</label></td>";
-		echo "<td><input type=text name=mysql_db id=mysql_db value='${database}'></td></tr>\n";
+		echo "<td><input type=text name=mysql_db id=mysql_db value='{$database}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_username>username:</label></td>";
-		echo "<td><input type=text name=mysql_username id=mysql_username value='${username}'></td></tr>\n";
+		echo "<td><input type=text name=mysql_username id=mysql_username value='{$username}'></td></tr>\n";
 		echo "<tr><td><label for=mysql_password>password:</label></td>";
-		echo "<td><input type=password name=mysql_password id=mysql_password value='${password}'></td></tr>\n";
+		echo "<td><input type=password name=mysql_password id=mysql_password value='{$password}'></td></tr>\n";
 		echo '</table>';
 	}
 	global $path_to_secret_php;
@@ -226,7 +226,7 @@ function init_config ()
 			$_REQUEST['mysql_password']
 		);
 		echo "<h2 class=trerror>Database connection failed. Check parameters and try again.</h2>\n";
-		echo "PDO DSN: <tt class=trwarning>${pdo_dsn}</tt><br>";
+		echo "PDO DSN: <tt class=trwarning>{$pdo_dsn}</tt><br>";
 		return FALSE;
 	}
 
@@ -237,7 +237,7 @@ function init_config ()
 		return FALSE;
 	}
 	fwrite ($conf, "<?php\n# This file has been generated automatically by RackTables installer.\n");
-	fwrite ($conf, "\$pdo_dsn = '${pdo_dsn}';\n");
+	fwrite ($conf, "\$pdo_dsn = '{$pdo_dsn}';\n");
 	fwrite ($conf, "\$db_username = '" . $_REQUEST['mysql_username'] . "';\n");
 	fwrite ($conf, "\$db_password = '" . $_REQUEST['mysql_password'] . "';\n\n");
 	fwrite ($conf, <<<'ENDOFTEXT'
@@ -322,7 +322,7 @@ function check_config_access()
 	}
 	$uname = get_process_owner();
 	echo 'Please set ownership (<tt>chown</tt>) and/or permissions (<tt>chmod</tt>) ';
-	echo "of <tt>${path_to_secret_php}</tt> on the server filesystem as follows:";
+	echo "of <tt>{$path_to_secret_php}</tt> on the server filesystem as follows:";
 	echo '<div align=left><ul>';
 	echo '<li>The file MUST NOT be writable by the httpd process.</li>';
 	echo '<li>The file MUST be readable by the httpd process.</li>';
@@ -376,7 +376,7 @@ function init_database_static ()
 	$failures = array();
 	foreach (array ('structure', 'dictbase') as $part)
 	{
-		echo "<tr><td>${part}</td>";
+		echo "<tr><td>{$part}</td>";
 		$nq = $nerrs = 0;
 		foreach (get_pseudo_file ($part) as $q)
 			try
@@ -390,7 +390,7 @@ function init_database_static ()
 				$errorInfo = $dbxlink->errorInfo();
 				$failures[] = array ($q, $errorInfo[2]);
 			}
-		echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
+		echo "<td>{$nq}</td><td>{$nerrs}</td></tr>\n";
 	}
 	if (!count ($failures))
 		echo "<strong><font color=green>done</font></strong>";
@@ -400,7 +400,7 @@ function init_database_static ()
 		foreach ($failures as $f)
 		{
 			list ($q, $i) = $f;
-			echo "${q} -- ${i}\n";
+			echo "{$q} -- {$i}\n";
 		}
 	}
 	// (re)load dictionary by pure PHP means w/o any external file
@@ -416,14 +416,14 @@ function init_database_static ()
 			$errlist[] = $query;
 		}
 	}
-	echo "<td>${nq}</td><td>${nerrs}</td></tr>\n";
+	echo "<td>{$nq}</td><td>{$nerrs}</td></tr>\n";
 
 	echo '</table>';
 	if (isset($errlist) && count ($errlist))
 	{
 		echo '<pre>The following queries failed:\n';
 		foreach ($errlist as $q)
-			echo "${q}\n\n";
+			echo "{$q}\n\n";
 		echo '</pre>';
 		return FALSE;
 	}
@@ -454,7 +454,7 @@ function init_database_dynamic ()
 		// Never send cleartext password over the wire.
 		$hash = sha1 ($_REQUEST['password']);
 		$query = "INSERT INTO `UserAccount` (`user_id`, `user_name`, `user_password_hash`, `user_realname`) " .
-			"VALUES (1,'admin','${hash}','RackTables Administrator')";
+			"VALUES (1,'admin','{$hash}','RackTables Administrator')";
 		$result = $dbxlink->exec ($query);
 		echo "Administrator password has been set successfully.<br>";
 		return TRUE;
@@ -2304,7 +2304,7 @@ WHERE O.objtype_id = 1562";
 ('NEAREST_RACKS_CHECKBOX', 'yes', 'string', 'yes', 'no', 'yes', 'Enable nearest racks in port list filter by default'),
 ('SHOW_OBJECTTYPE', 'yes', 'string', 'no', 'no', 'yes', 'Show object type column on depot page'),
 ('OBJECTLOG_PREVIEW_ENTRIES','5','uint','no','no','yes','Object log preview maximum entries (0 disables the preview)'),
-('DB_VERSION','${db_version}','string','no','yes','no','Database version.')";
+('DB_VERSION','{$db_version}','string','no','yes','no','Database version.')";
 
 		$query[] = "INSERT INTO `Script` VALUES ('RackCode','allow {\$userid_1}')";
 
@@ -2312,7 +2312,7 @@ WHERE O.objtype_id = 1562";
 		$sep = '';
 		for ($i = 1; $i <= 4094; $i++)
 		{
-			$tmpstr .= "${sep}(${i})";
+			$tmpstr .= "{$sep}({$i})";
 			$sep = ', ';
 		}
 		$query[] = $tmpstr;

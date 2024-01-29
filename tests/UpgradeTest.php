@@ -34,31 +34,31 @@ class UpgradeTest extends RTTestCase
 			$dbver = $version;
 			$db_name = getDBName();
 			$mysql_bin = '/usr/bin/mysql';
-			$dbxlink->exec ("DROP DATABASE ${db_name}");
-			$dbxlink->exec ("CREATE DATABASE ${db_name} CHARACTER SET utf8 COLLATE utf8_general_ci");
+			$dbxlink->exec ("DROP DATABASE {$db_name}");
+			$dbxlink->exec ("CREATE DATABASE {$db_name} CHARACTER SET utf8 COLLATE utf8_general_ci");
 			// FIXME: Importing the dump for 0.20.0 (and likely for the subsequent releases) fails when the configured
 			// MySQL username is different from "racktables", which is the recorded trigger definer in the file.
 			// A quick workaround, which may be not appropriate for a production server, is to grant the SUPER privilege:
 			// mysql> GRANT SUPER ON *.* TO racktables_user@localhost;
-			exec ("${mysql_bin} --user=${db_username} --password=${db_password} ${db_name} < ./data/${version}.sql", $output, $exitcode);
-			$this->assertEquals (0, $exitcode, "Populating the ${version} database failed");
+			exec ("{$mysql_bin} --user={$db_username} --password={$db_password} {$db_name} < ./data/{$version}.sql", $output, $exitcode);
+			$this->assertEquals (0, $exitcode, "Populating the {$version} database failed");
 
 			// the DB was deleted & re-created, so the current connection is invalid; re-connect
 			connectDB ();
 			$path = getDBUpgradePath ($version, CODE_VERSION);
-			$this->assertNotNull ($path, "Empty upgrade path when upgrading from ${version}");
+			$this->assertNotNull ($path, "Empty upgrade path when upgrading from {$version}");
 
 			foreach ($path as $batchid)
 			{
 				ob_start ();
 				executeUpgradeBatch ($batchid);
 				$output = ob_get_clean ();
-				$this->assertNotContains ('queries failed', $output, "Upgrading from ${version} failed at ${batchid}");
+				$this->assertNotContains ('queries failed', $output, "Upgrading from {$version} failed at {$batchid}");
 			}
 			ob_start ();
 			executeUpgradeBatch ('dictionary');
 			$output = ob_get_clean ();
-			$this->assertNotContains ('queries failed', $output, "Upgrading from ${version} failed when reloading dictionary");
+			$this->assertNotContains ('queries failed', $output, "Upgrading from {$version} failed when reloading dictionary");
 		}
 	}
 }

@@ -568,7 +568,7 @@ function getBypassValue()
 	if (!array_key_exists ('bypass', $page[$pageno]))
 		return NULL;
 	if (!array_key_exists ('bypass_type', $page[$pageno]))
-		throw new RackTablesError ("Internal structure error at node '${pageno}' (bypass_type is not set)", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Internal structure error at node '{$pageno}' (bypass_type is not set)", RackTablesError::INTERNAL);
 	return genericAssertion ($page[$pageno]['bypass'], $page[$pageno]['bypass_type']);
 }
 
@@ -810,7 +810,7 @@ function mergeGridFormToRack (&$rackData)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			if ($rackData[$unit_no][$locidx]['enabled'])
 				$rackData[$unit_no][$locidx]['checked'] =
-					isCheckSet ("atom_${rack_id}_${unit_no}_${locidx}") ? ' checked' : '';
+					isCheckSet ("atom_{$rack_id}_{$unit_no}_{$locidx}") ? ' checked' : '';
 }
 
 // wrapper around ip4_mask and ip6_mask
@@ -1285,7 +1285,7 @@ function getRSUforRow ($rowData)
 function string_insert_hrefs_callback ($m)
 {
 	$t_url_href    = 'href="' . rtrim($m[1], '.') . '"';
-	$s_url_replace = "<a ${t_url_href}>$m[1]</a> [<a ${t_url_href} target=\"_blank\">^</a>]";
+	$s_url_replace = "<a {$t_url_href}>$m[1]</a> [<a {$t_url_href} target=\"_blank\">^</a>]";
 	return $s_url_replace;
 }
 
@@ -1312,19 +1312,19 @@ function string_insert_hrefs ($p_string)
 
 		# valid set of characters that may occur in url scheme. Note: - should be first (A-F != -AF).
 		$t_url_valid_chars       = '-_.,!~*\';\/?%^\\\\:@&={\|}+$#[:alnum:]\pL';
-		$t_url_chars             = "(?:${t_url_hex}|[${t_url_valid_chars}\(\)\[\]])";
-		$t_url_chars2            = "(?:${t_url_hex}|[${t_url_valid_chars}])";
-		$t_url_chars_in_brackets = "(?:${t_url_hex}|[${t_url_valid_chars}\(\)])";
-		$t_url_chars_in_parens   = "(?:${t_url_hex}|[${t_url_valid_chars}\[\]])";
+		$t_url_chars             = "(?:{$t_url_hex}|[{$t_url_valid_chars}\(\)\[\]])";
+		$t_url_chars2            = "(?:{$t_url_hex}|[{$t_url_valid_chars}])";
+		$t_url_chars_in_brackets = "(?:{$t_url_hex}|[{$t_url_valid_chars}\(\)])";
+		$t_url_chars_in_parens   = "(?:{$t_url_hex}|[{$t_url_valid_chars}\[\]])";
 
-		$t_url_part1 = "${t_url_chars}";
-		$t_url_part2 = "(?:\(${t_url_chars_in_parens}*\)|\[${t_url_chars_in_brackets}*\]|${t_url_chars2})";
+		$t_url_part1 = "{$t_url_chars}";
+		$t_url_part2 = "(?:\({$t_url_chars_in_parens}*\)|\[{$t_url_chars_in_brackets}*\]|{$t_url_chars2})";
 
-		$s_url_regex = "/(${t_url_protocol}(${t_url_part1}*?${t_url_part2}+))/su";
+		$s_url_regex = "/({$t_url_protocol}({$t_url_part1}*?{$t_url_part2}+))/su";
 
 		# URL replacement
 		$t_url_href    = "href=\"'.rtrim('\\1','.').'\"";
-		$s_url_replace = "'<a ${t_url_href}>\\1</a> [<a ${t_url_href} target=\"_blank\">^</a>]'";
+		$s_url_replace = "'<a {$t_url_href}>\\1</a> [<a {$t_url_href} target=\"_blank\">^</a>]'";
 
 		# e-mail regex
 		$s_email_regex = substr_replace (email_regex_simple(), '(?:mailto:)?', 1, 0);
@@ -1364,9 +1364,9 @@ function email_regex_simple()
 
 		# a domain is one or more subdomains
 		$t_subdomain = "(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)";
-		$t_domain    = "(${t_subdomain}(?:\.${t_subdomain})*)";
+		$t_domain    = "({$t_subdomain}(?:\.{$t_subdomain})*)";
 
-		$s_email_regex = "/${t_recipient}\@${t_domain}/i";
+		$s_email_regex = "/{$t_recipient}\@{$t_domain}/i";
 	}
 	return $s_email_regex;
 }
@@ -3027,7 +3027,7 @@ function formatFileSize ($bytes)
 {
 	// bytes
 	if($bytes < 1024) // bytes
-		return "${bytes} bytes";
+		return "{$bytes} bytes";
 
 	// kilobytes
 	if ($bytes < 1024000)
@@ -3141,7 +3141,7 @@ function cookOptgroups ($recordList, $object_type_id = 0, $existing_value = 0)
 	{
 		$screenlist = array();
 		foreach (explode (';', getConfigVar ('VENDOR_SIEVE')) as $sieve)
-			if (preg_match ("/^([^@]+)(@${object_type_id})?\$/", trim ($sieve), $regs))
+			if (preg_match ("/^([^@]+)(@{$object_type_id})?\$/", trim ($sieve), $regs))
 				$screenlist[] = $regs[1];
 
 		foreach (array_keys ($ret) as $vendor)
@@ -3224,7 +3224,7 @@ function eval_expression ($expr, $tagchain, $silent = FALSE)
 			if (!isset ($pTable[$pname]))
 			{
 				if (!$silent)
-					showWarning ("Undefined predicate [${pname}]");
+					showWarning ("Undefined predicate [{$pname}]");
 				return NULL;
 			}
 			return $self ($pTable[$pname], $tagchain, $silent);
@@ -3251,7 +3251,7 @@ function eval_expression ($expr, $tagchain, $silent = FALSE)
 			return FALSE;
 		default:
 			if (!$silent)
-				showWarning ("Evaluation error, cannot process expression type '${expr['type']}'");
+				showWarning ("Evaluation error, cannot process expression type '{$expr['type']}'");
 			return NULL;
 	}
 }
@@ -3348,11 +3348,11 @@ function getAllVLANOptions ($except = array())
 	{
 		$domain_list = array();
 		foreach (getDomainVLANList ($domain_id, TRUE) as $vlan)
-			$domain_list["${domain_id}-${vlan['vlan_id']}"] = "${vlan['vlan_id']} ${vlan['vlan_descr']}";
+			$domain_list["{$domain_id}-{$vlan['vlan_id']}"] = "{$vlan['vlan_id']} {$vlan['vlan_descr']}";
 		if (isset ($except[$domain_id]))
 			foreach ($except[$domain_id] as $vid)
-				if (isset ($domain_list["${domain_id}-${vid}"]))
-					unset ($domain_list["${domain_id}-${vid}"]);
+				if (isset ($domain_list["{$domain_id}-{$vid}"]))
+					unset ($domain_list["{$domain_id}-{$vid}"]);
 		$ret[$domain_descr] = $domain_list;
 	}
 	return $ret;
@@ -3540,7 +3540,7 @@ function groupIntsToRanges ($list, $exclude_value = NULL)
 			else
 			{
 				if ($id_to)
-					$result[] = $id_from == $id_to ? $id_from : "${id_from}-${id_to}"; // flush
+					$result[] = $id_from == $id_to ? $id_from : "{$id_from}-{$id_to}"; // flush
 				$id_from = $id_to = $next_id; // start next pair
 			}
 	return $result;
@@ -3696,7 +3696,7 @@ function reduceSubarraysToColumn ($input, $column)
 		if (array_key_exists ($column, $item))
 			$ret[$key] = $item[$column];
 		else
-			throw new InvalidArgException ('input', '(array)', "column '${column}' is not set for subarray at index '${key}'");
+			throw new InvalidArgException ('input', '(array)', "column '{$column}' is not set for subarray at index '{$key}'");
 	return $ret;
 }
 
@@ -4593,7 +4593,7 @@ function strerror8021Q ($errno)
 		E_8021Q_PUSH_REMOTE_ERROR => 'push failed due to remote error',
 		E_8021Q_SYNC_DISABLED => 'sync disabled by operator',
 	);
-	return array_fetch ($errstr, $errno, "unknown error code ${errno}");
+	return array_fetch ($errstr, $errno, "unknown error code {$errno}");
 }
 
 function saveDownlinksReverb ($object_id, $requested_changes)
@@ -5640,35 +5640,35 @@ function formatAgeSeconds ($seconds)
 		case $seconds < 1:
 			return 'just now';
 		case $seconds < 60:
-			return "${seconds}s" . ' ago';
+			return "{$seconds}s" . ' ago';
 		case $seconds <= 300:
 			$mins = intval ($seconds / 60);
 			$secs = $seconds % 60;
-			return ($secs ? "{$mins}min ${secs}s" : "{$mins}min") . ' ago';
+			return ($secs ? "{$mins}min {$secs}s" : "{$mins}min") . ' ago';
 		case $seconds < 3600:
 			return round ($seconds / 60) . 'min' . ' ago';
 		case $seconds < 3 * 3600:
 			$hrs = intval ($seconds / 3600);
 			$mins = round (($seconds % 3600) / 60) . '';
-			return ($mins ? "${hrs}h ${mins}min" : "${hrs}h") . ' ago';
+			return ($mins ? "{$hrs}h {$mins}min" : "{$hrs}h") . ' ago';
 		case $seconds < 86400:
 			return round ($seconds / 3600) . 'h' . ' ago';
 		case $seconds < 86400 * 3:
 			$days = intval ($seconds / 86400);
 			$hrs = round (($seconds - $days * 86400) / 3600);
-			return ($hrs ? "${days}d ${hrs}h" : "${days}d") . ' ago';
+			return ($hrs ? "{$days}d {$hrs}h" : "{$days}d") . ' ago';
 		case $seconds < 86400 * 30.4375:
 			return round ($seconds / 86400) . 'd' . ' ago';
 		case $seconds < 86400 * 30.4375 * 4 :
 			$mon = intval ($seconds / 86400 / 30.4375);
 			$days = round (($seconds - $mon * 86400 * 30.4375) / 86400);
-			return ($days ? "${mon}mo ${days}d" : "${mon}mo") . ' ago';
+			return ($days ? "{$mon}mo {$days}d" : "{$mon}mo") . ' ago';
 		case $seconds < 365.25 * 86400:
 			return (round ($seconds / 86400 / 30.4375) . 'mo') . ' ago';
 		case $seconds < 2 * 365.25 * 86400:
 			$yrs = intval ($seconds / 86400 / 365.25);
 			$mon = round (($seconds - $yrs * 86400 * 365.25) / 86400 / 30.4375);
-			return ($mon ? "${yrs}y ${mon}mo" : "${yrs}y") . ' ago';
+			return ($mon ? "{$yrs}y {$mon}mo" : "{$yrs}y") . ' ago';
 		default:
 			return (round ($seconds / 86400 / 365.25) . 'y') . ' ago';
 	}
@@ -6215,7 +6215,7 @@ function mkCellA ($cell, $title = NULL)
 {
 	global $pageno_by_etype;
 	if (! isset ($pageno_by_etype[$cell['realm']]))
-		throw new RackTablesError ("Internal structure error in array \$pageno_by_etype. Page for realm '${cell['realm']}' is not set", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Internal structure error in array \$pageno_by_etype. Page for realm '{$cell['realm']}' is not set", RackTablesError::INTERNAL);
 	$cell_page = $pageno_by_etype[$cell['realm']];
 	$cell_key = $cell[$cell['realm'] == 'user' ? 'user_id' : 'id'];
 	if ($title === NULL)
@@ -6385,7 +6385,7 @@ function timestampFromDatetimestr ($s)
 {
 	$format = getConfigVar ('DATETIME_FORMAT');
 	if (FALSE === $tmp = strptime ($s, $format))
-		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
+		throw new InvalidArgException ('s', $s, "not a date in format '{$format}'");
 	$ret = mktime
 	(
 		$tmp['tm_hour'],       # 0~23
@@ -6409,7 +6409,7 @@ function SQLDateFromDateStr ($s, $format = NULL)
 	if ($format === NULL)
 		$format = getConfigVar ('DATEONLY_FORMAT');
 	if (FALSE === $tmp = strptime ($s, $format))
-		throw new InvalidArgException ('s', $s, "not a date in format '${format}'");
+		throw new InvalidArgException ('s', $s, "not a date in format '{$format}'");
 	$y = $tmp['tm_year'] + 1900;
 	$m = $tmp['tm_mon'] + 1;
 	$d = $tmp['tm_mday'];
@@ -6502,10 +6502,10 @@ function printLocationChildrenSelectOptions ($location, $parent_id, $location_id
 	{
 		if ($subLocation['id'] == $location_id)
 			continue;
-		echo "<option value=${subLocation['id']}";
+		echo "<option value={$subLocation['id']}";
 		if ($subLocation['id'] == $parent_id)
 			echo ' selected';
-		echo '>' . str_repeat ('&raquo; ', $level) . "${subLocation['name']}</option>\n";
+		echo '>' . str_repeat ('&raquo; ', $level) . "{$subLocation['name']}</option>\n";
 		if ($subLocation['kidc'] > 0)
 			$self ($subLocation, $parent_id, $location_id, $level);
 	}
@@ -6636,9 +6636,9 @@ function getLastCreatedId ($realm)
 
 function formatPatchCableHeapAsPlainText ($heap)
 {
-	$text = "${heap['amount']} pcs: [${heap['end1_connector']}] ${heap['pctype']} [${heap['end2_connector']}]";
+	$text = "{$heap['amount']} pcs: [{$heap['end1_connector']}] {$heap['pctype']} [{$heap['end2_connector']}]";
 	if ($heap['description'] != '')
-		$text .=  " (${heap['description']})";
+		$text .=  " ({$heap['description']})";
 	return stringForOption ($text, 512);
 }
 
@@ -6653,7 +6653,7 @@ function groupBy ($list, $group_field)
 	foreach ($list as $index => $item)
 	{
 		if (! is_array ($item))
-			throw new InvalidArgException ("list[${index}]", $item, 'must be an array');
+			throw new InvalidArgException ("list[{$index}]", $item, 'must be an array');
 		$key = '';
 		if (isset ($item[$group_field]))
 			$key = (string) $item[$group_field];
@@ -6755,10 +6755,10 @@ function requireListOfFiles ($x)
 
 function requireExtraFiles ($reqlist, $pageno, $tabno)
 {
-	if (array_key_exists ("${pageno}-${tabno}", $reqlist))
-		requireListOfFiles ($reqlist["${pageno}-${tabno}"]);
-	if (array_key_exists ("${pageno}-*", $reqlist))
-		requireListOfFiles ($reqlist["${pageno}-*"]);
+	if (array_key_exists ("{$pageno}-{$tabno}", $reqlist))
+		requireListOfFiles ($reqlist["{$pageno}-{$tabno}"]);
+	if (array_key_exists ("{$pageno}-*", $reqlist))
+		requireListOfFiles ($reqlist["{$pageno}-*"]);
 }
 
 // Return the text as a list of lines after removing CRs, empty lines

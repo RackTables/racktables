@@ -31,17 +31,17 @@ try {
 		if (isset ($tabhandler[$pageno][$tabno]))
 		{
 			if (! is_callable ($tabhandler[$pageno][$tabno]))
-				throw new RackTablesError ("Missing handler function for node '${pageno}-${tabno}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ("Missing handler function for node '{$pageno}-{$tabno}'", RackTablesError::INTERNAL);
 			call_user_func ($tabhandler[$pageno][$tabno], getBypassValue());
 		}
 		elseif (isset ($page[$pageno]['handler']))
 		{
 			if (! is_callable ($page[$pageno]['handler']))
-				throw new RackTablesError ("Missing handler function for node '${pageno}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ("Missing handler function for node '{$pageno}'", RackTablesError::INTERNAL);
 			$page[$pageno]['handler'] ($tabno);
 		}
 		else
-			throw new RackTablesError ("Failed to find handler for page '${pageno}', tab '${tabno}'", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Failed to find handler for page '{$pageno}', tab '{$tabno}'", RackTablesError::INTERNAL);
 		// Embed the current text in OB into interface layout (the latter also
 		// empties color message buffer).
 		$contents = ob_get_contents();
@@ -228,7 +228,7 @@ try {
 			)
 				throw new RackTablesError ('This request has no ophandler function.', RackTablesError::INTERNAL);
 			// We have a chance to handle an error before starting HTTP header.
-			if (!isset ($delayauth["${pageno}-${tabno}-${op}"]))
+			if (!isset ($delayauth["{$pageno}-{$tabno}-{$op}"]))
 				assertPermission();
 			# Call below does the job of bypass argument assertion, if such is required,
 			# so the ophandler function doesn't have to re-assert this portion of its
@@ -277,7 +277,7 @@ try {
 		if (isset ($popuphandler[$helper]) && is_callable ($popuphandler[$helper]))
 			call_user_func ($popuphandler[$helper], $helper);
 		else
-			throw new RackTablesError ("Missing handler function for node '${handler}'", RackTablesError::INTERNAL);
+			throw new RackTablesError ("Missing handler function for node '{$handler}'", RackTablesError::INTERNAL);
 		$contents = ob_get_contents();
 		ob_clean();
 		renderPopupHTML ($contents);
