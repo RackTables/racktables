@@ -1210,14 +1210,14 @@ function stringForTD ($string, $maxlen = 30)
 function stringForTextInputValue ($string, $maxlen = 30)
 {
 	if ($maxlen != 0)
-		$string = mb_substr ($string, 0, $maxlen);
+		$string = mb_substr ($string ?? "", 0, $maxlen);
 	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 }
 
 // "<TEXTAREA>%s</TEXTAREA>"
 function stringForTextarea ($string)
 {
-	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
+	return htmlspecialchars ($string ?? "", ENT_QUOTES, 'UTF-8');
 }
 
 // <OPTION>%s</OPTION>

@@ -472,7 +472,7 @@ function proxyStaticURI ($URI)
 	if
 	(
 		! preg_match (RE_STATIC_URI, $URI, $matches) ||
-		! array_key_exists (strtolower ($matches[1]), $content_type)
+		! array_key_exists (strtolower ($matches[1] ?? ""), $content_type)
 	)
 		printStatic404();
 	global $local_staticdir, $racktables_staticdir;

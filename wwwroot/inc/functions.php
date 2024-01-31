@@ -1216,7 +1216,7 @@ function findAllEndpoints ($object_id, $fallback = '')
 // $record['href'] is set to URL if it is specified in the input value
 function parseWikiLink (&$record)
 {
-	if (! preg_match ('/^\[\[(.+)\]\]$/', $record['value'], $matches))
+	if (! preg_match ('/^\[\[(.+)\]\]$/', $record['value'] ?? "", $matches))
 		$record['o_value'] = $record['value'];
 	else
 	{
@@ -1233,7 +1233,7 @@ function execGMarker ($line)
 {
 	return preg_replace ('/^.+%GSKIP%/', '',
 		preg_replace ('/^(.+)%GPASS%/', '\\1 ',
-			preg_replace ('/%L\d+,\d+(H|V|)%/', '', $line)));
+			preg_replace ('/%L\d+,\d+(H|V|)%/', '', $line ?? "")));
 }
 
 // extract the layout information from the %L...% marker in the dictionary info
@@ -1402,7 +1402,7 @@ function parseAutoPortsConfig ($schema)
 {
 	$ret = array();
 
-	foreach (explode ('+', $schema) as $product)
+	foreach (explode ('+', $schema ?? "") as $product)
 	{
 		$tmp = explode ('*', $product);
 		if (count ($tmp) > 4 || count ($tmp) < 3)
