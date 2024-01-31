@@ -548,8 +548,10 @@ function queryLDAPServer ($username, $password)
 	(
 		isset ($LDAP_options['search_dn']) &&
 		$LDAP_options['search_dn'] != '' &&
-		isset ($LDAP_options['search_attr']) &&
-		$LDAP_options['search_attr'] != ''
+		((isset ($LDAP_options['search_filter']) &&
+		$LDAP_options['search_filter'] != '') ||
+		(isset ($LDAP_options['search_attr']) &&
+		$LDAP_options['search_attr'] != ''))
 	)
 	{
 		// If a search_bind_rdn is supplied, bind to that and use it to search.
@@ -573,7 +575,12 @@ function queryLDAPServer ($username, $password)
 					RackTablesError::MISCONFIGURED
 				);
 		}
-		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "=${username})", array("dn"));
+		// compatibility: if 'search_filter' exists, use that one instead, as 'search_attr' is very limiting.
+		if (isset ($LDAP_options['search_filter']))
+			$search_attrs = str_replace('%USERNAME%', $username, $LDAP_options['search_filter']);
+		else
+			$search_attrs = '(' . $LDAP_options['search_attr'] . "=${username})";
+		$results = @ldap_search ($connect, $LDAP_options['search_dn'], $search_attrs, array("dn"));
 		if ($results === FALSE)
 			return array ('result' => 'CAN');
 		if (@ldap_count_entries ($connect, $results) != 1)
@@ -604,17 +611,23 @@ function queryLDAPServer ($username, $password)
 	(
 		isset ($LDAP_options['displayname_attrs']) &&
 		$LDAP_options['displayname_attrs'] != '' &&
-		isset ($LDAP_options['search_dn']) &&
-		$LDAP_options['search_dn'] != '' &&
-		isset ($LDAP_options['search_attr']) &&
-		$LDAP_options['search_attr'] != ''
+		((isset ($LDAP_options['search_filter']) &&
+		$LDAP_options['search_filter'] != '') ||
+		(isset ($LDAP_options['search_attr']) &&
+		$LDAP_options['search_attr'] != ''))
 	)
 	{
+		// compatibility: if 'search_filter' exists, use that one instead, as 'search_attr' is very limiting.
+		if (isset ($LDAP_options['search_filter']))
+			$search_attrs = str_replace('%USERNAME%', $username, $LDAP_options['search_filter']);
+		else
+			$search_attrs = '(' . $LDAP_options['search_attr'] . "=${username})";
+
 		$results = @ldap_search
 		(
 			$connect,
 			$LDAP_options['search_dn'],
-			'(' . $LDAP_options['search_attr'] . "=${username})",
+			$search_attrs,
 			array_merge (array ($LDAP_options['group_attr']), explode (' ', $LDAP_options['displayname_attrs']))
 		);
 		if (@ldap_count_entries ($connect, $results) != 1)
