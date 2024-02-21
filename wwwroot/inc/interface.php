@@ -3674,7 +3674,7 @@ function renderSearchResults ($terms, $summary)
 {
 	// sanitize $terms in preparation for output
 	$terms_sanitized = htmlspecialchars($terms);
-    $terms = $terms_sanitized
+    $terms = $terms_sanitized;
 	
 	// calculate the number of found objects
 	$nhits = 0;
