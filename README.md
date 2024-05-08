@@ -16,13 +16,8 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                               |
 | ------------------ | ----------------------------------------------------------------------- |
-| Debian 11          | `apt-get install mariadb-server`                                        |
-| Fedora 26          | `dnf install mariadb-server mariadb`                                    |
-| Fedora 32          | `dnf install mariadb-server`                                            |
+| Debian 11-12       | `apt-get install mariadb-server`                                        |
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
-| openSUSE 42.1      | `zypper install mysql-community-server`                                 |
-| Scientific&nbsp;Linux&nbsp;6 | `yum install mysql-server mysql` |
-| Ubuntu 18.04       | `apt-get install mysql-server`                                          |
 | Ubuntu 20.04       | `apt-get install mariadb-server`                                        |
 | Ubuntu 22.04       | `apt-get install mariadb-server`                                        |
 | RHEL 7             | `yum install -y mariadb-server mariadb`                                 |
@@ -31,11 +26,7 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Debian 11          | No action required, comes configured for UTF-8 by default.                                                         |
-| Fedora 26-32       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/my.cnf.d/mysqld-charset.cnf; systemctl restart mariadb``` |
-| openSUSE 42.1      | No action required, comes configured for UTF-8 by default.                                                         |
-| Scientific&nbsp;Linux&nbsp;6 | add `character-set-server=utf8` line to `[mysqld]` section of `/etc/my.cnf` file and restart mysqld |
-| Ubuntu 18.04       | ```printf "[mysqld]\ncharacter-set-server=utf8\n" > /etc/mysql/conf.d/charset.cnf; service mysql restart```        |
+| Debian 11-12       | No action required, comes configured for UTF-8 by default.                                                         |
 | Ubuntu 20.04       | No action required, comes configured for UTF-8 by default.                                                         |
 | RHEL 7             | add `character-set-server=utf8` line to `[server]` section of `/etc/my.cnf.d/server.cnf` file and restart mysqld   |
 
@@ -43,18 +34,15 @@ web-server for RackTables is Apache httpd.
 
 | Distribution       | How to do                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| Debian 11          | `apt-get install apache2-bin libapache2-mod-php php-gd php-mysql php-mbstring php-bcmath php-json php-snmp && systemctl restart apache2`
-| Fedora 26-32       | `dnf install httpd php php-mysqlnd php-pdo php-gd php-snmp php-mbstring php-bcmath`  |
+| Debian 11-12       | `apt-get install apache2-bin libapache2-mod-php php-gd php-mysql php-mbstring php-bcmath php-json php-snmp && systemctl restart apache2`
 | FreeBSD 10         | see note 1.3.c                                                                       | 
-| openSUSE 42.1      | `zypper install apache2-mod_php5 php5-gd php5-mbstring php5-mysql php5-bcmath`       |
-| Scientific&nbsp;Linux&nbsp;6 | `yum install httpd php php-mysql php-pdo php-gd php-mbstring php-bcmath` |
 | Ubuntu any release | `apt-get install apache2-bin libapache2-mod-php php-gd php-mysql php-mbstring php-bcmath php-json php-snmp`
 | RHEL 7             | `subscription-manager repos --enable=rhel-server-rhscl-7-rpms`
 |                    | `yum install httpd24 rh-php70 rh-php70-php-mysqlnd rh-php70-php-pdo rh-php70-php-gd rh-php70-php-snmp rh-php70-php-mbstring rh-php70-php-bcmath rh-php70-php-ldap rh-php70-php`
 
-#### 1.3.a. [redacted]
+#### 1.3.a. [no longer applies]
 
-#### 1.3.b. [redacted]
+#### 1.3.b. [no longer applies]
 
 #### 1.3.c. FreeBSD 10
 There are 3 different ways how you can install RackTables and its dependencies on FreeBSD.
@@ -94,7 +82,6 @@ Apache users should create a racktables.conf file under their apache
 Includes directory with the following contents:
 ```
 AddType  application/x-httpd-php         .php
-AddType  application/x-httpd-php-source  .phps
 
 <Directory /usr/local/www/racktables/wwwroot>
 	DirectoryIndex index.php
@@ -134,10 +121,7 @@ and initialize the application.
 
 | Distribution    | Apache httpd UID:GID    | MySQL/MariaDB UNIX socket path   |
 | --------------- | ----------------------- | -------------------------------- |
-| Debian 11       | `www-data:www-data`     | `/run/mysqld/mysqld.sock`    |
-| Fedora 26-32    | `apache:apache`         | `/var/lib/mysql/mysql.sock`      |
-| openSUSE 42.1   | `wwwrun:www`            | `/var/run/mysql/mysql.sock`      |
-| Ubuntu 18.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
+| Debian 11-12    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
 | Ubuntu 20.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 
 # How to upgrade RackTables
