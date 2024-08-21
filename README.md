@@ -123,6 +123,7 @@ and initialize the application.
 | --------------- | ----------------------- | -------------------------------- |
 | Debian 11-12    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
 | Ubuntu 20.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
+| Ubuntu 22.04    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
 
 # How to upgrade RackTables
 
