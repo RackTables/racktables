@@ -233,7 +233,7 @@ function generateSLBConfig2 ($triplet_list)
 							if ($ip_ver)
 								$fam_parser->addMacro ('IP_VER', $ip_ver);
 							if ('' != $vs_config = generateVSSection ($fam_parser))
-								$virtual_services["IPv${ip_ver} " . $fam_parser->expandMacro ('VS_HEADER')] = $vs_config;
+								$virtual_services["IPv{$ip_ver} " . $fam_parser->expandMacro ('VS_HEADER')] = $vs_config;
 						}
 					}
 					else
@@ -335,7 +335,7 @@ function makeUniqueVSGName ($seen_names, $keys, $vs_cell)
 	}
 
 	if (! isset ($vsg_name))
-		throw new RackTablesError ("Could not produce unique VS group name for ${vs_cell['name']}", RackTablesError::INTERNAL);
+		throw new RackTablesError ("Could not produce unique VS group name for {$vs_cell['name']}", RackTablesError::INTERNAL);
 	return $vsg_name;
 }
 

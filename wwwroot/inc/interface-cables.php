@@ -89,11 +89,11 @@ function renderPatchCableHeapEditor()
 		printOpFormIntro ('upd', array ('id' => $heap['id']));
 		echo '<tr>';
 		echo '<td>' . getOpLink (array ('op' => 'del', 'id' => $heap['id']), '', 'destroy', 'remove') . '</td>';
-		echo "<td class=tdright>${heap['amount']}</td>";
+		echo "<td class=tdright>{$heap['amount']}</td>";
 		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end1_conn_id'), $heap['end1_conn_id']) . '</td>';
 		echo '<td>' . getSelect (getPatchCableTypeOptions(), array ('name' => 'pctype_id'), $heap['pctype_id']) . '</td>';
 		echo '<td>' . getSelect (getPatchCableConnectorOptions(), array ('name' => 'end2_conn_id'), $heap['end2_conn_id']) . '</td>';
-		echo "<td><input type=text size=6 name=length value='${heap['length']}'></td>";
+		echo "<td><input type=text size=6 name=length value='{$heap['length']}'></td>";
 		echo '<td><input type=text size=48 name=description value="' . stringForTextInputValue ($heap['description'], 255) . '"></td>';
 		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 		echo '</tr>';
@@ -118,12 +118,12 @@ function renderPatchCableHeapAmount()
 		else
 			echo getImageHREF ('nodelete');
 		echo '</td>';
-		echo "<td><input type=text size=7 name=amount value='${heap['amount']}'></td>";
+		echo "<td><input type=text size=7 name=amount value='{$heap['amount']}'></td>";
 		echo '<td>' . getOpLink (array ('op' => 'inc', 'id' => $heap['id']), '', 'add', 'replenish') . '</td>';
 		echo '<td>' . stringForTD ($heap['end1_connector'], 32) . '</td>';
 		echo '<td>' . stringForTD ($heap['pctype'], 255) . '</td>';
 		echo '<td>' . stringForTD ($heap['end2_connector'], 32) . '</td>';
-		echo "<td class=tdright>${heap['length']}</td>";
+		echo "<td class=tdright>{$heap['length']}</td>";
 		echo '<td>' . stringForTD ($heap['description'], 255) . '</td>';
 		echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 		echo '</tr></form>';

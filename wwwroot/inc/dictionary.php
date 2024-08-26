@@ -26,7 +26,7 @@ function reloadDictionary ($rows_per_query = 25)
 	# is likely to hit the default execution time limit of 30 seconds.
 	foreach ($dictionary as $dict_key => $record)
 	{
-		$vlist[] = "(${dict_key}, ${record['chapter_id']}, '${record['dict_value']}', 'yes')";
+		$vlist[] = "({$dict_key}, {$record['chapter_id']}, '{$record['dict_value']}', 'yes')";
 		if (count ($vlist) == $rows_per_query)
 		{
 			$ret[] = buildInsert ($vlist);
@@ -53,13 +53,13 @@ function isInnoDBSupported ()
 
 function platform_generic_test ($is_ok, $topic, $what_if_not = 'FAILED', $error_class = 'trerror')
 {
-	echo "<tr><th class=tdleft>${topic}</th>";
+	echo "<tr><th class=tdleft>{$topic}</th>";
 	if ($is_ok)
 	{
 		echo '<td class="trok tdleft">PASSED</td></tr>';
 		return 0;
 	}
-	echo "<td class='${error_class} tdleft'>${what_if_not}</td></tr>";
+	echo "<td class='{$error_class} tdleft'>{$what_if_not}</td></tr>";
 	return 1;
 }
 

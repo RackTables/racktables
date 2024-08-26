@@ -209,7 +209,7 @@ function renderPopupObjectSelector()
 	echo '<br>';
 	echo "<input type=submit value='Proceed' onclick='".
 		"if (getElementById(\"parents\").value != \"\") {".
-		"	opener.location=\"?module=redirect&page=object&tab=edit&op=linkObjects&object_id=${object_id}&child_entity_type=object&child_entity_id=${object_id}&parent_entity_type=object&parent_entity_id=\"+getElementById(\"parents\").value; ".
+		"	opener.location=\"?module=redirect&page=object&tab=edit&op=linkObjects&object_id={$object_id}&child_entity_type=object&child_entity_id={$object_id}&parent_entity_type=object&parent_entity_id=\"+getElementById(\"parents\").value; ".
 		"	window.close();}'>";
 	echo '</form>';
 }
@@ -242,7 +242,7 @@ function handlePopupPortLink()
 			break;
 		}
 		else
-			$js_table .= "POIFC['${pair['type1']}-${pair['type2']}'] = 1;\n";
+			$js_table .= "POIFC['{$pair['type1']}-{$pair['type2']}'] = 1;\n";
 
 	if ($matches)
 	{
@@ -500,8 +500,8 @@ function renderPopupIPv4Selector()
 	}
 	usort ($addresses, 'sortObjectAddressesAndNames');
 	foreach ($addresses as $address)
-		echo "<option value='${address['ip']}' onclick='getElementById(\"ip\").value=\"${address['ip']}\";'>" .
-		"${address['object_name']} ${address['name']} ${address['ip']}</option>\n";
+		echo "<option value='{$address['ip']}' onclick='getElementById(\"ip\").value=\"{$address['ip']}\";'>" .
+		"{$address['object_name']} {$address['name']} {$address['ip']}</option>\n";
 	echo '</select><br><br>';
 	echo "<input type=submit value='Proceed' onclick='".
 		"if (getElementById(\"ip\")!=\"\") {".
@@ -519,7 +519,7 @@ function renderPopupHTML ($contents)
 	printPageHeaders();
 	echo '</head>';
 	echo '<body style="height: 100%;">';
-	echo "<div class=popupbar>${contents}</div>";
+	echo "<div class=popupbar>{$contents}</div>";
 	echo '</body>';
 	echo '</html>';
 }
