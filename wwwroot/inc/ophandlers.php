@@ -1498,7 +1498,7 @@ function updateUI ()
 		{
 			assertStringArg ("${i}_varvalue", TRUE);
 			$varname = genericAssertion ("${i}_varname", 'string');
-			$varvalue = $_REQUEST["${i}_varvalue"];
+			$varvalue = htmlspecialchars_decode($_REQUEST["${i}_varvalue"], ENT_QUOTES);
 			// If form value = value in DB, don't bother updating DB.
 			if (isConfigVarChanged ($varname, $varvalue))
 				setConfigVar ($varname, $varvalue);
