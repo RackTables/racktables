@@ -994,7 +994,7 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `asset_no` (`asset_no`),
-  KEY `id-tid` (`id`,`objtype_id`),
+  UNIQUE KEY `id-tid` (`id`,`objtype_id`),
   KEY `type_id` (`objtype_id`,`id`)
 ) ENGINE=InnoDB";
 
@@ -1063,7 +1063,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
-  KEY `id-is_assignable` (`id`,`is_assignable`),
+  UNIQUE KEY `id-is_assignable` (`id`,`is_assignable`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
 ) ENGINE=InnoDB";
 
