@@ -226,6 +226,7 @@ function getDBUpgradePath ($v1, $v2)
 		'0.21.4',
 		'0.21.5',
 		'0.22.0',
+		'0.22.1',
 	);
 	if (! in_array ($v1, $versionhistory) || ! in_array ($v2, $versionhistory))
 		return NULL;
@@ -1376,6 +1377,9 @@ INSERT INTO `Config` (varname, varvalue, vartype, emptyok, is_hidden, is_userdef
 			$query[] = "INSERT INTO PortCompat VALUES (441, 441)";
 			$query[] = "INSERT INTO PortInterfaceCompat VALUES (1, 441)";
 			$query[] = "UPDATE Config SET varvalue = '0.22.0' WHERE varname = 'DB_VERSION'";
+			break;
+		case '0.22.1':
+			$query[] = "UPDATE Config SET varvalue = '0.22.1' WHERE varname = 'DB_VERSION'";
 			break;
 		case 'dictionary':
 			$query = reloadDictionary();
