@@ -643,13 +643,13 @@ function get_pseudo_file ($name)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `IPv4LB` (
-  `object_id` int(10) unsigned default NULL,
+  `object_id` int(10) unsigned NOT NULL,
   `rspool_id` int(10) unsigned default NULL,
-  `vs_id` int(10) unsigned default NULL,
+  `vs_id` int(10) unsigned NOT NULL,
   `prio` varchar(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  UNIQUE KEY `LB-VS` (`object_id`,`vs_id`),
+  PRIMARY KEY (`object_id`,`vs_id`),
   KEY `IPv4LB-FK-rspool_id` (`rspool_id`),
   KEY `IPv4LB-FK-vs_id` (`vs_id`),
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
