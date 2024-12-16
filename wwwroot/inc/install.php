@@ -643,13 +643,13 @@ function get_pseudo_file ($name)
 ) ENGINE=InnoDB";
 
 		$query[] = "CREATE TABLE `IPv4LB` (
-  `object_id` int(10) unsigned default NULL,
+  `object_id` int(10) unsigned NOT NULL,
   `rspool_id` int(10) unsigned default NULL,
-  `vs_id` int(10) unsigned default NULL,
+  `vs_id` int(10) unsigned NOT NULL,
   `prio` varchar(255) default NULL,
   `vsconfig` text,
   `rsconfig` text,
-  UNIQUE KEY `LB-VS` (`object_id`,`vs_id`),
+  PRIMARY KEY (`object_id`,`vs_id`),
   KEY `IPv4LB-FK-rspool_id` (`rspool_id`),
   KEY `IPv4LB-FK-vs_id` (`vs_id`),
   CONSTRAINT `IPv4LB-FK-vs_id` FOREIGN KEY (`vs_id`) REFERENCES `IPv4VS` (`id`),
@@ -994,7 +994,7 @@ function get_pseudo_file ($name)
   `comment` text,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `asset_no` (`asset_no`),
-  KEY `id-tid` (`id`,`objtype_id`),
+  UNIQUE KEY `id-tid` (`id`,`objtype_id`),
   KEY `type_id` (`objtype_id`,`id`)
 ) ENGINE=InnoDB";
 
@@ -1063,7 +1063,7 @@ function get_pseudo_file ($name)
   PRIMARY KEY  (`id`),
   UNIQUE KEY `tag` (`tag`),
   KEY `TagTree-K-parent_id` (`parent_id`),
-  KEY `id-is_assignable` (`id`,`is_assignable`),
+  UNIQUE KEY `id-is_assignable` (`id`,`is_assignable`),
   CONSTRAINT `TagTree-K-parent_id` FOREIGN KEY (`parent_id`) REFERENCES `TagTree` (`id`)
 ) ENGINE=InnoDB";
 
