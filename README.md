@@ -20,6 +20,7 @@ web-server for RackTables is Apache httpd.
 | FreeBSD 10         | `pkg install mysql56-server`                                            |
 | Ubuntu 20.04       | `apt-get install mariadb-server`                                        |
 | Ubuntu 22.04       | `apt-get install mariadb-server`                                        |
+| Ubuntu 24.04       | `apt-get install mariadb-server`                                        |
 | RHEL 7             | `yum install -y mariadb-server mariadb`                                 |
 
 ### 1.2. Enable Unicode in the MySQL/MariaDB server
@@ -124,6 +125,7 @@ and initialize the application.
 | Debian 11-12    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
 | Ubuntu 20.04    | `www-data:www-data`     | `/var/run/mysqld/mysqld.sock`    |
 | Ubuntu 22.04    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
+| Ubuntu 24.04    | `www-data:www-data`     | `/run/mysqld/mysqld.sock`        |
 
 # How to upgrade RackTables
 
