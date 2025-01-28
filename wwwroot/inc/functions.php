@@ -1258,8 +1258,11 @@ function getRSUforRack ($data)
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 		for ($locidx = 0; $locidx < 3; $locidx++)
 			$counter[$data[$unit_no][$locidx]['state']]++;
-	return ($counter['T'] + $counter['W'] + $counter['U']) /
-		($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	$total = ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	if ($total === 0)
+		// Solve division by zero error when a rack, with no rackspace available, equals to 0.
+		return 0;
+	return ($counter['T'] + $counter['W'] + $counter['U']) / $total;
 }
 
 // Same for row.
@@ -1278,8 +1281,11 @@ function getRSUforRow ($rowData)
 			for ($locidx = 0; $locidx < 3; $locidx++)
 				$counter[$data[$unit_no][$locidx]['state']]++;
 	}
-	return ($counter['T'] + $counter['W'] + $counter['U']) /
-		($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	$total = ($counter['T'] + $counter['W'] + $counter['U'] + $counter['F']);
+	if ($total === 0)
+		// Solve division by zero error when a row of racks, with no rackspace available, equals to 0.
+		return 0;
+	return ($counter['T'] + $counter['W'] + $counter['U']) / $total;
 }
 
 function string_insert_hrefs_callback ($m)
