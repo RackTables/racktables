@@ -899,12 +899,10 @@ function delIPAllocation ()
 	showFuncMessage (__FUNCTION__, 'OK');
 }
 
-function addIPAllocation ()
+// Check if IP can be allocated
+// Returns false on critical error.
+function checkIPAllocation($ip_bin, $alloc_type)
 {
-	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
-	$ip_bin = assertIPArg ('ip');
-	$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
-
 	// check if address is alread allocated
 	$address = getIPAddress($ip_bin);
 
@@ -914,7 +912,7 @@ function addIPAllocation ()
 	if (getConfigVar ('IPV4_JAYWALK') != 'yes' && NULL === getIPAddressNetworkId ($ip_bin))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array (ip_format ($ip_bin)));
-		return;
+		return false;
 	}
 
 	if($address['reserved'] && $address['name'] != '')
@@ -922,6 +920,18 @@ function addIPAllocation ()
 		showWarning("IP ".ip_format($ip_bin)." reservation \"".$address['name']."\" is removed");
 		//TODO ask to take reserved IP or not !
 	}
+
+	return true;
+}
+
+function addIPAllocation ()
+{
+	setFuncMessages (__FUNCTION__, array ('OK' => 48, 'ERR1' => 170));
+	$ip_bin = assertIPArg ('ip');
+	$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
+
+	if (!checkIPAllocation($ip_bin, $alloc_type))
+		return;
 
 	bindIPToObject
 	(
@@ -933,6 +943,34 @@ function addIPAllocation ()
 
 	showFuncMessage (__FUNCTION__, 'OK');
 	return buildRedirectURL (NULL, NULL, array ('hl_ip' => ip_format ($ip_bin)));
+}
+
+function addLotOfIPAllocation()
+{
+	assertStringArg ('iplist', TRUE);
+	$object_id = genericAssertion ('object_id', 'uint');
+	$bond_name = genericAssertion ('bond_name', 'string0');
+	$alloc_type = genericAssertion ('bond_type', 'enum/alloc_type');
+
+	foreach (textareaCooked ($_REQUEST['iplist']) as $ip)
+		try
+		{
+			$ip_bin = ip_parse ($ip);
+			checkIPAllocation($ip_bin, $alloc_type);
+			bindIPToObject
+			(
+				$ip_bin,
+				$object_id,
+				$bond_name,
+				$alloc_type
+			);
+			showSuccess ('Allocated IP '.ip_format ($ip_bin));
+		}
+		catch (RackTablesError $e)
+		{
+			showError ("Failed to allocate ip '$ip': " . $e->getMessage());
+		}
+	return buildRedirectURL (NULL, NULL);
 }
 
 function addIPv4Prefix ()
