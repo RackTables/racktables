@@ -1180,7 +1180,7 @@ function renderObject8021QSyncPreview ($object, $vswitch, $plan, $C, $R, $maxdec
 	switchportInfoJS ($vswitch['object_id']); // load JS code to make portnames interactive
 	// Initialize one of the three popups: the data is ready.
 	$port_config = addslashes (json_encode (formatPortConfigHints ($vswitch['object_id'], $R)));
-	addJSText (<<<'END'
+	addJSText (<<<"END"
 $(document).ready(function(){
 	var confData = $.parseJSON('$port_config');
 	applyConfData(confData);
