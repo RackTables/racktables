@@ -820,7 +820,7 @@ function addMultiPorts ()
 				);
 				break;
 			default:
-				throw new RackTablesError ("unknown data format '${format}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ("unknown data format '{$format}'", RackTablesError::INTERNAL);
 		}
 	}
 	// Create ports, if they don't exist.
@@ -1150,7 +1150,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				continue;
 			// detect a change
 			$state = $rackData[$unit_no][$locidx]['state'];
-			$newstate = isCheckSet ("atom_${rack_id}_${unit_no}_${locidx}") ? $checked_state : $unchecked_state;
+			$newstate = isCheckSet ("atom_{$rack_id}_{$unit_no}_{$locidx}") ? $checked_state : $unchecked_state;
 			if ($state == $newstate)
 				continue;
 			$rackchanged = TRUE;
@@ -1163,7 +1163,7 @@ function processGridForm (&$rackData, $unchecked_state, $checked_state, $object_
 				!($state == $unchecked_state && $newstate == $checked_state)
 			)
 			{
-				showError ("${rack_name}: Rack ID ${rack_id}, unit ${unit_no}, 'atom ${atom}', cannot change state from '${state}' to '${newstate}'");
+				showError ("{$rack_name}: Rack ID {$rack_id}, unit {$unit_no}, 'atom {$atom}', cannot change state from '{$state}' to '{$newstate}'");
 				$dbxlink->rollBack();
 				return FALSE;
 			}
@@ -1233,7 +1233,7 @@ function updateObjectAllocation ()
 			$rackData = $workingRacksData[$cand_id];
 		$is_ro = ! rackModificationPermitted ($rackData, $op, FALSE);
 		// It's zero-U mounted to this rack on the form, but not in the DB.  Mount it.
-		if (isset($_REQUEST["zerou_${cand_id}"]) && !in_array($cand_id, $parentRacks))
+		if (isset($_REQUEST["zerou_{$cand_id}"]) && !in_array($cand_id, $parentRacks))
 		{
 			if ($is_ro)
 				continue;
@@ -1241,7 +1241,7 @@ function updateObjectAllocation ()
 			commitLinkEntities ('rack', $cand_id, 'object', $object_id);
 		}
 		// It's not zero-U mounted to this rack on the form, but it is in the DB.  Unmount it.
-		if (!isset($_REQUEST["zerou_${cand_id}"]) && in_array($cand_id, $parentRacks))
+		if (!isset($_REQUEST["zerou_{$cand_id}"]) && in_array($cand_id, $parentRacks))
 		{
 			if ($is_ro)
 				continue;
@@ -1333,10 +1333,10 @@ function updateObjectAttributes ($object_id)
 	$num_attrs = genericAssertion ('num_attrs', 'unsigned');
 	for ($i = 0; $i < $num_attrs; $i++)
 	{
-		$attr_id = genericAssertion ("${i}_attr_id", 'natural');
+		$attr_id = genericAssertion ("{$i}_attr_id", 'natural');
 		if (! array_key_exists ($attr_id, $oldvalues))
 			throw new InvalidRequestArgException ('attr_id', $attr_id, 'malformed request');
-		$value = genericAssertion ("${i}_value", 'string0');
+		$value = genericAssertion ("{$i}_value", 'string0');
 
 		// If the object is a rack, certain attributes (height, sort_order) never normally
 		// appear in this subset of the request arguments as they are processed elsewhere.
@@ -1359,11 +1359,11 @@ function updateObjectAttributes ($object_id)
 			switch ($oldvalues[$attr_id]['type'])
 			{
 			case 'uint':
-				genericAssertion ("${i}_value", 'unsigned');
+				genericAssertion ("{$i}_value", 'unsigned');
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'float':
-				genericAssertion ("${i}_value", 'decimal0');
+				genericAssertion ("{$i}_value", 'decimal0');
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'string':
@@ -1371,12 +1371,12 @@ function updateObjectAttributes ($object_id)
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'date':
-				$value = timestampFromDatetimestr (genericAssertion ("${i}_value", 'datetime'));
+				$value = timestampFromDatetimestr (genericAssertion ("{$i}_value", 'datetime'));
 				$oldvalue = $oldvalues[$attr_id]['value'];
 				break;
 			case 'dict':
 				// Not 'unsigned' as 0 is handled above.
-				genericAssertion ("${i}_value", 'natural');
+				genericAssertion ("{$i}_value", 'natural');
 				$oldvalue = $oldvalues[$attr_id]['key'];
 				break;
 			default:
@@ -1404,11 +1404,11 @@ function addMultipleObjects()
 	$max = genericAssertion ('num_records', 'natural');
 	for ($i = 0; $i < $max; $i++)
 	{
-		$tid = genericAssertion ("${i}_object_type_id", 'unsigned'); // 0 by default in the SELECT
-		assertStringArg ("${i}_object_name", TRUE);
-		assertStringArg ("${i}_object_label", TRUE);
-		assertStringArg ("${i}_object_asset_no", TRUE);
-		$name = $_REQUEST["${i}_object_name"];
+		$tid = genericAssertion ("{$i}_object_type_id", 'unsigned'); // 0 by default in the SELECT
+		assertStringArg ("{$i}_object_name", TRUE);
+		assertStringArg ("{$i}_object_label", TRUE);
+		assertStringArg ("{$i}_object_asset_no", TRUE);
+		$name = $_REQUEST["{$i}_object_name"];
 
 		if ($tid == 0)
 			continue; // Just skip on intact SELECT.
@@ -1417,9 +1417,9 @@ function addMultipleObjects()
 			$object_id = commitAddObject
 			(
 				$name,
-				$_REQUEST["${i}_object_label"],
+				$_REQUEST["{$i}_object_label"],
 				$tid,
-				$_REQUEST["${i}_object_asset_no"],
+				$_REQUEST["{$i}_object_asset_no"],
 				$taglist
 			);
 			showSuccess ('added object ' . mkCellA (spotEntity ('object', $object_id)));
@@ -1496,9 +1496,9 @@ function updateUI ()
 	{
 		for ($i = 0; $i < $num_vars; $i++)
 		{
-			assertStringArg ("${i}_varvalue", TRUE);
-			$varname = genericAssertion ("${i}_varname", 'string');
-			$varvalue = $_REQUEST["${i}_varvalue"];
+			assertStringArg ("{$i}_varvalue", TRUE);
+			$varname = genericAssertion ("{$i}_varname", 'string');
+			$varvalue = $_REQUEST["{$i}_varvalue"];
 			// If form value = value in DB, don't bother updating DB.
 			if (isConfigVarChanged ($varname, $varvalue))
 				setConfigVar ($varname, $varvalue);
@@ -1518,9 +1518,9 @@ function saveMyPreferences ()
 
 	for ($i = 0; $i < $num_vars; $i++)
 	{
-		assertStringArg ("${i}_varvalue", TRUE);
-		$varname = genericAssertion ("${i}_varname", 'string');
-		$varvalue = $_REQUEST["${i}_varvalue"];
+		assertStringArg ("{$i}_varvalue", TRUE);
+		$varname = genericAssertion ("{$i}_varname", 'string');
+		$varvalue = $_REQUEST["{$i}_varvalue"];
 
 		// If form value = value in DB, don't bother updating DB
 		if (!isConfigVarChanged($varname, $varvalue))
@@ -2048,21 +2048,21 @@ function importPTRData ()
 	$nbad = $ngood = 0;
 	for ($i = 1; $i <= $addrcount; $i++)
 	{
-		$inputname = "import_${i}";
+		$inputname = "import_{$i}";
 		if (! isCheckSet ($inputname))
 			continue;
-		$ip_bin = assertIPv4Arg ("addr_${i}");
-		assertStringArg ("descr_${i}", TRUE);
-		assertStringArg ("rsvd_${i}");
+		$ip_bin = assertIPv4Arg ("addr_{$i}");
+		assertStringArg ("descr_{$i}", TRUE);
+		assertStringArg ("rsvd_{$i}");
 		// Non-existent addresses will not have this argument set in request.
 		$rsvd = 'no';
-		if ($_REQUEST["rsvd_${i}"] == 'yes')
+		if ($_REQUEST["rsvd_{$i}"] == 'yes')
 			$rsvd = 'yes';
 		try
 		{
 			if (! ip_in_range ($ip_bin, $net))
 				throw new InvalidArgException ('ip_bin', $ip_bin);
-			updateAddress ($ip_bin, $_REQUEST["descr_${i}"], $rsvd);
+			updateAddress ($ip_bin, $_REQUEST["descr_{$i}"], $rsvd);
 			$ngood++;
 		}
 		catch (RackTablesError $e)
@@ -2798,7 +2798,7 @@ function save8021QPorts ()
 				$allowed = array ($native);
 				break;
 			default:
-				throw new InvalidRequestArgException ("pm_${i}", $portmode, 'unknown port mode');
+				throw new InvalidRequestArgException ("pm_{$i}", $portmode, 'unknown port mode');
 			}
 			$changes[$portname] = array
 			(
@@ -2890,19 +2890,19 @@ function resolve8021QConflicts ()
 	$F = array();
 	for ($i = 0; $i < $nrows; $i++)
 	{
-		if (!array_key_exists ("i_${i}", $sic))
+		if (!array_key_exists ("i_{$i}", $sic))
 			continue;
 		// let's hope other inputs are in place
-		switch ($sic["i_${i}"])
+		switch ($sic["i_{$i}"])
 		{
 		case 'left':
 		case 'right':
-			$F[$sic["pn_${i}"]] = array
+			$F[$sic["pn_{$i}"]] = array
 			(
-				'mode' => $sic["rm_${i}"],
-				'allowed' => array_fetch ($sic, "ra_${i}", array()),
-				'native' => $sic["rn_${i}"],
-				'decision' => $sic["i_${i}"],
+				'mode' => $sic["rm_{$i}"],
+				'allowed' => array_fetch ($sic, "ra_{$i}", array()),
+				'native' => $sic["rn_{$i}"],
+				'decision' => $sic["i_{$i}"],
 			);
 			break;
 		default:
@@ -2929,7 +2929,7 @@ function resolve8021QConflicts ()
 			{
 				// for R neither mutex nor revisions can be emulated, but revision change can be
 				if (!same8021QConfigs ($port, $R['portdata'][$port_name]))
-					throw new InvalidRequestArgException ("port ${port_name}", '(hidden)', 'expired form (switch data has changed)');
+					throw new InvalidRequestArgException ("port {$port_name}", '(hidden)', 'expired form (switch data has changed)');
 				if ($port['decision'] == 'right') // D wins, frame R by writing value of R to C
 					$ndone += upd8021QPort ('cached', $vswitch['object_id'], $port_name, $port, $C[$port_name]);
 				elseif ($port['decision'] == 'left') // R wins, cross D up
@@ -2982,9 +2982,9 @@ function update8021QPortList()
 			throw new InvalidRequestArgException ('ports[]', $line, 'malformed array item');
 	# $enabled + $disabled > 0
 	if ($enabled)
-		showSuccess ("enabled 802.1Q for ${enabled} port(s)");
+		showSuccess ("enabled 802.1Q for {$enabled} port(s)");
 	if ($disabled)
-		showSuccess ("disabled 802.1Q for ${disabled} port(s)");
+		showSuccess ("disabled 802.1Q for {$disabled} port(s)");
 }
 
 function cloneVST()
@@ -3056,11 +3056,11 @@ function importDPData()
 	$object_id = getBypassValue();
 	$nignored = $ndone = 0;
 	for ($i = 0; $i < $nports; $i++)
-		if (array_key_exists ("do_${i}", $sic))
+		if (array_key_exists ("do_{$i}", $sic))
 		{
 			$params = array();
-			assertStringArg ("ports_${i}");
-			foreach (explode (',', $_REQUEST["ports_${i}"]) as $item)
+			assertStringArg ("ports_{$i}");
+			foreach (explode (',', $_REQUEST["ports_{$i}"]) as $item)
 			{
 				$pair = explode (':', $item);
 				if (count ($pair) != 2)
@@ -3069,7 +3069,7 @@ function importDPData()
 			}
 			if (! isset ($params['a_id']) || ! isset ($params['b_id']) ||
 				! intval ($params['a_id']) || ! intval ($params['b_id']))
-				throw new InvalidRequestArgException ("ports_${i}", $_REQUEST["ports_${i}"], "can not unpack port ids");
+				throw new InvalidRequestArgException ("ports_{$i}", $_REQUEST["ports_{$i}"], "can not unpack port ids");
 
 			$porta = getPortInfo ($params['a_id']);
 			$portb = getPortInfo ($params['b_id']);
@@ -3258,7 +3258,7 @@ function autoPopulateUCS()
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
 			{
-				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
+				$spname = preg_replace ('#.+/ls-(.+)#i', '{$1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
 				$spname_id[$spname] = $new_object_id = commitAddObject ($spname, NULL, 4, NULL);
 			}
 			#    Set H/W Type for Blade Server
@@ -3268,14 +3268,14 @@ function autoPopulateUCS()
 			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
 			#  	 Set Slot#
 			commitUpdateAttrValue ($new_object_id, 28, $item['slot']);
-			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
+			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '{$1}/{$2}', $item['DN']);
 			if (array_key_exists ($parent_name, $chassis_id))
 				commitLinkEntities ('object', $chassis_id[$parent_name], 'object', $new_object_id);
 			$done++;
 			break;
 		case 'VnicPort':
-			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '${2}', $item['DN']) . "(" . $oinfo['name'] . ")";
-			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '${3}', $item['DN']);
+			$spname = preg_replace ('#^([^/]+)/ls-([^/]+)/([^/]+)$#', '{$2}', $item['DN']) . "(" . $oinfo['name'] . ")";
+			$porttype = preg_replace ('#^([^/]+)/([^/]+)/([^-/]+)-.+$#', '{$3}', $item['DN']);
 			try
 			{
 				// Add "virtual" (1469) ports for associated blades only. The attempt may fail
@@ -3293,7 +3293,7 @@ function autoPopulateUCS()
 				$new_object_id = commitAddObject ($mname, NULL, 4, NULL);
 			else
 			{
-				$spname = preg_replace ('#.+/ls-(.+)#i', '${1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
+				$spname = preg_replace ('#.+/ls-(.+)#i', '{$1}', $item['assigned']) . "(" . $oinfo['name'] . ")";
 				$new_object_id = commitAddObject ($spname, NULL, 4, NULL);
 			}
 			# Set H/W Type for RackmountServer
@@ -3301,13 +3301,13 @@ function autoPopulateUCS()
 				commitUpdateAttrValue ($new_object_id, 2, $ucsproductmap[$item['model']]);
 			# Set Serial#
 			commitUpdateAttrValue ($new_object_id, 1, $item['serial']);
-			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '${1}/${2}', $item['DN']);
+			$parent_name = preg_replace ('#^([^/]+)/([^/]+)/([^/]+)$#', '{$1}/{$2}', $item['DN']);
 			commitLinkEntities ('object', $ucsm_id, 'object', $new_object_id);
 			$done++;
 			break;
 		}
 	} # endfor
-	showSuccess ("Auto-populated UCS Domain '${oinfo['name']}' with ${done} items");
+	showSuccess ("Auto-populated UCS Domain '{$oinfo['name']}' with {$done} items");
 }
 
 function cleanupUCS()
@@ -3340,7 +3340,7 @@ function cleanupUCS()
 		commitDeleteObject ($item_id);
 		$done++;
 	}
-	showSuccess ("Removed ${done} items from UCS Domain '${oinfo['name']}'");
+	showSuccess ("Removed {$done} items from UCS Domain '{$oinfo['name']}'");
 }
 
 function getOpspec()
@@ -3470,7 +3470,7 @@ function buildOpspecColumns ($opspec, $listname)
 {
 	$columns = array();
 	if (! array_key_exists ($listname, $opspec))
-		throw new InvalidArgException ('opspec', '(malformed structure)', "missing '${listname}'");
+		throw new InvalidArgException ('opspec', '(malformed structure)', "missing '{$listname}'");
 	foreach ($opspec[$listname] as $argspec)
 		switch (TRUE)
 		{
@@ -3589,7 +3589,7 @@ function editIPv4Net ()
 	);
 	rebuildTagChainForEntity ('ipv4net', $net_id, buildTagChainFromIds ($taglist), TRUE);
 	$netdata = spotEntity ('ipv4net', $net_id);
-	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
+	showFuncMessage (__FUNCTION__, 'OK', array ("{$netdata['ip']}/{$netdata['mask']}"));
 }
 
 function editIPv6Net ()
@@ -3607,7 +3607,7 @@ function editIPv6Net ()
 	);
 	rebuildTagChainForEntity ('ipv6net', $net_id, buildTagChainFromIds ($taglist), TRUE);
 	$netdata = spotEntity ('ipv6net', $net_id);
-	showFuncMessage (__FUNCTION__, 'OK', array ("${netdata['ip']}/${netdata['mask']}"));
+	showFuncMessage (__FUNCTION__, 'OK', array ("{$netdata['ip']}/{$netdata['mask']}"));
 }
 
 function updIPv4RSP ()
@@ -3714,10 +3714,10 @@ function installPlugin ()
 	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${name}_install"))
-			throw new RackTablesError ("The ${name} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
+		if (! is_callable ("plugin_{$name}_install"))
+			throw new RackTablesError ("The {$name} plugin is missing or cannot be installed", RackTablesError::MISCONFIGURED);
 		$plugin = getPlugin ($name);
-		call_user_func ("plugin_${name}_install");
+		call_user_func ("plugin_{$name}_install");
 		commitInstallPlugin ($plugin['name'], $plugin['longname'], $plugin['code_version'], $plugin['home_url']);
 	}
 	catch (Exception $e)
@@ -3733,9 +3733,9 @@ function uninstallPlugin ()
 	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${name}_uninstall"))
-			throw new RackTablesError ("The ${name} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
-		call_user_func ("plugin_${name}_uninstall");
+		if (! is_callable ("plugin_{$name}_uninstall"))
+			throw new RackTablesError ("The {$name} plugin is missing or cannot be uninstalled", RackTablesError::MISCONFIGURED);
+		call_user_func ("plugin_{$name}_uninstall");
 		commitUninstallPlugin ($name);
 	}
 	catch (Exception $e)
@@ -3751,12 +3751,12 @@ function upgradePlugin ()
 	$name = assertStringArg ('name');
 	try
 	{
-		if (! is_callable ("plugin_${name}_upgrade"))
-			throw new RackTablesError ("The ${name} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
+		if (! is_callable ("plugin_{$name}_upgrade"))
+			throw new RackTablesError ("The {$name} plugin is missing or cannot be upgraded", RackTablesError::MISCONFIGURED);
 		$plugin = getPlugin ($name);
-		call_user_func ("plugin_${name}_upgrade");
+		call_user_func ("plugin_{$name}_upgrade");
 		// get details from the plugin code itself
-		$code_plugin = call_user_func ("plugin_${name}_info");
+		$code_plugin = call_user_func ("plugin_{$name}_info");
 		usePreparedUpdateBlade
 		(
 			'Plugin',

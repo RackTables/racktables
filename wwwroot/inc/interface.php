@@ -120,7 +120,7 @@ function renderInterfaceHTML ($pageno, $tabno, $payload)
 	echo '<div class=msgbar>';
 	showMessageOrError();
 	echo '</div>';
-	echo "<div class=pagebar>${payload}</div>";
+	echo "<div class=pagebar>{$payload}</div>";
 	echo '</div>'; // maintable
 	echo '</body>';
 	echo '</html>';
@@ -295,11 +295,11 @@ function renderLocationFilterPortlet ()
 		{
 			echo "<div class=tagbox style='text-align:left; padding-left:" . ($level * 16) . "px;'>";
 			$checked = (! isset ($_SESSION['locationFilter']) || in_array ($location['id'], $_SESSION['locationFilter'])) ? 'checked' : '';
-			echo "<label><input type=checkbox name='location_id[]' class=${level} value='${location['id']}'${checked} onClick=checkAll(this)>${location['name']}";
+			echo "<label><input type=checkbox name='location_id[]' class={$level} value='{$location['id']}'{$checked} onClick=checkAll(this)>{$location['name']}";
 			echo '</label>';
 			if ($location['kidc'])
 			{
-				echo "<a id='lfa" . $location['id'] . "' onclick=\"expand('${location['id']}')\" href\"#\" > - </a>";
+				echo "<a id='lfa" . $location['id'] . "' onclick=\"expand('{$location['id']}')\" href\"#\" > - </a>";
 				echo "<div id='lfd" . $location['id'] . "'>";
 				$self ($location['kids'], $level + 1);
 				echo '</div>';
@@ -413,12 +413,12 @@ function getRackThumbLink ($rack, $scale = 1, $object_id = NULL)
 		throw new InvalidArgException ('scale', $scale, 'must be a natural number');
 	$width = getRackImageWidth() * $scale;
 	$height = getRackImageHeight ($rack['height']) * $scale;
-	$title = "${rack['height']} units";
+	$title = "{$rack['height']} units";
 	$src = '?module=image' .
-		($scale == 1 && $object_id === NULL ? '&img=minirack' : "&img=midirack&scale=${scale}") .
-		"&rack_id=${rack['id']}" .
-		($object_id === NULL ? '' : "&object_id=${object_id}");
-	$img = "<img border=0 width=${width} height=${height} title='${title}' src='${src}'>";
+		($scale == 1 && $object_id === NULL ? '&img=minirack' : "&img=midirack&scale={$scale}") .
+		"&rack_id={$rack['id']}" .
+		($object_id === NULL ? '' : "&object_id={$object_id}");
+	$img = "<img border=0 width={$width} height={$height} title='{$title}' src='{$src}'>";
 	return mkA ($img, 'rack', $rack['id']);
 }
 
@@ -455,14 +455,14 @@ function renderRackspace ()
 			{
 				if ($locationIdx == 20)
 				{
-					showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
+					showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location {$location_id}.");
 					break;
 				}
 				$parentLocation = spotEntity ('location', $location_id);
 				$locationTree = sprintf ('%s %s', $parentLocation['name'], $locationTree);
 				$hrefLocationTree = "&raquo; <a href='" .
 					makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
-					"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
+					"{$cellfilter['urlextra']}'>{$parentLocation['name']}</a> " .
 					$hrefLocationTree;
 				$location_id = $parentLocation['parent_id'];
 				$locationIdx++;
@@ -506,8 +506,8 @@ function renderRackspace ()
 					)
 						continue;
 					$rackListIdx = 0;
-					echo "<tr class=row_${order}><th class=tdleft>${row['href_location_tree']}</th>";
-					echo "<th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row['row_id']))."${cellfilter['urlextra']}'>${row['row_name']}</a></th>";
+					echo "<tr class=row_{$order}><th class=tdleft>{$row['href_location_tree']}</th>";
+					echo "<th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row['row_id']))."{$cellfilter['urlextra']}'>{$row['row_name']}</a></th>";
 					echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
 					if (! count ($rackList))
 						echo '<td>(empty row)</td>';
@@ -517,7 +517,7 @@ function renderRackspace ()
 							if ($rackListIdx > 0 && $maxPerRow > 0 && $rackListIdx % $maxPerRow == 0)
 							{
 								echo '</tr></table></th></tr>';
-								echo "<tr class=row_${order}><th class=tdleft></th><th class=tdleft>${row['row_name']} (continued)";
+								echo "<tr class=row_{$order}><th class=tdleft></th><th class=tdleft>{$row['row_name']} (continued)";
 								echo "</th><th class=tdleft><table border=0 cellspacing=5><tr>";
 							}
 							echo '<td align=center valign=bottom>' . getRackThumbLink ($rack);
@@ -531,7 +531,7 @@ function renderRackspace ()
 			}
 		}
 	}
-	echo "</td><td class='pcright ${pageno}' width='25%'>";
+	echo "</td><td class='pcright {$pageno}' width='25%'>";
 	renderCellFilterPortlet ($cellfilter, 'rack', $found_racks);
 	echo "<br>\n";
 	renderLocationFilterPortlet ();
@@ -561,7 +561,7 @@ function renderLocationRowForEditor ($subtree, $level = 0)
 			FALSE
 		);
 		echo "</td><td class=tdleft>";
-		echo "<input type=text size=48 name=name value='${locationinfo['name']}'>";
+		echo "<input type=text size=48 name=name value='{$locationinfo['name']}'>";
 		echo '</td><td>' . getImageHREF ('save', 'Save changes', TRUE) . "</form></td></tr>\n";
 		if ($locationinfo['kidc'])
 			$self ($locationinfo['kids'], $level + 1);
@@ -570,15 +570,15 @@ function renderLocationRowForEditor ($subtree, $level = 0)
 
 function renderLocationSelectTree ($select_name, $selected_id = NULL)
 {
-	echo "<select name='${select_name}'>";
+	echo "<select name='{$select_name}'>";
 	echo '<option value=0>-- NONE --</option>';
 	$locationlist = listCells ('location');
 	foreach (treeFromList (addTraceToNodes ($locationlist)) as $location)
 	{
-		echo "<option value=${location['id']} style='font-weight: bold' ";
+		echo "<option value={$location['id']} style='font-weight: bold' ";
 		if ($location['id'] == $selected_id )
 		    echo ' selected';
-		echo ">${location['name']}</option>";
+		echo ">{$location['name']}</option>";
 		printLocationChildrenSelectOptions ($location, $selected_id);
 	}
 	echo '</select>';
@@ -658,7 +658,7 @@ function renderRackspaceRowEditor ()
 		echo getRowMountsCount ($row_id);
 		echo '</td><td>';
 		renderLocationSelectTree ('location_id', $rowInfo['location_id']);
-		echo "</td><td><input type=text name=name value='${rowInfo['name']}'></td><td>";
+		echo "</td><td><input type=text name=name value='{$rowInfo['name']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</form></td>";
 		echo '<td>&nbsp;</td>';
@@ -719,7 +719,7 @@ function renderRow ($row_id)
 			echo '<tr>';
 		}
 		$class = ($rack['has_problems'] == 'yes') ? 'error' : $order;
-		echo "<td align=center valign=bottom class=row_${class}>" .
+		echo "<td align=center valign=bottom class=row_{$class}>" .
 			getRackThumbLink ($rack, getConfigVar ('ROW_SCALE')) .
 			'<br>' . mkA (stringForLabel ($rack['name']), 'rack', $rack['id']) . '</td>';
 		$order = $nextorder[$order];
@@ -749,31 +749,31 @@ function renderEditAttributeTRs ($update_op, $values, $objtype_id, $skip_ids = a
 		$clear_html = ($record['value'] != '' && ($can_clear /* || $can_update*/)) ?
 			getOpLink (array ('op' => 'clearSticker', 'attr_id' => $record['id']), '', 'clear', 'Clear value', 'need-confirmation') :
 			'&nbsp;';
-		echo "<tr><td>${clear_html}</td>";
+		echo "<tr><td>{$clear_html}</td>";
 		echo '<th class=sticker>' . $record['name'] . ($record['type'] == 'date' ? $datehint : '') . ':</th>';
 		echo '<td class=tdleft>';
 		switch ($record['type'])
 		{
 			case 'uint':
 			case 'float':
-				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
-				echo "<input type=text ${ro_or_rw} value='${record['value']}'>";
+				$ro_or_rw = $can_update ? "name={$i}_value" : 'disabled';
+				echo "<input type=text {$ro_or_rw} value='{$record['value']}'>";
 				break;
 			case 'string':
 				printf
 				(
 					'<input type=text %s value="%s">',
-					$can_update ? "name=${i}_value" : 'disabled',
+					$can_update ? "name={$i}_value" : 'disabled',
 					stringForTextInputValue ($record['value'], 255)
 				);
 				break;
 			case 'date':
-				$ro_or_rw = $can_update ? "name=${i}_value" : 'disabled';
+				$ro_or_rw = $can_update ? "name={$i}_value" : 'disabled';
 				$date_value = $record['value'] ? datetimestrFromTimestamp ($record['value']) : '';
-				echo "<input type=text ${ro_or_rw} value='${date_value}'>";
+				echo "<input type=text {$ro_or_rw} value='{$date_value}'>";
 				break;
 			case 'dict':
-				$ro_or_rw = $can_update ? array ('name' => "${i}_value") : array ('name' => "${i}_value", 'disabled' => 1);
+				$ro_or_rw = $can_update ? array ('name' => "{$i}_value") : array ('name' => "{$i}_value", 'disabled' => 1);
 				$chapter = readChapter ($record['chapter_id'], 'o');
 				$chapter[0] = '-- NOT SET --';
 				$chapter = cookOptgroups ($chapter, $objtype_id, $record['key']);
@@ -784,12 +784,12 @@ function renderEditAttributeTRs ($update_op, $values, $objtype_id, $skip_ids = a
 		} // switch
 		if ($can_update)
 		{
-			echo "<input type=hidden name=${i}_attr_id value=${record['id']}>";
+			echo "<input type=hidden name={$i}_attr_id value={$record['id']}>";
 			$i++;
 		}
 		echo '</td></tr>';
 	} // foreach
-	echo "<input type=hidden name=num_attrs value=${i}>";
+	echo "<input type=hidden name=num_attrs value={$i}>";
 }
 
 function renderEditRowForm ($row_id)
@@ -807,7 +807,7 @@ function renderEditRowForm ($row_id)
 	natcasesort ($locations);
 	printSelect ($locations, array ('name' => 'location_id'), $row['location_id']);
 	echo "</td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${row['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='{$row['name']}'></td></tr>\n";
 	renderEditAttributeTRs ('updateRow', getAttrValuesSorted ($row_id), 1561);
 	if ($row['count'] == 0)
 	{
@@ -831,13 +831,13 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 {
 	$objectData = spotEntity ('object', $object_id);
 	if ($objectData['asset_no'] != '')
-		$prefix = "<div title='${objectData['asset_no']}";
+		$prefix = "<div title='{$objectData['asset_no']}";
 	else
 		$prefix = "<div title='no asset tag";
 	// Don't tell about label, if it matches common name.
 	$body = '';
 	if ($objectData['name'] != $objectData['label'] && $objectData['label'] != '')
-		$body = ", visible label is \"${objectData['label']}\"";
+		$body = ", visible label is \"{$objectData['label']}\"";
 	// Display list of child objects, if any
 	$objectChildren = getChildren ($objectData, 'object');
 	$slotRows = $slotCols = $slotInfo = $slotData = $slotTitle = $slotClass = array ();
@@ -869,11 +869,11 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 				$slotInfo[$slot] = $childData['dname'];
 				$slotData[$slot] = $childData['id'];
 				if ($childData['asset_no'] != '')
-					$slotTitle[$slot] = "<div title='${childData['asset_no']}";
+					$slotTitle[$slot] = "<div title='{$childData['asset_no']}";
 				else
 					$slotTitle[$slot] = "<div title='no asset tag";
 				if ($childData['label'] != '' && $childData['label'] != $childData['dname'])
-					$slotTitle[$slot] .= ", visible label is \"${childData['label']}\"";
+					$slotTitle[$slot] .= ", visible label is \"{$childData['label']}\"";
 				$slotTitle[$slot] .= "'>";
 				$slotClass[$slot] = 'state_T';
 				if ($childData['id'] == $hl_obj_id)
@@ -891,7 +891,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 		natsort($childNames);
 		$suffix = sprintf(", contains %s'>", implode(', ', $childNames));
 	}
-	echo "${prefix}${body}${suffix}" . mkCellA ($objectData) . '</div>';
+	echo "{$prefix}{$body}{$suffix}" . mkCellA ($objectData) . '</div>';
 	if (in_array ($objectData['objtype_id'], array (1502,1503))) // server chassis, network chassis
 	{
 		$objAttr = getAttrValues ($objectData['id']);
@@ -926,7 +926,7 @@ function printObjectDetailsForRenderRack ($object_id, $hl_obj_id = 0)
 									echo " rowspan=$slotRows[$s]";
 								if ($slotCols[$s] > 1)
 									echo " colspan=$slotCols[$s]";
-								echo " class='${slotClass[$s]}'>${slotTitle[$s]}";
+								echo " class='{$slotClass[$s]}'>{$slotTitle[$s]}";
 								if ($layout == 'V')
 								{
 									$tmp = mb_substr($slotInfo[$s], 0, 1);
@@ -984,7 +984,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 				continue;
 			$state = $rackData[$i][$locidx]['state'];
 
-			$class = "atom state_${state}";
+			$class = "atom state_{$state}";
 
 			if (isset ($rackData[$i][$locidx]['hl']))
 				$class .= $rackData[$i][$locidx]['hl'];
@@ -997,7 +997,7 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 				$class .= getCellClass ($objectData, $class_context);
 			}
 
-			echo "<td class='${class}'";
+			echo "<td class='{$class}'";
 
 			if (isset ($rackData[$i][$locidx]['colspan']))
 				echo ' colspan=' . $rackData[$i][$locidx]['colspan'];
@@ -1040,12 +1040,12 @@ function renderRack ($rack_id, $hl_obj_id = 0)
 			if ($zeroUObject['has_problems'] == 'yes')
 				$state .= 'w';
 
-			$class = "atom state_${state}";
+			$class = "atom state_{$state}";
 			setEntityColors ($zeroUObject);
 			$class_context = $zeroUObject['id'] == $hl_obj_id ? 'atom_selected' : 'atom_plain';
 			$class .= getCellClass ($zeroUObject, $class_context);
 
-			echo "<tr><td class='${class}'>";
+			echo "<tr><td class='{$class}'>";
 			printObjectDetailsForRenderRack ($zeroUObject['id']);
 			echo "</td></tr>\n";
 		}
@@ -1065,7 +1065,7 @@ function renderRackSortForm ($row_id)
 				update : function () {
 					serial = $('#sortRacks').sortable('serialize');
 					$.ajax({
-						url: 'index.php?module=ajax&ac=upd-rack-sort-order&row_id=${row_id}',
+						url: 'index.php?module=ajax&ac=upd-rack-sort-order&row_id={$row_id}',
 						type: 'post',
 						data: serial,
 					});
@@ -1081,7 +1081,7 @@ JSTXT;
 	echo "<tr><th>Drag to change order</th></tr>\n";
 	echo "<tr><td class=tdleft><ul class='uflist' id='sortRacks'>\n";
 	foreach (getRacks($row_id) as $rack_id => $rackInfo)
-		echo "<li id=racks_${rack_id}>${rackInfo['name']}</li>\n";
+		echo "<li id=racks_{$rack_id}>{$rackInfo['name']}</li>\n";
 	echo "</ul></td></tr></table>\n";
 	finishPortlet();
 }
@@ -1093,7 +1093,7 @@ function renderNewRackForm()
 	printOpFormIntro ('addRack', array ('mode' => 'one'));
 	echo '<table border=0 align=center>';
 	echo "<tr><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name></td>";
-	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 value='${default_height}'></td></tr>\n";
+	echo "<tr><th class=tdright>Height in units (required):</th><td class=tdleft><input type=text name=height1 value='{$default_height}'></td></tr>\n";
 	echo "<tr><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no></td></tr>\n";
 	echo "<tr><th class=tdright>Tags:</td><td class=tdleft>";
 	printTagsPicker ();
@@ -1106,7 +1106,7 @@ function renderNewRackForm()
 	startPortlet ('Add many');
 	printOpFormIntro ('addRack', array ('mode' => 'many'));
 	echo '<table border=0 align=center>';
-	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='${default_height}'></td>";
+	echo "<tr><th class=tdright>Height in units (*):</th><td class=tdleft><input type=text name=height2 value='{$default_height}'></td>";
 	echo "<tr><th class=tdright>Assign tags:</td><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
@@ -1131,9 +1131,9 @@ function renderEditObjectForm()
 	printSelect (getObjectTypeChangeOptions ($object['id']), array ('name' => 'object_type_id'), $object['objtype_id']);
 	echo '</td></tr>';
 	// baseline info
-	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='{$object['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='{$object['label']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='{$object['asset_no']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
@@ -1153,7 +1153,7 @@ function renderEditObjectForm()
 			foreach ($parents_group as $link_id => $parent_cell)
 			{
 				echo "<tr><td>&nbsp;</td>";
-				echo "<th class=tdright>${label}</th><td class=tdleft>";
+				echo "<th class=tdright>{$label}</th><td class=tdleft>";
 				echo mkCellA ($parent_cell);
 				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 				echo getOpLink (array('op'=>'unlinkObjects', 'link_id'=>$link_id), '', 'cut', 'Unlink container');
@@ -1177,7 +1177,7 @@ function renderEditObjectForm()
 	echo "&nbsp;";
 	echo getOpLink (array ('op'=>'resetObject'), '' ,'clear', 'Reset (cleanup) object', 'need-confirmation');
 	echo "</td></tr>\n";
-	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>${object['comment']}</textarea></td></tr>";
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=object_comment rows=10 cols=80>{$object['comment']}</textarea></td></tr>";
 
 	echo "<tr><th class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
@@ -1208,9 +1208,9 @@ function renderEditRackForm ($rack_id)
 	natcasesort ($rows);
 	printSelect ($rows, array ('name' => 'row_id'), $rack['row_id']);
 	echo "</td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${rack['name']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='${rack['height']}'></td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no value='${rack['asset_no']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='{$rack['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Height (required):</th><td class=tdleft><input type=text name=height value='{$rack['height']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=asset_no value='{$rack['asset_no']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
@@ -1232,7 +1232,7 @@ function renderEditRackForm ($rack_id)
 		echo "&nbsp;";
 	}
 	echo "</td></tr>\n";
-	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>${rack['comment']}</textarea></td></tr>";
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>{$rack['comment']}</textarea></td></tr>";
 	echo "<tr><td class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
@@ -1317,7 +1317,7 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	// Render the result whatever it is.
 	// Main layout.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${rackData['name']}</h1></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h1>{$rackData['name']}</h1></td></tr>\n";
 
 	// Left column with information portlet.
 	echo "<tr><td class=pcleft height='1%' width='50%'>";
@@ -1334,17 +1334,17 @@ function renderGridForm ($rack_id, $filter, $header, $submit, $state1, $state2)
 	addBulkSelectorJS ($table_id);
 	echo "<center>\n";
 	$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
-	echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
+	echo "<p style='color: red; margin-top:0px'>{$read_only_text}</p>\n";
 	echo "<table class=rack id={$table_id} border=0 cellspacing=0 cellpadding=1>\n";
 	echo "<tr><th width='10%'>&nbsp;</th>";
-	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-	echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '0', {$rackData['height']})\">Front</a></th>";
+	echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '1', {$rackData['height']})\">Interior</a></th>";
+	echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '2', {$rackData['height']})\">Back</a></th></tr>\n";
 	printOpFormIntro ('updateRack');
 	markupAtomGrid ($rackData, $state2);
 	renderAtomGrid ($rackData, $is_ro);
 	echo "</table></center>\n";
-	echo "<br><input type=submit name=do_update value='${submit}'></form><br><br>\n";
+	echo "<br><input type=submit name=do_update value='{$submit}'></form><br><br>\n";
 	finishPortlet();
 	echo "</td></tr></table>\n";
 }
@@ -1379,9 +1379,9 @@ function renderObjectPortRow ($port, $is_highlighted)
 	if ($is_highlighted)
 		echo ' class=highlight';
 	$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-	echo "><td class='tdleft $name_class' NOWRAP><a name='port-${port['id']}' class='interactive-portname nolink $a_class'>${port['name']}</a></td>";
-	echo "<td class=tdleft>${port['label']}</td>";
-	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class='tdleft l2address'>${port['l2address']}</td>";
+	echo "><td class='tdleft $name_class' NOWRAP><a name='port-{$port['id']}' class='interactive-portname nolink $a_class'>{$port['name']}</a></td>";
+	echo "<td class=tdleft>{$port['label']}</td>";
+	echo "<td class=tdleft>" . formatPortIIFOIF ($port) . "</td><td class='tdleft l2address'>{$port['l2address']}</td>";
 	if ($port['remote_object_id'])
 	{
 		$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);
@@ -1392,7 +1392,7 @@ function renderObjectPortRow ($port, $is_highlighted)
 		$editable = permitted ('object', 'ports', 'editPort')
 			? 'editable'
 			: '';
-		echo "<td class=tdleft><span class='rsvtext $editable id-${port['id']} op-upd-reservation-cable'>${port['cableid']}</span></td>";
+		echo "<td class=tdleft><span class='rsvtext $editable id-{$port['id']} op-upd-reservation-cable'>{$port['cableid']}</span></td>";
 	}
 	else
 		echo implode ('', formatPortReservation ($port)) . '<td></td>';
@@ -1406,7 +1406,7 @@ function renderObject ($object_id)
 	amplifyCell ($info);
 	// Main layout starts.
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${info['dname']}</h1></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h1>{$info['dname']}</h1></td></tr>\n";
 	// A mandatory left column with varying number of portlets.
 	echo "<tr><td class=pcleft>";
 
@@ -1529,7 +1529,7 @@ function renderObject ($object_id)
 			foreach ($alloclist as $alloc)
 			{
 				$rendered_alloc = callHook ('getRenderedAlloc', $object_id, $alloc);
-				echo "<tr class='${rendered_alloc['tr_class']}' valign=top>";
+				echo "<tr class='{$rendered_alloc['tr_class']}' valign=top>";
 
 				// display iface name, same values are grouped into single cell
 				if ($is_first_row)
@@ -1577,16 +1577,16 @@ function renderObject ($object_id)
 					$osif = $info['ipv4'][$localip_bin]['osif'] . ': ';
 				}
 				echo "<tr class='$class'>";
-				echo "<td class=tdleft>${pf['proto']}</td><td class=tdleft>${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+				echo "<td class=tdleft>{$pf['proto']}</td><td class=tdleft>{$osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 				echo "<td class=tdleft>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
 				$address = getIPAddress (ip4_parse ($pf['remoteip']));
 				echo "<td class='description tdleft'>";
 				if (count ($address['allocs']))
 					foreach($address['allocs'] as $bond)
-						echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
+						echo mkA ("{$bond['object_name']}({$bond['name']})", 'object', $bond['object_id']) . ' ';
 				elseif ($pf['remote_addr_name'] != '')
 					echo '(' . $pf['remote_addr_name'] . ')';
-				echo "</td><td class='description tdleft'>${pf['description']}</td></tr>";
+				echo "</td><td class='description tdleft'>{$pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
 		}
@@ -1598,10 +1598,10 @@ function renderObject ($object_id)
 			foreach ($forwards['in'] as $pf)
 			{
 				echo "<tr>";
-				echo "<td class=tdleft>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+				echo "<td class=tdleft>{$pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 				echo '<td class="description tdleft">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
 				echo "</td><td class=tdleft>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
-				echo "<td class='description tdleft'>${pf['description']}</td></tr>";
+				echo "<td class='description tdleft'>{$pf['description']}</td></tr>";
 			}
 			echo "</table><br><br>";
 		}
@@ -1642,18 +1642,18 @@ function renderRackMultiSelect ($sname, $racks, $selected)
 			$row_name = $rack['row_name'];
 		$rdata[$row_name][$rack['id']] = $rack['name'];
 	}
-	echo "<select name=${sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
+	echo "<select name={$sname} multiple size=" . getConfigVar ('MAXSELSIZE') . " onchange='getElementsByName(\"updateObjectAllocation\")[0].submit()'>\n";
 	$row_names = array_keys ($rdata);
 	natsort ($row_names);
 	foreach ($row_names as $optgroup)
 	{
-		echo "<optgroup label='${optgroup}'>";
+		echo "<optgroup label='{$optgroup}'>";
 		foreach ($rdata[$optgroup] as $rack_id => $rack_name)
 		{
-			echo "<option value=${rack_id}";
+			echo "<option value={$rack_id}";
 			if (!(array_search ($rack_id, $selected) === FALSE))
 				echo ' selected';
-			echo">${rack_name}</option>\n";
+			echo">{$rack_name}</option>\n";
 		}
 	}
 	echo "</select>\n";
@@ -1734,12 +1734,12 @@ function renderPortsForObject ($object_id)
 
 		$tr_class = isset ($hl_port_id) && $hl_port_id == $port['id'] ? 'class="highlight"' : '';
 		printOpFormIntro ('editPort', array ('port_id' => $port['id']));
-		echo "<tr $tr_class><td><a name='port-${port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id']))."'>";
+		echo "<tr $tr_class><td><a name='port-{$port['id']}' href='".makeHrefProcess(array('op'=>'delPort', 'port_id'=>$port['id']))."'>";
 		printImageHREF ('delete', 'Unlink and Delete this port');
 		echo "</a></td>\n";
 		$a_class = isEthernetPort ($port) ? 'port-menu' : '';
-		echo "<td class='tdleft $name_class' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='${port['name']}' size=16></td>";
-		echo "<td><input type=text name=label value='${port['label']}'></td>";
+		echo "<td class='tdleft $name_class' NOWRAP><input type=text name=name class='interactive-portname $a_class' value='{$port['name']}' size=16></td>";
+		echo "<td><input type=text name=label value='{$port['label']}'></td>";
 		echo '<td class=tdleft>';
 		if ($port['iif_id'] != 1)
 			echo '<label>' . $port['iif_name'] . ' ';
@@ -1755,7 +1755,7 @@ function renderPortsForObject ($object_id)
 		echo '</td>';
 
 		// 17 is the full notation length of a MAC address, 23 -- of a WWN address and 59 -- of an IPoIB address.
-		echo "<td><input type=text name=l2address value='${port['l2address']}' size=17 maxlength=59></td>\n";
+		echo "<td><input type=text name=l2address value='{$port['l2address']}' size=17 maxlength=59></td>\n";
 		if ($port['remote_object_id'])
 		{
 			$dname = formatObjectDisplayedName ($port['remote_object_name'], $port['remote_object_tid']);
@@ -1764,7 +1764,7 @@ function renderPortsForObject ($object_id)
 				"</td>";
 			echo "<td class=tdleft> " . formatLoggedSpan ($port['last_log'], $port['remote_name'], 'underline') .
 				"<input type=hidden name=reservation_comment value=''></td>";
-			echo "<td><input type=text name=cable value='${port['cableid']}'></td>";
+			echo "<td><input type=text name=cable value='{$port['cableid']}'></td>";
 			echo "<td class=tdcenter>";
 			echo getOpLink (array('op'=>'unlinkPort', 'port_id'=>$port['id'], ), '', 'cut', 'Unlink this port');
 			echo "</td>";
@@ -1772,7 +1772,7 @@ function renderPortsForObject ($object_id)
 		elseif ($port['reservation_comment'] != '')
 		{
 			echo "<td>" . formatLoggedSpan ($port['last_log'], 'Reserved:', 'strong underline') . "</td>";
-			echo "<td><input type=text name=reservation_comment value='${port['reservation_comment']}'></td>";
+			echo "<td><input type=text name=reservation_comment value='{$port['reservation_comment']}'></td>";
 			echo "<td></td>";
 			echo "<td class=tdcenter>";
 			echo getOpLink (array('op'=>'useup', 'port_id'=>$port['id']), '', 'clear', 'Use up this port');
@@ -1883,10 +1883,10 @@ JSEND
 
 		$rendered_alloc = callHook ('getRenderedAlloc', $object_id, $alloc);
 		$alloc_list .= getOutputOf ('printOpFormIntro', 'upd', array ('ip' => $alloc['addrinfo']['ip']));
-		$alloc_list .= "<tr class='${rendered_alloc['tr_class']}' valign=top>";
+		$alloc_list .= "<tr class='{$rendered_alloc['tr_class']}' valign=top>";
 
 		$alloc_list .= "<td>" . getOpLink (array ('op' => 'del', 'ip' => $alloc['addrinfo']['ip']), '', 'delete', 'Delete this IP address') . "</td>";
-		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='${alloc['osif']}' size=10>" . $rendered_alloc['td_name_suffix'] . "</td>";
+		$alloc_list .= "<td class=tdleft><input type='text' name='bond_name' value='{$alloc['osif']}' size=10>" . $rendered_alloc['td_name_suffix'] . "</td>";
 		$alloc_list .= $rendered_alloc['td_ip'];
 		if ($ext_ipv4_view == 'yes')
 		{
@@ -1990,7 +1990,7 @@ function showMessageOrError ()
 		if (! isset ($record['c']) || ! isset ($msginfo[$record['c']]))
 		{
 			$prefix = isset ($record['c']) ? $record['c'] . ': ' : '';
-			echo "<div class=msg_neutral>(${prefix}this message was lost)</div>";
+			echo "<div class=msg_neutral>({$prefix}this message was lost)</div>";
 			continue;
 		}
 		if (isset ($record['a']))
@@ -2034,7 +2034,7 @@ function showMessageOrError ()
 			}
 		else
 			$msgtext = $msginfo[$record['c']]['format'];
-		echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">${msgtext}</div>";
+		echo '<div class=msg_' . $msginfo[$record['c']]['code'] . ">{$msgtext}</div>";
 	}
 	$log_messages = array();
 }
@@ -2274,17 +2274,17 @@ function renderRackSpaceForObject ($object_id)
 		echo mkA ($rackData['name'], 'rack', $rackData['id']);
 		echo '</h2>';
 		$read_only_text = $is_ro ? '(read-only)' : '&nbsp;';
-		echo "<p style='color: red; margin-top:0px'>${read_only_text}</p>\n";
+		echo "<p style='color: red; margin-top:0px'>{$read_only_text}</p>\n";
 		echo "<table class=rack id={$table_id} border=0 cellspacing=0 cellpadding=1>\n";
 		echo "<tr><th width='10%'>&nbsp;</th>";
-		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '0', {$rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '1', {$rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '2', {$rackData['height']})\">Back</a></th></tr>\n";
 		renderAtomGrid ($rackData, $is_ro);
 		echo "<tr><th width='10%'>&nbsp;</th>";
-		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '0', ${rackData['height']})\">Front</a></th>";
-		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '1', ${rackData['height']})\">Interior</a></th>";
-		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('${rack_id}', '2', ${rackData['height']})\">Back</a></th></tr>\n";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '0', {$rackData['height']})\">Front</a></th>";
+		echo "<th width='50%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '1', {$rackData['height']})\">Interior</a></th>";
+		echo "<th width='20%'><a href='javascript:;' onclick=\"toggleColumnOfAtoms('{$rack_id}', '2', {$rackData['height']})\">Back</a></th></tr>\n";
 		echo "</table>\n<br>\n";
 		// Determine zero-u checkbox status.
 		// If form has been submitted, use form data, otherwise use DB data.
@@ -2293,7 +2293,7 @@ function renderRackSpaceForObject ($object_id)
 		else
 			$checked = in_array($rack_id, $parentRacks) ? 'checked' : '';
 		$disabled_text = $is_ro ? ' disabled' : '';
-		echo "<label>Zero-U: <input type=checkbox ${checked} name=zerou_${rack_id}${disabled_text}></label>\n<br><br>\n";
+		echo "<label>Zero-U: <input type=checkbox {$checked} name=zerou_{$rack_id}{$disabled_text}></label>\n<br><br>\n";
 		echo "<input type='button' onclick='uncheckAllAtoms({$rack_id}, {$rackData['height']});' value='Uncheck all'>\n";
 		echo '</center></td>';
 	}
@@ -2331,7 +2331,7 @@ function renderMolecule ($mdata, $object_id)
 	foreach ($rackpack as $rackData)
 	{
 		echo "<table class=molecule cellspacing=0>\n";
-		echo "<caption>${rackData['name']}</caption>\n";
+		echo "<caption>{$rackData['name']}</caption>\n";
 		echo "<tr><th width='10%'>&nbsp;</th><th width='20%'>Front</th><th width='50%'>Interior</th><th width='20%'>Back</th></tr>\n";
 		$reverse = considerConfiguredConstraint ($rackData, 'REVERSED_RACKS_LISTSRC');
 		for ($i = $rackData['height']; $i > 0; $i--)
@@ -2340,7 +2340,7 @@ function renderMolecule ($mdata, $object_id)
 			for ($locidx = 0; $locidx < 3; $locidx++)
 			{
 				$state = $rackData[$i][$locidx]['state'];
-				echo "<td class='atom state_${state}'>&nbsp;</td>\n";
+				echo "<td class='atom state_{$state}'>&nbsp;</td>\n";
 			}
 			echo "</tr>\n";
 		}
@@ -2388,14 +2388,14 @@ function renderDepot ()
 				setEntityColors ($obj);
 				$class = getCellClass ($obj, 'list_plain');
 
-				echo "<tr class='row_${order} tdleft ${problem}${class}' valign=top><td>" . mkA ("<strong>${obj['dname']}</strong>", 'object', $obj['id']);
+				echo "<tr class='row_{$order} tdleft {$problem}{$class}' valign=top><td>" . mkA ("<strong>{$obj['dname']}</strong>", 'object', $obj['id']);
 				if (count ($obj['etags']))
 					echo '<br><small>' . serializeTags ($obj['etags'], makeHref(array('page'=>$pageno, 'tab'=>'default')) . '&') . '</small>';
 				echo '</td>';
 				if ($showobjecttype)
 					echo "<td>" . decodeObjectType ($obj['objtype_id']) . "</td>";
-				echo "<td>${obj['label']}</td>";
-				echo "<td>${obj['asset_no']}</td>";
+				echo "<td>{$obj['label']}</td>";
+				echo "<td>{$obj['asset_no']}</td>";
 				$places = array();
 				if (array_key_exists ($obj['id'], $containerinfo))
 					foreach ($containerinfo[$obj['id']] as $ci)
@@ -2414,7 +2414,7 @@ function renderDepot ()
 		}
 	}
 
-	echo "</td><td class='pcright ${pageno}' width='25%'>";
+	echo "</td><td class='pcright {$pageno}' width='25%'>";
 
 	renderCellFilterPortlet ($cellfilter, 'object', $objects);
 	echo "</td></tr></table>\n";
@@ -2522,9 +2522,9 @@ function renderRackspaceHistory ()
 		if ($row['mo_id'] == $op_id)
 			$class = 'hl';
 		else
-			$class = "row_${order}";
-		echo "<tr class=${class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>${row['ctime']}</a></td>";
-		echo "<td>${row['user_name']}</td><td>";
+			$class = "row_{$order}";
+		echo "<tr class={$class}><td><a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'op_id'=>$row['mo_id']))."'>{$row['ctime']}</a></td>";
+		echo "<td>{$row['user_name']}</td><td>";
 		renderCell (spotEntity ('object', $row['ro_id']));
 		echo '</td><td>' . stringForTD ($row['comment'], 0) . '</td></tr>';
 		$order = $nextorder[$order];
@@ -2551,9 +2551,9 @@ function renderIPSpaceRecords ($tree, $baseurl, $target = 0, $level = 1)
 		{
 			$decor = array ('indent' => $level);
 			if ($item['symbol'] == 'node-collapsed')
-				$decor['symbolurl'] = "${baseurl}&eid=${item['id']}&hl_net=1";
+				$decor['symbolurl'] = "{$baseurl}&eid={$item['id']}&hl_net=1";
 			elseif ($item['symbol'] == 'node-expanded')
-				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid=${item['parent_id']}&hl_net=1" : '');
+				$decor['symbolurl'] = $baseurl . ($item['parent_id'] ? "&eid={$item['parent_id']}&hl_net=1" : '');
 
 			setEntityColors ($item);
 			$class_context = ($target == $item['id'] && isset ($_REQUEST['hl_net'])) ? 'list_selected' : 'list_plain';
@@ -2627,7 +2627,7 @@ function renderIPSpace()
 
 		if (! renderEmptyResults($cellfilter, 'IP nets', count($tree)))
 		{
-			startPortlet ("networks (${netcount})");
+			startPortlet ("networks ({$netcount})");
 			echo '<h4>';
 			$all = "<a href='".makeHref(array('page'=>$pageno, 'tab'=>$tabno, 'eid'=>'ALL')) .
 					$cellfilter['urlextra'] . "'>expand&nbsp;all</a>";
@@ -2647,7 +2647,7 @@ function renderIPSpace()
 				try
 				{
 					$netinfo = spotEntity ($realm, $eid);
-					echo "expanding ${netinfo['ip']}/${netinfo['mask']} ($auto / $all / $none)";
+					echo "expanding {$netinfo['ip']}/{$netinfo['mask']} ($auto / $all / $none)";
 				}
 				catch (EntityNotFoundException $e)
 				{
@@ -2666,7 +2666,7 @@ function renderIPSpace()
 		}
 	}
 
-	echo "</td><td class='pcright ${pageno}'>";
+	echo "</td><td class='pcright {$pageno}'>";
 	renderCellFilterPortlet ($cellfilter, $realm, $netlist);
 	echo "</td></tr></table>\n";
 }
@@ -2733,7 +2733,7 @@ END
 
 	// inputs column
 	$prefix_value = empty ($_REQUEST['set-prefix']) ? '' : $_REQUEST['set-prefix'];
-	echo "<th class=tdright>Prefix:</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' value='${prefix_value}'></td>";
+	echo "<th class=tdright>Prefix:</th><td class=tdleft><input type=text name='range' size=36 class='live-validate' value='{$prefix_value}'></td>";
 	echo '<tr><th class=tdright>VLAN:</th><td class=tdleft>';
 	echo getOptionTree ('vlan_ck', getAllVLANOptions(), array ('select_class' => 'vertical')) . '</td></tr>';
 	echo "<tr><th class=tdright>Name:</th><td class=tdleft><input type=text name='name' size='20'></td></tr>";
@@ -2755,8 +2755,8 @@ function getRenderedIPNetBacktrace ($range)
 		return array();
 
 	$v = ($range['realm'] == 'ipv4net') ? 4 : 6;
-	$space = "ipv${v}space"; // ipv4space, ipv6space
-	$tag = "\$ip${v}netid_"; // $ip4netid_, $ip6netid_
+	$space = "ipv{$v}space"; // ipv4space, ipv6space
+	$tag = "\$ip{$v}netid_"; // $ip4netid_, $ip6netid_
 
 	$ret = array();
 	// Build a backtrace from all parent networks.
@@ -2794,7 +2794,7 @@ function renderIPNetwork ($id)
 	loadIPAddrList ($range);
 	setEntityColors ($range);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${range['ip']}/${range['mask']}</h1><h2>";
+	echo "<tr><td colspan=2 align=center><h1>{$range['ip']}/{$range['mask']}</h1><h2>";
 	echo htmlspecialchars ($range['name'], ENT_QUOTES, 'UTF-8') . "</h2></td></tr>\n";
 
 	echo "<tr><td class=pcleft width='50%'>";
@@ -3034,14 +3034,14 @@ function renderIPv4NetworkAddresses ($range)
 		$tr_class .= ' ' . $addr['class'];
 		ob_start ();
 		echo "<tr class='tdleft $tr_class'>";
-		echo "<td><a class='$history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-$dottedquad' href='".makeHref(array('page'=>'ipaddress', 'ip'=>$addr['ip']))."'>{$addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name']) || !empty ($addr['comment']))
 			&& permitted ('ipaddress', 'properties', 'editAddress')
 			? 'editable'
 			: '';
-		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'>${addr['name']}</span></td>";
-		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'>${addr['comment']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-name'>{$addr['name']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-$dottedquad op-upd-ip-comment'>{$addr['comment']}</span></td>";
 		echo "<td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
@@ -3060,7 +3060,7 @@ function renderIPv4NetworkAddresses ($range)
 		foreach ($addr['vslist'] as $vs_id)
 		{
 			$vs = spotEntity ('ipv4vs', $vs_id);
-			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
+			echo $delim . mkA ("{$vs['name']}:{$vs['vport']}/{$vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
 		foreach ($addr['vsglist'] as $vs_id)
@@ -3072,7 +3072,7 @@ function renderIPv4NetworkAddresses ($range)
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
-			echo "${delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
+			echo "{$delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
@@ -3160,14 +3160,14 @@ function renderIPv6NetworkAddresses ($netinfo)
 		$tr_class = $addr['class'] . ' tdleft' . ($hl_ip === $ip_bin ? ' highlight' : '');
 		ob_start ();
 		echo "<tr class='$tr_class'>";
-		echo "<td><a class='$history_class' $title name='ip-${addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>${addr['ip']}</a></td>";
+		echo "<td><a class='$history_class' $title name='ip-{$addr['ip']}' href='" . makeHref (array ('page' => 'ipaddress', 'ip' => $addr['ip'])) . "'>{$addr['ip']}</a></td>";
 		$editable =
 			(empty ($addr['allocs']) || !empty ($addr['name'])
 			&& permitted ('ipaddress', 'properties', 'editAddress')
 			? 'editable'
 			: '');
-		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-ip-name'>${addr['name']}</span></td>";
-		echo "<td><span class='rsvtext $editable id-${addr['ip']} op-upd-ip-comment'>${addr['comment']}</span></td><td>";
+		echo "<td><span class='rsvtext $editable id-{$addr['ip']} op-upd-ip-name'>{$addr['name']}</span></td>";
+		echo "<td><span class='rsvtext $editable id-{$addr['ip']} op-upd-ip-comment'>{$addr['comment']}</span></td><td>";
 		$delim = '';
 		if ( $addr['reserved'] == 'yes')
 		{
@@ -3185,7 +3185,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['vslist'] as $vs_id)
 		{
 			$vs = spotEntity ('ipv4vs', $vs_id);
-			echo $delim . mkA ("${vs['name']}:${vs['vport']}/${vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
+			echo $delim . mkA ("{$vs['name']}:{$vs['vport']}/{$vs['proto']}", 'ipv4vs', $vs['id']) . '&rarr;';
 			$delim = '<br>';
 		}
 		foreach ($addr['vsglist'] as $vs_id)
@@ -3197,7 +3197,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 		foreach ($addr['rsplist'] as $rsp_id)
 		{
 			$rsp = spotEntity ('ipv4rspool', $rsp_id);
-			echo "${delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
+			echo "{$delim}&rarr;" . mkA ($rsp['name'], 'ipv4rspool', $rsp['id']);
 			$delim = '<br>';
 		}
 		echo "</td></tr>\n";
@@ -3224,7 +3224,7 @@ function renderIPv6NetworkAddresses ($netinfo)
 function renderIPNetworkProperties ($id)
 {
 	$netdata = spotEntity (etypeByPageno(), $id);
-	echo "<center><h1>${netdata['ip']}/${netdata['mask']}</h1></center>\n";
+	echo "<center><h1>{$netdata['ip']}/{$netdata['mask']}</h1></center>\n";
 	printOpFormIntro ('editRange');
 	echo "<table border=0 cellpadding=5 cellspacing=0 align='center'>\n";
 	echo '<tr><th class=tdright><label for=nameinput>Name:</label></th>';
@@ -3253,7 +3253,7 @@ function renderIPAddress ($ip_bin)
 	global $aat;
 	$address = getIPAddress ($ip_bin);
 	echo "<table border=0 class=objectview cellspacing=0 cellpadding=0>";
-	echo "<tr><td colspan=2 align=center><h1>${address['ip']}</h1></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><h1>{$address['ip']}</h1></td></tr>\n";
 
 	echo "<tr><td class=pcleft>";
 
@@ -3307,12 +3307,12 @@ function renderIPAddress ($ip_bin)
 		// render all allocation records for this address the same way
 		foreach ($address['allocs'] as $bond)
 		{
-			$tr_class = "${address['class']} tdleft";
+			$tr_class = "{$address['class']} tdleft";
 			if (isset ($_REQUEST['hl_object_id']) && $_REQUEST['hl_object_id'] == $bond['object_id'])
 				$tr_class .= ' highlight';
 			echo "<tr class='$tr_class'>" .
 				"<td>" . makeIPAllocLink ($ip_bin, $bond) . "</td>" .
-				"<td>${bond['name']}</td>" .
+				"<td>{$bond['name']}</td>" .
 				"<td><strong>" . $aat[$bond['type']] . "</strong></td>" .
 				"</tr>\n";
 		}
@@ -3364,15 +3364,15 @@ function renderIPAddress ($ip_bin)
 function renderIPAddressProperties ($ip_bin)
 {
 	$address = getIPAddress ($ip_bin);
-	echo "<center><h1>${address['ip']}</h1></center>\n";
+	echo "<center><h1>{$address['ip']}</h1></center>\n";
 
 	startPortlet ('update');
 	echo "<table border=0 cellpadding=10 cellpadding=1 align='center'>\n";
 	printOpFormIntro ('editAddress');
 	echo '<tr><td class=tdright><label for=id_name>Name:</label></td>';
-	echo "<td class=tdleft><input type=text name=name id=id_name size=20 value='${address['name']}'></tr>";
+	echo "<td class=tdleft><input type=text name=name id=id_name size=20 value='{$address['name']}'></tr>";
 	echo '<tr><td class=tdright><label for=id_comment>Comment:</label></td>';
-	echo "<td class=tdleft><input type=text name=comment id=id_comment size=20 value='${address['comment']}'></tr>";
+	echo "<td class=tdleft><input type=text name=comment id=id_comment size=20 value='{$address['comment']}'></tr>";
 	echo '<td class=tdright><label for=id_reserved>Reserved:</label></td>';
 	echo "<td class=tdleft><input type=checkbox name=reserved id=id_reserved size=20 ";
 	echo ($address['reserved']=='yes') ? 'checked' : '';
@@ -3437,7 +3437,7 @@ JSEND
 	global $aat;
 
 	$address = getIPAddress ($ip_bin);
-	echo "<center><h1>${address['ip']}</h1></center>\n";
+	echo "<center><h1>{$address['ip']}</h1></center>\n";
 	echo "<table class='widetable' cellpadding=5 cellspacing=0 border=0 align='center'>\n";
 	echo "<tr><th>&nbsp;</th><th>object</th><th>OS interface</th><th>allocation type</th><th>&nbsp;</th></tr>\n";
 
@@ -3447,14 +3447,14 @@ JSEND
 	{
 		$class = $address['class'];
 		if ($address['reserved'] == 'yes')
-			echo "<tr class='${class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
+			echo "<tr class='{$class}'><td colspan=3>&nbsp;</td><td class=tdleft><strong>RESERVED</strong></td><td>&nbsp;</td></tr>";
 		foreach ($address['allocs'] as $bond)
 		{
 			echo "<tr class='$class' id='aid-{$bond['object_id']}'>";
 			printOpFormIntro ('upd', array ('object_id' => $bond['object_id']));
 			echo "<td>" . getOpLink (array ('op' => 'del', 'object_id' => $bond['object_id'] ), '', 'delete', 'Unallocate address') . "</td>";
 			echo "<td>" . makeIPAllocLink ($ip_bin, $bond) . "</td>";
-			echo "<td><input type='text' name='bond_name' value='${bond['name']}' size=10 aid='{$bond['object_id']}'></td><td>";
+			echo "<td><input type='text' name='bond_name' value='{$bond['name']}' size=10 aid='{$bond['object_id']}'></td><td>";
 			printSelect ($aat, array ('name' => 'bond_type'), $bond['type']);
 			echo "</td><td>";
 			printImageHREF ('save', 'Save changes', TRUE);
@@ -3527,7 +3527,7 @@ function renderNATv4ForObject ($object_id)
 				'proto'=>$pf['proto'],
 			), '', 'delete', 'Delete NAT rule'
 		) . "</td>";
-		echo "<td>${pf['proto']}/${osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']);
+		echo "<td>{$pf['proto']}/{$osif}" . getRenderedIPPortPair ($pf['localip'], $pf['localport']);
 		if ($pf['local_addr_name'] != '')
 			echo ' (' . $pf['local_addr_name'] . ')';
 		echo "</td>";
@@ -3538,7 +3538,7 @@ function renderNATv4ForObject ($object_id)
 		echo "<td class='description'>";
 		if (count ($address['allocs']))
 			foreach ($address['allocs'] as $bond)
-				echo mkA ("${bond['object_name']}(${bond['name']})", 'object', $bond['object_id']) . ' ';
+				echo mkA ("{$bond['object_name']}({$bond['name']})", 'object', $bond['object_id']) . ' ';
 		elseif ($pf['remote_addr_name'] != '')
 			echo '(' . $pf['remote_addr_name'] . ')';
 		printOpFormIntro
@@ -3554,7 +3554,7 @@ function renderNATv4ForObject ($object_id)
 			)
 		);
 		echo "</td><td class='description'>";
-		echo "<input type='text' name='description' value='${pf['description']}'></td><td>";
+		echo "<input type='text' name='description' value='{$pf['description']}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></form></tr>";
 	}
@@ -3581,10 +3581,10 @@ function renderNATv4ForObject ($object_id)
 				'proto'=>$pf['proto'],
 			), '', 'delete', 'Delete NAT rule'
 		) . "</td>";
-		echo "<td>${pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
+		echo "<td>{$pf['proto']}/" . getRenderedIPPortPair ($pf['localip'], $pf['localport']) . "</td>";
 		echo '<td class="description">' . mkA ($pf['object_name'], 'object', $pf['object_id']);
 		echo "</td><td>" . getRenderedIPPortPair ($pf['remoteip'], $pf['remoteport']) . "</td>";
-		echo "<td class='description'>${pf['description']}</td></tr>";
+		echo "<td class='description'>{$pf['description']}</td></tr>";
 	}
 
 	echo "</table><br><br>";
@@ -3606,14 +3606,14 @@ function renderAddMultipleObjectsForm ()
 	{
 		echo '<tr><td>';
 		// Don't employ DEFAULT_OBJECT_TYPE to avoid creating ghost records for pre-selected empty rows.
-		printNiftySelect ($typelist, array ('name' => "${i}_object_type_id"), 0);
+		printNiftySelect ($typelist, array ('name' => "{$i}_object_type_id"), 0);
 		echo '</td>';
-		echo "<td><input type=text size=30 name=${i}_object_name></td>";
-		echo "<td><input type=text size=30 name=${i}_object_label></td>";
-		echo "<td><input type=text size=20 name=${i}_object_asset_no></td>";
+		echo "<td><input type=text size=30 name={$i}_object_name></td>";
+		echo "<td><input type=text size=30 name={$i}_object_label></td>";
+		echo "<td><input type=text size=20 name={$i}_object_asset_no></td>";
 		if ($i == 0)
 		{
-			echo "<td valign=top rowspan=${max}>";
+			echo "<td valign=top rowspan={$max}>";
 			printTagsPicker ();
 			echo "</td>\n";
 		}
@@ -3679,7 +3679,7 @@ function renderSearchResults ($terms, $summary)
 
 	if ($nhits == 0)
 	{
-		echo "<center><h2>Nothing found for '${terms}'</h2></center>";
+		echo "<center><h2>Nothing found for '{$terms}'</h2></center>";
 		return;
 	}
 	elseif ($nhits == 1)
@@ -3694,7 +3694,7 @@ function renderSearchResults ($terms, $summary)
 		if (isset ($url))
 			redirectUser ($url);
 	}
-	echo "<center><h2>${nhits} result(s) found for '${terms}'</h2></center>";
+	echo "<center><h2>{$nhits} result(s) found for '{$terms}'</h2></center>";
 	foreach ($summary as $where => $what)
 		switch ($where)
 		{
@@ -3714,7 +3714,7 @@ function renderSearchResults ($terms, $summary)
 						echo '<ul>';
 						foreach ($obj['by_attr'] as $attr_name)
 							if ($attr_name != 'name')
-								echo "<li>${attr_name} matched</li>";
+								echo "<li>{$attr_name} matched</li>";
 						echo '</ul>';
 					}
 					if (isset ($obj['by_sticker']))
@@ -3724,7 +3724,7 @@ function renderSearchResults ($terms, $summary)
 						foreach ($obj['by_sticker'] as $attr_id)
 						{
 							$record = $aval[$attr_id];
-							echo "<tr><th width='50%' class=sticker>${record['name']}:</th>";
+							echo "<tr><th width='50%' class=sticker>{$record['name']}:</th>";
 							if ($attr_id == 3) // FQDN
 							{
 								// Switch context for the RackCode in MGMT_PROTOS to work.
@@ -3751,8 +3751,8 @@ function renderSearchResults ($terms, $summary)
 										'object_id' => $object['id'],
 										'hl_port_id' => $port_id
 									)) . '">port ' . $port['name'] . '</a>';
-									echo "<tr><td>${port_href}:</td>";
-									echo "<td class=tdleft>${text}</td></tr>";
+									echo "<tr><td>{$port_href}:</td>";
+									echo "<td class=tdleft>{$text}</td></tr>";
 									break; // next reason
 								}
 						echo '</table>';
@@ -3761,21 +3761,21 @@ function renderSearchResults ($terms, $summary)
 					{
 						echo '<ul>';
 						foreach ($obj['by_iface'] as $ifname)
-							echo "<li>interface ${ifname}</li>";
+							echo "<li>interface {$ifname}</li>";
 						echo '</ul>';
 					}
 					if (isset ($obj['by_nat']))
 					{
 						echo '<ul>';
 						foreach ($obj['by_nat'] as $comment)
-							echo "<li>NAT rule: ${comment}</li>";
+							echo "<li>NAT rule: {$comment}</li>";
 						echo '</ul>';
 					}
 					if (isset ($obj['by_cableid']))
 					{
 						echo '<ul>';
 						foreach ($obj['by_cableid'] as $cableid)
-							echo "<li>link cable ID: ${cableid}</li>";
+							echo "<li>link cable ID: {$cableid}</li>";
 						echo '</ul>';
 					}
 					echo "</td></tr>";
@@ -3820,10 +3820,10 @@ function renderSearchResults ($terms, $summary)
 								'id' => $parentnet,
 								'tab' => 'default',
 								'hl_ip' => $fmt,
-							)) . "'>${fmt}</a></td>";
+							)) . "'>{$fmt}</a></td>";
 					else
 						echo mkA ($fmt, 'ipaddress', $fmt, 'default') . '</td>';
-					echo "<td class=tdleft>${addr['name']}</td><td>${addr['comment']}</td></tr>";
+					echo "<td class=tdleft>{$addr['name']}</td><td>{$addr['comment']}</td></tr>";
 				}
 				echo '</table>';
 				finishPortlet();
@@ -3956,7 +3956,7 @@ function renderAtomGrid ($data, $is_ro = FALSE)
 	for ($unit_no = $data['height']; $unit_no > 0; $unit_no--)
 	{
 		$unit_label = inverseRackUnit ($data['height'], $unit_no, $reverse);
-		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('${rack_id}','${unit_no}')\">${unit_label}</a></th>";
+		echo "<tr><th><a href='javascript:;' onclick=\"toggleRowOfAtoms('{$rack_id}','{$unit_no}')\">{$unit_label}</a></th>";
 		for ($locidx = 0; $locidx < 3; $locidx++)
 		{
 			$show_checkbox = $data[$unit_no][$locidx]['enabled'];
@@ -3989,9 +3989,9 @@ function renderAtomGrid ($data, $is_ro = FALSE)
 			{
 				// FIXME: This data requires a cleaner handover from markupAtomGrid()
 				// to be better suited for makeHtmlTag().
-				$name = "atom_${rack_id}_${unit_no}_${locidx}";
+				$name = "atom_{$rack_id}_{$unit_no}_{$locidx}";
 				$disabled_text = $is_ro ? ' disabled' : '';
-				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name=${name} id=${name}${disabled_text}>";
+				echo "<input type=checkbox" . $data[$unit_no][$locidx]['checked'] . " name={$name} id={$name}{$disabled_text}>";
 			}
 			elseif ($state == 'T')
 				printObjectDetailsForRenderRack ($data[$unit_no][$locidx]['object_id']);
@@ -4037,7 +4037,7 @@ function renderCellList ($realm = NULL, $title = 'items', $do_amplify = FALSE, $
 		}
 		finishPortlet();
 	}
-	echo "</td><td class='pcright ${pageno}'>";
+	echo "</td><td class='pcright {$pageno}'>";
 	renderCellFilterPortlet ($cellfilter, $realm, $celllist);
 	echo "</td></tr></table>\n";
 }
@@ -4111,7 +4111,7 @@ function renderEditLocationForm ($location_id)
 	natcasesort($locations);
 	printSelect ($locations, array ('name' => 'parent_id'), $location['parent_id']);
 	echo "</td></tr>\n";
-	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='${location['name']}'></td></tr>\n";
+	echo "<tr><td>&nbsp;</td><th class=tdright>Name (required):</th><td class=tdleft><input type=text name=name value='{$location['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
@@ -4127,7 +4127,7 @@ function renderEditLocationForm ($location_id)
 		echo getOpLink (array('op'=>'deleteLocation'), '', 'destroy', 'Delete location', 'need-confirmation');
 		echo "&nbsp;</td></tr>\n";
 	}
-	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>${location['comment']}</textarea></td></tr>";
+	echo "<tr><td colspan=3><b>Comment:</b><br><textarea name=comment rows=10 cols=80>{$location['comment']}</textarea></td></tr>";
 	echo "<tr><td class=submit colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>\n";
@@ -4198,7 +4198,7 @@ function renderSNMPPortFinder ($object_id)
 	printOpFormIntro ('querySNMPData', array ('ver' => 1));
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th class=tdright><label for=communityv1>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=communityv1 value='${snmpcomm}'></td></tr>";
+	echo "<td class=tdleft><input type=text name=community id=communityv1 value='{$snmpcomm}'></td></tr>";
 	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
 	echo '</table></form>';
 	finishPortlet();
@@ -4207,7 +4207,7 @@ function renderSNMPPortFinder ($object_id)
 	printOpFormIntro ('querySNMPData', array ('ver' => 2));
 	echo '<table cellspacing=0 cellpadding=5 align=center class=widetable>';
 	echo '<tr><th class=tdright><label for=communityv2>Community: </label></th>';
-	echo "<td class=tdleft><input type=text name=community id=communityv2 value='${snmpcomm}'></td></tr>";
+	echo "<td class=tdleft><input type=text name=community id=communityv2 value='{$snmpcomm}'></td></tr>";
 	echo '<tr><td colspan=2><input type=submit value="Try now"></td></tr>';
 	echo '</table></form>';
 	finishPortlet();
@@ -4226,11 +4226,11 @@ function renderSNMPPortFinder ($object_id)
 	<table cellspacing=0 cellpadding=5 align=center class=widetable>
 	<tr>
 		<th class=tdright><label for=sec_name>Security User:</label></th>
-		<td class=tdleft><input type=text id=sec_name name=sec_name value='${snmpcomm}'></td>
+		<td class=tdleft><input type=text id=sec_name name=sec_name value='{$snmpcomm}'></td>
 	</tr>
 	<tr>
 		<th class=tdright><label for="sec_level">Security Level:</label></th>
-		<td class=tdleft>${slselect}</td>
+		<td class=tdleft>{$slselect}</td>
 	</tr>
 	<tr>
 		<th class=tdright>Auth Type:</th>
@@ -4276,7 +4276,7 @@ function renderLivePTR ($id)
 	$range = spotEntity ('ipv4net', $id);
 	loadIPAddrList ($range);
 	$can_import = permitted (NULL, NULL, 'importPTRData');
-	echo "<center><h1>${range['ip']}/${range['mask']}</h1><h2>${range['name']}</h2></center>\n";
+	echo "<center><h1>{$range['ip']}/{$range['mask']}</h1><h2>{$range['name']}</h2></center>\n";
 
 	echo "<table class=objview border=0 width='100%'><tr><td class=pcleft>";
 	startPortlet ('current records');
@@ -4325,9 +4325,9 @@ function renderLivePTR ($id)
 			$ptrname = '';
 		if ($can_import)
 		{
-			echo "<input type=hidden name=addr_${idx} value=${straddr}>\n";
-			echo "<input type=hidden name=descr_${idx} value=${ptrname}>\n";
-			echo "<input type=hidden name=rsvd_${idx} value=${addr['reserved']}>\n";
+			echo "<input type=hidden name=addr_{$idx} value={$straddr}>\n";
+			echo "<input type=hidden name=descr_{$idx} value={$ptrname}>\n";
+			echo "<input type=hidden name=rsvd_{$idx} value={$addr['reserved']}>\n";
 		}
 		echo '<tr';
 		$print_cbox = FALSE;
@@ -4358,12 +4358,12 @@ function renderLivePTR ($id)
 		if (isset ($range['addrlist'][$ip_bin]['class']) && $range['addrlist'][$ip_bin]['class'] != '')
 			echo ' ' . $range['addrlist'][$ip_bin]['class'];
 		echo "'>" . mkA ($straddr, 'ipaddress', $straddr) . '</td>';
-		echo "<td class=tdleft>${addr['name']}</td><td class=tdleft>${ptrname}</td>";
+		echo "<td class=tdleft>{$addr['name']}</td><td class=tdleft>{$ptrname}</td>";
 		if ($can_import)
 		{
 			echo '<td>';
 			if ($print_cbox)
-				echo "<input type=checkbox name=import_${idx} id=atom_1_" . $box_counter++ . "_1>";
+				echo "<input type=checkbox name=import_{$idx} id=atom_1_" . $box_counter++ . "_1>";
 			else
 				echo '&nbsp;';
 			echo '</td>';
@@ -4375,7 +4375,7 @@ function renderLivePTR ($id)
 	{
 		echo '<tr><td colspan=3 align=center><input type=submit value="Import selected records"></td><td>';
 		addJSInternal ('js/racktables.js');
-		echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, ${box_counter})\">(toggle selection)</a>" : '&nbsp;';
+		echo --$box_counter ? "<a href='javascript:;' onclick=\"toggleColumnOfAtoms(1, 1, {$box_counter})\">(toggle selection)</a>" : '&nbsp;';
 		echo '</td></tr>';
 	}
 	echo "</table>";
@@ -4387,10 +4387,10 @@ function renderLivePTR ($id)
 
 	startPortlet ('stats');
 	echo "<table border=0 width='100%' cellspacing=0 cellpadding=2>";
-	echo "<tr class=trok><th class=tdright>Exact matches:</th><td class=tdleft>${cnt_match}</td></tr>\n";
-	echo "<tr class=trwarning><th class=tdright>Missing from DB/DNS:</th><td class=tdleft>${cnt_missing}</td></tr>\n";
+	echo "<tr class=trok><th class=tdright>Exact matches:</th><td class=tdleft>{$cnt_match}</td></tr>\n";
+	echo "<tr class=trwarning><th class=tdright>Missing from DB/DNS:</th><td class=tdleft>{$cnt_missing}</td></tr>\n";
 	if ($cnt_mismatch)
-		echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>${cnt_mismatch}</td></tr>\n";
+		echo "<tr class=trerror><th class=tdright>Mismatches:</th><td class=tdleft>{$cnt_mismatch}</td></tr>\n";
 	echo "</table>\n";
 	finishPortlet();
 
@@ -4405,7 +4405,7 @@ function renderAutoPortsForm ($object_id)
 	echo "<caption>The following ports can be quickly added:</caption>";
 	echo "<tr><th>type</th><th>name</th></tr>";
 	foreach (getAutoPorts ($info) as $autoport)
-		echo "<tr><td>" . $ptlist[$autoport['type']] . "</td><td>${autoport['name']}</td></tr>";
+		echo "<tr><td>" . $ptlist[$autoport['type']] . "</td><td>{$autoport['name']}</td></tr>";
 	printOpFormIntro ('generate');
 	echo "<tr><td colspan=2 align=center>";
 	echo "<input type=submit value='Generate'>";
@@ -4466,8 +4466,8 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 		foreach (buildTagCheckboxRows ($input_name, $preselect, $neg_preselect, $taginfo, $realm) as $row)
 		{
 			$tag_class = isset ($taginfo['id']) && isset ($taginfo['refcnt']) ? getTagClassName ($row['input_value']) : '';
-			echo "<tr class='${row['tr_class']}'><td colspan=2 class='${row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
-			echo "<label><input type=checkbox class='${row['input_class']}' name='${row['input_name']}[]' value='${row['input_value']}'";
+			echo "<tr class='{$row['tr_class']}'><td colspan=2 class='{$row['td_class']}' style='padding-left: " . ($row['level'] * 16) . "px;'>";
+			echo "<label><input type=checkbox class='{$row['input_class']}' name='{$row['input_name']}[]' value='{$row['input_value']}'";
 			if (array_key_exists ('input_extraattrs', $row))
 				echo ' ' . $row['input_extraattrs'];
 			if (! array_key_exists ('description', $row))
@@ -4477,9 +4477,9 @@ function printTagCheckboxTable ($input_name, $preselect, $neg_preselect, $taglis
 				$tag_extraattrs = 'title="' . stringForOption ($row['description'], 0) . '"';
 				$tag_class .= ' tag-descr';
 			}
-			echo "> <span class='${tag_class}' ${tag_extraattrs}>${row['text_tagname']}</span>";
+			echo "> <span class='{$tag_class}' {$tag_extraattrs}>{$row['text_tagname']}</span>";
 			if (array_key_exists ('text_refcnt', $row))
-				echo " <i>(${row['text_refcnt']})</i>";
+				echo " <i>({$row['text_refcnt']})</i>";
 			echo '</label></td></tr>';
 		}
 }
@@ -4524,7 +4524,7 @@ function renderEntityTags ($entity_id)
 				if (! $is_first)
 					$js_code .= ",";
 				$is_first = FALSE;
-				$js_code .= "\n\t${tag['id']} : 1";
+				$js_code .= "\n\t{$tag['id']} : 1";
 			}
 			$js_code .= "\n});\n$(document).ready(tag_cb.compactTreeMode);";
 			addJSInternal ('js/tag-cb.js');
@@ -4553,7 +4553,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		count ($preselect['pnamelist']) +
 		($preselect['extratext'] != '' ? 1 : 0)
 	);
-	$title = $filterc ? "Tag filters (${filterc})" : 'Tag filters';
+	$title = $filterc ? "Tag filters ({$filterc})" : 'Tag filters';
 	startPortlet ($title);
 	echo "<form method=get>\n";
 	echo '<table border=0 align=center cellspacing=0 class="tagtree">';
@@ -4574,8 +4574,8 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		{
 			$class = 'tagbox' . ($andor == $boolop ? ' selected' : '');
 			$checked = $andor == $boolop ? ' checked' : '';
-			echo "<td class='${class}'><label><input type=radio name=andor value=${boolop}";
-			echo $checked . ">${boolop}</input></label></td>";
+			echo "<td class='{$class}'><label><input type=radio name=andor value={$boolop}";
+			echo $checked . ">{$boolop}</input></label></td>";
 		}
 	}
 
@@ -4615,7 +4615,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		$psieve = getConfigVar ('FILTER_PREDICATE_SIEVE');
 		// Repack matching predicates in a way that tagOnChain() understands.
 		foreach (array_keys ($pTable) as $pname)
-			if (preg_match ("/${psieve}/", $pname))
+			if (preg_match ("/{$psieve}/", $pname))
 				$myPredicates[] = array ('id' => $pname, 'tag' => $pname);
 		if (!count ($myPredicates))
 			echo "<tr><td colspan=2 class='tagbox sparenetwork'>(no predicates to show)</td></tr>";
@@ -4640,7 +4640,7 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		echo $hr;
 		$hr = $ruler;
 		$class = isset ($preselect['extraclass']) ? 'class=' . $preselect['extraclass'] : '';
-		echo "<tr><td colspan=2><textarea name=cfe ${class}>\n" . $preselect['extratext'];
+		echo "<tr><td colspan=2><textarea name=cfe {$class}>\n" . $preselect['extratext'];
 		echo "</textarea></td></tr>\n";
 	}
 	// submit block
@@ -4649,8 +4649,8 @@ function renderCellFilterPortlet ($preselect, $realm, $cell_list = array(), $byp
 		$hr = $ruler;
 		echo '<tr><td class=tdleft>';
 		// "apply"
-		echo "<input type=hidden name=page value=${pageno}>\n";
-		echo "<input type=hidden name=tab value=${tabno}>\n";
+		echo "<input type=hidden name=page value={$pageno}>\n";
+		echo "<input type=hidden name=tab value={$tabno}>\n";
 		foreach ($bypass_params as $bypass_name => $bypass_value)
 			echo '<input type=hidden name="' . htmlspecialchars ($bypass_name, ENT_QUOTES) . '" value="' . htmlspecialchars ($bypass_value, ENT_QUOTES) . '">' . "\n";
 		// FIXME: The user will be able to "submit" the empty form even without a "submit"
@@ -4694,8 +4694,8 @@ END
 		else
 		{
 			echo "<form method=get>\n";
-			echo "<input type=hidden name=page value=${pageno}>\n";
-			echo "<input type=hidden name=tab value=${tabno}>\n";
+			echo "<input type=hidden name=page value={$pageno}>\n";
+			echo "<input type=hidden name=tab value={$tabno}>\n";
 			echo "<input type=hidden name='cft[]' value=''>\n";
 			echo "<input type=hidden name='cfp[]' value=''>\n";
 			echo "<input type=hidden name='nft[]' value=''>\n";
@@ -4725,7 +4725,7 @@ function renderTagRollerForRow ($row_id)
 	echo "<tr><th>Tags</th><td>";
 	printTagsPicker ();
 	echo "</td></tr>";
-	echo "<tr><th>Control question: the sum of ${a} and ${b}</th><td><input type=text name=sum></td></tr>";
+	echo "<tr><th>Control question: the sum of {$a} and {$b}</th><td><input type=text name=sum></td></tr>";
 	echo "<tr><td colspan=2 align=center><input type=submit value='Go!'></td></tr>";
 	echo "</table></form>";
 }
@@ -4919,9 +4919,9 @@ function renderFilesPortlet ($entity_type = NULL, $entity_id = 0)
 			// getFilesOfEntity() returns a standard cell list.
 			$file = spotEntity ('file', $file['id']);
 			renderCell ($file);
-			echo "</td><td class=tdleft>${file['comment']}</td></tr>";
+			echo "</td><td class=tdleft>{$file['comment']}</td></tr>";
 			if (isolatedPermission ('file', 'download', $file) && '' != ($pcode = getFilePreviewCode ($file)))
-				echo "<tr><td colspan=2>${pcode}</td></tr>\n";
+				echo "<tr><td colspan=2>{$pcode}</td></tr>\n";
 		}
 		echo "</table><br>\n";
 		finishPortlet();
@@ -4976,7 +4976,7 @@ function renderFilesForEntity ($entity_id)
 		{
 			echo "<tr valign=top><td class=tdleft>";
 			renderCell (spotEntity ('file', $file_id));
-			echo "</td><td class=tdleft>${file['comment']}</td><td class=tdcenter>";
+			echo "</td><td class=tdleft>{$file['comment']}</td><td class=tdcenter>";
 			echo getOpLink (array('op'=>'unlinkFile', 'link_id'=>$file['link_id']), '', 'CUT', 'Unlink file');
 			echo "</td></tr>\n";
 		}
@@ -4998,7 +4998,7 @@ function printRoutersTD ($rlist, $as_cell = 'yes')
 			break;
 		}
 	}
-	echo "<td class='${rtrclass}'>";
+	echo "<td class='{$rtrclass}'>";
 	$pfx = '';
 	foreach ($rlist as $rtr)
 	{
@@ -5029,13 +5029,13 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	if ($netinfo['symbol'] != '')
 	{
 		if (array_key_exists ('symbolurl', $decor))
-			echo "<a href='${decor['symbolurl']}'>";
+			echo "<a href='{$decor['symbolurl']}'>";
 		printImageHREF ($netinfo['symbol']);
 		if (array_key_exists ('symbolurl', $decor))
 			echo '</a>';
 	}
 	if (isset ($netinfo['id']))
-		echo "<a name='net-${netinfo['id']}' href='index.php?page=ipv${ip_ver}net&id=${netinfo['id']}'>";
+		echo "<a name='net-{$netinfo['id']}' href='index.php?page=ipv{$ip_ver}net&id={$netinfo['id']}'>";
 	echo $formatted;
 	if (isset ($netinfo['id']))
 		echo '</a>';
@@ -5055,7 +5055,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 		{
 			echo '<a href="' . makeHref (array
 			(
-				'page' => "ipv${ip_ver}space",
+				'page' => "ipv{$ip_ver}space",
 				'tab' => 'newrange',
 				'set-prefix' => $formatted,
 			)) . '">';
@@ -5067,7 +5067,7 @@ function printIPNetInfoTDs ($netinfo, $decor = array())
 	{
 		echo stringForTD ($netinfo['name']);
 		if (count ($netinfo['etags']))
-			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv${ip_ver}space&tab=default&") . '</small>';
+			echo '<br><small>' . serializeTags ($netinfo['etags'], "index.php?page=ipv{$ip_ver}space&tab=default&") . '</small>';
 	}
 	echo "</td>";
 }
@@ -5116,7 +5116,7 @@ function renderCell ($cell)
 		$title = 'created ' . $cell['ctime'];
 		if ($cell['ctime'] != $cell['mtime'])
 			$title .= "\nmodified " . $cell['mtime'];
-		echo "<span title='${title}'>";
+		echo "<span title='{$title}'>";
 		echo mkA ('<strong>' . stringForTD ($cell['name']) . '</strong>', 'file', $cell['id']);
 		echo '</span>';
 		echo "</td><td rowspan=3 valign=top>";
@@ -5200,11 +5200,11 @@ function renderRouterCell ($ip_bin, $ifname, $cell)
 	// as it overlays the router's tag colours without mixing).
 	$class = 'slbcell ' . getCellClass ($cell, 'atom_plain');
 	$dottedquad = ip_format ($ip_bin);
-	echo "<table class='${class}'><tr><td rowspan=3>${dottedquad}";
+	echo "<table class='{$class}'><tr><td rowspan=3>{$dottedquad}";
 	if ($ifname != '')
 		echo '@' . $ifname;
 	echo "</td>";
-	echo "<td><a href='index.php?page=object&object_id=${cell['id']}&hl_ip=${dottedquad}'><strong>${cell['dname']}</strong></a></td>";
+	echo "<td><a href='index.php?page=object&object_id={$cell['id']}&hl_ip={$dottedquad}'><strong>{$cell['dname']}</strong></a></td>";
 	echo "</td></tr><tr><td>";
 	printImageHREF ('router');
 	echo "</td></tr><tr><td>";
@@ -5243,8 +5243,8 @@ function getFilePreviewCode ($file)
 				$resampled = TRUE;
 			}
 			if ($resampled)
-				$ret .= "<a href='?module=download&file_id=${file['id']}&asattach=no'>";
-			$ret .= "<img width=${width} height=${height} src='?module=image&img=preview&file_id=${file['id']}'>";
+				$ret .= "<a href='?module=download&file_id={$file['id']}&asattach=no'>";
+			$ret .= "<img width={$width} height={$height} src='?module=image&img=preview&file_id={$file['id']}'>";
 			if ($resampled)
 				$ret .= '</a><br>(click to zoom)';
 			break;
@@ -5340,7 +5340,7 @@ function showPathAndSearch ($pageno, $tabno)
 				$anchor_tail = '#' . $param_value;
 				continue;
 			}
-			$item .= ($is_first ? '' : '&') . "${param_name}=${param_value}";
+			$item .= ($is_first ? '' : '&') . "{$param_name}={$param_value}";
 			$is_first = FALSE;
 		}
 		$item .= $anchor_tail;
@@ -5413,9 +5413,9 @@ function showTabs ($pageno, $tabno)
 			continue;
 		if ($tabidx == $tabno)
 			$tabclass = 'current'; // override any class for an active selection
-		echo "<li><a class=${tabclass}";
+		echo "<li><a class={$tabclass}";
 		echo " href='" . makeHref (makePageParams (array ('tab' => $tabidx)));
-		echo "'>${tabtitle}</a></li>\n";
+		echo "'>{$tabtitle}</a></li>\n";
 	}
 	echo "</ul></div>";
 }
@@ -5459,7 +5459,7 @@ function dynamic_title_decoder_throwing ($path_position)
 		$chapter_name = isset ($chapters[$chapter_no]) ? $chapters[$chapter_no]['name'] : 'N/A';
 		return array
 		(
-			'name' => "Chapter '${chapter_name}'",
+			'name' => "Chapter '{$chapter_name}'",
 			'params' => array ('chapter_no' => $chapter_no)
 		);
 	case 'user':
@@ -5535,7 +5535,7 @@ function dynamic_title_decoder_throwing ($path_position)
 		if (isset ($_REQUEST['q']))
 			return array
 			(
-				'name' => "search results for '${_REQUEST['q']}'",
+				'name' => "search results for '{$_REQUEST['q']}'",
 				'params' => array ('q' => $_REQUEST['q'])
 			);
 		else
@@ -5658,7 +5658,7 @@ function renderTwoColumnCompatTableViewer ($compat, $left, $right)
 	$last_lkey = NULL;
 	$order = 'odd';
 	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo "<tr><th>Key</th><th class=tdleft>${left['header']}</th><th>Key</th><th class=tdleft>${right['header']}</th></tr>";
+	echo "<tr><th>Key</th><th class=tdleft>{$left['header']}</th><th>Key</th><th class=tdleft>{$right['header']}</th></tr>";
 	foreach ($compat as $item)
 	{
 		if ($last_lkey !== $item[$left['key']])
@@ -5666,10 +5666,10 @@ function renderTwoColumnCompatTableViewer ($compat, $left, $right)
 			$order = $nextorder[$order];
 			$last_lkey = $item[$left['key']];
 		}
-		echo "<tr class=row_${order}>";
-		echo "<td class=tdright>${item[$left['key']]}</td>";
+		echo "<tr class=row_{$order}>";
+		echo "<td class=tdright>{$item[$left['key']]}</td>";
 		echo '<td class=tdleft>' . stringForTD ($item[$left['value']], $left['width']) . '</td>';
-		echo "<td class=tdright>${item[$right['key']]}</td>";
+		echo "<td class=tdright>{$item[$right['key']]}</td>";
 		echo '<td class=tdleft>' . stringForTD ($item[$right['value']], $right['width']) . '</td>';
 		echo '</tr>';
 	}
@@ -5694,7 +5694,7 @@ function renderTwoColumnCompatTableEditor ($compat, $left, $right)
 	$last_lkey = NULL;
 	$order = 'odd';
 	echo '<table class=cooltable align=center border=0 cellpadding=5 cellspacing=0>';
-	echo "<tr><th>&nbsp;</th><th class=tdleft>${left['header']}</th><th class=tdleft>${right['header']}</th></tr>";
+	echo "<tr><th>&nbsp;</th><th class=tdleft>{$left['header']}</th><th class=tdleft>{$right['header']}</th></tr>";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewitemTR ($left['key'], $left['options'], $right['key'], $right['options']);
 	foreach ($compat as $item)
@@ -5704,7 +5704,7 @@ function renderTwoColumnCompatTableEditor ($compat, $left, $right)
 			$order = $nextorder[$order];
 			$last_lkey = $item[$left['key']];
 		}
-		echo "<tr class=row_${order}>";
+		echo "<tr class=row_{$order}>";
 		echo '<td>';
 		echo getOpLink (array ('op' => 'del', $left['key'] => $item[$left['key']], $right['key'] => $item[$right['key']]), '', 'delete', 'remove pair');
 		echo '</td>';
@@ -5781,7 +5781,7 @@ function renderDiscoveredNeighbors ($object_id)
 					$dp_remote_object_id = lookupEntityByString ('object', $dp_neighbor['device']);
 				if (! $dp_remote_object_id)
 				{
-					$error_message = "No such neighbor <i>${dp_neighbor['device']}</i>";
+					$error_message = "No such neighbor <i>{$dp_neighbor['device']}</i>";
 					break;
 				}
 				$dp_remote_object = spotEntity ('object', $dp_remote_object_id);
@@ -5884,14 +5884,14 @@ function renderDiscoveredNeighbors ($object_id)
 				$initial_row = FALSE;
 			}
 			echo "<td>" . ($portinfo_local ?  formatPortIIFOIF ($portinfo_local) : '&nbsp;') . "</td>";
-			echo "<td>" . formatIfTypeVariants ($variants, "ports_${inputno}") . "</td>";
-			echo "<td>${dp_neighbor['device']}</td>";
+			echo "<td>" . formatIfTypeVariants ($variants, "ports_{$inputno}") . "</td>";
+			echo "<td>{$dp_neighbor['device']}</td>";
 			echo "<td>" . ($portinfo_remote ? formatPortLink ($dp_remote_object_id, NULL, $portinfo_remote['id'], $portinfo_remote['name']) : $dp_neighbor['port'] ) . "</td>";
 			echo "<td>" . ($portinfo_remote ?  formatPortIIFOIF ($portinfo_remote) : '&nbsp;') . "</td>";
 			echo "<td>";
 			if (! empty ($variants))
 			{
-				echo "<input type=checkbox name=do_${inputno} class='cb-makelink'>";
+				echo "<input type=checkbox name=do_{$inputno} class='cb-makelink'>";
 				$inputno++;
 			}
 			echo "</td>";
@@ -5903,7 +5903,7 @@ function renderDiscoveredNeighbors ($object_id)
 	}
 	if ($inputno)
 	{
-		echo "<input type=hidden name=nports value=${inputno}>";
+		echo "<input type=hidden name=nports value={$inputno}>";
 		echo '<tr><td colspan=7 align=center>' . getImageHREF ('CREATE', 'import selected', TRUE) . '</td></tr>';
 	}
 	echo '</table></form>';
@@ -6017,7 +6017,7 @@ function formatAttributeValue ($record, $objtype_id)
 					if (considerGivenConstraint (NULL, $filter))
 					{
 						$blank = (preg_match ('/^https?$/', $proto) ? 'target=_blank' : '');
-						return "<a $blank title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>${record['a_value']}</a>";
+						return "<a $blank title='Open $proto session' class='mgmt-link' href='" . $proto . '://' . $record['a_value'] . "'>{$record['a_value']}</a>";
 					}
 				}
 				catch (RackTablesError $e)
@@ -6026,11 +6026,11 @@ function formatAttributeValue ($record, $objtype_id)
 					// FIXME: In the current implementation the exception class is neither RackCodeError
 					// nor RCParserError, which is likely wrong. In the specific case of a syntax error
 					// it would be helpful to display its text in the warning.
-					showWarning ("could not parse '${filter}' for management protocol '${proto}' in MGMT_PROTOS");
+					showWarning ("could not parse '{$filter}' for management protocol '{$proto}' in MGMT_PROTOS");
 					continue;
 				}
 		return array_key_exists ('href', $record) ?
-			"<a href='${record['href']}'>${record['a_value']}</a>" :
+			"<a href='{$record['href']}'>{$record['a_value']}</a>" :
 			$record['a_value'];
 	case 'dict':
 		$map = array
@@ -6057,10 +6057,10 @@ function formatAttributeValue ($record, $objtype_id)
 				'cfe' => '{$attr_' . $record['id'] . '_' . $record['key'] . '}',
 			);
 			$filter_url = makeHref ($filter_args);
-			$result = "<a href='${filter_url}'>${record['a_value']}</a>";
+			$result = "<a href='{$filter_url}'>{$record['a_value']}</a>";
 		}
 		if (array_key_exists ('href', $record))
-			$result .= "&nbsp;<a class='img-link' href='${record['href']}'>" . getImageHREF ('html', 'vendor\'s info page') . "</a>";
+			$result .= "&nbsp;<a class='img-link' href='{$record['href']}'>" . getImageHREF ('html', 'vendor\'s info page') . "</a>";
 		return $result;
 	default:
 		throw new InvalidArgException ('record[type]', $record['type']);
@@ -6183,11 +6183,11 @@ function renderVirtualResourcesSummary ()
 		{
 			$total_vms = $cluster['cluster_vms'] + $cluster['resource_pool_vms'];
 			echo '<tr valign=top>';
-			echo '<td class="tdleft">' . mkA ("<strong>${cluster['name']}</strong>", 'object', $cluster['id']) . '</td>';
-			echo "<td class='tdleft'>${cluster['hypervisors']}</td>";
-			echo "<td class='tdleft'>${cluster['resource_pools']}</td>";
-			echo "<td class='tdleft'>${cluster['cluster_vms']}</td>";
-			echo "<td class='tdleft'>${cluster['resource_pool_vms']}</td>";
+			echo '<td class="tdleft">' . mkA ("<strong>{$cluster['name']}</strong>", 'object', $cluster['id']) . '</td>';
+			echo "<td class='tdleft'>{$cluster['hypervisors']}</td>";
+			echo "<td class='tdleft'>{$cluster['resource_pools']}</td>";
+			echo "<td class='tdleft'>{$cluster['cluster_vms']}</td>";
+			echo "<td class='tdleft'>{$cluster['resource_pool_vms']}</td>";
 			echo "<td class='tdleft'>$total_vms</td>";
 			echo "</tr>\n";
 		}
@@ -6208,12 +6208,12 @@ function renderVirtualResourcesSummary ()
 		foreach ($pools as $pool)
 		{
 			echo '<tr valign=top>';
-			echo '<td class="tdleft">' . mkA ("<strong>${pool['name']}</strong>", 'object', $pool['id']) . '</td>';
+			echo '<td class="tdleft">' . mkA ("<strong>{$pool['name']}</strong>", 'object', $pool['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($pool['cluster_id'])
-				echo mkA ("<strong>${pool['cluster_name']}</strong>", 'object', $pool['cluster_id']);
+				echo mkA ("<strong>{$pool['cluster_name']}</strong>", 'object', $pool['cluster_id']);
 			echo '</td>';
-			echo "<td class='tdleft'>${pool['VMs']}</td>";
+			echo "<td class='tdleft'>{$pool['VMs']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -6233,12 +6233,12 @@ function renderVirtualResourcesSummary ()
 		foreach ($hypervisors as $hypervisor)
 		{
 			echo '<tr valign=top>';
-			echo '<td class="tdleft">' . mkA ("<strong>${hypervisor['name']}</strong>", 'object', $hypervisor['id']) . '</td>';
+			echo '<td class="tdleft">' . mkA ("<strong>{$hypervisor['name']}</strong>", 'object', $hypervisor['id']) . '</td>';
 			echo '<td class="tdleft">';
 			if ($hypervisor['cluster_id'])
-				echo mkA ("<strong>${hypervisor['cluster_name']}</strong>", 'object', $hypervisor['cluster_id']);
+				echo mkA ("<strong>{$hypervisor['cluster_name']}</strong>", 'object', $hypervisor['cluster_id']);
 			echo '</td>';
-			echo "<td class='tdleft'>${hypervisor['VMs']}</td>";
+			echo "<td class='tdleft'>{$hypervisor['VMs']}</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -6258,7 +6258,7 @@ function renderVirtualResourcesSummary ()
 		foreach ($switches as $switch)
 		{
 			echo '<tr valign=top>';
-			echo '<td class="tdleft">' . mkA ("<strong>${switch['name']}</strong>", 'object', $switch['id']) . '</td>';
+			echo '<td class="tdleft">' . mkA ("<strong>{$switch['name']}</strong>", 'object', $switch['id']) . '</td>';
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
@@ -6327,7 +6327,7 @@ function formatPortReservation ($port)
 		? 'editable'
 		: '';
 	$ret[] = '<td class=tdleft>' .
-		formatLoggedSpan ($port['last_log'], $port['reservation_comment'], "rsvtext $editable id-${port['id']} op-upd-reservation-port") .
+		formatLoggedSpan ($port['last_log'], $port['reservation_comment'], "rsvtext $editable id-{$port['id']} op-upd-reservation-port") .
 		'</td>';
 	return $ret;
 }
@@ -6373,12 +6373,12 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 		echo '<tr>';
 		echo '<td>&nbsp;</td>';
 		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
-		echo "<td><input type=text size=${column['width']} name=${column['value']}></td>";
+		echo "<td><input type=text size={$column['width']} name={$column['value']}></td>";
 		echo '<td class=tdleft>' . getImageHREF ('create', 'create new', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
 	echo '<table class=widetable border=0 cellpadding=5 cellspacing=0 align=center>';
-	echo "<tr><th>Origin</th><th>&nbsp;</th><th>${column['header']}</th><th>&nbsp;</th></tr>";
+	echo "<tr><th>Origin</th><th>&nbsp;</th><th>{$column['header']}</th><th>&nbsp;</th></tr>";
 	if (getConfigVar ('ADDNEW_AT_TOP') == 'yes')
 		printNewitemTR ($column);
 	foreach ($rows as $row)
@@ -6397,11 +6397,11 @@ function renderSimpleTableWithOriginEditor ($rows, $column)
 			echo '<td>' . getImageHREF ('favorite', 'custom') . '</td>';
 			echo '<td>';
 			if (array_key_exists ('refc', $row) && $row['refc'] > 0)
-				echo getImageHREF ('nodestroy', "referenced ${row['refc']} times");
+				echo getImageHREF ('nodestroy', "referenced {$row['refc']} times");
 			else
 				echo getOpLink (array ('op' => 'del', $column['key'] => $row[$column['key']]), '', 'destroy', 'remove');
 			echo '</td>';
-			echo "<td><input type=text size=${column['width']} name=${column['value']} value='" . stringForTextInputValue ($row[$column['value']], $column['width']) . "'></td>";
+			echo "<td><input type=text size={$column['width']} name={$column['value']} value='" . stringForTextInputValue ($row[$column['value']], $column['width']) . "'></td>";
 			echo '<td>' . getImageHREF ('save', 'Save changes', TRUE) . '</td>';
 			echo '</form>';
 		}
@@ -6503,7 +6503,7 @@ function renderLogRecordsPortlet ($object_id)
 	$order = 'odd';
 	foreach (array_slice ($logrecords, 0, $lr_max) as $row)
 	{
-		echo "<tr class=row_${order} valign=top>";
+		echo "<tr class=row_{$order} valign=top>";
 		echo '<td class=tdleft>' . $row['date'] . '<br>' . $row['user'] . '</td>';
 		echo '<td class="logentry">' . string_insert_hrefs (htmlspecialchars ($row['content'], ENT_NOQUOTES)) . '</td>';
 		echo '</tr>';

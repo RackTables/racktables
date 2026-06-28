@@ -38,7 +38,7 @@ function renderVS ($vsid)
 
 	echo '<table border=0 class=objectview cellspacing=0 cellpadding=0>';
 	if ($vsinfo['name'] != '')
-		echo "<tr><td colspan=2 align=center><h1>${vsinfo['name']}</h1></td></tr>\n";
+		echo "<tr><td colspan=2 align=center><h1>{$vsinfo['name']}</h1></td></tr>\n";
 	echo '<tr>';
 
 	echo '<td class=pcleft>';
@@ -343,12 +343,12 @@ function renderSLBTriplets2 ($cell, $editable = FALSE, $hl_ip = NULL)
 		amplifyCell ($vs_cell);
 		echo makeHtmlTag ('tr', array(
 			'valign' => 'top',
-			'class' => "row_${order} triplet-row",
+			'class' => "row_{$order} triplet-row",
 			'data-object_id' => $slb['object_id'],
 			'data-vs_id' => $slb['vs_id'],
 			'data-rspool_id' => $slb['rspool_id'],
 		));
-		echo '<td><a href="#" onclick="' . "slb_config_preview(event, ${slb['object_id']}, ${slb['vs_id']}, ${slb['rspool_id']}); return false" . '">' . getImageHREF ('Zoom', 'config preview') . '</a></td>';
+		echo '<td><a href="#" onclick="' . "slb_config_preview(event, {$slb['object_id']}, {$slb['vs_id']}, {$slb['rspool_id']}); return false" . '">' . getImageHREF ('Zoom', 'config preview') . '</a></td>';
 		foreach (array_keys ($headers) as $realm)
 		{
 			if ($realm == $cell['realm'])

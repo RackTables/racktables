@@ -258,15 +258,15 @@ function assertDeviceBreed ($object_id)
 function validBreedFunction ($breed, $command)
 {
 	global $breedfunc;
-	return array_key_exists ("${breed}-${command}-main", $breedfunc);
+	return array_key_exists ("{$breed}-{$command}-main", $breedfunc);
 }
 
 function assertBreedFunction ($breed, $command)
 {
 	global $breedfunc;
 	if (! validBreedFunction ($breed, $command))
-		throw new RTGatewayError ("unsupported command '${command}' for breed '${breed}'");
-	return $breedfunc["${breed}-${command}-main"];
+		throw new RTGatewayError ("unsupported command '{$command}' for breed '{$breed}'");
+	return $breedfunc["{$breed}-{$command}-main"];
 }
 
 function queryDevice ($object_id, $command, $args = array())
@@ -289,7 +289,7 @@ function queryDevice ($object_id, $command, $args = array())
 	$funcname = assertBreedFunction ($breed, $command);
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
-		throw new RTGatewayError ("undeclared function '${funcname}'");
+		throw new RTGatewayError ("undeclared function '{$funcname}'");
 
 	global $current_query_breed;
 	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
@@ -327,7 +327,7 @@ function translateDeviceCommands ($object_id, $crq, $vlan_names = NULL)
 	$funcname = assertBreedFunction ($breed, 'xlatepushq');
 	require_once 'deviceconfig.php';
 	if (! is_callable ($funcname))
-		throw new RTGatewayError ("undeclared function '${funcname}'");
+		throw new RTGatewayError ("undeclared function '{$funcname}'");
 	global $current_query_breed;
 	$current_query_breed = $breed; // this global is used to auto-detect breed in shortenIfName
 	try
@@ -373,7 +373,7 @@ function makeGatewayParams ($object_id, /*array(&)*/$ref_settings, /*array(&)*/$
 						$params_from_settings[] = '-6';
 						break;
 					default:
-						throw new RTGatewayError ("Proto '${settings['proto']}' is invalid. Valid protocols are: '4', '6'");
+						throw new RTGatewayError ("Proto '{$settings['proto']}' is invalid. Valid protocols are: '4', '6'");
 				}
 			$params_from_settings[] = $settings['hostname'];
 			break;
@@ -409,7 +409,7 @@ function makeGatewayParams ($object_id, /*array(&)*/$ref_settings, /*array(&)*/$
 						$params_from_settings[] = '-6';
 						break;
 					default:
-						throw new RTGatewayError ("Proto '${settings['proto']}' is invalid. Valid protocols are: '4', '6'");
+						throw new RTGatewayError ("Proto '{$settings['proto']}' is invalid. Valid protocols are: '4', '6'");
 				}
 			if (isset ($settings['connect_timeout']))
 				$params_from_settings[] = '-oConnectTimeout=' . $settings['connect_timeout'];
@@ -433,11 +433,11 @@ function makeGatewayParams ($object_id, /*array(&)*/$ref_settings, /*array(&)*/$
 			}
 			foreach (array ('hostname', 'username', 'password') as $item)
 				if (empty ($settings[$item]))
-					throw new RTGatewayError ("${item} not available, check terminal_settings()");
-			$commands = "login ${settings['hostname']} ${settings['username']} ${settings['password']}\n" . $commands;
+					throw new RTGatewayError ("{$item} not available, check terminal_settings()");
+			$commands = "login {$settings['hostname']} {$settings['username']} {$settings['password']}\n" . $commands;
 			break;
 		default:
-			throw new RTGatewayError ("Invalid terminal protocol '${settings['protocol']}' specified");
+			throw new RTGatewayError ("Invalid terminal protocol '{$settings['protocol']}' specified");
 	}
 
 	// prepend commands by credentials
@@ -582,14 +582,14 @@ function queryTerminal ($object_id, $commands, $tolerate_remote_errors = TRUE)
 	if (substr($settings['protocol'],0,3) != 'ssh' || ! $settings['tolerate_remote_errors'])
 	{
 		if ($errors != '')
-			throw new RTGatewayError ("${settings['protocol']} error: " . rtrim ($errors));
+			throw new RTGatewayError ("{$settings['protocol']} error: " . rtrim ($errors));
 		elseif ($ret_code !== 0)
-			throw new RTGatewayError ("${settings['protocol']} error: result code $ret_code");
+			throw new RTGatewayError ("{$settings['protocol']} error: result code $ret_code");
 	}
 	elseif ($errors != '') // ssh and tolerate and non-empty $errors
 		foreach (explode ("\n", $errors) as $line)
 			if ($line != '' && ! $hide_warnings)
-				showWarning ("${settings['protocol']} ${settings['hostname']}: $line");
+				showWarning ("{$settings['protocol']} {$settings['hostname']}: $line");
 	return strtr($out, array("\r" => "")); // cut ^M symbols
 }
 
@@ -751,7 +751,7 @@ function setDevice8021QConfig ($object_id, $pseudocode, $vlan_names)
 		if (preg_match ('/>\s*configure exclusive\s*$[^#>]*?^error:/sm', $output))
 			throw new RTGatewayError ("Configuration is locked by other user");
 		elseif (preg_match ('/#\s*commit\s*$([^#]*?^error: .*?)$/sm', $output, $m))
-			throw new RTGatewayError ("Commit failed: ${m[1]}");
+			throw new RTGatewayError ("Commit failed: {$m[1]}");
 	}
 }
 
@@ -811,7 +811,7 @@ function nxos4ShortenIfName ($ifname)
 function vrp5xShortenIfName ($ifname)
 {
 	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
-		return "Eth-Trunk${m[1]}";
+		return "Eth-Trunk{$m[1]}";
 	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
 	$ifname = preg_replace ('@^(?:Ethernet|Eth)(.+)$@', 'ether\\1', $ifname);
 	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)(.+)$@', 'gi\\1', $ifname);
@@ -823,7 +823,7 @@ function vrp5xShortenIfName ($ifname)
 function vrp85ShortenIfName ($ifname)
 {
 	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
-		return "Eth-Trunk${m[1]}";
+		return "Eth-Trunk{$m[1]}";
 	// VRP 8.5 has already shortened ifNames
 	$ifname = preg_replace ('@^MEth(.+)$@', 'me\\1', $ifname);
 	$ifname = strtolower ($ifname);
@@ -847,7 +847,7 @@ function iosxr4ShortenIfName ($ifname)
 function ios12ShortenIfName ($ifname)
 {
 	if (preg_match ('@^eth-trunk(\d+)$@i', $ifname, $m))
-		return "Eth-Trunk${m[1]}";
+		return "Eth-Trunk{$m[1]}";
 	$ifname = preg_replace ('@^(?:[Ee]thernet|Eth)(.+)$@', 'e\\1', $ifname);
 	$ifname = preg_replace ('@^FastEthernet(.+)$@', 'fa\\1', $ifname);
 	$ifname = preg_replace ('@^(?:GigabitEthernet|GE)\s*(.+)$@', 'gi\\1', $ifname);

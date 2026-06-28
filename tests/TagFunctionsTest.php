@@ -25,9 +25,9 @@ class TagFunctionsTest extends RTTestCase
 		$this->b_tag_ids = array();
 		for ($i = 0; $i < self::NUM_TAGS; $i++)
 		{
-			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag a${i}"), 'color' => self::COLOR_A + $i));
+			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag a{$i}"), 'color' => self::COLOR_A + $i));
 			$this->a_tag_ids[] = lastInsertID();
-			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag b${i}"), 'color' => self::COLOR_B));
+			usePreparedInsertBlade ('TagTree', array ('tag' => $this->myString ("tag b{$i}"), 'color' => self::COLOR_B));
 			$this->b_tag_ids[] = lastInsertID();
 		}
 		$taglist = addTraceToNodes (getTagList());

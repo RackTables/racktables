@@ -253,7 +253,7 @@ function renderCactiServersEditor ()
 		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
 		echo '<td><input type=text size=24 name=username value="' . htmlspecialchars ($server['username'], ENT_QUOTES, 'UTF-8') . '"></td>';
 		echo '<td><input type=password size=24 name=password value="' . htmlspecialchars ($server['password'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
+		echo "<td class=tdright>{$server['num_graphs']}</td>";
 		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
@@ -268,7 +268,7 @@ function renderObjectCactiGraphs ($object_id)
 	{
 		$options = array();
 		foreach ($servers as $server)
-			$options[$server['id']] = "${server['id']}: ${server['base_url']}";
+			$options[$server['id']] = "{$server['id']}: {$server['base_url']}";
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
 		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph ID</th><th>Caption</th><td>&nbsp;</td></tr>\n";
 		printOpFormIntro ('add');
@@ -292,13 +292,13 @@ function renderObjectCactiGraphs ($object_id)
 	foreach (getCactiGraphsForObject ($object_id) as $graph_id => $graph)
 	{
 		$cacti_url = $servers[$graph['server_id']]['base_url'];
-		$text = "(graph ${graph_id} on server ${graph['server_id']})";
+		$text = "(graph {$graph_id} on server {$graph['server_id']})";
 		echo "<tr><td>";
-		echo "<a href='${cacti_url}/graph.php?action=view&local_graph_id=${graph_id}&rra_id=all' target='_blank'>";
-		echo "<img src='index.php?module=image&img=cactigraph&object_id=${object_id}&server_id=${graph['server_id']}&graph_id=${graph_id}' alt='${text}' title='${text}'></a></td><td>";
+		echo "<a href='{$cacti_url}/graph.php?action=view&local_graph_id={$graph_id}&rra_id=all' target='_blank'>";
+		echo "<img src='index.php?module=image&img=cactigraph&object_id={$object_id}&server_id={$graph['server_id']}&graph_id={$graph_id}' alt='{$text}' title='{$text}'></a></td><td>";
 		if(permitted ('object', 'cacti', 'del'))
 			echo getOpLink (array ('op' => 'del', 'server_id' => $graph['server_id'], 'graph_id' => $graph_id), '', 'Cut', 'Unlink graph', 'need-confirmation');
-		echo "&nbsp; &nbsp;${graph['caption']}";
+		echo "&nbsp; &nbsp;{$graph['caption']}";
 		echo "</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -314,7 +314,7 @@ function proxyCactiRequest ($server_id, $graph_id)
 	if (! array_key_exists ($server_id, $servers))
 		throw new InvalidRequestArgException ('server_id', $server_id);
 	$cacti_url = $servers[$server_id]['base_url'];
-	$url = "${cacti_url}/graph_image.php?action=view&local_graph_id=${graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
+	$url = "{$cacti_url}/graph_image.php?action=view&local_graph_id={$graph_id}&rra_id=" . getConfigVar ('CACTI_RRA_ID');
 	$postvars = 'action=login&login_username=' . $servers[$server_id]['username'];
 	$postvars .= '&login_password=' . $servers[$server_id]['password'];
 

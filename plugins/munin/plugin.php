@@ -248,7 +248,7 @@ function renderMuninServersEditor ()
 			echo getOpLink (array ('op' => 'del', 'id' => $server['id']), '', 'destroy', 'delete this server');
 		echo '</td>';
 		echo '<td><input type=text size=48 name=base_url value="' . htmlspecialchars ($server['base_url'], ENT_QUOTES, 'UTF-8') . '"></td>';
-		echo "<td class=tdright>${server['num_graphs']}</td>";
+		echo "<td class=tdright>{$server['num_graphs']}</td>";
 		echo '<td>' . getImageHREF ('save', 'update this server', TRUE) . '</td>';
 		echo '</tr></form>';
 	}
@@ -263,7 +263,7 @@ function renderObjectMuninGraphs ($object_id)
 	{
 		$options = array();
 		foreach ($servers as $server)
-			$options[$server['id']] = "${server['id']}: ${server['base_url']}";
+			$options[$server['id']] = "{$server['id']}: {$server['base_url']}";
 		echo "<table cellspacing=\"0\" align=\"center\" width=\"50%\">";
 		echo "<tr><td>&nbsp;</td><th>Server</th><th>Graph</th><th>Caption</th><td>&nbsp;</td></tr>\n";
 		printOpFormIntro ('add');
@@ -300,13 +300,13 @@ function renderObjectMuninGraphs ($object_id)
 	foreach (getMuninGraphsForObject ($object_id) as $graph_name => $graph)
 	{
 		$munin_url = $servers[$graph['server_id']]['base_url'];
-		$text = "(graph ${graph_name} on server ${graph['server_id']})";
+		$text = "(graph {$graph_name} on server {$graph['server_id']})";
 		echo "<tr><td>";
-		echo "<a href='${munin_url}/${domain}/${host}.${domain}/${graph_name}.html' target='_blank'>";
-		echo "<img src='index.php?module=image&img=muningraph&object_id=${object_id}&server_id=${graph['server_id']}&graph=${graph_name}' alt='${text}' title='${text}'></a></td>";
+		echo "<a href='{$munin_url}/{$domain}/{$host}.{$domain}/{$graph_name}.html' target='_blank'>";
+		echo "<img src='index.php?module=image&img=muningraph&object_id={$object_id}&server_id={$graph['server_id']}&graph={$graph_name}' alt='{$text}' title='{$text}'></a></td>";
 		echo "<td>";
 		echo getOpLink (array ('op' => 'del', 'server_id' => $graph['server_id'], 'graph' => $graph_name), '', 'Cut', 'Unlink graph', 'need-confirmation');
-		echo "&nbsp; &nbsp;${graph['caption']}";
+		echo "&nbsp; &nbsp;{$graph['caption']}";
 		echo "</td></tr>\n";
 	}
 	echo "</table>\n";
@@ -331,7 +331,7 @@ function proxyMuninRequest ($server_id, $graph)
 	if (! array_key_exists ($server_id, $servers))
 		throw new InvalidRequestArgException ('server_id', $server_id);
 	$munin_url = $servers[$server_id]['base_url'];
-	$url = "${munin_url}/${domain}/${host}.${domain}/${graph}-day.png";
+	$url = "{$munin_url}/{$domain}/{$host}.{$domain}/{$graph}-day.png";
 
 	$session = curl_init ();
 

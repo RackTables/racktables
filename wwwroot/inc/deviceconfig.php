@@ -707,12 +707,12 @@ function ros11ParsePortString ($string)
 			# Produce a list of interfaces from the given base interface
 			# name and upper index.
 			if ($matches[3] <= $matches[2])
-				throw new InvalidArgException ('string', $string, "format error in '${item}'");
+				throw new InvalidArgException ('string', $string, "format error in '{$item}'");
 			for ($i = $matches[2]; $i <= $matches[3]; $i++)
-				$ret[] = "${matches[1]}{$i}";
+				$ret[] = "{$matches[1]}{$i}";
 		}
 		else
-			throw new InvalidArgException ('string', $string, "format error in '${item}'");
+			throw new InvalidArgException ('string', $string, "format error in '{$item}'");
 	return $ret;
 }
 
@@ -875,7 +875,7 @@ function vrp55Read8021QConfig ($input)
 		switch (TRUE)
 		{
 		case preg_match ('/^ port (link-type )?hybrid /', $line):
-			throw new RTGatewayError ("unsupported hybrid link-type for $port_name: ${line}");
+			throw new RTGatewayError ("unsupported hybrid link-type for $port_name: {$line}");
 		case preg_match ('/^ port link-type (.+)$/', $line, $matches):
 			$ret['current']['link-type'] = $matches[1];
 			break;
@@ -1189,9 +1189,9 @@ function nxos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 				// Some NX-OS platforms interactively ask for a confirmation if the CLI user
 				// is trying to overwrite the allowed VLAN list for a port. The differentiative
 				// remove syntax works around this problem.
-				$ret .= "interface ${cmd['arg1']}\n";
+				$ret .= "interface {$cmd['arg1']}\n";
 				$ret .= "switchport trunk encapsulation dot1q\n";
-				$ret .= "switchport mode ${cmd['arg2']}\n";
+				$ret .= "switchport mode {$cmd['arg2']}\n";
 				$ret .= "no switchport trunk native vlan\n";
 				$ret .= "switchport trunk allowed vlan remove 1-4094\n";
 				break;
@@ -1218,38 +1218,38 @@ function ios12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 		case 'rem allowed':
 			$clause = $cmd['opcode'] == 'add allowed' ? 'add' : 'remove';
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			foreach (listToRanges ($cmd['vlans']) as $range)
-				$ret .= "switchport trunk allowed vlan ${clause} " .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+				$ret .= "switchport trunk allowed vlan {$clause} " .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']}-{$range['to']}") .
 					"\n";
 			$ret .= "exit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport trunk native vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\nno switchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nno switchport trunk native vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport access vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nno switchport access vlan\nexit\n";
 			break;
 		case 'set mode':
-			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
 			if ($cmd['arg2'] == 'trunk')
 				$ret .= "switchport trunk encapsulation dot1q\n";
-			$ret .= "switchport mode ${cmd['arg2']}\n";
+			$ret .= "switchport mode {$cmd['arg2']}\n";
 			if ($cmd['arg2'] == 'trunk')
 				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
 			$ret .= "exit\n";
@@ -1308,30 +1308,30 @@ function fdry5TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
-				$ret .= "vlan ${vlan_id}\ntagged ${cmd['port']}\nexit\n";
+				$ret .= "vlan {$vlan_id}\ntagged {$cmd['port']}\nexit\n";
 			break;
 		case 'rem allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
-				$ret .= "vlan ${vlan_id}\nno tagged ${cmd['port']}\nexit\n";
+				$ret .= "vlan {$vlan_id}\nno tagged {$cmd['port']}\nexit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\ndual-mode ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\ndual-mode {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\nno dual-mode ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nno dual-mode {$cmd['arg2']}\nexit\n";
 			break;
 		case 'set access':
-			$ret .= "vlan ${cmd['arg2']}\nuntagged ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg2']}\nuntagged {$cmd['arg1']}\nexit\n";
 			break;
 		case 'unset access':
-			$ret .= "vlan ${cmd['arg2']}\nno untagged ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg2']}\nno untagged {$cmd['arg1']}\nexit\n";
 			break;
 		case 'set mode': // NOP
 			break;
@@ -1376,32 +1376,32 @@ function vrp53TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "vlan ${cmd['arg1']}\nquit\n";
+			$ret .= "vlan {$cmd['arg1']}\nquit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "undo vlan ${cmd['arg1']}\n";
+			$ret .= "undo vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 		case 'rem allowed':
 			$clause = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			foreach (listToRanges ($cmd['vlans']) as $range)
-				$ret .=  "${clause}port trunk allow-pass vlan " .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+				$ret .=  "{$clause}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']} to {$range['to']}") .
 					"\n";
 			$ret .= "quit\n";
 			break;
 		case 'set native':
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nport default vlan {$cmd['arg2']}\nquit\n";
 			break;
 		case 'unset native':
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nundo port default vlan\nquit\n";
 			break;
 		case 'set mode':
 			$modemap = array ('access' => 'access', 'trunk' => 'hybrid');
-			$ret .= "interface ${cmd['arg1']}\nport link-type " . $modemap[$cmd['arg2']] . "\n";
+			$ret .= "interface {$cmd['arg1']}\nport link-type " . $modemap[$cmd['arg2']] . "\n";
 			if ($cmd['arg2'] == 'hybrid')
 				$ret .= "undo port default vlan\nundo port trunk allow-pass vlan all\n";
 			$ret .= "quit\n";
@@ -1451,33 +1451,33 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		{
 		case 'create VLAN':
 			if ($cmd['arg1'] != 1)
-				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+				$ret .= "vlan {$cmd['arg1']}\nquit\n";
 			break;
 		case 'destroy VLAN':
 			if ($cmd['arg1'] != 1)
-				$ret .= "undo vlan ${cmd['arg1']}\n";
+				$ret .= "undo vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 		case 'rem allowed':
 			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			foreach (listToRanges ($cmd['vlans']) as $range)
-				$ret .=  "${undo}port trunk allow-pass vlan " .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+				$ret .=  "{$undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']} to {$range['to']}") .
 					"\n";
 			$ret .= "quit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nport trunk pvid vlan {$cmd['arg2']}\nquit\n";
 			break;
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nport default vlan {$cmd['arg2']}\nquit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
 			break;
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nundo port default vlan\nquit\n";
 			break;
 		case 'set mode':
 			// VRP 5.50's meaning of "trunk" is much like the one of IOS
@@ -1496,9 +1496,9 @@ function vrp55TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 				'access' => '',
 				'trunk' => "undo port trunk allow-pass vlan 1\n",
 			);
-			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
 			$ret .= $before[$cmd['arg2']];
-			$ret .= "port link-type ${cmd['arg2']}\n";
+			$ret .= "port link-type {$cmd['arg2']}\n";
 			$ret .= $after[$cmd['arg2']];
 			$ret .= "quit\n";
 			break;
@@ -1547,33 +1547,33 @@ function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		{
 		case 'create VLAN':
 			if ($cmd['arg1'] != 1)
-				$ret .= "vlan ${cmd['arg1']}\nquit\n";
+				$ret .= "vlan {$cmd['arg1']}\nquit\n";
 			break;
 		case 'destroy VLAN':
 			if ($cmd['arg1'] != 1)
-				$ret .= "undo vlan ${cmd['arg1']}\n";
+				$ret .= "undo vlan {$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 		case 'rem allowed':
 			$undo = $cmd['opcode'] == 'add allowed' ? '' : 'undo ';
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			foreach (listToRanges ($cmd['vlans']) as $range)
-				$ret .=  "${undo}port trunk allow-pass vlan " .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']} to ${range['to']}") .
+				$ret .=  "{$undo}port trunk allow-pass vlan " .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']} to {$range['to']}") .
 					"\n";
 			$ret .= "quit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\nport trunk pvid vlan ${cmd['arg2']}\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nport trunk pvid vlan {$cmd['arg2']}\nquit\n";
 			break;
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nport default vlan ${cmd['arg2']}\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nport default vlan {$cmd['arg2']}\nquit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nundo port trunk pvid vlan\nquit\n";
 			break;
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nundo port default vlan\nquit\n";
+			$ret .= "interface {$cmd['arg1']}\nundo port default vlan\nquit\n";
 			break;
 		case 'set mode':
 			// VRP 5.50's meaning of "trunk" is much like the one of IOS
@@ -1592,9 +1592,9 @@ function vrp85TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 				'access' => '',
 				'trunk' => "undo port trunk allow-pass vlan 1\n",
 			);
-			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
 			$ret .= $before[$cmd['arg2']];
-			$ret .= "port link-type ${cmd['arg2']}\n";
+			$ret .= "port link-type {$cmd['arg2']}\n";
 			$ret .= $after[$cmd['arg2']];
 			$ret .= "quit\n";
 			break;
@@ -1643,43 +1643,43 @@ function xos12TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "create vlan VLAN${cmd['arg1']}\n";
-			$ret .= "configure vlan VLAN${cmd['arg1']} tag ${cmd['arg1']}\n";
+			$ret .= "create vlan VLAN{$cmd['arg1']}\n";
+			$ret .= "configure vlan VLAN{$cmd['arg1']} tag {$cmd['arg1']}\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "delete vlan VLAN${cmd['arg1']}\n";
+			$ret .= "delete vlan VLAN{$cmd['arg1']}\n";
 			break;
 		case 'add allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
 			{
-				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN${vlan_id}";
-				$ret .= "configure vlan ${vlan_name} add ports ${cmd['port']} tagged\n";
+				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN{$vlan_id}";
+				$ret .= "configure vlan {$vlan_name} add ports {$cmd['port']} tagged\n";
 			}
 			break;
 		case 'rem allowed':
 			foreach ($cmd['vlans'] as $vlan_id)
 			{
-				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN${vlan_id}";
-				$ret .= "configure vlan ${vlan_name} delete ports ${cmd['port']}\n";
+				$vlan_name = $vlan_id == 1 ? 'Default' : "VLAN{$vlan_id}";
+				$ret .= "configure vlan {$vlan_name} delete ports {$cmd['port']}\n";
 			}
 			break;
 		case 'set native':
-			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
-			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
-			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} untagged\n";
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN{$cmd['arg2']}";
+			$ret .= "configure vlan {$vlan_name} delete ports {$cmd['arg1']}\n";
+			$ret .= "configure vlan {$vlan_name} add ports {$cmd['arg1']} untagged\n";
 			break;
 		case 'unset native':
-			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
-			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
-			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} tagged\n";
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN{$cmd['arg2']}";
+			$ret .= "configure vlan {$vlan_name} delete ports {$cmd['arg1']}\n";
+			$ret .= "configure vlan {$vlan_name} add ports {$cmd['arg1']} tagged\n";
 			break;
 		case 'set access':
-			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
-			$ret .= "configure vlan ${vlan_name} add ports ${cmd['arg1']} untagged\n";
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN{$cmd['arg2']}";
+			$ret .= "configure vlan {$vlan_name} add ports {$cmd['arg1']} untagged\n";
 			break;
 		case 'unset access':
-			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN${cmd['arg2']}";
-			$ret .= "configure vlan ${vlan_name} delete ports ${cmd['arg1']}\n";
+			$vlan_name = $cmd['arg2'] == 1 ? 'Default' : "VLAN{$cmd['arg2']}";
+			$ret .= "configure vlan {$vlan_name} delete ports {$cmd['arg1']}\n";
 			break;
 		case 'set mode':
 		case 'begin configuration':
@@ -1724,7 +1724,7 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 		switch ($cmd['opcode'])
 		{
 		case 'create VLAN':
-			$ret .= "set vlans VLAN${cmd['arg1']} vlan-id ${cmd['arg1']}\n";
+			$ret .= "set vlans VLAN{$cmd['arg1']} vlan-id {$cmd['arg1']}\n";
 			break;
 		case 'destroy VLAN':
 			if (isset ($vlan_names[$cmd['arg1']]))
@@ -1734,7 +1734,7 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 		case 'rem allowed':
 			$del = ($cmd['opcode'] == 'rem allowed');
 			$pre = ($del ? 'delete' : 'set') .
-				" interfaces ${cmd['port']} unit 0 family ethernet-switching vlan members";
+				" interfaces {$cmd['port']} unit 0 family ethernet-switching vlan members";
 			if (count ($cmd['vlans']) > VLAN_MAX_ID - VLAN_MIN_ID)
 				$ret .= "$pre " . ($del ? '' : 'all') . "\n";
 			else
@@ -1743,33 +1743,33 @@ function jun10TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 					$vlan = array_shift ($cmd['vlans']);
 					$ret .= "$pre $vlan\n";
 					if ($del && isset ($vlan_names[$vlan]))
-						$ret .= "$pre ${vlan_names[$vlan]}\n";
+						$ret .= "$pre {$vlan_names[$vlan]}\n";
 				}
 			break;
 		case 'set native':
-			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id ${cmd['arg2']}\n";
-			$pre = "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members";
+			$ret .= "set interfaces {$cmd['arg1']} unit 0 family ethernet-switching native-vlan-id {$cmd['arg2']}\n";
+			$pre = "delete interfaces {$cmd['arg1']} unit 0 family ethernet-switching vlan members";
 			$vlan = $cmd['arg2'];
 			$ret .= "$pre $vlan\n";
 			if (isset ($vlan_names[$vlan]))
-				$ret .= "$pre ${vlan_names[$vlan]}\n";
+				$ret .= "$pre {$vlan_names[$vlan]}\n";
 			break;
 		case 'unset native':
-			$ret .= "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching native-vlan-id\n";
-			$pre = "interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members";
+			$ret .= "delete interfaces {$cmd['arg1']} unit 0 family ethernet-switching native-vlan-id\n";
+			$pre = "interfaces {$cmd['arg1']} unit 0 family ethernet-switching vlan members";
 			$vlan = $cmd['arg2'];
 			if (isset ($vlan_names[$vlan]))
-				$ret .= "delete $pre ${vlan_names[$vlan]}\n";
+				$ret .= "delete $pre {$vlan_names[$vlan]}\n";
 			$ret .= "set $pre $vlan\n";
 			break;
 		case 'set access':
-			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members ${cmd['arg2']}\n";
+			$ret .= "set interfaces {$cmd['arg1']} unit 0 family ethernet-switching vlan members {$cmd['arg2']}\n";
 			break;
 		case 'unset access':
-			$ret .= "delete interfaces ${cmd['arg1']} unit 0 family ethernet-switching vlan members\n";
+			$ret .= "delete interfaces {$cmd['arg1']} unit 0 family ethernet-switching vlan members\n";
 			break;
 		case 'set mode':
-			$ret .= "set interfaces ${cmd['arg1']} unit 0 family ethernet-switching port-mode ${cmd['arg2']}\n";
+			$ret .= "set interfaces {$cmd['arg1']} unit 0 family ethernet-switching port-mode {$cmd['arg2']}\n";
 			break;
 		case 'begin configuration':
 			$ret .= "configure exclusive\n";
@@ -1843,17 +1843,17 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			$ret .= "show running-config interface\n";
 			break;
 		case 'create VLAN':
-			$ret .= "int vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "int vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "no int vlan ${cmd['arg1']}\n";
+			$ret .= "no int vlan {$cmd['arg1']}\n";
 			break;
 		case 'rem allowed':
 			while (count ($cmd['vlans']))
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
-				$ret .= "no tagged ${cmd['port']}\n";
+				$ret .= "no tagged {$cmd['port']}\n";
 				$ret .= "exit\n";
 			}
 			break;
@@ -1862,30 +1862,30 @@ function ftos8TranslatePushQueue ($dummy_object_id, $queue, $vlan_names)
 			{
 				$vlan = array_shift ($cmd['vlans']);
 				$ret .= "int vlan $vlan\n";
-				$ret .= "tagged ${cmd['port']}\n";
+				$ret .= "tagged {$cmd['port']}\n";
 				$ret .= "exit\n";
 			}
 			break;
 		case 'unset native':
-			$ret .= "int vlan ${cmd['arg2']}\n";
-			$ret .= "no untagged ${cmd['arg1']}\n";
-			$ret .= "tagged ${cmd['arg1']}\n";
+			$ret .= "int vlan {$cmd['arg2']}\n";
+			$ret .= "no untagged {$cmd['arg1']}\n";
+			$ret .= "tagged {$cmd['arg1']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'unset access':
-			$ret .= "int vlan ${cmd['arg2']}\n";
-			$ret .= "no untagged ${cmd['arg1']}\n";
+			$ret .= "int vlan {$cmd['arg2']}\n";
+			$ret .= "no untagged {$cmd['arg1']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'set native':
-			$ret .= "int vlan ${cmd['arg2']}\n";
-			$ret .= "no tagged ${cmd['arg1']}\n";
-			$ret .= "untagged ${cmd['arg1']}\n";
+			$ret .= "int vlan {$cmd['arg2']}\n";
+			$ret .= "no tagged {$cmd['arg1']}\n";
+			$ret .= "untagged {$cmd['arg1']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'set access':
-			$ret .= "int vlan ${cmd['arg2']}\n";
-			$ret .= "untagged ${cmd['arg1']}\n";
+			$ret .= "int vlan {$cmd['arg2']}\n";
+			$ret .= "untagged {$cmd['arg1']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'set mode':
@@ -1945,20 +1945,20 @@ function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "copy running-config startup-config\n\n";
 			break;
 		case 'create VLAN':
-			$ret .= "vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "no vlan ${cmd['arg1']}\n";
+			$ret .= "no vlan {$cmd['arg1']}\n";
 			break;
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport access vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nno switchport access vlan\nexit\n";
 			break;
 		case 'set mode':
-			$ret .= "interface ${cmd['arg1']}\n";
-			$ret .= "switchport mode ${cmd['arg2']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
+			$ret .= "switchport mode {$cmd['arg2']}\n";
 			if ($cmd['arg2'] == 'trunk')
 				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan none\n";
 			$ret .= "exit\n";
@@ -1966,18 +1966,18 @@ function eos4TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 		case 'add allowed':
 		case 'rem allowed':
 			$clause = $cmd['opcode'] == 'add allowed' ? 'add' : 'remove';
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			foreach (listToRanges ($cmd['vlans']) as $range)
-				$ret .= "switchport trunk allowed vlan ${clause} " .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+				$ret .= "switchport trunk allowed vlan {$clause} " .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']}-{$range['to']}") .
 					"\n";
 			$ret .= "exit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport trunk native vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\nswitchport trunk native vlan tag\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport trunk native vlan tag\nexit\n";
 			break;
 		case 'getlldpstatus':
 			$ret .= "show lldp neighbors detail\n";
@@ -2020,27 +2020,27 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			$ret .= "copy running-config startup-config\nY\n";
 			break;
 		case 'create VLAN':
-			$ret .= "vlan database\nvlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan database\nvlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'destroy VLAN':
-			$ret .= "vlan database\nno vlan ${cmd['arg1']}\nexit\n";
+			$ret .= "vlan database\nno vlan {$cmd['arg1']}\nexit\n";
 			break;
 		case 'set access':
-			$ret .= "interface ${cmd['arg1']}\nswitchport access vlan ${cmd['arg2']}\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nswitchport access vlan {$cmd['arg2']}\nexit\n";
 			break;
 		case 'unset access':
-			$ret .= "interface ${cmd['arg1']}\nno switchport access vlan\nexit\n";
+			$ret .= "interface {$cmd['arg1']}\nno switchport access vlan\nexit\n";
 			break;
 		case 'set mode':
-			$ret .= "interface ${cmd['arg1']}\n";
-			$ret .= "switchport mode ${cmd['arg2']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
+			$ret .= "switchport mode {$cmd['arg2']}\n";
 			if ($cmd['arg2'] == 'trunk')
 				$ret .= "no switchport trunk native vlan\nswitchport trunk allowed vlan remove all\n";
 			$ret .= "exit\n";
 			break;
 		case 'add allowed':
 		case 'rem allowed':
-			$ret .= "interface ${cmd['port']}\n";
+			$ret .= "interface {$cmd['port']}\n";
 			# default VLAN special case
 			$ordinary = array();
 			foreach ($cmd['vlans'] as $vid)
@@ -2053,21 +2053,21 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 			foreach (listToRanges ($ordinary) as $range)
 				$ret .= 'switchport trunk allowed vlan ' .
 					($cmd['opcode'] == 'add allowed' ? 'add ' : 'remove ') .
-					($range['from'] == $range['to'] ? $range['to'] : "${range['from']}-${range['to']}") .
+					($range['from'] == $range['to'] ? $range['to'] : "{$range['from']}-{$range['to']}") .
 					"\n";
 			$ret .= "exit\n";
 			break;
 		case 'set native':
-			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
 			# default VLAN special case
 			if ($cmd['arg2'] == VLAN_DFL_ID)
 				$ret .= "no switchport default-vlan tagged\n";
 			else
-				$ret .= "switchport trunk native vlan ${cmd['arg2']}\n";
+				$ret .= "switchport trunk native vlan {$cmd['arg2']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'unset native':
-			$ret .= "interface ${cmd['arg1']}\n";
+			$ret .= "interface {$cmd['arg1']}\n";
 			# default VLAN special case
 			if ($cmd['arg2'] == VLAN_DFL_ID)
 				$ret .= "switchport default-vlan tagged\n";
@@ -2076,7 +2076,7 @@ function ros11TranslatePushQueue ($dummy_object_id, $queue, $dummy_vlan_names)
 				# output of "show interfaces switchport"), the config text doesn't display the
 				# native VLAN in the list of allowed VLANs. Respectively, setting the current
 				# native VLAN as allowed leaves it allowed, but not native any more.
-				$ret .= "switchport trunk allowed vlan add ${cmd['arg2']}\n";
+				$ret .= "switchport trunk allowed vlan add {$cmd['arg2']}\n";
 			$ret .= "exit\n";
 			break;
 		case 'getlldpstatus':
@@ -2176,7 +2176,7 @@ function xos12Read8021QConfig ($input)
 			if (strtolower ($matches[1]) == 'default')
 				throw new RTGatewayError ('default VLAN tag must be 1');
 			if ($matches[1] != 'VLAN' . $matches[2])
-				throw new RTGatewayError ("VLAN name ${matches[1]} does not match its tag ${matches[2]}");
+				throw new RTGatewayError ("VLAN name {$matches[1]} does not match its tag {$matches[2]}");
 			$ret['vlanlist'][] = $matches[2];
 			break;
 		case (preg_match ('/^configure vlan ([[:alnum:]]+) add ports (.+) (tagged|untagged) */', $line, $matches)):
@@ -2300,7 +2300,7 @@ function jun10Read8021QConfig ($input)
 		elseif (preg_match ('/^(\s+)family ethernet-switching\b/', $line, $m))
 		{
 			if ($current['is_range'])
-				throw new RTGatewayError ("interface-range '${current['name']}' contains switchport commands, which is not supported");
+				throw new RTGatewayError ("interface-range '{$current['name']}' contains switchport commands, which is not supported");
 			$current['is_ethernet'] = TRUE;
 			$current['indent'] = $m[1];
 		}
@@ -2587,7 +2587,7 @@ function ros11Read8021QConfig ($input)
 	foreach ($ret['portdata'] as $portname => $port)
 	{
 		if (! array_key_exists ('mode', $port))
-			throw new RTGatewayError ("unsupported configuration of port ${portname}");
+			throw new RTGatewayError ("unsupported configuration of port {$portname}");
 		if
 		(
 			! array_key_exists ('switchport forbidden default-vlan', $port)
@@ -2687,7 +2687,7 @@ function ros11Read8021QPorts (&$work, $line)
 	{
 	case 1 == preg_match ('/^switchport mode ([a-z]+)$/', $line, $m):
 		if ($m[1] != 'trunk' && $m[1] != 'access')
-			throw new RTGatewayError ("unsupported switchport mode '${m[1]}'");
+			throw new RTGatewayError ("unsupported switchport mode '{$m[1]}'");
 		$work['current']['config']['mode'] = $m[1];
 		$work['current']['config']['allowed'] = array();
 		$work['current']['config']['native'] = 0;
@@ -3430,11 +3430,11 @@ function ucsReadInventory ($text)
 		{
 		case preg_match ('/^COLUMNS (.+)$/', $line, $m):
 			if (! count ($hcols = explode (',', $m[1])))
-				throw new RTGatewayError ("UCS format error: '${line}'");
+				throw new RTGatewayError ("UCS format error: '{$line}'");
 			break;
 		case preg_match ('/^ROW (.+)$/', $line, $m):
 			if (count ($cols = explode (',', $m[1])) != count ($hcols))
-				throw new RTGatewayError ("UCS format error: '${line}'");
+				throw new RTGatewayError ("UCS format error: '{$line}'");
 			# $hcols and $cols have same array keys
 			$tmp = array();
 			foreach ($cols as $key => $value)
@@ -3442,7 +3442,7 @@ function ucsReadInventory ($text)
 			$ret[] = $tmp;
 			break;
 		default:
-			throw new RTGatewayError ("Unrecognized line: '${line}'");
+			throw new RTGatewayError ("Unrecognized line: '{$line}'");
 		}
 	return $ret;
 }

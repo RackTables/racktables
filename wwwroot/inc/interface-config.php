@@ -56,8 +56,8 @@ function renderUserListEditor ()
 		else
 			echo getOpLink (array ('op' => 'deleteUser', 'id' => $account['user_id']), '', 'destroy', 'delete user account');
 		echo '</td>';
-		echo "<td><input type=text name=username value='${account['user_name']}' size=16></td>";
-		echo "<td><input type=text name=realname value='${account['user_realname']}' size=24></td>";
+		echo "<td><input type=text name=username value='{$account['user_name']}' size=16></td>";
+		echo "<td><input type=text name=realname value='{$account['user_realname']}' size=24></td>";
 		echo "<td><input type=password name=password size=40></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></form></tr>';
@@ -106,8 +106,8 @@ function renderRackCodeViewer ()
 	{
 		// Line numbers start from 0 in CodeMirror API and from 1 elsewhere.
 		$lineno = genericAssertion ('line', 'natural') - 1;
-		$scrollcode = "rackCodeMirror.addLineClass (${lineno}, 'wrap', 'border_highlight');\n" .
-			"rackCodeMirror.scrollIntoView ({line: ${lineno}, ch: 0}, 50);\n";
+		$scrollcode = "rackCodeMirror.addLineClass ({$lineno}, 'wrap', 'border_highlight');\n" .
+			"rackCodeMirror.scrollIntoView ({line: {$lineno}, ch: 0}, 50);\n";
 	}
 	// Heredoc, not nowdoc!
 	addJSText (<<<"ENDJAVASCRIPT"
@@ -117,7 +117,7 @@ $(document).ready(function() {
 		theme:'rackcode',
 		readOnly:'nocursor',
 		lineNumbers:true });
-	${scrollcode}
+	{$scrollcode}
 });
 ENDJAVASCRIPT
 	); // addJSText ()
@@ -202,7 +202,7 @@ function renderObjectParentCompatViewer()
 			$order = $nextorder[$order];
 			$last_left_parent_id = $pair['parent_objtype_id'];
 		}
-		echo "<tr class=row_${order}><td>${pair['parent_name']}</td><td>${pair['child_name']}</td></tr>\n";
+		echo "<tr class=row_{$order}><td>{$pair['parent_name']}</td><td>{$pair['child_name']}</td></tr>\n";
 	}
 	echo '</table>';
 }
@@ -238,12 +238,12 @@ function renderObjectParentCompatEditor()
 			$order = $nextorder[$order];
 			$last_left_parent_id = $pair['parent_objtype_id'];
 		}
-		echo "<tr class=row_${order}><td>";
+		echo "<tr class=row_{$order}><td>";
 		if ($pair['count'] > 0)
 			printImageHREF ('nodelete', $pair['count'] . ' relationship(s) stored');
 		else
 			echo getOpLink (array ('op' => 'del', 'parent_objtype_id' => $pair['parent_objtype_id'], 'child_objtype_id' => $pair['child_objtype_id']), '', 'delete', 'remove pair');
-		echo "</td><td class=tdleft>${pair['parent_name']}</td><td class=tdleft>${pair['child_name']}</td></tr>\n";
+		echo "</td><td class=tdleft>{$pair['parent_name']}</td><td class=tdleft>{$pair['child_name']}</td></tr>\n";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewitemTR();
@@ -264,7 +264,7 @@ function renderOIFCompatViewer()
 			$order = $nextorder[$order];
 			$last_left_oif_id = $pair['type1'];
 		}
-		echo "<tr class=row_${order}><td>${pair['type1name']}</td><td>${pair['type2name']}</td></tr>";
+		echo "<tr class=row_{$order}><td>{$pair['type1name']}</td><td>{$pair['type2name']}</td></tr>";
 	}
 	echo '</table>';
 }
@@ -313,9 +313,9 @@ function renderOIFCompatEditor()
 			$order = $nextorder[$order];
 			$last_left_oif_id = $pair['type1'];
 		}
-		echo "<tr class=row_${order}><td>";
+		echo "<tr class=row_{$order}><td>";
 		echo getOpLink (array ('op' => 'del', 'type1' => $pair['type1'], 'type2' => $pair['type2']), '', 'delete', 'remove pair');
-		echo "</td><td class=tdleft>${pair['type1name']}</td><td class=tdleft>${pair['type2name']}</td></tr>";
+		echo "</td><td class=tdleft>{$pair['type1name']}</td><td class=tdleft>{$pair['type2name']}</td></tr>";
 	}
 	if (getConfigVar ('ADDNEW_AT_TOP') != 'yes')
 		printNewitemTR();
@@ -356,10 +356,10 @@ function renderIIFOIFCompatEditor()
 	echo '<table border=0 align=center cellspacing=0 cellpadding=5>';
 	foreach ($wdm_packs as $codename => $packinfo)
 	{
-		echo "<tr><th>&nbsp;</th><th colspan=2>${packinfo['title']}</th></tr>";
+		echo "<tr><th>&nbsp;</th><th colspan=2>{$packinfo['title']}</th></tr>";
 		foreach ($packinfo['iif_ids'] as $iif_id)
 		{
-			echo "<tr class=row_${order}><th class=tdleft>" . $iif[$iif_id] . '</th><td>';
+			echo "<tr class=row_{$order}><th class=tdleft>" . $iif[$iif_id] . '</th><td>';
 			echo getOpLink (array ('op' => 'addPack', 'standard' => $codename, 'iif_id' => $iif_id), '', 'add');
 			echo '</td><td>';
 			echo getOpLink (array ('op' => 'delPack', 'standard' => $codename, 'iif_id' => $iif_id), '', 'delete');
@@ -442,7 +442,7 @@ function renderPortOIFEditor()
 		if ($oif_id < 2000)
 		{
 			echo '<td class=tdleft>' . getImageHREF ('computer') . '</td>';
-			echo "<td class=tdleft>${oif_id}</td>";
+			echo "<td class=tdleft>{$oif_id}</td>";
 			echo '<td class=tdright>' . ($refcnt[$oif_id] ? $refcnt[$oif_id] : '&nbsp;') . '</td>';
 			echo '<td>&nbsp;</td>';
 			echo '<td class=tdleft>' . stringForTD ($oif_name, 48) . '</td>';
@@ -452,10 +452,10 @@ function renderPortOIFEditor()
 		{
 			printOpFormIntro ('upd', array ('id' => $oif_id));
 			echo '<td class=tdleft>' . getImageHREF ('favorite') . '</td>';
-			echo "<td class=tdleft>${oif_id}</td>";
+			echo "<td class=tdleft>{$oif_id}</td>";
 			if ($refcnt[$oif_id])
 			{
-				echo "<td class=tdright>${refcnt[$oif_id]}</td>";
+				echo "<td class=tdright>{$refcnt[$oif_id]}</td>";
 				echo '<td class=tdleft>' . getImageHREF ('nodestroy', 'cannot remove') . '</td>';
 			}
 			else
@@ -543,8 +543,8 @@ function renderEditAttributesForm ()
 			printImageHREF ('nodestroy', count ($attr['application']) . ' reference(s) in attribute map');
 		else
 			echo getOpLink (array('op'=>'del', 'attr_id'=>$attr['id']), '', 'destroy', 'Remove attribute');
-		echo "</td><td><input type=text name=attr_name value='${attr['name']}'></td>";
-		echo "<td class=tdleft>${attr['type']}</td><td>";
+		echo "</td><td><input type=text name=attr_name value='{$attr['name']}'></td>";
+		echo "<td class=tdleft>{$attr['type']}</td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo '</td></tr>';
 		echo '</form>';
@@ -577,7 +577,7 @@ function renderEditAttrMapForm ()
 	{
 		printOpFormIntro ('add');
 		echo '<tr>';
-		echo "<td colspan=2 class=tdleft>${aselect}</td>";
+		echo "<td colspan=2 class=tdleft>{$aselect}</td>";
 		echo '<td class=tdleft>';
 		printImageHREF ('add', '', TRUE);
 		echo ' ';
@@ -603,7 +603,7 @@ function renderEditAttrMapForm ()
 	{
 		if (!count ($attr['application']))
 			continue;
-		echo "<tr class=row_${order}><td class=tdleft>${attr['name']}</td>";
+		echo "<tr class=row_{$order}><td class=tdleft>{$attr['name']}</td>";
 		echo "<td class=tdleft>" . $attrtypes[$attr['type']] . "</td><td colspan=2 class=tdleft>";
 		foreach ($attr['application'] as $app)
 		{
@@ -615,7 +615,7 @@ function renderEditAttrMapForm ()
 				echo getOpLink (array('op'=>'del', 'attr_id'=>$attr['id'], 'objtype_id'=>$app['objtype_id']), '', 'delete', 'Remove mapping');
 			echo ' ';
 			if ($attr['type'] == 'dict')
-				echo decodeObjectType ($app['objtype_id']) . " (values from '${app['chapter_name']}')<br>";
+				echo decodeObjectType ($app['objtype_id']) . " (values from '{$app['chapter_name']}')<br>";
 			else
 				echo decodeObjectType ($app['objtype_id']) . '<br>';
 		}
@@ -632,7 +632,7 @@ function renderDictionary ()
 {
 	echo '<ul>';
 	foreach (getChapterList() as $chapter_no => $chapter)
-		echo '<li>' . mkA ($chapter['name'], 'chapter', $chapter_no) . " (${chapter['wordc']} records)</li>";
+		echo '<li>' . mkA ($chapter['name'], 'chapter', $chapter_no) . " ({$chapter['wordc']} records)</li>";
 	echo '</ul>';
 }
 
@@ -676,8 +676,8 @@ function renderChaptersEditor ()
 		else
 			echo getOpLink (array('op'=>'del', 'chapter_no'=>$chapter_id), '', 'destroy', 'Remove chapter');
 		echo '</td>';
-		echo "<td><input type=text name=chapter_name value='${chapter['name']}'" . ($sticky ? ' disabled' : '') . "></td>";
-		echo "<td class=tdleft>${wordcount}</td><td>";
+		echo "<td><input type=text name=chapter_name value='{$chapter['name']}'" . ($sticky ? ' disabled' : '') . "></td>";
+		echo "<td class=tdleft>{$wordcount}</td><td>";
 		if ($sticky)
 			echo '&nbsp;';
 		else
@@ -694,7 +694,7 @@ function renderChapter ($tgt_chapter_no)
 {
 	$words = readChapter ($tgt_chapter_no, 'a');
 	$wc = count ($words);
-	echo "<center><h2>${wc} record(s)</h2></center>";
+	echo "<center><h2>{$wc} record(s)</h2></center>";
 	if ($wc == 0)
 		return;
 	$refcnt = getChapterRefc ($tgt_chapter_no, array_keys ($words));
@@ -713,7 +713,7 @@ function renderChapter ($tgt_chapter_no)
 			$refc = '';
 		else
 		{
-			// For the ObjectType chapter the extra filter is as simple as "{\$typeid_${key}}" but
+			// For the ObjectType chapter the extra filter is as simple as "{\$typeid_{$key}}" but
 			// the reference counter also includes the relations with AttributeMap.objtype_id hence
 			// it often is not the same as the amount of objects that match the expression. With
 			// this in mind don't display the counter as a link for this specific chapter.
@@ -723,7 +723,7 @@ function renderChapter ($tgt_chapter_no)
 			{
 				$tmp = array();
 				foreach ($attrs as $attr_id)
-					$tmp[] = "{\$attr_${attr_id}_${key}}";
+					$tmp[] = "{\$attr_{$attr_id}_{$key}}";
 				$href = makeHref
 				(
 					array
@@ -771,25 +771,25 @@ function renderChapterEditor ($tgt_chapter_no)
 		printNewItemTR();
 	foreach ($words as $key => $value)
 	{
-		echo "<tr class=row_${order}><td>";
+		echo "<tr class=row_{$order}><td>";
 		$order = $nextorder[$order];
 		// Show plain row for stock records, render a form for user's ones.
 		if ($key < 50000)
 		{
 			printImageHREF ('computer');
-			echo "</td><td class=tdright>${key}</td><td>&nbsp;</td><td>${value}</td><td>&nbsp;</td></tr>";
+			echo "</td><td class=tdright>{$key}</td><td>&nbsp;</td><td>{$value}</td><td>&nbsp;</td></tr>";
 			continue;
 		}
 		printOpFormIntro ('upd', array ('dict_key' => $key));
 		printImageHREF ('favorite');
-		echo "</td><td class=tdright>${key}</td><td>";
+		echo "</td><td class=tdright>{$key}</td><td>";
 		// Prevent deleting words currently used somewhere.
 		if ($refcnt[$key])
 			printImageHREF ('nodelete', 'referenced ' . $refcnt[$key] . ' time(s)');
 		else
 			echo getOpLink (array('op'=>'del', 'dict_key'=>$key), '', 'delete', 'Delete word');
 		echo '</td>';
-		echo "<td class=tdleft><input type=text name=dict_value size=64 value='${value}'></td><td>";
+		echo "<td class=tdleft><input type=text name=dict_value size=64 value='{$value}'></td><td>";
 		printImageHREF ('save', 'Save changes', TRUE);
 		echo "</td></tr></form>";
 	}
@@ -819,7 +819,7 @@ function renderUIConfig ()
 		echo "<td nowrap valign=top class=tdright>";
 		renderConfigVarName ($v);
 		echo '</td>';
-		echo "<td valign=top class=tdleft>${v['varvalue']}</td></tr>";
+		echo "<td valign=top class=tdleft>{$v['varvalue']}</td></tr>";
 	}
 	echo "</table>\n";
 	finishPortlet();
@@ -843,11 +843,11 @@ function renderConfigEditor ()
 			continue;
 		if ($per_user && $v['is_userdefined'] != 'yes')
 			continue;
-		echo "<input type=hidden name=${i}_varname value='${v['varname']}'>";
+		echo "<input type=hidden name={$i}_varname value='{$v['varname']}'>";
 		echo '<tr><td class="tdright">';
 		renderConfigVarName ($v);
 		echo '</td>';
-		echo "<td class=\"tdleft\"><input type=text name=${i}_varvalue value='" . htmlspecialchars ($v['varvalue'], ENT_QUOTES) . "' size=24></td>";
+		echo "<td class=\"tdleft\"><input type=text name={$i}_varvalue value='" . htmlspecialchars ($v['varvalue'], ENT_QUOTES) . "' size=24></td>";
 		echo '<td class="tdleft">';
 		if ($per_user && $v['is_altered'] == 'yes')
 			echo getOpLink (array('op'=>'reset', 'varname'=>$v['varname']), 'reset');
@@ -855,7 +855,7 @@ function renderConfigEditor ()
 		echo "</tr>\n";
 		$i++;
 	}
-	echo "<input type=hidden name=num_vars value=${i}>\n";
+	echo "<input type=hidden name=num_vars value={$i}>\n";
 	echo "<tr><td colspan=3>";
 	printImageHREF ('SAVE', 'Save changes', TRUE);
 	echo "</td></tr>";
@@ -887,9 +887,9 @@ function serializeTagStats ($taginfo)
 		'vst' => ' VLAN switch template(s)',
 		'ipvs' => ' VS group(s)',
 	);
-	$stats = array ("tag ID = ${taginfo['id']}");
+	$stats = array ("tag ID = {$taginfo['id']}");
 	if ($taginfo['kidc'])
-		$stats[] = "${taginfo['kidc']} sub-tag(s)";
+		$stats[] = "{$taginfo['kidc']} sub-tag(s)";
 	if ($taginfo['refcnt']['total'])
 		foreach ($taginfo['refcnt'] as $article => $count)
 			if (array_key_exists ($article, $statsdecoder))
@@ -907,11 +907,11 @@ function renderTagRowForViewer ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
-	echo "<tr class='${trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	echo "<tr class='{$trclass}'><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
-	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . '</td>';
+	echo '</span>' . ($refc ? " <i>({$refc})</i>" : '') . '</td>';
 	echo '<td>' . stringForTD ($taginfo['description'], 64) . '</td>';
 	echo "</tr>\n";
 	foreach ($taginfo['kids'] as $kid)
@@ -933,7 +933,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Idem
 	$trclass = $taginfo['is_assignable'] == 'yes' ? '' : ($taginfo['kidc'] ? ' class=trnull' : ' class=trwarning');
-	echo "<tr${trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
+	echo "<tr{$trclass}><td align=left style='padding-left: " . ($level * 16) . "px;'>";
 	if ($taginfo['kidc'])
 		printImageHREF ('node-expanded-static');
 	if ($taginfo['refcnt']['total'] > 0 || $taginfo['kidc'])
@@ -943,7 +943,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	echo '</td><td>';
 	printOpFormIntro ('updateTag', array ('tag_id' => $taginfo['id']));
 	echo "<input type=text size=48 name=tag_name ";
-	echo "value='${taginfo['tag']}'></td><td class=tdleft>";
+	echo "value='{$taginfo['tag']}'></td><td class=tdleft>";
 	if ($taginfo['refcnt']['total'])
 		printSelect (array ('yes' => 'yes'), array ('name' => 'is_assignable')); # locked
 	else
@@ -959,7 +959,7 @@ function renderTagRowForEditor ($taginfo, $parent_name = NULL, $level = 0)
 	if ($taginfo['is_assignable'] == 'yes')
 	{
 		$class = getTagClass ($taginfo);
-		echo "</td><td class='${class}'>" . getColorSelect ('colorid_'.$taginfo['id'], $taginfo['color']) . '</td>';
+		echo "</td><td class='{$class}'>" . getColorSelect ('colorid_'.$taginfo['id'], $taginfo['color']) . '</td>';
 	}
 	else
 		echo '<td><input type="hidden" name="color" id="colorid_' . $taginfo['id'] . '" value=""></input></td>';
@@ -975,12 +975,12 @@ function addParentNodeOptionsJS ($prefix, $nodetype)
 	(
 // Heredoc, not nowdoc!
 <<<"END"
-function ${prefix}_showselectbox(e) {
-	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: '${nodetype}', node_id: this.id});
-	$(this).unbind('mousedown', ${prefix}_showselectbox);
+function {$prefix}_showselectbox(e) {
+	$(this).load('index.php', {module: 'ajax', ac: 'get-parent-node-options', node_type: '{$nodetype}', node_id: this.id});
+	$(this).unbind('mousedown', {$prefix}_showselectbox);
 }
 $(document).ready(function () {
-	$('select.nodelist-popup').bind('mousedown', ${prefix}_showselectbox);
+	$('select.nodelist-popup').bind('mousedown', {$prefix}_showselectbox);
 });
 END
 	); // addJSText()
@@ -995,7 +995,7 @@ function getColorSelect($id = 'color', $selected = NULL)
 	else
 		$class = '';
 
-	$ret = "<select tabindex='1' name='color' id='${id}' onchange='this.className=this.options[this.selectedIndex].className;'${class}>";
+	$ret = "<select tabindex='1' name='color' id='{$id}' onchange='this.className=this.options[this.selectedIndex].className;'{$class}>";
 	$ret .= '<option value=""></option>';
 
 	$colors = $tag_palette;
@@ -1006,7 +1006,7 @@ function getColorSelect($id = 'color', $selected = NULL)
 	foreach ($colors as $color)
 	{
 		$class = getTagClass (array ('id' => $color, 'color' => $color));
-		$ret .= "<option class='${class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
+		$ret .= "<option class='{$class}' value='$color'" . ($color == $selected ? " selected" : "" ) . ">#$color</option>";
 	}
 
 	$ret .= '</select>';
@@ -1049,14 +1049,14 @@ function renderTagRowForDescriptions ($taginfo, $level = 0)
 	if (!count ($taginfo['kids']))
 		$level++; // Shift instead of placing a spacer. This won't impact any nested nodes.
 	$refc = $taginfo['refcnt']['total'];
-	echo "<tr class='${trclass}'>";
+	echo "<tr class='{$trclass}'>";
 
 	echo '<td align=left style="padding-left: ' . ($level * 16) . 'px;">';
 	printOpFormIntro ('updTagDescr', array ('id' => $taginfo['id']));
 	if (count ($taginfo['kids']))
 		printImageHREF ('node-expanded-static');
 	echo '<span title="' . serializeTagStats ($taginfo) . '" class="' . getTagClassName ($taginfo['id']) . '">' . $taginfo['tag'];
-	echo '</span>' . ($refc ? " <i>(${refc})</i>" : '') . "</td>";
+	echo '</span>' . ($refc ? " <i>({$refc})</i>" : '') . "</td>";
 
 	echo '<td>';
 	if ($taginfo['description'] === NULL)
@@ -1139,8 +1139,8 @@ function renderMyAccount ()
 	startPortlet ('Current user info');
 	echo '<div style="text-align: left; display: inline-block;">';
 	echo "<table>";
-	echo "<tr><th>Login:</th><td>${remote_username}</td></tr>\n";
-	echo "<tr><th>Name:</th><td>${remote_displayname}</td></tr>\n";
+	echo "<tr><th>Login:</th><td>{$remote_username}</td></tr>\n";
+	echo "<tr><th>Name:</th><td>{$remote_displayname}</td></tr>\n";
 	echo "<tr><th>Explicit tags:</th><td>" . serializeTags (getExplicitTagsOnly ($expl_tags)) . "</td></tr>\n";
 	echo "<tr><th>Implicit tags:</th><td>" . serializeTags ($impl_tags) . "</td></tr>\n";
 	echo "<tr><th>Automatic tags:</th><td>" . serializeTags ($auto_tags) . "</td></tr>\n";

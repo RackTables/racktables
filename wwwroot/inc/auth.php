@@ -220,7 +220,7 @@ function gotClearanceForTagChain ($const_base)
 				}
 				break;
 			default:
-				throw new RackTablesError ("Can't process sentence of unknown type '${sentence['type']}'", RackTablesError::INTERNAL);
+				throw new RackTablesError ("Can't process sentence of unknown type '{$sentence['type']}'", RackTablesError::INTERNAL);
 		}
 	}
 	return FALSE;
@@ -573,7 +573,7 @@ function queryLDAPServer ($username, $password)
 					RackTablesError::MISCONFIGURED
 				);
 		}
-		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "=${username})", array("dn"));
+		$results = @ldap_search ($connect, $LDAP_options['search_dn'], '(' . $LDAP_options['search_attr'] . "={$username})", array("dn"));
 		if ($results === FALSE)
 			return array ('result' => 'CAN');
 		if (@ldap_count_entries ($connect, $results) != 1)
@@ -614,7 +614,7 @@ function queryLDAPServer ($username, $password)
 		(
 			$connect,
 			$LDAP_options['search_dn'],
-			'(' . $LDAP_options['search_attr'] . "=${username})",
+			'(' . $LDAP_options['search_attr'] . "={$username})",
 			array_merge (array ($LDAP_options['group_attr']), explode (' ', $LDAP_options['displayname_attrs']))
 		);
 		if (@ldap_count_entries ($connect, $results) != 1)

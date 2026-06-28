@@ -136,10 +136,10 @@ function getLocationSelectAJAX()
 	{
 		if ($location['id'] == $current_location_id)
 			continue;
-		echo "<option value=${location['id']} ";
+		echo "<option value={$location['id']} ";
 		if ($location['id'] == $selected_id)
 			echo 'selected ';
-		echo "style='font-weight: bold'>${location['name']}</option>";
+		echo "style='font-weight: bold'>{$location['name']}</option>";
 		if ($location['kidc'] > 0)
 			printLocationChildrenSelectOptions ($location, $selected_id, $current_location_id);
 	}

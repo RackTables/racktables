@@ -16,7 +16,7 @@ class GetChildrenListTest extends RTTestCase
 		self::$locations[] = $parent_location_id = commitAddObject (self::myStringStatic ('location 0', __CLASS__), NULL, 1562, NULL);
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			$child_location_id = commitAddObject (self::myStringStatic ("location ${i}", __CLASS__), NULL, 1562, NULL);
+			$child_location_id = commitAddObject (self::myStringStatic ("location {$i}", __CLASS__), NULL, 1562, NULL);
 			self::$locations[] = $child_location_id;
 			commitLinkEntities ('location', $parent_location_id, 'location', $child_location_id);
 			self::$links[] = lastInsertID();
@@ -30,7 +30,7 @@ class GetChildrenListTest extends RTTestCase
 		self::$objects[] = $parent_object_id = commitAddObject (self::myStringStatic ('object 0', __CLASS__), NULL, self::$objtype_id, NULL);
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			$child_object_id = commitAddObject (self::myStringStatic ("object ${i}", __CLASS__), NULL, self::$objtype_id, NULL);
+			$child_object_id = commitAddObject (self::myStringStatic ("object {$i}", __CLASS__), NULL, self::$objtype_id, NULL);
 			self::$objects[] = $child_object_id;
 			commitLinkEntities ('object', $parent_object_id, 'object', $child_object_id);
 			self::$links[] = lastInsertID();
@@ -42,7 +42,7 @@ class GetChildrenListTest extends RTTestCase
 		self::$tags[] = $parent_tag_id = lastInsertID ();
 		for ($i=1; $i<=self::$num_children; $i++)
 		{
-			usePreparedInsertBlade ('TagTree', array ('parent_id' => $parent_tag_id, 'tag' => self::myStringStatic ("tag ${i}", __CLASS__)));
+			usePreparedInsertBlade ('TagTree', array ('parent_id' => $parent_tag_id, 'tag' => self::myStringStatic ("tag {$i}", __CLASS__)));
 			$parent_tag_id = lastInsertID ();
 			self::$tags[] = $parent_tag_id;
 		}

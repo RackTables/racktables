@@ -342,7 +342,7 @@ function getSelectOptions ($options, $selected_id = NULL)
 	foreach ($options as $key => $value)
 	{
 		$selected = is_array ($selected_id) ? in_array ($key, $selected_id) : $key == $selected_id;
-		$ret .= "<option value='${key}'" . ($selected ? ' selected' : '') . '>';
+		$ret .= "<option value='{$key}'" . ($selected ? ' selected' : '') . '>';
 		$ret .= stringForOption ($value) . '</option>';
 	}
 	return $ret;
@@ -369,14 +369,14 @@ function getSelect ($optionList, $select_attrs = array(), $selected_id = NULL, $
 	{
 		foreach ($optionList as $key => $value)
 			break;
-		return "<input type=hidden name=${select_attrs['name']} id=${select_attrs['name']} value=${key}>" .
+		return "<input type=hidden name={$select_attrs['name']} id={$select_attrs['name']} value={$key}>" .
 			stringForLabel ($value, 64);
 	}
 	if (!array_key_exists ('id', $select_attrs))
 		$select_attrs['id'] = $select_attrs['name'];
 	$ret .= '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
-		$ret .= " ${attr_name}=${attr_value}";
+		$ret .= " {$attr_name}={$attr_value}";
 	$ret .= '>' . getSelectOptions ($optionList, $selected_id) . '</select>';
 	return $ret;
 }
@@ -401,18 +401,18 @@ function getNiftySelect ($groupList, $select_attrs, $selected_id = NULL)
 
 	$ret = '<select';
 	foreach ($select_attrs as $attr_name => $attr_value)
-		$ret .= " ${attr_name}=${attr_value}";
+		$ret .= " {$attr_name}={$attr_value}";
 	$ret .= ">\n";
 	foreach ($groupList as $groupname => $groupdata)
 	{
-		$ret .= "<optgroup label='${groupname}'>\n";
+		$ret .= "<optgroup label='{$groupname}'>\n";
 		foreach ($groupdata as $dict_key => $dict_value)
 		{
 			if (is_array ($selected_id))
 				$is_selected = in_array ($dict_key, $selected_id);
 			else
 				$is_selected = $dict_key == $selected_id;
-			$ret .= "<option value='${dict_key}'" . ($is_selected ? ' selected' : '') . ">${dict_value}</option>\n";
+			$ret .= "<option value='{$dict_key}'" . ($is_selected ? ' selected' : '') . ">{$dict_value}</option>\n";
 		}
 		$ret .= "</optgroup>\n";
 	}
@@ -433,11 +433,11 @@ function getOptionTree ($tree_name, $tree_options, $tree_config = array())
 $(function() {
 	var option_tree = " . json_encode ($tree_options) . ";
 	var options = " . json_encode ($tree_config + $default_config) . ";
-	$('input[name=${tree_name}]').optionTree(option_tree, options);
+	$('input[name={$tree_name}]').optionTree(option_tree, options);
 });"
 	); // addJSText()
 
-	return "<input type=hidden name=${tree_name}>";
+	return "<input type=hidden name={$tree_name}>";
 }
 
 function printImageHREF ($tag, $title = '', $do_input = FALSE)
@@ -570,7 +570,7 @@ function addJSExternal ($url, $group = 'default')
 	if (! isUrl ($url))
 		throw new InvalidArgException ('url', $url, 'Value passed is not a URL');
 
-	addPageHeader ("<script type='text/javascript' src='${url}'></script>\n", $group);
+	addPageHeader ("<script type='text/javascript' src='{$url}'></script>\n", $group);
 }
 
 // addJSInternal adds links that go through the Chrome module of index.php
@@ -592,7 +592,7 @@ function addJSInternal ($uri, $group = 'default')
 	if (! isUri ($uri))
 		throw new InvalidArgException ('uri', $uri, 'Value passed is not a valid URI');
 
-	addPageHeader ("<script type='text/javascript' src='?module=chrome&uri=${uri}'></script>\n", $group);
+	addPageHeader ("<script type='text/javascript' src='?module=chrome&uri={$uri}'></script>\n", $group);
 }
 
 // This function adds script blocks that automatically appear in the <head> of your page.
@@ -738,7 +738,7 @@ function getRenderedIPv4NetCapacity ($range)
 			if ($mask = array_shift ($free_masks))
 			{
 				$cnt = count ($range['spare_ranges'][$mask]);
-				$free_text = ', ' . ($cnt > 1 ? "<small>${cnt}&times;</small>" : "") . "/$mask free";
+				$free_text = ', ' . ($cnt > 1 ? "<small>{$cnt}&times;</small>" : "") . "/$mask free";
 			}
 		}
 		$text = ip4_range_size ($range) . $free_text;
@@ -796,7 +796,7 @@ function getRenderedIPv6NetCapacity ($range)
 	if ($cnt == 1 && $mult == '')
 		$cnt = '1';
 
-	return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}${cnt}${mult} ${what}" . "</div>";
+	return "<div class=\"$class\" id=\"$div_id\">" . "{$addrc}{$cnt}{$mult} {$what}" . "</div>";
 }
 
 // Buffer the header only once. Disregard subsequent calls even if they
@@ -896,7 +896,7 @@ function serializeTags ($chain, $baseurl = '')
 		{
 			$class = $has_descr ? 'tag-descr ' : '';
 			$class .= getTagClassName ($taginfo['id']);
-			$class = "class='${class}'";
+			$class = "class='{$class}'";
 		}
 
 		$href = '';
@@ -905,7 +905,7 @@ function serializeTags ($chain, $baseurl = '')
 		else
 		{
 			$tag = 'a';
-			$href = "href='${baseurl}cft[]=${taginfo['id']}'";
+			$href = "href='{$baseurl}cft[]={$taginfo['id']}'";
 		}
 		$tmp[] = "<$tag $href $title $class>" . $taginfo['tag'] . "</$tag>";
 	}
@@ -914,7 +914,7 @@ function serializeTags ($chain, $baseurl = '')
 
 function startPortlet ($title = '')
 {
-	echo "<div class=portlet><h2>${title}</h2>";
+	echo "<div class=portlet><h2>{$title}</h2>";
 }
 
 function finishPortlet ()
@@ -1069,7 +1069,7 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 {
 	$done = ((int) ($percentage * 100));
 	if (! $inline)
-		$src = "?module=progressbar&done=$done" . (empty ($theme) ? '' : "&theme=${theme}");
+		$src = "?module=progressbar&done=$done" . (empty ($theme) ? '' : "&theme={$theme}");
 	else
 	{
 		$bk_request = $_REQUEST;
@@ -1077,7 +1077,7 @@ function getProgressBar ($percentage = 0, $theme = '', $inline = FALSE)
 		$src = 'data:image/png;base64,' . chunk_split (base64_encode (getOutputOf ('renderProgressBarImage', $done)));
 		$_REQUEST = $bk_request;
 	}
-	$ret = "<img width=100 height=10 border=0 title='${done}%' src='$src'>";
+	$ret = "<img width=100 height=10 border=0 title='{$done}%' src='$src'>";
 	return $ret;
 }
 
@@ -1093,11 +1093,11 @@ function getRenderedNetVLAN ($cell)
 	$links = array();
 	foreach ($cell['8021q'] as $vi)
 	{
-		$vlan_info = getVlanRow ("${vi['domain_id']}-${vi['vlan_id']}");
+		$vlan_info = getVlanRow ("{$vi['domain_id']}-{$vi['vlan_id']}");
 		$links[] = formatVLANAsShortLink ($vlan_info);
 	}
 	$noun = count ($cell['8021q']) > 1 ? 'VLANs' : 'VLAN';
-	return "<div class='vlan'><strong><small>${noun}</small> " . implode (', ', $links) . '</strong></div>';
+	return "<div class='vlan'><strong><small>{$noun}</small> " . implode (', ', $links) . '</strong></div>';
 }
 
 // DEPRECATED and will be removed in 0.22.0
@@ -1133,7 +1133,7 @@ function printOpFormIntro ($opname, $extra = array(), $upload = FALSE)
 {
 	global $pageno, $tabno, $page;
 
-	echo "<form method=post id=${opname} name=${opname} action='?module=redirect&page=${pageno}&tab=${tabno}&op=${opname}'";
+	echo "<form method=post id={$opname} name={$opname} action='?module=redirect&page={$pageno}&tab={$tabno}&op={$opname}'";
 	if ($upload)
 		echo " enctype='multipart/form-data'";
 	echo ">";
@@ -1164,7 +1164,7 @@ function makeFileDownloadButton ($file_id, $imgname = 'download')
 {
 	$href = makeHref (array ('module' => 'download', 'file_id' => $file_id));
 	$img = getImageHREF ($imgname, 'download file');
-	return "<a href='${href}'>${img}</a>";
+	return "<a href='{$href}'>{$img}</a>";
 }
 
 // This function is DEPRECATED and will be removed in version 0.22.0.
@@ -1196,7 +1196,7 @@ function stringForLabel ($string, $maxlen = 30)
 	$trimmed = mb_substr ($string, 0, $maxlen - 1);
 	$trimmed = htmlspecialchars ($trimmed, ENT_QUOTES, 'UTF-8');
 	$trimmed = str_replace (' ', '&nbsp;', $trimmed) . '&hellip;';
-	return "<span title='${full}'>${trimmed}</span>";
+	return "<span title='{$full}'>{$trimmed}</span>";
 }
 
 // "<TD>%s</TD>"
@@ -1334,12 +1334,12 @@ function getCellClass ($cell, $context)
 	foreach ($cell['colors'] as $color)
 	{
 		$rgb = colorHex2Rgb ($color);
-		$gradient .= "rgba(${rgb},0.2) ${percent}%, rgba(${rgb},0.3) " . ($percent + $step) . "%,";
+		$gradient .= "rgba({$rgb},0.2) {$percent}%, rgba({$rgb},0.3) " . ($percent + $step) . "%,";
 		$percent += $step;
 	}
 	$style .= "background-image:linear-gradient(135deg," . trim ($gradient, ',') . ") !important;";
 	$cell_id = $cell[$cell['realm'] == 'user' ? 'user_id' : 'id'];
-	return getCachedCSSClassForStyle ("cellcolor-${cell_id}", $style);
+	return getCachedCSSClassForStyle ("cellcolor-{$cell_id}", $style);
 }
 
 function getTagClass ($taginfo)
@@ -1347,7 +1347,7 @@ function getTagClass ($taginfo)
 	if (! array_key_exists ('color', $taginfo) || $taginfo['color'] === NULL)
 		return '';
 	$rgb = colorHex2Rgb ($taginfo['color'], TRUE);
-	return getCachedCSSClassForStyle ("tagcolor-${taginfo['id']}", "background: rgb($rgb);");
+	return getCachedCSSClassForStyle ("tagcolor-{$taginfo['id']}", "background: rgb($rgb);");
 }
 
 // This function has a side effect: it adds inline CSS.

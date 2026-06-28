@@ -108,8 +108,8 @@ class RackTablesError extends Exception
 		header ('Content-Type: text/html; charset=UTF-8');
 		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
 		echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
-		echo "<head><title>${title}</title>";
-		echo "</head><body>${text}";
+		echo "<head><title>{$title}</title>";
+		echo "</head><body>{$text}";
 		if (isset ($helpdesk_banner))
 			echo '<hr>' . $helpdesk_banner;
 		echo '</body></html>';
@@ -154,7 +154,7 @@ class EntityNotFoundException extends RackTablesError
 {
 	function __construct ($realm, $id)
 	{
-		parent::__construct ("Record '${realm}'#'${id}' does not exist");
+		parent::__construct ("Record '{$realm}'#'{$id}' does not exist");
 	}
 	public function dispatch()
 	{
@@ -286,8 +286,8 @@ class RTPermissionDenied extends RackTablesError
 		echo serializeTags ($impl_tags) . "&nbsp;</td></tr>\n";
 		echo '<tr><th width="50%" class=tagchain>Automatic tags:</th><td class=tagchain>';
 		echo serializeTags ($auto_tags) . "&nbsp;</td></tr>\n";
-		echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>${pageno}</td></tr>\n";
-		echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>${tabno}</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright>Requested page:</th><td class=tdleft>{$pageno}</td></tr>\n";
+		echo "<tr><th width='50%' class=tdright>Requested tab:</th><td class=tdleft>{$tabno}</td></tr>\n";
 		echo "<tr><td colspan=2 align=center>Click <a href='index.php?logout'>here</a> to logout.</td></tr>\n";
 		echo "</table>\n";
 		echo '</body></html>';
