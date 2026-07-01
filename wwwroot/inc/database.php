@@ -1626,6 +1626,11 @@ function createMolecule ($molData)
 function recordObjectHistory ($object_id)
 {
 	global $remote_username;
+	// $disable_logging_objects can be defined in secrets.php to disable history logger for objects
+  // same idea as for $disable_logging
+	global $disable_logging_objects;
+	if (isset ($disable_logging_objects) && $disable_logging_objects)
+		return;
 	usePreparedExecuteBlade
 	(
 		'INSERT INTO ObjectHistory ' .
