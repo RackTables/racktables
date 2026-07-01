@@ -137,7 +137,7 @@ INNER JOIN (
 				}
 			$rows_by_pn = array();
 		}
-		$prev_object_id = $row['object_id'];
+		$prev_object_id = $row['object_id'] ?? "";
 		if ($row)
 			$rows_by_pn[$row['name']][] = $row;
 		else

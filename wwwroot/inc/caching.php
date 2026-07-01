@@ -67,7 +67,7 @@ function HTTPDateToUnixTime ($string)
 	$formats['asctime'] = '/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2}| \d{1}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/';
 
 	$matches = array();
-	if (preg_match ($formats['rfc1123'], $string, $matches))
+	if (preg_match ($formats['rfc1123'], $string ?? "", $matches))
 	{
 		$hours = $matches[5];
 		$minutes = $matches[6];
@@ -76,7 +76,7 @@ function HTTPDateToUnixTime ($string)
 		$day = $matches[2];
 		$year = $matches[4];
 	}
-	elseif (preg_match ($formats['rfc850'], $string, $matches))
+	elseif (preg_match ($formats['rfc850'], $string ?? "", $matches))
 	{
 		$hours = $matches[5];
 		$minutes = $matches[6];
@@ -85,7 +85,7 @@ function HTTPDateToUnixTime ($string)
 		$day = $matches[2];
 		$year = $matches[4];
 	}
-	elseif (preg_match ($formats['asctime'], $string, $matches))
+	elseif (preg_match ($formats['asctime'], $string ?? "", $matches))
 	{
 		$hours = $matches[4];
 		$minutes = $matches[5];
