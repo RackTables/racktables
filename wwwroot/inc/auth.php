@@ -38,7 +38,36 @@ function authenticate ()
 		$user_auth_src,
 		$script_mode,
 		$require_local_account;
-	// Phase 1. Assert basic pre-requisites, short-circuit the logout request.
+	// Phase 1. Check session-based auth before HTTP basic auth.
+	if (! isset ($script_mode) || $script_mode !== TRUE)
+	{
+		# Handle logout via 'logout@' HTTP auth trick or explicit logout request
+		if (isset ($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER'] === 'logout')
+		{
+			startSession();
+			$_SESSION = array();
+			session_destroy();
+			session_commit();
+			redirectUser ('index.php?module=login');
+		}
+		startROSession();
+		if (isset ($_SESSION['rt_authenticated']) && $_SESSION['rt_authenticated'] === TRUE)
+		{
+			$remote_username = isset ($_SESSION['rt_username']) ? $_SESSION['rt_username'] : '';
+			$remote_displayname = isset ($_SESSION['rt_displayname']) ? $_SESSION['rt_displayname'] : $remote_username;
+			if ($remote_username != '')
+			{
+				# Phase 3. Load user tags from database (same as non-session path).
+				$userinfo = constructUserCell ($remote_username);
+				$user_given_tags = $userinfo['etags'];
+				$auto_tags = array_merge ($auto_tags, $userinfo['atags']);
+				session_commit();
+				return; // success via session
+			}
+		}
+		session_commit();
+	}
+	// Phase 1b. Assert basic pre-requisites, short-circuit the logout request.
 	if (! isset ($user_auth_src) || ! isset ($require_local_account))
 		throw new RackTablesError ('secret.php: either user_auth_src or require_local_account are missing', RackTablesError::MISCONFIGURED);
 	if (isset ($_REQUEST['logout']))

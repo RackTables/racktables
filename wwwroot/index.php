@@ -14,6 +14,32 @@ try {
 
 	switch ($requestedModule)
 	{
+	case 'login':
+		require_once 'inc/pre-init.php';
+		require_once 'inc/config.php';
+		require_once 'inc/functions.php';
+		require_once 'inc/database.php';
+		require_once 'inc/auth.php';
+		$script_mode = TRUE;
+		require_once 'inc/init.php';
+		require_once 'inc/login.php';
+		$action = array_key_exists ('action', $_REQUEST) ? $_REQUEST['action'] : 'form';
+		switch ($action)
+		{
+		case 'authenticate':
+			loginAuthenticate();
+			break;
+		case 'logout':
+			loginLogout();
+			break;
+		default:
+			global $error_message;
+			$error_message = NULL;
+			renderLoginPage();
+			break;
+		}
+		break;
+
 	case 'interface':
 		require_once 'inc/interface.php';
 		// init.php has to be included after interface.php, otherwise the bits
@@ -307,5 +333,13 @@ try {
 catch (Exception $e)
 {
 	ob_end_clean();
+	if ($e instanceof RackTablesError && $e->getCode() == RackTablesError::NOT_AUTHENTICATED)
+	{
+		# Redirect to login page instead of showing 401
+		require_once 'inc/login.php';
+		$login_url = 'index.php?module=login';
+		header ("Location: " . $login_url);
+		die;
+	}
 	printException ($e);
 }

@@ -73,9 +73,7 @@ $attrtypes = array
 
 function showLogoutURL ()
 {
-	$https = (isset ($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '';
-	$port = (! in_array ($_SERVER['SERVER_PORT'], array (80, 443))) ? ':' . $_SERVER['SERVER_PORT'] : '';
-	printf ('http%s://logout@%s%s%s?logout', $https, $_SERVER['SERVER_NAME'], $port, $_SERVER['PHP_SELF']);
+	echo 'index.php?module=login&action=logout';
 }
 
 $quick_links = NULL; // you can override this in your local.php, but first initialize it with getConfiguredQuickLinks()
