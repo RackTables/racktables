@@ -10,7 +10,7 @@ The following steps are expected to be ran as **root** and on a debian system (t
 If you are using a different distribution of Linux please make sure you install the correct packages in the next step.
 ## 1. Install prerequisites
 ```
-apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmath php-json php-snmp
+apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmath php-json php-snmp git
 ```
 
 ## 2. Git clone project
