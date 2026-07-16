@@ -1,11 +1,39 @@
 # Welcome!
 Thank you for selecting RackTables as your datacenter management solution!
 If you are looking for documentation or wish to send feedback, please
-look for the respective links at [project's web-site](https://racktables.org).
+look for the respective links at the [project's web-site](https://racktables.org).
 
 This is a fork of the main project with modifications that I personnally want and are made available for you to use/modify.
 
-# How to install RackTables
+# Quick install
+The following steps are expected to be ran as **root** and on a debian system (tested on debian 12).   
+If you are using a different distribution of Linux please make sure you install the correct packages in the next step.
+## 1. Install prerequisites
+```
+apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmath php-json php-snmp
+```
+
+## 2. Git clone project
+``` 
+cd /var/www/html
+git clone https://github.com/tinihawk/racktables.git
+```
+
+## 3. Run installer script
+```
+cd /var/www/html/racktables
+chmod +x install.sh
+./install.sh
+```
+
+## 4. Connect to the server
+Navigate to `http://<server ip address>` and you should be met with a login page.
+The default username is `admin` and the password is also `admin`
+
+# Manual install RackTables
+<details>
+
+<summary>Click here to expand</summary>
 
 ## 1. Prepare the server
 
@@ -63,15 +91,16 @@ git clone https://github.com/tinihawk/racktables.git
 ```
 
 ## 2 Server configuration
-Once the files are downloaded locally you can browse to http://<server ip address> and follow the instructions.  
-You will need the secret.php file to be writable by al.
+Once the files are downloaded locally you can browse to `http://<server ip address>` and follow the instructions.  
+You will need the secret.php file to be writable by all.
 
 ### 2.1 Harden the secret file
-Note: set `secret.php` permissions when prompted.
+When prompted, set `secret.php` permissions as so :
 ```
 chown www-data:www-data /var/www/html/racktables/wwwroot/inc/secret.php
 chmod 400 /var/www/html/racktables/wwwroot/inc/secret.php 
 ```
+</details>
 
 # How to upgrade RackTables
 
