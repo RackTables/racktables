@@ -18,10 +18,11 @@ apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmat
 cd /var/www/html
 git clone https://github.com/tinihawk/racktables.git
 ```
+[comment]: # (For dev branch : git clone -b dev --single-branch https://github.com/tinihawk/racktables.git)
 
 ## 3. Run installer script
 ```
-cd /var/www/html/racktables
+cd racktables
 chmod +x install.sh
 ./install.sh
 ```
@@ -44,7 +45,7 @@ a MySQL/MariaDB server version 5 or later for back-end.
 
 | Distribution       | command                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| Debian based       | `apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmath php-json php-snmp` |
+| Debian based       | `apt install mariadb-server nginx php-fpm php-gd php-mysql php-mbstring php-bcmath php-json php-snmp git` |
 
 
 ### 1.2 Prepare nginx
