@@ -420,6 +420,35 @@ function getRackThumbLink ($rack, $scale = 1, $object_id = NULL)
 	return mkA ($img, 'rack', $rack['id']);
 }
 
+# Walks up the location tree and returns both the plain location chain
+# (used for sorting) and the linked one (used for display).
+function buildLocationTree ($location_id, $urlextra = '')
+{
+	// contains location names in the form of 'grandparent parent child', used for sorting
+	$locationTree = '';
+	// contains location names as well as links
+	$hrefLocationTree = '';
+	$locationIdx = 0;
+	while ($location_id)
+	{
+		if ($locationIdx == 20)
+		{
+			showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
+			break;
+		}
+		$parentLocation = spotEntity ('location', $location_id);
+		$locationTree = sprintf ('%s %s', $parentLocation['name'], $locationTree);
+		$hrefLocationTree = "&raquo; <a href='" .
+			makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
+			"${urlextra}'>${parentLocation['name']}</a> " .
+			$hrefLocationTree;
+		$location_id = $parentLocation['parent_id'];
+		$locationIdx++;
+	}
+	$hrefLocationTree = substr ($hrefLocationTree, 8);
+	return array ($locationTree, $hrefLocationTree);
+}
+
 function renderRackspace ()
 {
 	global $pageno;
@@ -443,29 +472,7 @@ function renderRackspace ()
 		{
 			$rackList = applyCellFilter ('rack', $cellfilter, $row_id);
 			$found_racks = array_merge ($found_racks, $rackList);
-			$location_id = $rowInfo['location_id'];
-			$locationIdx = 0;
-			// contains location names in the form of 'grandparent parent child', used for sorting
-			$locationTree = '';
-			// contains location names as well as links
-			$hrefLocationTree = '';
-			while ($location_id)
-			{
-				if ($locationIdx == 20)
-				{
-					showWarning ("Warning: There is likely a circular reference in the location tree.  Investigate location ${location_id}.");
-					break;
-				}
-				$parentLocation = spotEntity ('location', $location_id);
-				$locationTree = sprintf ('%s %s', $parentLocation['name'], $locationTree);
-				$hrefLocationTree = "&raquo; <a href='" .
-					makeHref(array('page'=>'location', 'location_id'=>$parentLocation['id'])) .
-					"${cellfilter['urlextra']}'>${parentLocation['name']}</a> " .
-					$hrefLocationTree;
-				$location_id = $parentLocation['parent_id'];
-				$locationIdx++;
-			}
-			$hrefLocationTree = substr ($hrefLocationTree, 8);
+			list ($locationTree, $hrefLocationTree) = buildLocationTree ($rowInfo['location_id'], $cellfilter['urlextra']);
 			$rows[] = array (
 				'location_id' => $rowInfo['location_id'],
 				'location_tree' => $locationTree,
@@ -475,6 +482,31 @@ function renderRackspace ()
 				'racks' => $rackList
 			);
 			$rackCount += count($rackList);
+		}
+
+		// Locations without any rows of their own are not covered by the loop
+		// above; add a placeholder entry for each of them, but only when the
+		// location at least holds some objects, so that purely empty spots
+		// don't clutter the listing.
+		$locations_with_rows = array ();
+		foreach ($rows as $row)
+			if ($row['location_id'])
+				$locations_with_rows[$row['location_id']] = TRUE;
+		foreach (listCells ('location') as $loc_id => $locInfo)
+		{
+			if (isset ($locations_with_rows[$loc_id]))
+				continue;
+			if (! count (getObjectsForLocation ($loc_id)))
+				continue;
+			list ($locationTree, $hrefLocationTree) = buildLocationTree ($loc_id, $cellfilter['urlextra']);
+			$rows[] = array (
+				'location_id' => $loc_id,
+				'location_tree' => $locationTree,
+				'href_location_tree' => $hrefLocationTree,
+				'row_id' => 0,
+				'row_name' => '(None)',
+				'racks' => array ()
+			);
 		}
 
 		// sort by location, then by row
@@ -505,7 +537,11 @@ function renderRackspace ()
 						continue;
 					$rackListIdx = 0;
 					echo "<tr class=row_${order}><th class=tdleft>${row['href_location_tree']}</th>";
-					echo "<th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row['row_id']))."${cellfilter['urlextra']}'>${row['row_name']}</a></th>";
+					// Placeholder entries (locations without rows) have no row link.
+					if ($row['row_id'])
+						echo "<th class=tdleft><a href='".makeHref(array('page'=>'row', 'row_id'=>$row['row_id']))."${cellfilter['urlextra']}'>${row['row_name']}</a></th>";
+					else
+						echo "<th class=tdleft>${row['row_name']}</th>";
 					echo "<th class=tdleft><table border=0 cellspacing=5><tr>";
 					if (! count ($rackList))
 						echo '<td>(empty row)</td>';
@@ -1132,6 +1168,15 @@ function renderEditObjectForm()
 	echo "<tr><td>&nbsp;</td><th class=tdright>Common name:</th><td class=tdleft><input type=text name=object_name value='${object['name']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Visible label:</th><td class=tdleft><input type=text name=object_label value='${object['label']}'></td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Asset tag:</th><td class=tdleft><input type=text name=object_asset_no value='${object['asset_no']}'></td></tr>\n";
+	// location selection
+	echo '<tr><td>&nbsp;</td><th class=tdright>Location:</th><td class=tdleft>';
+	$locations = array ();
+	$locations[0] = '-- NOT SET --';
+	foreach (listCells ('location') as $id => $locationInfo)
+		$locations[$id] = $locationInfo['name'];
+	natcasesort ($locations);
+	printSelect ($locations, array ('name' => 'location_id'), getObjectLocationId ($object_id));
+	echo "</td></tr>\n";
 	echo "<tr><td>&nbsp;</td><th class=tdright>Tags:</th><td class=tdleft>";
 	printTagsPicker ();
 	echo "</td></tr>\n";
@@ -1425,6 +1470,8 @@ function renderObject ($object_id)
 		$summary['Asset tag'] = $info['asset_no'];
 	elseif (considerConfiguredConstraint ($info, 'ASSETWARN_LISTSRC'))
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Asset tag is missing.</td></tr>');
+	if ($location_id = getObjectLocationId ($info['id']))
+		$summary['Location'] = mkA (spotEntity ('location', $location_id)['name'], 'location', $location_id);
 	$parents = getParents ($info, 'object');
 	// lookup the human-readable object type, sort by it
 	foreach ($parents as $parent_id => $parent)
@@ -4054,6 +4101,7 @@ function renderLocationPage ($location_id)
 		$summary['Parent location'] = mkA ($locationData['parent_name'], 'location', $locationData['parent_id']);
 	$summary['Child locations'] = count($locationData['locations']);
 	$summary['Rows'] = count($locationData['rows']);
+	$summary['Objects'] = count($locationData['objects']);
 	if ($locationData['has_problems'] == 'yes')
 		$summary[] = array ('<tr><td colspan=2 class=msg_error>Has problems</td></tr>');
 	foreach (getAttrValuesSorted ($locationData['id']) as $record)
@@ -4075,12 +4123,18 @@ function renderLocationPage ($location_id)
 	renderFilesPortlet ('location', $location_id);
 	echo '</td>';
 
-	// Right column with list of rows and child locations
+	// Right column with list of rows, child locations and objects
 	echo '<td class=pcright>';
 	startPortlet ('Rows ('. count ($locationData['rows']) . ')');
 	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
 	foreach ($locationData['rows'] as $row_id => $name)
 		echo '<tr><td>' . mkA ($name, 'row', $row_id) . '</td></tr>';
+	echo "</table>\n";
+	finishPortlet();
+	startPortlet ('Objects (' . count ($locationData['objects']) . ')');
+	echo "<table border=0 cellspacing=0 cellpadding=5 align=center>\n";
+	foreach ($locationData['objects'] as $object_id => $name)
+		echo '<tr><td>' . mkA ($name, 'object', $object_id) . '</td></tr>';
 	echo "</table>\n";
 	finishPortlet();
 	startPortlet ('Child Locations (' . count ($locationData['locations']) . ')');
@@ -4119,7 +4173,7 @@ function renderEditLocationForm ($location_id)
 		'<th class=tdright><label for=has_problems>Has problems:</label></th>' .
 		'<td class=tdleft><input type=checkbox name=has_problems id=has_problems' . ($location['has_problems'] == 'yes' ? ' checked' : '') . '></td>' .
 		"</tr>\n";
-	if (count ($location['locations']) == 0 && count ($location['rows']) == 0)
+	if (count ($location['locations']) == 0 && count ($location['rows']) == 0 && count ($location['objects']) == 0)
 	{
 		echo "<tr><td>&nbsp;</td><th class=tdright>Actions:</th><td class=tdleft>";
 		echo getOpLink (array('op'=>'deleteLocation'), '', 'destroy', 'Delete location', 'need-confirmation');

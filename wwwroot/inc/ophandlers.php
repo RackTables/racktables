@@ -1310,6 +1310,8 @@ function updateObject ()
 		$_REQUEST['object_comment']
 	);
 	updateObjectAttributes ($object_id);
+	if (isset ($_REQUEST['location_id']))
+		commitObjectLocation ($object_id, genericAssertion ('location_id', 'unsigned'));
 	$object = spotEntity ('object', $object_id);
 	if ($object_type_id != $object['objtype_id'])
 	{
@@ -2254,7 +2256,7 @@ function deleteLocation ()
 	$location_id = genericAssertion ('location_id', 'natural');
 	$locationData = spotEntity ('location', $location_id);
 	amplifyCell ($locationData);
-	if (count ($locationData['locations']) || count ($locationData['rows']))
+	if (count ($locationData['locations']) || count ($locationData['rows']) || count ($locationData['objects']))
 	{
 		showFuncMessage (__FUNCTION__, 'ERR1', array ($locationData['name']));
 		return;

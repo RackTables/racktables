@@ -313,6 +313,26 @@ function getRows ($location_id)
 	return reduceSubarraysToColumn (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)), 'name');
 }
 
+// Return list of objects assigned to a specified location
+function getObjectsForLocation ($location_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT O.id, O.name, O.objtype_id FROM RackObject O ' .
+		'INNER JOIN EntityLink EL ON ' .
+		"EL.parent_entity_type = 'location' " .
+		"AND EL.child_entity_type = 'object' " .
+		"AND EL.child_entity_id = O.id " .
+		'WHERE EL.parent_entity_id = ? ' .
+		'ORDER BY O.name',
+		array ($location_id)
+	);
+	$ret = array ();
+	foreach (reindexById ($result->fetchAll (PDO::FETCH_ASSOC)) as $id => $row)
+		$ret[$id] = formatObjectDisplayedName ($row['name'], $row['objtype_id']);
+	return $ret;
+}
+
 function getRacks ($row_id)
 {
 	$result = usePreparedSelectBlade
@@ -740,6 +760,7 @@ function amplifyCell (&$record, $dummy = NULL)
 	case 'location':
 		$record['locations'] = getLocations ($record['id']);
 		$record['rows'] = getRows ($record['id']);
+		$record['objects'] = getObjectsForLocation ($record['id']);
 		break;
 	case 'row':
 		$record['racks'] = getRacks ($record['id']);
@@ -1241,6 +1262,49 @@ function commitUnlinkEntities ($parent_entity_type, $parent_entity_id, $child_en
 function commitUnlinkEntitiesByLinkID ($link_id)
 {
 	usePreparedDeleteBlade ('EntityLink', array ('id' => $link_id));
+}
+
+// Return the ID of the location an object is assigned to, 0 if none
+function getObjectLocationId ($object_id)
+{
+	$result = usePreparedSelectBlade
+	(
+		'SELECT parent_entity_id FROM EntityLink ' .
+		"WHERE parent_entity_type = 'location' " .
+		"AND child_entity_type = 'object' " .
+		'AND child_entity_id = ?',
+		array ($object_id)
+	);
+	$row = $result->fetch (PDO::FETCH_ASSOC);
+	return $row ? (int) $row['parent_entity_id'] : 0;
+}
+
+// Assign an object to a location, or detach it from its current location
+// when $location_id is 0
+function commitObjectLocation ($object_id, $location_id)
+{
+	$old_location_id = getObjectLocationId ($object_id);
+	if ($location_id > 0 && $location_id != $old_location_id)
+	{
+		try
+		{
+			spotEntity ('location', $location_id);
+		}
+		catch (EntityNotFoundException $e)
+		{
+			throw new InvalidRequestArgException ('location_id', $location_id, 'unknown location');
+		}
+		if ($old_location_id > 0)
+			commitUpdateEntityLink
+			(
+				'location', $old_location_id, 'object', $object_id,
+				'location', $location_id, 'object', $object_id
+			);
+		else
+			commitLinkEntities ('location', $location_id, 'object', $object_id);
+	}
+	elseif ($location_id == 0 && $old_location_id > 0)
+		commitUnlinkEntities ('location', $old_location_id, 'object', $object_id);
 }
 
 // return VM clusters and corresponding stats
