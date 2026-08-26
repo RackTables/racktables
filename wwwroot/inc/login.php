@@ -19,10 +19,11 @@ function renderLoginPage ()
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
 	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">';
 	echo '<head><title>RackTables: Login</title>';
+	echo '<link rel="ICON" type="image/x-icon" href="?module=chrome&uri=pix/favicon.ico" />';
 	echo '<style type="text/css">';
-	echo 'body { font-family: Arial, Sans-Serif, sans-serif; font-size: small; background-color: #f0f0f0; margin: 0; padding: 0; }';
-	echo '.login-box { width: 320px; margin: 100px auto; background-color: #ffffff; border: 1px solid #a0a0a0; padding: 20px; }';
-	echo '.login-box h2 { text-align: center; margin: 0 0 20px 0; color: #333333; }';
+	echo 'body { font-family: Arial, Sans-Serif, sans-serif; font-size: small; background-color: #ffffff; margin: 0; padding: 0; }';
+	echo '.login-box { width: 320px; margin: 100px auto; background-color: #ffffff; border: 1px solid #3c78b5; padding: 20px; }';
+	echo '.login-box h2 { text-align: center; margin: 0 0 20px 0; color: #254a6f; }';
 	echo '.login-box table { width: 100%; }';
 	echo '.login-box td { padding: 4px 0; }';
 	echo '.login-box th { text-align: right; padding: 4px 8px 4px 0; color: #333333; }';
@@ -34,7 +35,7 @@ function renderLoginPage ()
 	echo '</head>';
 	echo '<body>';
 	echo '<div class="login-box">';
-	echo '<h2>RackTables Login</h2>';
+	echo '<h2>RackTables</h2>';
 
 	if (isset ($error_message))
 		echo '<div class="login-error">' . htmlspecialchars ($error_message) . '</div>';
@@ -47,7 +48,7 @@ function renderLoginPage ()
 	echo '<table border=0 cellspacing=0 cellpadding=0 width="100%"><tr><td class="submit"><input type="submit" value="Login" /></td></tr></table>';
 	echo '</form>';
 	$enterprise = getConfigVar ('enterprise');
-	echo '<div class="login-footer">' . $enterprise . ' RackTables ' . CODE_VERSION . '</div>';
+	echo '<div class="login-footer">' . $enterprise . '  ' . CODE_VERSION . '</div>';
 	echo '</div>';
 	echo '</body>';
 	echo '</html>';
