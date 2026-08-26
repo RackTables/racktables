@@ -13,4 +13,4 @@ committers' copies) can run into issues:
    have already been executed.
 */
 
-define ('CODE_VERSION', 'h0.23.0');
+define ('CODE_VERSION', 'h0.24.0');
